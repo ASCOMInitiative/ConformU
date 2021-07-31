@@ -1,0 +1,45 @@
+﻿@inherits LayoutComponentBase
+@inject ConformLogger conformLogger
+@inject ConformConfiguration configuration
+
+<BlazorPro.BlazorSize.MediaQueryList>
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <div class="main">
+        <div class="top-row px-4">
+            <span>Current device - @deviceTechnology @deviceType</span>
+            <a href="https://ascom-standards.org" target="_blank">ASCOM Initiative</a>
+        </div>
+
+        <div class="content px-4">
+            @Body
+        </div>
+    </div>
+</BlazorPro.BlazorSize.MediaQueryList>>
+
+@code
+{
+    private string deviceType;
+    private string deviceTechnology;
+
+    protected override void OnInitialized()
+    {
+        conformLogger.LogDebug("MainLayout", "OnInitialized Running");
+        configuration.ConfigurationChanged += OnConfigurationChanged;
+        conformLogger.LogDebug("MainLayout", "OnInitialized Added configuraiton change event handler");
+        deviceType = configuration.Settings.CurrentDeviceType;
+        deviceTechnology = configuration.Settings.CurrentDeviceTechnology;
+    }
+
+    private void OnConfigurationChanged(object caller, EventArgs args)
+    {
+        conformLogger.LogDebug("MainLayout", $"Configuration changed! {configuration.Settings.CurrentDeviceType}");
+        deviceType = configuration.Settings.CurrentDeviceType;
+        deviceTechnology = configuration.Settings.CurrentDeviceTechnology;
+        conformLogger.LogDebug("MainLayout", $"Calling InvokeAsync StateHasChanged.");
+        InvokeAsync(StateHasChanged);
+        conformLogger.LogDebug("MainLayout", $"Returned from InvokeAsync StateHasChanged.");
+    }
+}

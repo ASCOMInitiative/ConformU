@@ -1,0 +1,228 @@
+﻿@page "/Settings"
+@inject ConformLogger conformLogger
+@inject ConformConfiguration configuration
+@{
+}
+@*Title and settings reset button*@
+<div class="row">
+    <h1>Settings</h1>
+    <RadzenButton Click=@(args => OnResetButtonClick()) Text="Reset to Defaults" Icon="account_circle" Style="margin-bottom: 20px; width: 220px; position: absolute; right: 30px;" />
+</div>
+
+@*Status message*@
+<div class="row">
+    <h3>Configuration status:   @status</h3>
+</div>
+
+@*Configuration tabs*@
+<RadzenTabs Change=@OnChange style="height: 500px;margin-top:20px" RenderMode="TabRenderMode.Client">
+    <Tabs>
+        <RadzenTabsItem Text="General">
+            <div class="row">
+                <RadzenCard Style="width:300px; margin-bottom: 20px; height:250px; margin-right: 20px">
+                    <RadzenCheckBoxList @bind-Value=@currentScope TValue="int" Orientation="Orientation.Vertical" Change=@(args => OnScopeChange(args))>
+                        <Items>
+                            <RadzenCheckBoxListItem Text="Test Properties" Value="0" />
+                            <RadzenCheckBoxListItem Text="Test Methods" Value="1" />
+                            <RadzenCheckBoxListItem Text="Test SideOfPier Read" Value="2" />
+                            <RadzenCheckBoxListItem Text="Test SideOfPier Write" Value="3" />
+                            <RadzenCheckBoxListItem Text="Test Performance" Value="4" />
+                        </Items>
+                    </RadzenCheckBoxList>
+                </RadzenCard>
+
+                <RadzenCard Style="width:410px; margin-bottom:20px;height:250px;">
+                    <div class="row" style="margin-top:12px; margin-left:4px;">
+                        <RadzenCheckBox Style="margin-top:6px;" Name="CHK1" @bind-Value=@chkUpdates TValue="bool" Change=@(args => OnCheckboxChange(args, "Updates")) />
+                        <RadzenLabel Text="Check for updates" Component="CHK1" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
+                        <RadzenTextBox @bind-Value="lastUpdateDate" Disabled=true />
+                    </div>
+                    <div class="row" style="margin-top:12px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHK2" @bind-Value=@chkDisplayCalls TValue="bool" Change=@(args => OnCheckboxChange(args, "DisplayCalls")) /> <RadzenLabel Text="Display method calls" Component="CHK2" Style="margin-left: 5px;" />
+                    </div>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHK3" @bind-Value=@chkDebug TValue="bool" Change=@(args => OnCheckboxChange(args, "Debug")) /> <RadzenLabel Text="Debug enabled" Component="CHK3" Style="margin-left: 5px;" />
+                    </div>
+                </RadzenCard>
+            </div>
+        </RadzenTabsItem>
+
+        <RadzenTabsItem Text="Telescope">
+            <div class="row">
+            </div>
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Camera">
+            <div class="row">
+            </div>
+        </RadzenTabsItem>
+
+
+    </Tabs>
+</RadzenTabs>
+
+@*Page code*@
+@code {
+    string status;
+
+    IEnumerable<int> currentScope = new List<int>() { 0, 1, 2, 3 };
+    bool chkUpdates;
+    bool chkDisplayCalls;
+    bool chkDebug;
+    string deviceType;
+    string lastUpdateDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+
+    protected override void OnInitialized()
+    {
+        status = configuration.Status;
+        SetConfiguration();
+        conformLogger.LogDebug("OnInitialized", "Running");
+    }
+
+    private void SetConfiguration()
+    {
+        List<int> newScope = new();
+
+        // Set scope
+        if (configuration.Settings.TestProperties) newScope.Add(0);
+        if (configuration.Settings.TestMethods) newScope.Add(1);
+        if (configuration.Settings.TestSideOfPierRead) newScope.Add(2);
+        if (configuration.Settings.TestSideOfPierWrite) newScope.Add(3);
+        if (configuration.Settings.TestPerformance) newScope.Add(4);
+        currentScope = newScope;
+
+        // Set other general settings
+        chkUpdates = configuration.Settings.UpdateCheck;
+        chkDisplayCalls = configuration.Settings.DisplayMethodCalls;
+        chkDebug = configuration.Settings.Debug;
+
+        deviceType = configuration.Settings.CurrentDeviceType;
+    }
+
+    void OnScopeChange(IEnumerable<int> scope)
+    {
+        List<int> newScope = new();
+        bool propertiesEnabled = scope.Contains(0);
+        bool methodsEnabled = scope.Contains(1);
+        bool sideofPierReadEnabled = scope.Contains(2);
+        bool sideofPierWriteEnabled = scope.Contains(3);
+        bool performanceEnabled = scope.Contains(4);
+
+        conformLogger.LogDebug("OnStageChange", $"Properties: {propertiesEnabled}, Methods: {methodsEnabled}, SideOfPierRead: {sideofPierReadEnabled}, SideOfPierWrite {sideofPierWriteEnabled}");
+
+
+        if (sideofPierWriteEnabled)
+        {
+            newScope = new List<int>() { 0, 1, 2, 3 };
+            configuration.Settings.TestProperties = true;
+            configuration.Settings.TestMethods = true;
+            configuration.Settings.TestSideOfPierRead = true;
+            configuration.Settings.TestSideOfPierWrite = true;
+
+        }
+        else
+        {
+            if (sideofPierReadEnabled)
+            {
+                newScope = new List<int>() { 0, 1, 2 };
+                configuration.Settings.TestProperties = true;
+                configuration.Settings.TestMethods = true;
+                configuration.Settings.TestSideOfPierRead = true;
+                configuration.Settings.TestSideOfPierWrite = false;
+            }
+            else
+            {
+                if (methodsEnabled)
+                {
+                    newScope = new List<int>() { 0, 1 };
+                    configuration.Settings.TestProperties = true;
+                    configuration.Settings.TestMethods = true;
+                    configuration.Settings.TestSideOfPierRead = false;
+                    configuration.Settings.TestSideOfPierWrite = false;
+                }
+                else
+                {
+                    if (propertiesEnabled)
+                    {
+                        newScope = new List<int>() { 0 };
+                        configuration.Settings.TestProperties = true;
+                        configuration.Settings.TestMethods = false;
+                        configuration.Settings.TestSideOfPierRead = false;
+                        configuration.Settings.TestSideOfPierWrite = false;
+                    }
+                    else
+                    {
+                        newScope = new List<int>();
+                        configuration.Settings.TestProperties = false;
+                        configuration.Settings.TestMethods = false;
+                        configuration.Settings.TestSideOfPierRead = false;
+                        configuration.Settings.TestSideOfPierWrite = false;
+                    }
+                    ;
+                }
+            }
+        }
+        if (performanceEnabled)
+        {
+            newScope.Add(4);
+            configuration.Settings.TestPerformance = true;
+        }
+        else
+        {
+            configuration.Settings.TestPerformance = false;
+        }
+
+        scope = newScope;
+        configuration.Save();
+        status = configuration.Status;
+
+        //StateHasChanged();
+    }
+
+    void OnDeviceTypeChange(object value)
+    {
+        var str = value is IEnumerable<object> ? string.Join(", ", (IEnumerable<object>)value) : value;
+        conformLogger.LogDebug("OnDeviceTypeChange", $"Value changed to {str}");
+        configuration.Settings.CurrentDeviceType = str.ToString();
+        configuration.Save();
+        status = configuration.Status;
+
+    }
+
+
+    void OnResetButtonClick()
+    {
+        configuration.Reset();
+        status = configuration.Status;
+        SetConfiguration();
+        //StateHasChanged();
+    }
+
+    void OnCheckboxChange(bool args, string name)
+    {
+        conformLogger.LogDebug("OnCheckboxChange", $"{name} = {args}");
+
+        switch (name)
+        {
+            case "Updates":
+                configuration.Settings.UpdateCheck = chkUpdates;
+                break;
+            case "DisplayCalls":
+                configuration.Settings.DisplayMethodCalls = chkDisplayCalls; ;
+                break;
+            case "Debug":
+                configuration.Settings.Debug = chkDebug;
+                break;
+
+        }
+
+        configuration.Save();
+        status = configuration.Status;
+
+        //StateHasChanged();
+    }
+
+    void OnChange(int index)
+    {
+        //console.Log($"Tab with index {index} was selected.");
+    }
+}

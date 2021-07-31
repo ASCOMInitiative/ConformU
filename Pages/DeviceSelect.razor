@@ -1,0 +1,84 @@
+﻿@page "/DeviceSelection"
+@using ASCOM.Standard.Discovery
+
+@inject ConformLogger conformLogger
+@inject ConformConfiguration configuration
+
+<h1>Device Selection</h1>
+
+@*Select device type drop-down*@
+<div class="row">
+    <h3 style="padding-right: 1em">Select device type</h3>
+    <RadzenDropDown AllowClear="false" TValue="string" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" Style="width:300px"
+                    Placeholder="Select..." Data=@devices TextProperty="Device" ValueProperty="Device" Change=@(args => OnDeviceTypeChange(args)) @bind-Value=@deviceType />
+</div>
+
+<RadzenTabs Change=@OnChange style="height: 500px;margin-top:20px" RenderMode="TabRenderMode.Client">
+    <Tabs>
+        <RadzenTabsItem Text="Alpaca Device">
+            <RadzenCard Style="width:300px; margin-bottom: 20px; height:250px; margin-right: 20px">
+            </RadzenCard>
+            <RadzenButton Click=@(args => OnAlpacaSearchClick()) Text="Search" Style="margin-bottom: 20px; width: 150px" />
+            <RadzenButton Click=@(args => OnSelectTechnologyClick("Alpaca")) Text="Select" Style="margin-bottom: 20px; width: 150px" />
+        </RadzenTabsItem>
+
+        <RadzenTabsItem Text="Windows COM Driver">
+            <RadzenCard Style="width:300px; margin-bottom: 20px; height:250px; margin-right: 20px">
+            </RadzenCard>
+            <RadzenButton Click=@(args => OnSelectTechnologyClick("COM")) Text="Select" Style="margin-bottom: 20px; width: 150px" />
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+
+
+
+@code
+{
+    IEnumerable<object> devices = new string[] { "Telescope", "Focuser", "Rotator" };
+    string deviceType;
+
+    protected override void OnInitialized()
+    {
+        deviceType = configuration.Settings.CurrentDeviceType;
+    }
+
+
+    void OnAlpacaSearchClick()
+    {
+        using (Finder finder = new Finder())
+        {
+
+finder.ResponseReceivedEvent+=
+            conformLogger.LogDebug("OnAlpacaSearchClick", $"Initiating search");
+
+            finder.
+        }
+    }
+
+    void OnSelectTechnologyClick(string args)
+    {
+        conformLogger.LogDebug("OnSelectTechnologyClick", $"Value changed to {args}");
+        configuration.Settings.CurrentDeviceTechnology = args;
+        configuration.Save();
+        StateHasChanged();
+    }
+
+
+
+    void OnDeviceTypeChange(object value)
+    {
+        var str = value is IEnumerable<object> ? string.Join(", ", (IEnumerable<object>)value) : value;
+        conformLogger.LogDebug("OnDeviceTypeChange", $"Value changed to {str}");
+        configuration.Settings.CurrentDeviceType = str.ToString();
+        configuration.Save();
+        StateHasChanged();
+
+    }
+
+    void OnChange(int index)
+    {
+        //console.Log($"Tab with index {index} was selected.");
+    }
+
+
+}
