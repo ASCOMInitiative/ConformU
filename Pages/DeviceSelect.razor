@@ -1,5 +1,6 @@
 ﻿@page "/DeviceSelection"
 @using ASCOM.Standard.Discovery
+@using System.Net
 
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
@@ -13,10 +14,11 @@
                     Placeholder="Select..." Data=@devices TextProperty="Device" ValueProperty="Device" Change=@(args => OnDeviceTypeChange(args)) @bind-Value=@deviceType />
 </div>
 
-<RadzenTabs Change=@OnChange style="height: 500px;margin-top:20px" RenderMode="TabRenderMode.Client">
+<RadzenTabs Change=@OnChange style="height: 1000px;margin-top:20px" RenderMode="TabRenderMode.Client">
     <Tabs>
         <RadzenTabsItem Text="Alpaca Device">
-            <RadzenCard Style="width:300px; margin-bottom: 20px; height:250px; margin-right: 20px">
+            <RadzenCard Style="width:400px; margin-bottom: 20px; height:500px; margin-right: 20px">
+                <RadzenTextArea @bind-Value=@alpacaDevices Cols="60" Rows="10" />
             </RadzenCard>
             <RadzenButton Click=@(args => OnAlpacaSearchClick()) Text="Search" Style="margin-bottom: 20px; width: 150px" />
             <RadzenButton Click=@(args => OnSelectTechnologyClick("Alpaca")) Text="Select" Style="margin-bottom: 20px; width: 150px" />
@@ -30,13 +32,11 @@
     </Tabs>
 </RadzenTabs>
 
-
-
 @code
 {
     IEnumerable<object> devices = new string[] { "Telescope", "Focuser", "Rotator" };
     string deviceType;
-
+    string alpacaDevices;
     protected override void OnInitialized()
     {
         deviceType = configuration.Settings.CurrentDeviceType;
@@ -47,12 +47,18 @@
     {
         using (Finder finder = new Finder())
         {
-
-finder.ResponseReceivedEvent+=
+            alpacaDevices = "";
+            finder.ResponseReceivedEvent += AlpacaDeviceDiscovered;
             conformLogger.LogDebug("OnAlpacaSearchClick", $"Initiating search");
-
-            finder.
+            finder.Search(true, true);
         }
+    }
+
+    private void AlpacaDeviceDiscovered<IPEndPoint>(object asd, IPEndPoint endpoint)
+    {
+
+        alpacaDevices += $"{endpoint}\r\n";
+        StateHasChanged();
     }
 
     void OnSelectTechnologyClick(string args)
