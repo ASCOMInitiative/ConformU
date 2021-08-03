@@ -21,6 +21,8 @@
 
 </head>
 <body>
+    <!--Return position information for a control with the supplied ID-->
+    <script>GetBoundingClientRect = (elementId) => { return document.getElementById(elementId).getBoundingClientRect(); }; </script>
     <app>
         <component type="typeof(App)" render-mode="ServerPrerendered" />
     </app>

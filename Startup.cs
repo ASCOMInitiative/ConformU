@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Radzen;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,6 +46,9 @@ public class Startup
                 options.EnableLogging = false; // Better performance
                 options.SuppressInitEvent = false; // Ensure the event fires when the application is first loaded
             });
+
+        // Radzen services
+        services.AddScoped<NotificationService>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

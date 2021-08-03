@@ -12,22 +12,22 @@ using System.Threading;
 using AlpacaDiscovery;
 using ASCOM.Standard.Utilities;
 
-namespace AlpacaDiscoveryVB
+namespace AlpacaDiscovery
 {
 
 
     // This namespace dual targets NetStandard2.0 and Net35, thus no async await
     internal class Finder : IDisposable
     {
-        private TraceLogger TL;
+        private readonly TraceLogger TL;
         private readonly Action<IPEndPoint, AlpacaDiscoveryResponse> callbackFunctionDelegate;
         private readonly UdpClient udpClient;
-        private List<UdpClient> ipV6Discoveryclients = new List<UdpClient>();
+        private readonly List<UdpClient> ipV6Discoveryclients = new ();
 
         /// <summary>
         /// A cache of all endpoints found by the server
         /// </summary>
-        public List<IPEndPoint> CachedEndpoints { get; private set; } = new List<IPEndPoint>();
+        public List<IPEndPoint> CachedEndpoints { get; private set; } = new ();
 
         #region Initialisation and Dispose
         /// <summary>
@@ -42,9 +42,11 @@ namespace AlpacaDiscoveryVB
             TL = traceLogger; // Save the trace logger object
             LogMessage("Finder", "Starting Initialisation...");
             callbackFunctionDelegate = callback;
-            udpClient = new UdpClient();
-            udpClient.EnableBroadcast = true;
-            udpClient.MulticastLoopback = false;
+            udpClient = new UdpClient
+            {
+                EnableBroadcast = true,
+                MulticastLoopback = false
+            };
 
             // 0 tells OS to give us a free ethereal port
             udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
@@ -205,7 +207,7 @@ namespace AlpacaDiscoveryVB
                                     LogMessage("SendDiscoveryMessageIpV6", $"Sent multicast IPv6 discovery packet");
                                     ipV6Discoveryclients.Add(client);
                                 }
-                                catch (SocketException ex)
+                                catch 
                                 {
                                 }
                             }
@@ -253,7 +255,7 @@ namespace AlpacaDiscoveryVB
             }
 
             // Ignore these, they can occur after the Finder is disposed
-            catch (ObjectDisposedException __unusedObjectDisposedException1__)
+            catch (ObjectDisposedException)
             {
             }
             catch (Exception ex)
@@ -281,7 +283,7 @@ namespace AlpacaDiscoveryVB
         {
             if (TL is object)
             {
-                string indentSpaces = new string(' ', Thread.CurrentThread.ManagedThreadId * Constants.NUMBER_OF_THREAD_MESSAGE_INDENT_SPACES);
+                string indentSpaces = new(' ', Thread.CurrentThread.ManagedThreadId * Constants.NUMBER_OF_THREAD_MESSAGE_INDENT_SPACES);
                 TL.LogMessage($"Finder - {method}", $"{indentSpaces}{Thread.CurrentThread.ManagedThreadId} - {message}");
             }
         }

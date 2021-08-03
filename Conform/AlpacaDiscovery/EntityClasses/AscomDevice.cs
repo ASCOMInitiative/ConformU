@@ -8,8 +8,8 @@ namespace AlpacaDiscovery
 {
 
     /// <summary>
-/// Data object describing an ASCOM device that is served by an Alpaca device as returned by the <see cref="AlpacaDiscovery"/> component.
-/// </summary>
+    /// Data object describing an ASCOM device that is served by an Alpaca device as returned by the <see cref="AlpacaDiscovery"/> component.
+    /// </summary>
     [Guid("E768E0BB-D795-4CAE-95D0-9D0173BF57BC")]
     [ComVisible(true)]
     [ClassInterface(ClassInterfaceType.None)]
@@ -17,26 +17,26 @@ namespace AlpacaDiscovery
     {
 
         /// <summary>
-    /// Initialises the class with default values
-    /// </summary>
-    /// <remarks>COM clients should use this initialiser and set the properties individually because COM only supports parameterless initialisers.</remarks>
+        /// Initialises the class with default values
+        /// </summary>
+        /// <remarks>COM clients should use this initialiser and set the properties individually because COM only supports parameterless initialisers.</remarks>
         public AscomDevice()
         {
         }
 
         /// <summary>
-    /// Initialise the ASCOM device name, ASCOM device type and ASCOM device unique ID, plus
-    /// the Alpaca API device number, unique ID, device IP endpoint, Alpaca unique ID, interface version and status message
-    /// </summary>
-    /// <param name="ascomDdeviceName">ASCOM device name</param>
-    /// <param name="ascomDeviceType">ASCOM device type</param>
-    /// <param name="alpacaDeviceNumber">Alpaca API device number</param>
-    /// <param name="uniqueId">ASCOM device unique ID</param>
-    /// <param name="ipEndPoint">Alpaca device IP endpoint</param>
-    /// <param name="hostName">ALapca device host name</param>
-    /// <param name="interfaceVersion">Supported Alpaca interface version</param>
-    /// <param name="statusMessage">Alpaca device status message</param>
-    /// <remarks>This can only be used by .NET clients because COM only supports parameterless initialisers.</remarks>
+        /// Initialise the ASCOM device name, ASCOM device type and ASCOM device unique ID, plus
+        /// the Alpaca API device number, unique ID, device IP endpoint, Alpaca unique ID, interface version and status message
+        /// </summary>
+        /// <param name="ascomDdeviceName">ASCOM device name</param>
+        /// <param name="ascomDeviceType">ASCOM device type</param>
+        /// <param name="alpacaDeviceNumber">Alpaca API device number</param>
+        /// <param name="uniqueId">ASCOM device unique ID</param>
+        /// <param name="ipEndPoint">Alpaca device IP endpoint</param>
+        /// <param name="hostName">ALapca device host name</param>
+        /// <param name="interfaceVersion">Supported Alpaca interface version</param>
+        /// <param name="statusMessage">Alpaca device status message</param>
+        /// <remarks>This can only be used by .NET clients because COM only supports parameterless initialisers.</remarks>
         internal AscomDevice(string ascomDdeviceName, string ascomDeviceType, int alpacaDeviceNumber, string uniqueId, IPEndPoint ipEndPoint, string hostName, int interfaceVersion, string statusMessage)
         {
             AscomDeviceName = ascomDdeviceName;
@@ -61,51 +61,59 @@ namespace AlpacaDiscovery
             {
                 throw new InvalidValueException($"Unsupported network type {ipEndPoint.AddressFamily} when creating a new ASCOMDevice");
             }
+
+            // Populate the IP port number from the supplied IPAddress
+            IpPort = ipEndPoint.Port;
         }
 
         /// <summary>
-    /// ASCOM device name
-    /// </summary>
+        /// ASCOM device name
+        /// </summary>
         public string AscomDeviceName { get; set; }
 
         /// <summary>
-    /// ASCOM device type
-    /// </summary>
+        /// ASCOM device type
+        /// </summary>
         public string AscomDeviceType { get; set; }
 
         /// <summary>
-    /// Alpaca API device number
-    /// </summary>
+        /// Alpaca API device number
+        /// </summary>
         public int AlpacaDeviceNumber { get; set; }
 
         /// <summary>
-    /// ASCOM device unique ID
-    /// </summary>
+        /// ASCOM device unique ID
+        /// </summary>
         public string UniqueId { get; set; }
 
         /// <summary>
-    /// The ASCOM device's DNS host name, if available, otherwise its IP address. IPv6 addresses will be in canonical form.
-    /// </summary>
+        /// The ASCOM device's DNS host name, if available, otherwise its IP address. IPv6 addresses will be in canonical form.
+        /// </summary>
         public string HostName { get; set; }
 
         /// <summary>
-    /// The ASCOM device's IP address. IPv6 addresses will be in canonical form.
-    /// </summary>
+        /// The ASCOM device's IP address. IPv6 addresses will be in canonical form.
+        /// </summary>
         public string IpAddress { get; set; }
 
         /// <summary>
-    /// Supported Alpaca interface version
-    /// </summary>
+        /// The ASCOM device's IP port.
+        /// </summary>
+        public int IpPort { get; set; }
+
+        /// <summary>
+        /// Supported Alpaca interface version
+        /// </summary>
         public int InterfaceVersion { get; set; }
 
         /// <summary>
-    /// Alpaca device status message
-    /// </summary>
+        /// Alpaca device status message
+        /// </summary>
         public string StatusMessage { get; set; }
 
         /// <summary>
-    /// Alpaca device IP endpoint
-    /// </summary>
+        /// Alpaca device IP endpoint
+        /// </summary>
         internal IPEndPoint IPEndPoint { get; set; }
     }
 }

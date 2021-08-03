@@ -18,6 +18,8 @@ public class ConformLogger
     {
         Console.WriteLine("***** Creating Trace Logger");
         TL = new TraceLogger(loggerName, enabled);
+        TraceLogger = TL;
+
         Console.WriteLine("***** Trace Logger created OK");
         Debug = false;
     }
@@ -27,6 +29,7 @@ public class ConformLogger
         TL.LogMessage(id, message);
         Console.WriteLine($"##### {id} - {message}");
     }
+    public TraceLogger TraceLogger { get; set; }
     public void LogDebug(string id, string message)
     {
         if (Debug)

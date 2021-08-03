@@ -1,13 +1,33 @@
-﻿using System;
+﻿using AlpacaDiscovery;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 public class Settings
 {
-    public bool Debug { get; set; } = false;
-    public string CurrentDeviceType { get; set; } = "";
+    /// <summary>
+    /// IP address of the current device (Alpaca only)
+    /// </summary>
+    public AscomDevice CurrentAlpacaDevice { get; set; } = new();
+    /// <summary>
+    /// Descriptive name of the current device
+    /// </summary>
+    public string CurrentDeviceName { get; set; } = "No device selected";
+    /// <summary>
+    /// ProgID of the current device (COM only)
+    /// </summary>
+    public string CurrentDeviceProgId { get; set; } = "";
+    /// <summary>
+    /// Technology of the current device: Alpaca or COM
+    /// </summary>
     public string CurrentDeviceTechnology { get; set; } = "Alpaca";
+    /// <summary>
+    /// ASCOM Device type of the current device
+    /// </summary>
+    public string CurrentDeviceType { get; set; } = "Telescope";
+    public bool Debug { get; set; } = false;
     public string DeviceCamera { get; set; } = "";
     public string DeviceCoverCalibrator { get; set; }
     public string DeviceDome { get; set; } = "";

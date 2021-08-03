@@ -6,10 +6,9 @@
     <div class="sidebar">
         <NavMenu />
     </div>
-
     <div class="main">
         <div class="top-row px-4">
-            <span>Current device - @deviceTechnology @deviceType</span>
+            <span>Current device - @deviceName (@deviceTechnology @deviceType)</span>
             <a href="https://ascom-standards.org" target="_blank">ASCOM Initiative</a>
         </div>
 
@@ -17,29 +16,42 @@
             @Body
         </div>
     </div>
-</BlazorPro.BlazorSize.MediaQueryList>>
+    <div >
+        <RadzenNotification />
+    </div>
+</BlazorPro.BlazorSize.MediaQueryList>
 
 @code
 {
+    private string deviceName;
     private string deviceType;
     private string deviceTechnology;
 
     protected override void OnInitialized()
     {
-        conformLogger.LogDebug("MainLayout", "OnInitialized Running");
         configuration.ConfigurationChanged += OnConfigurationChanged;
-        conformLogger.LogDebug("MainLayout", "OnInitialized Added configuraiton change event handler");
-        deviceType = configuration.Settings.CurrentDeviceType;
-        deviceTechnology = configuration.Settings.CurrentDeviceTechnology;
+        SetDisplayVariables();
     }
 
     private void OnConfigurationChanged(object caller, EventArgs args)
     {
-        conformLogger.LogDebug("MainLayout", $"Configuration changed! {configuration.Settings.CurrentDeviceType}");
+        SetDisplayVariables();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void SetDisplayVariables()
+    {
+        conformLogger.LogDebug("MainLayout - SetDisplayVariables", $"Device description: {configuration.Settings.CurrentDeviceName} {configuration.Settings.CurrentDeviceType} {configuration.Settings.CurrentDeviceTechnology}");
+        if (configuration.Settings.CurrentDeviceTechnology == "Alpaca")
+        {
+            deviceName = $"{configuration.Settings.CurrentDeviceName} - {configuration.Settings.CurrentAlpacaDevice.IpAddress}:{configuration.Settings.CurrentAlpacaDevice.IpPort}";
+        }
+        else
+        {
+            deviceName = configuration.Settings.CurrentDeviceName;
+        }
         deviceType = configuration.Settings.CurrentDeviceType;
         deviceTechnology = configuration.Settings.CurrentDeviceTechnology;
-        conformLogger.LogDebug("MainLayout", $"Calling InvokeAsync StateHasChanged.");
-        InvokeAsync(StateHasChanged);
-        conformLogger.LogDebug("MainLayout", $"Returned from InvokeAsync StateHasChanged.");
+
     }
 }

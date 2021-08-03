@@ -10,7 +10,7 @@ using AlpacaDiscovery;
 using ASCOM;
 using ASCOM.Standard.Utilities;
 
-namespace AlpacaDiscoveryVB
+namespace AlpacaDiscovery
 {
 
     /// <summary>
