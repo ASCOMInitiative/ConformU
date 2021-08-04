@@ -10,9 +10,13 @@ namespace ConformU
     public class Settings
     {
         /// <summary>
-        /// IP address of the current device (Alpaca only)
+        /// Details of the currently selected Alpaca device
         /// </summary>
         public AscomDevice CurrentAlpacaDevice { get; set; } = new();
+        /// <summary>
+        /// Details of the currently selected Alpaca device
+        /// </summary>
+        public ComDevice CurrentComDevice { get; set; } = new();
         /// <summary>
         /// Descriptive name of the current device
         /// </summary>

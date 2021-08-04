@@ -7,6 +7,11 @@ namespace ConformU
 {
     public class ComDevice
     {
+        public ComDevice()
+        {
+            DisplayName = "";
+            ProgId = "";
+        }
         public ComDevice(string displayName, string progId)
         {
             DisplayName = displayName;

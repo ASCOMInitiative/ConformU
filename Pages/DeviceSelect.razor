@@ -50,8 +50,7 @@
                                            TValue="AscomDevice"
                                            TextProperty="DisplayName"
                                            ValueProperty="AscomDevice"
-                                           @bind-Value=@selectedAlpacaDevice
-                                           Change=@(args => OnAlpacaDeviceChanged(args)) />
+                                           Change=@(args => OnNewAlpacaDeviceSelected(args)) />
 
                 </RadzenCard>
 
@@ -61,7 +60,7 @@
                     <RadzenTextArea Style="line-height:1.3"
                                     Cols="300"
                                     Rows="40"
-                                    @bind-Value=@alpacaDiscoveryStatus />
+                                    @bind-Value=@alpacaDiscoveryProgress />
 
                 </RadzenCard>
 
@@ -75,10 +74,10 @@
                               Click=@(args => OnAlpacaSearchClick()) />
 
                 @* An ID is required for this button so that JavaScript can return the button's position in the viewport in order that any warning message can be positioned next to the button *@
-                <RadzenButton id="SelectButton"
+                <RadzenButton id="SelectAlpacaButton"
                               Style="margin-bottom: 20px; margin-left:20px; width: 150px"
                               Text="Select"
-                              Click=@(args => OnSelectDeviceClick(ConformConstants.TECHNOLOGY_ALPACA)) />
+                              Click=@(args => OnSelectAlpacaDeviceClick()) />
 
             </div>
 
@@ -94,8 +93,7 @@
                 @* COM device selection radio buttons *@
                 <RadzenCard Style="width:600px; margin-bottom: 20px; height:800px; margin-right: 20px; overflow: auto;">
 
-                    <RadzenRadioButtonList @bind-Value=@selectedComDevice
-                                           Orientation="Orientation.Vertical"
+                    <RadzenRadioButtonList Orientation="Orientation.Vertical"
                                            Data=@comDeviceList
                                            TValue="ComDevice"
                                            TextProperty="DisplayName"
@@ -106,9 +104,10 @@
             </div>
 
             @* COMdevice selection button *@
-            <RadzenButton Style="margin-bottom: 20px; width: 150px"
+            <RadzenButton id="SelectComButton"
+                          Style="margin-bottom: 20px; width: 150px"
                           Text="Select"
-                          Click=@(args => OnSelectDeviceClick(ConformConstants.TECHNOLOGY_COM)) />
+                          Click=@(args => OnNewComDeviceSelected()) />
 
         </RadzenTabsItem>
 
@@ -119,111 +118,53 @@
 @code
 {
     List<string> validAscomdDeviceTypes = new() { "Telescope", "Camera", "CoverCalibrator", "Dome", "Focuser", "ObservingConditions", "Rotator", "Switch", "Video" };
-    string selectedDeviceType;
-    string alpacaDiscoveryStatus;
-    AlpacaDiscovery discovery;
-    bool osIsWindows;
+    string selectedDeviceType; // One of the valid ASCOM device types above
+    string alpacaDiscoveryProgress; // Text describing events happening while Alpaca discovery is underway
+    AlpacaDiscovery discovery; // Alpaca discovery component
+    bool osIsWindows; // OS environment type
     bool osIsNotWindows;
     int selectedTabNumber = 0; // Current tab number 0 = Alpaca, 1 = COM
+    string technologyType = ConformConstants.TECHNOLOGY_ALPACA; // Is the user selecting an Alpaca or a COM device?
 
-    List<AlpacaDeviceListItem> ascomDevices = new();
-    List<ComDeviceListItem> comDeviceList = new();
+    List<AlpacaDeviceListItem> ascomDevices = new(); // List of discovered Alpaca devices for use in the Alpaca devices Radzen radio button list
+    List<ComDeviceListItem> comDeviceList = new(); // List of COM devices for use in the Radzen COM devices radio button list
 
-    AscomDevice selectedAlpacaDevice;
-    ComDevice selectedComDevice;
+    AscomDevice selectedAlpacaDevice; // Details of the currently selected Alpaca device
+    ComDevice selectedComDevice; // Details of the currently selected COM device
+
+    #region Initialisation and Load
 
     protected override void OnInitialized()
     {
+        // Initialise variables
         selectedDeviceType = configuration.Settings.CurrentDeviceType;
         discovery = new AlpacaDiscovery(conformLogger.TraceLogger);
         discovery.AlpacaDevicesUpdated += AlpacaDeviceDiscovered;
         discovery.DiscoveryCompleted += AlpacaDiscoveryCompleted;
+
+        // Define OS environment variables
         osIsWindows = OperatingSystem.IsWindows();
         osIsNotWindows = !osIsWindows;
-        StartDiscovery();
 
-    }
-
-    void StartDiscovery()
-    {
-        alpacaDiscoveryStatus = "";
-        discovery.StartDiscovery(1, 1000, 32227, 1.0, false, true, false);
-    }
-
-    void OnComDeviceChanged(ComDevice value)
-    {
-        if (value is null) value = new ComDevice("Unknown", "Unknown");
-        conformLogger.LogDebug("OnComDeviceChanged", $"New COM Device selected: {value.ProgId}, description: {value.DisplayName}");
-    }
-
-    void OnAlpacaDeviceChanged(AscomDevice value)
-    {
-        if (value is null) value = new AscomDevice();
-        conformLogger.LogDebug("OnDeviceChanged", $"New Device selected: {value.AscomDeviceName} at {value.IpAddress}");
-    }
-
-    void OnAlpacaSearchClick()
-    {
+        // Start an Alpaca discovery to populate the Alpaca device list
         StartDiscovery();
     }
 
-    private void AlpacaDiscoveryCompleted(object asd, EventArgs args)
+    #endregion
+
+    #region Page component event Handlers
+
+    void OnTabChange(int tabIndex)
     {
-        conformLogger.LogDebug("AlpacaDiscoveryCompleted", $"Discovery complete");
-        alpacaDiscoveryStatus += $"Discovery complete!";
-        ascomDevices = new();
-        foreach (AscomDevice device in discovery.GetAscomDevices(selectedDeviceType))
+        selectedTabNumber = tabIndex;
+        conformLogger.LogMessage("OnTabChange", $"Selected new tab: {tabIndex}");
+
+        if (tabIndex == 1)
         {
-            ascomDevices.Add(new AlpacaDeviceListItem($"{device.AscomDeviceName} ({device.IpAddress})", device));
+            UpdateComDevices();
         }
-        InvokeAsync(StateHasChanged);
-    }
-
-    private void AlpacaDeviceDiscovered(object asd, EventArgs args)
-    {
-        List<AscomDevice> newDevices = discovery.GetAscomDevices("");
-        //alpacaDiscoveryStatus = "";
-        foreach (AscomDevice device in newDevices)
-        {
-            alpacaDiscoveryStatus += $"{device.IpAddress} {device.AscomDeviceName}\r\n";
-        }
-        conformLogger.LogDebug("AlpacaDeviceDiscovered", $"{newDevices.Count} devices.");
-
-        InvokeAsync(StateHasChanged);
-    }
-
-    async void OnSelectDeviceClick(string technologyType)
-    {
-        switch (technologyType)
-        {
-            case ConformConstants.TECHNOLOGY_ALPACA:
-                if (selectedAlpacaDevice is null)
-                {
-                    var result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "SelectButton");
-
-                    var x = (int)(result.Right) + 30;
-                    var y = (int)(result.Top) - 40;
-
-                    ShowNotification(new NotificationMessage { Style = $"position: fixed; left: {x}px; top:{y}px;", Severity = NotificationSeverity.Error, Summary = "Select Device", Detail = $"No device has been selected!", Duration = 4000 });
-                }
-                else
-                {
-                    conformLogger.LogDebug("OnSelectDeviceClick", $"Alpaca device selected: {technologyType}");
-                    configuration.Settings.CurrentDeviceName = selectedAlpacaDevice.AscomDeviceName;
-                    configuration.Settings.CurrentAlpacaDevice = selectedAlpacaDevice;
-                    configuration.Settings.CurrentDeviceType = selectedAlpacaDevice.AscomDeviceType;
-                }
-                break;
-
-            case ConformConstants.TECHNOLOGY_COM:
-                conformLogger.LogDebug("OnSelectDeviceClick", $"COM device selected: {technologyType}");
-                configuration.Settings.CurrentDeviceType = selectedDeviceType;
-                break;
-        }
-
-        configuration.Settings.CurrentDeviceTechnology = technologyType;
-        configuration.Save();
         StateHasChanged();
+
     }
 
     void OnDeviceTypeChange(object value)
@@ -245,25 +186,117 @@
 
     }
 
-    async void ShowNotification(NotificationMessage message)
+    #endregion
+
+    #region Alpaca TAB event handlers
+
+    private void OnNewAlpacaDeviceSelected(AscomDevice value)
     {
-        notificationService.Notify(message);
-        await InvokeAsync(() => { StateHasChanged(); });
+        selectedAlpacaDevice = value;
+        if (value is null) value = new AscomDevice();
+        conformLogger.LogDebug("OnDeviceChanged", $"New Device selected: {value.AscomDeviceName} at {value.IpAddress}");
     }
 
-
-    void OnTabChange(int tabIndex)
+    private void OnAlpacaSearchClick()
     {
-        selectedTabNumber = tabIndex;
-        conformLogger.LogMessage("OnTabChange", $"Selected new tab: {tabIndex}");
+        StartDiscovery();
+    }
 
-        if (tabIndex == 1)
+    private async void OnSelectAlpacaDeviceClick()
+    {
+        if (selectedAlpacaDevice is null)
         {
-            UpdateComDevices();
-        }
-        StateHasChanged();
+            var result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "SelectAlpacaButton");
 
+            var x = (int)(result.Right) + 30;
+            var y = (int)(result.Top) - 40;
+
+            ShowNotification(new NotificationMessage { Style = $"position: fixed; left: {x}px; top:{y}px;", Severity = NotificationSeverity.Error, Summary = "Select Device", Detail = $"No device has been selected!", Duration = 4000 });
+        }
+        else
+        {
+            conformLogger.LogDebug("OnSelectDeviceClick", $"Alpaca device selected: {technologyType}");
+            configuration.Settings.CurrentDeviceName = selectedAlpacaDevice.AscomDeviceName;
+            configuration.Settings.CurrentAlpacaDevice = selectedAlpacaDevice;
+            configuration.Settings.CurrentDeviceType = selectedAlpacaDevice.AscomDeviceType;
+        }
+
+        technologyType = ConformConstants.TECHNOLOGY_ALPACA;
+        configuration.Settings.CurrentDeviceTechnology = technologyType;
+        configuration.Save();
+        StateHasChanged();
     }
+
+    #endregion
+
+    #region COM TAB event handlers
+
+    private async void OnNewComDeviceSelected()
+    {
+        if (selectedComDevice is null)
+        {
+            var result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "SelectComButton");
+
+            var x = (int)(result.Right) + 30;
+            var y = (int)(result.Top) - 40;
+
+            ShowNotification(new NotificationMessage { Style = $"position: fixed; left: {x}px; top:{y}px;", Severity = NotificationSeverity.Error, Summary = "Select Device", Detail = $"No device has been selected!", Duration = 4000 });
+        }
+        else
+        {
+            conformLogger.LogDebug("OnSelectDeviceClick", $"COM device selected: {technologyType}");
+            configuration.Settings.CurrentDeviceName = selectedComDevice.DisplayName;
+            configuration.Settings.CurrentComDevice = selectedComDevice;
+            configuration.Settings.CurrentDeviceType = selectedDeviceType;
+            configuration.Settings.CurrentDeviceProgId = selectedComDevice.ProgId;
+        }
+
+        technologyType = ConformConstants.TECHNOLOGY_COM;
+        configuration.Settings.CurrentDeviceTechnology = technologyType;
+        configuration.Save();
+        StateHasChanged();
+    }
+
+    void OnComDeviceChanged(ComDevice value)
+    {
+        selectedComDevice = value;
+        if (value is null) value = new ComDevice("Unknown", "Unknown");
+        conformLogger.LogDebug("OnComDeviceChanged", $"New COM Device selected: {value.ProgId}, description: {value.DisplayName}");
+    }
+
+    #endregion
+
+    #region Alpaca discovery event handlers
+
+    private void AlpacaDiscoveryCompleted(object caller, EventArgs args)
+    {
+        conformLogger.LogDebug("AlpacaDiscoveryCompleted", $"Discovery complete");
+        alpacaDiscoveryProgress += $"Discovery complete!";
+        ascomDevices = new();
+        foreach (AscomDevice device in discovery.GetAscomDevices(selectedDeviceType))
+        {
+            ascomDevices.Add(new AlpacaDeviceListItem($"{device.AscomDeviceName} ({device.IpAddress})", device));
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void AlpacaDeviceDiscovered(object caller, EventArgs args)
+    {
+        List<AscomDevice> newDevices = discovery.GetAscomDevices(selectedDeviceType);
+        //alpacaDiscoveryStatus = "";
+        foreach (AscomDevice device in newDevices)
+        {
+            alpacaDiscoveryProgress += $"{device.IpAddress} {device.AscomDeviceName}\r\n";
+        }
+        if (newDevices.Count > 0) alpacaDiscoveryProgress += $"\r\n";
+        conformLogger.LogDebug("AlpacaDeviceDiscovered", $"Found {newDevices.Count} devices.");
+
+        InvokeAsync(StateHasChanged);
+    }
+
+    #endregion
+
+    #region Support code
 
     private void UpdateComDevices()
     {
@@ -277,5 +310,19 @@
         }
 
     }
+
+    async void ShowNotification(NotificationMessage message)
+    {
+        notificationService.Notify(message);
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    void StartDiscovery()
+    {
+        alpacaDiscoveryProgress = "Discovery started...\r\n";
+        discovery.StartDiscovery(1, 1000, 32227, 1.0, false, true, false);
+    }
+
+    #endregion
 
 }
