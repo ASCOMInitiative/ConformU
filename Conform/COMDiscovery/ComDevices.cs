@@ -7,43 +7,44 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-public class ComDevices
+namespace ConformU
 {
-    private const string ASCOM_PROFILE_KEY = @"SOFTWARE\ASCOM";
-
-    public ComDevices()
+    public class ComDevices
     {
-    }
-
-    public static Dictionary<string, string> GetRegisteredDrivers(string requiredDeviceType, ConformLogger TL)
-    {
-        Dictionary<string, string> result = new Dictionary<string, string>();
-        if (!OperatingSystem.IsWindows()) throw new InvalidOperationException("Conform.ComDevices.GetRegisteredDrivers can only be used on a Windows operating system");
-
-        RegistryKey baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32);
-        RegistryKey profile = baseKey.OpenSubKey(ASCOM_PROFILE_KEY);
-
-        string[] keyNames = profile.GetSubKeyNames();
-        foreach (string keyName in keyNames)
+        public ComDevices()
         {
-            TL.LogMessage("GetRegisteredDrivers", $"Found key name {keyName}");
-            if (keyName.ToUpperInvariant() == $"{requiredDeviceType} Drivers".ToUpperInvariant())
-            {
-                TL.LogMessage("GetRegisteredDrivers", $"Found DRIVERS of type {keyName}");
-                RegistryKey drivers = profile.OpenSubKey($"{requiredDeviceType} Drivers");
-                string[] driverNames = drivers.GetSubKeyNames();
-                foreach (string driverName in driverNames)
-                {
-                    TL.LogMessage("GetRegisteredDrivers", $"Found Driver: {driverName}");
-                    RegistryKey driver = drivers.OpenSubKey(driverName);
-                    string description = (string)driver.GetValue("");
-                    result.Add(driverName, description);
-                    TL.LogMessage("GetRegisteredDrivers", $"Added Driver: {driverName} {description}");
-                }
-
-            }
         }
 
-        return result;
+        public static Dictionary<string, string> GetRegisteredDrivers(string requiredDeviceType, ConformLogger TL)
+        {
+            Dictionary<string, string> result = new();
+            if (!OperatingSystem.IsWindows()) throw new InvalidOperationException("Conform.ComDevices.GetRegisteredDrivers can only be used on a Windows operating system");
+
+            RegistryKey baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32);
+            RegistryKey profile = baseKey.OpenSubKey(ConformConstants.ASCOM_PROFILE_KEY);
+
+            string[] keyNames = profile.GetSubKeyNames();
+            foreach (string keyName in keyNames)
+            {
+                TL.LogMessage("GetRegisteredDrivers", $"Found key name {keyName}");
+                if (keyName.ToUpperInvariant() == $"{requiredDeviceType} Drivers".ToUpperInvariant())
+                {
+                    TL.LogMessage("GetRegisteredDrivers", $"Found DRIVERS of type {keyName}");
+                    RegistryKey drivers = profile.OpenSubKey($"{requiredDeviceType} Drivers");
+                    string[] driverNames = drivers.GetSubKeyNames();
+                    foreach (string driverName in driverNames)
+                    {
+                        TL.LogMessage("GetRegisteredDrivers", $"Found Driver: {driverName}");
+                        RegistryKey driver = drivers.OpenSubKey(driverName);
+                        string description = (string)driver.GetValue("");
+                        result.Add(driverName, description);
+                        TL.LogMessage("GetRegisteredDrivers", $"Added Driver: {driverName} {description}");
+                    }
+
+                }
+            }
+
+            return result;
+        }
     }
 }

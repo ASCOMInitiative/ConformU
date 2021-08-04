@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <RuntimeIdentifiers>win10-x64;linux-arm</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
     <UserSecretsId>c49fec0a-dd2c-4e60-9e85-407d8d9bdd9f</UserSecretsId>
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>

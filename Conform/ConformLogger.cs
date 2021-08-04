@@ -10,34 +10,37 @@ using System.Linq;
 using System.Threading.Tasks;
 using ASCOM.Standard.Utilities;
 
-public class ConformLogger
+namespace ConformU
 {
-    private readonly TraceLogger TL;
-
-    public ConformLogger(string loggerName, bool enabled)
+    public class ConformLogger
     {
-        Console.WriteLine("***** Creating Trace Logger");
-        TL = new TraceLogger(loggerName, enabled);
-        TraceLogger = TL;
+        private readonly TraceLogger TL;
 
-        Console.WriteLine("***** Trace Logger created OK");
-        Debug = false;
-    }
+        public ConformLogger(string loggerName, bool enabled)
+        {
+            Console.WriteLine("***** Creating Trace Logger");
+            TL = new TraceLogger(loggerName, enabled);
+            TraceLogger = TL;
 
-    public void LogMessage(string id, string message)
-    {
-        TL.LogMessage(id, message);
-        Console.WriteLine($"##### {id} - {message}");
-    }
-    public TraceLogger TraceLogger { get; set; }
-    public void LogDebug(string id, string message)
-    {
-        if (Debug)
+            Console.WriteLine("***** Trace Logger created OK");
+            Debug = false;
+        }
+
+        public void LogMessage(string id, string message)
         {
             TL.LogMessage(id, message);
             Console.WriteLine($"##### {id} - {message}");
         }
-    }
+        public TraceLogger TraceLogger { get; set; }
+        public void LogDebug(string id, string message)
+        {
+            if (Debug)
+            {
+                TL.LogMessage(id, message);
+                Console.WriteLine($"##### {id} - {message}");
+            }
+        }
 
-    public bool Debug { get; set; }
+        public bool Debug { get; set; }
+    }
 }
