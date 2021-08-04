@@ -24,9 +24,7 @@ namespace ConformU
             Error = 7,
             Always = 8
         }
-
-
-
+        public const string NO_DEVICE_SELECTED = "No device selected"; // Text indicating that no device has been sleected
 
     }
 

@@ -15,7 +15,7 @@
 </div>
 
 @*Configuration tabs*@
-<RadzenTabs Change=@OnChange style="height: 500px;margin-top:20px" RenderMode="TabRenderMode.Client">
+<RadzenTabs Change=@OnChange style="height: 820px;margin-top:20px" RenderMode="TabRenderMode.Client">
     <Tabs>
         <RadzenTabsItem Text="General">
             <div class="row">
@@ -49,19 +49,52 @@
 
         <RadzenTabsItem Text="Telescope">
             <div class="row">
+                <h3 style="margin-top: 5px;">Select the tests which Conform should perform.</h3>
+                <RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(true)) Text="Check all tests" Style="margin-left: 20px; " />
+                <RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(false)) Text="Uncheck all tests" Style="margin-left: 20px; " />
             </div>
-        </RadzenTabsItem>
-        <RadzenTabsItem Text="Camera">
-            <div class="row">
-            </div>
+
+            <RadzenCheckBoxList @bind-Value=@telescopeTests
+                                Style="margin-top:20px"
+                                TValue="string"
+                                Orientation="Orientation.Vertical"
+                                Change=@(args => OnTelescopeTestsChange(args,""))>
+                <Items>
+                    @foreach (var item in configuration.Settings.TelescopeTests)
+                    {
+                        <RadzenCheckBoxListItem Text="@item.Key" Value="@item.Key" />
+                    }
+                </Items>
+            </RadzenCheckBoxList>
+
         </RadzenTabsItem>
 
+        <RadzenTabsItem Text="Camera">
+            <h3>Conform will normally test camera imaging at all supported bin values that the camera reports through MaxBinX and MaxBinY.</h3>
+            <h3>The settings below can be used to limit testing to specified maximum values.</h3>
+
+            <div style="margin-top:40px" class="row">
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraTestMaxBinX" TValue="int" Min="0" Change=@(args => OnMaxBinXChange(args)) />
+                <h3 style="margin-left: 20px;margin-top: 5px;">Max BinX for testing</h3>
+            </div>
+            <div class="row">
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraTestMaxBinY" TValue="int" Min="0" Change=@(args => OnMaxBinYChange(args)) />
+                <h3 style="margin-left: 20px;margin-top: 5px;">Max BinY for testing</h3>
+            </div>
+
+            <h3 style="margin-top: 2em">To use the maximum bin values supplied by the camera, set the values above to zero.</h3>
+        </RadzenTabsItem>
 
     </Tabs>
 </RadzenTabs>
 
 @*Page code*@
 @code {
+
+    int cameraTestMaxBinX;
+    int cameraTestMaxBinY;
+
+    IEnumerable<string> telescopeTests;
     string status;
 
     IEnumerable<int> currentScope = new List<int>() { 0, 1, 2, 3 };
@@ -76,6 +109,54 @@
         status = configuration.Status;
         SetConfiguration();
         conformLogger.LogDebug("OnInitialized", "Running");
+
+        telescopeTests = new List<string>();
+        foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
+        {
+            if (item.Value) ((List<string>)telescopeTests).Add(item.Key);
+        }
+
+        SetTelescopeTests();
+        SetCameraTests();
+    }
+
+    private void OnSetTelescopeTestsButtonClick(bool state)
+    {
+        Dictionary<string, bool> changedTests = new();
+        foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
+        {
+            changedTests.Add(item.Key, state);
+        }
+        configuration.Settings.TelescopeTests = changedTests;
+
+        configuration.Save();
+        SetTelescopeTests();
+    }
+
+    private void OnMaxBinXChange(int newValue)
+    {
+        configuration.Settings.CameraTestMaxBinX = newValue;
+        configuration.Save();
+    }
+    private void OnMaxBinYChange(int newValue)
+    {
+        configuration.Settings.CameraTestMaxBinY = newValue;
+        configuration.Save();
+    }
+
+    private void SetCameraTests()
+    {
+        cameraTestMaxBinX = configuration.Settings.CameraTestMaxBinX;
+        cameraTestMaxBinY = configuration.Settings.CameraTestMaxBinY;
+    }
+
+    private void SetTelescopeTests()
+    {
+        telescopeTests = new List<string>();
+        foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
+        {
+            if (item.Value) ((List<string>)telescopeTests).Add(item.Key);
+        }
     }
 
     private void SetConfiguration()
@@ -96,6 +177,10 @@
         chkDebug = configuration.Settings.Debug;
 
         deviceType = configuration.Settings.CurrentDeviceType;
+
+        // Reset device test settings
+        SetTelescopeTests();
+        SetCameraTests();
     }
 
     void OnScopeChange(IEnumerable<int> scope)
@@ -194,7 +279,7 @@
         configuration.Reset();
         status = configuration.Status;
         SetConfiguration();
-        //StateHasChanged();
+        StateHasChanged();
     }
 
     void OnCheckboxChange(bool args, string name)
@@ -225,4 +310,33 @@
     {
         //console.Log($"Tab with index {index} was selected.");
     }
+
+    #region Telescope TAB
+
+
+    void OnTelescopeTestsChange(IEnumerable<string> value, string asd)
+    {
+        conformLogger.TraceLogger.LogMessage("OnTelescopeTestsChange", $"Start of enabled test list");
+
+        Dictionary<string, bool> newTelescopetestValues = new();
+        foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
+        {
+            newTelescopetestValues[item.Key] = false;
+        }
+
+
+        foreach (string i in value)
+        {
+            conformLogger.TraceLogger.LogMessage("OnTelescopeTestsChange", $"Setting value: {i} true");
+            newTelescopetestValues[i] = true;
+        }
+        configuration.Settings.TelescopeTests = newTelescopetestValues;
+        conformLogger.TraceLogger.LogMessage("OnTelescopeTestsChange", $"End of enabled test list");
+        configuration.Save();
+    }
+
+    #endregion
+
+
+
 }

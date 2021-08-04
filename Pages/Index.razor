@@ -7,11 +7,13 @@
 @inject ConformLogger conformLogger
 @inject ConformConfiguration settings
 @inject IJSRuntime JS
+@* Radzen notification service to enable pop-up alerts *@
+@inject NotificationService notificationService
 
 <div>
     <h1>Welcome to Conform Universal!</h1>
     <div>
-        <RadzenButton Click=@(args => StartTest("Starting test")) Text="Start" Icon="account_circle" Style="margin-bottom: 20px; width: 150px" />
+        <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Icon="account_circle" Style="margin-bottom: 20px; width: 150px" />
         <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Icon="account_circle" Style="margin-bottom: 20px; width: 150px" />
     </div>
 
@@ -28,11 +30,21 @@
 
     DeviceConformanceTester tester;
 
-    void StartTest(string buttonName)
+    async void StartTest(string buttonName)
     {
 
-        settings.Validate();
-        settings.Reset();
+        string validationMessage = settings.Validate();
+        if (!string.IsNullOrEmpty(validationMessage))
+        {
+            var result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "StartButton");
+
+            var x = (int)(result.Left);
+            var y = (int)(result.Top) + 100;
+
+            ShowNotification(new NotificationMessage { Style = $"position: fixed; left: {x}px; top:{y}px;", Severity = NotificationSeverity.Error, Summary = "Test Device", Detail = $"Cannot start test: {validationMessage}", Duration = 4000 });
+
+            return;
+        }
         LogMsgDebug("WarningMessageDisplayed", settings.Settings.WarningMessageDisplayed.ToString());
         LogMsgDebug("UpdateDate", settings.Settings.UpdateDate.ToString());
         LogMsgDebug("DisplayMethodCalls", settings.Settings.DisplayMethodCalls.ToString());
@@ -52,9 +64,23 @@
         LogMsgDebug("StartTest", $"TASK started");
 
     }
-    void StopTest(string buttonName)
+    async void StopTest(string buttonName)
     {
         LogMsgDebug("StopClick", $"STOPPING TESTER");
+
+        string validationMessage = settings.Validate();
+        if (!string.IsNullOrEmpty(validationMessage))
+        {
+            var result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "StartButton");
+
+            var x = (int)(result.Left);
+            var y = (int)(result.Top) + 100;
+
+            ShowNotification(new NotificationMessage { Style = $"position: fixed; left: {x}px; top:{y}px;", Severity = NotificationSeverity.Error, Summary = "Test Device", Detail = $"Cannot stop test: {validationMessage}", Duration = 4000 });
+
+            return;
+        }
+
 
         if (tester is not null)
         {
@@ -136,5 +162,10 @@
     }
 
     #endregion
+    private async void ShowNotification(NotificationMessage message)
+    {
+        notificationService.Notify(message);
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
 
 }

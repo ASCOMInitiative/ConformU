@@ -63,8 +63,10 @@ namespace ConformU
         /// <summary>
         /// Validate the settings values
         /// </summary>
-        public void Validate()
+        public string Validate()
         {
+            if (settings.CurrentDeviceName == ConformConstants.NO_DEVICE_SELECTED) return "No device has been selected.";
+            return "";
         }
 
         /// <summary>
@@ -76,12 +78,17 @@ namespace ConformU
             PersistSettings(settings);
             Status = $"Settings saved at {DateTime.Now:HH:mm:ss.f}.";
 
+            RaiseConfigurationChnagedEvent();
+        }
+
+        private void RaiseConfigurationChnagedEvent()
+        {
             if (ConfigurationChanged is not null)
             {
                 EventArgs args = new();
-                TL.LogDebug("ConformConfigurationSave", "About to call configuration changed event handler");
+                TL.LogDebug("RaiseConfigurationChnagedEvent", "About to call configuration changed event handler");
                 ConfigurationChanged(this, args);
-                TL.LogDebug("ConformConfigurationSave", "Returned from configuration changed event handler");
+                TL.LogDebug("RaiseConfigurationChnagedEvent", "Returned from configuration changed event handler");
             }
         }
 
@@ -91,6 +98,7 @@ namespace ConformU
             settings = new();
             PersistSettings(settings);
             Status = $"Settings reset at {DateTime.Now:HH:mm:ss.f}.";
+            RaiseConfigurationChnagedEvent();
 
         }
 

@@ -311,7 +311,7 @@
 
     }
 
-    async void ShowNotification(NotificationMessage message)
+    private async void ShowNotification(NotificationMessage message)
     {
         notificationService.Notify(message);
         await InvokeAsync(() => { StateHasChanged(); });

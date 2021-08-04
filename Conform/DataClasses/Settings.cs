@@ -9,6 +9,29 @@ namespace ConformU
 {
     public class Settings
     {
+
+        public  const string NO_DEVICE_SELECTED = "No device selected";
+        public Settings()
+        {
+            TelescopeTests.Add("CanMoveAxis", true);
+            TelescopeTests.Add("Park/Unpark", true);
+            TelescopeTests.Add("AbortSlew", true);
+            TelescopeTests.Add("AxisRate", true);
+            TelescopeTests.Add("FindHome", true);
+            TelescopeTests.Add("MoveAxis", true);
+            TelescopeTests.Add("PulseGuide", true);
+            TelescopeTests.Add("SlewToCoordinates", true);
+            TelescopeTests.Add("SlewToCoordinatesAsync", true);
+            TelescopeTests.Add("SlewToTarget", true);
+            TelescopeTests.Add("SlewToTargetAsync", true);
+            TelescopeTests.Add("DestinationSideOfPier", true);
+            TelescopeTests.Add("SlewToAltAz", true);
+            TelescopeTests.Add("SlewToAltAzAsync", true);
+            TelescopeTests.Add("SyncToCoordinates", true);
+            TelescopeTests.Add("SyncToTarget", true);
+            TelescopeTests.Add("SyncToAltAz", true);
+        }
+
         /// <summary>
         /// Details of the currently selected Alpaca device
         /// </summary>
@@ -20,7 +43,7 @@ namespace ConformU
         /// <summary>
         /// Descriptive name of the current device
         /// </summary>
-        public string CurrentDeviceName { get; set; } = "No device selected";
+        public string CurrentDeviceName { get; set; } = NO_DEVICE_SELECTED;
         /// <summary>
         /// ProgID of the current device (COM only)
         /// </summary>
@@ -33,6 +56,12 @@ namespace ConformU
         /// ASCOM Device type of the current device
         /// </summary>
         public string CurrentDeviceType { get; set; } = "Telescope";
+
+        public Dictionary<string, bool> TelescopeTests { get; set; } = new();
+
+        public int CameraTestMaxBinX { get; set; }
+        public int CameraTestMaxBinY { get; set; }
+
         public bool Debug { get; set; } = false;
         public string DeviceCamera { get; set; } = "";
         public string DeviceCoverCalibrator { get; set; }
