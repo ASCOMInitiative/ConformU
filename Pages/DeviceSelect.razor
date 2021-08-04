@@ -132,45 +132,6 @@
     AscomDevice selectedAlpacaDevice;
     ComDevice selectedComDevice;
 
-    public class ComDeviceListItem
-    {
-        public ComDeviceListItem(string displayName, ComDevice comDevice)
-        {
-            DisplayName = displayName;
-            ComDevice = comDevice;
-        }
-
-        public string DisplayName { get; set; }
-        public ComDevice ComDevice { get; set; }
-    }
-
-    public class AlpacaDeviceListItem
-    {
-        public AlpacaDeviceListItem(string displayName, AscomDevice ascomDevice)
-        {
-            DisplayName = displayName;
-            AscomDevice = ascomDevice;
-        }
-
-        public string DisplayName { get; set; }
-        public AscomDevice AscomDevice { get; set; }
-    }
-
-    /// <summary>
-    /// Data strructure for a display element's bounding rectangle
-    /// </summary>
-    public class BoundingClientRect
-    {
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Width { get; set; }
-        public double Height { get; set; }
-        public double Top { get; set; }
-        public double Right { get; set; }
-        public double Bottom { get; set; }
-        public double Left { get; set; }
-    }
-
     protected override void OnInitialized()
     {
         selectedDeviceType = configuration.Settings.CurrentDeviceType;
@@ -238,7 +199,7 @@
             case ConformConstants.TECHNOLOGY_ALPACA:
                 if (selectedAlpacaDevice is null)
                 {
-                    var result = await JS.InvokeAsync<BoundingClientRect>("GetBoundingClientRect", "SelectButton");
+                    var result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "SelectButton");
 
                     var x = (int)(result.Right) + 30;
                     var y = (int)(result.Top) - 40;
