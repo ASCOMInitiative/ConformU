@@ -67,7 +67,7 @@
         LogMsg("CurrentDeviceType", settings.Settings.CurrentDeviceType);
 
         LogMsg("StartTest", $"Creating TASK");
-        tester = new DeviceConformanceTester(settings, cancelConformToken);
+        tester = new DeviceConformanceTester(settings, cancelConformToken, conformLogger);
         tester.OutputChanged += TesterChanged;
         conformanceTest = new Task(() =>
         {
@@ -118,7 +118,8 @@
     {
         lock (screenLoglockObject)
         {
-            LogMsg(e.Id, $" Message: {e.Message}"); // Log the message
+            screenLog += $"{(e.Id).PadRight(30)} {e.Message}\r\n";  // Add the new log message to the screen display
+            InvokeAsync(StateHasChanged); // Display the updated log on the screen
         }
     }
 
