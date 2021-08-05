@@ -32,7 +32,7 @@ namespace ConformU
 
         public void TestDevice()
         {
-            DeviceTesterBaseClass l_TestDevice = new TelescopeTester(this, TL); // Variable to hold the device being tested
+            DeviceTesterBaseClass l_TestDevice = new TelescopeTester(this, configuration, TL); // Variable to hold the device being tested
             bool m_TestRunning;
 
             try

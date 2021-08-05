@@ -126,7 +126,7 @@ namespace Conform
         #endregion
 
         #region Global Variables
-        internal static MessageLevel g_LogLevel;
+        internal static MessageLevel g_LogLevel=MessageLevel.msgDebug;
         internal static int g_CountError, g_CountWarning, g_CountIssue;
         internal static System.IO.StreamWriter g_LogFile;
         internal static System.IO.StreamWriter g_ValidationTempFile;
@@ -160,31 +160,31 @@ namespace Conform
         internal static string g_CoverCalibratorProgID;
 
         // Status update class
-        internal static Dictionary<string, CheckState> g_TelescopeTests = new Dictionary<string, CheckState>();
-        internal static Dictionary<string, CheckState> g_TelescopeTestsMaster = new Dictionary<string, CheckState>();
+        //internal static Dictionary<string, CheckState> g_TelescopeTests = new Dictionary<string, CheckState>();
+        //internal static Dictionary<string, CheckState> g_TelescopeTestsMaster = new Dictionary<string, CheckState>();
 
         internal static void SetTelescopeTestOptions()
         {
             // Populate the master list of Telescope Tests that are called from main and setup forms on-load events
-            g_TelescopeTestsMaster.Clear();
-            g_TelescopeTestsMaster.Add(TELTEST_CAN_MOVE_AXIS, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_PARK_UNPARK, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_ABORT_SLEW, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_AXIS_RATE, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_COMMANDXXX, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_FIND_HOME, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_MOVE_AXIS, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_PULSE_GUIDE, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_COORDINATES, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_COORDINATES_ASYNC, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_TARGET, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_TARGET_ASYNC, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_DESTINATION_SIDE_OF_PIER, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_ALTAZ, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_ALTAZ_ASYNC, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_SYNC_TO_COORDINATES, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_SYNC_TO_TARGET, CheckState.Checked);
-            g_TelescopeTestsMaster.Add(TELTEST_SYNC_TO_ALTAZ, CheckState.Checked);
+            //g_TelescopeTestsMaster.Clear();
+            //g_TelescopeTestsMaster.Add(TELTEST_CAN_MOVE_AXIS, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_PARK_UNPARK, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_ABORT_SLEW, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_AXIS_RATE, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_COMMANDXXX, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_FIND_HOME, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_MOVE_AXIS, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_PULSE_GUIDE, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_COORDINATES, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_COORDINATES_ASYNC, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_TARGET, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_TARGET_ASYNC, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_DESTINATION_SIDE_OF_PIER, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_ALTAZ, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_ALTAZ_ASYNC, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_SYNC_TO_COORDINATES, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_SYNC_TO_TARGET, CheckState.Checked);
+            //g_TelescopeTestsMaster.Add(TELTEST_SYNC_TO_ALTAZ, CheckState.Checked);
         }
 
         #endregion

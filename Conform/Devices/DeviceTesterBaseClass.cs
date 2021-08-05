@@ -79,7 +79,7 @@ namespace Conform
         /// <param name="HasPerformanceCheck">Device has a performance test</param>
         /// <param name="HasPostRunCheck">Device requires a post run safety check</param>
         /// <remarks></remarks>
-        public DeviceTesterBaseClass(bool HasCanProperties, bool HasProperties, bool HasMethods, bool HasPreRunCheck, bool HasPreConnectCheck, bool HasPerformanceCheck, bool HasPostRunCheck, ConformU.DeviceConformanceTester parent,ConformU.ConformLogger logger) : base()
+        public DeviceTesterBaseClass(bool HasCanProperties, bool HasProperties, bool HasMethods, bool HasPreRunCheck, bool HasPreConnectCheck, bool HasPerformanceCheck, bool HasPostRunCheck, ConformU.DeviceConformanceTester parent, ConformU.ConformLogger logger) : base()
         {
             l_HasPreConnectCheck = HasPreConnectCheck;
             l_Connected = false;
@@ -1088,37 +1088,37 @@ namespace Conform
 
         #region Common methods for all device tester classes
 
-        internal  void LogMsgOK(string p_Test, string p_Msg)
+        internal void LogMsgOK(string p_Test, string p_Msg)
         {
             LogMsg(p_Test, MessageLevel.msgOK, p_Msg);
         }
 
-        internal  void LogMsgDebug(string p_Test, string p_Msg)
+        internal void LogMsgDebug(string p_Test, string p_Msg)
         {
             LogMsg(p_Test, MessageLevel.msgDebug, p_Msg);
         }
 
-        internal  void LogMsgInfo(string p_Test, string p_Msg)
+        internal void LogMsgInfo(string p_Test, string p_Msg)
         {
             LogMsg(p_Test, MessageLevel.msgInfo, p_Msg);
         }
 
-        internal  void LogMsgIssue(string p_Test, string p_Msg)
+        internal void LogMsgIssue(string p_Test, string p_Msg)
         {
             LogMsg(p_Test, MessageLevel.msgIssue, p_Msg);
         }
 
-        internal  void LogMsgError(string p_Test, string p_Msg)
+        internal void LogMsgError(string p_Test, string p_Msg)
         {
             LogMsg(p_Test, MessageLevel.msgError, p_Msg);
         }
 
-        internal  void LogMsgWarning(string p_Test, string p_Msg)
+        internal void LogMsgWarning(string p_Test, string p_Msg)
         {
             LogMsg(p_Test, MessageLevel.msgWarning, p_Msg);
         }
 
-        internal  void LogMsg(string p_Test, MessageLevel p_MsgLevel, string p_Msg)
+        internal void LogMsg(string p_Test, MessageLevel p_MsgLevel, string p_Msg)
         {
             const int c_Spacing = 52;
             const int TEST_NAME_WIDTH = 34;
@@ -1230,7 +1230,7 @@ namespace Conform
                             }
                     }
                     parentClass.OnLogMessageChanged("LogMessage", $"{l_Msg}");
-
+                    TL.LogMessage(p_Test, l_MsgLevelFormatted + " " + l_MsgFormatted);
                 }
             }
             catch (Exception)

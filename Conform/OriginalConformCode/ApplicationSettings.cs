@@ -254,49 +254,49 @@ namespace Conform
         }
 
         // Telescope
-        public Dictionary<string, CheckState> TeleScopeTests
-        {
-            get
-            {
-                var RetVal = new Dictionary<string, CheckState>();
-                CheckState testState;
-                string registryValue;
-                foreach (KeyValuePair<string, CheckState> kvp in g_TelescopeTestsMaster)
-                {
-                    try
-                    {
-                        //LogMsgDebug("TeleScopeTests", $"Retrieving key: {kvp.Key}");
-                        registryValue = m_TelescopeTestsKey.GetValue(kvp.Key).ToString();
-                        //LogMsgDebug("TeleScopeTests", $"Retrieved registry value: {registryValue} for {kvp.Key}");
-                        testState = (CheckState)Conversions.ToInteger(Enum.Parse(typeof(CheckState), registryValue, true));
-                        //LogMsgDebug("TeleScopeTests", $"Retrieved checked state: {testState} for {kvp.Key}");
-                        RetVal.Add(kvp.Key, testState);
-                    }
-                    catch (System.IO.IOException ex) // Value doesn't exist so create it
-                    {
-                        //LogMsgDebug("TeleScopeTests", $"IOException for key {kvp.Key}: {ex}");
-                        SetName(m_TelescopeTestsKey, kvp.Key, CheckState.Checked.ToString());
-                        RetVal.Add(kvp.Key, CheckState.Checked);
-                    }
-                    catch (Exception ex)
-                    {
-                        //LogMsgDebug("TeleScopeTests", $"Unexpected exception for key {kvp.Key}: {ex}");
-                        SetName(m_TelescopeTestsKey, kvp.Key, CheckState.Checked.ToString());
-                        RetVal.Add(kvp.Key, CheckState.Checked);
-                    }
-                }
+        //public Dictionary<string, CheckState> TeleScopeTests
+        //{
+        //    get
+        //    {
+        //        var RetVal = new Dictionary<string, CheckState>();
+        //        CheckState testState;
+        //        string registryValue;
+        //        foreach (KeyValuePair<string, CheckState> kvp in g_TelescopeTestsMaster)
+        //        {
+        //            try
+        //            {
+        //                //LogMsgDebug("TeleScopeTests", $"Retrieving key: {kvp.Key}");
+        //                registryValue = m_TelescopeTestsKey.GetValue(kvp.Key).ToString();
+        //                //LogMsgDebug("TeleScopeTests", $"Retrieved registry value: {registryValue} for {kvp.Key}");
+        //                testState = (CheckState)Conversions.ToInteger(Enum.Parse(typeof(CheckState), registryValue, true));
+        //                //LogMsgDebug("TeleScopeTests", $"Retrieved checked state: {testState} for {kvp.Key}");
+        //                RetVal.Add(kvp.Key, testState);
+        //            }
+        //            catch (System.IO.IOException ex) // Value doesn't exist so create it
+        //            {
+        //                //LogMsgDebug("TeleScopeTests", $"IOException for key {kvp.Key}: {ex}");
+        //                SetName(m_TelescopeTestsKey, kvp.Key, CheckState.Checked.ToString());
+        //                RetVal.Add(kvp.Key, CheckState.Checked);
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                //LogMsgDebug("TeleScopeTests", $"Unexpected exception for key {kvp.Key}: {ex}");
+        //                SetName(m_TelescopeTestsKey, kvp.Key, CheckState.Checked.ToString());
+        //                RetVal.Add(kvp.Key, CheckState.Checked);
+        //            }
+        //        }
 
-                //LogMsgDebug("TeleScopeTests", $"Returning {RetVal.Count} values.");
-                return RetVal;
-            }
+        //        //LogMsgDebug("TeleScopeTests", $"Returning {RetVal.Count} values.");
+        //        return RetVal;
+        //    }
 
-            set
-            {
-                //LogMsgDebug("TeleScopeTests", $"Setting {value.Count} values.");
-                foreach (KeyValuePair<string, CheckState> kvp in value)
-                    SetName(m_TelescopeTestsKey, kvp.Key, kvp.Value.ToString());
-            }
-        }
+        //    set
+        //    {
+        //        //LogMsgDebug("TeleScopeTests", $"Setting {value.Count} values.");
+        //        foreach (KeyValuePair<string, CheckState> kvp in value)
+        //            SetName(m_TelescopeTestsKey, kvp.Key, kvp.Value.ToString());
+        //    }
+        //}
 
         public bool TestSideOfPierRead
         {

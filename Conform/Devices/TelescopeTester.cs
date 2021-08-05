@@ -8,6 +8,8 @@ using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.CompilerServices;
 using static Conform.GlobalVarsAndCode;
 using ASCOM.Standard.Interfaces;
+using ConformU;
+using System.Collections.Generic;
 
 namespace Conform
 {
@@ -87,6 +89,10 @@ namespace Conform
         // Axis rate checks
         private double[,] m_AxisRatesPrimaryArray = new double[1001, 2], m_AxisRatesArray = new double[1001, 2];
         #endregion
+
+        private Settings settings;
+
+        private Dictionary<string, bool> telescopeTests;
 
         #region Enums
         private enum CanType
@@ -194,9 +200,14 @@ namespace Conform
         #endregion
 
         #region New and Dispose
-        public TelescopeTester(ConformU.DeviceConformanceTester parent,ConformU.ConformLogger logger) : base(true, true, true, true, false, true, true, parent,logger) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
+        public TelescopeTester(DeviceConformanceTester parent, ConformConfiguration conformConfiguration, ConformLogger logger) : base(true, true, true, true, false, true, true, parent, logger) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
         {
             g_Util = new();
+            g_Settings.MessageLevel = MessageLevel.msgDebug;
+            g_Settings.Debug = true;
+
+            settings = conformConfiguration.Settings;
+            telescopeTests = settings.TelescopeTests;
         }
 
         // IDisposable
@@ -604,7 +615,7 @@ namespace Conform
             if (!TestStop())
             {
                 LogMsg("TimeCheck", MessageLevel.msgInfo, $"PC Time Zone:  { TimeZoneInfo.Local.DisplayName} offset: {TimeZoneInfo.Local.BaseUtcOffset.Hours} hours.");
-                LogMsg("TimeCheck", MessageLevel.msgInfo, $"PC UTCDate:    " + DateTime.UtcNow.ToString( "dd-MMM-yyyy HH:mm:ss.fff"));
+                LogMsg("TimeCheck", MessageLevel.msgInfo, $"PC UTCDate:    " + DateTime.UtcNow.ToString("dd-MMM-yyyy HH:mm:ss.fff"));
                 // v1.0.12.0 Added catch logic for any UTCDate issues
                 try
                 {
@@ -672,7 +683,8 @@ namespace Conform
             DriveRate l_DriveRate;
             double l_TimeDifference;
 #if DEBUG
-            ITrackingRates l_TrackingRates = null;
+            //ITrackingRates l_TrackingRates = null;
+            ASCOM.DeviceInterface.ITrackingRates l_TrackingRates = null;
             DriveRate l_TrackingRate;
 #else
             dynamic l_TrackingRates = null;
@@ -1849,7 +1861,7 @@ namespace Conform
                     LogMsg("SiderealTime", MessageLevel.msgComment, "About to get SiderealTime property");
                 m_SiderealTimeScope = Conversions.ToDouble(telescopeDevice.SiderealTime);
                 canReadSiderealTime = true;
-                m_SiderealTimeASCOM = (18.697374558d + 24.065709824419081d * (DateTime.Now.ToOADate() + 2415018.5 - 2451545.0d) + m_SiteLongitude / 15.0d) % 24.0d;
+                m_SiderealTimeASCOM = (18.697374558d + 24.065709824419081d * (DateTime.UtcNow.ToOADate() + 2415018.5 - 2451545.0d) + m_SiteLongitude / 15.0d) % 24.0d;
                 switch (m_SiderealTimeScope)
                 {
                     case var case25 when case25 < 0.0d:
@@ -2137,60 +2149,67 @@ namespace Conform
                     HandleException("TrackingRates", MemberType.Property, Required.Mandatory, ex, "");
                 }
 
-                try
+                if (l_TrackingRates is not null)
                 {
-                    IEnumerator l_Enum;
-                    object l_Obj;
-                    DriveRate l_Drv;
-                    l_Enum = (IEnumerator)l_TrackingRates.GetEnumerator();
-                    if (l_Enum is null)
+                    try
                     {
-                        LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "ERROR: The driver did NOT return an Enumerator object!");
+                        IEnumerator l_Enum;
+                        object l_Obj;
+                        DriveRate l_Drv;
+                        l_Enum = (IEnumerator)l_TrackingRates.GetEnumerator();
+                        if (l_Enum is null)
+                        {
+                            LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "ERROR: The driver did NOT return an Enumerator object!");
+                        }
+                        else
+                        {
+                            LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "OK - the driver returned an Enumerator object");
+                        }
+
+                        l_Enum.Reset();
+                        LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "Reset Enumerator");
+                        while (l_Enum.MoveNext())
+                        {
+                            LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "Reading Current");
+                            l_Obj = l_Enum.Current;
+                            LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "Read Current OK, Type: " + l_Obj.GetType().Name);
+                            l_Drv = (DriveRate)Conversions.ToInteger(l_Obj);
+                            LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "Found drive rate: " + Enum.GetName(typeof(DriveRate), l_Drv));
+                        }
+
+                        l_Enum.Reset();
+                        l_Enum = null;
+
+                        // Clean up TrackingRates object
+                        if (l_TrackingRates is object)
+                        {
+                            try
+                            {
+                                l_TrackingRates.Dispose();
+                            }
+                            catch
+                            {
+                            }
+
+                            try
+                            {
+                                Marshal.ReleaseComObject(l_TrackingRates);
+                            }
+                            catch
+                            {
+                            }
+
+                            l_TrackingRates = null;
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "OK - the driver returned an Enumerator object");
-                    }
-
-                    l_Enum.Reset();
-                    LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "Reset Enumerator");
-                    while (l_Enum.MoveNext())
-                    {
-                        LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "Reading Current");
-                        l_Obj = l_Enum.Current;
-                        LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "Read Current OK, Type: " + l_Obj.GetType().Name);
-                        l_Drv = (DriveRate)Conversions.ToInteger(l_Obj);
-                        LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "Found drive rate: " + Enum.GetName(typeof(DriveRate), l_Drv));
-                    }
-
-                    l_Enum.Reset();
-                    l_Enum = null;
-
-                    // Clean up TrackingRates object
-                    if (l_TrackingRates is object)
-                    {
-                        try
-                        {
-                            l_TrackingRates.Dispose();
-                        }
-                        catch
-                        {
-                        }
-
-                        try
-                        {
-                            Marshal.ReleaseComObject(l_TrackingRates);
-                        }
-                        catch
-                        {
-                        }
-
-                        l_TrackingRates = null;
+                        HandleException("TrackingRates", MemberType.Property, Required.Mandatory, ex, "");
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    HandleException("TrackingRates", MemberType.Property, Required.Mandatory, ex, "");
+                    LogMsg("TrackingRates Enum", MessageLevel.msgInfo, "Skipped enumerator test because of an issue creating the TrackingRates object");
                 }
 
                 try
@@ -2301,7 +2320,7 @@ namespace Conform
                         LogMsgOK("TrackingRates", "Successfully obtained a TrackingRates object after the previous TrackingRates object was disposed");
                         if (g_Settings.DisplayMethodCalls)
                             LogMsg("TrackingRate Read", MessageLevel.msgComment, "About to get TrackingRate property");
-                        l_TrackingRate = telescopeDevice.TrackingRate;
+                        l_TrackingRate = (DriveRate)telescopeDevice.TrackingRate;
                         LogMsg("TrackingRate Read", MessageLevel.msgOK, l_TrackingRate.ToString());
 
                         // TrackingRate Write - Optional
@@ -2440,7 +2459,7 @@ namespace Conform
             // CanMoveAxis - Required - This must be first test as Parked tests use its results
             if (g_InterfaceVersion > 1)
             {
-                if (g_TelescopeTests[TELTEST_CAN_MOVE_AXIS] == CheckState.Checked | g_TelescopeTests[TELTEST_MOVE_AXIS] == CheckState.Checked | g_TelescopeTests[TELTEST_PARK_UNPARK] == CheckState.Checked)
+                if (telescopeTests[TELTEST_CAN_MOVE_AXIS] | telescopeTests[TELTEST_MOVE_AXIS] | telescopeTests[TELTEST_PARK_UNPARK])
                 {
                     TelescopeRequiredMethodsTest(RequiredMethodType.tstCanMoveAxisPrimary, "CanMoveAxis:Primary");
                     if (TestStop())
@@ -2465,7 +2484,7 @@ namespace Conform
             // Test Park, Unpark - Optional
             if (g_InterfaceVersion > 1)
             {
-                if (g_TelescopeTests[TELTEST_PARK_UNPARK] == CheckState.Checked)
+                if (telescopeTests[TELTEST_PARK_UNPARK])
                 {
                     if (canPark) // Can Park
                     {
@@ -2768,7 +2787,7 @@ namespace Conform
             }
 
             // AbortSlew - Optional
-            if (g_TelescopeTests[TELTEST_ABORT_SLEW] == CheckState.Checked)
+            if (telescopeTests[TELTEST_ABORT_SLEW])
             {
                 TelescopeOptionalMethodsTest(OptionalMethodType.AbortSlew, "AbortSlew", true);
                 if (TestStop())
@@ -2782,7 +2801,7 @@ namespace Conform
             // AxisRates - Required
             if (g_InterfaceVersion > 1)
             {
-                if (g_TelescopeTests[TELTEST_AXIS_RATE] == CheckState.Checked | g_TelescopeTests[TELTEST_MOVE_AXIS] == CheckState.Checked)
+                if (telescopeTests[TELTEST_AXIS_RATE] | telescopeTests[TELTEST_MOVE_AXIS])
                 {
                     TelescopeAxisRateTest("AxisRate:Primary", TelescopeAxis.Primary);
                     TelescopeAxisRateTest("AxisRate:Secondary", TelescopeAxis.Secondary);
@@ -2799,7 +2818,7 @@ namespace Conform
             }
 
             // FindHome - Optional
-            if (g_TelescopeTests[TELTEST_FIND_HOME] == CheckState.Checked)
+            if (telescopeTests[TELTEST_FIND_HOME])
             {
                 TelescopeOptionalMethodsTest(OptionalMethodType.FindHome, "FindHome", canFindHome);
                 if (TestStop())
@@ -2813,7 +2832,7 @@ namespace Conform
             // MoveAxis - Optional
             if (g_InterfaceVersion > 1)
             {
-                if (g_TelescopeTests[TELTEST_MOVE_AXIS] == CheckState.Checked)
+                if (telescopeTests[TELTEST_MOVE_AXIS])
                 {
                     TelescopeOptionalMethodsTest(OptionalMethodType.MoveAxisPrimary, "MoveAxis Primary", m_CanMoveAxisPrimary);
                     if (TestStop())
@@ -2836,7 +2855,7 @@ namespace Conform
             }
 
             // PulseGuide - Optional
-            if (g_TelescopeTests[TELTEST_PULSE_GUIDE] == CheckState.Checked)
+            if (telescopeTests[TELTEST_PULSE_GUIDE])
             {
                 TelescopeOptionalMethodsTest(OptionalMethodType.PulseGuide, "PulseGuide", canPulseGuide);
                 if (TestStop())
@@ -2848,7 +2867,7 @@ namespace Conform
             }
 
             // Test Equatorial slewing to coordinates - Optional
-            if (g_TelescopeTests[TELTEST_SLEW_TO_COORDINATES] == CheckState.Checked)
+            if (telescopeTests[TELTEST_SLEW_TO_COORDINATES])
             {
                 TelescopeSlewTest(SlewSyncType.SlewToCoordinates, "SlewToCoordinates", canSlew, "CanSlew");
                 if (TestStop())
@@ -2869,7 +2888,7 @@ namespace Conform
             }
 
             // Test Equatorial slewing to coordinates asynchronous - Optional
-            if (g_TelescopeTests[TELTEST_SLEW_TO_COORDINATES_ASYNC] == CheckState.Checked)
+            if (telescopeTests[TELTEST_SLEW_TO_COORDINATES_ASYNC])
             {
                 TelescopeSlewTest(SlewSyncType.SlewToCoordinatesAsync, "SlewToCoordinatesAsync", canSlewAsync, "CanSlewAsync");
                 if (TestStop())
@@ -2890,7 +2909,7 @@ namespace Conform
             }
 
             // Equatorial Sync to Coordinates - Optional - Moved here so that it can be tested before any target coordinates are set - Peter 4th August 2018
-            if (g_TelescopeTests[TELTEST_SYNC_TO_COORDINATES] == CheckState.Checked)
+            if (telescopeTests[TELTEST_SYNC_TO_COORDINATES])
             {
                 TelescopeSyncTest(SlewSyncType.SyncToCoordinates, "SyncToCoordinates", canSync, "CanSync");
                 if (TestStop())
@@ -3073,7 +3092,7 @@ namespace Conform
                 return;
 
             // Test Equatorial target slewing - Optional
-            if (g_TelescopeTests[TELTEST_SLEW_TO_TARGET] == CheckState.Checked)
+            if (telescopeTests[TELTEST_SLEW_TO_TARGET])
             {
                 TelescopeSlewTest(SlewSyncType.SlewToTarget, "SlewToTarget", canSlew, "CanSlew");
                 if (TestStop())
@@ -3094,7 +3113,7 @@ namespace Conform
             }
 
             // Test Equatorial target slewing asynchronous - Optional
-            if (g_TelescopeTests[TELTEST_SLEW_TO_TARGET_ASYNC] == CheckState.Checked)
+            if (telescopeTests[TELTEST_SLEW_TO_TARGET_ASYNC])
             {
                 TelescopeSlewTest(SlewSyncType.SlewToTargetAsync, "SlewToTargetAsync", canSlewAsync, "CanSlewAsync");
                 if (TestStop())
@@ -3117,7 +3136,7 @@ namespace Conform
             // DestinationSideOfPier - Optional
             if (g_InterfaceVersion > 1)
             {
-                if (g_TelescopeTests[TELTEST_DESTINATION_SIDE_OF_PIER] == CheckState.Checked)
+                if (telescopeTests[TELTEST_DESTINATION_SIDE_OF_PIER])
                 {
                     if (m_AlignmentMode == AlignmentMode.GermanPolar)
                     {
@@ -3143,7 +3162,7 @@ namespace Conform
             // Test AltAz Slewing - Optional
             if (g_InterfaceVersion > 1)
             {
-                if (g_TelescopeTests[TELTEST_SLEW_TO_ALTAZ] == CheckState.Checked)
+                if (telescopeTests[TELTEST_SLEW_TO_ALTAZ])
                 {
                     TelescopeSlewTest(SlewSyncType.SlewToAltAz, "SlewToAltAz", canSlewAltAz, "CanSlewAltAz");
                     if (TestStop())
@@ -3171,7 +3190,7 @@ namespace Conform
             // Test AltAz Slewing asynchronous - Optional
             if (g_InterfaceVersion > 1)
             {
-                if (g_TelescopeTests[TELTEST_SLEW_TO_ALTAZ_ASYNC] == CheckState.Checked)
+                if (telescopeTests[TELTEST_SLEW_TO_ALTAZ_ASYNC])
                 {
                     TelescopeSlewTest(SlewSyncType.SlewToAltAzAsync, "SlewToAltAzAsync", canSlewAltAzAsync, "CanSlewAltAzAsync");
                     if (TestStop())
@@ -3197,7 +3216,7 @@ namespace Conform
             }
 
             // Equatorial Sync to Target - Optional
-            if (g_TelescopeTests[TELTEST_SYNC_TO_TARGET] == CheckState.Checked)
+            if (telescopeTests[TELTEST_SYNC_TO_TARGET])
             {
                 TelescopeSyncTest(SlewSyncType.SyncToTarget, "SyncToTarget", canSync, "CanSync");
                 if (TestStop())
@@ -3220,7 +3239,7 @@ namespace Conform
             // AltAz Sync - Optional
             if (g_InterfaceVersion > 1)
             {
-                if (g_TelescopeTests[TELTEST_SYNC_TO_ALTAZ] == CheckState.Checked)
+                if (telescopeTests[TELTEST_SYNC_TO_ALTAZ])
                 {
                     TelescopeSyncTest(SlewSyncType.SyncToAltAz, "SyncToAltAz", canSyncAltAz, "CanSyncAltAz");
                     if (TestStop())
@@ -5060,8 +5079,9 @@ namespace Conform
             int l_Count = 0;
 
 #if DEBUG
-            IAxisRates l_AxisRatesIRates;
-            IAxisRates l_AxisRates = null;
+
+            ASCOM.DeviceInterface.IAxisRates l_AxisRatesIRates;
+            ASCOM.DeviceInterface.IAxisRates l_AxisRates = null;
             IRate l_Rate = null;
 #else
             dynamic l_AxisRatesIRates;
@@ -5129,7 +5149,7 @@ namespace Conform
                         dynamic AxisRateItem;
 #endif
 
-                        AxisRateItem = l_AxisRates[i];
+                        AxisRateItem = (IRate)l_AxisRates[i];
                         LogMsg(p_Name + " Count", MessageLevel.msgDebug, "Rate " + i + " - Minimum: " + AxisRateItem.Minimum.ToString() + ", Maximum: " + AxisRateItem.Maximum.ToString());
                     }
                 }
@@ -5196,7 +5216,7 @@ namespace Conform
                     try
                     {
 #if DEBUG
-                        l_AxisRatesIRates = (IAxisRates)l_AxisRates;
+                        l_AxisRatesIRates = l_AxisRates;
                         foreach (IRate currentL_Rate in l_AxisRatesIRates)
                         {
                             l_Rate = currentL_Rate;
