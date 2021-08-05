@@ -33,11 +33,11 @@ namespace ConformU
             services.AddServerSideBlazor();
 
             // Conform components
-
-            ConformLogger conformLogger = new("ConformU", true);
-            conformLogger.Debug = true;
-            services.AddSingleton(conformLogger);
-            services.AddSingleton<ConformConfiguration>();
+            ConformLogger conformLogger = new("ConformU", true);  // Create a logger component
+            ConformConfiguration conformConfiguration = new ConformConfiguration(conformLogger); // Create a configuration settings component
+            conformLogger.Debug = conformConfiguration.Settings.Debug; // Set the logger trace level to the configured value 
+            services.AddSingleton(conformLogger); // Add the logger component to the list of injectable services
+            services.AddSingleton(conformConfiguration); // Add the configuration component to the list of injectable services
 
             // Resizeable screen log textarea infrastructure
             services.AddMediaQueryService();

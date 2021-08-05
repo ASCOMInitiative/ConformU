@@ -1,9 +1,7 @@
-﻿@using BlazorPro.BlazorSize
-@using ConformU
-@inject IResizeListener listener
+﻿@page "/"
 @implements IDisposable
-@page "/"
-@inject ILogger<App> logger
+@using System.Threading
+@inject IResizeListener listener
 @inject ConformLogger conformLogger
 @inject ConformConfiguration settings
 @inject IJSRuntime JS
@@ -20,74 +18,83 @@
     <h4>Conform Log</h4>
     <RadzenTextArea Style="line-height:1.3" Name="ScreenLog" @bind-Value=@screenLog Rows="@Rows" Cols="250" ReadOnly=true />
 </div>
+
 @code {
 
     int Rows = 10;
     string screenLog;
-    int messageCount = 0;
-    int initialisationCount = 0;
     object screenLoglockObject = new object();
 
     DeviceConformanceTester tester;
 
+    // Task and cancellation support
+    Task conformanceTest;
+    Task waitForTestCompletion;
+    CancellationTokenSource cancellationTokenSource;
+    CancellationToken cancelConformToken;
+
+    protected override void OnInitialized()
+    {
+    }
+
     async void StartTest(string buttonName)
     {
 
+        // Validate the supplied configuraiton and only start if there are no settings issues
         string validationMessage = settings.Validate();
-        if (!string.IsNullOrEmpty(validationMessage))
+        if (!string.IsNullOrEmpty(validationMessage)) // There is a configuraiton issue so present an error message
         {
-            var result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "StartButton");
+            // Find the current position of the start button in the viewport
+            BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "StartButton");
+            int x = (int)(result.Left);
+            int y = (int)(result.Top) + 100;
 
-            var x = (int)(result.Left);
-            var y = (int)(result.Top) + 100;
-
+            // Display the error message left aligned and below the start button
             ShowNotification(new NotificationMessage { Style = $"position: fixed; left: {x}px; top:{y}px;", Severity = NotificationSeverity.Error, Summary = "Test Device", Detail = $"Cannot start test: {validationMessage}", Duration = 4000 });
 
             return;
         }
-        LogMsgDebug("WarningMessageDisplayed", settings.Settings.WarningMessageDisplayed.ToString());
-        LogMsgDebug("UpdateDate", settings.Settings.UpdateDate.ToString());
-        LogMsgDebug("DisplayMethodCalls", settings.Settings.DisplayMethodCalls.ToString());
-        LogMsgDebug("Telescope", settings.Settings.DeviceTelescope.ToString());
-        LogMsgDebug("CurrentDeviceType", settings.Settings.CurrentDeviceType);
 
-        Console.WriteLine($"{DateTime.Now.ToString("HH:mm:ss.fff")} StartTest Start - Count: {initialisationCount}");
+        // Create a task cancellation token source and cancellation token
+        cancellationTokenSource = new CancellationTokenSource();
+        cancelConformToken = cancellationTokenSource.Token;
 
-        LogMsgDebug("StartTest", $"Creating TASK");
-        Task conformanceTest = new Task(() =>
+        // Setting have validated OK so start the test
+        LogMsg("WarningMessageDisplayed", settings.Settings.WarningMessageDisplayed.ToString());
+        LogMsg("UpdateDate", settings.Settings.UpdateDate.ToString());
+        LogMsg("DisplayMethodCalls", settings.Settings.DisplayMethodCalls.ToString());
+        LogMsg("Telescope", settings.Settings.DeviceTelescope.ToString());
+        LogMsg("CurrentDeviceType", settings.Settings.CurrentDeviceType);
+
+        LogMsg("StartTest", $"Creating TASK");
+        tester = new DeviceConformanceTester(settings, cancelConformToken);
+        tester.OutputChanged += TesterChanged;
+        conformanceTest = new Task(() =>
         {
-            tester = new DeviceConformanceTester(settings);
-            tester.OutputChanged += TesterChanged;
-        });
-        LogMsgDebug("StartTest", $"Starting TASK");
+            tester.TestDevice();
+            LogMsg("StartTest", $"Test FINISHED");
+            tester.Dispose(); // Dispose of the tester
+            tester = null;
+            LogMsg("StartTest", $"Tester disposed");
+
+            GC.Collect();
+        }, cancelConformToken);
+
+        LogMsg("StartTest", $"Starting TASK");
         conformanceTest.Start();
-        LogMsgDebug("StartTest", $"TASK started");
+        LogMsg("StartTest", $"TASK started");
 
     }
-    async void StopTest(string buttonName)
+
+    void StopTest(string buttonName)
     {
-        LogMsgDebug("StopClick", $"STOPPING TESTER");
-
-        string validationMessage = settings.Validate();
-        if (!string.IsNullOrEmpty(validationMessage))
-        {
-            var result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "StartButton");
-
-            var x = (int)(result.Left);
-            var y = (int)(result.Top) + 100;
-
-            ShowNotification(new NotificationMessage { Style = $"position: fixed; left: {x}px; top:{y}px;", Severity = NotificationSeverity.Error, Summary = "Test Device", Detail = $"Cannot stop test: {validationMessage}", Duration = 4000 });
-
-            return;
-        }
-
+        LogMsg("StopClick", $"STOPPING TESTER");
 
         if (tester is not null)
         {
-            tester.Dispose();
-            tester = null;
+            LogMsg("StopClick", $"Setting cancellation token");
+            cancellationTokenSource.Cancel(); // Cancel the Conform run
         }
-        GC.Collect();
     }
 
     /// <summary>
@@ -95,27 +102,24 @@
     /// </summary>
     /// <param name="id"></param>
     /// <param name="message"></param>
-    void LogMsgDebug(string id, string message)
+    void LogMsg(string id, string message)
     {
-        logger.LogInformation($"Logger - {message}");
-        conformLogger.LogDebug(id, message);
-        screenLog += $"{(id).PadRight(30)} {message}\r\n"; // Add the new log message to the screen display
+        conformLogger.LogMessage(id, message);
+        screenLog += $"{(id).PadRight(30)} {message}\r\n";  // Add the new log message to the screen display
+        InvokeAsync(StateHasChanged); // Display the updated log on the screen
     }
-
 
     /// <summary>
     /// Event handler for messages returned from the tester
     /// </summary>
     /// <param name="source"></param>
     /// <param name="e"></param>
-    private void TesterChanged(object source, MessageEventArgs e)
+    public void TesterChanged(object sender, MessageEventArgs e)
     {
         lock (screenLoglockObject)
         {
-            messageCount += 1;
-            LogMsgDebug(e.Id, $"Call count: {messageCount}, Message: {e.Message}"); // Log the message
+            LogMsg(e.Id, $" Message: {e.Message}"); // Log the message
         }
-        InvokeAsync(StateHasChanged); // Display the updated log on the screen
     }
 
     #region Log textarea - resize support
@@ -143,7 +147,7 @@
         Rows = Convert.ToInt32(((double)browser.Height - 200) / 20.0) + (browser.Height / 300) - 1;
 
         // Log the new window size and number of rows
-        LogMsgDebug("WindowResized", $"Height: {browser.Height}, Rows: {Rows}");
+        LogMsg("WindowResized", $"Height: {browser.Height}, Rows: {Rows}");
 
         // We're outside of the component's lifecycle, be sure to let it know it has to re-render.
         StateHasChanged();

@@ -138,7 +138,7 @@
     {
         // Initialise variables
         selectedDeviceType = configuration.Settings.CurrentDeviceType;
-        discovery = new AlpacaDiscovery(conformLogger.TraceLogger);
+        discovery = new AlpacaDiscovery(conformLogger);
         discovery.AlpacaDevicesUpdated += AlpacaDeviceDiscovered;
         discovery.DiscoveryCompleted += AlpacaDiscoveryCompleted;
 

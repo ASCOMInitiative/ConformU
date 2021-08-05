@@ -12,32 +12,18 @@ using ASCOM.Standard.Utilities;
 
 namespace ConformU
 {
-    public class ConformLogger
+    public class ConformLogger:TraceLogger
     {
-        private readonly TraceLogger TL;
-
-        public ConformLogger(string loggerName, bool enabled)
+        public ConformLogger(string loggerName, bool enabled):base(loggerName,enabled)
         {
-            Console.WriteLine("***** Creating Trace Logger");
-            TL = new TraceLogger(loggerName, enabled);
-            TraceLogger = TL;
-
-            Console.WriteLine("***** Trace Logger created OK");
             Debug = false;
         }
 
-        public void LogMessage(string id, string message)
-        {
-            TL.LogMessage(id, message);
-            Console.WriteLine($"##### {id} - {message}");
-        }
-        public TraceLogger TraceLogger { get; set; }
         public void LogDebug(string id, string message)
         {
             if (Debug)
             {
-                TL.LogMessage(id, message);
-                Console.WriteLine($"##### {id} - {message}");
+                base.LogMessage(id, message);
             }
         }
 

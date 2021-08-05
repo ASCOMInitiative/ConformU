@@ -3,26 +3,49 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace ConformU
 {
     public class DeviceConformanceTester : IDisposable
     {
-        public DeviceConformanceTester(ConformConfiguration configuration)
+        ConformConfiguration configuration;
+        CancellationToken cancellationToken;
+        public DeviceConformanceTester(ConformConfiguration conformConfiguration, CancellationToken conforCancellationToken)
         {
+            configuration = conformConfiguration;
+            cancellationToken = conforCancellationToken;
         }
 
-        public event MessageEventHandler OutputChanged;
-        private void LogMessage(string id, string message)
+        public void TestDevice()
         {
-            if (OutputChanged is not null)
+            for (int i = 0; i < 5; i++)
             {
-                MessageEventArgs args = new()
-                {
-                    Id = id,
-                    Message = message
-                };
-                OutputChanged(this, args);
+                Console.WriteLine($"OutputChanged is null {OutputChanged is null} Loop {i}");
+                OnLogMessageChanged("TestDevice", $"Loop {i} {cancellationToken.IsCancellationRequested} {configuration.Settings.CurrentDeviceType}");
+                if (cancellationToken.IsCancellationRequested) break;
+                Thread.Sleep(1000);
+            }
+            Console.WriteLine($"Finished processing: Task Cancelled: {cancellationToken.IsCancellationRequested}");
+            OnLogMessageChanged("TestDevice", $"Finished processing: Task Cancelled: {cancellationToken.IsCancellationRequested}");
+
+        }
+
+        public event EventHandler<MessageEventArgs> OutputChanged;
+
+        protected virtual void OnLogMessageChanged(string id, string message)
+        {
+            MessageEventArgs e = new()
+            {
+                Id = id,
+                Message = message
+            };
+
+            EventHandler<MessageEventArgs> messageEventHandler = OutputChanged;
+
+            if (messageEventHandler is not null)
+            {
+                messageEventHandler(this, e);
             }
         }
 
@@ -37,7 +60,6 @@ namespace ConformU
                 {
                 }
 
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 disposedValue = true;
             }
         }

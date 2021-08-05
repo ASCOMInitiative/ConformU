@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace ConformU
 {
-    public delegate void MessageEventHandler(object sender, MessageEventArgs e);
     public class MessageEventArgs : EventArgs
     {
         public string Id { get; set; }
