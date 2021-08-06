@@ -5,6 +5,7 @@ using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.CompilerServices;
 using Microsoft.Win32;
 using static Conform.GlobalVarsAndCode;
+using static ConformU.ConformConstants;
 
 namespace Conform
 {
@@ -84,7 +85,7 @@ namespace Conform
         private const string LOG_FILES_DIRECTORY = "Log File Directory";
         private const string LOG_FILES_DIRECTORY_DEFAULT = @"\ASCOM";
         private const string MESSAGE_LEVEL = "Message Level";
-        private const MessageLevel MESSAGE_LEVEL_DEFAULT = MessageLevel.msgInfo;
+        private const MessageLevel MESSAGE_LEVEL_DEFAULT = MessageLevel.Info;
         private const string TEST_METHODS = "Test Methods";
         private const bool TEST_METHODS_DEFAULT = true;
         private const string TEST_PERFORMANCE = "Test Performance";

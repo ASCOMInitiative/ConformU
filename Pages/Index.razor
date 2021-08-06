@@ -25,7 +25,7 @@
     string screenLog;
     object screenLoglockObject = new object();
 
-    DeviceConformanceTester tester;
+    ConformanceTestManager tester;
 
     // Task and cancellation support
     Task conformanceTest;
@@ -60,14 +60,9 @@
         cancelConformToken = cancellationTokenSource.Token;
 
         // Setting have validated OK so start the test
-        LogMsg("WarningMessageDisplayed", settings.Settings.WarningMessageDisplayed.ToString());
-        LogMsg("UpdateDate", settings.Settings.UpdateDate.ToString());
-        LogMsg("DisplayMethodCalls", settings.Settings.DisplayMethodCalls.ToString());
-        LogMsg("Telescope", settings.Settings.DeviceTelescope.ToString());
-        LogMsg("CurrentDeviceType", settings.Settings.CurrentDeviceType);
 
-        LogMsg("StartTest", $"Creating TASK");
-        tester = new DeviceConformanceTester(settings, cancelConformToken, conformLogger);
+        //LogMsg("StartTest", $"Creating TASK");
+        tester = new ConformanceTestManager(settings, conformLogger, cancelConformToken);
         tester.OutputChanged += TesterChanged;
         conformanceTest = new Task(() =>
         {
@@ -80,27 +75,25 @@
                 LogMsg("StartTest", $"Exception: \r\n {ex}");
 
             }
-            LogMsg("StartTest", $"Test FINISHED");
+            //LogMsg("StartTest", $"Test FINISHED");
             tester.Dispose(); // Dispose of the tester
             tester = null;
-            LogMsg("StartTest", $"Tester disposed");
+            //LogMsg("StartTest", $"Tester disposed");
 
             GC.Collect();
         }, cancelConformToken);
 
-        LogMsg("StartTest", $"Starting TASK");
+        //LogMsg("StartTest", $"Starting TASK");
         conformanceTest.Start();
-        LogMsg("StartTest", $"TASK started");
+        //LogMsg("StartTest", $"TASK started");
 
     }
 
     void StopTest(string buttonName)
     {
-        LogMsg("StopClick", $"STOPPING TESTER");
-
         if (tester is not null)
         {
-            LogMsg("StopClick", $"Setting cancellation token");
+            LogMsg("StopClick", $"STOPPING TESTER");
             cancellationTokenSource.Cancel(); // Cancel the Conform run
         }
     }
@@ -158,7 +151,7 @@
         Rows = Convert.ToInt32(((double)browser.Height - 200) / 20.0) + (browser.Height / 300) - 1;
 
         // Log the new window size and number of rows
-        LogMsg("WindowResized", $"Height: {browser.Height}, Rows: {Rows}");
+        //LogMsg("WindowResized", $"Height: {browser.Height}, Rows: {Rows}");
 
         // We're outside of the component's lifecycle, be sure to let it know it has to re-render.
         StateHasChanged();

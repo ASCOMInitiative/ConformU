@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using static ConformU.ConformConstants;
 
 namespace ConformU
 {
@@ -55,7 +56,7 @@ namespace ConformU
         /// <summary>
         /// ASCOM Device type of the current device
         /// </summary>
-        public string CurrentDeviceType { get; set; } = "Telescope";
+        public DeviceType CurrentDeviceType { get; set; } = DeviceType.Telescope;
 
         public Dictionary<string, bool> TelescopeTests { get; set; } = new();
 
@@ -84,6 +85,9 @@ namespace ConformU
         public bool UpdateCheck { get; set; } = true;
         public DateTime UpdateDate { get; set; } = DateTime.MinValue;
         public bool WarningMessageDisplayed { get; set; } = false;
+        public bool UseDriverAccess { get; set; } = false;
+       
+        public bool InterpretErrorMessages { get; set; } = false;
 
     }
 }

@@ -1,8 +1,8 @@
 ﻿@page "/Settings"
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
-@{
-}
+@using static ConformU.ConformConstants
+
 @*Title and settings reset button*@
 <div class="row">
     <h1>Settings</h1>
@@ -101,7 +101,7 @@
     bool chkUpdates;
     bool chkDisplayCalls;
     bool chkDebug;
-    string deviceType;
+    DeviceType deviceType;
     string lastUpdateDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
 
     protected override void OnInitialized()
@@ -262,17 +262,6 @@
 
         //StateHasChanged();
     }
-
-    void OnDeviceTypeChange(object value)
-    {
-        var str = value is IEnumerable<object> ? string.Join(", ", (IEnumerable<object>)value) : value;
-        conformLogger.LogDebug("OnDeviceTypeChange", $"Value changed to {str}");
-        configuration.Settings.CurrentDeviceType = str.ToString();
-        configuration.Save();
-        status = configuration.Status;
-
-    }
-
 
     void OnResetButtonClick()
     {

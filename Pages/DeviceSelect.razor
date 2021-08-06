@@ -3,6 +3,7 @@
 @using System.Net
 @using AlpacaDiscovery
 @using System.Threading
+@using static ConformU.ConformConstants
 
 @* Activity logger object*@
 @inject ConformLogger conformLogger
@@ -25,7 +26,7 @@
                     AllowFiltering="false"
                     Data=@validAscomdDeviceTypes
                     TValue="string"
-                    @bind-Value=@selectedDeviceType
+                    @bind-Value=@selectedDeviceTypeString
                     Change=@(args => OnDeviceTypeChange(args)) />
 </div>
 
@@ -91,7 +92,7 @@
             <div class="row">
 
                 @* COM device selection radio buttons *@
-                <RadzenCard Style="width:600px; margin-bottom: 20px; height:800px; margin-right: 20px; overflow: auto;">
+                <RadzenCard Style="width:900px; margin-bottom: 20px; height:800px; margin-right: 20px; overflow: auto;">
 
                     <RadzenRadioButtonList Orientation="Orientation.Vertical"
                                            Data=@comDeviceList
@@ -117,8 +118,9 @@
 
 @code
 {
-    List<string> validAscomdDeviceTypes = new() { "Telescope", "Camera", "CoverCalibrator", "Dome", "Focuser", "ObservingConditions", "Rotator", "Switch", "Video" };
-    string selectedDeviceType; // One of the valid ASCOM device types above
+    List<string> validAscomdDeviceTypes = new() { DeviceType.Telescope.ToString(), DeviceType.Camera.ToString(), DeviceType.CoverCalibrator.ToString(), DeviceType.Dome.ToString(), DeviceType.Focuser.ToString(), DeviceType.ObservingConditions.ToString(), DeviceType.Rotator.ToString(), DeviceType.Switch.ToString(), DeviceType.Video.ToString() };
+    DeviceType selectedDeviceType; // DeviceType of the selected device
+    string selectedDeviceTypeString; // String representation of the currently selected DeviceType
     string alpacaDiscoveryProgress; // Text describing events happening while Alpaca discovery is underway
     AlpacaDiscovery discovery; // Alpaca discovery component
     bool osIsWindows; // OS environment type
@@ -138,6 +140,7 @@
     {
         // Initialise variables
         selectedDeviceType = configuration.Settings.CurrentDeviceType;
+        selectedDeviceTypeString = selectedDeviceType.ToString();
         discovery = new AlpacaDiscovery(conformLogger);
         discovery.AlpacaDevicesUpdated += AlpacaDeviceDiscovered;
         discovery.DiscoveryCompleted += AlpacaDiscoveryCompleted;
@@ -159,9 +162,15 @@
         selectedTabNumber = tabIndex;
         conformLogger.LogMessage("OnTabChange", $"Selected new tab: {tabIndex}");
 
-        if (tabIndex == 1)
+        switch (tabIndex)
         {
-            UpdateComDevices();
+            case 0:
+                StartDiscovery();
+                break;
+
+            case 1:
+                UpdateComDevices();
+                break;
         }
         StateHasChanged();
 
@@ -192,6 +201,8 @@
 
     private void OnNewAlpacaDeviceSelected(AscomDevice value)
     {
+        selectedDeviceType = Enum.Parse<DeviceType>(selectedDeviceTypeString);
+        configuration.Settings.CurrentDeviceType = selectedDeviceType;
         selectedAlpacaDevice = value;
         if (value is null) value = new AscomDevice();
         conformLogger.LogDebug("OnDeviceChanged", $"New Device selected: {value.AscomDeviceName} at {value.IpAddress}");
@@ -218,7 +229,7 @@
             conformLogger.LogDebug("OnSelectDeviceClick", $"Alpaca device selected: {technologyType}");
             configuration.Settings.CurrentDeviceName = selectedAlpacaDevice.AscomDeviceName;
             configuration.Settings.CurrentAlpacaDevice = selectedAlpacaDevice;
-            configuration.Settings.CurrentDeviceType = selectedAlpacaDevice.AscomDeviceType;
+            configuration.Settings.CurrentDeviceType = Enum.Parse<DeviceType>(selectedAlpacaDevice.AscomDeviceType);
         }
 
         technologyType = ConformConstants.TECHNOLOGY_ALPACA;
@@ -244,10 +255,11 @@
         }
         else
         {
+            selectedDeviceType = Enum.Parse<DeviceType>(selectedDeviceTypeString);
+            configuration.Settings.CurrentDeviceType = selectedDeviceType;
             conformLogger.LogDebug("OnSelectDeviceClick", $"COM device selected: {technologyType}");
             configuration.Settings.CurrentDeviceName = selectedComDevice.DisplayName;
             configuration.Settings.CurrentComDevice = selectedComDevice;
-            configuration.Settings.CurrentDeviceType = selectedDeviceType;
             configuration.Settings.CurrentDeviceProgId = selectedComDevice.ProgId;
         }
 
@@ -273,7 +285,7 @@
         conformLogger.LogDebug("AlpacaDiscoveryCompleted", $"Discovery complete");
         alpacaDiscoveryProgress += $"Discovery complete!";
         ascomDevices = new();
-        foreach (AscomDevice device in discovery.GetAscomDevices(selectedDeviceType))
+        foreach (AscomDevice device in discovery.GetAscomDevices(Enum.Parse<DeviceType>(selectedDeviceTypeString).ToString()))
         {
             ascomDevices.Add(new AlpacaDeviceListItem($"{device.AscomDeviceName} ({device.IpAddress})", device));
         }
@@ -282,7 +294,7 @@
 
     private void AlpacaDeviceDiscovered(object caller, EventArgs args)
     {
-        List<AscomDevice> newDevices = discovery.GetAscomDevices(selectedDeviceType);
+        List<AscomDevice> newDevices = discovery.GetAscomDevices(Enum.Parse<DeviceType>(selectedDeviceTypeString).ToString());
         //alpacaDiscoveryStatus = "";
         foreach (AscomDevice device in newDevices)
         {
@@ -301,12 +313,12 @@
     private void UpdateComDevices()
     {
         comDeviceList.Clear();
-        Dictionary<string, string> registeredDevices = ComDevices.GetRegisteredDrivers(selectedDeviceType, conformLogger);
+        Dictionary<string, string> registeredDevices = ComDevices.GetRegisteredDrivers(Enum.Parse<DeviceType>(selectedDeviceTypeString).ToString(), conformLogger);
         foreach (KeyValuePair<string, string> kvp in registeredDevices)
         {
             conformLogger.LogMessage("UpdateComDevices", $"Found device: {kvp.Key} {kvp.Value}");
-            ComDevice comDevice = new ComDevice(kvp.Value, kvp.Key);
-            comDeviceList.Add(new ComDeviceListItem(kvp.Value, comDevice));
+            ComDevice comDevice = new ComDevice($"{kvp.Value} ({kvp.Key})", kvp.Key);
+            comDeviceList.Add(new ComDeviceListItem($"{kvp.Value} ({kvp.Key})", comDevice));
         }
 
     }

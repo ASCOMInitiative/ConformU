@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
+@using static ConformU.ConformConstants
 
 <BlazorPro.BlazorSize.MediaQueryList>
     <div class="sidebar">
@@ -16,7 +17,7 @@
             @Body
         </div>
     </div>
-    <div >
+    <div>
         <RadzenNotification />
     </div>
 </BlazorPro.BlazorSize.MediaQueryList>
@@ -24,7 +25,7 @@
 @code
 {
     private string deviceName;
-    private string deviceType;
+    private DeviceType deviceType;
     private string deviceTechnology;
 
     protected override void OnInitialized()

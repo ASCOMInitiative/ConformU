@@ -24,6 +24,22 @@ namespace ConformU
             Error = 7,
             Always = 8
         }
+
+        public enum DeviceType
+        {
+            Telescope = 0,
+            Camera = 1,
+            Dome = 2,
+            FilterWheel = 3,
+            Focuser = 4,
+            ObservingConditions = 5,
+            Rotator = 6,
+            Switch = 7,
+            SafetyMonitor = 8,
+            Video = 9,
+            CoverCalibrator = 10
+        }
+
         public const string NO_DEVICE_SELECTED = "No device selected"; // Text indicating that no device has been sleected
 
         //

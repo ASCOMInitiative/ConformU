@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Threading;
 using ASCOM.Standard.Utilities;
 using Microsoft.VisualBasic;
+using static ConformU.ConformConstants;
 
 namespace Conform
 {
@@ -34,39 +35,11 @@ namespace Conform
             Indeterminate = 2
         }
 
-        internal enum MessageLevel
-        {
-            msgNone = 0,
-            msgDebug = 1,
-            msgComment = 2,
-            msgInfo = 3,
-            msgOK = 4,
-            msgWarning = 5,
-            msgIssue = 6,
-            msgError = 7,
-            msgAlways = 8
-        }
-
         internal enum StatusType
         {
             staTest = 1,
             staAction = 2,
             staStatus = 3
-        }
-
-        internal enum DeviceType
-        {
-            Telescope = 0,
-            Camera = 1,
-            Dome = 2,
-            FilterWheel = 3,
-            Focuser = 4,
-            ObservingConditions = 5,
-            Rotator = 6,
-            Switch = 7,
-            SafetyMonitor = 8,
-            Video = 9,
-            CoverCalibrator = 10
         }
 
         public enum SpecialTest
@@ -126,14 +99,14 @@ namespace Conform
         #endregion
 
         #region Global Variables
-        internal static MessageLevel g_LogLevel=MessageLevel.msgDebug;
+        internal static MessageLevel g_LogLevel;
         internal static int g_CountError, g_CountWarning, g_CountIssue;
         internal static System.IO.StreamWriter g_LogFile;
         internal static System.IO.StreamWriter g_ValidationTempFile;
         //internal static ConformCommandStrings g_CmdStrings = null;
         //internal static ConformCommandStrings g_CmdStringsRaw = null;
         internal static object g_DeviceObject;
-        internal static ApplicationSettings g_Settings = new ApplicationSettings();
+        //internal static ApplicationSettings g_Settings = new ApplicationSettings();
         internal static int g_InterfaceVersion; // Variable to held interface version of the current device
 
         // Exception number variables
@@ -154,8 +127,7 @@ namespace Conform
         internal static string g_CameraProgID;
         internal static string g_VideoCameraProgID;
         internal static string g_DomeProgID;
-        internal static string g_CurrentProgID;
-        internal static string g_TelescopeProgID="ASCOM.Simulator.Telescope";
+        internal static string g_TelescopeProgID = "ASCOM.Simulator.Telescope";
         internal static string g_ObservingConditionsProgID = "";
         internal static string g_CoverCalibratorProgID;
 
@@ -228,7 +200,7 @@ namespace Conform
 
         internal static void WaitForAbsolute(int p_Duration, string p_Message)
         {
-            //LogMsg("WaitForAbsolute", MessageLevel.msgDebug, p_Duration + " " + p_Message);
+            //LogMsg("WaitForAbsolute", MessageLevel.Debug, p_Duration + " " + p_Message);
             for (int i = 0, loopTo = (int)Math.Round(p_Duration / 100d); i <= loopTo; i++)
             {
                 Thread.Sleep(100);

@@ -9,18 +9,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<COMReference Include="{215d64d2-031c-33c7-96e3-61794cd1ee61}">
-			<WrapperTool>tlbimp</WrapperTool>
-			<VersionMinor>0</VersionMinor>
-			<VersionMajor>2</VersionMajor>
-			<Guid>215d64d2-031c-33c7-96e3-61794cd1ee61</Guid>
-		</COMReference>
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="ASCOM.Standard.Utilities" Version="1.0.0-alpha16" />
 		<PackageReference Include="BlazorPro.BlazorSize" Version="5.0.0" />
-		<PackageReference Include="Radzen.Blazor" Version="3.8.0" />
+		<PackageReference Include="Radzen.Blazor" Version="3.8.1" />
 	</ItemGroup>
 
 </Project>
