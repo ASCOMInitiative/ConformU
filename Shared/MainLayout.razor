@@ -3,24 +3,22 @@
 @inject ConformConfiguration configuration
 @using static ConformU.ConformConstants
 
-<BlazorPro.BlazorSize.MediaQueryList>
-    <div class="sidebar">
-        <NavMenu />
+<div class="sidebar">
+    <NavMenu />
+</div>
+<div class="main">
+    <div class="top-row px-4">
+        <span>Current device - @deviceName (@deviceTechnology @deviceType)</span>
+        <a href="https://ascom-standards.org" target="_blank">ASCOM Initiative</a>
     </div>
-    <div class="main">
-        <div class="top-row px-4">
-            <span>Current device - @deviceName (@deviceTechnology @deviceType)</span>
-            <a href="https://ascom-standards.org" target="_blank">ASCOM Initiative</a>
-        </div>
 
-        <div class="content px-4">
-            @Body
-        </div>
+    <div class="content px-4">
+        @Body
     </div>
-    <div>
-        <RadzenNotification />
-    </div>
-</BlazorPro.BlazorSize.MediaQueryList>
+</div>
+<div>
+    <RadzenNotification />
+</div>
 
 @code
 {

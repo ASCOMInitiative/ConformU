@@ -21,11 +21,8 @@
 
 </head>
 <body>
-    <!--Return position information for a control with the supplied ID-->
-    <script>GetBoundingClientRect = (elementId) => { return document.getElementById(elementId).getBoundingClientRect(); }; </script>
-    <script>ScrollToBottom = (elementId) => { document.getElementById(elementId).scrollTop = document.getElementById(elementId).scrollHeight; }; </script>
-     <app>
-        <component type="typeof(App)" render-mode="ServerPrerendered" />
+    <app>
+        <component type="typeof(App)" render-mode="Server" />
     </app>
 
     <div id="conform-error-ui">
@@ -49,7 +46,10 @@
         function XXscrollToBottom(ref) {
             ref.scrollTop = ref.scrollHeight;
         }
-
     </script>
+
+    <!--Return position information for a control with the supplied ID-->
+    <script>GetBoundingClientRect = (elementId) => { return document.getElementById(elementId).getBoundingClientRect(); };</script>
+    <script>ScrollToBottom = (elementId) => { document.getElementById(elementId).scrollTop = document.getElementById(elementId).scrollHeight; };</script>
 </body>
 </html>

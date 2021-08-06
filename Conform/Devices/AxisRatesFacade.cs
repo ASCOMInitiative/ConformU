@@ -102,7 +102,8 @@ namespace ConformU
 
         System.Collections.IEnumerator IAxisRates.GetEnumerator()
         {
-            throw new ASCOM.NotImplementedException();
+            pos = -1; //Reset pointer as this is assumed by .NET enumeration
+            return this as IEnumerator;
         }
 
         public object Current

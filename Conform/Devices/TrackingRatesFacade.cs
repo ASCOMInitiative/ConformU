@@ -60,10 +60,9 @@ namespace ConformU
         {
             get
             {
-                if (index < 1 || index > this.Count)
-                    throw new ASCOM.InvalidValueException("TrackingRates.this", index.ToString(CultureInfo.CurrentCulture), string.Format(CultureInfo.CurrentCulture, "1 to {0}", this.Count));
-                return m_TrackingRates[index - 1];
-            }   // 1-based
+                if (index < 1 || index > this.Count) throw new ASCOM.InvalidValueException("TrackingRates.this", index.ToString(CultureInfo.CurrentCulture), string.Format(CultureInfo.CurrentCulture, "1 to {0}", this.Count));
+                return m_TrackingRates[index - 1];// 1-based
+            }
         }
         #endregion
 
@@ -89,7 +88,14 @@ namespace ConformU
             }
         }
 
-        DriveRate ITrackingRates.this[int index] => throw new NotImplementedException();
+        DriveRate ITrackingRates.this[int index]
+        {
+            get
+            {
+                if (index < 1 || index > this.Count) throw new ASCOM.InvalidValueException("TrackingRates.this", index.ToString(CultureInfo.CurrentCulture), string.Format(CultureInfo.CurrentCulture, "1 to {0}", this.Count));
+                return m_TrackingRates[index - 1]; // 1-based
+            }
+        }
 
         #endregion
 

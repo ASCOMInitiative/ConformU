@@ -601,7 +601,7 @@ namespace Conform
             var fileInfo = new System.IO.FileInfo(assembly.Location);
             var lastModified = fileInfo.LastWriteTime;
             LogMsg("", MessageLevel.Always, ""); // Blank line
-            LogMsg("ConformanceCheck", MessageLevel.Always, "ASCOM Device Conformance Checker Version " + this.GetType().Assembly.GetName().Version.ToString() + ", Build time: " + lastModified.ToString());
+            LogMsg("ConformanceCheck", MessageLevel.Always, "ASCOM Universal Device Conformance Checker Version " + this.GetType().Assembly.GetName().Version.ToString() + ", Build time: " + lastModified.ToString());
             //LogMsg("ConformanceCheck", MessageLevel.Always, "Running on: " + Prof.GetProfile("Platform", "Platform Name", "Unknown") + " " + Prof.GetProfile("Platform", "Platform Version", "Unknown"));
             LogMsg("", MessageLevel.Always, ""); // Blank line
             LogMsg("ConformanceCheck", MessageLevel.Always, DRIVER_PROGID + p_ProgID);

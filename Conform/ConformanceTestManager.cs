@@ -244,6 +244,7 @@ namespace ConformU
                 if (g_CountError == 0 & g_CountWarning == 0 & g_CountIssue == 0 & !g_Stop)
                 {
                     testDevice.LogMsg("No errors, warnings or issues found: your driver passes ASCOM validation!!", MessageLevel.Always, "");
+                    testDevice.LogMsg("", MessageLevel.Always, "");
                 }
                 else
                 {
@@ -257,6 +258,7 @@ namespace ConformU
                     if (g_CountWarning != 1)
                         l_Message = l_Message + "s";
                     testDevice.LogMsg(l_Message, MessageLevel.Always, "");
+                    testDevice.LogMsg("", MessageLevel.Always, "");
                 }
             }
             catch (Exception ex)

@@ -40,8 +40,8 @@ namespace ConformU
             services.AddSingleton(conformConfiguration); // Add the configuration component to the list of injectable services
 
             // Resizeable screen log text area infrastructure
-            services.AddMediaQueryService();
-            services.AddScoped<ResizeListener>();
+            //services.AddMediaQueryService();
+            //services.AddScoped<ResizeListener>();
             services.AddResizeListener(options =>
                 {
                     options.ReportRate = 100; // Milliseconds between update notifications (I think - documentation not clear)

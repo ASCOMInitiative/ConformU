@@ -697,7 +697,7 @@ namespace Conform
             DriveRate l_DriveRate;
             double l_TimeDifference;
 #if DEBUG
-            dynamic l_TrackingRates = null;
+            ITrackingRates l_TrackingRates = null;
             //ASCOM.DeviceInterface.ITrackingRates l_TrackingRates = null;
             dynamic l_TrackingRate;
 #else
@@ -5096,9 +5096,9 @@ namespace Conform
             //ASCOM.DeviceInterface.IAxisRates l_AxisRatesIRates;
             //ASCOM.DeviceInterface.IAxisRates l_AxisRates = null;
             //ASCOM.DeviceInterface.IRate l_Rate = null;
-            dynamic l_AxisRatesIRates;
-            dynamic l_AxisRates = null;
-            dynamic l_Rate = null;
+            IAxisRates l_AxisRatesIRates;
+            IAxisRates l_AxisRates = null;
+            IRate l_Rate = null;
 #else
             dynamic l_AxisRatesIRates;
             dynamic l_AxisRates = null;
@@ -5161,7 +5161,7 @@ namespace Conform
                     {
 #if DEBUG
                         //ASCOM.DeviceInterface.IRate AxisRateItem;
-                        dynamic AxisRateItem;
+                        IRate AxisRateItem;
 #else
                         dynamic AxisRateItem;
 #endif
@@ -6309,9 +6309,9 @@ namespace Conform
             if (Operators.ConditionalCompareObjectGreater(p_AxisRates.Count, 0, false))
             {
 #if DEBUG
-                dynamic l_AxisRatesIRates = (ASCOM.DeviceInterface.IAxisRates)p_AxisRates;
+                IAxisRates l_AxisRatesIRates = p_AxisRates;
                 l_RateCount = 0;
-                foreach (ASCOM.DeviceInterface.IRate currentL_Rate in l_AxisRatesIRates)
+                foreach (IRate currentL_Rate in l_AxisRatesIRates)
                 {
                     l_Rate = currentL_Rate;
                     if (l_Rate.Minimum < l_RateMinimum) l_RateMinimum = l_Rate.Minimum;
