@@ -13,6 +13,7 @@
     <div>
         <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Icon="account_circle" Style="margin-bottom: 20px; width: 150px" />
         <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Icon="account_circle" Style="margin-bottom: 20px; width: 150px" />
+        <RadzenTextBox Id="Status" Style="width: 50em; margin-left: 40px;" @bind-Value=@statusMessage />
     </div>
 
     <h4>Conform Log</h4>
@@ -23,7 +24,9 @@
 
     int Rows = 10;
     string screenLog;
-    object screenLoglockObject = new object();
+    object screenLogLockObject = new object();
+    object statusLockObject = new object();
+    string statusMessage = "Conformance run status";
 
     ConformanceTestManager tester;
 
@@ -63,7 +66,9 @@
 
         //LogMsg("StartTest", $"Creating TASK");
         tester = new ConformanceTestManager(settings, conformLogger, cancelConformToken);
-        tester.OutputChanged += TesterChanged;
+        tester.OutputChanged += OutputChanged;
+        tester.StatusChanged += StatusChanged;
+
         conformanceTest = new Task(() =>
         {
             try
@@ -79,8 +84,10 @@
             tester.Dispose(); // Dispose of the tester
             tester = null;
             //LogMsg("StartTest", $"Tester disposed");
+            JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
 
             GC.Collect();
+
         }, cancelConformToken);
 
         //LogMsg("StartTest", $"Starting TASK");
@@ -115,9 +122,9 @@
     /// </summary>
     /// <param name="source"></param>
     /// <param name="e"></param>
-    async public void TesterChanged(object sender, MessageEventArgs e)
+    async public void OutputChanged(object sender, MessageEventArgs e)
     {
-        lock (screenLoglockObject)
+        lock (screenLogLockObject)
         {
             screenLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
 
@@ -125,6 +132,22 @@
         }
         await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
     }
+
+    /// <summary>
+    /// Event handler for messages returned from the tester
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="e"></param>
+    async public void StatusChanged(object sender, MessageEventArgs e)
+    {
+        lock (statusLockObject)
+        {
+            statusMessage =$"{e.Message}";  // Add the new log message to the screen display
+
+            InvokeAsync(StateHasChanged); // Display the updated log on the screen
+        }
+    }
+
 
     #region Log textarea - resize support
 

@@ -83,7 +83,7 @@ namespace Conform
 
 #if DEBUG
         //private ASCOM.DriverAccess.Telescope telescopeDevice;
-        private dynamic telescopeDevice;
+        private ITelescopeV3 telescopeDevice;
 #else
         private dynamic telescopeDevice;
 #endif
@@ -475,7 +475,8 @@ namespace Conform
                     if (settings.DisplayMethodCalls)
                         LogMsg("ConformanceCheck", MessageLevel.Comment, "About to create driver using CreateObject");
                     Type driverType = Type.GetTypeFromProgID(g_TelescopeProgID);
-                    telescopeDevice = Activator.CreateInstance(driverType);
+                    dynamic driverObject = Activator.CreateInstance(driverType);
+                    telescopeDevice = new TelescopeFacade(driverObject);
                     LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
 
 
@@ -3564,7 +3565,7 @@ namespace Conform
 
                                 if (settings.DisplayMethodCalls)
                                     LogMsg(testName, MessageLevel.Comment, "About to get Tracking property");
-                                if (canSetTracking &  telescopeDevice.Tracking)
+                                if (canSetTracking & telescopeDevice.Tracking)
                                 {
                                     if (settings.DisplayMethodCalls)
                                         LogMsg(testName, MessageLevel.Comment, "About to set Tracking property to false");
@@ -3771,7 +3772,7 @@ namespace Conform
                                     syncAz = 358.0d; // Ensure legal Az
                                 if (settings.DisplayMethodCalls)
                                     LogMsg(testName, MessageLevel.Comment, "About to get Tracking property");
-                                if (canSetTracking &  telescopeDevice.Tracking)
+                                if (canSetTracking & telescopeDevice.Tracking)
                                 {
                                     if (settings.DisplayMethodCalls)
                                         LogMsg(testName, MessageLevel.Comment, "About to set Tracking property to false");
@@ -3884,7 +3885,7 @@ namespace Conform
                         {
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.Comment, "About to get Tracking property");
-                            if (canSetTracking &  !telescopeDevice.Tracking)
+                            if (canSetTracking & !telescopeDevice.Tracking)
                             {
                                 if (settings.DisplayMethodCalls)
                                     LogMsg(p_Name, MessageLevel.Comment, "About to set Tracking property to true");
@@ -3904,7 +3905,7 @@ namespace Conform
                         {
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.Comment, "About to get Tracking property");
-                            if (canSetTracking &  !telescopeDevice.Tracking)
+                            if (canSetTracking & !telescopeDevice.Tracking)
                             {
                                 if (settings.DisplayMethodCalls)
                                     LogMsg(p_Name, MessageLevel.Comment, "About to set Tracking property to true");
@@ -3925,7 +3926,7 @@ namespace Conform
                         {
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.Comment, "About to get Tracking property");
-                            if (canSetTracking &  !telescopeDevice.Tracking)
+                            if (canSetTracking & !telescopeDevice.Tracking)
                             {
                                 if (settings.DisplayMethodCalls)
                                     LogMsg(p_Name, MessageLevel.Comment, "About to set Tracking property to true");
@@ -3981,7 +3982,7 @@ namespace Conform
                         {
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.Comment, "About to get Tracking property");
-                            if (canSetTracking &  !telescopeDevice.Tracking)
+                            if (canSetTracking & !telescopeDevice.Tracking)
                             {
                                 if (settings.DisplayMethodCalls)
                                     LogMsg(p_Name, MessageLevel.Comment, "About to set Tracking property to true");
@@ -4039,7 +4040,7 @@ namespace Conform
                             LogMsg(p_Name, MessageLevel.Debug, Conversions.ToString(Operators.ConcatenateObject("Tracking 1: ", telescopeDevice.Tracking)));
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.Comment, "About to get Tracking property");
-                            if (canSetTracking &  telescopeDevice.Tracking)
+                            if (canSetTracking & telescopeDevice.Tracking)
                             {
                                 if (settings.DisplayMethodCalls)
                                     LogMsg(p_Name, MessageLevel.Comment, "About to set property Tracking to false");
@@ -4069,7 +4070,7 @@ namespace Conform
                             LogMsg(p_Name, MessageLevel.Debug, Conversions.ToString(Operators.ConcatenateObject("Tracking 1: ", telescopeDevice.Tracking)));
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.Comment, "About to get Tracking property");
-                            if (canSetTracking &  telescopeDevice.Tracking)
+                            if (canSetTracking & telescopeDevice.Tracking)
                             {
                                 if (settings.DisplayMethodCalls)
                                     LogMsg(p_Name, MessageLevel.Comment, "About to set Tracking property false");
@@ -4300,7 +4301,7 @@ namespace Conform
                     {
                         if (settings.DisplayMethodCalls)
                             LogMsg(p_Name, MessageLevel.Comment, "About to get Tracking property");
-                        if (canSetTracking &  !telescopeDevice.Tracking)
+                        if (canSetTracking & !telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.Comment, "About to set Tracking property to true");
@@ -4388,7 +4389,7 @@ namespace Conform
                     {
                         if (settings.DisplayMethodCalls)
                             LogMsg(p_Name, MessageLevel.Comment, "About to get Tracking property");
-                        if (canSetTracking &  !telescopeDevice.Tracking)
+                        if (canSetTracking & !telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.Comment, "About to set Tracking property to true");
@@ -4565,7 +4566,7 @@ namespace Conform
                     {
                         if (settings.DisplayMethodCalls)
                             LogMsg(p_Name, MessageLevel.Comment, "About to get Tracking property");
-                        if (canSetTracking &  !telescopeDevice.Tracking)
+                        if (canSetTracking & !telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.Comment, "About to set Tracking property to true");
@@ -4654,7 +4655,7 @@ namespace Conform
                     {
                         if (settings.DisplayMethodCalls)
                             LogMsg(p_Name, MessageLevel.Comment, "About to get Tracking property");
-                        if (canSetTracking &  telescopeDevice.Tracking)
+                        if (canSetTracking & telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.Comment, "About to set Tracking property to false");
@@ -4742,7 +4743,7 @@ namespace Conform
                     {
                         if (settings.DisplayMethodCalls)
                             LogMsg(p_Name, MessageLevel.Comment, "About to get Tracking property");
-                        if (canSetTracking &  telescopeDevice.Tracking)
+                        if (canSetTracking & telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.Comment, "About to set Tracking property to false");
@@ -5095,7 +5096,7 @@ namespace Conform
             //ASCOM.DeviceInterface.IAxisRates l_AxisRatesIRates;
             //ASCOM.DeviceInterface.IAxisRates l_AxisRates = null;
             //ASCOM.DeviceInterface.IRate l_Rate = null;
-            dynamic  l_AxisRatesIRates;
+            dynamic l_AxisRatesIRates;
             dynamic l_AxisRates = null;
             dynamic l_Rate = null;
 #else
@@ -5183,7 +5184,7 @@ namespace Conform
                     IEnumerator l_Enum;
                     dynamic l_Obj;
 #if DEBUG
-                    dynamic  AxisRateItem = null;
+                    dynamic AxisRateItem = null;
 #else
                     dynamic AxisRateItem = null;
 #endif
@@ -5233,7 +5234,7 @@ namespace Conform
                     {
 #if DEBUG
                         l_AxisRatesIRates = l_AxisRates;
-                        foreach (dynamic  currentL_Rate in l_AxisRatesIRates)
+                        foreach (dynamic currentL_Rate in l_AxisRatesIRates)
                         {
                             l_Rate = currentL_Rate;
                             if ((bool)Operators.OrObject(Operators.ConditionalCompareObjectLess(l_Rate.Minimum, 0, false), Operators.ConditionalCompareObjectLess(l_Rate.Maximum, 0, false))) // Error because negative values are not allowed
@@ -7059,7 +7060,7 @@ namespace Conform
                     {
                         if (settings.DisplayMethodCalls)
                             LogMsg(testName, MessageLevel.Comment, "About to get Tracking property");
-                        if (canSetTracking &  !telescopeDevice.Tracking)
+                        if (canSetTracking & !telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
                                 LogMsg(testName, MessageLevel.Comment, "About to set Tracking property to true");
@@ -7077,7 +7078,7 @@ namespace Conform
                     {
                         if (settings.DisplayMethodCalls)
                             LogMsg(testName, MessageLevel.Comment, "About to get Tracking property");
-                        if (canSetTracking &  !telescopeDevice.Tracking)
+                        if (canSetTracking & !telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
                                 LogMsg(testName, MessageLevel.Comment, "About to set Tracking property to true");

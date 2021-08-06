@@ -916,7 +916,7 @@ namespace Conform
                     }
             }
 
-            parentClass.OnStatusChanged($"{test} - {action} - {status}");
+            parentClass.OnStatusChanged($"{test} {action} {status}");
         }
 
         /// <summary>
@@ -932,7 +932,7 @@ namespace Conform
             action = newAction;
             status = newStatus;
 
-            parentClass.OnStatusChanged($"{test} - {action} - {status}");
+            parentClass.OnStatusChanged($"{test} {action} {status}");
         }
 
         private bool IncludeMethod(MandatoryMethod p_Method, DeviceType p_DeviceType, int p_InterfaceVersion)

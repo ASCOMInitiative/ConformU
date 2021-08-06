@@ -34,12 +34,12 @@ namespace ConformU
 
             // Conform components
             ConformLogger conformLogger = new("ConformU", true);  // Create a logger component
-            ConformConfiguration conformConfiguration = new ConformConfiguration(conformLogger); // Create a configuration settings component
-            conformLogger.Debug = conformConfiguration.Settings.Debug; // Set the logger trace level to the configured value 
             services.AddSingleton(conformLogger); // Add the logger component to the list of injectable services
+
+            ConformConfiguration conformConfiguration = new ConformConfiguration(conformLogger); // Create a configuration settings component
             services.AddSingleton(conformConfiguration); // Add the configuration component to the list of injectable services
 
-            // Resizeable screen log textarea infrastructure
+            // Resizeable screen log text area infrastructure
             services.AddMediaQueryService();
             services.AddScoped<ResizeListener>();
             services.AddResizeListener(options =>
