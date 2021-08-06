@@ -4,7 +4,7 @@ using System.Collections;
 using System.Linq;
 using System.Runtime.InteropServices;
 using ASCOM;
-using Microsoft.VisualBasic;
+//using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.CompilerServices;
 using static Conform.GlobalVarsAndCode;
 using ASCOM.Standard.Interfaces;
@@ -474,7 +474,8 @@ namespace Conform
                     LogMsg("Conform", MessageLevel.Always, "is using CreateObject to get a Telescope object");
                     if (settings.DisplayMethodCalls)
                         LogMsg("ConformanceCheck", MessageLevel.Comment, "About to create driver using CreateObject");
-                    telescopeDevice = Interaction.CreateObject(g_TelescopeProgID);
+                    Type driverType = Type.GetTypeFromProgID(g_TelescopeProgID);
+                    telescopeDevice = Activator.CreateInstance(driverType);
                     LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
 
 
@@ -626,7 +627,7 @@ namespace Conform
                     if (settings.DisplayMethodCalls)
                         LogMsg("TimeCheck", MessageLevel.Comment, "About to get UTCDate property");
                     LogMsg("TimeCheck", MessageLevel.Debug, Conversions.ToString(Operators.ConcatenateObject("Mount UTCDate Unformatted: ", telescopeDevice.UTCDate)));
-                    LogMsg("TimeCheck", MessageLevel.Info, "Mount UTCDate: " + Strings.Format(telescopeDevice.UTCDate, "dd-MMM-yyyy HH:mm:ss.fff"));
+                    LogMsg("TimeCheck", MessageLevel.Info, "Mount UTCDate: " + String.Format(telescopeDevice.UTCDate, "dd-MMM-yyyy HH:mm:ss.fff"));
                 }
                 catch (COMException ex)
                 {
@@ -723,19 +724,19 @@ namespace Conform
                 {
                     case var @case when @case < 0.0d:
                         {
-                            LogMsg("Altitude", MessageLevel.Warning, "Altitude is <0.0 degrees: " + Strings.Format(m_Altitude, "0.00000000"));
+                            LogMsg("Altitude", MessageLevel.Warning, "Altitude is <0.0 degrees: " + m_Altitude.ToString("0.00000000"));
                             break;
                         }
 
                     case var case1 when case1 > 90.0000001d:
                         {
-                            LogMsg("Altitude", MessageLevel.Warning, "Altitude is >90.0 degrees: " + Strings.Format(m_Altitude, "0.00000000"));
+                            LogMsg("Altitude", MessageLevel.Warning, "Altitude is >90.0 degrees: " + m_Altitude.ToString("0.00000000"));
                             break;
                         }
 
                     default:
                         {
-                            LogMsg("Altitude", MessageLevel.OK, Strings.Format(m_Altitude, "0.00"));
+                            LogMsg("Altitude", MessageLevel.OK, m_Altitude.ToString("0.00"));
                             break;
                         }
                 }
@@ -876,19 +877,19 @@ namespace Conform
                 {
                     case var case4 when case4 < 0.0d:
                         {
-                            LogMsg("Azimuth", MessageLevel.Warning, "Azimuth is <0.0 degrees: " + Strings.Format(m_Azimuth, "0.00"));
+                            LogMsg("Azimuth", MessageLevel.Warning, "Azimuth is <0.0 degrees: " + m_Azimuth.ToString( "0.00"));
                             break;
                         }
 
                     case var case5 when case5 > 360.0000000001d:
                         {
-                            LogMsg("Azimuth", MessageLevel.Warning, "Azimuth is >360.0 degrees: " + Strings.Format(m_Azimuth, "0.00"));
+                            LogMsg("Azimuth", MessageLevel.Warning, "Azimuth is >360.0 degrees: " + m_Azimuth.ToString( "0.00"));
                             break;
                         }
 
                     default:
                         {
-                            LogMsg("Azimuth", MessageLevel.OK, Strings.Format(m_Azimuth, "0.00"));
+                            LogMsg("Azimuth", MessageLevel.OK, m_Azimuth.ToString( "0.00"));
                             break;
                         }
                 }
@@ -944,13 +945,13 @@ namespace Conform
                     {
                         case var case8 when case8 >= 0.0d:
                             {
-                                LogMsg("DeclinationRate Read", MessageLevel.OK, Strings.Format(m_DeclinationRate, "0.00"));
+                                LogMsg("DeclinationRate Read", MessageLevel.OK, m_DeclinationRate.ToString( "0.00"));
                                 break;
                             }
 
                         default:
                             {
-                                LogMsg("DeclinationRate Read", MessageLevel.Warning, "Negative DeclinatioRate: " + Strings.Format(m_DeclinationRate, "0.00"));
+                                LogMsg("DeclinationRate Read", MessageLevel.Warning, "Negative DeclinatioRate: " + m_DeclinationRate.ToString( "0.00"));
                                 break;
                             }
                     }
@@ -961,13 +962,13 @@ namespace Conform
                     {
                         case 0.0d:
                             {
-                                LogMsg("DeclinationRate Read", MessageLevel.OK, Strings.Format(m_DeclinationRate, "0.00"));
+                                LogMsg("DeclinationRate Read", MessageLevel.OK, m_DeclinationRate.ToString( "0.00"));
                                 break;
                             }
 
                         default:
                             {
-                                LogMsg("DeclinationRate Read", MessageLevel.Issue, "DeclinationRate is non zero when CanSetDeclinationRate is False " + Strings.Format(m_DeclinationRate, "0.00"));
+                                LogMsg("DeclinationRate Read", MessageLevel.Issue, "DeclinationRate is non zero when CanSetDeclinationRate is False " + m_DeclinationRate.ToString( "0.00"));
                                 break;
                             }
                     }
@@ -1017,7 +1018,7 @@ namespace Conform
                     if (settings.DisplayMethodCalls)
                         LogMsg("DeclinationRate Write", MessageLevel.Comment, "About to set DeclinationRate property to 0.0");
                     telescopeDevice.DeclinationRate = 0.0d; // Set to a harmless value
-                    LogMsg("DeclinationRate Write", MessageLevel.OK, Strings.Format(m_DeclinationRate, "0.00"));
+                    LogMsg("DeclinationRate Write", MessageLevel.OK, m_DeclinationRate.ToString("0.00"));
                 }
                 catch (Exception ex)
                 {
@@ -1163,13 +1164,13 @@ namespace Conform
                         {
                             case var case10 when case10 < 0.0d:
                                 {
-                                    LogMsg("GuideRateDeclination Read", MessageLevel.Warning, "GuideRateDeclination is < 0.0 " + Strings.Format(m_GuideRateDeclination, "0.00"));
+                                    LogMsg("GuideRateDeclination Read", MessageLevel.Warning, "GuideRateDeclination is < 0.0 " + m_GuideRateDeclination.ToString("0.00"));
                                     break;
                                 }
 
                             default:
                                 {
-                                    LogMsg("GuideRateDeclination Read", MessageLevel.OK, Strings.Format(m_GuideRateDeclination, "0.00"));
+                                    LogMsg("GuideRateDeclination Read", MessageLevel.OK, m_GuideRateDeclination.ToString("0.00"));
                                     break;
                                 }
                         }
@@ -1202,13 +1203,13 @@ namespace Conform
                         {
                             case var case11 when case11 < 0.0d:
                                 {
-                                    LogMsg("GuideRateDeclination Read", MessageLevel.Warning, "GuideRateDeclination is < 0.0 " + Strings.Format(m_GuideRateDeclination, "0.00"));
+                                    LogMsg("GuideRateDeclination Read", MessageLevel.Warning, "GuideRateDeclination is < 0.0 " + m_GuideRateDeclination.ToString("0.00"));
                                     break;
                                 }
 
                             default:
                                 {
-                                    LogMsg("GuideRateDeclination Read", MessageLevel.OK, Strings.Format(m_GuideRateDeclination, "0.00"));
+                                    LogMsg("GuideRateDeclination Read", MessageLevel.OK, m_GuideRateDeclination.ToString("0.00"));
                                     break;
                                 }
                         }
@@ -1223,7 +1224,7 @@ namespace Conform
                         if (settings.DisplayMethodCalls)
                             LogMsg("GuideRateDeclination Write", MessageLevel.Comment, "About to set GuideRateDeclination property to " + m_GuideRateDeclination);
                         telescopeDevice.GuideRateDeclination = m_GuideRateDeclination;
-                        LogMsg("GuideRateDeclination Write", MessageLevel.Issue, "CanSetGuideRates is false but no exception generated; value returned: " + Strings.Format(m_GuideRateDeclination, "0.00"));
+                        LogMsg("GuideRateDeclination Write", MessageLevel.Issue, "CanSetGuideRates is false but no exception generated; value returned: " + m_GuideRateDeclination.ToString("0.00"));
                     }
                     catch (Exception ex) // Some other error so OK
                     {
@@ -1253,13 +1254,13 @@ namespace Conform
                         {
                             case var case12 when case12 < 0.0d:
                                 {
-                                    LogMsg("GuideRateRightAscension Read", MessageLevel.Warning, "GuideRateRightAscension is < 0.0 " + Strings.Format(m_GuideRateRightAscension, "0.00"));
+                                    LogMsg("GuideRateRightAscension Read", MessageLevel.Warning, "GuideRateRightAscension is < 0.0 " + m_GuideRateRightAscension.ToString("0.00"));
                                     break;
                                 }
 
                             default:
                                 {
-                                    LogMsg("GuideRateRightAscension Read", MessageLevel.OK, Strings.Format(m_GuideRateRightAscension, "0.00"));
+                                    LogMsg("GuideRateRightAscension Read", MessageLevel.OK, m_GuideRateRightAscension.ToString("0.00"));
                                     break;
                                 }
                         }
@@ -1292,13 +1293,13 @@ namespace Conform
                         {
                             case var case13 when case13 < 0.0d:
                                 {
-                                    LogMsg("GuideRateRightAscension Read", MessageLevel.Warning, "GuideRateRightAscension is < 0.0 " + Strings.Format(m_GuideRateRightAscension, "0.00"));
+                                    LogMsg("GuideRateRightAscension Read", MessageLevel.Warning, "GuideRateRightAscension is < 0.0 " + m_GuideRateRightAscension.ToString("0.00"));
                                     break;
                                 }
 
                             default:
                                 {
-                                    LogMsg("GuideRateRightAscension Read", MessageLevel.OK, Strings.Format(m_GuideRateRightAscension, "0.00"));
+                                    LogMsg("GuideRateRightAscension Read", MessageLevel.OK, m_GuideRateRightAscension.ToString("0.00"));
                                     break;
                                 }
                         }
@@ -1313,7 +1314,7 @@ namespace Conform
                         if (settings.DisplayMethodCalls)
                             LogMsg("GuideRateRightAscension Write", MessageLevel.Comment, "About to set GuideRateRightAscension property to " + m_GuideRateRightAscension);
                         telescopeDevice.GuideRateRightAscension = m_GuideRateRightAscension;
-                        LogMsg("GuideRateRightAscension Write", MessageLevel.Issue, "CanSetGuideRates is false but no exception generated; value returned: " + Strings.Format(m_GuideRateRightAscension, "0.00"));
+                        LogMsg("GuideRateRightAscension Write", MessageLevel.Issue, "CanSetGuideRates is false but no exception generated; value returned: " + m_GuideRateRightAscension.ToString("0.00"));
                     }
                     catch (Exception ex) // Some other error so OK
                     {
@@ -1412,13 +1413,13 @@ namespace Conform
                     {
                         case var case16 when case16 >= 0.0d:
                             {
-                                LogMsg("RightAscensionRate Read", MessageLevel.OK, Strings.Format(m_RightAscensionRate, "0.00"));
+                                LogMsg("RightAscensionRate Read", MessageLevel.OK, m_RightAscensionRate.ToString("0.00"));
                                 break;
                             }
 
                         default:
                             {
-                                LogMsg("RightAscensionRate Read", MessageLevel.Warning, "Negative RightAscensionRate: " + Strings.Format(m_RightAscensionRate, "0.00"));
+                                LogMsg("RightAscensionRate Read", MessageLevel.Warning, "Negative RightAscensionRate: " + m_RightAscensionRate.ToString("0.00"));
                                 break;
                             }
                     }
@@ -1429,13 +1430,13 @@ namespace Conform
                     {
                         case 0.0d:
                             {
-                                LogMsg("RightAscensionRate Read", MessageLevel.OK, Strings.Format(m_RightAscensionRate, "0.00"));
+                                LogMsg("RightAscensionRate Read", MessageLevel.OK, m_RightAscensionRate.ToString("0.00"));
                                 break;
                             }
 
                         default:
                             {
-                                LogMsg("RightAscensionRate Read", MessageLevel.Issue, "RightAscensionRate is non zero when CanSetRightAscensionRate is False " + Strings.Format(m_DeclinationRate, "0.00"));
+                                LogMsg("RightAscensionRate Read", MessageLevel.Issue, "RightAscensionRate is non zero when CanSetRightAscensionRate is False " + m_DeclinationRate.ToString("0.00"));
                                 break;
                             }
                     }
@@ -1485,7 +1486,7 @@ namespace Conform
                     if (settings.DisplayMethodCalls)
                         LogMsg("RightAscensionRate Write", MessageLevel.Comment, "About to set RightAscensionRate property to 0.00");
                     telescopeDevice.RightAscensionRate = 0.0d; // Set to a harmless value
-                    LogMsg("RightAscensionRate Write", MessageLevel.OK, Strings.Format(m_RightAscensionRate, "0.00"));
+                    LogMsg("RightAscensionRate Write", MessageLevel.OK, m_RightAscensionRate.ToString("0.00"));
                 }
                 catch (Exception ex)
                 {
@@ -1650,7 +1651,7 @@ namespace Conform
                 }
                 else
                 {
-                    ExTest("SiteLatitude Write", ex.Message, EX_COM + ex.Message + " " + Conversion.Hex(ex.ErrorCode));
+                    ExTest("SiteLatitude Write", ex.Message, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                 }
             }
             catch (Exception ex)
@@ -2529,7 +2530,7 @@ namespace Conform
                                     }
                                     catch (COMException ex)
                                     {
-                                        LogMsg("Park", MessageLevel.Issue, "Exception when calling Park two times in succession: " + ex.Message + " " + Conversion.Hex(ex.ErrorCode));
+                                        LogMsg("Park", MessageLevel.Issue, "Exception when calling Park two times in succession: " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                                     }
                                     catch (Exception ex)
                                     {
@@ -2663,7 +2664,7 @@ namespace Conform
                                             }
                                             catch (COMException ex)
                                             {
-                                                LogMsg("UnPark", MessageLevel.Issue, "Exception when calling UnPark two times in succession: " + ex.Message + " " + Conversion.Hex(ex.ErrorCode));
+                                                LogMsg("UnPark", MessageLevel.Issue, "Exception when calling UnPark two times in succession: " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                                             }
                                             catch (Exception ex)
                                             {
@@ -2672,7 +2673,7 @@ namespace Conform
                                         }
                                         catch (COMException ex)
                                         {
-                                            LogMsg("UnPark", MessageLevel.Error, EX_COM + ex.Message + " " + Conversion.Hex(ex.ErrorCode));
+                                            LogMsg("UnPark", MessageLevel.Error, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                                         }
                                         catch (Exception ex)
                                         {
@@ -2697,7 +2698,7 @@ namespace Conform
                                             }
                                             else
                                             {
-                                                ExTest("UnPark", ex.Message, EX_COM + ex.Message + " " + Conversion.Hex(ex.ErrorCode));
+                                                ExTest("UnPark", ex.Message, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                                             }
                                         }
                                         catch (MethodNotImplementedException)
@@ -2715,7 +2716,7 @@ namespace Conform
                                 }
                                 catch (COMException ex)
                                 {
-                                    LogMsg("Park", MessageLevel.Error, EX_COM + ex.Message + " " + Conversion.Hex(ex.ErrorCode));
+                                    LogMsg("Park", MessageLevel.Error, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                                 }
                                 catch (Exception ex)
                                 {
@@ -4793,7 +4794,7 @@ namespace Conform
             //Status(StatusType.staAction, p_Name);
             try
             {
-                l_StartTime = DateAndTime.Now;
+                l_StartTime = DateTime.Now;
                 l_Count = 0.0d;
                 l_LastElapsedTime = 0.0d;
                 do
@@ -4874,10 +4875,10 @@ namespace Conform
                             }
                     }
 
-                    l_ElapsedTime = DateAndTime.Now.Subtract(l_StartTime).TotalSeconds;
+                    l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
                     if (l_ElapsedTime > l_LastElapsedTime + 1.0d)
                     {
-                        //Status(StatusType.staStatus, l_Count + " transactions in " + Strings.Format(l_ElapsedTime, "0") + " seconds");
+                        //Status(StatusType.staStatus, l_Count + " transactions in " + String.Format(l_ElapsedTime, "0") + " seconds");
                         l_LastElapsedTime = l_ElapsedTime;
                         //Application.DoEvents();
                         if (cancellationToken.IsCancellationRequested)
@@ -4890,25 +4891,25 @@ namespace Conform
                 {
                     case var case1 when case1 > 10.0d:
                         {
-                            LogMsg("Performance: " + p_Name, MessageLevel.Info, "Transaction rate: " + Strings.Format(l_Rate, "0.0") + " per second");
+                            LogMsg("Performance: " + p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case var case2 when 2.0d <= case2 && case2 <= 10.0d:
                         {
-                            LogMsg("Performance: " + p_Name, MessageLevel.Info, "Transaction rate: " + Strings.Format(l_Rate, "0.0") + " per second");
+                            LogMsg("Performance: " + p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case var case3 when 1.0d <= case3 && case3 <= 2.0d:
                         {
-                            LogMsg("Performance: " + p_Name, MessageLevel.Info, "Transaction rate: " + Strings.Format(l_Rate, "0.0") + " per second");
+                            LogMsg("Performance: " + p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     default:
                         {
-                            LogMsg("Performance: " + p_Name, MessageLevel.Info, "Transaction rate: " + Strings.Format(l_Rate, "0.0") + " per second");
+                            LogMsg("Performance: " + p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
                 }
@@ -5159,7 +5160,7 @@ namespace Conform
                 }
                 catch (COMException ex)
                 {
-                    LogMsg(p_Name + " Count", MessageLevel.Error, EX_COM + ex.Message + " " + Conversion.Hex(ex.ErrorCode));
+                    LogMsg(p_Name + " Count", MessageLevel.Error, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                 }
                 catch (Exception ex)
                 {
@@ -5208,7 +5209,7 @@ namespace Conform
                 }
                 catch (COMException ex)
                 {
-                    LogMsg(p_Name + " Enum", MessageLevel.Error, EX_COM + ex.Message + " " + Conversion.Hex(ex.ErrorCode));
+                    LogMsg(p_Name + " Enum", MessageLevel.Error, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                 }
                 catch (Exception ex)
                 {
@@ -5307,12 +5308,12 @@ namespace Conform
 
                     catch (COMException ex)
                     {
-                        LogMsg(p_Name, MessageLevel.Error, "COM Unable to read AxisRates object - Exception: " + ex.Message + " " + Conversion.Hex(ex.ErrorCode));
+                        LogMsg(p_Name, MessageLevel.Error, "COM Unable to read AxisRates object - Exception: " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                         LogMsg(p_Name, MessageLevel.Debug, "COM Unable to read AxisRates object - Exception: " + ex.ToString());
                     }
                     catch (DriverException ex)
                     {
-                        LogMsg(p_Name, MessageLevel.Error, ".NET Unable to read AxisRates object - Exception: " + ex.Message + " " + Conversion.Hex(ex.Number));
+                        LogMsg(p_Name, MessageLevel.Error, ".NET Unable to read AxisRates object - Exception: " + ex.Message + " " + ex.Number.ToString("X8"));
                         LogMsg(p_Name, MessageLevel.Debug, ".NET Unable to read AxisRates object - Exception: " + ex.ToString());
                     }
                     catch (Exception ex)
@@ -5385,11 +5386,11 @@ namespace Conform
             }
             catch (COMException ex)
             {
-                LogMsg(p_Name, MessageLevel.Error, "COM Unable to get an AxisRates object - Exception: " + ex.Message + " " + Conversion.Hex(ex.ErrorCode));
+                LogMsg(p_Name, MessageLevel.Error, "COM Unable to get an AxisRates object - Exception: " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
             }
             catch (DriverException ex)
             {
-                LogMsg(p_Name, MessageLevel.Error, ".NET Unable to get an AxisRates object - Exception: " + ex.Message + " " + Conversion.Hex(ex.Number));
+                LogMsg(p_Name, MessageLevel.Error, ".NET Unable to get an AxisRates object - Exception: " + ex.Message + " " + ex.Number.ToString("X8"));
             }
             catch (NullReferenceException ex) // Report null objects returned by the driver that are caught by DriverAccess.
             {
@@ -5662,7 +5663,7 @@ namespace Conform
                                     if (settings.DisplayMethodCalls)
                                         LogMsg(p_Name, MessageLevel.Comment, "About to call FindHome method");
                                     telescopeDevice.FindHome();
-                                    m_StartTime = DateAndTime.Now;
+                                    m_StartTime = DateTime.Now;
                                     //Status(StatusType.staAction, "Waiting for mount to home");
                                     l_ct = 0;
                                     do
@@ -5672,7 +5673,7 @@ namespace Conform
                                         if (settings.DisplayMethodCalls)
                                             LogMsg(p_Name, MessageLevel.Comment, "About to get AtHome property");
                                     }
-                                    while (!telescopeDevice.AtHome & TestStop() & (DateAndTime.Now.Subtract(m_StartTime).TotalMilliseconds < 60000)); // Wait up to a minute to find home
+                                    while (!telescopeDevice.AtHome & TestStop() & (DateTime.Now.Subtract(m_StartTime).TotalMilliseconds < 60000)); // Wait up to a minute to find home
                                     if (settings.DisplayMethodCalls)
                                         LogMsg(p_Name, MessageLevel.Comment, "About to get AtHome property");
                                     if (Conversions.ToBoolean(telescopeDevice.AtHome))
@@ -5746,11 +5747,11 @@ namespace Conform
                                 else // OK to test pulse guiding
                                 {
                                     //Status(StatusType.staAction, "Start PulseGuide");
-                                    m_StartTime = DateAndTime.Now;
+                                    m_StartTime = DateTime.Now;
                                     if (settings.DisplayMethodCalls)
                                         LogMsg(p_Name, MessageLevel.Comment, "About to call PulseGuide method, Direction: " + ((int)GuideDirection.East).ToString() + ", Duration: " + PULSEGUIDE_MOVEMENT_TIME * 1000 + "ms");
                                     telescopeDevice.PulseGuide(GuideDirection.East, PULSEGUIDE_MOVEMENT_TIME * 1000); // Start a 2 second pulse
-                                    m_EndTime = DateAndTime.Now;
+                                    m_EndTime = DateTime.Now;
                                     LogMsg(p_Name, MessageLevel.Debug, "PulseGuide command time: " + PULSEGUIDE_MOVEMENT_TIME * 1000 + " milliseconds, PulseGuide call duration: " + m_EndTime.Subtract(m_StartTime).TotalMilliseconds + " milliseconds");
                                     if (m_EndTime.Subtract(m_StartTime).TotalMilliseconds < PULSEGUIDE_MOVEMENT_TIME * 0.75d * 1000d) // If less than three quarters of the expected duration then assume we have returned early
                                     {
@@ -5821,14 +5822,14 @@ namespace Conform
                                     LogMsg(p_Name, MessageLevel.Info, "This test will now wait for 7 minutes while the mount tracks through the Meridian");
 
                                     // Wait for mount to move
-                                    m_StartTime = DateAndTime.Now;
+                                    m_StartTime = DateTime.Now;
                                     do
                                     {
                                         System.Threading.Thread.Sleep(SLEEP_TIME);
                                         //Application.DoEvents();
-                                        //SetStatus(p_Name, "Waiting for transit through Meridian", Convert.ToInt32(DateAndTime.Now.Subtract(m_StartTime).TotalSeconds) + "/" + SIDEOFPIER_MERIDIAN_TRACKING_PERIOD / 1000d + " seconds");
+                                        //SetStatus(p_Name, "Waiting for transit through Meridian", Convert.ToInt32(DateTime.Now.Subtract(m_StartTime).TotalSeconds) + "/" + SIDEOFPIER_MERIDIAN_TRACKING_PERIOD / 1000d + " seconds");
                                     }
-                                    while (!(DateAndTime.Now.Subtract(m_StartTime).TotalMilliseconds > SIDEOFPIER_MERIDIAN_TRACKING_PERIOD | TestStop()));
+                                    while (!(DateTime.Now.Subtract(m_StartTime).TotalMilliseconds > SIDEOFPIER_MERIDIAN_TRACKING_PERIOD | TestStop()));
 
                                     // SlewScope(TelescopeRAFromHourAngle(+0.0833333), 0.0, "Slewing to flip point") '5 minutes past zenith
                                     if (cancellationToken.IsCancellationRequested)
@@ -6351,11 +6352,11 @@ namespace Conform
                     }
                     catch (COMException ex)
                     {
-                        LogMsg(p_Name, MessageLevel.Error, "Unable to set a movement rate of zero - " + ex.Message + " " + Conversion.Hex(ex.ErrorCode));
+                        LogMsg(p_Name, MessageLevel.Error, "Unable to set a movement rate of zero - " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                     }
                     catch (DriverException ex)
                     {
-                        LogMsg(p_Name, MessageLevel.Error, "Unable to set a movement rate of zero - " + ex.Message + " " + Conversion.Hex(ex.Number));
+                        LogMsg(p_Name, MessageLevel.Error, "Unable to set a movement rate of zero - " + ex.Message + " " + ex.Number.ToString("X8"));
                     }
                     catch (Exception ex)
                     {
@@ -7157,7 +7158,7 @@ namespace Conform
         private void WaitForSlew(string testName)
         {
             DateTime WaitStartTime;
-            WaitStartTime = DateAndTime.Now;
+            WaitStartTime = DateTime.Now;
             do
             {
                 WaitFor(SLEEP_TIME);
@@ -7166,7 +7167,7 @@ namespace Conform
                 if (settings.DisplayMethodCalls)
                     LogMsg(testName, MessageLevel.Comment, "About to get Slewing property");
             }
-            while (telescopeDevice.Slewing & DateAndTime.Now.Subtract(WaitStartTime).TotalSeconds < (double)WAIT_FOR_SLEW_MINIMUM_DURATION & TestStop());
+            while (telescopeDevice.Slewing & DateTime.Now.Subtract(WaitStartTime).TotalSeconds < (double)WAIT_FOR_SLEW_MINIMUM_DURATION & TestStop());
             //My.MyProject.Forms.FrmConformMain.staStatus.Text = "Slew completed";
         }
 
@@ -7273,7 +7274,8 @@ namespace Conform
                         if (settings.DisplayMethodCalls)
                             LogMsg("AccessChecks", MessageLevel.Comment, "About to create driver object with CreateObject");
                         LogMsg("AccessChecks", MessageLevel.Debug, "Creating late bound object for interface test");
-                        l_DeviceObject = Interaction.CreateObject(g_TelescopeProgID);
+                        Type driverType = Type.GetTypeFromProgID(g_TelescopeProgID);
+                        l_DeviceObject = Activator.CreateInstance(driverType);
                         LogMsg("AccessChecks", MessageLevel.Debug, "Created late bound object OK");
                         switch (TestType)
                         {
@@ -7368,7 +7370,7 @@ namespace Conform
 
         private string FormatDec(double Dec)
         {
-            return g_Util.DegreesToDMS(Dec, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(Conversions.ToInteger(Operators.AddObject(9, Interaction.IIf(DISPLAY_DECIMAL_DIGITS > 0, DISPLAY_DECIMAL_DIGITS + 1, 0))));
+            return g_Util.DegreesToDMS(Dec, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(Conversions.ToInteger(Operators.AddObject(9, (DISPLAY_DECIMAL_DIGITS > 0 ? DISPLAY_DECIMAL_DIGITS + 1 : 0))));
         }
 
         private dynamic FormatAltitude(double Alt)
@@ -7378,7 +7380,7 @@ namespace Conform
 
         private string FormatAzimuth(double Az)
         {
-            return g_Util.DegreesToDMS(Az, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(Conversions.ToInteger(Operators.AddObject(9, Interaction.IIf(DISPLAY_DECIMAL_DIGITS > 0, DISPLAY_DECIMAL_DIGITS + 1, 0))));
+            return g_Util.DegreesToDMS(Az, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(Conversions.ToInteger(Operators.AddObject(9, (DISPLAY_DECIMAL_DIGITS > 0 ? DISPLAY_DECIMAL_DIGITS + 1 : 0))));
         }
 
         public string TranslatePierSide(PointingState p_PierSide, bool p_Long)
