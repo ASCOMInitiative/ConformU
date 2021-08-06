@@ -43,6 +43,7 @@ namespace ConformU
         }
 
         public event EventHandler<MessageEventArgs> OutputChanged;
+        public event EventHandler<MessageEventArgs> StatusChanged;
 
         public void TestDevice()
         {
@@ -291,6 +292,22 @@ namespace ConformU
             };
 
             EventHandler<MessageEventArgs> messageEventHandler = OutputChanged;
+
+            if (messageEventHandler is not null)
+            {
+                messageEventHandler(this, e);
+            }
+        }
+
+        internal void OnStatusChanged(string status)
+        {
+            MessageEventArgs e = new()
+            {
+                Id = "Status",
+                Message = status
+            };
+
+            EventHandler<MessageEventArgs> messageEventHandler = StatusChanged;
 
             if (messageEventHandler is not null)
             {

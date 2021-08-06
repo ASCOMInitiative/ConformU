@@ -27,6 +27,8 @@ namespace Conform
         private bool l_HasPreConnectCheck;
         private dynamic Device; // IAscomDriverV1
 
+        private string test, action, status;
+
         private ConformU.ConformanceTestManager parentClass;
         private ConformU.ConformLogger TL;
 
@@ -591,9 +593,9 @@ namespace Conform
         /// <param name="p_ProgID">The ProgID.</param>
         protected void CheckInitialise(string p_ProgID)
         {
-            //Status(StatusType.staTest, ""); // Clear status messages
-            //Status(StatusType.staAction, "");
-            //Status(StatusType.staStatus, "");
+            Status(StatusType.staTest, ""); // Clear status messages
+            Status(StatusType.staAction, "");
+            Status(StatusType.staStatus, "");
             g_Stop = true; // Initialise stop flag to stop
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
             var fileInfo = new System.IO.FileInfo(assembly.Location);
@@ -884,6 +886,54 @@ namespace Conform
         #endregion
 
         #region Base class support Code
+
+        /// <summary>
+        /// Update the status display
+        /// </summary>
+        /// <param name="Status">Type of message to set, Test, Action or Status</param>
+        /// <param name="Message">Message text</param>
+        /// <remarks></remarks>
+        internal void Status(StatusType Status, string message)
+        {
+            switch (Status)
+            {
+                case StatusType.staTest:
+                    {
+                        test = message;
+                        break;
+                    }
+
+                case StatusType.staAction:
+                    {
+                        action = message;
+                        break;
+                    }
+
+                case StatusType.staStatus:
+                    {
+                        status = message;
+                        break;
+                    }
+            }
+
+            parentClass.OnStatusChanged($"{test} - {action} - {status}");
+        }
+
+        /// <summary>
+        ///Set the test, action and status in one call
+        ///</summary>
+        ///<param name="newTest">Name of the test being conducted</param>
+        ///<param name="newAction">Specific action within the test</param>
+        ///<param name="newStatus">Status of the action</param>
+        ///<remarks></remarks>
+        public void SetStatus(string newTest, string newAction, string newStatus)
+        {
+            test = newTest;
+            action = newAction;
+            status = newStatus;
+
+            parentClass.OnStatusChanged($"{test} - {action} - {status}");
+        }
 
         private bool IncludeMethod(MandatoryMethod p_Method, DeviceType p_DeviceType, int p_InterfaceVersion)
         {

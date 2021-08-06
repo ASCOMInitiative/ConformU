@@ -164,13 +164,12 @@ namespace Conform
         #region Code
         internal static bool TestStop()
         {
-            bool TestStopRet = default;
             //Application.DoEvents();
             Thread.Sleep(10);
             //Application.DoEvents();
             Thread.Sleep(10);
             //Application.DoEvents();
-            TestStopRet = g_Stop;
+            bool TestStopRet = g_Stop;
             return TestStopRet;
         }
 
