@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using ASCOM.Standard.AlpacaClients;
+using ASCOM.Standard.Utilities;
 
 namespace ConformU
 {
@@ -25,6 +27,7 @@ namespace ConformU
                 switch (settings.CurrentDeviceTechnology)
                 {
                     case ConformConstants.TECHNOLOGY_ALPACA:
+                        driver = new Telescope("http", "127.0.0.1", 11111, 0, new TraceLogger("TelescopeFacade", true));
                         break;
 
                     case ConformConstants.TECHNOLOGY_COM:
