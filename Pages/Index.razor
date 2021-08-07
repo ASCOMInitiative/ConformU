@@ -58,17 +58,18 @@
             return;
         }
 
+        // Setting have validated OK so start the test
+
         // Create a task cancellation token source and cancellation token
         cancellationTokenSource = new CancellationTokenSource();
         cancelConformToken = cancellationTokenSource.Token;
 
-        // Setting have validated OK so start the test
-
-        //LogMsg("StartTest", $"Creating TASK");
+        // Create a test manager instance to oversee the test
         tester = new ConformanceTestManager(settings, conformLogger, cancelConformToken);
         tester.OutputChanged += OutputChanged;
         tester.StatusChanged += StatusChanged;
 
+        // Create a task to run the conformance test
         conformanceTest = new Task(() =>
         {
             try
@@ -83,17 +84,14 @@
 
         }, cancelConformToken);
 
-        LogMsg("StartTest", $"Starting TASK");
+        // Start the conformnance test task
         conformanceTest.Start();
-        LogMsg("StartTest", $"TASK started");
 
         // Execute this continuation task when the conformance test finishes to ensure that the tester is disposed even when the conformance task itself is cancelled.
         await conformanceTest.ContinueWith(antecedent =>
         {
-            //LogMsg("StartTest", $"TASK FINISHED - Status: {antecedent.Status}");
             tester.Dispose(); // Dispose of the tester
             tester = null;
-            //LogMsg("StartTest", $"Tester disposed");
             JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
 
             GC.Collect();
