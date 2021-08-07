@@ -126,7 +126,7 @@ namespace ConformU
         {
             get
             {
-                return new TrackingRatesCom(driver);
+                return new TrackingRatesFacade(driver);
             }
         }
 
@@ -168,7 +168,7 @@ namespace ConformU
 
         public IAxisRates AxisRates(TelescopeAxis Axis)
         {
-            return new AxisRatesCom(Axis, driver);
+            return new AxisRatesFacade(Axis, driver);
         }
 
         public bool CanMoveAxis(TelescopeAxis Axis)

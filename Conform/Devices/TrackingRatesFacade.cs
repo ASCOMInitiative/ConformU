@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ConformU
 {
-    public class TrackingRatesCom : ITrackingRates, IEnumerable, IEnumerator, IDisposable
+    public class TrackingRatesFacade : ITrackingRates, IEnumerable, IEnumerator, IDisposable
     {
         private DriveRate[] m_TrackingRates;
         private static int _pos = -1;
@@ -17,7 +17,7 @@ namespace ConformU
         // Default constructor - Internal prevents public creation
         // of instances. Returned by Telescope.AxisRates.
         //
-        internal TrackingRatesCom(dynamic driver)
+        internal TrackingRatesFacade(dynamic driver)
         {
             //
             // This array must hold ONE or more DriveRates values, indicating

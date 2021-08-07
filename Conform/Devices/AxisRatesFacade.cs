@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ConformU
 {
-    public class AxisRatesCom : IAxisRates, IEnumerable, IEnumerator, IDisposable
+    public class AxisRatesFacade : IAxisRates, IEnumerable, IEnumerator, IDisposable
     {
         private TelescopeAxis m_axis;
         private RateFacade[] m_Rates;
@@ -19,7 +19,7 @@ namespace ConformU
         // Constructor - Internal prevents public creation
         // of instances. Returned by Telescope.AxisRates.
         //
-        internal AxisRatesCom(TelescopeAxis Axis, dynamic driver)
+        internal AxisRatesFacade(TelescopeAxis Axis, dynamic driver)
         {
             m_axis = Axis;
             IEnumerable driverAxisRates = driver.AxisRates(Axis);
