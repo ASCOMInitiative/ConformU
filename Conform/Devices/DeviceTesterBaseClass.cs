@@ -756,7 +756,7 @@ namespace Conform
             // Clean up
             try
             {
-                DisposeAndReleaseObject("AccessChecks", l_DeviceObject);
+                //DisposeAndReleaseObject("AccessChecks", l_DeviceObject);
             }
             catch (Exception ex)
             {
@@ -1320,75 +1320,6 @@ namespace Conform
 
 
 
-
-        public void DisposeAndReleaseObject(string driverName, dynamic ObjectToRelease)
-        {
-            Type ObjectType;
-            int RemainingObjectCount, LoopCount;
-            LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, $"  About to release {driverName} driver instance");
-            if (settings.DisplayMethodCalls)
-                LogMsg("DisposeAndReleaseObject", MessageLevel.Comment, $"About to release {driverName} driver instance");
-            try
-            {
-                ObjectType = ObjectToRelease.GetType();
-                LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, $"  Unmarshalling {ObjectType.Name} -  {ObjectType.FullName}");
-            }
-            catch (Exception ex1)
-            {
-                LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  GetType Exception: " + ex1.Message);
-            }
-
-            try
-            {
-                if (settings.DisplayMethodCalls)
-                    LogMsg("DisposeAndReleaseObject", MessageLevel.Comment, "About to set Connected property");
-                ObjectToRelease.Connected = false;
-                LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, $"  Connected successfully set to False");
-            }
-            catch (Exception ex1)
-            {
-                LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Exception setting Connected = False: " + ex1.Message);
-            }
-
-            try
-            {
-                ObjectToRelease.Dispose();
-                LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, $"  Successfully called Dispose()");
-            }
-            catch (Exception ex1)
-            {
-                LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Dispose Exception: " + ex1.Message);
-            }
-
-            try
-            {
-                LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Releasing COM object");
-                LoopCount = 0;
-                do
-                {
-                    LoopCount += 1;
-                    RemainingObjectCount = Marshal.ReleaseComObject(ObjectToRelease);
-                    LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Remaining object count: " + RemainingObjectCount + ", LoopCount: " + LoopCount);
-                }
-                while (!(RemainingObjectCount <= 0 | LoopCount == 20));
-            }
-            catch (Exception ex2)
-            {
-                LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  ReleaseComObject Exception: " + ex2.Message);
-            }
-
-            try
-            {
-                ObjectToRelease = null;
-                GC.Collect();
-            }
-            catch (Exception ex3)
-            {
-                LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Set to nothing Exception: " + ex3.Message);
-            }
-
-            LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  End of ReleaseCOMObject");
-        }
 
         /// <summary>
         /// Test a supplied exception for whether it is a MethodNotImplemented type

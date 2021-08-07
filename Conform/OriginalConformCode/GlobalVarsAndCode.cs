@@ -127,7 +127,6 @@ namespace Conform
         internal static string g_CameraProgID;
         internal static string g_VideoCameraProgID;
         internal static string g_DomeProgID;
-        internal static string g_TelescopeProgID = "ASCOM.Simulator.Telescope";
         internal static string g_ObservingConditionsProgID = "";
         internal static string g_CoverCalibratorProgID;
 

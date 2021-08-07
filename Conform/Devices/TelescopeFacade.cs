@@ -1,17 +1,46 @@
-﻿using ASCOM.Standard.Interfaces;
+﻿using ASCOM;
+using ASCOM.Standard.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace ConformU
 {
-    public class TelescopeFacade : ITelescopeV3
+    public class TelescopeFacade : ITelescopeV3, IDisposable
     {
-        dynamic driver;
-        public TelescopeFacade(dynamic driverObject)
+        private dynamic driver; // COM driver object
+        private Settings settings; // Conform configuration settings
+
+        public TelescopeFacade(Settings conformSettings)
         {
-            driver = driverObject;
+            settings = conformSettings;
+        }
+
+        public void CreateDevice()
+        {
+            try
+            {
+                switch (settings.CurrentDeviceTechnology)
+                {
+                    case ConformConstants.TECHNOLOGY_ALPACA:
+                        break;
+
+                    case ConformConstants.TECHNOLOGY_COM:
+                        Type driverType = Type.GetTypeFromProgID(settings.CurrentComDevice.ProgId);
+                        driver = Activator.CreateInstance(driverType);
+                        break;
+
+                    default:
+                        throw new InvalidValueException($"TelescopeFacade:CreateDevice - Unknown technology type: {settings.CurrentDeviceTechnology}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"TelescopeFacade:CreateDevice - Exception: {ex}");
+            }
+
         }
 
         public AlignmentMode AlignmentMode => (AlignmentMode)driver.AlignmentMode;
@@ -97,7 +126,7 @@ namespace ConformU
         {
             get
             {
-                return new TrackingRatesFacade(driver);
+                return new TrackingRatesCom(driver);
             }
         }
 
@@ -139,7 +168,7 @@ namespace ConformU
 
         public IAxisRates AxisRates(TelescopeAxis Axis)
         {
-            return new AxisRatesFacade(Axis, driver);
+            return new AxisRatesCom(Axis, driver);
         }
 
         public bool CanMoveAxis(TelescopeAxis Axis)
@@ -169,7 +198,15 @@ namespace ConformU
 
         public void Dispose()
         {
-            driver.Dispose();
+            switch (settings.CurrentDeviceTechnology)
+            {
+                case ConformConstants.TECHNOLOGY_ALPACA:
+
+                    break;
+                case ConformConstants.TECHNOLOGY_COM:
+                    DisposeAndReleaseObject("Dispose", driver);
+                    break;
+            }
         }
 
         public void FindHome()
@@ -246,5 +283,76 @@ namespace ConformU
         {
             driver.UnPark();
         }
+
+        public void DisposeAndReleaseObject(string driverName, dynamic ObjectToRelease)
+        {
+            Type ObjectType;
+            int RemainingObjectCount, LoopCount;
+            //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, $"  About to release {driverName} driver instance");
+            if (settings.DisplayMethodCalls)
+                //LogMsg("DisposeAndReleaseObject", MessageLevel.Comment, $"About to release {driverName} driver instance");
+                try
+                {
+                    ObjectType = ObjectToRelease.GetType();
+                    //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, $"  Unmarshalling {ObjectType.Name} -  {ObjectType.FullName}");
+                }
+                catch (Exception ex1)
+                {
+                    //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  GetType Exception: " + ex1.Message);
+                }
+
+            try
+            {
+                if (settings.DisplayMethodCalls)
+                    //LogMsg("DisposeAndReleaseObject", MessageLevel.Comment, "About to set Connected property");
+                    ObjectToRelease.Connected = false;
+                //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, $"  Connected successfully set to False");
+            }
+            catch (Exception ex1)
+            {
+                //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Exception setting Connected = False: " + ex1.Message);
+            }
+
+            try
+            {
+                ObjectToRelease.Dispose();
+                //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, $"  Successfully called Dispose()");
+            }
+            catch (Exception ex1)
+            {
+                //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Dispose Exception: " + ex1.Message);
+            }
+
+            try
+            {
+                //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Releasing COM object");
+                LoopCount = 0;
+                do
+                {
+                    LoopCount += 1;
+                    RemainingObjectCount = Marshal.ReleaseComObject(ObjectToRelease);
+                    //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Remaining object count: " + RemainingObjectCount + ", LoopCount: " + LoopCount);
+                }
+                while (!(RemainingObjectCount <= 0 | LoopCount == 20));
+            }
+            catch (Exception ex2)
+            {
+                //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  ReleaseComObject Exception: " + ex2.Message);
+            }
+
+            try
+            {
+                ObjectToRelease = null;
+                GC.Collect();
+            }
+            catch (Exception ex3)
+            {
+                //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Set to nothing Exception: " + ex3.Message);
+            }
+
+            //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  End of ReleaseCOMObject");
+        }
+
+
     }
 }

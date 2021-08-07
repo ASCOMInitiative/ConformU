@@ -10,8 +10,10 @@ namespace ConformU
 {
     public class Settings
     {
+        AscomDevice ascomDevice = new();
+        ComDevice comDevice = new();
 
-        public  const string NO_DEVICE_SELECTED = "No device selected";
+        public const string NO_DEVICE_SELECTED = "No device selected";
         public Settings()
         {
             TelescopeTests.Add("CanMoveAxis", true);
@@ -36,23 +38,45 @@ namespace ConformU
         /// <summary>
         /// Details of the currently selected Alpaca device
         /// </summary>
-        public AscomDevice CurrentAlpacaDevice { get; set; } = new();
+        public AscomDevice CurrentAlpacaDevice
+        {
+            get
+            {
+                return ascomDevice;
+            }
+            set
+            {
+                ascomDevice = value;
+                CurrentDeviceName = ascomDevice.AscomDeviceName;
+            }
+        }
+
         /// <summary>
         /// Details of the currently selected Alpaca device
         /// </summary>
-        public ComDevice CurrentComDevice { get; set; } = new();
+        public ComDevice CurrentComDevice
+        {
+            get
+            {
+                return comDevice;
+            }
+            set
+            {
+                comDevice = value;
+                CurrentDeviceName = comDevice.DisplayName;
+            }
+        }
+
         /// <summary>
         /// Descriptive name of the current device
         /// </summary>
-        public string CurrentDeviceName { get; set; } = NO_DEVICE_SELECTED;
-        /// <summary>
-        /// ProgID of the current device (COM only)
-        /// </summary>
-        public string CurrentDeviceProgId { get; set; } = "";
+        public string CurrentDeviceName { get; private set; } = NO_DEVICE_SELECTED;
+
         /// <summary>
         /// Technology of the current device: Alpaca or COM
         /// </summary>
         public string CurrentDeviceTechnology { get; set; } = ConformConstants.TECHNOLOGY_ALPACA;
+
         /// <summary>
         /// ASCOM Device type of the current device
         /// </summary>
@@ -86,7 +110,7 @@ namespace ConformU
         public DateTime UpdateDate { get; set; } = DateTime.MinValue;
         public bool WarningMessageDisplayed { get; set; } = false;
         public bool UseDriverAccess { get; set; } = false;
-       
+
         public bool InterpretErrorMessages { get; set; } = false;
 
     }

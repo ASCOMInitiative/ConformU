@@ -15,7 +15,7 @@ using static ConformU.ConformConstants;
 
 namespace Conform
 {
-    internal class TelescopeTester : DeviceTesterBaseClass
+    internal class TelescopeTester : DeviceTesterBaseClass, IDisposable
     {
 
         #region Variables and Constants
@@ -83,7 +83,7 @@ namespace Conform
 
 #if DEBUG
         //private ASCOM.DriverAccess.Telescope telescopeDevice;
-        private ITelescopeV3 telescopeDevice;
+        private TelescopeFacade telescopeDevice;
 #else
         private dynamic telescopeDevice;
 #endif
@@ -210,7 +210,6 @@ namespace Conform
 
             settings = conformConfiguration.Settings;
             telescopeTests = settings.TelescopeTests;
-            g_TelescopeProgID = settings.CurrentDeviceProgId;
             cancellationToken = conformCancellationToken;
         }
 
@@ -226,21 +225,14 @@ namespace Conform
                 {
                     if (true) // Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining driver in memory to change flags)
                     {
-                        try
-                        {
-                            DisposeAndReleaseObject("Telescope Device", telescopeDevice);
-                        }
-                        catch
-                        {
-                        }
-
+                        if (telescopeDevice is not null) telescopeDevice.Dispose();
                         telescopeDevice = null;
-                        g_DeviceObject = null;
                         GC.Collect();
                     }
                 }
             }
 
+            // Call the DeviceTesterBaseClass dispose method
             base.Dispose(disposing);
             disposedValue = true;
         }
@@ -260,7 +252,7 @@ namespace Conform
                 // Set the error type numbers according to the standards adopted by individual authors.
                 // Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
                 // messages to driver authors!
-                switch (g_TelescopeProgID ?? "")
+                switch (settings.CurrentComDevice.ProgId ?? "")
                 {
                     case "Hub.Telescope":
                         {
@@ -358,7 +350,7 @@ namespace Conform
                 }
             }
 
-            CheckInitialise(g_TelescopeProgID);
+            CheckInitialise(settings.CurrentComDevice.ProgId);
         }
 
         public override void CheckAccessibility()
@@ -464,7 +456,7 @@ namespace Conform
                 l_TryCount += 1;
                 try
                 {
-                    LogMsg("Telescope:CreateDevice", MessageLevel.Debug, "Creating ProgID: " + g_TelescopeProgID);
+                    LogMsg("Telescope:CreateDevice", MessageLevel.Debug, "Creating ProgID: " + settings.CurrentComDevice.ProgId);
 #if DEBUG
                     //LogMsg("Conform", MessageLevel.Always, "is using ASCOM.DriverAccess.Telescope to get a Telescope object");
                     //if (settings.DisplayMethodCalls) LogMsg("CreateDevice", MessageLevel.Comment, "About to create driver using DriverAccess");
@@ -474,9 +466,8 @@ namespace Conform
                     LogMsg("Conform", MessageLevel.Always, "is using CreateObject to get a Telescope object");
                     if (settings.DisplayMethodCalls)
                         LogMsg("ConformanceCheck", MessageLevel.Comment, "About to create driver using CreateObject");
-                    Type driverType = Type.GetTypeFromProgID(g_TelescopeProgID);
-                    dynamic driverObject = Activator.CreateInstance(driverType);
-                    telescopeDevice = new TelescopeFacade(driverObject);
+                    telescopeDevice = new TelescopeFacade(settings);
+                    telescopeDevice.CreateDevice();
                     LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
 
 
@@ -7287,7 +7278,7 @@ namespace Conform
                         if (settings.DisplayMethodCalls)
                             LogMsg("AccessChecks", MessageLevel.Comment, "About to create driver object with CreateObject");
                         LogMsg("AccessChecks", MessageLevel.Debug, "Creating late bound object for interface test");
-                        Type driverType = Type.GetTypeFromProgID(g_TelescopeProgID);
+                        Type driverType = Type.GetTypeFromProgID(settings.CurrentComDevice.ProgId);
                         l_DeviceObject = Activator.CreateInstance(driverType);
                         LogMsg("AccessChecks", MessageLevel.Debug, "Created late bound object OK");
                         switch (TestType)
@@ -7350,7 +7341,7 @@ namespace Conform
                 // Clean up
                 try
                 {
-                    DisposeAndReleaseObject("Telescope V1", l_ITelescope);
+                    //DisposeAndReleaseObject("Telescope V1", l_ITelescope);
                 }
                 catch
                 {
@@ -7358,7 +7349,7 @@ namespace Conform
 
                 try
                 {
-                    DisposeAndReleaseObject("Telescope V3", l_DeviceObject);
+                    //DisposeAndReleaseObject("Telescope V3", l_DeviceObject);
                 }
                 catch
                 {

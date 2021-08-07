@@ -66,6 +66,22 @@ namespace ConformU
         public string Validate()
         {
             if (settings.CurrentDeviceName == ConformConstants.NO_DEVICE_SELECTED) return "No device has been selected.";
+            if ((settings.CurrentDeviceTechnology != ConformConstants.TECHNOLOGY_ALPACA) & (settings.CurrentDeviceTechnology != ConformConstants.TECHNOLOGY_COM)) return $"Technology type is not Alpaca or COM: '{settings.CurrentDeviceTechnology}'";
+
+            switch (settings.CurrentDeviceTechnology)
+            {
+                case ConformConstants.TECHNOLOGY_ALPACA:
+                    break;
+
+                case ConformConstants.TECHNOLOGY_COM:
+                    if (settings.CurrentComDevice.ProgId == "") return "CurrentComDevice.ProgId  is empty.";
+
+                    break;
+            }
+
+
+
+            // All OK so return empty string
             return "";
         }
 

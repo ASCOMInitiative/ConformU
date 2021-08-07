@@ -156,18 +156,19 @@ namespace ConformU
                     // Try to set Connected to True
                     try
                     {
+                        // Test setting Connected to True
                         if (settings.DisplayMethodCalls) testDevice.LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set Connected property");
                         testDevice.Connected = true;
                         testDevice.LogMsg("ConformanceCheck", MessageLevel.OK, "Connected OK");
                         testDevice.LogMsg("", MessageLevel.Always, "");
 
-                        // Connected OK so run tests
+                        // Test common methods
                         if (!cancellationToken.IsCancellationRequested & settings.TestProperties)
                         {
                             testDevice.CheckCommonMethods();
                         }
 
-                        // Read Can properties
+                        // Test and read Can properties
                         if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasCanProperties)
                         {
                             testDevice.LogMsg("Can Properties", MessageLevel.Always, "");
@@ -215,6 +216,7 @@ namespace ConformU
                             testDevice.LogMsg("", MessageLevel.Always, ""); // Blank line
                         }
 
+                        // Display completion or "test cancelled" message
                         if (!cancellationToken.IsCancellationRequested)
                         {
                             testDevice.LogMsg("Conformance test complete", MessageLevel.Always, "");
@@ -241,12 +243,12 @@ namespace ConformU
 
                 // Report the success or failure of conformance checking
                 testDevice.LogMsg("", MessageLevel.Always, "");
-                if (g_CountError == 0 & g_CountWarning == 0 & g_CountIssue == 0 & !g_Stop)
+                if (g_CountError == 0 & g_CountWarning == 0 & g_CountIssue == 0 & !g_Stop) // No issues - device conforms as expected
                 {
                     testDevice.LogMsg("No errors, warnings or issues found: your driver passes ASCOM validation!!", MessageLevel.Always, "");
                     testDevice.LogMsg("", MessageLevel.Always, "");
                 }
-                else
+                else // Some issues found, the device fails the conformance check
                 {
                     l_Message = "Your driver had " + g_CountError + " error";
                     if (g_CountError != 1)

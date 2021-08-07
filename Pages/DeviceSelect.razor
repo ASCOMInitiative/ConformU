@@ -227,7 +227,6 @@
         else
         {
             conformLogger.LogDebug("OnSelectDeviceClick", $"Alpaca device selected: {technologyType}");
-            configuration.Settings.CurrentDeviceName = selectedAlpacaDevice.AscomDeviceName;
             configuration.Settings.CurrentAlpacaDevice = selectedAlpacaDevice;
             configuration.Settings.CurrentDeviceType = Enum.Parse<DeviceType>(selectedAlpacaDevice.AscomDeviceType);
         }
@@ -258,9 +257,7 @@
             selectedDeviceType = Enum.Parse<DeviceType>(selectedDeviceTypeString);
             configuration.Settings.CurrentDeviceType = selectedDeviceType;
             conformLogger.LogDebug("OnSelectDeviceClick", $"COM device selected: {technologyType}");
-            configuration.Settings.CurrentDeviceName = selectedComDevice.DisplayName;
             configuration.Settings.CurrentComDevice = selectedComDevice;
-            configuration.Settings.CurrentDeviceProgId = selectedComDevice.ProgId;
         }
 
         technologyType = ConformConstants.TECHNOLOGY_COM;

@@ -41,7 +41,7 @@
     private void SetDisplayVariables()
     {
         conformLogger.LogDebug("MainLayout - SetDisplayVariables", $"Device description: {configuration.Settings.CurrentDeviceName} {configuration.Settings.CurrentDeviceType} {configuration.Settings.CurrentDeviceTechnology}");
-        if (configuration.Settings.CurrentDeviceTechnology == "Alpaca")
+        if (configuration.Settings.CurrentDeviceTechnology == ConformConstants.TECHNOLOGY_ALPACA)
         {
             deviceName = $"{configuration.Settings.CurrentDeviceName} - {configuration.Settings.CurrentAlpacaDevice.IpAddress}:{configuration.Settings.CurrentAlpacaDevice.IpPort}";
         }

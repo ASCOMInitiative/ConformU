@@ -80,20 +80,24 @@
                 LogMsg("StartTest", $"Exception: \r\n {ex}");
 
             }
-            //LogMsg("StartTest", $"Test FINISHED");
+
+        }, cancelConformToken);
+
+        LogMsg("StartTest", $"Starting TASK");
+        conformanceTest.Start();
+        LogMsg("StartTest", $"TASK started");
+
+        // Execute this continuation task when the conformance test finishes to ensure that the tester is disposed even when the conformance task itself is cancelled.
+        await conformanceTest.ContinueWith(antecedent =>
+        {
+            //LogMsg("StartTest", $"TASK FINISHED - Status: {antecedent.Status}");
             tester.Dispose(); // Dispose of the tester
             tester = null;
             //LogMsg("StartTest", $"Tester disposed");
             JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
 
             GC.Collect();
-
-        }, cancelConformToken);
-
-        //LogMsg("StartTest", $"Starting TASK");
-        conformanceTest.Start();
-        //LogMsg("StartTest", $"TASK started");
-
+        });
     }
 
     void StopTest(string buttonName)
