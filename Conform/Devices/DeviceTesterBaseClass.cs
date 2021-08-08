@@ -792,7 +792,7 @@ namespace Conform
             parentClass.OnStatusChanged($"{test} {action} {status}");
         }
 
-        private bool IncludeMethod(MandatoryMethod p_Method, DeviceType p_DeviceType, int p_InterfaceVersion)
+        private static bool IncludeMethod(MandatoryMethod p_Method, DeviceType p_DeviceType, int p_InterfaceVersion)
         {
             // This mechanic allows individual tests for particular devices to be skipped. It is no longer required because this is handled by DriverAccess
             // The code is left in place in case it is ever needed in the future
@@ -1192,9 +1192,9 @@ namespace Conform
             bool IsMethodNotImplementedExceptionRet = false; // Set false default value
             try
             {
-                if (deviceException is COMException) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
+                if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
                 {
-                    COMException = (COMException)deviceException;
+                    COMException = exception;
                     if (COMException.ErrorCode == g_ExNotImplemented | COMException.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
                     {
                         IsMethodNotImplementedExceptionRet = true;
@@ -1226,9 +1226,9 @@ namespace Conform
             bool IsNotImplementedExceptionRet = false; // Set false default value
             try
             {
-                if (deviceException is COMException) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
+                if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
                 {
-                    COMException = (COMException)deviceException;
+                    COMException = exception;
                     if (COMException.ErrorCode == g_ExNotImplemented | COMException.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
                     {
                         IsNotImplementedExceptionRet = true;
@@ -1261,9 +1261,9 @@ namespace Conform
             bool IsPropertyNotImplementedExceptionRet = false; // Set false default value
             try
             {
-                if (deviceException is COMException) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
+                if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
                 {
-                    COMException = (COMException)deviceException;
+                    COMException = exception;
                     if (COMException.ErrorCode == g_ExNotImplemented | COMException.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
                     {
                         IsPropertyNotImplementedExceptionRet = true;
@@ -1297,9 +1297,9 @@ namespace Conform
             bool IsInvalidValueExceptionRet = false; // Set false default value
             try
             {
-                if (deviceException is COMException) // This is a COM exception so test whether the error code indicates that it is an invalid value exception
+                if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is an invalid value exception
                 {
-                    COMException = (COMException)deviceException;
+                    COMException = exception;
                     if (COMException.ErrorCode == ErrorCodes.InvalidValue | COMException.ErrorCode == g_ExInvalidValue1 | COMException.ErrorCode == g_ExInvalidValue2 | COMException.ErrorCode == g_ExInvalidValue3 | COMException.ErrorCode == g_ExInvalidValue4 | COMException.ErrorCode == g_ExInvalidValue5 | COMException.ErrorCode == g_ExInvalidValue6) // This is an invalid value exception
                     {
                         IsInvalidValueExceptionRet = true;
@@ -1310,9 +1310,9 @@ namespace Conform
                 {
                     IsInvalidValueExceptionRet = true;
                 }
-                else if (deviceException is DriverException)
+                else if (deviceException is DriverException exception1)
                 {
-                    DriverException = (DriverException)deviceException;
+                    DriverException = exception1;
                     if (DriverException.Number == ErrorCodes.InvalidValue) // This is an invalid value exception
                     {
                         LogMsg(MemberName, MessageLevel.Issue, "Received ASCOM.DriverException(0x" + ErrorCodes.InvalidValue.ToString("X8") + "), please use ASCOM.InvalidValueException to report invalid values");
@@ -1346,9 +1346,9 @@ namespace Conform
             bool IsInvalidOperationExceptionRet = false; // Set false default value
             try
             {
-                if (deviceException is COMException) // This is a COM exception so test whether the error code indicates that it is an invalid operation exception
+                if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is an invalid operation exception
                 {
-                    COMException = (COMException)deviceException;
+                    COMException = exception;
                     if (COMException.ErrorCode == ErrorCodes.InvalidOperationException) // This is an invalid operation exception
                     {
                         IsInvalidOperationExceptionRet = true;
@@ -1359,9 +1359,9 @@ namespace Conform
                 {
                     IsInvalidOperationExceptionRet = true;
                 }
-                else if (deviceException is DriverException)
+                else if (deviceException is DriverException exception1)
                 {
-                    DriverException = (DriverException)deviceException;
+                    DriverException = exception1;
                     if (DriverException.Number == ErrorCodes.InvalidOperationException) // This is an invalid operation exception
                     {
                         LogMsg(MemberName, MessageLevel.Issue, "Received ASCOM.DriverException(0x" + ErrorCodes.InvalidOperationException.ToString("X8") + "), please use ASCOM.InvalidOperationException to report invalid operations");
@@ -1393,9 +1393,9 @@ namespace Conform
             bool  IsNotSetExceptionRet = false; // Set false default value
             try
             {
-                if (deviceException is COMException) // This is a COM exception so test whether the error code indicates that it is a not set exception
+                if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is a not set exception
                 {
-                    COMException = (COMException)deviceException;
+                    COMException = exception;
                     if (COMException.ErrorCode == g_ExNotSet1) // This is a not set exception
                     {
                         IsNotSetExceptionRet = true;
@@ -1533,7 +1533,7 @@ namespace Conform
         /// <param name="ex">Exception whose name is required</param>
         /// <returns>String exception name</returns>
         /// <remarks></remarks>
-        protected string GetExceptionName(Exception ex)
+        protected static string GetExceptionName(Exception ex)
         {
             COMException ComEx;
             DriverException DriverEx;
@@ -1552,9 +1552,9 @@ namespace Conform
                     RetVal = ex.GetType().Name;
                 }
             }
-            else if (ex is COMException) // Handle XOM exceptions with their error code
+            else if (ex is COMException exception) // Handle XOM exceptions with their error code
             {
-                ComEx = (COMException)ex;
+                ComEx = exception;
                 RetVal = "COMException(0x" + ComEx.ErrorCode.ToString("X8") + ")";
             }
             else // We got something else so report it

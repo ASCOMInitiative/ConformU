@@ -174,7 +174,7 @@ namespace Conform
 
         private enum PerformanceType
         {
-            tstPerfAltitude = 1,
+            tstPerfAltitude = 0,
             tstPerfAtHome = 1,
             tstPerfAtPark = 2,
             tstPerfAzimuth = 3,
@@ -3670,7 +3670,7 @@ namespace Conform
 
                                         default:
                                             {
-                                                LogMsg(testName, MessageLevel.Info, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Synced to within ", FormatAltitude(difference)), " DD:MM:SS of expected Altitude: "), FormatAltitude(syncAlt))));
+                                                LogMsg(testName, MessageLevel.Info, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Synced to within ", TelescopeTester.FormatAltitude(difference)), " DD:MM:SS of expected Altitude: "), TelescopeTester.FormatAltitude(syncAlt))));
                                                 showOutcome = true;
                                                 break;
                                             }
@@ -3703,9 +3703,9 @@ namespace Conform
                                     if (showOutcome)
                                     {
                                         LogMsg(testName, MessageLevel.Comment, "           Altitude    Azimuth");
-                                        LogMsg(testName, MessageLevel.Comment, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Original:  ", FormatAltitude(currentAlt)), "   "), FormatAzimuth(currentAz))));
-                                        LogMsg(testName, MessageLevel.Comment, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Sync to:   ", FormatAltitude(syncAlt)), "   "), FormatAzimuth(syncAz))));
-                                        LogMsg(testName, MessageLevel.Comment, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("New:       ", FormatAltitude(newAlt)), "   "), FormatAzimuth(newAz))));
+                                        LogMsg(testName, MessageLevel.Comment, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Original:  ", TelescopeTester.FormatAltitude(currentAlt)), "   "), FormatAzimuth(currentAz))));
+                                        LogMsg(testName, MessageLevel.Comment, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Sync to:   ", TelescopeTester.FormatAltitude(syncAlt)), "   "), FormatAzimuth(syncAz))));
+                                        LogMsg(testName, MessageLevel.Comment, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("New:       ", TelescopeTester.FormatAltitude(newAlt)), "   "), FormatAzimuth(newAz))));
                                     }
                                 }
                                 else // Can't test effects of a sync
@@ -4099,19 +4099,19 @@ namespace Conform
                                 {
                                     case var case4 when case4 <= 1.0d / 3600.0d: // <1 seconds
                                         {
-                                            LogMsg(p_Name, MessageLevel.OK, Conversions.ToString(Operators.ConcatenateObject("Slewed to target Altitude OK: ", FormatAltitude(m_TargetAltitude))));
+                                            LogMsg(p_Name, MessageLevel.OK, Conversions.ToString(Operators.ConcatenateObject("Slewed to target Altitude OK: ", TelescopeTester.FormatAltitude(m_TargetAltitude))));
                                             break;
                                         }
 
                                     case var case5 when case5 <= 2.0d / 3600.0d: // 2 seconds
                                         {
-                                            LogMsg(p_Name, MessageLevel.OK, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Slewed to within 2 seconds of Altitude target: ", FormatAltitude(m_TargetAltitude)), " Actual Altitude "), FormatAltitude(l_ActualAltitude))));
+                                            LogMsg(p_Name, MessageLevel.OK, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Slewed to within 2 seconds of Altitude target: ", TelescopeTester.FormatAltitude(m_TargetAltitude)), " Actual Altitude "), TelescopeTester.FormatAltitude(l_ActualAltitude))));
                                             break;
                                         }
 
                                     default:
                                         {
-                                            LogMsg(p_Name, MessageLevel.Info, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Slewed to within ", FormatAltitude(l_Difference)), " DD:MM:SS of expected Altitude: "), FormatAltitude(m_TargetAltitude))));
+                                            LogMsg(p_Name, MessageLevel.Info, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Slewed to within ", TelescopeTester.FormatAltitude(l_Difference)), " DD:MM:SS of expected Altitude: "), TelescopeTester.FormatAltitude(m_TargetAltitude))));
                                             break;
                                         }
                                 } // Do nothing
@@ -4551,12 +4551,12 @@ namespace Conform
                             {
                             } // Attempt to stop any motion that has actually started
 
-                            LogMsg(p_Name, MessageLevel.Error, Conversions.ToString(Operators.ConcatenateObject("Failed to reject bad Altitude coordinate: ", FormatAltitude(m_TargetAltitude))));
+                            LogMsg(p_Name, MessageLevel.Error, Conversions.ToString(Operators.ConcatenateObject("Failed to reject bad Altitude coordinate: ", TelescopeTester.FormatAltitude(m_TargetAltitude))));
                         }
                         catch (Exception ex)
                         {
                             Status(StatusType.staAction, "Slew rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", Conversions.ToString(Operators.ConcatenateObject("Correctly rejected bad Altitude coordinate: ", FormatAltitude(m_TargetAltitude))));
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", Conversions.ToString(Operators.ConcatenateObject("Correctly rejected bad Altitude coordinate: ", TelescopeTester.FormatAltitude(m_TargetAltitude))));
                         }
 
                         try
@@ -4618,12 +4618,12 @@ namespace Conform
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.Comment, "About to call SyncToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
                             telescopeDevice.SyncToAltAz(m_TargetAzimuth, m_TargetAltitude);
-                            LogMsg(p_Name, MessageLevel.Error, Conversions.ToString(Operators.ConcatenateObject("Failed to reject bad Altitude coordinate: ", FormatAltitude(m_TargetAltitude))));
+                            LogMsg(p_Name, MessageLevel.Error, Conversions.ToString(Operators.ConcatenateObject("Failed to reject bad Altitude coordinate: ", TelescopeTester.FormatAltitude(m_TargetAltitude))));
                         }
                         catch (Exception ex)
                         {
                             Status(StatusType.staAction, "Sync rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Altitude coordinate", Conversions.ToString(Operators.ConcatenateObject("Correctly rejected bad Altitude coordinate: ", FormatAltitude(m_TargetAltitude))));
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Altitude coordinate", Conversions.ToString(Operators.ConcatenateObject("Correctly rejected bad Altitude coordinate: ", TelescopeTester.FormatAltitude(m_TargetAltitude))));
                         }
 
                         try
@@ -6777,7 +6777,7 @@ namespace Conform
         /// <param name="FirstRA">First RA (hours)</param>
         /// <param name="SecondRA">Second RA (hours)</param>
         /// <returns>Difference (seconds) between the supplied RAs</returns>
-        private double RaDifferenceInSeconds(double FirstRA, double SecondRA)
+        private static double RaDifferenceInSeconds(double FirstRA, double SecondRA)
         {
             double RaDifferenceInSecondsRet = Math.Abs(FirstRA - SecondRA); // Calculate the difference allowing for negative outcomes
             if (RaDifferenceInSecondsRet > 12.0d)
@@ -7110,27 +7110,27 @@ namespace Conform
             }
         }
 
-        private string FormatRA(double ra)
+        private static string FormatRA(double ra)
         {
             return g_Util.HoursToHMS(ra, ":", ":", "", DISPLAY_DECIMAL_DIGITS);
         }
 
-        private string FormatDec(double Dec)
+        private static string FormatDec(double Dec)
         {
             return g_Util.DegreesToDMS(Dec, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(Conversions.ToInteger(Operators.AddObject(9, (DISPLAY_DECIMAL_DIGITS > 0 ? DISPLAY_DECIMAL_DIGITS + 1 : 0))));
         }
 
-        private dynamic FormatAltitude(double Alt)
+        private static dynamic FormatAltitude(double Alt)
         {
             return g_Util.DegreesToDMS(Alt, ":", ":", "", DISPLAY_DECIMAL_DIGITS);
         }
 
-        private string FormatAzimuth(double Az)
+        private static string FormatAzimuth(double Az)
         {
             return g_Util.DegreesToDMS(Az, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(Conversions.ToInteger(Operators.AddObject(9, (DISPLAY_DECIMAL_DIGITS > 0 ? DISPLAY_DECIMAL_DIGITS + 1 : 0))));
         }
 
-        public string TranslatePierSide(PointingState p_PierSide, bool p_Long)
+        public static string TranslatePierSide(PointingState p_PierSide, bool p_Long)
         {
             string l_PierSide;
             switch (p_PierSide)

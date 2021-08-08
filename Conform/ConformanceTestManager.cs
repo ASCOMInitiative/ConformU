@@ -18,12 +18,11 @@ namespace ConformU
     public class ConformanceTestManager : IDisposable
     {
         string l_Message;
-
-        ConformConfiguration configuration;
-        CancellationToken cancellationToken;
+        readonly ConformConfiguration configuration;
+        readonly CancellationToken cancellationToken;
         private bool disposedValue;
-        private ConformLogger TL;
-        private Settings settings;
+        private readonly ConformLogger TL;
+        private readonly Settings settings;
 
         public ConformanceTestManager(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken)
         {
@@ -252,13 +251,13 @@ namespace ConformU
                 {
                     l_Message = "Your driver had " + g_CountError + " error";
                     if (g_CountError != 1)
-                        l_Message = l_Message + "s";
+                        l_Message += "s";
                     l_Message = l_Message + ", " + g_CountWarning + " warning";
                     if (g_CountWarning != 1)
-                        l_Message = l_Message + "s";
+                        l_Message += "s";
                     l_Message = l_Message + " and " + g_CountIssue + " issue";
                     if (g_CountWarning != 1)
-                        l_Message = l_Message + "s";
+                        l_Message += "s";
                     testDevice.LogMsg(l_Message, MessageLevel.Always, "");
                     testDevice.LogMsg("", MessageLevel.Always, "");
                 }

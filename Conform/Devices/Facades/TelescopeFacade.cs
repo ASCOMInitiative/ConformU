@@ -212,6 +212,7 @@ namespace ConformU
                     DisposeAndReleaseObject( driver);
                     break;
             }
+            GC.SuppressFinalize(this);
         }
 
         public void FindHome()
