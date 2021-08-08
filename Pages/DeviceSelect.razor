@@ -126,7 +126,7 @@
     bool osIsWindows; // OS environment type
     bool osIsNotWindows;
     int selectedTabNumber = 0; // Current tab number 0 = Alpaca, 1 = COM
-    string technologyType = ConformConstants.TECHNOLOGY_ALPACA; // Is the user selecting an Alpaca or a COM device?
+    DeviceTechnology technologyType = ConformConstants.DeviceTechnology.Alpaca; // Is the user selecting an Alpaca or a COM device?
 
     List<AlpacaDeviceListItem> ascomDevices = new(); // List of discovered Alpaca devices for use in the Alpaca devices Radzen radio button list
     List<ComDeviceListItem> comDeviceList = new(); // List of COM devices for use in the Radzen COM devices radio button list
@@ -139,7 +139,7 @@
     protected override void OnInitialized()
     {
         // Initialise variables
-        selectedDeviceType = configuration.Settings.CurrentDeviceType;
+        selectedDeviceType = configuration.Settings.DeviceType;
         selectedDeviceTypeString = selectedDeviceType.ToString();
         discovery = new AlpacaDiscovery(conformLogger);
         discovery.AlpacaDevicesUpdated += AlpacaDeviceDiscovered;
@@ -202,7 +202,7 @@
     private void OnNewAlpacaDeviceSelected(AscomDevice value)
     {
         selectedDeviceType = Enum.Parse<DeviceType>(selectedDeviceTypeString);
-        configuration.Settings.CurrentDeviceType = selectedDeviceType;
+        configuration.Settings.DeviceType = selectedDeviceType;
         selectedAlpacaDevice = value;
         if (value is null) value = new AscomDevice();
         conformLogger.LogDebug("OnDeviceChanged", $"New Device selected: {value.AscomDeviceName} at {value.IpAddress}");
@@ -227,12 +227,12 @@
         else
         {
             conformLogger.LogDebug("OnSelectDeviceClick", $"Alpaca device selected: {technologyType}");
-            configuration.Settings.CurrentAlpacaDevice = selectedAlpacaDevice;
-            configuration.Settings.CurrentDeviceType = Enum.Parse<DeviceType>(selectedAlpacaDevice.AscomDeviceType);
+            configuration.Settings.AlpacaDevice = selectedAlpacaDevice;
+            configuration.Settings.DeviceType = Enum.Parse<DeviceType>(selectedAlpacaDevice.AscomDeviceType);
         }
 
-        technologyType = ConformConstants.TECHNOLOGY_ALPACA;
-        configuration.Settings.CurrentDeviceTechnology = technologyType;
+        technologyType = ConformConstants.DeviceTechnology.Alpaca;
+        configuration.Settings.DeviceTechnology = technologyType;
         configuration.Save();
         StateHasChanged();
     }
@@ -255,13 +255,13 @@
         else
         {
             selectedDeviceType = Enum.Parse<DeviceType>(selectedDeviceTypeString);
-            configuration.Settings.CurrentDeviceType = selectedDeviceType;
+            configuration.Settings.DeviceType = selectedDeviceType;
             conformLogger.LogDebug("OnSelectDeviceClick", $"COM device selected: {technologyType}");
-            configuration.Settings.CurrentComDevice = selectedComDevice;
+            configuration.Settings.ComDevice = selectedComDevice;
         }
 
-        technologyType = ConformConstants.TECHNOLOGY_COM;
-        configuration.Settings.CurrentDeviceTechnology = technologyType;
+        technologyType = ConformConstants.DeviceTechnology.COM;
+        configuration.Settings.DeviceTechnology = technologyType;
         configuration.Save();
         StateHasChanged();
     }

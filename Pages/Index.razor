@@ -32,7 +32,6 @@
 
     // Task and cancellation support
     Task conformanceTest;
-    Task waitForTestCompletion;
     CancellationTokenSource cancellationTokenSource;
     CancellationToken cancelConformToken;
 
@@ -140,7 +139,7 @@
     /// </summary>
     /// <param name="source"></param>
     /// <param name="e"></param>
-    async public void StatusChanged(object sender, MessageEventArgs e)
+    public void StatusChanged(object sender, MessageEventArgs e)
     {
         lock (statusLockObject)
         {

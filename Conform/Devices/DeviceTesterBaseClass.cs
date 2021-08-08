@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading;
 using ASCOM;
 using ConformU;
 using Microsoft.VisualBasic;
@@ -29,10 +30,11 @@ namespace Conform
 
         private string test, action, status;
 
-        private ConformU.ConformanceTestManager parentClass;
-        private ConformU.ConformLogger TL;
+        private readonly ConformanceTestManager parentClass;
+        private readonly ConformLogger TL;
+        private readonly CancellationToken cancellationToken;
 
-        private Settings settings;
+        private readonly Settings settings;
         #endregion
 
         #region Enums
@@ -85,7 +87,7 @@ namespace Conform
         /// <param name="HasPerformanceCheck">Device has a performance test</param>
         /// <param name="HasPostRunCheck">Device requires a post run safety check</param>
         /// <remarks></remarks>
-        public DeviceTesterBaseClass(bool HasCanProperties, bool HasProperties, bool HasMethods, bool HasPreRunCheck, bool HasPreConnectCheck, bool HasPerformanceCheck, bool HasPostRunCheck, ConformanceTestManager parent, ConformConfiguration conformConfiguration, ConformLogger logger) : base()
+        public DeviceTesterBaseClass(bool HasCanProperties, bool HasProperties, bool HasMethods, bool HasPreRunCheck, bool HasPreConnectCheck, bool HasPerformanceCheck, bool HasPostRunCheck, ConformanceTestManager parent, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken cancellationToken) : base()
         {
             l_HasPreConnectCheck = HasPreConnectCheck;
             l_Connected = false;
@@ -97,6 +99,7 @@ namespace Conform
             l_HasPerformanceCheck = HasPerformanceCheck;
             parentClass = parent;
             TL = logger;
+            this.cancellationToken = cancellationToken;
             settings = conformConfiguration.Settings;
         }
 
@@ -397,7 +400,7 @@ namespace Conform
                                         LogMsg("SupportedActions", MessageLevel.OK, "Found action: " + ActionString);
 
                                         // Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
-                                        if (p_DeviceType == DeviceType.ObservingConditions & g_ObservingConditionsProgID.ToUpperInvariant() == "ASCOM.OCH.OBSERVINGCONDITIONS")
+                                        if (p_DeviceType == DeviceType.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.ToUpper() == "ASCOM.OCH.OBSERVINGCONDITIONS")
                                         {
                                             if (ActionString.ToUpperInvariant().StartsWith("//OCSIMULATOR:"))
                                             {
@@ -624,153 +627,8 @@ namespace Conform
             LogMsg("Error", MessageLevel.Always, "number for \"Value Not Set 2\" is: " + Conversion.Hex(g_ExNotSet1));
             if (g_ExNotSet2 != 0 & g_ExNotSet2 != g_ExNotSet1)
                 LogMsg("Error", MessageLevel.Always, "number for \"Value Not Set 3\" is: " + Conversion.Hex(g_ExNotSet2));
-            if (settings.InterpretErrorMessages)
-            {
-                LogMsg("Error", MessageLevel.Always, "messages will be interpreted to infer state.");
-            }
-            else
-            {
-                LogMsg("Error", MessageLevel.Always, "messages will not be interpreted to infer state.");
-            }
 
             LogMsg("", MessageLevel.Always, "");
-        }
-
-        public virtual void CheckAccessibility()
-        {
-            LogMsg("ConformanceCheckAccessibility", MessageLevel.Error, "DeviceTester base Class warning message, you should not see this message!");
-        }
-
-        protected void CheckAccessibility(string p_ProgId, DeviceType p_DeviceType)
-        {
-            dynamic l_DeviceObject;
-            Type l_Type;
-            var l_TryCount = default(int);
-            string l_ErrMsg = "";
-            LogMsg("Driver Access Checks", MessageLevel.OK, "");
-
-            // Try late binding as an object
-            l_DeviceObject = null;
-            do
-            {
-                l_TryCount += 1;
-                try
-                {
-#if DEBUG
-                    if (settings.DisplayMethodCalls) LogMsg("CreateObject", MessageLevel.Comment, "About to create instance using CreateObject");
-                    l_Type = Type.GetTypeFromProgID(p_ProgId);
-                    l_DeviceObject = Activator.CreateInstance(l_Type);
-                    LogMsg("AccessChecks", MessageLevel.Debug, "Successfully created driver using CreateObject");
-#else
-
-                    l_Type = Type.GetTypeFromProgID(p_ProgId);
-                    if (settings.DisplayMethodCalls) LogMsg("AccessChecks", MessageLevel.Comment, "About to create instance using Activator.CreateInstance");
-                    l_DeviceObject = Activator.CreateInstance(l_Type);
-                    LogMsg("AccessChecks", MessageLevel.Debug, "Successfully created driver using Activator.CreateInstance");
-
-#endif
-                    WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver initialisation");
-                    LogMsg("AccessChecks", MessageLevel.OK, "Successfully created driver using late binding");
-                    try
-                    {
-                        switch (p_DeviceType)
-                        {
-                            case DeviceType.Focuser: // Focuser uses link to connect
-                                {
-                                    if (settings.DisplayMethodCalls)
-                                        LogMsg("AccessChecks", MessageLevel.Comment, "About to set Link property true");
-                                    l_DeviceObject.Link = true;
-                                    if (settings.DisplayMethodCalls)
-                                        LogMsg("AccessChecks", MessageLevel.Comment, "About to set Link property false");
-                                    l_DeviceObject.Link = false; // Everything else uses connect!
-                                    break;
-                                }
-
-                            default:
-                                {
-                                    if (settings.DisplayMethodCalls)
-                                        LogMsg("AccessChecks", MessageLevel.Comment, "About to set Connected property true");
-                                    l_DeviceObject.Connected = true;
-                                    if (settings.DisplayMethodCalls)
-                                        LogMsg("AccessChecks", MessageLevel.Comment, "About to set Connected property false");
-                                    try
-                                    {
-                                        l_DeviceObject.Connected = false;
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        LogMsg("AccessChecks", MessageLevel.Error, "Error disconnecting from late bound driver: " + ex.Message);
-                                        LogMsg("AccessChecks", MessageLevel.Debug, "Exception: " + ex.ToString());
-                                    }
-
-                                    break;
-                                }
-                        }
-
-                        LogMsg("AccessChecks", MessageLevel.OK, "Successfully connected using late binding");
-                        try
-                        {
-                            if (l_DeviceObject.GetType().IsCOMObject)
-                            {
-                                LogMsg("AccessChecks", MessageLevel.Info, "The driver is a COM object");
-                            }
-                            else
-                            {
-                                LogMsg("AccessChecks", MessageLevel.Info, "The driver is a .NET object");
-                                LogMsg("AccessChecks", MessageLevel.Info, "The AssemblyQualifiedName is: " + Strings.Left(l_DeviceObject.GetType().AssemblyQualifiedName.ToString(), 76));
-                            }
-
-                            foreach (var currentL_Type in l_DeviceObject.GetType().GetInterfaces())
-                            {
-                                l_Type = currentL_Type;
-                                LogMsg("AccessChecks", MessageLevel.Info, "The driver implements interface: " + l_Type.FullName);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            LogMsg("AccessChecks", MessageLevel.Error, "Error reading driver characteristics: " + ex.Message);
-                            LogMsg("", MessageLevel.Always, "");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogMsg("AccessChecks", MessageLevel.Error, "Error connecting to driver using late binding: " + ex.ToString());
-                        LogMsg("", MessageLevel.Always, "");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    l_ErrMsg = ex.ToString();
-                    LogMsg("DeviceTesterBaseClass", MessageLevel.Debug, l_ErrMsg);
-                }
-
-                if (l_DeviceObject is null)
-                    WaitFor(200);
-            }
-            while (!(l_TryCount == 3 | l_DeviceObject is object));
-            if (l_DeviceObject is null)
-            {
-                LogMsg("AccessChecks", MessageLevel.Error, "Error creating driver object using late binding: " + l_ErrMsg);
-                LogMsg("", MessageLevel.Always, "");
-            }
-
-            // Clean up
-            try
-            {
-                //DisposeAndReleaseObject("AccessChecks", l_DeviceObject);
-            }
-            catch (Exception ex)
-            {
-                LogMsg("AccessChecks", MessageLevel.Debug, "Error releasing driver object using ReleaseCOMObject: " + ex.ToString());
-            }
-
-            l_DeviceObject = null;
-            LogMsg("AccessChecks", MessageLevel.Debug, "Collecting garbage");
-            GC.Collect();
-            LogMsg("AccessChecks", MessageLevel.Debug, "Collecting garbage complete");
-            GC.WaitForPendingFinalizers();
-            LogMsg("AccessChecks", MessageLevel.Debug, "Finished waiting for pending finalisers");
-            WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for device driver to be cleaned up by operating system"); // Wait to allow device to complete destruction
         }
 
         public virtual void CreateDevice()
@@ -787,9 +645,7 @@ namespace Conform
         {
             get
             {
-                bool ConnectedRet = default;
-                ConnectedRet = l_Connected;
-                return ConnectedRet;
+                return l_Connected;
             }
 
             set
@@ -1143,6 +999,31 @@ namespace Conform
         #endregion
 
         #region Common methods for all device tester classes
+        /// <summary>
+        /// Delays execution for the given time period in milliseconds
+        /// </summary>
+        /// <param name="p_Duration">Delay duration in milliseconds</param>
+        /// <remarks></remarks>
+        internal void WaitFor(int p_Duration)
+        {
+            DateTime l_StartTime;
+            int WaitDuration;
+            WaitDuration = (int)Math.Round(p_Duration / 100d);
+            if (WaitDuration > SLEEP_TIME)
+                WaitDuration = SLEEP_TIME;
+            if (WaitDuration < 1)
+                WaitDuration = 1;
+            // Wait for p_Duration milliseconds
+            l_StartTime = DateAndTime.Now; // Save start time
+            do
+            {
+                Thread.Sleep(WaitDuration);
+                //Application.DoEvents();
+            }
+            while (!(DateAndTime.Now.Subtract(l_StartTime).TotalMilliseconds > p_Duration | cancellationToken.IsCancellationRequested));
+        }
+
+
 
         internal void LogMsgOK(string p_Test, string p_Msg)
         {
@@ -1180,7 +1061,6 @@ namespace Conform
             const int TEST_NAME_WIDTH = 34;
             string l_MsgLevelFormatted, l_Msg, l_TestFormatted, l_MsgFormatted;
             int i, j;
-            l_Msg = "";
             try
             {
                 if (p_MsgLevel >= g_LogLevel)
@@ -1295,28 +1175,6 @@ namespace Conform
             }
         }
 
-        internal void ExTest(string p_TestName, string p_EXMessage, string p_LogMessage)
-        {
-            string l_Msg;
-            l_Msg = Strings.UCase(p_EXMessage);
-            if ((l_Msg.Contains("NOT") | l_Msg.Contains("DOESN'T")) & (l_Msg.Contains("SET") | l_Msg.Contains("IMPLEMENTED") | l_Msg.Contains("SUPPORTED") | l_Msg.Contains("PRESENT")) | l_Msg.Contains("INVALID") | l_Msg.Contains("SUPPORT"))
-            {
-                // 3.0.0.12 - removed next two lines and added third to make this an OK message
-                if (settings.InterpretErrorMessages) // We are interpreting error messages so report this as OK (This was Conform's behaviour prior to 6.0.0.37)
-                {
-                    LogMsg(p_TestName, MessageLevel.OK, p_LogMessage);
-                }
-                else // As of v6.0.0.37 default behaviour is not to interpret error messages
-                {
-                    LogMsg(p_TestName, MessageLevel.Info, "The following Issue can be changed to OK by setting \"Interpret error messages\" in Conform's setup dialogue");
-                    LogMsg(p_TestName, MessageLevel.Issue, p_LogMessage);
-                }
-            }
-            else
-            {
-                LogMsg(p_TestName, MessageLevel.Issue, p_LogMessage);
-            }
-        }
 
 
 
@@ -1330,9 +1188,8 @@ namespace Conform
         /// <remarks>Different tests are applied for COM and MethodNotImplemmented exceptions</remarks>
         protected bool IsMethodNotImplementedException(Exception deviceException)
         {
-            bool IsMethodNotImplementedExceptionRet = default;
             COMException COMException;
-            IsMethodNotImplementedExceptionRet = false; // Set false default value
+            bool IsMethodNotImplementedExceptionRet = false; // Set false default value
             try
             {
                 if (deviceException is COMException) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
@@ -1365,9 +1222,8 @@ namespace Conform
         /// <remarks>Different tests are applied for COM and .NET exceptions</remarks>
         protected bool IsNotImplementedException(Exception deviceException)
         {
-            bool IsNotImplementedExceptionRet = default;
             COMException COMException;
-            IsNotImplementedExceptionRet = false; // Set false default value
+            bool IsNotImplementedExceptionRet = false; // Set false default value
             try
             {
                 if (deviceException is COMException) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
@@ -1401,9 +1257,8 @@ namespace Conform
         /// <remarks>Different tests are applied for COM and PropertyNotImplemmented exceptions</remarks>
         protected bool IsPropertyNotImplementedException(Exception deviceException)
         {
-            bool IsPropertyNotImplementedExceptionRet = default;
             COMException COMException;
-            IsPropertyNotImplementedExceptionRet = false; // Set false default value
+            bool IsPropertyNotImplementedExceptionRet = false; // Set false default value
             try
             {
                 if (deviceException is COMException) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
@@ -1437,10 +1292,9 @@ namespace Conform
         /// <remarks>Different tests are applied for COM and InvalidValueException exceptions</remarks>
         protected bool IsInvalidValueException(string MemberName, Exception deviceException)
         {
-            bool IsInvalidValueExceptionRet = default;
             COMException COMException;
             DriverException DriverException;
-            IsInvalidValueExceptionRet = false; // Set false default value
+            bool IsInvalidValueExceptionRet = false; // Set false default value
             try
             {
                 if (deviceException is COMException) // This is a COM exception so test whether the error code indicates that it is an invalid value exception
@@ -1487,10 +1341,9 @@ namespace Conform
         /// <remarks>Different tests are applied for COM and InvalidValueException exceptions</remarks>
         protected bool IsInvalidOperationException(string MemberName, Exception deviceException)
         {
-            bool IsInvalidOperationExceptionRet = default;
             COMException COMException;
             DriverException DriverException;
-            IsInvalidOperationExceptionRet = false; // Set false default value
+            bool IsInvalidOperationExceptionRet = false; // Set false default value
             try
             {
                 if (deviceException is COMException) // This is a COM exception so test whether the error code indicates that it is an invalid operation exception
@@ -1536,9 +1389,8 @@ namespace Conform
         /// <remarks>Different tests are applied for COM and ValueNotSetException exceptions</remarks>
         protected bool IsNotSetException(Exception deviceException)
         {
-            bool IsNotSetExceptionRet = default;
             COMException COMException;
-            IsNotSetExceptionRet = false; // Set false default value
+            bool  IsNotSetExceptionRet = false; // Set false default value
             try
             {
                 if (deviceException is COMException) // This is a COM exception so test whether the error code indicates that it is a not set exception

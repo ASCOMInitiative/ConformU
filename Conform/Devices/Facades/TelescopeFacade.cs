@@ -13,10 +13,10 @@ namespace ConformU
     public class TelescopeFacade : ITelescopeV3, IDisposable
     {
         private dynamic driver; // COM driver object
-        private Settings settings; // Conform configuration settings
-        private ILogger logger;
+        private readonly Settings settings; // Conform configuration settings
+        private readonly ILogger logger;
 
-        public TelescopeFacade(Settings conformSettings,ILogger logger)
+        public TelescopeFacade(Settings conformSettings, ILogger logger)
         {
             settings = conformSettings;
             this.logger = logger;
@@ -26,19 +26,19 @@ namespace ConformU
         {
             try
             {
-                switch (settings.CurrentDeviceTechnology)
+                switch (settings.DeviceTechnology)
                 {
-                    case ConformConstants.TECHNOLOGY_ALPACA:
-                        driver = new Telescope("http", settings.CurrentAlpacaDevice.IpAddress, settings.CurrentAlpacaDevice.IpPort, settings.CurrentAlpacaDevice.AlpacaDeviceNumber, new TraceLogger("TelescopeFacade", true));
+                    case ConformConstants.DeviceTechnology.Alpaca:
+                        driver = new Telescope("http", settings.AlpacaDevice.IpAddress, settings.AlpacaDevice.IpPort, settings.AlpacaDevice.AlpacaDeviceNumber, new TraceLogger("TelescopeFacade", true));
                         break;
 
-                    case ConformConstants.TECHNOLOGY_COM:
-                        Type driverType = Type.GetTypeFromProgID(settings.CurrentComDevice.ProgId);
+                    case ConformConstants.DeviceTechnology.COM:
+                        Type driverType = Type.GetTypeFromProgID(settings.ComDevice.ProgId);
                         driver = Activator.CreateInstance(driverType);
                         break;
 
                     default:
-                        throw new InvalidValueException($"TelescopeFacade:CreateDevice - Unknown technology type: {settings.CurrentDeviceTechnology}");
+                        throw new InvalidValueException($"TelescopeFacade:CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
             }
             catch (Exception ex)
@@ -173,7 +173,7 @@ namespace ConformU
 
         public IAxisRates AxisRates(TelescopeAxis Axis)
         {
-            return new AxisRatesFacade(Axis, driver,logger);
+            return new AxisRatesFacade(Axis, driver, logger);
         }
 
         public bool CanMoveAxis(TelescopeAxis Axis)
@@ -203,13 +203,13 @@ namespace ConformU
 
         public void Dispose()
         {
-            switch (settings.CurrentDeviceTechnology)
+            switch (settings.DeviceTechnology)
             {
-                case ConformConstants.TECHNOLOGY_ALPACA:
+                case ConformConstants.DeviceTechnology.Alpaca:
 
                     break;
-                case ConformConstants.TECHNOLOGY_COM:
-                    DisposeAndReleaseObject("Dispose", driver);
+                case ConformConstants.DeviceTechnology.COM:
+                    DisposeAndReleaseObject( driver);
                     break;
             }
         }
@@ -289,73 +289,48 @@ namespace ConformU
             driver.UnPark();
         }
 
-        public void DisposeAndReleaseObject(string driverName, dynamic ObjectToRelease)
+        public void DisposeAndReleaseObject(dynamic ObjectToRelease)
         {
             Type ObjectType;
             int RemainingObjectCount, LoopCount;
-            //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, $"  About to release {driverName} driver instance");
             if (settings.DisplayMethodCalls)
-                //LogMsg("DisposeAndReleaseObject", MessageLevel.Comment, $"About to release {driverName} driver instance");
                 try
                 {
                     ObjectType = ObjectToRelease.GetType();
-                    //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, $"  Unmarshalling {ObjectType.Name} -  {ObjectType.FullName}");
                 }
-                catch (Exception ex1)
-                {
-                    //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  GetType Exception: " + ex1.Message);
-                }
+                catch { }
 
             try
             {
                 if (settings.DisplayMethodCalls)
-                    //LogMsg("DisposeAndReleaseObject", MessageLevel.Comment, "About to set Connected property");
                     ObjectToRelease.Connected = false;
-                //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, $"  Connected successfully set to False");
             }
-            catch (Exception ex1)
-            {
-                //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Exception setting Connected = False: " + ex1.Message);
-            }
+            catch { }
 
             try
             {
                 ObjectToRelease.Dispose();
-                //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, $"  Successfully called Dispose()");
             }
-            catch (Exception ex1)
-            {
-                //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Dispose Exception: " + ex1.Message);
-            }
+            catch { }
 
             try
             {
-                //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Releasing COM object");
                 LoopCount = 0;
                 do
                 {
                     LoopCount += 1;
                     RemainingObjectCount = Marshal.ReleaseComObject(ObjectToRelease);
-                    //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Remaining object count: " + RemainingObjectCount + ", LoopCount: " + LoopCount);
                 }
                 while (!(RemainingObjectCount <= 0 | LoopCount == 20));
             }
-            catch (Exception ex2)
-            {
-                //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  ReleaseComObject Exception: " + ex2.Message);
-            }
+            catch { }
 
             try
             {
                 ObjectToRelease = null;
                 GC.Collect();
             }
-            catch (Exception ex3)
-            {
-                //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  Set to nothing Exception: " + ex3.Message);
-            }
-
-            //LogMsg("DisposeAndReleaseObject", MessageLevel.Debug, "  End of ReleaseCOMObject");
+            catch { }
         }
 
 

@@ -101,11 +101,8 @@ namespace Conform
         #region Global Variables
         internal static MessageLevel g_LogLevel;
         internal static int g_CountError, g_CountWarning, g_CountIssue;
-        internal static System.IO.StreamWriter g_LogFile;
-        internal static System.IO.StreamWriter g_ValidationTempFile;
         //internal static ConformCommandStrings g_CmdStrings = null;
         //internal static ConformCommandStrings g_CmdStringsRaw = null;
-        internal static object g_DeviceObject;
         //internal static ApplicationSettings g_Settings = new ApplicationSettings();
         internal static int g_InterfaceVersion; // Variable to held interface version of the current device
 
@@ -117,18 +114,6 @@ namespace Conform
         // Helper variables
         internal static Utilities g_Util;
         // Friend g_Util As ASCOM.Utilities.Util
-
-        // Device ProgID variables
-        internal static string g_SafetyMonitorProgID;
-        internal static string g_SwitchProgID;
-        internal static string g_FilterWheelProgID;
-        internal static string g_FocuserProgID;
-        internal static string g_RotatorProgID;
-        internal static string g_CameraProgID;
-        internal static string g_VideoCameraProgID;
-        internal static string g_DomeProgID;
-        internal static string g_ObservingConditionsProgID = "";
-        internal static string g_CoverCalibratorProgID;
 
         // Status update class
         //internal static Dictionary<string, CheckState> g_TelescopeTests = new Dictionary<string, CheckState>();
@@ -170,30 +155,6 @@ namespace Conform
             //Application.DoEvents();
             bool TestStopRet = g_Stop;
             return TestStopRet;
-        }
-
-        /// <summary>
-        /// Delays execution for the given time period in milliseconds
-        /// </summary>
-        /// <param name="p_Duration">Delay duration in milliseconds</param>
-        /// <remarks></remarks>
-        internal static void WaitFor(int p_Duration)
-        {
-            DateTime l_StartTime;
-            int WaitDuration;
-            WaitDuration = (int)Math.Round(p_Duration / 100d);
-            if (WaitDuration > SLEEP_TIME)
-                WaitDuration = SLEEP_TIME;
-            if (WaitDuration < 1)
-                WaitDuration = 1;
-            // Wait for p_Duration milliseconds
-            l_StartTime = DateAndTime.Now; // Save start time
-            do
-            {
-                Thread.Sleep(WaitDuration);
-                //Application.DoEvents();
-            }
-            while (!(DateAndTime.Now.Subtract(l_StartTime).TotalMilliseconds > p_Duration | TestStop()));
         }
 
         internal static void WaitForAbsolute(int p_Duration, string p_Message)

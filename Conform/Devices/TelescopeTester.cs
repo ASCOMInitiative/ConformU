@@ -79,25 +79,22 @@ namespace Conform
         private bool m_CanReadSideOfPier;
         private double m_TargetAltitude, m_TargetAzimuth;
         private bool canReadAltitide, canReadAzimuth, canReadSiderealTime;
-        private CancellationToken cancellationToken;
+        private readonly CancellationToken cancellationToken;
 
-#if DEBUG
-        //private ASCOM.DriverAccess.Telescope telescopeDevice;
         private TelescopeFacade telescopeDevice;
-#else
-        private dynamic telescopeDevice;
-#endif
 
         private dynamic DriverAsObject;
+
         // Axis rate checks
-        private double[,] m_AxisRatesPrimaryArray = new double[1001, 2], m_AxisRatesArray = new double[1001, 2];
+        private readonly double[,] m_AxisRatesPrimaryArray = new double[1001, 2];
+        private readonly double[,] m_AxisRatesArray = new double[1001, 2];
         #endregion
 
-        private Settings settings;
+        private readonly Settings settings;
 
-        private Dictionary<string, bool> telescopeTests;
+        private readonly Dictionary<string, bool> telescopeTests;
 
-        private ILogger logger;
+        private readonly ILogger logger;
 
         #region Enums
         private enum CanType
@@ -205,7 +202,7 @@ namespace Conform
         #endregion
 
         #region New and Dispose
-        public TelescopeTester(ConformanceTestManager parent, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(true, true, true, true, false, true, true, parent, conformConfiguration, logger) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
+        public TelescopeTester(ConformanceTestManager parent, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(true, true, true, true, false, true, true, parent, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
         {
             g_Util = new();
             //g_settings.MessageLevel = MessageLevel.Debug;
@@ -255,7 +252,7 @@ namespace Conform
                 // Set the error type numbers according to the standards adopted by individual authors.
                 // Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
                 // messages to driver authors!
-                switch (settings.CurrentComDevice.ProgId ?? "")
+                switch (settings.ComDevice.ProgId ?? "")
                 {
                     case "Hub.Telescope":
                         {
@@ -353,102 +350,7 @@ namespace Conform
                 }
             }
 
-            CheckInitialise(settings.CurrentComDevice.ProgId);
-        }
-
-        public override void CheckAccessibility()
-        {
-            //try
-            //{
-            //    ASCOM.DriverAccess.Telescope l_DriverAccessTelescope = null;
-            //    string l_ErrMsg = "";
-            //    int l_TryCount = 0;
-            //    try
-            //    {
-            //        LogMsg("AccessChecks", MessageLevel.Debug, "Before MyBase.CheckAccessibility");
-            //        CheckAccessibility(g_TelescopeProgID, DeviceType.Telescope);
-            //        LogMsg("AccessChecks", MessageLevel.Debug, "After MyBase.CheckAccessibility");
-            //        try
-            //        {
-            //            TestEarlyBinding(InterfaceType.ITelescopeV2);
-            //            TestEarlyBinding(InterfaceType.ITelescopeV3);
-
-            //            // Try client access toolkit
-            //            l_DriverAccessTelescope = null;
-            //            l_TryCount = 0;
-            //            do
-            //            {
-            //                l_TryCount += 1;
-            //                try
-            //                {
-            //                    if (settings.DisplayMethodCalls)
-            //                        LogMsg("AccessChecks", MessageLevel.Comment, "About to create DriverAccess instance");
-            //                    l_DriverAccessTelescope = new ASCOM.DriverAccess.Telescope(g_TelescopeProgID);
-            //                    WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
-            //                    LogMsg("AccessChecks", MessageLevel.OK, "Successfully created driver using driver access toolkit");
-            //                    try
-            //                    {
-            //                        if (settings.DisplayMethodCalls)
-            //                            LogMsg("AccessChecks", MessageLevel.Comment, "About to set Connected property true");
-            //                        l_DriverAccessTelescope.Connected = true;
-            //                        LogMsg("AccessChecks", MessageLevel.OK, "Successfully connected using driver access toolkit");
-            //                        if (settings.DisplayMethodCalls)
-            //                            LogMsg("AccessChecks", MessageLevel.Comment, "About to set Connected property false");
-            //                        l_DriverAccessTelescope.Connected = false;
-            //                        LogMsg("AccessChecks", MessageLevel.Debug, "Successfully disconnected using driver access toolkit");
-            //                    }
-            //                    catch (Exception ex)
-            //                    {
-            //                        LogMsg("AccessChecks", MessageLevel.Error, "Error connecting to driver using driver access toolkit: " + ex.ToString());
-            //                        LogMsg("", MessageLevel.Always, "");
-            //                    }
-            //                }
-            //                catch (Exception ex)
-            //                {
-            //                    l_ErrMsg = ex.ToString();
-            //                }
-
-            //                if (l_DriverAccessTelescope is null)
-            //                    WaitFor(200);
-            //            }
-            //            while (!(l_TryCount == 3 | l_DriverAccessTelescope is object)); // Exit if created OK
-            //            if (l_DriverAccessTelescope is null)
-            //            {
-            //                LogMsg("AccessChecks", MessageLevel.Error, "Error creating driver using driver access toolkit: " + l_ErrMsg);
-            //                LogMsg("", MessageLevel.Always, "");
-            //            }
-            //            else
-            //            {
-            //                LogMsg("Telescope:CreateDevice", MessageLevel.Debug, "Created telescope on attempt: " + l_TryCount.ToString());
-            //            }
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            LogMsg("Telescope:CheckAcc.EX3", MessageLevel.Error, ex.ToString());
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        LogMsg("Telescope:CheckAcc.EX2", MessageLevel.Error, ex.ToString());
-            //    }
-
-            //    // Clean up
-            //    try
-            //    {
-            //        l_DriverAccessTelescope.Dispose();
-            //    }
-            //    catch
-            //    {
-            //    }
-            //    // Try : Marshal.ReleaseComObject(l_DriverAccessTelescope) : Catch : End Try
-            //    l_DriverAccessTelescope = null;
-            //    GC.Collect();
-            //    WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for Accessibility Telescope Object to Dispose");
-            //}
-            //catch (Exception ex)
-            //{
-            //    LogMsg("Telescope:CheckAcc.EX1", MessageLevel.Error, ex.ToString());
-            //}
+            CheckInitialise(settings.ComDevice.ProgId);
         }
 
         public override void CreateDevice()
@@ -459,40 +361,14 @@ namespace Conform
                 l_TryCount += 1;
                 try
                 {
-                    LogMsg("Telescope:CreateDevice", MessageLevel.Debug, "Creating ProgID: " + settings.CurrentComDevice.ProgId);
-#if DEBUG
-                    //LogMsg("Conform", MessageLevel.Always, "is using ASCOM.DriverAccess.Telescope to get a Telescope object");
-                    //if (settings.DisplayMethodCalls) LogMsg("CreateDevice", MessageLevel.Comment, "About to create driver using DriverAccess");
-                    //telescopeDevice = new ASCOM.DriverAccess.Telescope(g_TelescopeProgID);
-                    //LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
+                    LogMsg("Telescope:CreateDevice", MessageLevel.Debug, "Creating ProgID: " + settings.ComDevice.ProgId);
 
                     LogMsg("Conform", MessageLevel.Always, "is using CreateObject to get a Telescope object");
                     if (settings.DisplayMethodCalls)
                         LogMsg("ConformanceCheck", MessageLevel.Comment, "About to create driver using CreateObject");
-                    telescopeDevice = new TelescopeFacade(settings,logger);
+                    telescopeDevice = new TelescopeFacade(settings, logger);
                     telescopeDevice.CreateDevice();
                     LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
-
-
-
-#else
-                    if (g_Settings.UseDriverAccess)
-                    {
-                        LogMsg("Conform", MessageLevel.Always, "is using ASCOM.DriverAccess.Telescope to get a Telescope object");
-                        if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to create driver using DriverAccess");
-                        telescopeDevice = new ASCOM.DriverAccess.Telescope(g_TelescopeProgID);
-                        LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
-                    }
-                    else
-                    {
-                        LogMsg("Conform", MessageLevel.Always, "is using CreateObject to get a Telescope object");
-                        if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to create driver using CreateObject");
-                        telescopeDevice = Interaction.CreateObject(g_TelescopeProgID);
-                        LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
-                    }
-#endif
 
                     WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
                     g_Stop = false;
@@ -513,16 +389,8 @@ namespace Conform
             // Create a pointer to the raw COM object that represents the Telescope (Only used for rate object Dispose() tests)
             try
             {
-                if (settings.UseDriverAccess) // Use an internal DriverAccess field to get a pointer to the underlying COM driver
-                {
-                    //LogMsg("CreateDevice", MessageLevel.Debug, "Using DriverAccess to get underlying driver as an object");
-                    //DriverAsObject = ((ASCOM.DriverAccess.Telescope)telescopeDevice).memberFactory.GetLateBoundObject; // Have to convert the device from object to DriverAccess.Telescope in order to be able to access the internal GetLateBoundObject field
-                }
-                else
-                {
-                    LogMsg("CreateDevice", MessageLevel.Debug, "Driver is already an object so using it \"as is\" for driver as an object");
-                    DriverAsObject = telescopeDevice;
-                }
+                LogMsg("CreateDevice", MessageLevel.Debug, "Driver is already an object so using it \"as is\" for driver as an object");
+                DriverAsObject = telescopeDevice;
 
                 LogMsg("CreateDevice", MessageLevel.Debug, "Got driver object OK");
             }
@@ -538,10 +406,9 @@ namespace Conform
         {
             get
             {
-                bool ConnectedRet = default;
                 if (settings.DisplayMethodCalls)
                     LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get Connected property");
-                ConnectedRet = telescopeDevice.Connected;
+                bool ConnectedRet = telescopeDevice.Connected;
                 return ConnectedRet;
             }
 
@@ -690,14 +557,8 @@ namespace Conform
             bool l_OriginalTrackingState;
             DriveRate l_DriveRate;
             double l_TimeDifference;
-#if DEBUG
             ITrackingRates l_TrackingRates = null;
-            //ASCOM.DeviceInterface.ITrackingRates l_TrackingRates = null;
             dynamic l_TrackingRate;
-#else
-            dynamic l_TrackingRates = null;
-            dynamic l_TrackingRate;
-#endif
 
             // AlignmentMode - Optional
             try
@@ -1654,7 +1515,8 @@ namespace Conform
                 }
                 else
                 {
-                    ExTest("SiteLatitude Write", ex.Message, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+
+                    LogMsg("SiteLatitude Write", MessageLevel.Issue, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                 }
             }
             catch (Exception ex)
@@ -2199,12 +2061,15 @@ namespace Conform
                             {
                             }
 
-                            try
+                            if (OperatingSystem.IsWindows())
                             {
-                                Marshal.ReleaseComObject(l_TrackingRates);
-                            }
-                            catch
-                            {
+                                try
+                                {
+                                    Marshal.ReleaseComObject(l_TrackingRates);
+                                }
+                                catch
+                                {
+                                }
                             }
 
                             l_TrackingRates = null;
@@ -2274,14 +2139,14 @@ namespace Conform
                     {
                     }
 
-                    try
+                    if (OperatingSystem.IsWindows())
                     {
-                        Marshal.ReleaseComObject(l_TrackingRates);
+                        try
+                        {
+                            Marshal.ReleaseComObject(l_TrackingRates);
+                        }
+                        catch { }
                     }
-                    catch
-                    {
-                    }
-
                     l_TrackingRates = null;
                 }
 
@@ -2304,12 +2169,13 @@ namespace Conform
                     LogMsg("TrackingRates.Dispose", MessageLevel.Debug, "Exception: " + ex.ToString());
                 }
 
-                try
+                if (OperatingSystem.IsWindows())
                 {
-                    Marshal.ReleaseComObject(l_TrackingRates);
-                }
-                catch
-                {
+                    try
+                    {
+                        Marshal.ReleaseComObject(l_TrackingRates);
+                    }
+                    catch { }
                 }
 
                 l_TrackingRates = null;
@@ -2701,7 +2567,7 @@ namespace Conform
                                             }
                                             else
                                             {
-                                                ExTest("UnPark", ex.Message, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                                                LogMsg("UnPark", MessageLevel.Issue, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                                             }
                                         }
                                         catch (MethodNotImplementedException)
@@ -2710,7 +2576,7 @@ namespace Conform
                                         }
                                         catch (Exception ex)
                                         {
-                                            ExTest("UnPark", ex.Message, EX_NET + ex.Message);
+                                            LogMsg("UnPark", MessageLevel.Issue, EX_NET + ex.Message);
                                         }
                                         // Create user interface message asking for manual scope UnPark
                                         LogMsg("UnPark", MessageLevel.Comment, "CanUnPark is false so you need to unpark manually");
@@ -3620,7 +3486,7 @@ namespace Conform
                                 // Calculate the sync test RA coordinate as a variation from the current RA coordinate
                                 syncRA = startRA - SYNC_SIMULATED_ERROR / (15.0d * 60.0d); // Convert sync error in arc minutes to RA hours
                                 if (syncRA < 0.0d)
-                                    syncRA = syncRA + 24.0d; // Ensure legal RA
+                                    syncRA += 24.0d; // Ensure legal RA
 
                                 // Calculate the sync test DEC coordinate as a variation from the current DEC coordinate
                                 syncDEC = startDec - SYNC_SIMULATED_ERROR / 60.0d; // Convert sync error in arc minutes to degrees
@@ -3723,7 +3589,7 @@ namespace Conform
                                 // Calculate the sync test RA coordinate as a variation from the current RA coordinate
                                 syncRA = startRA + SYNC_SIMULATED_ERROR / (15.0d * 60.0d); // Convert sync error in arc minutes to RA hours
                                 if (syncRA >= 24.0d)
-                                    syncRA = syncRA - 24.0d; // Ensure legal RA
+                                    syncRA -= 24.0d; // Ensure legal RA
 
                                 // Calculate the sync test DEC coordinate as a variation from the current DEC coordinate
                                 syncDEC = startDec + SYNC_SIMULATED_ERROR / 60.0d; // Convert sync error in arc minutes to degrees
@@ -5084,20 +4950,11 @@ namespace Conform
         {
             int l_NAxisRates, l_i, l_j;
             bool l_AxisRateOverlap = default, l_AxisRateDuplicate, l_CanGetAxisRates = default, l_HasRates = default;
-            int l_Count = 0;
+            int l_Count;
 
-#if DEBUG
-            //ASCOM.DeviceInterface.IAxisRates l_AxisRatesIRates;
-            //ASCOM.DeviceInterface.IAxisRates l_AxisRates = null;
-            //ASCOM.DeviceInterface.IRate l_Rate = null;
             IAxisRates l_AxisRatesIRates;
             IAxisRates l_AxisRates = null;
             IRate l_Rate = null;
-#else
-            dynamic l_AxisRatesIRates;
-            dynamic l_AxisRates = null;
-            dynamic l_Rate = null;
-#endif
 
             try
             {
@@ -5153,12 +5010,7 @@ namespace Conform
                     var loopTo = l_Count;
                     for (i = 1; i <= loopTo; i++)
                     {
-#if DEBUG
-                        //ASCOM.DeviceInterface.IRate AxisRateItem;
                         IRate AxisRateItem;
-#else
-                        dynamic AxisRateItem;
-#endif
 
                         AxisRateItem = l_AxisRates[i];
                         LogMsg(p_Name + " Count", MessageLevel.Debug, "Rate " + i + " - Minimum: " + AxisRateItem.Minimum.ToString() + ", Maximum: " + AxisRateItem.Maximum.ToString());
@@ -5177,11 +5029,7 @@ namespace Conform
                 {
                     IEnumerator l_Enum;
                     dynamic l_Obj;
-#if DEBUG
-                    dynamic AxisRateItem = null;
-#else
-                    dynamic AxisRateItem = null;
-#endif
+                    IRate AxisRateItem = null;
 
                     l_Enum = (IEnumerator)l_AxisRates.GetEnumerator();
                     if (l_Enum is null)
@@ -5200,11 +5048,7 @@ namespace Conform
                         LogMsg(p_Name + " Enum", MessageLevel.Debug, "Reading Current");
                         l_Obj = l_Enum.Current;
                         LogMsg(p_Name + " Enum", MessageLevel.Debug, "Read Current OK, Type: " + l_Obj.GetType().Name);
-#if DEBUG
                         AxisRateItem = l_Obj;
-#else
-                        AxisRateItem = l_Obj;
-#endif
 
                         LogMsg(p_Name + " Enum", MessageLevel.Debug, "Found axis rate - Minimum: " + AxisRateItem.Minimum.ToString() + ", Maximum: " + AxisRateItem.Maximum.ToString());
                     }
@@ -5226,9 +5070,8 @@ namespace Conform
                 {
                     try
                     {
-#if DEBUG
                         l_AxisRatesIRates = l_AxisRates;
-                        foreach (dynamic currentL_Rate in l_AxisRatesIRates)
+                        foreach (IRate currentL_Rate in l_AxisRatesIRates)
                         {
                             l_Rate = currentL_Rate;
                             if ((bool)Operators.OrObject(Operators.ConditionalCompareObjectLess(l_Rate.Minimum, 0, false), Operators.ConditionalCompareObjectLess(l_Rate.Maximum, 0, false))) // Error because negative values are not allowed
@@ -5252,65 +5095,6 @@ namespace Conform
                             l_HasRates = true;
                         }
                     }
-#else
-                        if (g_Settings.UseDriverAccess)
-                        {
-                            l_AxisRatesIRates = (IAxisRates)l_AxisRates;
-                            foreach (var currentL_Rate in l_AxisRatesIRates)
-                            {
-                                l_Rate = currentL_Rate;
-                                if (Operators.OrObject(Operators.ConditionalCompareObjectLess(l_Rate.Minimum, 0, false), Operators.ConditionalCompareObjectLess(l_Rate.Maximum, 0, false)))) // Error because negative values are not allowed
-                                {
-                                    LogMsg(p_Name, MessageLevel.Error, "Minimum or maximum rate is negative: " + l_Rate.Minimum.ToString() + ", " + l_Rate.Maximum.ToString());
-                                }
-                                else if (Operators.ConditionalCompareObjectLessEqual(l_Rate.Minimum, l_Rate.Maximum, false))) // All positive values so continue tests
-                                                                                                                                                    // Minimum <= Maximum so OK
-                                {
-                                    LogMsg(p_Name, MessageLevel.OK, "Axis rate minimum: " + l_Rate.Minimum.ToString() + " Axis rate maximum: " + l_Rate.Maximum.ToString());
-                                }
-                                else // Minimum > Maximum so error!
-                                {
-                                    LogMsg(p_Name, MessageLevel.Error, "Maximum rate is less than minimum rate - minimum: " + l_Rate.Minimum.ToString() + " maximum: " + l_Rate.Maximum.ToString());
-                                }
-
-                                // Save rates for overlap testing
-                                l_NAxisRates += 1;
-                                m_AxisRatesArray[l_NAxisRates, AXIS_RATE_MINIMUM] = l_Rate.Minimum);
-                                m_AxisRatesArray[l_NAxisRates, AXIS_RATE_MAXIMUM] = l_Rate.Maximum);
-                                l_HasRates = true;
-                            }
-                        }
-                        else
-                        {
-                            foreach (var currentL_Rate1 in (IEnumerable)l_AxisRates)
-                            {
-                                l_Rate = currentL_Rate1;
-                                if (Operators.OrObject(Operators.ConditionalCompareObjectLess(l_Rate.Minimum, 0, false), Operators.ConditionalCompareObjectLess(l_Rate.Maximum, 0, false)))) // Error because negative values are not allowed
-                                {
-                                    LogMsg(p_Name, MessageLevel.Error, "Minimum or maximum rate is negative: " + l_Rate.Minimum.ToString() + ", " + l_Rate.Maximum.ToString());
-                                }
-                                else // All positive values so continue tests
-                                {
-                                    if (Operators.ConditionalCompareObjectLessEqual(l_Rate.Minimum, l_Rate.Maximum, false))) // Minimum <= Maximum so OK
-                                    {
-                                        LogMsg(p_Name, MessageLevel.OK, "Axis rate minimum: " + l_Rate.Minimum.ToString() + " Axis rate maximum: " + l_Rate.Maximum.ToString());
-                                    }
-                                    else // Minimum > Maximum so error!
-                                    {
-                                        LogMsg(p_Name, MessageLevel.Error, "Maximum rate is less than minimum rate - minimum: " + l_Rate.Minimum.ToString() + " maximum: " + l_Rate.Maximum.ToString());
-                                    }
-
-                                    l_HasRates = true;
-                                }
-
-                                // Save rates for overlap testing
-                                l_NAxisRates += 1;
-                                m_AxisRatesArray[l_NAxisRates, AXIS_RATE_MINIMUM] = l_Rate.Minimum);
-                                m_AxisRatesArray[l_NAxisRates, AXIS_RATE_MAXIMUM] = l_Rate.Maximum);
-                            }
-                        }
-                    }
-#endif
 
                     catch (COMException ex)
                     {
@@ -5331,10 +5115,10 @@ namespace Conform
                     // Overlap testing
                     if (l_NAxisRates > 1) // Confirm whether there are overlaps if number of axis rate pairs exceeds 1
                     {
-                        var loopTo1 = l_NAxisRates;
+                        int loopTo1 = l_NAxisRates;
                         for (l_i = 1; l_i <= loopTo1; l_i++)
                         {
-                            var loopTo2 = l_NAxisRates;
+                            int loopTo2 = l_NAxisRates;
                             for (l_j = 1; l_j <= loopTo2; l_j++)
                             {
                                 if (l_i != l_j) // Only test different lines, shouldn't compare same lines!
@@ -5359,10 +5143,10 @@ namespace Conform
                     l_AxisRateDuplicate = false;
                     if (l_NAxisRates > 1) // Confirm whether there are overlaps if number of axis rate pairs exceeds 1
                     {
-                        var loopTo3 = l_NAxisRates;
+                        int loopTo3 = l_NAxisRates;
                         for (l_i = 1; l_i <= loopTo3; l_i++)
                         {
-                            var loopTo4 = l_NAxisRates;
+                            int loopTo4 = l_NAxisRates;
                             for (l_j = 1; l_j <= loopTo4; l_j++)
                             {
                                 if (l_i != l_j) // Only test different lines, shouldn't compare same lines!
@@ -5419,12 +5203,15 @@ namespace Conform
                 {
                 }
 
-                try
+                if (OperatingSystem.IsWindows())
                 {
-                    Marshal.ReleaseComObject(l_AxisRates);
-                }
-                catch
-                {
+                    try
+                    {
+                        Marshal.ReleaseComObject(l_AxisRates);
+                    }
+                    catch
+                    {
+                    }
                 }
 
                 l_AxisRates = null;
@@ -5441,12 +5228,13 @@ namespace Conform
                 {
                 }
 
-                try
+                if (OperatingSystem.IsWindows())
                 {
-                    Marshal.ReleaseComObject(l_Rate);
-                }
-                catch
-                {
+                    try
+                    {
+                        Marshal.ReleaseComObject(l_Rate);
+                    }
+                    catch { }
                 }
 
                 l_Rate = null;
@@ -5594,11 +5382,7 @@ namespace Conform
         {
             int l_ct;
             double l_TestDec, l_TestRAOffset;
-#if DEBUG
             dynamic l_AxisRates = null;
-#else
-            dynamic l_AxisRates = null;
-#endif
 
             Status(StatusType.staTest, p_Name);
             LogMsg("TelescopeOptionalMethodsTest", MessageLevel.Debug, p_Type.ToString() + " " + p_Name + " " + p_CanTest.ToString());
@@ -5679,7 +5463,7 @@ namespace Conform
                                         if (settings.DisplayMethodCalls)
                                             LogMsg(p_Name, MessageLevel.Comment, "About to get AtHome property");
                                     }
-                                    while (!telescopeDevice.AtHome & TestStop() & (DateTime.Now.Subtract(m_StartTime).TotalMilliseconds < 60000)); // Wait up to a minute to find home
+                                    while (!telescopeDevice.AtHome & !cancellationToken.IsCancellationRequested & (DateTime.Now.Subtract(m_StartTime).TotalMilliseconds < 60000)); // Wait up to a minute to find home
                                     if (settings.DisplayMethodCalls)
                                         LogMsg(p_Name, MessageLevel.Comment, "About to get AtHome property");
                                     if (telescopeDevice.AtHome)
@@ -5835,7 +5619,7 @@ namespace Conform
                                         //Application.DoEvents();
                                         SetStatus(p_Name, "Waiting for transit through Meridian", Convert.ToInt32(DateTime.Now.Subtract(m_StartTime).TotalSeconds) + "/" + SIDEOFPIER_MERIDIAN_TRACKING_PERIOD / 1000d + " seconds");
                                     }
-                                    while (!(DateTime.Now.Subtract(m_StartTime).TotalMilliseconds > SIDEOFPIER_MERIDIAN_TRACKING_PERIOD | TestStop()));
+                                    while (!(DateTime.Now.Subtract(m_StartTime).TotalMilliseconds > SIDEOFPIER_MERIDIAN_TRACKING_PERIOD | cancellationToken.IsCancellationRequested));
 
                                     // SlewScope(TelescopeRAFromHourAngle(+0.0833333), 0.0, "Slewing to flip point") '5 minutes past zenith
                                     if (cancellationToken.IsCancellationRequested)
@@ -5955,17 +5739,8 @@ namespace Conform
                     {
                         try
                         {
-#if DEBUG
                             if (settings.DisplayMethodCalls) LogMsg(p_Name, MessageLevel.Comment, "About to dispose of AxisRates object");
                             l_AxisRates.Dispose();
-#else
-                            if (g_Settings.UseDriverAccess)
-                            {
-                                if (settings.DisplayMethodCalls)
-                                    LogMsg(p_Name, MessageLevel.Comment, "About to dispose of AxisRates object");
-                                l_AxisRates.Dispose();
-                            }
-#endif
 
                             LogMsg(p_Name, MessageLevel.OK, "AxisRates object successfully disposed");
                         }
@@ -6282,15 +6057,9 @@ namespace Conform
             }
         }
 
-#if DEBUG
         private void TelescopeMoveAxisTest(string p_Name, TelescopeAxis p_Axis, IAxisRates p_AxisRates)
         {
             dynamic l_Rate = null;
-#else
-        private void TelescopeMoveAxisTest(string p_Name, TelescopeAxes p_Axis, dynamic p_AxisRates)
-        {
-            dynamic l_Rate = null;
-#endif
 
             double l_MoveRate = default, l_RateMinimum, l_RateMaximum;
             bool l_TrackingStart, l_TrackingEnd, l_CanSetZero;
@@ -6302,7 +6071,6 @@ namespace Conform
             LogMsg(p_Name, MessageLevel.Debug, Conversions.ToString(Operators.ConcatenateObject("Number of rates found: ", p_AxisRates.Count)));
             if (Operators.ConditionalCompareObjectGreater(p_AxisRates.Count, 0, false))
             {
-#if DEBUG
                 IAxisRates l_AxisRatesIRates = p_AxisRates;
                 l_RateCount = 0;
                 foreach (IRate currentL_Rate in l_AxisRatesIRates)
@@ -6313,33 +6081,6 @@ namespace Conform
                     LogMsg(p_Name, MessageLevel.Debug, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Checking rates: ", l_Rate.Minimum), " "), l_Rate.Maximum), ", Current rates: "), l_RateMinimum), " "), l_RateMaximum)));
                     l_RateCount += 1;
                 }
-#else
-                IAxisRates l_AxisRatesIRates;
-                l_RateCount = 0;
-                if (g_Settings.UseDriverAccess)
-                {
-                    l_AxisRatesIRates = (IAxisRates)p_AxisRates;
-                    foreach (IRate currentL_Rate in l_AxisRatesIRates)
-                    {
-                        l_Rate = currentL_Rate;
-                        if (l_Rate.Minimum < l_RateMinimum) l_RateMinimum = l_Rate.Minimum;
-                        if (l_Rate.Maximum > l_RateMaximum) l_RateMaximum = l_Rate.Maximum;
-                        LogMsg(p_Name, MessageLevel.Debug, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Checking rates: ", l_Rate.Minimum), " "), l_Rate.Maximum), ", Current rates: "), l_RateMinimum), " "), l_RateMaximum)));
-                        l_RateCount += 1;
-                    }
-                }
-                else
-                {
-                    foreach (IRate currentL_Rate1 in (IEnumerable)p_AxisRates)
-                    {
-                        l_Rate = currentL_Rate1;
-                        if (l_Rate.Minimum < l_RateMinimum) l_RateMinimum = l_Rate.Minimum;
-                        if (l_Rate.Maximum > l_RateMaximum) l_RateMaximum = l_Rate.Maximum;
-                        LogMsg(p_Name, MessageLevel.Debug, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Checking rates: ", l_Rate.Minimum), " "), l_Rate.Maximum), ", Current rates: "), l_RateMinimum), " "), l_RateMaximum)));
-                        l_RateCount += 1;
-                    }
-                }
-#endif
 
                 if (l_RateMinimum != double.PositiveInfinity & l_RateMaximum != double.NegativeInfinity) // Found valid rates
                 {
@@ -7038,8 +6779,7 @@ namespace Conform
         /// <returns>Difference (seconds) between the supplied RAs</returns>
         private double RaDifferenceInSeconds(double FirstRA, double SecondRA)
         {
-            double RaDifferenceInSecondsRet = default;
-            RaDifferenceInSecondsRet = Math.Abs(FirstRA - SecondRA); // Calculate the difference allowing for negative outcomes
+            double RaDifferenceInSecondsRet = Math.Abs(FirstRA - SecondRA); // Calculate the difference allowing for negative outcomes
             if (RaDifferenceInSecondsRet > 12.0d)
                 RaDifferenceInSecondsRet = 24.0d - RaDifferenceInSecondsRet; // Deal with the cases where the two elements are more than 12 hours apart going in the initial direction
             RaDifferenceInSecondsRet = Math.Round(RaDifferenceInSecondsRet * 15.0d * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero); // RA difference is in arc seconds from hours of RA
@@ -7174,13 +6914,13 @@ namespace Conform
                     LogMsg(testName, MessageLevel.Comment, "About to get Slewing property");
             }
             //while (telescopeDevice.Slewing & (DateTime.Now.Subtract(WaitStartTime).TotalSeconds < WAIT_FOR_SLEW_MINIMUM_DURATION) & !TestStop());
-            while (!(!telescopeDevice.Slewing & (DateTime.Now.Subtract(WaitStartTime).TotalSeconds > WAIT_FOR_SLEW_MINIMUM_DURATION) | TestStop()));
+            while (!(!telescopeDevice.Slewing & (DateTime.Now.Subtract(WaitStartTime).TotalSeconds > WAIT_FOR_SLEW_MINIMUM_DURATION) | cancellationToken.IsCancellationRequested));
             //My.MyProject.Forms.FrmConformMain.staStatus.Text = "Slew completed";
         }
 
         private double TelescopeRAFromHourAngle(string testName, double p_Offset)
         {
-            double TelescopeRAFromHourAngleRet = default;
+            double TelescopeRAFromHourAngleRet;
 
             // Handle the possibility that the mandatory SideealTime property has not been implemented
             if (canReadSiderealTime)
@@ -7214,7 +6954,7 @@ namespace Conform
 
         private double TelescopeRAFromSiderealTime(string testName, double p_Offset)
         {
-            double TelescopeRAFromSiderealTimeRet = default;
+            double TelescopeRAFromSiderealTimeRet;
             double CurrentSiderealTime;
 
             // Handle the possibility that the mandatory SideealTime property has not been implemented
@@ -7244,13 +6984,13 @@ namespace Conform
                 {
                     case var case2 when case2 < 0.0d: // Illegal if < 0 hours
                         {
-                            TelescopeRAFromSiderealTimeRet = TelescopeRAFromSiderealTimeRet + 24.0d;
+                            TelescopeRAFromSiderealTimeRet += 24.0d;
                             break;
                         }
 
                     case var case3 when case3 >= 24.0d: // Illegal if > 24 hours
                         {
-                            TelescopeRAFromSiderealTimeRet = TelescopeRAFromSiderealTimeRet - 24.0d;
+                            TelescopeRAFromSiderealTimeRet -= 24.0d;
                             break;
                         }
                 }
@@ -7267,7 +7007,7 @@ namespace Conform
         {
             dynamic l_ITelescope;
             dynamic l_DeviceObject = null;
-            string l_ErrMsg = "";
+            string l_ErrMsg;
             int l_TryCount = 0;
             try
             {
@@ -7281,7 +7021,7 @@ namespace Conform
                         if (settings.DisplayMethodCalls)
                             LogMsg("AccessChecks", MessageLevel.Comment, "About to create driver object with CreateObject");
                         LogMsg("AccessChecks", MessageLevel.Debug, "Creating late bound object for interface test");
-                        Type driverType = Type.GetTypeFromProgID(settings.CurrentComDevice.ProgId);
+                        Type driverType = Type.GetTypeFromProgID(settings.ComDevice.ProgId);
                         l_DeviceObject = Activator.CreateInstance(driverType);
                         LogMsg("AccessChecks", MessageLevel.Debug, "Created late bound object OK");
                         switch (TestType)
@@ -7485,11 +7225,11 @@ namespace Conform
                                     else
                                     {
                                         if (m_Slewing & m_RightAscensionRate == Rate)
-                                            LogMsg(TestName, MessageLevel.Error, string.Format("RightAscensionRate was successfully set to {0} but Slewing is returning True, it should return False.", Rate, m_RightAscensionRate));
+                                            LogMsg(TestName, MessageLevel.Error, $"RightAscensionRate was successfully set to {Rate} but Slewing is returning True, it should return False.");
                                         if (m_Slewing & m_RightAscensionRate != Rate)
-                                            LogMsg(TestName, MessageLevel.Error, string.Format("RightAscensionRate Read does not return {0} as set, instead it returns {1}. Slewing is also returning True, it should return False.", Rate, m_RightAscensionRate));
+                                            LogMsg(TestName, MessageLevel.Error, $"RightAscensionRate Read does not return {Rate} as set, instead it returns {m_RightAscensionRate}. Slewing is also returning True, it should return False.");
                                         if (!m_Slewing & m_RightAscensionRate != Rate)
-                                            LogMsg(TestName, MessageLevel.Error, string.Format("RightAscensionRate Read does not return {0} as set, instead it returns {1}.", Rate, m_RightAscensionRate));
+                                            LogMsg(TestName, MessageLevel.Error, $"RightAscensionRate Read does not return {Rate} as set, instead it returns {m_RightAscensionRate}.");
                                     }
 
                                     break;
@@ -7518,7 +7258,7 @@ namespace Conform
                                     else
                                     {
                                         if (m_Slewing & m_DeclinationRate == Rate)
-                                            LogMsg(TestName, MessageLevel.Error, string.Format("DeclinationRate was successfully set to {0} but Slewing is returning True, it should return False.", Rate, m_DeclinationRate));
+                                            LogMsg(TestName, MessageLevel.Error, $"DeclinationRate was successfully set to {Rate} but Slewing is returning True, it should return False.");
                                         if (m_Slewing & m_DeclinationRate != Rate)
                                             LogMsg(TestName, MessageLevel.Error, string.Format("DeclinationRate Read does not return {0} as set, instead it returns {1}. Slewing is also returning True, it should return False.", Rate, m_DeclinationRate));
                                         if (!m_Slewing & m_DeclinationRate != Rate)

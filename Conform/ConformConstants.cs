@@ -12,6 +12,12 @@ namespace ConformU
 
         public const string ASCOM_PROFILE_KEY = @"SOFTWARE\ASCOM";
 
+        public enum DeviceTechnology
+        {
+            Alpaca,
+            COM
+        }
+        
         public enum MessageLevel
         {
             None = 0,

@@ -70,6 +70,9 @@ namespace ConformU
                 logger.LogInformation("***** Using production environment");
             }
 
+            //
+            // MAKE HTTP ONLY NO HTTPS SUPPORT
+            //
             //app.UseHttpsRedirection();
             app.UseStaticFiles();
 

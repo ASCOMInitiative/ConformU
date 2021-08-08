@@ -55,7 +55,7 @@ namespace ConformU
             g_CountIssue = 0;
 
             // Create the required device tester class
-            switch (settings.CurrentDeviceType) // Set current progID and device test class
+            switch (settings.DeviceType) // Set current progID and device test class
             {
                 case DeviceType.Telescope:
                     {
@@ -236,7 +236,7 @@ namespace ConformU
                 }
                 catch (Exception ex) // Exception when creating device
                 {
-                    testDevice.LogMsg("Initialise", MessageLevel.Error, $"Unable to {(settings.CurrentDeviceTechnology == ConformConstants.TECHNOLOGY_ALPACA ? "access" : "create")} the device: {ex.Message}");
+                    testDevice.LogMsg("Initialise", MessageLevel.Error, $"Unable to {(settings.DeviceTechnology == DeviceTechnology.Alpaca? "access" : "create")} the device: {ex.Message}");
                     testDevice.LogMsg("", MessageLevel.Always, "");
                     testDevice.LogMsg("ConformanceCheck", MessageLevel.Always, "Further tests abandoned as Conform cannot create the driver");
                 }
