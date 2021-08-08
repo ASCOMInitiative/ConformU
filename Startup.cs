@@ -70,7 +70,7 @@ namespace ConformU
                 logger.LogInformation("***** Using production environment");
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();

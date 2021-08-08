@@ -14,10 +14,12 @@ namespace ConformU
     {
         private dynamic driver; // COM driver object
         private Settings settings; // Conform configuration settings
+        private ILogger logger;
 
-        public TelescopeFacade(Settings conformSettings)
+        public TelescopeFacade(Settings conformSettings,ILogger logger)
         {
             settings = conformSettings;
+            this.logger = logger;
         }
 
         public void CreateDevice()
@@ -27,7 +29,7 @@ namespace ConformU
                 switch (settings.CurrentDeviceTechnology)
                 {
                     case ConformConstants.TECHNOLOGY_ALPACA:
-                        driver = new Telescope("http", "127.0.0.1", 11111, 0, new TraceLogger("TelescopeFacade", true));
+                        driver = new Telescope("http", settings.CurrentAlpacaDevice.IpAddress, settings.CurrentAlpacaDevice.IpPort, settings.CurrentAlpacaDevice.AlpacaDeviceNumber, new TraceLogger("TelescopeFacade", true));
                         break;
 
                     case ConformConstants.TECHNOLOGY_COM:
@@ -171,7 +173,7 @@ namespace ConformU
 
         public IAxisRates AxisRates(TelescopeAxis Axis)
         {
-            return new AxisRatesFacade(Axis, driver);
+            return new AxisRatesFacade(Axis, driver,logger);
         }
 
         public bool CanMoveAxis(TelescopeAxis Axis)

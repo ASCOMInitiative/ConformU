@@ -9,10 +9,12 @@
 		<ApplicationIcon />
 		<AssemblyVersion>0.1.0.0</AssemblyVersion>
 		<FileVersion>0.1.0.0</FileVersion>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>conformu.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AlpacaClients" Version="0.0.3" />
+		<PackageReference Include="AlpacaClients" Version="0.0.5" />
 		<PackageReference Include="ASCOM.Standard.Utilities" Version="1.0.0-alpha16" />
 		<PackageReference Include="BlazorPro.BlazorSize" Version="5.0.0" />
 		<PackageReference Include="Radzen.Blazor" Version="3.8.1" />

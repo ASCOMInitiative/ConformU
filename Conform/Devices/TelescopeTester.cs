@@ -97,6 +97,8 @@ namespace Conform
 
         private Dictionary<string, bool> telescopeTests;
 
+        private ILogger logger;
+
         #region Enums
         private enum CanType
         {
@@ -211,6 +213,7 @@ namespace Conform
             settings = conformConfiguration.Settings;
             telescopeTests = settings.TelescopeTests;
             cancellationToken = conformCancellationToken;
+            this.logger = logger;
         }
 
         // IDisposable
@@ -466,7 +469,7 @@ namespace Conform
                     LogMsg("Conform", MessageLevel.Always, "is using CreateObject to get a Telescope object");
                     if (settings.DisplayMethodCalls)
                         LogMsg("ConformanceCheck", MessageLevel.Comment, "About to create driver using CreateObject");
-                    telescopeDevice = new TelescopeFacade(settings);
+                    telescopeDevice = new TelescopeFacade(settings,logger);
                     telescopeDevice.CreateDevice();
                     LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
 

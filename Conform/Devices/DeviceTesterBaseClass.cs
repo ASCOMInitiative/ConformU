@@ -597,9 +597,10 @@ namespace Conform
             Status(StatusType.staAction, "");
             Status(StatusType.staStatus, "");
             g_Stop = true; // Initialise stop flag to stop
-            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            var fileInfo = new System.IO.FileInfo(assembly.Location);
-            var lastModified = fileInfo.LastWriteTime;
+            //var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            //var fileInfo = new System.IO.FileInfo(assembly.Location);
+            //var lastModified = fileInfo.LastWriteTime;
+            string lastModified = "Unknown";
             LogMsg("", MessageLevel.Always, ""); // Blank line
             LogMsg("ConformanceCheck", MessageLevel.Always, "ASCOM Universal Device Conformance Checker Version " + this.GetType().Assembly.GetName().Version.ToString() + ", Build time: " + lastModified.ToString());
             //LogMsg("ConformanceCheck", MessageLevel.Always, "Running on: " + Prof.GetProfile("Platform", "Platform Name", "Unknown") + " " + Prof.GetProfile("Platform", "Platform Version", "Unknown"));
