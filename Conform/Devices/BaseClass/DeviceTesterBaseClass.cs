@@ -12,7 +12,7 @@ using Microsoft.VisualBasic.CompilerServices;
 using static Conform.Globals;
 using static ConformU.ConformConstants;
 
-namespace Conform
+namespace ConformU
 {
 
     /// <summary>

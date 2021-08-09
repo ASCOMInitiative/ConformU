@@ -29,7 +29,7 @@ namespace ConformU
                 switch (settings.DeviceTechnology)
                 {
                     case ConformConstants.DeviceTechnology.Alpaca:
-                        driver = new Telescope("http", settings.AlpacaDevice.IpAddress, settings.AlpacaDevice.IpPort, settings.AlpacaDevice.AlpacaDeviceNumber, new TraceLogger("TelescopeFacade", true));
+                        driver = new Telescope("http", settings.AlpacaDevice.IpAddress, settings.AlpacaDevice.IpPort, settings.AlpacaDevice.AlpacaDeviceNumber, logger);
                         break;
 
                     case ConformConstants.DeviceTechnology.COM:

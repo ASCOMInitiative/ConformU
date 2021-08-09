@@ -1,5 +1,4 @@
-﻿// Option Strict On
-using System;
+﻿using System;
 using System.Collections;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -62,6 +61,7 @@ namespace Conform
         private const double SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR = 0.5d; // Must be in the range 0..+1.0. Target declinations will be calculated as this fraction of the altitude of the highest pole from the horizon
         private const double SLEW_SYNC_OK_TOLERANCE = 10.0d; // (Arc seconds) Upper limit of Slew or Sync error that will generate an OK output, otherwise generates an Info message detailing distance
         private const double SYNC_SIMULATED_ERROR = 60.0d; // (Arc minutes) Distance that the telescope will be told that it is in error  when the sync command is issued. The error is applied to both RA and DEC axes
+
         private bool canFindHome, canPark, canPulseGuide, canSetDeclinationRate, canSetGuideRates, canSetPark, canSetPierside, canSetRightAscensionRate;
         private bool canSetTracking, canSlew, canSlewAltAz, canSlewAltAzAsync, canSlewAsync, canSync, canSyncAltAz, canUnpark;
         private AlignmentMode m_AlignmentMode;
@@ -99,26 +99,24 @@ namespace Conform
         private bool m_CanReadSideOfPier;
         private double m_TargetAltitude, m_TargetAzimuth;
         private bool canReadAltitide, canReadAzimuth, canReadSiderealTime;
-        private readonly CancellationToken cancellationToken;
 
         private TelescopeFacade telescopeDevice;
+
+        private readonly Dictionary<string, bool> telescopeTests;
 
         private dynamic DriverAsObject;
 
         // Axis rate checks
         private readonly double[,] m_AxisRatesPrimaryArray = new double[1001, 2];
         private readonly double[,] m_AxisRatesArray = new double[1001, 2];
-        #endregion
-
-        private readonly Settings settings;
-
-        private readonly Dictionary<string, bool> telescopeTests;
-
-        private readonly ILogger logger;
 
         // Helper variables
         internal static Utilities g_Util;
+        private readonly CancellationToken cancellationToken;
+        private readonly Settings settings;
+        private readonly ILogger logger;
 
+        #endregion
 
         #region Enums
         private enum CanType
