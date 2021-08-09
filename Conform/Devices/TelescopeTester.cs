@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using ASCOM;
 
 using Microsoft.VisualBasic.CompilerServices;
-using static Conform.GlobalVarsAndCode;
+using static Conform.Globals;
 using ASCOM.Standard.Interfaces;
 using ConformU;
 using System.Collections.Generic;

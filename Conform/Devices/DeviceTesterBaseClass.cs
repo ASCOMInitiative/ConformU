@@ -9,7 +9,7 @@ using ASCOM;
 using ConformU;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.CompilerServices;
-using static Conform.GlobalVarsAndCode;
+using static Conform.Globals;
 using static ConformU.ConformConstants;
 
 namespace Conform
@@ -164,7 +164,7 @@ namespace Conform
                 HandleException("InterfaceVersion", MemberType.Property, Required.Mandatory, ex, "");
             }
 
-            if (TestStop())
+            if (cancellationToken.IsCancellationRequested)
                 return;
 
             // Connected - Required
@@ -186,7 +186,7 @@ namespace Conform
                     LogMsg("Connected", MessageLevel.Error, ex.Message);
                 }
 
-                if (TestStop())
+                if (cancellationToken.IsCancellationRequested)
                     return;
             }
 
@@ -226,7 +226,7 @@ namespace Conform
                     HandleException("Description", MemberType.Property, Required.Mandatory, ex, "");
                 }
 
-                if (TestStop())
+                if (cancellationToken.IsCancellationRequested)
                     return;
             }
 
@@ -258,7 +258,7 @@ namespace Conform
                     HandleException("DriverInfo", MemberType.Property, Required.Mandatory, ex, "");
                 }
 
-                if (TestStop())
+                if (cancellationToken.IsCancellationRequested)
                     return;
             }
 
@@ -294,7 +294,7 @@ namespace Conform
                     LogMsg("DriverVersion", MessageLevel.Error, ex.Message);
                 }
 
-                if (TestStop())
+                if (cancellationToken.IsCancellationRequested)
                     return;
             }
             else
@@ -330,7 +330,7 @@ namespace Conform
                     HandleException("Name", MemberType.Property, Required.Mandatory, ex, "");
                 }
 
-                if (TestStop())
+                if (cancellationToken.IsCancellationRequested)
                     return;
             }
 
@@ -484,7 +484,7 @@ namespace Conform
                 }
             }
 
-            if (TestStop())
+            if (cancellationToken.IsCancellationRequested)
                 return;
             LogMsg("", MessageLevel.Always, "");
         }
@@ -608,7 +608,7 @@ namespace Conform
             LogMsg("ConformanceCheck", MessageLevel.Always, "ASCOM Universal Device Conformance Checker Version " + this.GetType().Assembly.GetName().Version.ToString() + ", Build time: " + lastModified.ToString());
             //LogMsg("ConformanceCheck", MessageLevel.Always, "Running on: " + Prof.GetProfile("Platform", "Platform Name", "Unknown") + " " + Prof.GetProfile("Platform", "Platform Version", "Unknown"));
             LogMsg("", MessageLevel.Always, ""); // Blank line
-            LogMsg("ConformanceCheck", MessageLevel.Always, DRIVER_PROGID + p_ProgID);
+            LogMsg("ConformanceCheck", MessageLevel.Always, $"Driver ProgID: {p_ProgID}");
             LogMsg("", MessageLevel.Always, ""); // Blank line
             LogMsg("Error handling", MessageLevel.Always, "");
             LogMsg("Error", MessageLevel.Always, "number for \"Not Implemented\" is: " + Conversion.Hex(g_ExNotImplemented));
@@ -1574,6 +1574,18 @@ namespace Conform
         {
             if (settings.DisplayMethodCalls)
                 LogMsg(test, MessageLevel.Comment, memberName);
+        }
+
+        internal void WaitForAbsolute(int p_Duration, string p_Message)
+        {
+            LogMsg("WaitForAbsolute", MessageLevel.Debug, p_Duration + " " + p_Message);
+            for (int i = 0, loopTo = (int)Math.Round(p_Duration / 100d); i <= loopTo; i++)
+            {
+                Thread.Sleep(100);
+                SetStatus(p_Message, ((p_Duration / 100d - i) / 10d).ToString(), "");
+            }
+
+            SetStatus("", "", "");
         }
 
         #endregion

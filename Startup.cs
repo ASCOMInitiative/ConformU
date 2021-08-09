@@ -36,7 +36,7 @@ namespace ConformU
             ConformLogger conformLogger = new("ConformU", true);  // Create a logger component
             services.AddSingleton(conformLogger); // Add the logger component to the list of injectable services
 
-            ConformConfiguration conformConfiguration = new ConformConfiguration(conformLogger); // Create a configuration settings component
+            ConformConfiguration conformConfiguration = new(conformLogger); // Create a configuration settings component
             services.AddSingleton(conformConfiguration); // Add the configuration component to the list of injectable services
 
             // Resizeable screen log text area infrastructure

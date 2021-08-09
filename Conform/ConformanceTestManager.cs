@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 using System.Runtime;
 using System.Text;
 using Conform;
-using static Conform.GlobalVarsAndCode;
+using static Conform.Globals;
 using static ConformU.ConformConstants;
 
 namespace ConformU
@@ -242,7 +242,7 @@ namespace ConformU
 
                 // Report the success or failure of conformance checking
                 testDevice.LogMsg("", MessageLevel.Always, "");
-                if (g_CountError == 0 & g_CountWarning == 0 & g_CountIssue == 0 & !g_Stop) // No issues - device conforms as expected
+                if (g_CountError == 0 & g_CountWarning == 0 & g_CountIssue == 0 & !cancellationToken.IsCancellationRequested) // No issues - device conforms as expected
                 {
                     testDevice.LogMsg("No errors, warnings or issues found: your driver passes ASCOM validation!!", MessageLevel.Always, "");
                     testDevice.LogMsg("", MessageLevel.Always, "");
