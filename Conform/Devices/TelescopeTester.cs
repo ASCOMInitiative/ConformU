@@ -12,6 +12,7 @@ using ConformU;
 using System.Collections.Generic;
 using System.Threading;
 using static ConformU.ConformConstants;
+using ASCOM.Standard.Utilities;
 
 namespace Conform
 {
@@ -19,8 +20,27 @@ namespace Conform
     {
 
         #region Variables and Constants
+        // TelescopeTest constants
+        internal const string TELTEST_ABORT_SLEW = "AbortSlew";
+        internal const string TELTEST_AXIS_RATE = "AxisRate";
+        internal const string TELTEST_CAN_MOVE_AXIS = "CanMoveAxis";
+        internal const string TELTEST_COMMANDXXX = "CommandXXX";
+        internal const string TELTEST_DESTINATION_SIDE_OF_PIER = "DestinationSideOfPier";
+        internal const string TELTEST_FIND_HOME = "FindHome";
+        internal const string TELTEST_MOVE_AXIS = "MoveAxis";
+        internal const string TELTEST_PARK_UNPARK = "Park/Unpark";
+        internal const string TELTEST_PULSE_GUIDE = "PulseGuide";
+        internal const string TELTEST_SLEW_TO_ALTAZ = "SlewToAltAz";
+        internal const string TELTEST_SLEW_TO_ALTAZ_ASYNC = "SlewToAltAzAsync";
+        internal const string TELTEST_SLEW_TO_TARGET = "SlewToTarget";
+        internal const string TELTEST_SLEW_TO_TARGET_ASYNC = "SlewToTargetAsync";
+        internal const string TELTEST_SYNC_TO_ALTAZ = "SyncToAltAz";
+        internal const string TELTEST_SLEW_TO_COORDINATES = "SlewToCoordinates";
+        internal const string TELTEST_SLEW_TO_COORDINATES_ASYNC = "SlewToCoordinatesAsync";
+        internal const string TELTEST_SYNC_TO_COORDINATES = "SyncToCoordinates";
+        internal const string TELTEST_SYNC_TO_TARGET = "SyncToTarget";
+
         private const int TRACKING_COMMAND_DELAY = 1000; // Time to wait between changing Tracking state
-        private const int PERF_LOOP_TIME = 5; // Performance loop run time in seconds
         private const int MOVE_AXIS_TIME = 2000; // Number of milliseconds for each move axis command
         private const int NUM_AXIS_RATES = 1000;
         private const int AXIS_RATE_MINIMUM = 0; // Mnemonics for the axis rate array second dimension
@@ -95,6 +115,10 @@ namespace Conform
         private readonly Dictionary<string, bool> telescopeTests;
 
         private readonly ILogger logger;
+
+        // Helper variables
+        internal static Utilities g_Util;
+
 
         #region Enums
         private enum CanType

@@ -31,14 +31,7 @@ namespace ConformU
             TL = logger;
             settings = conformConfiguration.Settings;
 
-            if (settings.Debug)
-            {
-                g_LogLevel = MessageLevel.Debug;
-            }
-            else
-            {
-                g_LogLevel = MessageLevel.Comment;
-            }
+
         }
 
         public event EventHandler<MessageEventArgs> OutputChanged;
