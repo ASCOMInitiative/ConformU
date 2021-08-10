@@ -75,7 +75,7 @@ namespace ConformU
 
                 case DeviceType.Rotator:
                     {
-                        //testDevice = new RotatorTester();
+                        testDevice = new RotatorTester(this, configuration,TL,cancellationToken);
                         break;
                     }
 
@@ -105,7 +105,7 @@ namespace ConformU
 
                 case DeviceType.SafetyMonitor:
                     {
-                        //testDevice = new SafetyMonitorTester();
+                        testDevice = new SafetyMonitorTester(this, configuration, TL, cancellationToken);
                         break;
                     }
 

@@ -70,15 +70,15 @@
             @* Alpaca search and device selection buttons *@
             <div class="row">
 
-                <RadzenButton Style="margin-bottom: 20px; width: 150px"
-                              Text="Search"
-                              Click=@(args => OnAlpacaSearchClick()) />
-
                 @* An ID is required for this button so that JavaScript can return the button's position in the viewport in order that any warning message can be positioned next to the button *@
                 <RadzenButton id="SelectAlpacaButton"
-                              Style="margin-bottom: 20px; margin-left:20px; width: 150px"
+                              Style="margin-bottom: 20px; width: 150px"
                               Text="Select"
                               Click=@(args => OnSelectAlpacaDeviceClick()) />
+
+                <RadzenButton Style="margin-bottom: 20px; width: 150px; margin-left: 20px;"
+                              Text="Search"
+                              Click=@(args => OnAlpacaSearchClick()) />
 
             </div>
 
@@ -118,7 +118,7 @@
 
 @code
 {
-    List<string> validAscomdDeviceTypes = new() { DeviceType.Telescope.ToString(), DeviceType.Camera.ToString(), DeviceType.CoverCalibrator.ToString(), DeviceType.Dome.ToString(), DeviceType.Focuser.ToString(), DeviceType.ObservingConditions.ToString(), DeviceType.Rotator.ToString(), DeviceType.Switch.ToString(), DeviceType.Video.ToString() };
+    List<string> validAscomdDeviceTypes = new() { DeviceType.Telescope.ToString(), DeviceType.Camera.ToString(), DeviceType.CoverCalibrator.ToString(), DeviceType.Dome.ToString(), DeviceType.Focuser.ToString(), DeviceType.ObservingConditions.ToString(), DeviceType.Rotator.ToString(), DeviceType.SafetyMonitor.ToString(), DeviceType.Switch.ToString(), DeviceType.Video.ToString() };
     DeviceType selectedDeviceType; // DeviceType of the selected device
     string selectedDeviceTypeString; // String representation of the currently selected DeviceType
     string alpacaDiscoveryProgress; // Text describing events happening while Alpaca discovery is underway

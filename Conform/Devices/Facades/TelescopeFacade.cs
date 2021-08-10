@@ -2,51 +2,18 @@
 using ASCOM.Standard.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using ASCOM.Standard.AlpacaClients;
-using ASCOM.Standard.Utilities;
 
 namespace ConformU
 {
-    public class TelescopeFacade : ITelescopeV3, IDisposable
+    public class TelescopeFacade : FacadeBaseClass, ITelescopeV3, IDisposable
     {
-        private dynamic driver; // COM driver object
-        private readonly Settings settings; // Conform configuration settings
-        private readonly ILogger logger;
 
-        public TelescopeFacade(Settings conformSettings, ILogger logger)
-        {
-            settings = conformSettings;
-            this.logger = logger;
-        }
+        // Create the test device in the facade base class
+        public TelescopeFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }
 
-        public void CreateDevice()
-        {
-            try
-            {
-                switch (settings.DeviceTechnology)
-                {
-                    case ConformConstants.DeviceTechnology.Alpaca:
-                        driver = new Telescope("http", settings.AlpacaDevice.IpAddress, settings.AlpacaDevice.IpPort, settings.AlpacaDevice.AlpacaDeviceNumber, logger);
-                        break;
-
-                    case ConformConstants.DeviceTechnology.COM:
-                        Type driverType = Type.GetTypeFromProgID(settings.ComDevice.ProgId);
-                        driver = Activator.CreateInstance(driverType);
-                        break;
-
-                    default:
-                        throw new InvalidValueException($"TelescopeFacade:CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"TelescopeFacade:CreateDevice - Exception: {ex}");
-            }
-
-        }
+        #region Interface implementation
 
         public AlignmentMode AlignmentMode => (AlignmentMode)driver.AlignmentMode;
 
@@ -136,39 +103,10 @@ namespace ConformU
         }
 
         public DateTime UTCDate { get => driver.UTCDate; set => driver.UTCDate = value; }
-        public bool Connected { get => driver.Connected; set => driver.Connected = value; }
-
-        public string Description => driver.Description;
-
-        public string DriverInfo => driver.DriverInfo;
-
-        public string DriverVersion => driver.DriverVersion;
-
-        public short InterfaceVersion => driver.InterfaceVersion;
-
-        public string Name => driver.Name;
-
-        public IList<string> SupportedActions
-        {
-            get
-            {
-                List<string> supportedActions = new();
-                foreach (string action in driver.SupportedActions)
-                {
-                    supportedActions.Add(action);
-                }
-                return supportedActions;
-            }
-        }
 
         public void AbortSlew()
         {
             driver.AbortSlew();
-        }
-
-        public string Action(string ActionName, string ActionParameters)
-        {
-            return driver.Action(ActionName, ActionParameters);
         }
 
         public IAxisRates AxisRates(TelescopeAxis Axis)
@@ -181,38 +119,9 @@ namespace ConformU
             return driver.CanMoveAxis(Axis);
         }
 
-        public void CommandBlind(string Command, bool Raw = false)
-        {
-            driver.CommandBlind(Command, Raw);
-        }
-
-        public bool CommandBool(string Command, bool Raw = false)
-        {
-            return driver.CommandBool(Command, Raw);
-        }
-
-        public string CommandString(string Command, bool Raw = false)
-        {
-            return driver.CommandString(Command, Raw);
-        }
-
         public PointingState DestinationSideOfPier(double RightAscension, double Declination)
         {
             return (PointingState)driver.DestinationSideOfPier(RightAscension, Declination);
-        }
-
-        public void Dispose()
-        {
-            switch (settings.DeviceTechnology)
-            {
-                case ConformConstants.DeviceTechnology.Alpaca:
-
-                    break;
-                case ConformConstants.DeviceTechnology.COM:
-                    DisposeAndReleaseObject( driver);
-                    break;
-            }
-            GC.SuppressFinalize(this);
         }
 
         public void FindHome()
@@ -290,50 +199,6 @@ namespace ConformU
             driver.UnPark();
         }
 
-        public void DisposeAndReleaseObject(dynamic ObjectToRelease)
-        {
-            Type ObjectType;
-            int RemainingObjectCount, LoopCount;
-            if (settings.DisplayMethodCalls)
-                try
-                {
-                    ObjectType = ObjectToRelease.GetType();
-                }
-                catch { }
-
-            try
-            {
-                if (settings.DisplayMethodCalls)
-                    ObjectToRelease.Connected = false;
-            }
-            catch { }
-
-            try
-            {
-                ObjectToRelease.Dispose();
-            }
-            catch { }
-
-            try
-            {
-                LoopCount = 0;
-                do
-                {
-                    LoopCount += 1;
-                    RemainingObjectCount = Marshal.ReleaseComObject(ObjectToRelease);
-                }
-                while (!(RemainingObjectCount <= 0 | LoopCount == 20));
-            }
-            catch { }
-
-            try
-            {
-                ObjectToRelease = null;
-                GC.Collect();
-            }
-            catch { }
-        }
-
-
+        #endregion
     }
 }

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 using ASCOM;
+using ASCOM.Standard.AlpacaClients;
+using ASCOM.Standard.Interfaces;
 using ConformU;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.CompilerServices;
@@ -1052,6 +1054,7 @@ namespace ConformU
         #endregion
 
         #region Common methods for all device tester classes
+
         /// <summary>
         /// Delays execution for the given time period in milliseconds
         /// </summary>

@@ -11,34 +11,24 @@ namespace ConformU
     public class TrackingRatesFacade : ITrackingRates, IEnumerable, IEnumerator, IDisposable
     {
         private DriveRate[] m_TrackingRates;
-        private static int _pos = -1;
+        private int _pos = -1;
 
-        //
-        // Default constructor - Internal prevents public creation
-        // of instances. Returned by Telescope.AxisRates.
-        //
+        // Default constructor - Internal prevents public creation instances.
         internal TrackingRatesFacade(dynamic driver)
         {
-            //
-            // This array must hold ONE or more DriveRates values, indicating
-            // the tracking rates supported by your telescope. The one value
-            // (tracking rate) that MUST be supported is driveSidereal!
-            //
-            IEnumerable driverRates = driver.TrackingRates;
+            // Initialise to an empty array
+            m_TrackingRates = Array.Empty<DriveRate>();
 
+            // Assign the TrackinRates response to an IEnumerable variable
+            IEnumerable trackingRates = driver.TrackingRates;
 
-            int ct = 0;
-            foreach (DriveRate rate in driverRates)
+            // Copy the response values to a local array so that the driver is not continually polled for values
+            int nextArrayPosition = 0;
+            foreach (DriveRate rate in trackingRates)
             {
-                ct++;
-            }
-
-            m_TrackingRates = new DriveRate[ct];
-            ct = 0;
-            foreach (DriveRate rate in driverRates)
-            {
-                m_TrackingRates[ct] = rate;
-                ct++;
+                Array.Resize<DriveRate>(ref m_TrackingRates, nextArrayPosition + 1); // Resize the array to add one more entry (always 1 more than the array element position, which is 0 based).
+                m_TrackingRates[nextArrayPosition] = rate; // Store the rate in the new array entry
+                nextArrayPosition++; // Increment the rate counter
             }
         }
 

@@ -15,34 +15,24 @@ using ASCOM.Standard.Interfaces;
 using static ConformU.ConformConstants;
 using System.Threading;
 using ASCOM.Standard.Utilities;
+using ASCOM.Standard.AlpacaClients;
 
 namespace ConformU
 {
 
     internal class SafetyMonitorTester : DeviceTesterBaseClass
     {
-        private bool m_CanIsGood, m_CanEmergencyShutdown;
-        private bool m_IsSafe, m_IsGood;
-        private string m_Description, m_DriverInfo, m_DriverVersion;
-
-        /* TODO ERROR: Skipped IfDirectiveTrivia */
-        /* TODO ERROR: Skipped DisabledTextTrivia */
-        /* TODO ERROR: Skipped ElseDirectiveTrivia */
+        private bool m_IsSafe;
         private ISafetyMonitor m_SafetyMonitor;
-        /* TODO ERROR: Skipped EndIfDirectiveTrivia */
 
         // Helper variables
         internal static Utilities g_Util;
         private readonly CancellationToken cancellationToken;
         private readonly Settings settings;
-        private readonly ILogger logger;
+        private readonly ConformLogger logger;
 
         // IDisposable
         private bool disposedValue = false;        // To detect redundant calls
-
-
-
-
 
         private enum RequiredProperty
         {
@@ -55,7 +45,7 @@ namespace ConformU
 
         #region New and Dispose
 
-        public SafetyMonitorTester(ConformanceTestManager parent, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(true, true, true, true, false, true, true, parent, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
+        public SafetyMonitorTester(ConformanceTestManager parent, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(false, true, false, false, true, true, false, parent, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
         {
             g_Util = new();
             //g_settings.MessageLevel = MessageLevel.Debug;
@@ -67,17 +57,12 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogMsg("Dispose", MessageLevel.Debug, "Disposing of Telescope driver: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogMsg("Dispose", MessageLevel.Debug, "Disposing of test device: " + disposing.ToString() + " " + disposedValue.ToString());
             if (!disposedValue)
             {
                 if (disposing)
                 {
-                    if (true) // Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining driver in memory to change flags)
-                    {
-                        if (telescopeDevice is not null) telescopeDevice.Dispose();
-                        telescopeDevice = null;
-                        GC.Collect();
-                    }
+                    if (m_SafetyMonitor is not null) m_SafetyMonitor.Dispose();
                 }
             }
 
@@ -88,7 +73,6 @@ namespace ConformU
 
         #endregion
 
-
         public override void CheckInitialise()
         {
             // Set the error type numbers according to the standards adopted by individual authors.
@@ -96,7 +80,7 @@ namespace ConformU
             // messages to driver authors!
             unchecked
             {
-                switch (g_SafetyMonitorProgID)
+                switch (settings.ComDevice.ProgId ?? "")
                 {
                     default:
                         {
@@ -112,25 +96,41 @@ namespace ConformU
                         }
                 }
             }
-            base.CheckInitialise(g_SafetyMonitorProgID);
         }
 
         public override void CreateDevice()
         {
-            /* TODO ERROR: Skipped IfDirectiveTrivia *//* TODO ERROR: Skipped DisabledTextTrivia *//* TODO ERROR: Skipped ElseDirectiveTrivia */
-            if (g_Settings.UseDriverAccess)
+            try
             {
-                LogMsg("Conform", MessageLevel.Always, "is using ASCOM.DriverAccess.SafetyMonitor to get a SafetyMonitor object");
-                m_SafetyMonitor = new ASCOM.DriverAccess.SafetyMonitor(g_SafetyMonitorProgID);
+                switch (settings.DeviceTechnology)
+                {
+                    case DeviceTechnology.Alpaca:
+                        logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
+                        m_SafetyMonitor = new AlpacaSafetyMonitor("http", settings.AlpacaDevice.IpAddress, settings.AlpacaDevice.IpPort, settings.AlpacaDevice.AlpacaDeviceNumber, logger);
+                        logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Alpaca device created OK");
+                        break;
+
+                    case DeviceTechnology.COM:
+                        m_SafetyMonitor = new ASCOM.Standard.COM.DriverAccess.SafetyMonitor(settings.ComDevice.ProgId);
+                        break;
+
+                    default:
+                        throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
+                }
+
                 LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
+
+                WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
+                g_Stop = false;
             }
-            else
+            catch (Exception ex)
             {
-                m_SafetyMonitor = CreateObject(g_SafetyMonitorProgID);
-                LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
+                LogMsg("CreateDevice", MessageLevel.Debug, "Exception thrown: " + ex.Message);
+                throw; // Re throw exception 
             }
-            /* TODO ERROR: Skipped EndIfDirectiveTrivia */
-            g_Stop = false; // connected OK so clear stop flag to allow other tests to run
+
+            if (g_Stop) WaitFor(200);
+
         }
         public override void PreConnectChecks()
         {
@@ -238,9 +238,9 @@ namespace ConformU
                     l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
                     if (l_ElapsedTime > l_LastElapsedTime + 1.0)
                     {
-                        Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString( "0") + " seconds");
+                        Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
                         l_LastElapsedTime = l_ElapsedTime;
-                        if (TestStop())
+                        if (cancellationToken.IsCancellationRequested)
                             return;
                     }
                 }

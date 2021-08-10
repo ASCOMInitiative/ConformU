@@ -14,7 +14,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ASCOM.Standard.AlpacaClients" Version="0.0.10" />
+		<PackageReference Include="ASCOM.Standard.AlpacaClients" Version="0.0.13" />
+		<PackageReference Include="ASCOM.Standard.COM.DriverAccess" Version="1.0.0-alpha16" />
 		<PackageReference Include="ASCOM.Standard.Utilities" Version="1.0.0-alpha16" />
 		<PackageReference Include="BlazorPro.BlazorSize" Version="5.0.0" />
 		<PackageReference Include="Radzen.Blazor" Version="3.8.1" />

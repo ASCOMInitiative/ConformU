@@ -3,15 +3,17 @@ using System.Collections;
 using System.Linq;
 using System.Runtime.InteropServices;
 using ASCOM;
-
 using Microsoft.VisualBasic.CompilerServices;
 using static Conform.Globals;
-using ASCOM.Standard.Interfaces;
 using ConformU;
 using System.Collections.Generic;
 using System.Threading;
 using static ConformU.ConformConstants;
+using ASCOM.Standard.COM;
+using ASCOM.Standard.AlpacaClients;
+using ASCOM.Standard.Interfaces;
 using ASCOM.Standard.Utilities;
+using ASCOM.Standard.COM.DriverAccess;
 
 namespace Conform
 {
@@ -100,21 +102,18 @@ namespace Conform
         private double m_TargetAltitude, m_TargetAzimuth;
         private bool canReadAltitide, canReadAzimuth, canReadSiderealTime;
 
-        private TelescopeFacade telescopeDevice;
-
         private readonly Dictionary<string, bool> telescopeTests;
-
-        private dynamic DriverAsObject;
 
         // Axis rate checks
         private readonly double[,] m_AxisRatesPrimaryArray = new double[1001, 2];
         private readonly double[,] m_AxisRatesArray = new double[1001, 2];
 
         // Helper variables
+        private ITelescopeV3 telescopeDevice;
         internal static Utilities g_Util;
         private readonly CancellationToken cancellationToken;
         private readonly Settings settings;
-        private readonly ILogger logger;
+        private readonly ConformLogger logger;
 
         #endregion
 
@@ -227,7 +226,6 @@ namespace Conform
         public TelescopeTester(ConformanceTestManager parent, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(true, true, true, true, false, true, true, parent, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
         {
             g_Util = new();
-            //g_settings.MessageLevel = MessageLevel.Debug;
 
             settings = conformConfiguration.Settings;
             telescopeTests = settings.TelescopeTests;
@@ -240,17 +238,13 @@ namespace Conform
 
         protected override void Dispose(bool disposing)
         {
-            LogMsg("Dispose", MessageLevel.Debug, "Disposing of Telescope driver: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogMsg("Dispose", MessageLevel.Debug, "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
             if (!disposedValue)
             {
                 if (disposing)
                 {
-                    if (true) // Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining driver in memory to change flags)
-                    {
-                        if (telescopeDevice is not null) telescopeDevice.Dispose();
-                        telescopeDevice = null;
-                        GC.Collect();
-                    }
+                    if (telescopeDevice is not null) telescopeDevice.Dispose();
+                    telescopeDevice = null;
                 }
             }
 
@@ -377,51 +371,36 @@ namespace Conform
 
         public override void CreateDevice()
         {
-            int l_TryCount = 0;
-            do
-            {
-                l_TryCount += 1;
-                try
-                {
-                    LogMsg("Telescope:CreateDevice", MessageLevel.Debug, "Creating ProgID: " + settings.ComDevice.ProgId);
-
-                    LogMsg("Conform", MessageLevel.Always, "is using CreateObject to get a Telescope object");
-                    if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to create driver using CreateObject");
-                    telescopeDevice = new TelescopeFacade(settings, logger);
-                    telescopeDevice.CreateDevice();
-                    LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
-
-                    WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
-                    g_Stop = false;
-                }
-                catch (Exception ex)
-                {
-                    LogMsg("", MessageLevel.Debug, "Attempt " + l_TryCount + " - exception thrown: " + ex.Message);
-                    if (l_TryCount == 3)
-                        throw;
-                } // Re throw exception if on our third attempt
-
-                if (g_Stop)
-                    WaitFor(200);
-            }
-            while (g_Stop); // Exit if created OK
-            LogMsg("CreateDevice", MessageLevel.Debug, "Created telescope on attempt: " + l_TryCount.ToString());
-
-            // Create a pointer to the raw COM object that represents the Telescope (Only used for rate object Dispose() tests)
             try
             {
-                LogMsg("CreateDevice", MessageLevel.Debug, "Driver is already an object so using it \"as is\" for driver as an object");
-                DriverAsObject = telescopeDevice;
+                switch (settings.DeviceTechnology)
+                {
+                    case DeviceTechnology.Alpaca:
+                        logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
+                        telescopeDevice = new AlpacaTelescope("http", settings.AlpacaDevice.IpAddress, settings.AlpacaDevice.IpPort, settings.AlpacaDevice.AlpacaDeviceNumber, logger);
+                        logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Alpaca device created OK");
+                        break;
 
-                LogMsg("CreateDevice", MessageLevel.Debug, "Got driver object OK");
+                    case DeviceTechnology.COM:
+                        telescopeDevice = new Telescope(settings.ComDevice.ProgId);
+                        break;
+
+                    default:
+                        throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
+                }
+
+                LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
+
+                WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
+                g_Stop = false;
             }
             catch (Exception ex)
             {
-                LogMsg("CreateDevice", MessageLevel.Error, "Exception: " + ex.ToString());
+                LogMsg("CreateDevice", MessageLevel.Debug, "Exception thrown: " + ex.Message);
+                throw; // Re throw exception 
             }
 
-            LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver as an object");
+            if (g_Stop) WaitFor(200);
         }
 
         public override bool Connected
@@ -2174,7 +2153,7 @@ namespace Conform
 
                 // Test the TrackingRates.Dispose() method
                 LogMsg("TrackingRates", MessageLevel.Debug, "Getting tracking rates");
-                l_TrackingRates = DriverAsObject.TrackingRates;
+                l_TrackingRates = telescopeDevice.TrackingRates;
                 try
                 {
                     LogMsg("TrackingRates", MessageLevel.Debug, "Disposing tracking rates");
@@ -5271,19 +5250,19 @@ namespace Conform
                     {
                         case TelescopeAxis.Primary:
                             {
-                                l_AxisRates = DriverAsObject.AxisRates(TelescopeAxis.Primary);
+                                l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary);
                                 break;
                             }
 
                         case TelescopeAxis.Secondary:
                             {
-                                l_AxisRates = DriverAsObject.AxisRates(TelescopeAxis.Secondary);
+                                l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary);
                                 break;
                             }
 
                         case TelescopeAxis.Tertiary:
                             {
-                                l_AxisRates = DriverAsObject.AxisRates(TelescopeAxis.Tertiary);
+                                l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary);
                                 break;
                             }
 
