@@ -1,4 +1,5 @@
 ﻿using AlpacaDiscovery;
+using ASCOM;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +11,9 @@ namespace ConformU
 {
     public class Settings
     {
-        AscomDevice ascomDevice = new();
-        ComDevice comDevice = new();
+        private AscomDevice ascomDevice = new();
+        private ComDevice comDevice = new();
+        private DeviceTechnology deviceTechnology = DeviceTechnology.Alpaca;
 
         private const string NO_DEVICE_SELECTED = "No device selected";
         public Settings() { }
@@ -39,6 +41,8 @@ namespace ConformU
             }
         }
 
+        public AlpacaConfiguration AlpacaConfiguration { get; set; } = new AlpacaConfiguration();
+
         /// <summary>
         /// Details of the currently selected Alpaca device
         /// </summary>
@@ -55,6 +59,8 @@ namespace ConformU
             }
         }
 
+        public ComConfiguration ComConfiguration { get; set; } = new ComConfiguration();
+
         /// <summary>
         /// Descriptive name of the current device
         /// </summary>
@@ -63,7 +69,28 @@ namespace ConformU
         /// <summary>
         /// Technology of the current device: Alpaca or COM
         /// </summary>
-        public DeviceTechnology DeviceTechnology { get; set; } = DeviceTechnology.Alpaca;
+        public DeviceTechnology DeviceTechnology
+        {
+            get
+            {
+                return deviceTechnology;
+            }
+            set
+            {
+                deviceTechnology = value;
+                switch (deviceTechnology)
+                {
+                    case DeviceTechnology.Alpaca:
+                        DeviceName = AlpacaDevice.AscomDeviceName;
+                        break;
+                    case DeviceTechnology.COM:
+                        DeviceName = ComDevice.DisplayName;
+                        break;
+                    default:
+                        throw new InvalidValueException($"Unknown technology type: {value}");
+                }
+            }
+        }
 
         /// <summary>
         /// ASCOM Device type of the current device

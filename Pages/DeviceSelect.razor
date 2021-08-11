@@ -126,7 +126,7 @@
     bool osIsWindows; // OS environment type
     bool osIsNotWindows;
     int selectedTabNumber = 0; // Current tab number 0 = Alpaca, 1 = COM
-    DeviceTechnology technologyType = ConformConstants.DeviceTechnology.Alpaca; // Is the user selecting an Alpaca or a COM device?
+    DeviceTechnology technologyType = DeviceTechnology.Alpaca; // Is the user selecting an Alpaca or a COM device?
 
     List<AlpacaDeviceListItem> ascomDevices = new(); // List of discovered Alpaca devices for use in the Alpaca devices Radzen radio button list
     List<ComDeviceListItem> comDeviceList = new(); // List of COM devices for use in the Radzen COM devices radio button list
@@ -231,7 +231,7 @@
             configuration.Settings.DeviceType = Enum.Parse<DeviceType>(selectedAlpacaDevice.AscomDeviceType);
         }
 
-        technologyType = ConformConstants.DeviceTechnology.Alpaca;
+        technologyType = DeviceTechnology.Alpaca;
         configuration.Settings.DeviceTechnology = technologyType;
         configuration.Save();
         StateHasChanged();
@@ -260,7 +260,7 @@
             configuration.Settings.ComDevice = selectedComDevice;
         }
 
-        technologyType = ConformConstants.DeviceTechnology.COM;
+        technologyType = DeviceTechnology.COM;
         configuration.Settings.DeviceTechnology = technologyType;
         configuration.Save();
         StateHasChanged();

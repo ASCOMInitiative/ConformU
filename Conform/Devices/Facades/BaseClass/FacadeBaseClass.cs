@@ -43,7 +43,7 @@ namespace ConformU
                 {
                     switch (settings.DeviceTechnology)
                     {
-                        case ConformConstants.DeviceTechnology.Alpaca:
+                        case DeviceTechnology.Alpaca:
                             try
                             {
                                 if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to set Connected False.");
@@ -59,7 +59,7 @@ namespace ConformU
                             catch { }
                             break;
 
-                        case ConformConstants.DeviceTechnology.COM:
+                        case DeviceTechnology.COM:
                             int remainingObjectCount, loopCount;
 
                             try

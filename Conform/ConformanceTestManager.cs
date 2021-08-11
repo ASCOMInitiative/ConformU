@@ -11,7 +11,6 @@ using System.Runtime;
 using System.Text;
 using Conform;
 using static Conform.Globals;
-using static ConformU.ConformConstants;
 
 namespace ConformU
 {

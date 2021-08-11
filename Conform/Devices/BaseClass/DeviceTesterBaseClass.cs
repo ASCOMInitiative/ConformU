@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using ASCOM;
 using ASCOM.Standard.AlpacaClients;
+using ASCOM.Standard.COM.DriverAccess;
 using ASCOM.Standard.Interfaces;
 using ConformU;
 using Microsoft.VisualBasic;
@@ -1654,6 +1655,7 @@ namespace ConformU
 
             SetStatus("", "", "");
         }
+
 
         #endregion
     }
