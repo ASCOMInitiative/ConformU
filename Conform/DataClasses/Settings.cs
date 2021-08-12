@@ -123,8 +123,8 @@ namespace ConformU
         };
 
         // Camera test configuration
-        public int CameraTestMaxBinX { get; set; }
-        public int CameraTestMaxBinY { get; set; }
+        public int CameraMaxBinX { get; set; }
+        public int CameraMaxBinY { get; set; }
 
         // Conformance test configuration 
         public bool TestProperties { get; set; } = true;

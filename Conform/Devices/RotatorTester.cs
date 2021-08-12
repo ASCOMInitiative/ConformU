@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices;
 using Microsoft.VisualBasic; // Install-Package Microsoft.VisualBasic
 using Microsoft.VisualBasic.CompilerServices; // Install-Package Microsoft.VisualBasic
-using static ConformU.ConformConstants;
 using System.Threading;
 using ASCOM.Standard.Interfaces;
 using ASCOM.Standard.AlpacaClients;
+using ASCOM.Standard.COM.DriverAccess;
 
 namespace ConformU
 {
@@ -51,7 +47,7 @@ namespace ConformU
         #endregion
 
         #region New and Dispose
-        public RotatorTester(ConformanceTestManager parent, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(true, true, true, true, false, true, true, parent, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
+        public RotatorTester(ConformanceTestManager parent, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(true, true, true, true, false, true, false, parent, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
         {
             settings = conformConfiguration.Settings;
             cancellationToken = conformCancellationToken;
@@ -79,7 +75,6 @@ namespace ConformU
         }
 
         #endregion
-
 
         #region Code
 
@@ -112,22 +107,36 @@ namespace ConformU
                 switch (settings.DeviceTechnology)
                 {
                     case DeviceTechnology.Alpaca:
-                        logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
+                        LogMsg("CreateDevice", MessageLevel.Info, $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
                         m_Rotator = new AlpacaRotator(settings.AlpacaConfiguration.AccessServiceType.ToString(), settings.AlpacaDevice.IpAddress, settings.AlpacaDevice.IpPort, settings.AlpacaDevice.AlpacaDeviceNumber, logger);
-                        logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Alpaca device created OK");
+                        //LogMsg("CreateDevice", MessageLevel.Info, $"Alpaca device created OK");
                         break;
 
                     case DeviceTechnology.COM:
-                        m_Rotator = new ASCOM.Standard.COM.DriverAccess.Rotator(settings.ComDevice.ProgId);
+                        switch (settings.ComConfiguration.ComACcessMechanic)
+                        {
+                            case ComAccessMechanic.Native:
+                                LogMsg("CreateDevice", MessageLevel.Info, $"Creating Native COM device: {settings.ComDevice.ProgId}");
+                                m_Rotator = new RotatorFacade(settings, logger);
+                                break;
+
+                            case ComAccessMechanic.DriverAccess:
+                                LogMsg("CreateDevice", MessageLevel.Info, $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
+                                m_Rotator = new Rotator(settings.ComDevice.ProgId);
+                                break;
+
+                            default:
+                                throw new ASCOM.InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComACcessMechanic}");
+                        }
+
+                        //LogMsg("CreateDevice", MessageLevel.Info, "Successfully created driver");
+                        WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
                         break;
 
                     default:
                         throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
 
-                LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
-
-                WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
                 g_Stop = false;
             }
             catch (Exception ex)
@@ -212,7 +221,7 @@ namespace ConformU
 
                 LogMsg("Pre-run Check", MessageLevel.OK, "Rotator is stationary");
             }
-            catch 
+            catch
             {
                 // Don't report errors at this point
             }

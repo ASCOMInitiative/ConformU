@@ -1,21 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Security;
-using System.Text;
-//using Microsoft.VisualBasic;
 using ASCOM.Standard.Interfaces;
-using static ConformU.ConformConstants;
 using System.Threading;
 using ASCOM.Standard.Utilities;
 using ASCOM.Standard.AlpacaClients;
+using ASCOM.Standard.COM.DriverAccess;
 
 namespace ConformU
 {
@@ -111,7 +99,21 @@ namespace ConformU
                         break;
 
                     case DeviceTechnology.COM:
-                        m_SafetyMonitor = new ASCOM.Standard.COM.DriverAccess.SafetyMonitor(settings.ComDevice.ProgId);
+                        switch (settings.ComConfiguration.ComACcessMechanic)
+                        {
+                            case ComAccessMechanic.Native:
+                                logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
+                                m_SafetyMonitor = new SafetyMonitorFacade(settings, logger);
+                                break;
+
+                            case ComAccessMechanic.DriverAccess:
+                                logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
+                                m_SafetyMonitor = new SafetyMonitor(settings.ComDevice.ProgId);
+                                break;
+
+                            default:
+                                throw new ASCOM.InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComACcessMechanic}");
+                        }
                         break;
 
                     default:

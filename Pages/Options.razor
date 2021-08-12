@@ -19,7 +19,8 @@
     <Tabs>
         <RadzenTabsItem Text="General">
             <div class="row">
-                <RadzenCard Style="width:300px; margin-bottom: 20px; height:250px; margin-right: 20px">
+                <RadzenCard Style="width:300px; margin-bottom: 20px; height:270px; margin-right: 20px">
+                    <h3 style="margin-bottom:0;">Test Scope</h3>
                     <RadzenCheckBoxList @bind-Value=@currentScope TValue="int" Orientation="Orientation.Vertical" Change=@(args => OnScopeChange(args))>
                         <Items>
                             <RadzenCheckBoxListItem Text="Test Properties" Value="0" />
@@ -31,7 +32,8 @@
                     </RadzenCheckBoxList>
                 </RadzenCard>
 
-                <RadzenCard Style="width:410px; margin-bottom:20px;height:250px;">
+                <RadzenCard Style="width:410px; margin-bottom:20px;height:270px;">
+                    <h3 style="margin-bottom:0;">Operation</h3>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Style="margin-top:6px;" Name="CHK1" @bind-Value=@chkUpdates TValue="bool" Change=@(args => OnCheckboxChange(args, "Updates")) />
                         <RadzenLabel Text="Check for updates" Component="CHK1" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
@@ -43,6 +45,23 @@
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHK3" @bind-Value=@chkDebug TValue="bool" Change=@(args => OnCheckboxChange(args, "Debug")) /> <RadzenLabel Text="Debug enabled" Component="CHK3" Style="margin-left: 5px;" />
                     </div>
+                </RadzenCard>
+            </div>
+            <div class="row">
+
+                <RadzenCard Style="width:300px; margin-bottom:20px;height:130px;">
+                    <h3>COM Access Mechanic</h3>
+                    <RadzenDropDown @bind-Value=@comAccessMechanic
+                                    Style="width:245px"
+                                    Data="comAccessMechanicoptions"
+                                    TextProperty="Key"
+                                    ValueProperty="Value"
+                                    TValue="ComAccessMechanic"
+                                    AllowClear="false"
+                                    Multiple="false"
+                                    MaxSelectedLabels="1"
+                                    Change=@(args => OnComAccessModeChange(args)) />
+
                 </RadzenCard>
             </div>
         </RadzenTabsItem>
@@ -91,6 +110,14 @@
 @*Page code*@
 @code {
 
+    List<KeyValuePair<string, ComAccessMechanic>> comAccessMechanicoptions = new()
+    {
+            new KeyValuePair<string, ComAccessMechanic>("Native", ComAccessMechanic.Native),
+            new KeyValuePair<string, ComAccessMechanic>("Driver Access", ComAccessMechanic.DriverAccess)
+        };
+
+    ComAccessMechanic comAccessMechanic = ComAccessMechanic.Native;
+
     int cameraTestMaxBinX;
     int cameraTestMaxBinY;
 
@@ -106,9 +133,10 @@
 
     protected override void OnInitialized()
     {
+        conformLogger.LogDebug("OnInitialized", "Running");
+
         status = configuration.Status;
         SetConfiguration();
-        conformLogger.LogDebug("OnInitialized", "Running");
 
         telescopeTests = new List<string>();
         foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
@@ -118,6 +146,13 @@
 
         SetTelescopeTests();
         SetCameraTests();
+    }
+
+    void OnComAccessModeChange(object accessMode)
+    {
+        ComAccessMechanic comMechanic = (ComAccessMechanic)accessMode;
+        configuration.Settings.ComConfiguration.ComACcessMechanic = comAccessMechanic;
+        configuration.Save();
     }
 
     private void OnSetTelescopeTestsButtonClick(bool state)
@@ -135,19 +170,19 @@
 
     private void OnMaxBinXChange(int newValue)
     {
-        configuration.Settings.CameraTestMaxBinX = newValue;
+        configuration.Settings.CameraMaxBinX = newValue;
         configuration.Save();
     }
     private void OnMaxBinYChange(int newValue)
     {
-        configuration.Settings.CameraTestMaxBinY = newValue;
+        configuration.Settings.CameraMaxBinY = newValue;
         configuration.Save();
     }
 
     private void SetCameraTests()
     {
-        cameraTestMaxBinX = configuration.Settings.CameraTestMaxBinX;
-        cameraTestMaxBinY = configuration.Settings.CameraTestMaxBinY;
+        cameraTestMaxBinX = configuration.Settings.CameraMaxBinX;
+        cameraTestMaxBinY = configuration.Settings.CameraMaxBinY;
     }
 
     private void SetTelescopeTests()
@@ -181,6 +216,9 @@
         // Reset device test settings
         SetTelescopeTests();
         SetCameraTests();
+
+        // COM Settings
+        comAccessMechanic = configuration.Settings.ComConfiguration.ComACcessMechanic;
     }
 
     void OnScopeChange(IEnumerable<int> scope)

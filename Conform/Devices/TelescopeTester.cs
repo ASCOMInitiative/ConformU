@@ -382,7 +382,21 @@ namespace Conform
                         break;
 
                     case DeviceTechnology.COM:
-                        telescopeDevice = new Telescope(settings.ComDevice.ProgId);
+                        switch (settings.ComConfiguration.ComACcessMechanic)
+                        {
+                            case ComAccessMechanic.Native:
+                                logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
+                                telescopeDevice = new TelescopeFacade(settings, logger);
+                                break;
+
+                            case ComAccessMechanic.DriverAccess:
+                                logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
+                                telescopeDevice = new Telescope(settings.ComDevice.ProgId);
+                                break;
+
+                            default:
+                                throw new ASCOM.InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComACcessMechanic}");
+                        }
                         break;
 
                     default:
