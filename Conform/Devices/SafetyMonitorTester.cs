@@ -45,7 +45,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogMsg("Dispose", MessageLevel.Debug, "Disposing of test device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogMsg("Dispose", MessageLevel.msgDebug, "Disposing of test device: " + disposing.ToString() + " " + disposedValue.ToString());
             if (!disposedValue)
             {
                 if (disposing)
@@ -93,21 +93,21 @@ namespace ConformU
                 switch (settings.DeviceTechnology)
                 {
                     case DeviceTechnology.Alpaca:
-                        logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
+                        logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
                         m_SafetyMonitor = new AlpacaSafetyMonitor(settings.AlpacaConfiguration.AccessServiceType.ToString(), settings.AlpacaDevice.IpAddress, settings.AlpacaDevice.IpPort, settings.AlpacaDevice.AlpacaDeviceNumber, logger);
-                        logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Alpaca device created OK");
+                        logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Alpaca device created OK");
                         break;
 
                     case DeviceTechnology.COM:
                         switch (settings.ComConfiguration.ComACcessMechanic)
                         {
                             case ComAccessMechanic.Native:
-                                logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
+                                logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
                                 m_SafetyMonitor = new SafetyMonitorFacade(settings, logger);
                                 break;
 
                             case ComAccessMechanic.DriverAccess:
-                                logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
+                                logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
                                 m_SafetyMonitor = new SafetyMonitor(settings.ComDevice.ProgId);
                                 break;
 
@@ -120,14 +120,14 @@ namespace ConformU
                         throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
 
-                LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
+                LogMsg("CreateDevice", MessageLevel.msgDebug, "Successfully created driver");
 
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
                 g_Stop = false;
             }
             catch (Exception ex)
             {
-                LogMsg("CreateDevice", MessageLevel.Debug, "Exception thrown: " + ex.Message);
+                LogMsg("CreateDevice", MessageLevel.msgDebug, "Exception thrown: " + ex.Message);
                 throw; // Re throw exception 
             }
 
@@ -142,13 +142,13 @@ namespace ConformU
                 LogCallToDriver("IsSafe", "About to get IsSafe property");
                 m_IsSafe = m_SafetyMonitor.IsSafe;
                 if (!m_IsSafe)
-                    LogMsg("IsSafe", MessageLevel.OK, "Reports false before connection");
+                    LogMsg("IsSafe", MessageLevel.msgOK, "Reports false before connection");
                 else
-                    LogMsg("IsSafe", MessageLevel.Issue, "Reports true before connection rather than false");
+                    LogMsg("IsSafe", MessageLevel.msgIssue, "Reports true before connection rather than false");
             }
             catch (Exception ex)
             {
-                LogMsg("IsSafe", MessageLevel.Error, "Cannot confirm that IsSafe is false before connection because it threw an exception: " + ex.Message);
+                LogMsg("IsSafe", MessageLevel.msgError, "Cannot confirm that IsSafe is false before connection because it threw an exception: " + ex.Message);
             }
         }
         public override bool Connected
@@ -193,13 +193,13 @@ namespace ConformU
                         {
                             m_IsSafe = m_SafetyMonitor.IsSafe;
                             LogCallToDriver("IsSafe", "About to get IsSafe property");
-                            LogMsg(p_Name, MessageLevel.OK, m_IsSafe.ToString());
+                            LogMsg(p_Name, MessageLevel.msgOK, m_IsSafe.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "RequiredPropertiesTest: Unknown test type " + p_Type.ToString());
+                            LogMsg(p_Name, MessageLevel.msgError, "RequiredPropertiesTest: Unknown test type " + p_Type.ToString());
                             break;
                         }
                 }
@@ -232,7 +232,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogMsg(p_Name, MessageLevel.Error, "PerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogMsg(p_Name, MessageLevel.msgError, "PerformanceTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }
@@ -252,32 +252,32 @@ namespace ConformU
                 {
                     case object _ when l_Rate > 10.0:
                         {
-                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case object _ when 2.0 <= l_Rate && l_Rate <= 10.0:
                         {
-                            LogMsg(p_Name, MessageLevel.OK, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.msgOK, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case object _ when 1.0 <= l_Rate && l_Rate <= 2.0:
                         {
-                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogMsg(p_Name, MessageLevel.Info, "Unable to complete test: " + ex.ToString());
+                LogMsg(p_Name, MessageLevel.msgInfo, "Unable to complete test: " + ex.ToString());
             }
         }
     }

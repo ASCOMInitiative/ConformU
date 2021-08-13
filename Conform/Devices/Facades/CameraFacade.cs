@@ -15,7 +15,7 @@ namespace ConformU
         public short BinX { get => driver.BinX; set => driver.BinX = value; }
         public short BinY { get => driver.BinY; set => driver.BinY = value; }
 
-        public CameraState CameraState => driver.CameraState;
+        public CameraState CameraState => (CameraState)driver.CameraState;
 
         public int CameraXSize => driver.CameraXSize;
 
@@ -95,17 +95,39 @@ namespace ConformU
 
         public short GainMin => driver.GainMin;
 
-        public IList<string> Gains => driver.Gains;
+        public IList<string> Gains
+        {
+            get
+            {
+                List<string> returnValue = new();
+                foreach (string gain in driver.Gains)
+                {
+                    returnValue.Add(gain);
+                }
+                return returnValue;
+            }
+        }
 
         public short PercentCompleted => driver.PercentCompleted;
 
         public short ReadoutMode { get => driver.ReadoutMode; set => driver.ReadoutMode = value; }
 
-        public IList<string> ReadoutModes => driver.ReadoutModes;
+        public IList<string> ReadoutModes
+        {
+            get
+            {
+                List<string> returnValue = new();
+                foreach (string gain in driver.ReadoutModes)
+                {
+                    returnValue.Add(gain);
+                }
+                return returnValue;
+            }
+        }
 
         public string SensorName => driver.SensorName;
 
-        public SensorType SensorType => driver.SensorType;
+        public SensorType SensorType => (SensorType)driver.SensorType;
 
         public int Offset { get => driver.Offset; set => driver.Offset = value; }
 
@@ -113,7 +135,19 @@ namespace ConformU
 
         public int OffsetMin => driver.OffsetMin;
 
-        public IList<string> Offsets => driver.Offsets;
+        public IList<string> Offsets
+        {
+            get
+            {
+                List<string> returnValue = new();
+                foreach (string gain in driver.Offsets)
+                {
+                    returnValue.Add(gain);
+                }
+                return returnValue;
+            }
+        }
+
         public double SubExposureDuration { get => driver.SubExposureDuration; set => driver.SubExposureDuration = value; }
 
         public void AbortExposure()

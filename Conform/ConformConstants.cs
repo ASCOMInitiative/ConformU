@@ -35,14 +35,14 @@ namespace ConformU
     public enum MessageLevel
     {
         None = 0,
-        Debug = 1,
-        Comment = 2,
-        Info = 3,
-        OK = 4,
-        Warning = 5,
-        Issue = 6,
-        Error = 7,
-        Always = 8
+        msgDebug = 1,
+        msgComment = 2,
+        msgInfo = 3,
+        msgOK = 4,
+        msgWarning = 5,
+        msgIssue = 6,
+        msgError = 7,
+        msgAlways = 8
     }
 
     // Must be valid service types because they are used as values in Alpaca access code i.e. ServiceType.http.ToString()

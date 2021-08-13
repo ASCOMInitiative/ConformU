@@ -1,135 +1,182 @@
 ﻿@page "/Settings"
+@using ASCOM
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
 @using static ConformU.ConformConstants
 
 @*Title and settings reset button*@
 <div class="row">
-    <h1>Settings</h1>
-    <RadzenButton Click=@(args => OnResetButtonClick()) Text="Reset to Defaults" Icon="account_circle" Style="margin-bottom: 20px; width: 220px; position: absolute; right: 30px;" />
+	<h1>Settings</h1>
+	<RadzenButton Click=@(args => OnResetButtonClick()) Text="Reset to Defaults" Icon="account_circle" Style="margin-bottom: 20px; width: 220px; position: absolute; right: 30px;" />
 </div>
 
 @*Status message*@
 <div class="row">
-    <h3>Configuration status:   @status</h3>
+	<h3>Configuration status:   @status</h3>
 </div>
 
 @*Configuration tabs*@
 <RadzenTabs Change=@OnChange style="height: 820px;margin-top:20px" RenderMode="TabRenderMode.Client">
-    <Tabs>
-        <RadzenTabsItem Text="General">
-            <div class="row">
-                <RadzenCard Style="width:300px; margin-bottom: 20px; height:270px; margin-right: 20px">
-                    <h3 style="margin-bottom:0;">Test Scope</h3>
-                    <RadzenCheckBoxList @bind-Value=@currentScope TValue="int" Orientation="Orientation.Vertical" Change=@(args => OnScopeChange(args))>
-                        <Items>
-                            <RadzenCheckBoxListItem Text="Test Properties" Value="0" />
-                            <RadzenCheckBoxListItem Text="Test Methods" Value="1" />
-                            <RadzenCheckBoxListItem Text="Test SideOfPier Read" Value="2" />
-                            <RadzenCheckBoxListItem Text="Test SideOfPier Write" Value="3" />
-                            <RadzenCheckBoxListItem Text="Test Performance" Value="4" />
-                        </Items>
-                    </RadzenCheckBoxList>
-                </RadzenCard>
+	<Tabs>
+		<RadzenTabsItem Text="General">
+			<div class="row">
+				<RadzenCard Style="width:300px; margin-bottom: 20px; height:270px; margin-right: 20px">
+					<h3 style="margin-bottom:0;">Test Scope</h3>
+					<RadzenCheckBoxList @bind-Value=@conformanceTestScope TValue="int" Orientation="Orientation.Vertical" Change=@(args => OnScopeChange(args))>
+						<Items>
+							<RadzenCheckBoxListItem Text="Test Properties" Value="0" />
+							<RadzenCheckBoxListItem Text="Test Methods" Value="1" />
+							<RadzenCheckBoxListItem Text="Test SideOfPier Read" Value="2" />
+							<RadzenCheckBoxListItem Text="Test SideOfPier Write" Value="3" />
+							<RadzenCheckBoxListItem Text="Test Performance" Value="4" />
+						</Items>
+					</RadzenCheckBoxList>
+				</RadzenCard>
 
-                <RadzenCard Style="width:410px; margin-bottom:20px;height:270px;">
-                    <h3 style="margin-bottom:0;">Operation</h3>
-                    <div class="row" style="margin-top:12px; margin-left:4px;">
-                        <RadzenCheckBox Style="margin-top:6px;" Name="CHK1" @bind-Value=@chkUpdates TValue="bool" Change=@(args => OnCheckboxChange(args, "Updates")) />
-                        <RadzenLabel Text="Check for updates" Component="CHK1" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
-                        <RadzenTextBox @bind-Value="lastUpdateDate" Disabled=true />
-                    </div>
-                    <div class="row" style="margin-top:12px; margin-left:4px;">
-                        <RadzenCheckBox Name="CHK2" @bind-Value=@chkDisplayCalls TValue="bool" Change=@(args => OnCheckboxChange(args, "DisplayCalls")) /> <RadzenLabel Text="Display method calls" Component="CHK2" Style="margin-left: 5px;" />
-                    </div>
-                    <div class="row" style="margin-top:14px; margin-left:4px;">
-                        <RadzenCheckBox Name="CHK3" @bind-Value=@chkDebug TValue="bool" Change=@(args => OnCheckboxChange(args, "Debug")) /> <RadzenLabel Text="Debug enabled" Component="CHK3" Style="margin-left: 5px;" />
-                    </div>
-                </RadzenCard>
+				<RadzenCard Style="width:410px; margin-bottom:20px;height:270px;">
+					<h3 style="margin-bottom:0;">Operation</h3>
+					<div class="row" style="margin-top:12px; margin-left:4px;">
+						<RadzenCheckBox Style="margin-top:6px;" Name="CHK1" @bind-Value=@chkUpdates TValue="bool" Change=@(args => OnCheckboxChange(args, "Updates")) />
+						<RadzenLabel Text="Check for updates" Component="CHK1" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
+						<RadzenTextBox @bind-Value="lastUpdateDate" Disabled=true />
+					</div>
+					<div class="row" style="margin-top:12px; margin-left:4px;">
+						<RadzenCheckBox Name="CHK2" @bind-Value=@chkDisplayCalls TValue="bool" Change=@(args => OnCheckboxChange(args, "DisplayCalls")) /> <RadzenLabel Text="Display method calls" Component="CHK2" Style="margin-left: 5px;" />
+					</div>
+					<div class="row" style="margin-top:14px; margin-left:4px;">
+						<RadzenCheckBox Name="CHK3" @bind-Value=@chkDebug TValue="bool" Change=@(args => OnCheckboxChange(args, "Debug")) /> <RadzenLabel Text="Debug enabled" Component="CHK3" Style="margin-left: 5px;" />
+					</div>
+				</RadzenCard>
+			</div>
+			<div class="row">
+
+				<RadzenCard Style="width:300px; margin-bottom:20px;height:130px;">
+					<h3>COM Access Mechanic</h3>
+					<RadzenDropDown @bind-Value=@comAccessMechanic
+									Style="width:245px"
+									Data="comAccessMechanicoptions"
+									TextProperty="Key"
+									ValueProperty="Value"
+									TValue="ComAccessMechanic"
+									AllowClear="false"
+									Multiple="false"
+									MaxSelectedLabels="1"
+									Change=@(args => OnComAccessModeChange(args)) />
+
+				</RadzenCard>
+			</div>
+		</RadzenTabsItem>
+
+		<RadzenTabsItem Text="Telescope">
+			<div class="row">
+				<h3 style="margin-top: 5px;">Select the tests which Conform should perform.</h3>
+				<RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(true)) Text="Check all tests" Style="margin-left: 20px; " />
+				<RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(false)) Text="Uncheck all tests" Style="margin-left: 20px; " />
+			</div>
+
+			<RadzenCheckBoxList @bind-Value=@telescopeTests
+								Style="margin-top:20px"
+								TValue="string"
+								Orientation="Orientation.Vertical"
+								Change=@(args => OnTelescopeTestsChange(args,""))>
+				<Items>
+					@foreach (var item in configuration.Settings.TelescopeTests)
+					{
+						<RadzenCheckBoxListItem Text="@item.Key" Value="@item.Key" />
+					}
+				</Items>
+			</RadzenCheckBoxList>
+		</RadzenTabsItem>
+
+		<RadzenTabsItem Text="Camera">
+			<h3>Conform will normally test camera imaging at all supported bin values that the camera reports through MaxBinX and MaxBinY.</h3>
+			<h3>The settings below can be used to limit testing to specified maximum values.</h3>
+
+			<div style="margin-top:40px" class="row">
+				<RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraTestMaxBinX" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraMaxBinX)) />
+				<p style="margin-left: 20px;margin-top: 5px;">Max BinX for testing</p>
+			</div>
+			<div class="row">
+				<RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraTestMaxBinY" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraMaxBinY)) />
+				<p style="margin-left: 20px;margin-top: 5px;">Max BinY for testing</p>
+			</div>
+
+			<h3 style="margin-top: 2em">To use the maximum bin values supplied by the camera, set the values above to zero.</h3>
+		</RadzenTabsItem>
+
+        <RadzenTabsItem Text="Dome">
+            <h3>These settings control how long Conform waits for actions to complete before reporting a timeout.</h3>
+
+            <div style="margin-top:20px" class="row">
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeShutterTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.DomeShutterTimeout)) />
+                <p style="margin-left: 20px;margin-top: 5px;">Shutter movement completion timeout</p>
             </div>
             <div class="row">
-
-                <RadzenCard Style="width:300px; margin-bottom:20px;height:130px;">
-                    <h3>COM Access Mechanic</h3>
-                    <RadzenDropDown @bind-Value=@comAccessMechanic
-                                    Style="width:245px"
-                                    Data="comAccessMechanicoptions"
-                                    TextProperty="Key"
-                                    ValueProperty="Value"
-                                    TValue="ComAccessMechanic"
-                                    AllowClear="false"
-                                    Multiple="false"
-                                    MaxSelectedLabels="1"
-                                    Change=@(args => OnComAccessModeChange(args)) />
-
-                </RadzenCard>
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeAzimuthTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.DomeAzimuthTimeout)) />
+                <p style="margin-left: 20px;margin-top: 5px;">Azimuth movement completion timeout</p>
             </div>
-        </RadzenTabsItem>
-
-        <RadzenTabsItem Text="Telescope">
-            <div class="row">
-                <h3 style="margin-top: 5px;">Select the tests which Conform should perform.</h3>
-                <RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(true)) Text="Check all tests" Style="margin-left: 20px; " />
-                <RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(false)) Text="Uncheck all tests" Style="margin-left: 20px; " />
-            </div>
-
-            <RadzenCheckBoxList @bind-Value=@telescopeTests
-                                Style="margin-top:20px"
-                                TValue="string"
-                                Orientation="Orientation.Vertical"
-                                Change=@(args => OnTelescopeTestsChange(args,""))>
-                <Items>
-                    @foreach (var item in configuration.Settings.TelescopeTests)
-                    {
-                        <RadzenCheckBoxListItem Text="@item.Key" Value="@item.Key" />
-                    }
-                </Items>
-            </RadzenCheckBoxList>
-
-        </RadzenTabsItem>
-
-        <RadzenTabsItem Text="Camera">
-            <h3>Conform will normally test camera imaging at all supported bin values that the camera reports through MaxBinX and MaxBinY.</h3>
-            <h3>The settings below can be used to limit testing to specified maximum values.</h3>
-
             <div style="margin-top:40px" class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraTestMaxBinX" TValue="int" Min="0" Change=@(args => OnMaxBinXChange(args)) />
-                <h3 style="margin-left: 20px;margin-top: 5px;">Max BinX for testing</h3>
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeAltitudeTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.DomeAltitudeTimeout)) />
+                <p style="margin-left: 20px;margin-top: 5px;">Altitude movement completion timeout</p>
             </div>
             <div class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraTestMaxBinY" TValue="int" Min="0" Change=@(args => OnMaxBinYChange(args)) />
-                <h3 style="margin-left: 20px;margin-top: 5px;">Max BinY for testing</h3>
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeStabilisationWaitTime" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.DomeStabilisationWaitTime)) />
+                <p style="margin-left: 20px;margin-top: 5px;">Movement stabilisation wait time</p>
             </div>
 
-            <h3 style="margin-top: 2em">To use the maximum bin values supplied by the camera, set the values above to zero.</h3>
+            <h3 style="margin-top: 2em">By default commands to open the dome shutter will be suppressed to protect observing equipment.</h3>
+            <h3 style="margin-top: 0em">For a full conformance check, the dome must be permitted to open its shutter.</h3>
+            <div class="row" style="margin-top:14px; margin-left:4px;">
+                <RadzenCheckBox Name="CHKOPENSHUTTER" @bind-Value=@domeOpenShutter TValue="bool" Change=@(args => OnCheckboxChange(args, "DomeOpenShutter")) />
+                <RadzenLabel Text="Weather safety - Allow dome to open during testing." Component="CHKOPENSHUTTER" Style="margin-left: 5px;" />
+            </div>
+
         </RadzenTabsItem>
 
-    </Tabs>
+	</Tabs>
 </RadzenTabs>
 
 @*Page code*@
 @code {
-
-    List<KeyValuePair<string, ComAccessMechanic>> comAccessMechanicoptions = new()
+    private enum NumericConfigurationItem
     {
-            new KeyValuePair<string, ComAccessMechanic>("Native", ComAccessMechanic.Native),
-            new KeyValuePair<string, ComAccessMechanic>("Driver Access", ComAccessMechanic.DriverAccess)
-        };
+        CameraMaxBinX,
+        CameraMaxBinY,
+        DomeShutterTimeout,
+        DomeAzimuthTimeout,
+        DomeAltitudeTimeout,
+        DomeStabilisationWaitTime,
+    }
 
-    ComAccessMechanic comAccessMechanic = ComAccessMechanic.Native;
+    // Camera test configuration
+    private int cameraTestMaxBinX;
+    private int cameraTestMaxBinY;
 
-    int cameraTestMaxBinX;
-    int cameraTestMaxBinY;
+    // Dome test configuration
+    private int domeShutterTimeout;
+    private int domeAzimuthTimeout;
+    private int domeAltitudeTimeout;
+    private int domeStabilisationWaitTime;
+    private bool domeOpenShutter;
 
-    IEnumerable<string> telescopeTests;
-    string status;
+    // Telescope test configuration
+    private IEnumerable<string> telescopeTests;
+    private string status;
 
-    IEnumerable<int> currentScope = new List<int>() { 0, 1, 2, 3 };
-    bool chkUpdates;
-    bool chkDisplayCalls;
-    bool chkDebug;
-    DeviceType deviceType;
-    string lastUpdateDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+    // Conform general configuration
+    private IEnumerable<int> conformanceTestScope = new List<int>() { 0, 1, 2, 3 };
+    private bool chkUpdates;
+    private bool chkDisplayCalls;
+    private bool chkDebug;
+    private DeviceType deviceType;
+    private string lastUpdateDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+
+    private ComAccessMechanic comAccessMechanic = ComAccessMechanic.Native;
+    private List<KeyValuePair<string, ComAccessMechanic>> comAccessMechanicoptions = new()
+    {
+        new KeyValuePair<string, ComAccessMechanic>("Native", ComAccessMechanic.Native),
+        new KeyValuePair<string, ComAccessMechanic>("Driver Access", ComAccessMechanic.DriverAccess)
+    };
 
     protected override void OnInitialized()
     {
@@ -146,6 +193,41 @@
 
         SetTelescopeTests();
         SetCameraTests();
+        SetDomeTests();
+    }
+
+    private void OnIntegerItemChange(int newValue, NumericConfigurationItem numericConfigurationItem)
+    {
+        switch (numericConfigurationItem)
+        {
+            case NumericConfigurationItem.CameraMaxBinX:
+                configuration.Settings.CameraMaxBinX = newValue;
+                break;
+
+            case NumericConfigurationItem.CameraMaxBinY:
+                configuration.Settings.CameraMaxBinY = newValue;
+                break;
+
+            case NumericConfigurationItem.DomeAltitudeTimeout:
+                configuration.Settings.DomeAltitudeTimeout = newValue;
+                break;
+
+            case NumericConfigurationItem.DomeAzimuthTimeout:
+                configuration.Settings.DomeAzimuthTimeout = newValue;
+                break;
+
+            case NumericConfigurationItem.DomeStabilisationWaitTime:
+                configuration.Settings.DomeStabilisationWaitTime = newValue;
+                break;
+
+            case NumericConfigurationItem.DomeShutterTimeout:
+                configuration.Settings.DomeShutterTimeout = newValue;
+                break;
+
+            default:
+                throw new InvalidValueException($"OnIntegerItemChange - Unknown numeric configurtation item: {numericConfigurationItem}");
+        }
+        configuration.Save();
     }
 
     void OnComAccessModeChange(object accessMode)
@@ -168,21 +250,19 @@
         SetTelescopeTests();
     }
 
-    private void OnMaxBinXChange(int newValue)
-    {
-        configuration.Settings.CameraMaxBinX = newValue;
-        configuration.Save();
-    }
-    private void OnMaxBinYChange(int newValue)
-    {
-        configuration.Settings.CameraMaxBinY = newValue;
-        configuration.Save();
-    }
-
     private void SetCameraTests()
     {
         cameraTestMaxBinX = configuration.Settings.CameraMaxBinX;
         cameraTestMaxBinY = configuration.Settings.CameraMaxBinY;
+    }
+
+    private void SetDomeTests()
+    {
+        domeShutterTimeout = configuration.Settings.DomeShutterTimeout;
+        domeAzimuthTimeout = configuration.Settings.DomeAzimuthTimeout;
+        domeAltitudeTimeout = configuration.Settings.DomeAltitudeTimeout;
+        domeStabilisationWaitTime = configuration.Settings.DomeStabilisationWaitTime;
+        domeOpenShutter = configuration.Settings.DomeOpenShutter;
     }
 
     private void SetTelescopeTests()
@@ -204,7 +284,7 @@
         if (configuration.Settings.TestSideOfPierRead) newScope.Add(2);
         if (configuration.Settings.TestSideOfPierWrite) newScope.Add(3);
         if (configuration.Settings.TestPerformance) newScope.Add(4);
-        currentScope = newScope;
+        conformanceTestScope = newScope;
 
         // Set other general settings
         chkUpdates = configuration.Settings.UpdateCheck;
@@ -216,6 +296,7 @@
         // Reset device test settings
         SetTelescopeTests();
         SetCameraTests();
+        SetDomeTests();
 
         // COM Settings
         comAccessMechanic = configuration.Settings.ComConfiguration.ComACcessMechanic;
@@ -318,13 +399,22 @@
             case "Updates":
                 configuration.Settings.UpdateCheck = chkUpdates;
                 break;
+
             case "DisplayCalls":
                 configuration.Settings.DisplayMethodCalls = chkDisplayCalls; ;
                 break;
+
             case "Debug":
                 configuration.Settings.Debug = chkDebug;
                 break;
 
+            case "DomeOpenShutter":
+                configuration.Settings.DomeOpenShutter = domeOpenShutter;
+                break;
+
+
+            default:
+                throw new InvalidValueException($"OnCheckboxChange - Unknown checkbox name: {name}");
         }
 
         configuration.Save();

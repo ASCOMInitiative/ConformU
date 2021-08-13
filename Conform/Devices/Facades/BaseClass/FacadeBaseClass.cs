@@ -24,14 +24,14 @@ namespace ConformU
             this.logger = logger;
             try
             {
-                logger?.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating ProgID: {settings.ComDevice.ProgId}");
+                logger?.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating ProgID: {settings.ComDevice.ProgId}");
                 Type driverType = Type.GetTypeFromProgID(settings.ComDevice.ProgId);
-                logger?.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating Type: {driverType}");
+                logger?.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating Type: {driverType}");
                 driver = Activator.CreateInstance(driverType);
             }
             catch (Exception ex)
             {
-                logger.LogMessage("CreateDevice", MessageLevel.Error, $"Exception creating driver: {ex}");
+                logger.LogMessage("CreateDevice", MessageLevel.msgError, $"Exception creating driver: {ex}");
             }
         }
 
@@ -46,14 +46,14 @@ namespace ConformU
                         case DeviceTechnology.Alpaca:
                             try
                             {
-                                if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to set Connected False.");
+                                if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.msgDebug, $"About to set Connected False.");
                                 driver.Connected = false;
                             }
                             catch { }
 
                             try
                             {
-                                if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to call Dispose method.");
+                                if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.msgDebug, $"About to call Dispose method.");
                                 driver.Dispose();
                             }
                             catch { }
@@ -64,14 +64,14 @@ namespace ConformU
 
                             try
                             {
-                                if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to set Connected False.");
+                                if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.msgDebug, $"About to set Connected False.");
                                 driver.Connected = false;
                             }
                             catch { }
 
                             try
                             {
-                                if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to call Dispose method.");
+                                if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.msgDebug, $"About to call Dispose method.");
                                 driver.Dispose();
                             }
                             catch { }
@@ -83,7 +83,7 @@ namespace ConformU
                                 {
                                     loopCount += 1;
                                     remainingObjectCount = Marshal.ReleaseComObject(driver);
-                                    if (settings.Debug) logger?.LogMessage("Dispose", MessageLevel.Debug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
+                                    if (settings.Debug) logger?.LogMessage("Dispose", MessageLevel.msgDebug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
 
                                 }
                                 while (!(remainingObjectCount <= 0 | loopCount == 20));

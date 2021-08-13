@@ -133,5 +133,12 @@ namespace ConformU
         public bool TestSideOfPierRead { get; set; } = false;
         public bool TestSideOfPierWrite { get; set; } = false;
 
+        // Dome test configuration
+        public int DomeShutterTimeout { get; set; } = 240;
+        public int DomeAzimuthTimeout { get; set; } = 240;
+        public int DomeAltitudeTimeout { get; set; } = 240;
+        public int DomeStabilisationWaitTime { get; set; } = 10;
+        public bool DomeOpenShutter { get; set; } = false;
+
     }
 }
