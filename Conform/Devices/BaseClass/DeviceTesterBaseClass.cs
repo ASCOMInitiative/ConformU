@@ -656,13 +656,24 @@ namespace ConformU
             Status(StatusType.staAction, "");
             Status(StatusType.staStatus, "");
             g_Stop = true; // Initialise stop flag to stop
-            //var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            //var fileInfo = new System.IO.FileInfo(assembly.Location);
-            //var lastModified = fileInfo.LastWriteTime;
-            string lastModified = "Unknown";
+
+            DateTime lastModifiedTime=DateTime.MinValue;
+            try
+            {
+                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                LogMsg("ConformanceCheck", MessageLevel.msgDebug, $"Assembly location: {assembly.Location}");
+                var fileInfo = new System.IO.FileInfo(assembly.Location);
+                LogMsg("ConformanceCheck", MessageLevel.msgDebug, $"Last write time: {fileInfo.LastWriteTime}");
+                lastModifiedTime = fileInfo.LastWriteTime;
+            }
+            catch (Exception ex)
+            {
+                LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"Last modified exception: {ex}");
+            }
+
             LogMsg("", MessageLevel.msgAlways, ""); // Blank line
-            LogMsg("ConformanceCheck", MessageLevel.msgAlways, "ASCOM Universal Device Conformance Checker Version " + this.GetType().Assembly.GetName().Version.ToString() + ", Build time: " + lastModified.ToString());
-            //LogMsg("ConformanceCheck", MessageLevel.Always, "Running on: " + Prof.GetProfile("Platform", "Platform Name", "Unknown") + " " + Prof.GetProfile("Platform", "Platform Version", "Unknown"));
+            LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"ASCOM Universal Device Conformance Checker Version {this.GetType().Assembly.GetName().Version.ToString()}, Build time: {lastModifiedTime:ddd dd MMMM yyyy HH:mm:ss}");
+
             LogMsg("", MessageLevel.msgAlways, ""); // Blank line
             LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"Driver ProgID: {p_ProgID}");
             LogMsg("", MessageLevel.msgAlways, ""); // Blank line

@@ -15,10 +15,12 @@ namespace ConformU
 {
     public class ConformLogger : TraceLogger
     {
-        public ConformLogger(string loggerName, bool enabled) : base(loggerName, enabled)
+        public ConformLogger(string logFileName, string logFilePath, string loggerName, bool enabled) : base(logFileName, logFilePath, loggerName, enabled)
         {
             Debug = false;
+            Console.WriteLine($"CONFORMLOGGER INIT - Log file name: {logFileName}, Log file path: {logFilePath}, Logger name: {loggerName}");
         }
+
 
         public void LogMessage(string id, MessageLevel logLevel, string message)
         {
@@ -35,5 +37,12 @@ namespace ConformU
         }
 
         public bool Debug { get; set; }
+
+        public new void LogMessage(string id, string message)
+        {
+            Console.WriteLine($"{id.PadRight(25)} {message}");
+            base.LogMessage(id, message);
+        }
+
     }
 }

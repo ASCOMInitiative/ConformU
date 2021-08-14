@@ -1,16 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Security;
-using System.Text;
-using Microsoft.VisualBasic;
+//using Microsoft.VisualBasic;
 using ASCOM.Standard.Interfaces;
 using System.Threading;
 using ASCOM.Standard.AlpacaClients;
@@ -21,12 +10,6 @@ namespace ConformU
 
     internal class DomeTester : DeviceTesterBaseClass
     {
-        // These constants have been moved to the applications setting object so that they can be changed by the user, the same default values have been retained
-        // Const DOME_SHUTTER_TIMEOUT As Integer = 60 'Timeout for dome to open or close shutter
-        // Const DOME_AZIMUTH_TIMEOUT As Integer = 180 'Timeout for dome to move to azimuth
-        // Const DOME_ALTITUDE_TIMEOUT As Integer = 120 'Timeout for dome to move to altitude
-        // Const DOME_POST_COMMAND_WAIT_TIME As Integer = 5000 '
-
         const double DOME_SYNC_OFFSET = 45.0; // Amount to offset the azimuth when testing ability to sync
         const double DOME_ILLEGAL_ALTITUDE_LOW = -10.0; // Illegal value to test dome driver exception generation
         const double DOME_ILLEGAL_ALTITUDE_HIGH = 100.0; // Illegal value to test dome driver exception generation
@@ -210,12 +193,10 @@ namespace ConformU
             base.CheckCommonMethods(domeDevice, DeviceType.Dome);
         }
 
-
         public override void PreRunCheck()
         {
             int l_VStringPtr, l_V1, l_V2, l_V3;
             string l_VString;
-            Microsoft.VisualBasic.MsgBoxResult l_MsgBoxResult;
 
             // Add a test for a back level version of the Dome simulator - just abandon this process if any errors occur
             if (settings.ComDevice.ProgId.ToUpper() == "DOMESIM.DOME")
@@ -224,30 +205,31 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("PreRunCheck", "About to get DriverInfo property");
-                    l_VStringPtr = Strings.InStr(domeDevice.DriverInfo.ToUpper(), "ASCOM DOME SIMULATOR "); // Point at the start of the version string
+                    l_VStringPtr = domeDevice.DriverInfo.ToUpper().IndexOf("ASCOM DOME SIMULATOR "); // Point at the start of the version string
                     if (l_VStringPtr > 0)
                     {
                         LogCallToDriver("PreRunCheck", "About to get DriverInfo property");
-                        l_VString = Strings.Mid(domeDevice.DriverInfo.ToUpper(), l_VStringPtr + 21); // Get the version string
-                        l_VStringPtr = Strings.InStr(l_VString, ".");
+                        l_VString = domeDevice.DriverInfo.ToUpper().Substring(l_VStringPtr + 21); // Get the version string
+                        l_VStringPtr = l_VString.IndexOf(".");
                         if (l_VStringPtr > 1)
                         {
-                            l_V1 = System.Convert.ToInt32(Strings.Mid(l_VString, 1, l_VStringPtr - 1)); // Extract the number
-                            l_VString = Strings.Mid(l_VString, l_VStringPtr + 1); // Get the second version number part
-                            l_VStringPtr = Strings.InStr(l_VString, ".");
+                            l_V1 = System.Convert.ToInt32(l_VString.Substring(1, l_VStringPtr - 1)); // Extract the number
+                            l_VString = l_VString.Substring(l_VStringPtr + 1); // Get the second version number part
+                            l_VStringPtr = l_VString.IndexOf(".");
                             if (l_VStringPtr > 1)
                             {
-                                l_V2 = System.Convert.ToInt32(Strings.Mid(l_VString, 1, l_VStringPtr - 1)); // Extract the number
-                                l_VString = Strings.Mid(l_VString, l_VStringPtr + 1); // Get the third version number part
-                                                                                      // Find the next non numeric character
+                                l_V2 = int.Parse(l_VString.Substring(1, l_VStringPtr - 1)); // Extract the number
+                                l_VString = l_VString.Substring(l_VStringPtr + 1); // Get the third version number part
+                                                                                   // Find the next non numeric character
                                 l_VStringPtr = 0;
                                 do
                                     l_VStringPtr += 1;
-                                while (!!Information.IsNumeric(Strings.Mid(l_VString, l_VStringPtr, 1)));
+                                while (int.TryParse(l_VString.Substring(l_VStringPtr, 1), out _));
+
                                 if (l_VStringPtr > 1)
                                 {
-                                    l_V3 = System.Convert.ToInt32(Strings.Mid(l_VString, 1, l_VStringPtr - 1)); // Extract the number
-                                                                                                                // Turn the version parts into a whole number
+                                    l_V3 = System.Convert.ToInt32(l_VString.Substring(1, l_VStringPtr - 1)); // Extract the number
+                                                                                                             // Turn the version parts into a whole number
                                     l_V1 = l_V1 * 1000000 + l_V2 * 1000 + l_V3;
                                     if (l_V1 < 5000007)
                                     {
@@ -319,16 +301,7 @@ namespace ConformU
                     }
                     catch (Exception ex)
                     {
-                        LogMsg("DomeSafety", MessageLevel.msgComment, "Unable to open shutter: " + ex.Message);
-                        LogMsg("DomeSafety", MessageLevel.msgComment, "Prompting for manual intervention...");
-                        l_MsgBoxResult = Interaction.MsgBox("Please open shutter and press OK or press Cancel to stop tests", MsgBoxStyle.OkCancel | MsgBoxStyle.SystemModal, "Dome Safety");
-                        if (l_MsgBoxResult == MsgBoxResult.Cancel)
-                        {
-                            g_Stop = true; // Stop if cancel was pressed
-                            LogMsg("DomeSafety", MessageLevel.msgComment, "Cancel pressed, further testing abandoned");
-                        }
-                        else
-                            LogMsg("DomeSafety", MessageLevel.msgComment, "OK pressed, testing continues");
+                        LogMsg("DomeSafety", MessageLevel.msgComment, "Unable to open shutter, some tests may fail: " + ex.Message);
                     }
                     Status(StatusType.staTest, "");
                 }
@@ -463,7 +436,7 @@ namespace ConformU
                     DomeWaitForSlew(settings.DomeAzimuthTimeout);
                     LogMsg("DomeSafety", MessageLevel.msgOK, "Dome successfully parked");
                 }
-                catch (Exception )
+                catch (Exception)
                 {
                     LogMsg("DomeSafety", MessageLevel.msgError, "Exception generated, unable to park dome");
                 }
@@ -545,7 +518,7 @@ namespace ConformU
             do
             {
                 WaitFor(SLEEP_TIME);
-                Status(StatusType.staStatus, "Slewing Status: " + domeDevice.Slewing + ", Timeout: " + Strings.Format(DateTime.Now.Subtract(l_StartTime).TotalSeconds, "#0") + "/" + p_TimeOut + ", press stop to abandon wait");
+                Status(StatusType.staStatus, "Slewing Status: " + domeDevice.Slewing + ", Timeout: " + DateTime.Now.Subtract(l_StartTime).TotalSeconds.ToString("#0") + "/" + p_TimeOut + ", press stop to abandon wait");
             }
             while (!!domeDevice.Slewing | cancellationToken.IsCancellationRequested | (DateTime.Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut));
 
@@ -1144,7 +1117,7 @@ namespace ConformU
                                         else
                                             l_NewAzimuth = l_OriginalAzimuth + DOME_SYNC_OFFSET;
                                         domeDevice.SyncToAzimuth(l_NewAzimuth); // Sync to new azimuth
-                                                                            // OK Dome hasn't moved but should now show azimuth as a new value
+                                                                                // OK Dome hasn't moved but should now show azimuth as a new value
                                         switch (Math.Abs(l_NewAzimuth - domeDevice.Azimuth))
                                         {
                                             case object _ when Math.Abs(l_NewAzimuth - domeDevice.Azimuth) < 1.0 // very close so give it an OK
@@ -1248,7 +1221,6 @@ namespace ConformU
         }
         private void DomeShutterTest(ShutterState p_RequiredShutterState, string p_Name)
         {
-            MsgBoxResult l_MsgBoxResult;
             ShutterState l_ShutterState;
 
             if (settings.DomeOpenShutter)
@@ -1340,14 +1312,7 @@ namespace ConformU
 
                         case ShutterState.Error:
                             {
-                                l_MsgBoxResult = Interaction.MsgBox("ShutterState is \"Error\" please prepare the shutter for the " + p_Name + " test and press OK or press Cancel to stop tests", MsgBoxStyle.OkCancel | MsgBoxStyle.SystemModal, "Dome Safety");
-                                if (l_MsgBoxResult == MsgBoxResult.Cancel)
-                                {
-                                    g_Stop = true; // Stop if cancel was pressed
-                                    LogMsg("DomeSafety", MessageLevel.msgComment, "Cancel pressed, further testing abandoned");
-                                }
-                                else
-                                    LogMsg("DomeSafety", MessageLevel.msgComment, "OK pressed, testing continues");
+                                LogMsg("DomeShutterTest", MessageLevel.msgError, $"Shutter state is Error: {l_ShutterState}");
                                 break;
                             }
 
@@ -1536,7 +1501,7 @@ namespace ConformU
                     l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
                     if (l_ElapsedTime > l_LastElapsedTime + 1.0)
                     {
-                        Status(StatusType.staStatus, l_Count + " transactions in " + Strings.Format(l_ElapsedTime, "0") + " seconds");
+                        Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
                         l_LastElapsedTime = l_ElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
@@ -1548,25 +1513,25 @@ namespace ConformU
                 {
                     case object _ when l_Rate > 10.0:
                         {
-                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + Strings.Format(l_Rate, "0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case object _ when 2.0 <= l_Rate && l_Rate <= 10.0:
                         {
-                            LogMsg(p_Name, MessageLevel.msgOK, "Transaction rate: " + Strings.Format(l_Rate, "0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.msgOK, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case object _ when 1.0 <= l_Rate && l_Rate <= 2.0:
                         {
-                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + Strings.Format(l_Rate, "0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + Strings.Format(l_Rate, "0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
                 }

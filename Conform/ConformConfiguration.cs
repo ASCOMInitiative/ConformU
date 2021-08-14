@@ -16,21 +16,32 @@ namespace ConformU
 
         private readonly ConformLogger TL;
         Settings settings;
+        string fileSettingsFileName;
 
         /// <summary>
         /// Create a Configuration mangement instance and load the current settings
         /// </summary>
         /// <param name="logger">Data logger instance.</param>
-        public ConformConfiguration(ConformLogger logger)
+        public ConformConfiguration(ConformLogger logger, string configurationFile)
         {
             TL = logger;
+
             try
             {
                 settings = new();
 
-                string folderName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), FOLDER_NAME);
-                string fileSettingsFileName = Path.Combine(folderName, FOLDER_SETTINGS_FILE);
-                TL.LogDebug("ConformConfiguration", $"Settings folder: {folderName}, Settings file: {fileSettingsFileName}");
+                if (string.IsNullOrEmpty(configurationFile))
+                {
+                    string folderName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), FOLDER_NAME);
+                    fileSettingsFileName = Path.Combine(folderName, FOLDER_SETTINGS_FILE);
+                    TL.LogDebug("ConformConfiguration", $"Settings folder: {folderName}, Settings file: {fileSettingsFileName}");
+                }
+                else
+                {
+                    fileSettingsFileName = configurationFile;
+                    TL.LogDebug("ConformConfiguration", $"Settings file: {fileSettingsFileName}");
+                }
+
 
                 if (File.Exists(fileSettingsFileName))
                 {
@@ -43,7 +54,7 @@ namespace ConformU
                 }
                 else
                 {
-                    TL.LogDebug("ConformConfiguration", "File does not exist, creating file...");
+                    TL.LogMessage("ConformConfiguration", $"Configuration file does not exist, initialising new file: {fileSettingsFileName}");
                     PersistSettings(settings);
                     Status = "Settings set to defaults on first time use.";
                 }
@@ -65,12 +76,20 @@ namespace ConformU
         /// </summary>
         public string Validate()
         {
-            if (settings.DeviceName == ConformConstants.NO_DEVICE_SELECTED) return "No device has been selected.";
-            if ((settings.DeviceTechnology != DeviceTechnology.Alpaca) & (settings.DeviceTechnology != DeviceTechnology.COM)) return $"Technology type is not Alpaca or COM: '{settings.DeviceTechnology}'";
+            string issueList = ""; // Initialise to an empty string indicating that all is OK
+
+            if (settings.DeviceName == ConformConstants.NO_DEVICE_SELECTED) issueList += "\r\nNo device has been selected.";
+            if ((settings.DeviceTechnology != DeviceTechnology.Alpaca) & (settings.DeviceTechnology != DeviceTechnology.COM)) issueList += $"\r\nTechnology type is not Alpaca or COM: '{settings.DeviceTechnology}'";
 
             switch (settings.DeviceTechnology)
             {
                 case DeviceTechnology.Alpaca:
+                    if (string.IsNullOrEmpty(settings.AlpacaDevice.AscomDeviceType)) issueList += $"\r\nAlpaca device type is not set";
+
+                    if (string.IsNullOrEmpty(settings.AlpacaDevice.IpAddress)) issueList += $"\r\nAlpaca device IP address is not set";
+
+                    if (settings.AlpacaDevice.IpPort == 0) issueList += $"\r\nAlpaca device IP Port is not set.";
+                    if (settings.AlpacaDevice.InterfaceVersion == 0) issueList += $"\r\nAlpaca interface version is not set";
                     break;
 
                 case DeviceTechnology.COM:
@@ -78,11 +97,9 @@ namespace ConformU
 
                     break;
             }
+            issueList = issueList.Trim();
 
-
-
-            // All OK so return empty string
-            return "";
+            return issueList;
         }
 
         /// <summary>
@@ -138,10 +155,7 @@ namespace ConformU
                     throw new ArgumentNullException(nameof(settingsToPersist));
                 }
 
-                string folderName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), FOLDER_NAME);
-                string fileSettingsFileName = Path.Combine(folderName, FOLDER_SETTINGS_FILE);
-
-                TL.LogDebug("PersistSettings", $"Settings folder: {folderName}, Settings file: {fileSettingsFileName}");
+                TL.LogDebug("PersistSettings", $"Settings file: {fileSettingsFileName}");
 
                 JsonSerializerOptions options = new()
                 {
@@ -149,7 +163,7 @@ namespace ConformU
                 };
                 string serialisedSettings = JsonSerializer.Serialize<Settings>(settingsToPersist, options);
 
-                Directory.CreateDirectory(folderName);
+                Directory.CreateDirectory(Path.GetDirectoryName(fileSettingsFileName));
                 File.WriteAllText(fileSettingsFileName, serialisedSettings);
             }
             catch (Exception ex)

@@ -5,6 +5,8 @@
 @inject ConformLogger conformLogger
 @inject ConformConfiguration settings
 @inject IJSRuntime JS
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 @* Radzen notification service to enable pop-up alerts *@
 @inject NotificationService notificationService
 
@@ -37,11 +39,14 @@
 
     protected override void OnInitialized()
     {
+        Console.WriteLine($"Settings location - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_SETTINGS)}");
+        Console.WriteLine($"Log file name     - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILENAME)}");
+        Console.WriteLine($"Log file path     - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILEPATH)}");
+        
     }
 
     async void StartTest(string buttonName)
     {
-
         // Validate the supplied configuraiton and only start if there are no settings issues
         string validationMessage = settings.Validate();
         if (!string.IsNullOrEmpty(validationMessage)) // There is a configuraiton issue so present an error message
@@ -143,7 +148,7 @@
     {
         lock (statusLockObject)
         {
-            statusMessage =$"{e.Message}";  // Add the new log message to the screen display
+            statusMessage = $"{e.Message}";  // Add the new log message to the screen display
 
             InvokeAsync(StateHasChanged); // Display the updated log on the screen
         }

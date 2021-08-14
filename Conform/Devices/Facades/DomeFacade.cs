@@ -37,7 +37,7 @@ namespace ConformU
 
         public bool CanSyncAzimuth => driver.CanSyncAzimuth;
 
-        public ShutterState ShutterStatus => driver.ShutterStatus;
+        public ShutterState ShutterStatus => (ShutterState)driver.ShutterStatus;
 
         public bool Slaved { get => driver.Slaved; set => driver.Slaved = value; }
 

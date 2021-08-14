@@ -61,6 +61,9 @@ namespace ConformU
 
         public const string NO_DEVICE_SELECTED = "No device selected"; // Text indicating that no device has been sleected
 
+        public const string COMMAND_OPTION_SETTINGS = "ConformSettings";
+        public const string COMMAND_OPTION_LOGFILENAME = "ConformLogFileName";
+        public const string COMMAND_OPTION_LOGFILEPATH = "ConformLogFilePath";
     }
 
 }

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Radzen;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -22,7 +23,7 @@ namespace ConformU
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -33,15 +34,39 @@ namespace ConformU
             services.AddServerSideBlazor();
 
             // Conform components
-            ConformLogger conformLogger = new("ConformU", true);  // Create a logger component
+            string loggerName;
+            // Set log name with casing appropriate to OS
+            if (OperatingSystem.IsWindows())
+            {
+                loggerName = "ConformU";
+            }
+            else
+            {
+                loggerName = "conformu";
+            }
+
+            string logFileName = Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILENAME) ?? "";
+            string logFilePath = Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILEPATH) ?? "";
+
+            // Use fully qualified file name if present, otherwise use log file path and relative file name
+            if (Path.IsPathFullyQualified(logFileName)) // Full file name and path provided so split into path and filename and ignore any supplied log file path
+            {
+                logFilePath = Path.GetDirectoryName(logFileName);
+                logFileName = Path.GetFileName(logFileName);
+            }
+            else // Relative file name so use supplied log file name and path
+            {
+                // No action required
+            }
+
+            ConformLogger conformLogger = new(logFileName, logFilePath, loggerName, true);  // Create a logger component
+            conformLogger.Debug = true;
             services.AddSingleton(conformLogger); // Add the logger component to the list of injectable services
 
-            ConformConfiguration conformConfiguration = new(conformLogger); // Create a configuration settings component
+            ConformConfiguration conformConfiguration = new(conformLogger, Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_SETTINGS)); // Create a configuration settings component
             services.AddSingleton(conformConfiguration); // Add the configuration component to the list of injectable services
 
             // Resizeable screen log text area infrastructure
-            //services.AddMediaQueryService();
-            //services.AddScoped<ResizeListener>();
             services.AddResizeListener(options =>
                 {
                     options.ReportRate = 100; // Milliseconds between update notifications (I think - documentation not clear)
@@ -64,10 +89,11 @@ namespace ConformU
             }
             else
             {
-                app.UseExceptionHandler("/Error");
+                //app.UseExceptionHandler("/Error");
+                app.UseDeveloperExceptionPage();
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-                logger.LogInformation("***** Using production environment");
+                //app.UseHsts();
+                logger.LogInformation("***** Using modified production environment");
             }
 
             //
@@ -83,6 +109,11 @@ namespace ConformU
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+
+            //foreach (var c in Configuration.AsEnumerable())
+            //{
+            //    Console.WriteLine($"{c.Key,-40}:{c.Value}");
+            //}
         }
     }
 }
