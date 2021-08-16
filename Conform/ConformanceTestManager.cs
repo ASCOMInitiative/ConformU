@@ -110,7 +110,7 @@ namespace ConformU
 
                 case DeviceType.CoverCalibrator:
                     {
-                        //testDevice = new CoverCalibratorTester(this, configuration,TL,cancellationToken);
+                        testDevice = new CoverCalibratorTester(this, configuration,TL,cancellationToken);
                         break;
                     }
 
