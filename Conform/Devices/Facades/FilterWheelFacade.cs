@@ -13,11 +13,11 @@ namespace ConformU
 
         #region Interface implementation
 
-        public int[] FocusOffsets => driver.FocusOffsets;
+        public int[] FocusOffsets => (int[])FunctionNoParameters(() => driver.FocusOffsets);
 
-        public string[] Names => driver.driver.Names;
+        public string[] Names => (string[])FunctionNoParameters(() => driver.Names);
 
-        public short Position { get => driver.Position; set => driver.Position = value; }
+        public short Position { get => (short)FunctionNoParameters(() => driver.Position); set => Method1Parameter((i) => driver.Position = i, value); }
 
         #endregion
 

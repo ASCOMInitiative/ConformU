@@ -18,7 +18,7 @@ namespace ConformU
         ILogger logger;
 
         // Default constructor - Internal prevents public creation instances.
-        internal AxisRatesFacade(TelescopeAxis Axis, dynamic driver, ILogger logger)
+        internal AxisRatesFacade(TelescopeAxis Axis, dynamic driver, TelescopeFacade telescopeFacade, ILogger logger)
         {
             m_Rates = Array.Empty<RateFacade>(); // Initialise to an empty array
 
@@ -26,7 +26,7 @@ namespace ConformU
             m_axis = Axis;
 
             // Assign the AxisRates response to an IEnumerable variable
-            IEnumerable driverAxisRates = driver.AxisRates(Axis);
+            IEnumerable driverAxisRates = (IEnumerable)telescopeFacade.Function1Parameter((i) => driver.AxisRates(i), Axis);
 
             // Copy the response values to a local array so that the driver is not continually polled for values
             int nextArrayPosition = 0;

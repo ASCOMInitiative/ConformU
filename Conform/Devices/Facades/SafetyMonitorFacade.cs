@@ -15,7 +15,7 @@ namespace ConformU
 
         #region Interface implementation
 
-        public bool IsSafe => driver.IsSafe;
+        public bool IsSafe => (bool)FunctionNoParameters(() => driver.IsSafe);
 
         #endregion
 

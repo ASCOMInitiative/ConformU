@@ -195,6 +195,19 @@ namespace ConformU
             return returnValue;
         }
 
+        internal object Function1Parameter(Func<object, object> action, object parameter1)
+        {
+            //logger?.LogMessage("Function1Parameter", MessageLevel.msgDebug, $"About to call driverHostForm.SendVoid(action) on thread {Thread.CurrentThread.ManagedThreadId}");
+
+#if WINDOWS7_0_OR_GREATER
+            object returnValue = driverHostForm.Func1Parameter(action, parameter1);
+#else
+            object returnValue = action(parameter1);
+#endif
+            //logger?.LogMessage("Function1Parameter", MessageLevel.msgDebug, $"Returned from driverHostForm.SendVoid(action) on thread {Thread.CurrentThread.ManagedThreadId}");
+            return returnValue;
+        }
+
         internal object Function2Parameters(Func<object, object, object> action, object parameter1, object parameter2)
         {
             //logger?.LogMessage("Function2Parameters", MessageLevel.msgDebug, $"About to call driverHostForm.SendVoid(action) on thread {Thread.CurrentThread.ManagedThreadId}");

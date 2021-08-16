@@ -1,5 +1,4 @@
-﻿#if WINDOWS7_0_OR_GREATER
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,10 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+#if WINDOWS7_0_OR_GREATER
 using System.Windows.Forms;
 
 namespace ConformU
 {
+
     public partial class DriverHostForm : Form
     {
         private string progId;
@@ -63,6 +65,7 @@ namespace ConformU
         public delegate void Action1ParameterDelegate(Action<object> action, object parameter1);
         public delegate void Action2ParametersDelegate(Action<object, object> action, object parameter1, object parameter2);
         public delegate object FuncNoParameterDelegate(Func<object> action);
+        public delegate object Func1ParameterDelegate(Func<object, object> func, object parameter1);
         public delegate object Func2ParameterDelegate(Func<object, object, object> func, object parameter1, object parameter2);
 
         internal void ActionNoParameters(Action action)
@@ -128,6 +131,23 @@ namespace ConformU
             {
                 //logger?.LogMessage("FuncNoParameters", MessageLevel.msgDebug, $"About to run Action {action.Method.Name} on thread: {Thread.CurrentThread.ManagedThreadId}");
                 object returnValue = action();
+                //logger?.LogMessage("FuncNoParameters", MessageLevel.msgDebug, $"Returned from Action {action.Method.Name} on thread: {Thread.CurrentThread.ManagedThreadId}");
+                return returnValue;
+            }
+        }
+
+        internal object Func1Parameter(Func<object, object> action, object parameter1)
+        {
+            if (this.InvokeRequired)
+            {
+                //logger?.LogMessage("FuncNoParameters", MessageLevel.msgDebug, $"Invoke required for {action.Method.Name} command on thread: {Thread.CurrentThread.ManagedThreadId}");
+                Func1ParameterDelegate getValue = new(Func1Parameter);
+                return this.Invoke(getValue, action, parameter1);
+            }
+            else
+            {
+                //logger?.LogMessage("FuncNoParameters", MessageLevel.msgDebug, $"About to run Action {action.Method.Name} on thread: {Thread.CurrentThread.ManagedThreadId}");
+                object returnValue = action(parameter1);
                 //logger?.LogMessage("FuncNoParameters", MessageLevel.msgDebug, $"Returned from Action {action.Method.Name} on thread: {Thread.CurrentThread.ManagedThreadId}");
                 return returnValue;
             }

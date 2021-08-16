@@ -13,34 +13,34 @@ namespace ConformU
 
         #region Interface implementation
 
-        public bool Absolute => driver.Absolute;
+        public bool Absolute => (bool)FunctionNoParameters(() => driver.Absolute);
 
-        public bool IsMoving => driver.IsMoving;
+        public bool IsMoving => (bool)FunctionNoParameters(() => driver.IsMoving);
 
-        public bool Link { get => driver.Link; set => driver.Link = value; }
+        public bool Link { get => (bool)FunctionNoParameters(() => driver.Link); set => Method1Parameter((i) => driver.Link = i, value); }
 
-        public int MaxIncrement => driver.MaxIncrement;
+        public int MaxIncrement => (int)FunctionNoParameters(() => driver.MaxIncrement);
 
-        public int MaxStep => driver.MaxStep;
+        public int MaxStep => (int)FunctionNoParameters(() => driver.MaxStep);
 
-        public int Position => driver.Position;
+        public int Position => (int)FunctionNoParameters(() => driver.Position);
 
-        public double StepSize => driver.StepSize;
+        public double StepSize => (double)FunctionNoParameters(() => driver.StepSize);
 
-        public bool TempComp { get => driver.TempComp; set => driver.TempComp = value; }
+        public bool TempComp { get => (bool)FunctionNoParameters(() => driver.TempComp); set => Method1Parameter((i) => driver.TempComp = i, value); }
 
-        public bool TempCompAvailable => driver.TempCompAvailable;
+        public bool TempCompAvailable => (bool)FunctionNoParameters(() => driver.TempCompAvailable);
 
-        public double Temperature => driver.Temperature;
+        public double Temperature => (double)FunctionNoParameters(() => driver.Temperature);
 
         public void Halt()
         {
-            driver.Halt();
+            MethodNoParameters(() => driver.Halt());
         }
 
         public void Move(int Position)
         {
-            driver.Move(Position);
+            Method1Parameter((i) => driver.Move(i), Position);
         }
 
         #endregion

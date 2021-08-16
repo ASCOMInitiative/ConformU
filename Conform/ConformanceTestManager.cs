@@ -80,7 +80,7 @@ namespace ConformU
 
                 case DeviceType.Focuser:
                     {
-                        //testDevice = new FocuserTester(this, configuration,TL,cancellationToken);
+                        testDevice = new FocuserTester(this, configuration,TL,cancellationToken);
                         break;
                     }
 
@@ -92,7 +92,7 @@ namespace ConformU
 
                 case DeviceType.FilterWheel:
                     {
-                        //testDevice = new FilterWheelTester(this, configuration,TL,cancellationToken);
+                        testDevice = new FilterWheelTester(this, configuration,TL,cancellationToken);
                         break;
                     }
 

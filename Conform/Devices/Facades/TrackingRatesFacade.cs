@@ -14,13 +14,13 @@ namespace ConformU
         private int _pos = -1;
 
         // Default constructor - Internal prevents public creation instances.
-        internal TrackingRatesFacade(dynamic driver)
+        internal TrackingRatesFacade(dynamic driver, TelescopeFacade telescopeFacade)
         {
             // Initialise to an empty array
             m_TrackingRates = Array.Empty<DriveRate>();
 
             // Assign the TrackinRates response to an IEnumerable variable
-            IEnumerable trackingRates = driver.TrackingRates;
+            IEnumerable trackingRates = (IEnumerable)telescopeFacade.FunctionNoParameters(() => driver.TrackingRates);
 
             // Copy the response values to a local array so that the driver is not continually polled for values
             int nextArrayPosition = 0;
