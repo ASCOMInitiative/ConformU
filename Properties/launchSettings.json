@@ -17,7 +17,6 @@
     },
     "ConformU": {
       "commandName": "Project",
-      "commandLineArgs": " --logfilename testlog.txt -s c:\\users\\peter\\documents\\conform.settings",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

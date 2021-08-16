@@ -17,17 +17,17 @@ namespace ConformU
 
         public AlignmentMode AlignmentMode => (AlignmentMode)driver.AlignmentMode;
 
-        public double Altitude => driver.Altitude;
+        public double Altitude => (double)FunctionNoParameters(() => driver.Altitude);
 
-        public double ApertureArea => driver.ApertureArea;
+        public double ApertureArea => (double)FunctionNoParameters(() => driver.ApertureArea);
 
-        public double ApertureDiameter => driver.ApertureDiameter;
+        public double ApertureDiameter => (double)FunctionNoParameters(() => driver.ApertureDiameter);
 
         public bool AtHome => driver.AtHome;
 
         public bool AtPark => driver.AtPark;
 
-        public double Azimuth => driver.Azimuth;
+        public double Azimuth => (double)FunctionNoParameters(() => driver.Azimuth);
 
         public bool CanFindHome => driver.CanFindHome;
 
@@ -61,36 +61,36 @@ namespace ConformU
 
         public bool CanUnpark => driver.CanUnpark;
 
-        public double Declination => driver.Declination;
+        public double Declination => (double)FunctionNoParameters(() => driver.Declination);
 
-        public double DeclinationRate { get => driver.DeclinationRate; set => driver.DeclinationRate = value; }
+        public double DeclinationRate { get => (double)FunctionNoParameters(() => driver.DeclinationRate); set => driver.DeclinationRate = value; }
         public bool DoesRefraction { get => driver.DoesRefraction; set => driver.DoesRefraction = value; }
 
         public EquatorialCoordinateType EquatorialSystem => (EquatorialCoordinateType)driver.EquatorialSystem;
 
-        public double FocalLength => driver.FocalLength;
+        public double FocalLength => (double)FunctionNoParameters(() => driver.FocalLength);
 
-        public double GuideRateDeclination { get => driver.GuideRateDeclination; set => driver.GuideRateDeclination = value; }
-        public double GuideRateRightAscension { get => driver.GuideRateRightAscension; set => driver.GuideRateRightAscension = value; }
+        public double GuideRateDeclination { get => (double)FunctionNoParameters(() => driver.GuideRateDeclination); set => driver.GuideRateDeclination = value; }
+        public double GuideRateRightAscension { get => (double)FunctionNoParameters(() => driver.GuideRateRightAscension); set => driver.GuideRateRightAscension = value; }
 
         public bool IsPulseGuiding => driver.IsPulseGuiding;
 
-        public double RightAscension => driver.RightAscension;
+        public double RightAscension => (double)FunctionNoParameters(() => driver.RightAscension);
 
-        public double RightAscensionRate { get => driver.RightAscensionRate; set => driver.RightAscensionRate = value; }
+        public double RightAscensionRate { get => (double)FunctionNoParameters(() => driver.RightAscensionRate); set => driver.RightAscensionRate = value; }
         public PointingState SideOfPier { get => (PointingState)driver.SideOfPier; set => driver.SideOfPier = value; }
 
-        public double SiderealTime => driver.SiderealTime;
+        public double SiderealTime => (double)FunctionNoParameters(() => driver.SiderealTime);
 
-        public double SiteElevation { get => driver.SiteElevation; set => driver.SiteElevation = value; }
-        public double SiteLatitude { get => driver.SiteLatitude; set => driver.SiteLatitude = value; }
-        public double SiteLongitude { get => driver.SiteLongitude; set => driver.SiteLongitude = value; }
+        public double SiteElevation { get => (double)FunctionNoParameters(() => driver.SiteElevation); set => driver.SiteElevation = value; }
+        public double SiteLatitude {get => (double) FunctionNoParameters(() => driver.SiteLatitude); set => driver.SiteLatitude = value; }
+        public double SiteLongitude {get => (double)FunctionNoParameters(() => driver.SiteLongitude); set => driver.SiteLongitude = value; }
 
-        public bool Slewing => driver.Slewing;
+        public bool Slewing => (bool)FunctionNoParameters(() => driver.Slewing);
 
         public short SlewSettleTime { get => driver.SlewSettleTime; set => driver.SlewSettleTime = value; }
-        public double TargetDeclination { get => driver.TargetDeclination; set => driver.TargetDeclination = value; }
-        public double TargetRightAscension { get => driver.TargetRightAscension; set => driver.TargetRightAscension = value; }
+        public double TargetDeclination { get => (double)FunctionNoParameters(() => driver.TargetDeclination); set => driver.TargetDeclination = value; }
+        public double TargetRightAscension { get => (double)FunctionNoParameters(() => driver.TargetRightAscension); set => driver.TargetRightAscension = value; }
         public bool Tracking { get => driver.Tracking; set => driver.Tracking = value; }
         public DriveRate TrackingRate { get => (DriveRate)driver.TrackingRate; set => driver.TrackingRate = value; }
 
@@ -161,12 +161,15 @@ namespace ConformU
 
         public void SlewToCoordinates(double RightAscension, double Declination)
         {
-            driver.SlewToCoordinates(RightAscension, Declination);
+            //driver.SlewToCoordinates(RightAscension, Declination);
+            Method2Parameters((i, j) => driver.SlewToCoordinates(i, j), RightAscension, Declination);
         }
 
         public void SlewToCoordinatesAsync(double RightAscension, double Declination)
         {
-            driver.SlewToCoordinatesAsync(RightAscension, Declination);
+            //driver.SlewToCoordinatesAsync(RightAscension, Declination);
+            Method2Parameters((i, j) => driver.SlewToCoordinatesAsync(i, j), RightAscension, Declination);
+
         }
 
         public void SlewToTarget()

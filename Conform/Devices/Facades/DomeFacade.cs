@@ -3,13 +3,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+#if WINDOWS7_0_OR_GREATER
+using System.Windows.Forms;
+#endif
+
 
 namespace ConformU
 {
     public class DomeFacade : FacadeBaseClass, IDomeV2
     {
         // Create the test device in the facade base class
-        public DomeFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }
+        public DomeFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) 
+        {
+#if WINDOWS7_0_OR_GREATER
+            Form f = new();
+#endif
+        }
 
         #region Interface implementation
 
@@ -88,7 +97,7 @@ namespace ConformU
             driver.SyncToAzimuth(Azimuth);
         }
 
-        #endregion
+#endregion
 
     }
 }

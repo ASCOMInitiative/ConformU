@@ -260,10 +260,10 @@ namespace ConformU
                         throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
 
-                LogMsg("CreateDevice", MessageLevel.msgDebug, "Successfully created driver");
-
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
                 g_Stop = false;
+                LogMsg("CreateDevice", MessageLevel.msgDebug, "Successfully created driver");
+
             }
             catch (Exception ex)
             {
@@ -273,6 +273,7 @@ namespace ConformU
 
             if (g_Stop) WaitFor(200);
         }
+
         public override bool Connected
         {
             get
@@ -2507,13 +2508,11 @@ namespace ConformU
                                 Status(StatusType.staAction, "Waiting for exposure to start");
 
                                 // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
-                                if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageReady");
+                                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageReady");
                                 imageReadyTooEarly = System.Convert.ToBoolean(m_Camera.ImageReady);
 
                                 // Wait for exposing state
-                                if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get CameraState multiple times");
+                                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get CameraState multiple times");
                                 do
                                 {
                                     WaitFor(CAMERA_SLEEP_TIME);
@@ -2523,15 +2522,13 @@ namespace ConformU
                                 while (!((m_Camera.CameraState == CameraState.Exposing) | (m_Camera.CameraState == CameraState.Error)));
 
                                 // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
-                                if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageReady");
+                                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageReady");
                                 imageReadyTooEarly = m_Camera.ImageReady;
 
                                 // Wait for the exposing state to finish
                                 l_StartTime = DateTime.Now;
                                 l_StartTimeUTC = DateTime.UtcNow;
-                                if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
+                                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
                                 do
                                 {
                                     l_PercentCompletedMessage = "Not present in a V1 driver";
@@ -2581,8 +2578,7 @@ namespace ConformU
 
                                     Status(StatusType.staAction, "Waiting for " + p_Duration.ToString() + " second exposure to complete: " + Conversion.Int(DateTime.Now.Subtract(l_StartTime).TotalSeconds) + ",   PercentComplete: " + l_PercentCompletedMessage);
                                     WaitFor(CAMERA_SLEEP_TIME);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
+                                    if (cancellationToken.IsCancellationRequested) return;
                                 }
                                 while (m_Camera.CameraState == CameraState.Exposing)// Initialise PercentCompleted message// Operation completed OK// Not implemented// Not valid at this time// Something bad happened!// Not valid at this time// Not implemented// Something bad happened!
     ;
@@ -2590,30 +2586,25 @@ namespace ConformU
                                 // Wait for camera to become idle
                                 l_EndTime = DateTime.Now;
                                 Status(StatusType.staAction, "Waiting for camera idle state, reading/downloading image");
-                                if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get CameraState multiple times");
+                                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get CameraState multiple times");
                                 do
                                 {
                                     WaitFor(CAMERA_SLEEP_TIME);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
+                                    if (cancellationToken.IsCancellationRequested) return;
                                 }
                                 while (!((m_Camera.CameraState == CameraState.Idle) | (m_Camera.CameraState == CameraState.Error)));
 
                                 // Wait for image to become ready
                                 Status(StatusType.staAction, "Waiting for image ready");
-                                if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get CameraState multiple times");
+                                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get CameraState multiple times");
                                 do
                                 {
                                     WaitFor(CAMERA_SLEEP_TIME);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
+                                    if (cancellationToken.IsCancellationRequested) return;
                                 }
                                 while (!((m_Camera.ImageReady) | (m_Camera.CameraState == CameraState.Error)));
 
-                                if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageReady");
+                                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageReady");
                                 if (m_Camera.ImageReady)
                                 {
                                     LogMsg("StartExposure", MessageLevel.msgOK, "Asynchronous exposure found OK: " + p_Duration + " seconds");
@@ -2840,8 +2831,7 @@ namespace ConformU
             // LastExposureDuration
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get LastExposureDuration");
+                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get LastExposureDuration");
                 m_LastExposureDuration = m_Camera.LastExposureDuration;
                 if ((Math.Abs(m_LastExposureDuration - p_Duration) / p_Duration) < 0.02)
                     LogMsg("LastExposureDuration", MessageLevel.msgOK, "LastExposureDuration is: " + m_LastExposureDuration + " seconds");
@@ -2856,8 +2846,7 @@ namespace ConformU
             // LastExposurestartTime
             try // Confirm that it can be read
             {
-                if (settings.DisplayMethodCalls)
-                    LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get LastExposureStartTime");
+                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get LastExposureStartTime");
                 m_LastExposureStartTime = m_Camera.LastExposureStartTime;
                 int l_i;
                 // Confirm that the format is as expected

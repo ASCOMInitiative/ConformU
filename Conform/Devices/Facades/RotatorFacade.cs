@@ -11,43 +11,43 @@ namespace ConformU
         // Create the test device in the facade base class
         public RotatorFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }
 
-        public bool CanReverse => driver.CanReverse;
+        public bool CanReverse => (bool)FunctionNoParameters(() => driver.CanReverse);
 
-        public bool IsMoving => driver.IsMoving;
+        public bool IsMoving => (bool)FunctionNoParameters(() => driver.IsMoving);
 
-        public float Position => driver.Position;
+        public float Position => (float)FunctionNoParameters(() => driver.Position);
 
-        public bool Reverse { get => driver.Reverse; set => driver.Reverse = value; }
+        public bool Reverse { get => (bool)FunctionNoParameters(() => driver.Reverse); set => Method1Parameter((i) => driver.Reverse = i, value); }
 
-        public float StepSize => driver.StepSize;
+        public float StepSize => (float)FunctionNoParameters(() => driver.StepSize);
 
-        public float TargetPosition => driver.TargetPosition;
+        public float TargetPosition => (float)FunctionNoParameters(() => driver.TargetPosition);
 
-        public float MechanicalPosition => driver.MechanicalPosition;
+        public float MechanicalPosition => (float)FunctionNoParameters(() => driver.MechanicalPosition);
 
         public void Halt()
         {
-            driver.Halt();
+            MethodNoParameters(() => driver.Halt());
         }
 
         public void Move(float Position)
         {
-            driver.Move(Position);
+            Method1Parameter((i) => driver.Move(i), Position);
         }
 
         public void MoveAbsolute(float Position)
         {
-            driver.MoveAbsolute(Position);
+            Method1Parameter((i) => driver.MoveAbsolute(i),Position);
         }
 
         public void MoveMechanical(float Position)
         {
-            driver.MoveMechanical(Position);
+            Method1Parameter((i) => driver.MoveMechanical(i),Position);
         }
 
         public void Sync(float Position)
         {
-            driver.Sync(Position);
+            Method1Parameter((i) => driver.Sync(i),Position);
         }
     }
 }

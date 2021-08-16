@@ -12,95 +12,100 @@ namespace ConformU
         // Create the test device in the facade base class
         public CameraFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }
 
-        public short BinX { get => driver.BinX; set => driver.BinX = value; }
-        public short BinY { get => driver.BinY; set => driver.BinY = value; }
+        public short BinX { get => (short)FunctionNoParameters(() => driver.BinX); set => Method1Parameter((i) => driver.BinX = i, value); }
 
-        public CameraState CameraState => (CameraState)driver.CameraState;
+        public short BinY { get => (short)FunctionNoParameters(() => driver.BinY); set => Method1Parameter((i) => driver.BinY = i, value); }
 
-        public int CameraXSize => driver.CameraXSize;
+        public CameraState CameraState => (CameraState)FunctionNoParameters(() => driver.CameraState);
 
-        public int CameraYSize => driver.CameraYSize;
+        public int CameraXSize => (int)FunctionNoParameters(() => driver.CameraXSize);
 
-        public bool CanAbortExposure => driver.CanAbortExposure;
+        public int CameraYSize => (int)FunctionNoParameters(() => driver.CameraYSize);
 
-        public bool CanAsymmetricBin => driver.CanAsymmetricBin;
+        public bool CanAbortExposure => (bool)FunctionNoParameters(() => driver.CanAbortExposure);
 
-        public bool CanGetCoolerPower => driver.CanGetCoolerPower;
+        public bool CanAsymmetricBin => (bool)FunctionNoParameters(() => driver.CanAsymmetricBin);
 
-        public bool CanPulseGuide => driver.CanPulseGuide;
+        public bool CanGetCoolerPower => (bool)FunctionNoParameters(() => driver.CanGetCoolerPower);
 
-        public bool CanSetCCDTemperature => driver.CanSetCCDTemperature;
+        public bool CanPulseGuide => (bool)FunctionNoParameters(() => driver.CanPulseGuide);
 
-        public bool CanStopExposure => driver.CanStopExposure;
+        public bool CanSetCCDTemperature => (bool)FunctionNoParameters(() => driver.CanSetCCDTemperature);
 
-        public double CCDTemperature => driver.CCDTemperature;
+        public bool CanStopExposure => (bool)FunctionNoParameters(() => driver.CanStopExposure);
 
-        public bool CoolerOn { get => driver.CoolerOn; set => driver.CoolerOn = value; }
+        public double CCDTemperature => (double)FunctionNoParameters(() => driver.CCDTemperature);
 
-        public double CoolerPower => driver.CoolerPower;
+        public bool CoolerOn { get => (bool)FunctionNoParameters(() => driver.CoolerOn); set => Method1Parameter((i) => driver.CoolerOn = i,value); }
 
-        public double ElectronsPerADU => driver.ElectronsPerADU;
+        public double CoolerPower => (double)FunctionNoParameters(() => driver.CoolerPower);
 
-        public double FullWellCapacity => driver.FullWellCapacity;
+        public double ElectronsPerADU => (double)FunctionNoParameters(() => driver.ElectronsPerADU);
 
-        public bool HasShutter => driver.HasShutter;
+        public double FullWellCapacity => (double)FunctionNoParameters(() => driver.FullWellCapacity);
 
-        public double HeatSinkTemperature => driver.HeatSinkTemperature;
+        public bool HasShutter => (bool)FunctionNoParameters(() => driver.HasShutter);
 
-        public object ImageArray => driver.ImageArray;
+        public double HeatSinkTemperature => (double)FunctionNoParameters(() => driver.HeatSinkTemperature);
 
-        public object ImageArrayVariant => driver.ImageArrayVariant;
+        public object ImageArray => FunctionNoParameters(() => driver.ImageArray);
 
-        public bool ImageReady => driver.ImageReady;
+        public object ImageArrayVariant => FunctionNoParameters(() => driver.ImageArrayVariant);
 
-        public bool IsPulseGuiding => driver.IsPulseGuiding;
+        public bool ImageReady => (bool)FunctionNoParameters(() => driver.ImageReady);
 
-        public double LastExposureDuration => driver.LastExposureDuration;
+        public bool IsPulseGuiding => (bool)FunctionNoParameters(() => driver.IsPulseGuiding);
 
-        public string LastExposureStartTime => driver.LastExposureStartTime;
+        public double LastExposureDuration => (double)FunctionNoParameters(() => driver.LastExposureDuration);
 
-        public int MaxADU => driver.MaxADU;
+        public string LastExposureStartTime => (string)FunctionNoParameters(() => driver.LastExposureStartTime);
 
-        public short MaxBinX => driver.MaxBinX;
+        public int MaxADU => (int)FunctionNoParameters(() => driver.MaxADU);
 
-        public short MaxBinY => driver.MaxBinY;
+        public short MaxBinX => (short)FunctionNoParameters(() => driver.MaxBinX);
 
-        public int NumX { get => driver.NumX; set => driver.NumX = value; }
-        public int NumY { get => driver.NumY; set => driver.NumY = value; }
+        public short MaxBinY => (short)FunctionNoParameters(() => driver.MaxBinY);
 
-        public double PixelSizeX => driver.PixelSizeX;
+        public int NumX { get => (int)FunctionNoParameters(() => driver.NumX); set => Method1Parameter((i) => driver.NumX = i,value); }
 
-        public double PixelSizeY => driver.PixelSizeY;
+        public int NumY { get => (int)FunctionNoParameters(() => driver.NumY); set => Method1Parameter((i) => driver.NumY = i, value); }
 
-        public double SetCCDTemperature { get => driver.SetCCDTemperature; set => driver.SetCCDTemperature = value; }
-        public int StartX { get => driver.StartX; set => driver.StartX = value; }
-        public int StartY { get => driver.StartY; set => driver.StartY = value; }
+        public double PixelSizeX => (double)FunctionNoParameters(() => driver.PixelSizeX);
 
-        public short BayerOffsetX => driver.BayerOffsetX;
+        public double PixelSizeY => (double)FunctionNoParameters(() => driver.PixelSizeY);
 
-        public short BayerOffsetY => driver.BayerOffsetY;
+        public double SetCCDTemperature { get => (double)FunctionNoParameters(() => driver.SetCCDTemperature); set => Method1Parameter((i) => driver.SetCCDTemperature = i, value); }
 
-        public bool CanFastReadout => driver.CanFastReadout;
+        public int StartX { get => (int)FunctionNoParameters(() => driver.StartX); set => Method1Parameter((i) => driver.StartX = i, value); }
 
-        public double ExposureMax => driver.ExposureMax;
+        public int StartY { get => (int)FunctionNoParameters(() => driver.StartY); set => Method1Parameter((i) => driver.StartY = i, value); }
 
-        public double ExposureMin => driver.ExposureMin;
+        public short BayerOffsetX => (short)FunctionNoParameters(() => driver.BayerOffsetX);
 
-        public double ExposureResolution => driver.ExposureResolution;
+        public short BayerOffsetY => (short)FunctionNoParameters(() => driver.BayerOffsetY);
 
-        public bool FastReadout { get => driver.FastReadout; set => driver.FastReadout = value; }
-        public short Gain { get => driver.Gain; set => driver.Gain = value; }
+        public bool CanFastReadout => (bool)FunctionNoParameters(() => driver.CanFastReadout);
 
-        public short GainMax => driver.GainMax;
+        public double ExposureMax => (double)FunctionNoParameters(() => driver.ExposureMax);
 
-        public short GainMin => driver.GainMin;
+        public double ExposureMin => (double)FunctionNoParameters(() => driver.ExposureMin);
+
+        public double ExposureResolution => (double)FunctionNoParameters(() => driver.ExposureResolution);
+
+        public bool FastReadout { get => (bool)FunctionNoParameters(() => driver.FastReadout); set => Method1Parameter((i) => driver.FastReadout = i, value); }
+
+        public short Gain { get => (short)FunctionNoParameters(() => driver.Gain); set => Method1Parameter((i) => driver.Gain = i, value); }
+
+        public short GainMax => (short)FunctionNoParameters(() => driver.GainMax);
+
+        public short GainMin => (short)FunctionNoParameters(() => driver.GainMin);
 
         public IList<string> Gains
         {
             get
             {
                 List<string> returnValue = new();
-                foreach (string gain in driver.Gains)
+                foreach (string gain in (System.Collections.IEnumerable)FunctionNoParameters(() => driver.Gains))
                 {
                     returnValue.Add(gain);
                 }
@@ -108,16 +113,16 @@ namespace ConformU
             }
         }
 
-        public short PercentCompleted => driver.PercentCompleted;
+        public short PercentCompleted => (short)FunctionNoParameters(() => driver.PercentCompleted);
 
-        public short ReadoutMode { get => driver.ReadoutMode; set => driver.ReadoutMode = value; }
+        public short ReadoutMode { get => (short)FunctionNoParameters(() => driver.ReadoutMode); set => Method1Parameter((i) => driver.ReadoutMode = i, value); }
 
         public IList<string> ReadoutModes
         {
             get
             {
                 List<string> returnValue = new();
-                foreach (string gain in driver.ReadoutModes)
+                foreach (string gain in (System.Collections.IEnumerable)FunctionNoParameters(() => driver.ReadoutModes))
                 {
                     returnValue.Add(gain);
                 }
@@ -125,22 +130,22 @@ namespace ConformU
             }
         }
 
-        public string SensorName => driver.SensorName;
+        public string SensorName => (string)FunctionNoParameters(() => driver.SensorName);
 
-        public SensorType SensorType => (SensorType)driver.SensorType;
+        public SensorType SensorType => (SensorType)FunctionNoParameters(() => driver.SensorType);
 
-        public int Offset { get => driver.Offset; set => driver.Offset = value; }
+        public int Offset { get => (int)FunctionNoParameters(() => driver.Offset); set => Method1Parameter((i) => driver.Offset = i, value); }
 
-        public int OffsetMax => driver.OffsetMax;
+        public int OffsetMax => (int)FunctionNoParameters(() => driver.OffsetMax);
 
-        public int OffsetMin => driver.OffsetMin;
+        public int OffsetMin => (int)FunctionNoParameters(() => driver.OffsetMin);
 
         public IList<string> Offsets
         {
             get
             {
                 List<string> returnValue = new();
-                foreach (string gain in driver.Offsets)
+                foreach (string gain in (System.Collections.IEnumerable)FunctionNoParameters(() => driver.Offsets))
                 {
                     returnValue.Add(gain);
                 }
@@ -148,32 +153,30 @@ namespace ConformU
             }
         }
 
-        public double SubExposureDuration { get => driver.SubExposureDuration; set => driver.SubExposureDuration = value; }
+        public double SubExposureDuration { get => (double)FunctionNoParameters(() => driver.SubExposureDuration); set => Method1Parameter((i) => driver.SubExposureDuration = i, value); }
 
         public void AbortExposure()
         {
-            driver.AbortExposure();
+            MethodNoParameters(() => driver.AbortExposure());
+
         }
 
         public void PulseGuide(GuideDirection Direction, int Duration)
         {
-            driver.PulseGuide(Direction, Duration);
+            Method2Parameters((i, j) => driver.PulseGuide(i, j), Direction, Duration);
         }
 
         public void StartExposure(double Duration, bool Light)
         {
-            driver.StartExposure(Duration, Light);
+            Method2Parameters((i, j) => driver.StartExposure(i, j), Duration, Light);
+
         }
 
         public void StopExposure()
         {
-            driver.StopExposure();
+            MethodNoParameters(() => driver.StopExposure());
+
         }
-
-        #region Interface implementation
-
-        #endregion
-
 
     }
 }
