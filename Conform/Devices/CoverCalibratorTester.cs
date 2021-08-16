@@ -35,7 +35,6 @@ namespace ConformU
         private CalibratorStatus calibratorState;
         private bool canAsynchronousOpen;
         private double asynchronousOpenTime;
-        private bool canAsynchronousClose;
         private double asynchronousCloseTime;
         private int maxBrightness;
         private bool calibratorStateOk;
@@ -870,20 +869,17 @@ namespace ConformU
                         {
                             LogMsg(propertyName, MessageLevel.msgInfo, "Transaction rate: " + Strings.Format(loopRate, "0.0") + " per second");
                             break;
-                            break;
                         }
 
                     case object _ when 2.0 <= loopRate && loopRate <= 10.0:
                         {
                             LogMsg(propertyName, MessageLevel.msgOK, "Transaction rate: " + Strings.Format(loopRate, "0.0") + " per second");
                             break;
-                            break;
                         }
 
                     case object _ when 1.0 <= loopRate && loopRate <= 2.0:
                         {
                             LogMsg(propertyName, MessageLevel.msgInfo, "Transaction rate: " + Strings.Format(loopRate, "0.0") + " per second");
-                            break;
                             break;
                         }
 

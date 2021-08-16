@@ -140,5 +140,9 @@ namespace ConformU
         public int DomeStabilisationWaitTime { get; set; } = 10;
         public bool DomeOpenShutter { get; set; } = false;
 
+        // ObservingConditions test configuration
+        public int ObservingConditionsRetryTime = 1;
+        public int ObservingConditionsMaxRetries = 5;
+
     }
 }

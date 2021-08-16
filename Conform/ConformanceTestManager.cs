@@ -86,7 +86,7 @@ namespace ConformU
 
                 case DeviceType.ObservingConditions:
                     {
-                        //testDevice = new ObservingConditionsTester(this, configuration,TL,cancellationToken);
+                        testDevice = new ObservingConditionsTester(this, configuration,TL,cancellationToken);
                         break;
                     }
 
