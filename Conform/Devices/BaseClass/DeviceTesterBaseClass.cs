@@ -657,7 +657,7 @@ namespace ConformU
             Status(StatusType.staStatus, "");
             g_Stop = true; // Initialise stop flag to stop
 
-            DateTime lastModifiedTime=DateTime.MinValue;
+            DateTime lastModifiedTime = DateTime.MinValue;
             try
             {
                 var assembly = System.Reflection.Assembly.GetExecutingAssembly();
@@ -1253,9 +1253,6 @@ namespace ConformU
                 // MsgBox(Len(l_Msg) & " *" & l_Msg & "* " & ex.ToString, MsgBoxStyle.Critical)
             }
         }
-
-
-
 
 
 

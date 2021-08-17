@@ -141,8 +141,13 @@ namespace ConformU
         public bool DomeOpenShutter { get; set; } = false;
 
         // ObservingConditions test configuration
-        public int ObservingConditionsRetryTime = 1;
-        public int ObservingConditionsMaxRetries = 5;
+        public int ObservingConditionsRetryTime { get; set; } = 1;
+        public int ObservingConditionsMaxRetries { get; set; } = 5;
 
+        // Switch test configuration
+        public bool SwitchSet { get; set; } = false;
+        public int SwitchReadDelay { get; set; } = 500;
+        public int SwitchWriteDelay { get; set; } = 3000;
+        public int ExtendedSwitchNumberTestRange { get; set; } = 100;
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace ConformU
 {
-    internal class Arraylist
-    {
-    }
+    //internal class Arraylist
+    //{
+    //}
 }

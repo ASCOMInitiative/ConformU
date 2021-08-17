@@ -68,7 +68,7 @@ namespace ConformU
 
                 case DeviceType.Video:
                     {
-                        //testDevice = new VideoTester(this, configuration,TL,cancellationToken);
+                        testDevice = new VideoTester(this, configuration,TL,cancellationToken);
                         break;
                     }
 
@@ -98,7 +98,7 @@ namespace ConformU
 
                 case DeviceType.Switch:
                     {
-                        //testDevice = new SwitchTester(this, configuration,TL,cancellationToken);
+                        testDevice = new SwitchTester(this, configuration,TL,cancellationToken);
                         break;
                     }
 
@@ -116,7 +116,7 @@ namespace ConformU
 
                 default:
                     {
-                        //LogMsg("Conform:ConformanceCheck", MessageLevel.Error, "Unknown device type: " + m_CurrentDeviceType.ToString() + ". You need to add it to the ConformanceCheck subroutine");
+                        TL.LogMessage("Conform:ConformanceCheck", MessageLevel.msgError, "Unknown device type: " + settings.DeviceType + ". You need to add it to the ConformanceCheck subroutine");
                         break;
                     }
             }
@@ -219,9 +219,10 @@ namespace ConformU
                     }
                     catch (Exception ex) // Exception when setting Connected = True
                     {
-                        testDevice.LogMsg("Connected", MessageLevel.msgError, $"Exception when setting Connected = True: {ex.Message}");
+                        testDevice.LogMsg("Connected", MessageLevel.msgError, $"Exception when testing driver: {ex.Message}");
+                        testDevice.LogMsg("Connected", MessageLevel.msgDebug, $"{ex}");
                         testDevice.LogMsg("", MessageLevel.msgAlways, "");
-                        testDevice.LogMsg("ConformanceCheck", MessageLevel.msgAlways, "Further tests abandoned as Conform cannot connect to the driver");
+                        testDevice.LogMsg("ConformanceCheck", MessageLevel.msgAlways, "Further tests abandoned.");
                     }
 
                 }
