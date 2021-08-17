@@ -145,9 +145,9 @@ namespace ConformU
         public int ObservingConditionsMaxRetries { get; set; } = 5;
 
         // Switch test configuration
-        public bool SwitchSet { get; set; } = false;
+        public bool SwitchEnableSet { get; set; } = false;
         public int SwitchReadDelay { get; set; } = 500;
         public int SwitchWriteDelay { get; set; } = 3000;
-        public int ExtendedSwitchNumberTestRange { get; set; } = 100;
+        public int SwitchExtendedNumberTestRange { get; set; } = 100;
     }
 }

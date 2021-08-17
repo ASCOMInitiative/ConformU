@@ -73,7 +73,7 @@ namespace ConformU
 
             SWITCH_READ_DELAY = settings.SwitchReadDelay; // Get values for the two delay parameters as set by the user or the default values if not yet set
             SWITCH_WRITE_DELAY = settings.SwitchWriteDelay;
-            ExtendedSwitchNumberTestRange = settings.ExtendedSwitchNumberTestRange;
+            ExtendedSwitchNumberTestRange = settings.SwitchExtendedNumberTestRange;
         }
 
         // IDisposable
@@ -571,7 +571,7 @@ namespace ConformU
                                     }
 
                                     // Now try to write to see which of these methods are available
-                                    if (settings.SwitchSet)
+                                    if (settings.SwitchEnableSet)
                                     {
 
                                         // Try to set the two boolean values through SetSwitch

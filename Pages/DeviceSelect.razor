@@ -31,7 +31,7 @@
 </div>
 
 @* Select device tabs *@
-<RadzenTabs Style="height: 1000px;margin-top:20px"
+<RadzenTabs Style="height: auto; margin-top: 20px"
             RenderMode="TabRenderMode.Server"
             @bind-value=@selectedTabNumber
             Change=@(args => OnTabChange(args))>
@@ -44,7 +44,7 @@
             <div class="row">
 
                 @* Alpaca device selection radio buttons *@
-                <RadzenCard Style="width:600px; margin-bottom: 20px; height:800px; margin-right: 20px; overflow: auto;">
+                <RadzenCard Style="width:600px; margin-bottom: 20px; min-height:120px;  height:fit-content; margin-right: 20px; overflow: auto;">
 
                     <RadzenRadioButtonList Orientation="Orientation.Vertical"
                                            Data=@ascomDevices
@@ -56,11 +56,11 @@
                 </RadzenCard>
 
                 @* Alpaca discovery progress information *@
-                <RadzenCard Style="width:600px; margin-bottom: 20px; height:800px; margin-right: 20px">
+                <RadzenCard Style="width: 600px; margin-bottom: 20px; height: fit-content; margin-right: 20px">
 
-                    <RadzenTextArea Style="line-height:1.3"
+                    <RadzenTextArea Style="line-height:1.3; height: fit-content;"
                                     Cols="300"
-                                    Rows="40"
+                                    Rows="@statusBoxHeight"
                                     @bind-Value=@alpacaDiscoveryProgress />
 
                 </RadzenCard>
@@ -70,14 +70,9 @@
             @* Alpaca search and device selection buttons *@
             <div class="row">
 
-                @* An ID is required for this button so that JavaScript can return the button's position in the viewport in order that any warning message can be positioned next to the button *@
-                <RadzenButton id="SelectAlpacaButton"
-                              Style="margin-bottom: 20px; width: 150px"
-                              Text="Select"
-                              Click=@(args => OnSelectAlpacaDeviceClick()) />
-
                 <RadzenButton Style="margin-bottom: 20px; width: 150px; margin-left: 20px;"
                               Text="Search"
+                              Disabled="@discoveryInProgress"
                               Click=@(args => OnAlpacaSearchClick()) />
 
             </div>
@@ -92,7 +87,7 @@
             <div class="row">
 
                 @* COM device selection radio buttons *@
-                <RadzenCard Style="width:900px; margin-bottom: 20px; height:800px; margin-right: 20px; overflow: auto;">
+                <RadzenCard Style="width:900px; margin-bottom: 20px; height:fit-content; margin-right: 20px; overflow: auto;">
 
                     <RadzenRadioButtonList Orientation="Orientation.Vertical"
                                            Data=@comDeviceList
@@ -104,12 +99,6 @@
 
             </div>
 
-            @* COMdevice selection button *@
-            <RadzenButton id="SelectComButton"
-                          Style="margin-bottom: 20px; width: 150px"
-                          Text="Select"
-                          Click=@(args => OnNewComDeviceSelected()) />
-
         </RadzenTabsItem>
 
     </Tabs>
@@ -118,6 +107,8 @@
 
 @code
 {
+    bool discoveryInProgress = false;
+    int statusBoxHeight = 0; // Number of rows in the status box list ==> Determnines the height of the box
     List<string> validAscomdDeviceTypes = new() { DeviceType.Telescope.ToString(), DeviceType.Camera.ToString(), DeviceType.CoverCalibrator.ToString(), DeviceType.Dome.ToString(), DeviceType.FilterWheel.ToString(), DeviceType.Focuser.ToString(), DeviceType.ObservingConditions.ToString(), DeviceType.Rotator.ToString(), DeviceType.SafetyMonitor.ToString(), DeviceType.Switch.ToString(), DeviceType.Video.ToString() };
     DeviceType selectedDeviceType; // DeviceType of the selected device
     string selectedDeviceTypeString; // String representation of the currently selected DeviceType
@@ -178,7 +169,7 @@
 
     void OnDeviceTypeChange(object value)
     {
-        configuration.Save();
+        SaveConfiguration();
 
         switch (selectedTabNumber)
         {
@@ -190,9 +181,6 @@
                 UpdateComDevices();
                 break;
         }
-
-        StateHasChanged();
-
     }
 
     #endregion
@@ -206,6 +194,16 @@
         selectedAlpacaDevice = value;
         if (value is null) value = new AscomDevice();
         conformLogger.LogDebug("OnDeviceChanged", $"New Device selected: {value.AscomDeviceName} at {value.IpAddress}");
+
+        conformLogger.LogDebug("OnSelectDeviceClick", $"Alpaca device selected: {technologyType}");
+        configuration.Settings.AlpacaDevice = selectedAlpacaDevice;
+        configuration.Settings.DeviceType = Enum.Parse<DeviceType>(selectedAlpacaDevice.AscomDeviceType);
+
+        technologyType = DeviceTechnology.Alpaca;
+        configuration.Settings.DeviceTechnology = technologyType;
+
+        SaveConfiguration();
+
     }
 
     private void OnAlpacaSearchClick()
@@ -213,7 +211,7 @@
         StartDiscovery();
     }
 
-    private async void OnSelectAlpacaDeviceClick()
+    private async void XXXXXXOnSelectAlpacaDeviceClick()
     {
         if (selectedAlpacaDevice is null)
         {
@@ -233,71 +231,72 @@
 
         technologyType = DeviceTechnology.Alpaca;
         configuration.Settings.DeviceTechnology = technologyType;
-        configuration.Save();
-        StateHasChanged();
+
+        SaveConfiguration();
     }
 
     #endregion
 
     #region COM TAB event handlers
 
-    private async void OnNewComDeviceSelected()
-    {
-        if (selectedComDevice is null)
-        {
-            var result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "SelectComButton");
-
-            var x = (int)(result.Right) + 30;
-            var y = (int)(result.Top) - 40;
-
-            ShowNotification(new NotificationMessage { Style = $"position: fixed; left: {x}px; top:{y}px;", Severity = NotificationSeverity.Error, Summary = "Select Device", Detail = $"No device has been selected!", Duration = 4000 });
-        }
-        else
-        {
-            selectedDeviceType = Enum.Parse<DeviceType>(selectedDeviceTypeString);
-            configuration.Settings.DeviceType = selectedDeviceType;
-            conformLogger.LogDebug("OnSelectDeviceClick", $"COM device selected: {technologyType}");
-            configuration.Settings.ComDevice = selectedComDevice;
-        }
-
-        technologyType = DeviceTechnology.COM;
-        configuration.Settings.DeviceTechnology = technologyType;
-        configuration.Save();
-        StateHasChanged();
-    }
-
     void OnComDeviceChanged(ComDevice value)
     {
         selectedComDevice = value;
         if (value is null) value = new ComDevice("Unknown", "Unknown");
         conformLogger.LogDebug("OnComDeviceChanged", $"New COM Device selected: {value.ProgId}, description: {value.DisplayName}");
+
+        selectedDeviceType = Enum.Parse<DeviceType>(selectedDeviceTypeString);
+        configuration.Settings.DeviceType = selectedDeviceType;
+        conformLogger.LogDebug("OnSelectDeviceClick", $"COM device selected: {technologyType}");
+        configuration.Settings.ComDevice = selectedComDevice;
+
+        technologyType = DeviceTechnology.COM;
+        configuration.Settings.DeviceTechnology = technologyType;
+
+        SaveConfiguration();
+
     }
 
     #endregion
 
     #region Alpaca discovery event handlers
 
+    private void SetStatusAreaHeight()
+    {
+        if (statusBoxHeight < 20)
+        {
+            statusBoxHeight += 1;
+        }
+    }
+
     private void AlpacaDiscoveryCompleted(object caller, EventArgs args)
     {
         conformLogger.LogDebug("AlpacaDiscoveryCompleted", $"Discovery complete");
         alpacaDiscoveryProgress += $"Discovery complete!";
+        SetStatusAreaHeight();
         ascomDevices = new();
         foreach (AscomDevice device in discovery.GetAscomDevices(Enum.Parse<DeviceType>(selectedDeviceTypeString).ToString()))
         {
             ascomDevices.Add(new AlpacaDeviceListItem($"{device.AscomDeviceName} ({device.IpAddress})", device));
         }
+        discoveryInProgress = false;
         InvokeAsync(StateHasChanged);
     }
 
     private void AlpacaDeviceDiscovered(object caller, EventArgs args)
     {
         List<AscomDevice> newDevices = discovery.GetAscomDevices(Enum.Parse<DeviceType>(selectedDeviceTypeString).ToString());
-        //alpacaDiscoveryStatus = "";
+
         foreach (AscomDevice device in newDevices)
         {
-            alpacaDiscoveryProgress += $"{device.IpAddress} {device.AscomDeviceName}\r\n";
+            //alpacaDiscoveryProgress += $"{device.IpAddress} {device.AscomDeviceName}\r\n";
+            //SetStatusAreaHeight();
         }
-        if (newDevices.Count > 0) alpacaDiscoveryProgress += $"\r\n";
+        if (newDevices.Count > 0)
+        {
+            //alpacaDiscoveryProgress += $"New Alpaca device discovered...\r\n";
+            //SetStatusAreaHeight();
+        }
         conformLogger.LogDebug("AlpacaDeviceDiscovered", $"Found {newDevices.Count} devices.");
 
         InvokeAsync(StateHasChanged);
@@ -320,6 +319,13 @@
 
     }
 
+    private void SaveConfiguration()
+    {
+        configuration.Save();
+        StateHasChanged();
+    }
+
+
     private async void ShowNotification(NotificationMessage message)
     {
         notificationService.Notify(message);
@@ -328,7 +334,9 @@
 
     void StartDiscovery()
     {
+        discoveryInProgress = true;
         alpacaDiscoveryProgress = "Discovery started...\r\n";
+        statusBoxHeight = 3; // Initual status area height
         discovery.StartDiscovery(1, 1000, 32227, 1.0, false, true, false);
     }
 
