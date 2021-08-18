@@ -261,6 +261,7 @@ namespace ConformU
                 }
 
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
+                baseClassDevice = m_Camera; // Assign the driver to the base class
                 g_Stop = false;
                 LogMsg("CreateDevice", MessageLevel.msgDebug, "Successfully created driver");
 

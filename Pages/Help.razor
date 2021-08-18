@@ -1,4 +1,16 @@
 ﻿@page "/Help"
-@{
+@using System.Reflection
+
+<h1>Help</h1>
+
+<h3>ConformU version @assemblyVersion</h3>
+@code 
+{
+    string assemblyVersion;
+
+    protected override void OnInitialized()
+    {
+        assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+    }
+
 }
-<h1>Help!</h1>

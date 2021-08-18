@@ -18,17 +18,24 @@
         <RadzenTextBox Id="Status" Style="width: 50em; margin-left: 40px;" @bind-Value=@statusMessage />
     </div>
 
+    @*<div style="resize:none; overflow: auto;">*@
+
     <h4>Conform Log</h4>
-    <RadzenTextArea Id="ConformLog" Style="line-height:1.3" Name="ScreenLog" @bind-Value=@screenLog Rows="@Rows" Cols="250" ReadOnly=true />
+    <RadzenTextArea Id="ConformLog" Style="line-height:1.3;" Name="ScreenLog" @bind-Value=@screenLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
+
+    @*Rows="@screenLogRows"*@
+
+    @*</div>*@
 </div>
 
 @code {
 
-    int Rows = 10;
-    string screenLog;
+    int screenLogRows = 10;
+    string screenLog = "Initial log message";
     object screenLogLockObject = new object();
     object statusLockObject = new object();
     string statusMessage = "Conformance run status";
+    string screenLogMaxHeight = "100";
 
     ConformanceTestManager tester;
 
@@ -42,7 +49,7 @@
         Console.WriteLine($"Settings location - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_SETTINGS)}");
         Console.WriteLine($"Log file name     - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILENAME)}");
         Console.WriteLine($"Log file path     - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILEPATH)}");
-        
+
     }
 
     async void StartTest(string buttonName)
@@ -95,7 +102,7 @@
         await conformanceTest.ContinueWith(antecedent =>
         {
             tester.Dispose(); // Dispose of the tester
-            tester = null;
+        tester = null;
             JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
 
             GC.Collect();
@@ -120,7 +127,32 @@
     {
         conformLogger.LogMessage(id, message);
         screenLog += $"{(id).PadRight(30)} {message}\r\n";  // Add the new log message to the screen display
+        SetScreenLogRows();
         InvokeAsync(StateHasChanged); // Display the updated log on the screen
+    }
+
+    async void SetScreenLogRows()
+    {
+        // Find the current position of the Conform log text area in the viewport
+        BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ConformLog");
+        int x = (int)(result.Left);
+        int y = (int)(result.Top) + 100;
+
+        @*screenLogRows = (int)((browser.Height - result.Top) / 20);
+            conformLogger.LogMessage("SetScreenLogRows", $"Browserheight: {browser.Height}, LogAreaTop: {result.Top}, LogAreaHeight: {result.Height}, ScreenLogRows: {screenLogRows}");*@
+
+
+
+
+        int crCount = screenLog.Count((f) => f == (char)10);
+
+        int heightCount = Convert.ToInt32(((double)browser.Height - 200.0) / 20.0) + (browser.Height / 300) - 1;
+
+        //screenLogRows = Math.Min(crCount, heightCount);
+        screenLogRows =  heightCount;
+        conformLogger.LogMessage("SetScreenLogRows", $"screenLogRows: {screenLogRows}");
+
+
     }
 
     /// <summary>
@@ -133,7 +165,7 @@
         lock (screenLogLockObject)
         {
             screenLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
-
+            SetScreenLogRows();
             InvokeAsync(StateHasChanged); // Display the updated log on the screen
         }
         await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
@@ -175,14 +207,11 @@
     {
         // Get the browsers's width / height
         browser = window;
+        SetScreenLogRows();        // Log the new window size and number of rows
+                                   // We're outside of the component's lifecycle, be sure to let it know it has to re-render.
+        conformLogger.LogMessage("WindowResized", $"Browser height: {browser.Height}, Browser width: {browser.Width}");
 
-        // Calculate the number of rows
-        Rows = Convert.ToInt32(((double)browser.Height - 200) / 20.0) + (browser.Height / 300) - 1;
 
-        // Log the new window size and number of rows
-        //LogMsg("WindowResized", $"Height: {browser.Height}, Rows: {Rows}");
-
-        // We're outside of the component's lifecycle, be sure to let it know it has to re-render.
         StateHasChanged();
     }
 

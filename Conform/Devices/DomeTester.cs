@@ -161,6 +161,7 @@ namespace ConformU
                 }
 
                 LogMsg("CreateDevice", MessageLevel.msgDebug, "Successfully created driver");
+                baseClassDevice = domeDevice; // Assign the driver to the base class
 
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
                 g_Stop = false;

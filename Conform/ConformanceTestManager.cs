@@ -22,6 +22,7 @@ namespace ConformU
         private bool disposedValue;
         private readonly ConformLogger TL;
         private readonly Settings settings;
+        DeviceTesterBaseClass testDevice = null; // Variable to hold the device tester class
 
         public ConformanceTestManager(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken)
         {
@@ -29,23 +30,15 @@ namespace ConformU
             cancellationToken = conformCancellationToken;
             TL = logger;
             settings = conformConfiguration.Settings;
-
-
         }
 
         public event EventHandler<MessageEventArgs> OutputChanged;
         public event EventHandler<MessageEventArgs> StatusChanged;
 
-        public void TestDevice()
+        private void AssugnTestDevice()
         {
-            DeviceTesterBaseClass testDevice = null; // Variable to hold the device tester class
-            
-            // Initialise error counters
-            g_CountError = 0;
-            g_CountWarning = 0;
-            g_CountIssue = 0;
+            // Assign the required device tester class dependent on which type of device is being tested
 
-            // Create the required device tester class
             switch (settings.DeviceType) // Set current progID and device test class
             {
                 case DeviceType.Telescope:
@@ -62,43 +55,43 @@ namespace ConformU
 
                 case DeviceType.Camera:
                     {
-                        testDevice = new CameraTester(this, configuration,TL,cancellationToken);
+                        testDevice = new CameraTester(this, configuration, TL, cancellationToken);
                         break;
                     }
 
                 case DeviceType.Video:
                     {
-                        testDevice = new VideoTester(this, configuration,TL,cancellationToken);
+                        testDevice = new VideoTester(this, configuration, TL, cancellationToken);
                         break;
                     }
 
                 case DeviceType.Rotator:
                     {
-                        testDevice = new RotatorTester(this, configuration,TL,cancellationToken);
+                        testDevice = new RotatorTester(this, configuration, TL, cancellationToken);
                         break;
                     }
 
                 case DeviceType.Focuser:
                     {
-                        testDevice = new FocuserTester(this, configuration,TL,cancellationToken);
+                        testDevice = new FocuserTester(this, configuration, TL, cancellationToken);
                         break;
                     }
 
                 case DeviceType.ObservingConditions:
                     {
-                        testDevice = new ObservingConditionsTester(this, configuration,TL,cancellationToken);
+                        testDevice = new ObservingConditionsTester(this, configuration, TL, cancellationToken);
                         break;
                     }
 
                 case DeviceType.FilterWheel:
                     {
-                        testDevice = new FilterWheelTester(this, configuration,TL,cancellationToken);
+                        testDevice = new FilterWheelTester(this, configuration, TL, cancellationToken);
                         break;
                     }
 
                 case DeviceType.Switch:
                     {
-                        testDevice = new SwitchTester(this, configuration,TL,cancellationToken);
+                        testDevice = new SwitchTester(this, configuration, TL, cancellationToken);
                         break;
                     }
 
@@ -110,7 +103,7 @@ namespace ConformU
 
                 case DeviceType.CoverCalibrator:
                     {
-                        testDevice = new CoverCalibratorTester(this, configuration,TL,cancellationToken);
+                        testDevice = new CoverCalibratorTester(this, configuration, TL, cancellationToken);
                         break;
                     }
 
@@ -120,6 +113,47 @@ namespace ConformU
                         break;
                     }
             }
+
+        }
+
+        public void SetupDialog()
+        {
+            // Assign a tester relevant to the device type being tested
+            AssugnTestDevice();
+
+            try
+            {
+                // Create the test device
+                testDevice.CreateDevice();
+
+                // Run the SetupDialog method on a separate thread
+                Task setupDialog = Task.Factory.StartNew(() => testDevice.SetupDialog());
+
+                // Wait for the setup dialogue to be closed
+                setupDialog.Wait();
+            }
+            catch (Exception ex)
+            {
+                TL.LogMessage("TestManager:SetupDialog", $"Exception \r\n{ex}");
+            }
+            finally
+            {
+                // Always dispose of the device
+                try { testDevice.Dispose(); } catch { }
+            }
+        }
+
+        public void TestDevice()
+        {
+            DeviceTesterBaseClass testDevice = null; // Variable to hold the device tester class
+
+            // Initialise error counters
+            g_CountError = 0;
+            g_CountWarning = 0;
+            g_CountIssue = 0;
+
+            // Assign a tester relevant to the device type being tested
+            AssugnTestDevice();
 
             // Test the device
             try
@@ -228,7 +262,7 @@ namespace ConformU
                 }
                 catch (Exception ex) // Exception when creating device
                 {
-                    testDevice.LogMsg("Initialise", MessageLevel.msgError, $"Unable to {(settings.DeviceTechnology == DeviceTechnology.Alpaca? "access" : "create")} the device: {ex.Message}");
+                    testDevice.LogMsg("Initialise", MessageLevel.msgError, $"Unable to {(settings.DeviceTechnology == DeviceTechnology.Alpaca ? "access" : "create")} the device: {ex.Message}");
                     testDevice.LogMsg("", MessageLevel.msgAlways, "");
                     testDevice.LogMsg("ConformanceCheck", MessageLevel.msgAlways, "Further tests abandoned as Conform cannot create the driver");
                 }

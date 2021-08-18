@@ -72,15 +72,15 @@ namespace ConformU
         {
             if (this.InvokeRequired)
             {
-                //logger?.LogMessage("ActionNoParameters", MessageLevel.msgDebug, $"Invoke required for {action.Method.Name} command on thread: {Thread.CurrentThread.ManagedThreadId}");
+                //logger?.LogMessage("ActionNoParameters", $"Invoke required for {action.Method.Name} command on thread: {Thread.CurrentThread.ManagedThreadId}");
                 ActionNoParametersDelegate sendVoid = new(ActionNoParameters);
                 this.Invoke(sendVoid, action);
             }
             else
             {
-                //logger?.LogMessage("ActionNoParameters", MessageLevel.msgDebug, $"About to run Action {action.Method.Name} on thread: {Thread.CurrentThread.ManagedThreadId}");
+                //logger?.LogMessage("ActionNoParameters", $"About to run Action {action.Method.Name} on thread: {Thread.CurrentThread.ManagedThreadId}");
                 action();
-                //logger?.LogMessage("ActionNoParameters", MessageLevel.msgDebug, $"Returned from Action {action.Method.Name} on thread: {Thread.CurrentThread.ManagedThreadId}");
+                //logger?.LogMessage("ActionNoParameters",  $"Returned from Action {action.Method.Name} on thread: {Thread.CurrentThread.ManagedThreadId}");
             }
 
         }

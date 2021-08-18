@@ -149,13 +149,13 @@ namespace ConformU
 
         internal void MethodNoParameters(Action action)
         {
-            //logger?.LogMessage("MethodNoParameters", MessageLevel.msgDebug, $"About to call driverHostForm.SendVoid(action) on thread {Thread.CurrentThread.ManagedThreadId}");
+            //logger?.LogMessage("MethodNoParameters", $"About to call driverHostForm.SendVoid(action) on thread {Thread.CurrentThread.ManagedThreadId}");
 #if WINDOWS7_0_OR_GREATER
             driverHostForm.ActionNoParameters(action);
 #else
             action();
 #endif
-            //logger?.LogMessage("MethodNoParameters", MessageLevel.msgDebug, $"Returned from driverHostForm.SendVoid(action) on thread {Thread.CurrentThread.ManagedThreadId}");
+            //logger?.LogMessage("MethodNoParameters", $"Returned from driverHostForm.SendVoid(action) on thread {Thread.CurrentThread.ManagedThreadId}");
         }
 
         internal void Method1Parameter(Action<object> action, object parameter1)
@@ -295,6 +295,11 @@ namespace ConformU
         public string CommandString(string Command, bool Raw = false)
         {
             return driver.CommandString(Command, Raw);
+        }
+
+        public void SetupDialog()
+        {
+            MethodNoParameters(() => driver.SetupDialog());
         }
 
         #endregion

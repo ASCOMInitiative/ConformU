@@ -44,7 +44,7 @@ namespace ConformU
 
         private bool l_Connected, l_HasProperties, l_HasCanProperties, l_HasMethods, l_HasPreRunCheck, l_HasPostRunCheck, l_HasPerformanceCheck;
         private bool l_HasPreConnectCheck;
-        private dynamic Device; // IAscomDriverV1
+        internal dynamic baseClassDevice; // IAscomDriverV1
 
         private string test, action, status;
 
@@ -183,6 +183,12 @@ namespace ConformU
 
         #region Code
 
+        public void SetupDialog()
+        {
+            if (settings.DisplayMethodCalls) LogMsg("SetupDialog", MessageLevel.msgComment, "About to call SetupDialog");
+            baseClassDevice.SetupDialog();
+        }
+
         public void CheckCommonMethods(object p_DeviceObject, DeviceType p_DeviceType)
         {
             string m_DriverVersion, m_DriverInfo, m_Description, m_Name; // , m_LastResult As String
@@ -191,14 +197,14 @@ namespace ConformU
             // Dim m_Configuration, SC() As String
             bool m_Connected;
             LogMsg("Common Driver Methods", MessageLevel.msgAlways, "");
-            Device = p_DeviceObject; // CType(DeviceObject, IAscomDriverV1)
+            baseClassDevice = p_DeviceObject; // CType(DeviceObject, IAscomDriverV1)
 
             // InterfaceVersion - Required
             try
             {
                 if (settings.DisplayMethodCalls)
                     LogMsg("InterfaceVersion", MessageLevel.msgComment, "About to get property InterfaceVersion");
-                g_InterfaceVersion = Conversions.ToInteger(Device.InterfaceVersion);
+                g_InterfaceVersion = Conversions.ToInteger(baseClassDevice.InterfaceVersion);
                 switch (g_InterfaceVersion)
                 {
                     case var @case when @case < 1:
@@ -230,7 +236,7 @@ namespace ConformU
                 {
                     if (settings.DisplayMethodCalls)
                         LogMsg("Connected", MessageLevel.msgComment, "About to get property Connected");
-                    m_Connected = Device.Connected;
+                    m_Connected = baseClassDevice.Connected;
                     LogMsg("Connected", MessageLevel.msgOK, m_Connected.ToString());
                 }
                 catch (COMException ex)
@@ -253,7 +259,7 @@ namespace ConformU
                 {
                     if (settings.DisplayMethodCalls)
                         LogMsg("Description", MessageLevel.msgComment, "About to get property Description");
-                    m_Description = Conversions.ToString(Device.Description);
+                    m_Description = Conversions.ToString(baseClassDevice.Description);
                     switch (m_Description ?? "")
                     {
                         case var case1 when case1 == "":
@@ -293,7 +299,7 @@ namespace ConformU
                 {
                     if (settings.DisplayMethodCalls)
                         LogMsg("DriverInfo", MessageLevel.msgComment, "About to get property DriverInfo");
-                    m_DriverInfo = Conversions.ToString(Device.DriverInfo);
+                    m_DriverInfo = Conversions.ToString(baseClassDevice.DriverInfo);
                     switch (m_DriverInfo ?? "")
                     {
                         case var case2 when case2 == "":
@@ -325,7 +331,7 @@ namespace ConformU
                 {
                     if (settings.DisplayMethodCalls)
                         LogMsg("DriverVersion", MessageLevel.msgComment, "About to get property DriverVersion");
-                    m_DriverVersion = Conversions.ToString(Device.DriverVersion);
+                    m_DriverVersion = Conversions.ToString(baseClassDevice.DriverVersion);
                     switch (m_DriverVersion ?? "")
                     {
                         case var case3 when case3 == "":
@@ -365,7 +371,7 @@ namespace ConformU
                 {
                     if (settings.DisplayMethodCalls)
                         LogMsg("Name", MessageLevel.msgComment, "About to get property Name");
-                    m_Name = Conversions.ToString(Device.Name);
+                    m_Name = Conversions.ToString(baseClassDevice.Name);
                     switch (m_Name ?? "")
                     {
                         case var case4 when case4 == "":
@@ -427,7 +433,7 @@ namespace ConformU
             {
                 if (settings.DisplayMethodCalls)
                     LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method SupportedActions");
-                SA = (IList)Device.SupportedActions;
+                SA = (IList)baseClassDevice.SupportedActions;
                 if (SA.Count == 0)
                 {
                     LogMsg("SupportedActions", MessageLevel.msgOK, "Driver returned an empty action list");
@@ -464,7 +470,7 @@ namespace ConformU
                                                 {
                                                     if (settings.DisplayMethodCalls)
                                                         LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action");
-                                                    result = Conversions.ToString(Device.Action(ActionString, TEST_PARAMETERS));
+                                                    result = Conversions.ToString(baseClassDevice.Action(ActionString, TEST_PARAMETERS));
                                                     LogMsg("SupportedActions", MessageLevel.msgOK, string.Format("OC simulator action {0} gave result: {1}", ActionString, result));
                                                 }
                                                 catch (Exception ex1)
@@ -478,7 +484,7 @@ namespace ConformU
                                                 {
                                                     if (settings.DisplayMethodCalls)
                                                         LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action");
-                                                    result = Conversions.ToString(Device.Action(ActionString, TEST_PARAMETERS));
+                                                    result = Conversions.ToString(baseClassDevice.Action(ActionString, TEST_PARAMETERS));
                                                     LogMsg("SupportedActions", MessageLevel.msgOK, string.Format("OC simulator action {0} gave result: {1}", ActionString, result));
                                                 }
                                                 catch (Exception ex1)
@@ -492,7 +498,7 @@ namespace ConformU
                                                 {
                                                     if (settings.DisplayMethodCalls)
                                                         LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action");
-                                                    result = Conversions.ToString(Device.Action(ActionString, TEST_PARAMETERS));
+                                                    result = Conversions.ToString(baseClassDevice.Action(ActionString, TEST_PARAMETERS));
                                                     LogMsg("SupportedActions", MessageLevel.msgOK, string.Format("Switch simulator action {0} gave result: {1}", ActionString, result));
                                                 }
                                                 catch (Exception ex1)
@@ -506,7 +512,7 @@ namespace ConformU
                                                 {
                                                     if (settings.DisplayMethodCalls)
                                                         LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action");
-                                                    result = Conversions.ToString(Device.Action(ActionString, TEST_PARAMETERS));
+                                                    result = Conversions.ToString(baseClassDevice.Action(ActionString, TEST_PARAMETERS));
                                                     LogMsg("SupportedActions", MessageLevel.msgOK, string.Format("Switch simulator action {0} gave result: {1}", ActionString, result));
                                                 }
                                                 catch (Exception ex1)

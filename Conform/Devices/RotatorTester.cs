@@ -129,7 +129,9 @@ namespace ConformU
                                 throw new ASCOM.InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComACcessMechanic}");
                         }
 
-                        //LogMsg("CreateDevice", MessageLevel.Info, "Successfully created driver");
+                        LogMsg("CreateDevice", MessageLevel.msgInfo, "Successfully created driver");
+                        baseClassDevice = m_Rotator; // Assign the driver to the base class
+
                         WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
                         break;
 

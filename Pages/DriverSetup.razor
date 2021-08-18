@@ -1,4 +1,34 @@
 ﻿@page "/DeviceSelectionTest"
-@{
+@inject ConformLogger conformLogger
+@inject ConformConfiguration configuration
+@using System.Threading
+
+<h1>Driver Setup</h1>
+
+<h3>COM Driver Setup</h3>
+<RadzenButton Id="StartButton" Click=@(args => SetupCom()) Text="Start" Icon="account_circle" Style="margin-bottom: 20px; width: 150px" />
+
+
+
+@code{
+
+
+    protected override void OnInitialized()
+    {
+
+    }
+
+    void SetupCom()
+    {
+        CancellationTokenSource cancellationTokenSource;
+        CancellationToken cancelConformToken;
+
+        // Create a task cancellation token source and cancellation token
+        cancellationTokenSource = new CancellationTokenSource();
+        cancelConformToken = cancellationTokenSource.Token;
+
+        ConformanceTestManager testManager = new(configuration, conformLogger, cancelConformToken);
+        testManager.SetupDialog();
+    }
+
 }
-<h1>Driver Setup!</h1>
