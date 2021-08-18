@@ -1,34 +1,114 @@
 ﻿@page "/DeviceSelectionTest"
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
+@inject IJSRuntime JSRuntime
+
 @using System.Threading
 
 <h1>Driver Setup</h1>
 
-<h3>COM Driver Setup</h3>
-<RadzenButton Id="StartButton" Click=@(args => SetupCom()) Text="Start" Icon="account_circle" Style="margin-bottom: 20px; width: 150px" />
+<div style="margin-top: 20px;">
 
 
+    <div style="margin-top: 20px; display: @noDeviceMessageDisplay">
+        <h3>No device has been selected.</h3>
+    </div>
+
+    <div style="margin-top: 20px; display: @comControlsDisplay">
+        <h3>COM Driver Setup</h3>
+        <RadzenButton Click=@(args => SetupCom()) Text="Open Setup Dialogue" Style="width: 250px;" />
+    </div>
+
+    <div style="margin-top: 20px; display: @alpacaControlsDisplay">
+        <h3>Alpaca Device Setup</h3>
+        <RadzenButton Click=@(args => SetupAlpacaMain()) Text="Main Setup Page" Style="margin-right: 20px; width: 200px;" />
+        <RadzenButton Click=@(args => SetupAlpacaDevice()) Text="Device Setup Page" Style="width: 200px;" />
+    </div>
+</div>
 
 @code{
-
+    string alpacaControlsDisplay = "none";
+    string comControlsDisplay = "none";
+    string noDeviceMessageDisplay = "none";
+    bool alpacaControlsVisible = false;
+    bool comControlsVisible = false;
+    bool noDeviceMessageVisible = false;
 
     protected override void OnInitialized()
     {
+        switch (configuration.Settings.DeviceTechnology)
+        {
+            case DeviceTechnology.NotSelected:
+                noDeviceMessageDisplay = "inline";
+                noDeviceMessageVisible = true;
+                break;
+
+            case DeviceTechnology.Alpaca:
+                alpacaControlsDisplay = "inline";
+                alpacaControlsVisible = true;
+                break;
+
+            case DeviceTechnology.COM:
+                comControlsDisplay = "inline";
+                comControlsVisible = true;
+                break;
+
+            default:
+                throw new ASCOM.InvalidValueException($"DriverSetupForm.razor - Invalid device technology type: {configuration.Settings.DeviceTechnology}");
+        }
+
+    }
+
+    void SetupAlpacaMain()
+    {
+        try
+        {
+            string url = $"{configuration.Settings.AlpacaConfiguration.AccessServiceType}://{configuration.Settings.AlpacaDevice.IpAddress}:{configuration.Settings.AlpacaDevice.IpPort}/setup".ToLowerInvariant();
+            conformLogger.LogMessage("SetupAlpacaMain", $"URL: {url}");
+            JSRuntime.InvokeAsync<object>("open", url, "_blank");
+            conformLogger.LogMessage("SetupAlpacaMain", $"Returned from URL: {url}");
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("SetupAlpacaMain", ex.ToString());
+        }
+    }
+
+    async void SetupAlpacaDevice()
+    {
+        try
+        {
+            string url = $"{configuration.Settings.AlpacaConfiguration.AccessServiceType}://{configuration.Settings.AlpacaDevice.IpAddress}:{configuration.Settings.AlpacaDevice.IpPort}/setup/v1/{configuration.Settings.AlpacaDevice.AscomDeviceType}/{configuration.Settings.AlpacaDevice.AlpacaDeviceNumber}/setup".ToLowerInvariant();
+            conformLogger.LogMessage("SetupAlpacaDevice", $"URL: {url}");
+            await JSRuntime.InvokeAsync<object>("open", url, "_blank");
+            conformLogger.LogMessage("SetupAlpacaDevice", $"Returned from URL: {url}");
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("SetupAlpacaDevice", ex.ToString());
+        }
 
     }
 
     void SetupCom()
     {
-        CancellationTokenSource cancellationTokenSource;
-        CancellationToken cancelConformToken;
+        try
+        {
+            CancellationTokenSource cancellationTokenSource;
+            CancellationToken cancelConformToken;
 
-        // Create a task cancellation token source and cancellation token
-        cancellationTokenSource = new CancellationTokenSource();
-        cancelConformToken = cancellationTokenSource.Token;
+            // Create a task cancellation token source and cancellation token
+            cancellationTokenSource = new CancellationTokenSource();
+            cancelConformToken = cancellationTokenSource.Token;
 
-        ConformanceTestManager testManager = new(configuration, conformLogger, cancelConformToken);
-        testManager.SetupDialog();
+            ConformanceTestManager testManager = new(configuration, conformLogger, cancelConformToken);
+            testManager.SetupDialog();
+            testManager.Dispose();
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("SetupCom", ex.ToString());
+        }
     }
 
 }

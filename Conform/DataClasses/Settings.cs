@@ -13,7 +13,7 @@ namespace ConformU
     {
         private AscomDevice ascomDevice = new();
         private ComDevice comDevice = new();
-        private DeviceTechnology deviceTechnology = DeviceTechnology.Alpaca;
+        private DeviceTechnology deviceTechnology = DeviceTechnology.NotSelected;
 
         private const string NO_DEVICE_SELECTED = "No device selected";
         public Settings() { }
@@ -95,7 +95,7 @@ namespace ConformU
         /// <summary>
         /// ASCOM Device type of the current device
         /// </summary>
-        public DeviceType DeviceType { get; set; } = DeviceType.Telescope;
+        public DeviceType DeviceType { get; set; } = DeviceType.NoDeviceType;
 
         // Telescope test configuration
         /// <summary>

@@ -13,23 +13,25 @@ namespace ConformU
 
     public enum DeviceTechnology
     {
-        Alpaca = 0,
-        COM = 1
+        NotSelected=0,
+        Alpaca = 1,
+        COM = 2
     }
 
     public enum DeviceType
     {
-        Telescope = 0,
-        Camera = 1,
-        Dome = 2,
-        FilterWheel = 3,
-        Focuser = 4,
-        ObservingConditions = 5,
-        Rotator = 6,
-        Switch = 7,
-        SafetyMonitor = 8,
-        Video = 9,
-        CoverCalibrator = 10
+        NoDeviceType=0,
+        Telescope = 1,
+        Camera = 2,
+        Dome = 3,
+        FilterWheel = 4,
+        Focuser = 5,
+        ObservingConditions = 6,
+        Rotator = 7,
+        Switch = 8,
+        SafetyMonitor = 9,
+        Video = 10,
+        CoverCalibrator = 11
     }
 
     public enum MessageLevel
