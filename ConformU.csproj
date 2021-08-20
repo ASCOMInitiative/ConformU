@@ -12,6 +12,7 @@
     <AssemblyOriginatorKeyFile>conformu.snk</AssemblyOriginatorKeyFile>
     <Version>0.1.0.0</Version>
     <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>conformu</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='net5.0-windows'">

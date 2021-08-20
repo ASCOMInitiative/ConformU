@@ -157,6 +157,9 @@ namespace ConformU
             }
             else // Run as a web operation
             {
+                // Set the working directory to the application directory
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
+                
                 CancellationTokenSource tokenSource= new();
                 CancellationToken applicationCancellationtoken = tokenSource.Token;
 
