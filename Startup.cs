@@ -1,6 +1,7 @@
 using BlazorPro.BlazorSize;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
@@ -76,6 +77,9 @@ namespace ConformU
 
             // Radzen services
             services.AddScoped<NotificationService>();
+
+            // Add event handler to detect when the browser closes
+            services.AddSingleton<CircuitHandler, CircuitHandlerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

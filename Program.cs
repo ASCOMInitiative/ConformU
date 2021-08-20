@@ -8,9 +8,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -155,10 +157,17 @@ namespace ConformU
             }
             else // Run as a web operation
             {
+                CancellationTokenSource tokenSource= new();
+                CancellationToken applicationCancellationtoken = tokenSource.Token;
+
                 Console.WriteLine($"Staring web server.");
-                CreateHostBuilder(argList.ToArray()) // Use the revised argument list because the command line parser is fussy about prefixes and won't accept / 
+                Task t = CreateHostBuilder(argList.ToArray()) // Use the revised argument list because the command line parser is fussy about prefixes and won't accept / 
                      .Build()
-                     .Run();
+                     .RunAsync(applicationCancellationtoken);
+
+                OpenBrowser("http://localhost:5000/");
+
+                t.Wait();
                 return 0;
             }
 
@@ -182,5 +191,30 @@ namespace ConformU
                     {
                         webBuilder.UseStartup<Startup>();
                     });
+
+        public static void OpenBrowser(string url)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                ProcessStartInfo startInfo = new();
+                startInfo.WorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                startInfo.FileName = "xdg-open";
+                startInfo.Arguments = url;
+                Process.Start(startInfo);
+                //Process.Start("xdg-open", url);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Process.Start("open", url);
+            }
+            else
+            {
+                // throw 
+            }
+        }
     }
 }

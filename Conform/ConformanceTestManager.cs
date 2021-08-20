@@ -35,8 +35,10 @@ namespace ConformU
         public event EventHandler<MessageEventArgs> OutputChanged;
         public event EventHandler<MessageEventArgs> StatusChanged;
 
-        private void AssugnTestDevice()
+        private void AssignTestDevice()
         {
+            testDevice = null;
+
             // Assign the required device tester class dependent on which type of device is being tested
 
             switch (settings.DeviceType) // Set current progID and device test class
@@ -119,7 +121,7 @@ namespace ConformU
         public void SetupDialog()
         {
             // Assign a tester relevant to the device type being tested
-            AssugnTestDevice();
+            AssignTestDevice();
 
             try
             {
@@ -145,15 +147,13 @@ namespace ConformU
 
         public void TestDevice()
         {
-            DeviceTesterBaseClass testDevice = null; // Variable to hold the device tester class
-
             // Initialise error counters
             g_CountError = 0;
             g_CountWarning = 0;
             g_CountIssue = 0;
 
             // Assign a tester relevant to the device type being tested
-            AssugnTestDevice();
+            AssignTestDevice();
 
             // Test the device
             try

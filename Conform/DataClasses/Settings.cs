@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using static ConformU.ConformConstants;
 
@@ -149,5 +150,7 @@ namespace ConformU
         public int SwitchReadDelay { get; set; } = 500;
         public int SwitchWriteDelay { get; set; } = 3000;
         public int SwitchExtendedNumberTestRange { get; set; } = 100;
+
+        internal CancellationToken ApplicationCancellationToken { get; set; }
     }
 }

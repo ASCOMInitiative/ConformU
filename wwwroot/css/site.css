@@ -154,12 +154,12 @@ app {
     z-index: 1000;
 }
 
-#conform-error-ui .dismiss {
-    cursor: pointer;
-    position: absolute;
-    right: 0.75rem;
-    top: 0.5rem;
-}
+    #conform-error-ui .dismiss {
+        cursor: pointer;
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+    }
 
 @media (max-width: 767.98px) {
     .main .top-row:not(.auth) {
@@ -204,5 +204,10 @@ app {
     .sidebar .collapse {
         /* Never collapse the sidebar for wide screens */
         display: block;
+    }
+
+    /* Radzeb table ordering */
+    ul[role=tablist] {
+        flex-wrap: wrap;
     }
 }

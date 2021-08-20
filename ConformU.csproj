@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <OutputType>winexe</OutputType>
+    <OutputType>Exe</OutputType>
     <RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
     <UserSecretsId>c49fec0a-dd2c-4e60-9e85-407d8d9bdd9f</UserSecretsId>
     <Platforms>AnyCPU</Platforms>
@@ -11,26 +11,12 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>conformu.snk</AssemblyOriginatorKeyFile>
     <Version>0.1.0.0</Version>
-    <Configurations>Debug;Release;Windows</Configurations>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Windows|AnyCPU'">
-    <Optimize>True</Optimize>
+  <PropertyGroup Condition="'$(TargetFramework)'=='net5.0-windows'">
+    <UseWindowsForms>True</UseWindowsForms>
   </PropertyGroup>
-
-  <Choose>
-    <When Condition=" '$(Configuration)'=='Windows' ">
-      <PropertyGroup>
-        <TargetFramework>net5.0-windows</TargetFramework>
-        <UseWindowsForms>true</UseWindowsForms>
-      </PropertyGroup>
-    </When>
-    <When Condition=" '$(Configuration)'!='Windows' ">
-      <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
-      </PropertyGroup>
-    </When>
-  </Choose>
 
   <ItemGroup>
     <_WebToolingArtifacts Remove="Properties\PublishProfiles\Linux-Arm.pubxml" />
@@ -38,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ASCOM.Standard.AlpacaClients" Version="0.0.14" />
+    <PackageReference Include="ASCOM.Standard.AlpacaClients" Version="0.0.15" />
     <PackageReference Include="ASCOM.Standard.COM.DriverAccess" Version="1.0.0-alpha17" />
     <PackageReference Include="ASCOM.Standard.Utilities" Version="1.0.0-alpha16" />
     <PackageReference Include="BlazorPro.BlazorSize" Version="5.0.0" />
