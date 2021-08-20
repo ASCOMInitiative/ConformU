@@ -19,91 +19,91 @@
 @*Select device type drop-down*@
 <div class="row">
 
-	<h3 style="padding-right: 1em">Select device type</h3>
+    <h3 style="padding-right: 1em">Select device type</h3>
 
-	<RadzenDropDown Style="width:300px"
-					AllowClear="false"
-					AllowFiltering="false"
-					Data=@validAscomdDeviceTypes
-					TValue="string"
-					@bind-Value=@selectedDeviceTypeString
-					Change=@(args => OnDeviceTypeChange(args)) />
+    <RadzenDropDown Style="width:300px"
+                    AllowClear="false"
+                    AllowFiltering="false"
+                    Data=@validAscomdDeviceTypes
+                    TValue="string"
+                    @bind-Value=@selectedDeviceTypeString
+                    Change=@(args => OnDeviceTypeChange(args)) />
 </div>
 
 @* Select device tabs *@
 <RadzenTabs Style="height: auto; margin-top: 20px"
-			RenderMode="TabRenderMode.Server"
-			@bind-value=@selectedTabNumber
-			Change=@(args => OnTabChange(args))>
+            RenderMode="TabRenderMode.Server"
+            @bind-value=@selectedTabNumber
+            Change=@(args => OnTabChange(args))>
 
-	<Tabs>
+    <Tabs>
 
-		@* Alpaca device search tab *@
-		<RadzenTabsItem Text="Alpaca Devices">
+        @* Alpaca device search tab *@
+        <RadzenTabsItem Text="Alpaca Devices">
 
-			<div class="row">
+            <div class="row">
 
-				@* Alpaca device selection radio buttons *@
-				<RadzenCard Style="width:600px; margin-bottom: 20px; min-height:120px;  height:fit-content; margin-right: 20px; overflow: auto;">
+                @* Alpaca device selection radio buttons *@
+                <RadzenCard Style="width:600px; margin-bottom: 20px; min-height:120px;  height:fit-content; margin-right: 20px; overflow: auto;">
 
-					<RadzenRadioButtonList @bind-Value=@ascomDevice
-										   Orientation="Orientation.Vertical"
-										   Data=@ascomDevices
-										   TValue="AscomDevice"
-										   TextProperty="DisplayName"
-										   ValueProperty="AscomDevice"
-										   Change=@(args => OnNewAlpacaDeviceSelected(args)) />
+                    <RadzenRadioButtonList @bind-Value=@ascomDevice
+                                           Orientation="Orientation.Vertical"
+                                           Data=@ascomDevices
+                                           TValue="AscomDevice"
+                                           TextProperty="DisplayName"
+                                           ValueProperty="AscomDevice"
+                                           Change=@(args => OnNewAlpacaDeviceSelected(args)) />
 
-				</RadzenCard>
+                </RadzenCard>
 
-				@* Alpaca discovery progress information *@
-				<RadzenCard Style="width: 600px; margin-bottom: 20px; height: fit-content; margin-right: 20px">
+                @* Alpaca discovery progress information *@
+                <RadzenCard Style="width: 600px; margin-bottom: 20px; height: fit-content; margin-right: 20px">
 
-					<RadzenTextArea Style="line-height:1.3; height: fit-content;"
-									Cols="300"
-									Rows="@statusBoxHeight"
-									@bind-Value=@alpacaDiscoveryProgress />
+                    <RadzenTextArea Style="line-height:1.3; height: fit-content;"
+                                    Cols="300"
+                                    Rows="@statusBoxHeight"
+                                    @bind-Value=@alpacaDiscoveryProgress />
 
-				</RadzenCard>
+                </RadzenCard>
 
-			</div>
+            </div>
 
-			@* Alpaca search and device selection buttons *@
-			<div class="row">
+            @* Alpaca search and device selection buttons *@
+            <div class="row">
 
-				<RadzenButton Style="margin-bottom: 20px; width: 150px; margin-left: 20px;"
-							  Text="Rediscover"
-							  Disabled="@discoveryInProgress"
-							  Click=@(args => OnAlpacaSearchClick()) />
+                <RadzenButton Style="margin-bottom: 20px; width: 150px; margin-left: 20px;"
+                              Text="Rediscover"
+                              Disabled="@discoveryInProgress"
+                              Click=@(args => OnAlpacaSearchClick()) />
 
-			</div>
+            </div>
 
-		</RadzenTabsItem>
+        </RadzenTabsItem>
 
-		@* COM device search tab *@
-		<RadzenTabsItem Text="Windows COM Drivers"
-						Disabled=@osIsNotWindows
-						Visible=@osIsWindows>
+        @* COM device search tab *@
+        <RadzenTabsItem Text="Windows COM Drivers"
+                        Disabled=@osIsNotWindows
+                        Visible=@osIsWindows>
 
-			<div class="row">
+            <div class="row">
 
-				@* COM device selection radio buttons *@
-				<RadzenCard Style="width:900px; margin-bottom: 20px; height:fit-content; margin-right: 20px; overflow: auto;">
+                @* COM device selection radio buttons *@
+                <RadzenCard Style="width:900px; margin-bottom: 20px; height:fit-content; margin-right: 20px; overflow: auto;">
 
-					<RadzenRadioButtonList @bind-Value=@comDevice
-										   Orientation="Orientation.Vertical"
-										   Data=@comDeviceList
-										   TValue="ComDevice"
-										   TextProperty="DisplayName"
-										   ValueProperty="ComDevice"
-										   Change=@(args => OnComDeviceChanged(args)) />
-				</RadzenCard>
+                    <RadzenRadioButtonList @bind-Value=@comDevice
+                                           Orientation="Orientation.Vertical"
+                                           Data=@comDeviceList
+                                           TValue="ComDevice"
+                                           TextProperty="DisplayName"
+                                           ValueProperty="ComDevice"
+                                           Change=@(args => OnComDeviceChanged(args)) />
+                </RadzenCard>
 
-			</div>
+            </div>
 
-		</RadzenTabsItem>
+        </RadzenTabsItem>
 
-	</Tabs>
+    </Tabs>
 
 </RadzenTabs>
 
@@ -137,7 +137,7 @@
         // Initialise variables
         selectedDeviceType = (configuration.Settings.DeviceType == DeviceType.NoDeviceType) ? DeviceType.Telescope : configuration.Settings.DeviceType;
         selectedDeviceTypeString = selectedDeviceType.ToString();
-        discovery = new AlpacaDiscovery(conformLogger);
+        discovery = new AlpacaDiscovery(null);
         discovery.AlpacaDevicesUpdated += AlpacaDeviceDiscovered;
         discovery.DiscoveryCompleted += AlpacaDiscoveryCompleted;
 
@@ -341,13 +341,23 @@
         await InvokeAsync(() => { StateHasChanged(); });
     }
 
-    void StartDiscovery()
+    async void StartDiscovery()
     {
         discoveredAlpacaDevices.Clear();
         discoveryInProgress = true;
-        alpacaDiscoveryProgress = "Discovery started...\r\n";
+        alpacaDiscoveryProgress = $"Discovery started (Duration {configuration.Settings.AlpacaConfiguration.DiscoveryDuration:0.0} seconds)...\r\n";
         statusBoxHeight = 3; // Initual status area height
-        discovery.StartDiscovery(1, 1000, 32227, 1.0, false, true, false);
+        Task t = Task.Run(() =>
+            discovery.StartDiscovery(configuration.Settings.AlpacaConfiguration.NumberOfDiscoveryPolls,
+            (int)(configuration.Settings.AlpacaConfiguration.DiscoveryPollInterval * 1000),
+            configuration.Settings.AlpacaConfiguration.DiscoveryPort,
+            configuration.Settings.AlpacaConfiguration.DiscoveryDuration,
+            configuration.Settings.AlpacaConfiguration.DiscoveryResolveName,
+            configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4,
+            configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6)
+        );
+
+        //t.Wait();
     }
 
     #endregion

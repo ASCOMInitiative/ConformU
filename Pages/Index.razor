@@ -31,7 +31,7 @@
 @code {
 
     int screenLogRows = 10;
-    string screenLog = "Initial log message";
+    string screenLog = "Conform log.";
     object screenLogLockObject = new object();
     object statusLockObject = new object();
     string statusMessage = "Conformance run status";
@@ -46,9 +46,9 @@
 
     protected override void OnInitialized()
     {
-        Console.WriteLine($"Settings location - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_SETTINGS)}");
-        Console.WriteLine($"Log file name     - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILENAME)}");
-        Console.WriteLine($"Log file path     - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILEPATH)}");
+        //Console.WriteLine($"Settings location - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_SETTINGS)}");
+        //Console.WriteLine($"Log file name     - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILENAME)}");
+        //Console.WriteLine($"Log file path     - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILEPATH)}");
 
     }
 
@@ -138,21 +138,16 @@
         int x = (int)(result.Left);
         int y = (int)(result.Top) + 100;
 
-        @*screenLogRows = (int)((browser.Height - result.Top) / 20);
-            conformLogger.LogMessage("SetScreenLogRows", $"Browserheight: {browser.Height}, LogAreaTop: {result.Top}, LogAreaHeight: {result.Height}, ScreenLogRows: {screenLogRows}");*@
-
-
-
+        //screenLogRows = (int)((browser.Height - result.Top) / 20);
+        //conformLogger.LogMessage("SetScreenLogRows", $"Browserheight: {browser.Height}, LogAreaTop: {result.Top}, LogAreaHeight: {result.Height}, ScreenLogRows: {screenLogRows}");
 
         int crCount = screenLog.Count((f) => f == (char)10);
 
         int heightCount = Convert.ToInt32(((double)browser.Height - 200.0) / 20.0) + (browser.Height / 300) - 1;
 
         //screenLogRows = Math.Min(crCount, heightCount);
-        screenLogRows =  heightCount;
-        conformLogger.LogMessage("SetScreenLogRows", $"screenLogRows: {screenLogRows}");
-
-
+        screenLogRows = heightCount;
+        //conformLogger.LogMessage("SetScreenLogRows", $"screenLogRows: {screenLogRows}");
     }
 
     /// <summary>
@@ -209,7 +204,7 @@
         browser = window;
         SetScreenLogRows();        // Log the new window size and number of rows
                                    // We're outside of the component's lifecycle, be sure to let it know it has to re-render.
-        conformLogger.LogMessage("WindowResized", $"Browser height: {browser.Height}, Browser width: {browser.Width}");
+                                   //conformLogger.LogMessage("WindowResized", $"Browser height: {browser.Height}, Browser width: {browser.Width}");
 
 
         StateHasChanged();

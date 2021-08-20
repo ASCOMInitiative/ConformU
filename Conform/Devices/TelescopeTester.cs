@@ -377,7 +377,7 @@ namespace Conform
                 {
                     case DeviceTechnology.Alpaca:
                         logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
-                        telescopeDevice = new AlpacaTelescope(settings.AlpacaConfiguration.AccessServiceType.ToString(), settings.AlpacaDevice.IpAddress, settings.AlpacaDevice.IpPort, settings.AlpacaDevice.AlpacaDeviceNumber, logger);
+                        telescopeDevice = new AlpacaTelescope(settings.AlpacaConfiguration.AccessServiceType.ToString(), settings.AlpacaDevice.IpAddress, settings.AlpacaDevice.IpPort, settings.AlpacaDevice.AlpacaDeviceNumber, settings.AlpacaConfiguration.LogCalls ? logger : null);
                         logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Alpaca device created OK");
                         break;
 

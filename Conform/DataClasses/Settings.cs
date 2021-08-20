@@ -81,6 +81,9 @@ namespace ConformU
                 deviceTechnology = value;
                 switch (deviceTechnology)
                 {
+                    case DeviceTechnology.NotSelected:
+                        DeviceName = "No device selected";
+                        break;
                     case DeviceTechnology.Alpaca:
                         DeviceName = AlpacaDevice.AscomDeviceName;
                         break;

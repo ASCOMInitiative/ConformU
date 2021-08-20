@@ -8,7 +8,7 @@ namespace ConformU
     public class AlpacaConfiguration
     {
         public int NumberOfDiscoveryPolls { get; set; } = 1;
-        public int DiscoveryPollInterval { get; set; } = 1;
+        public double DiscoveryPollInterval { get; set; } = 1.0;
         public int DiscoveryPort { get; set; } = 32227;
         public double DiscoveryDuration { get; set; } = 1.0;
         public bool DiscoveryResolveName { get; set; } = false;
@@ -17,5 +17,6 @@ namespace ConformU
         public ServiceType AccessServiceType { get; set; } = ServiceType.Http;
         public string AccessUserName { get; set; } = "";
         public string AccessPassword { get; set; } = "";
+        public bool LogCalls { get; set; } = false;
     }
 }

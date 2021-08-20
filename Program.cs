@@ -157,19 +157,25 @@ namespace ConformU
             }
             else // Run as a web operation
             {
-                // Set the working directory to the application directory
-                Directory.SetCurrentDirectory(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
-                
+                if (!Debugger.IsAttached)
+                {
+                    // Set the working directory to the application directory
+                    Directory.SetCurrentDirectory(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
+                }
                 CancellationTokenSource tokenSource= new();
                 CancellationToken applicationCancellationtoken = tokenSource.Token;
 
+                argList.Add("--environment Development");
+                
                 Console.WriteLine($"Staring web server.");
                 Task t = CreateHostBuilder(argList.ToArray()) // Use the revised argument list because the command line parser is fussy about prefixes and won't accept / 
                      .Build()
                      .RunAsync(applicationCancellationtoken);
 
-                OpenBrowser("http://localhost:5000/");
-
+                if (!Debugger.IsAttached)
+                {
+                    OpenBrowser("http://localhost:5000/");
+                }
                 t.Wait();
                 return 0;
             }

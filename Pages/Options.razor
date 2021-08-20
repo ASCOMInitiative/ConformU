@@ -18,7 +18,8 @@
 @*Configuration tabs*@
 <RadzenTabs Change=@OnTabChange style="height: 820px;margin-top:20px; width:auto; height: auto" RenderMode="TabRenderMode.Client">
     <Tabs>
-        <RadzenTabsItem Text="General">
+
+        <RadzenTabsItem Text="Conform">
             <div class="row" style="margin-top:@topMargin;">
                 <RadzenCard Style="width:300px; margin-bottom: 20px; height:270px; margin-right: 20px">
                     <h3 style="margin-bottom:0;">Test Scope</h3>
@@ -48,23 +49,81 @@
                     </div>
                 </RadzenCard>
             </div>
-            <div class="row">
+        </RadzenTabsItem>
 
-                <RadzenCard Style="width:300px; margin-bottom:20px;height:130px;">
-                    <h3>COM Access Mechanic</h3>
-                    <RadzenDropDown @bind-Value=@comAccessMechanic
-                                    Style="width:245px"
-                                    Data="comAccessMechanicoptions"
-                                    TextProperty="Key"
-                                    ValueProperty="Value"
-                                    TValue="ComAccessMechanic"
-                                    AllowClear="false"
-                                    Multiple="false"
-                                    MaxSelectedLabels="1"
-                                    Change=@(args => OnComAccessModeChange(args)) />
+        <RadzenTabsItem Text="Alpaca and COM">
+            <div class="row" style="margin-top:@topMargin;">
+                <RadzenCard Style="width:560px; margin-bottom: 20px;  margin-right: 20px">
+                    <h3 style="margin-bottom:0;">Alpaca Discovery Configuration</h3>
+                    <div class="row" style="margin-top: 15px">
+                        <RadzenNumeric Style="margin-left: 20px; width: 8em" @bind-Value="alpacaNumberOfDiscoveryPolls" TValue="int" Min="1" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.AlpacaNumberOfDiscoveryPolls)) />
+                        <p style="margin-left: 20px;margin-top: 5px;">Number of discovery polls (Default 1)</p>
+                    </div>
+                    <div class="row">
+                        <RadzenNumeric Style="margin-left: 20px; width: 8em " Format="0.0" @bind-Value="alpacaDiscoveryPollInterval" Step="0.1" TValue="double" Min="0.1M" Change=@(args => OnDoubleItemChange(args,NumericConfigurationItem.AlpacaDiscoveryPollInterval)) />
+                        <p style="margin-left: 20px;margin-top: 5px;">Interval between polls (Seconds - default 1.0)</p>
+                    </div>
+                    <div class="row">
+                        <RadzenNumeric Style="margin-left: 20px; width: 8em " @bind-Value="alpacaDiscoveryPort" TValue="int" Min="1" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.AlpacaDiscoveryPort)) />
+                        <p style="margin-left: 20px;margin-top: 5px;">Alpaca discovery port (Default 32227)</p>
+                    </div>
+                    <div class="row">
+                        <RadzenNumeric Style="margin-left: 20px; width: 8em" Format="0.0" @bind-Value="alpacaDiscoveryDuration" Step="0.1" TValue="double" Min="0.1M" Change=@(args => OnDoubleItemChange(args,NumericConfigurationItem.AlpacaDiscoveryDuration)) />
+                        <p style="margin-left: 20px;margin-top: 5px;">Discovery duration (Seconds - default 1.0)</p>
+                    </div>
+
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenDropDown @bind-Value=@alpacaServiceType
+                                        Style="width:8em"
+                                        Data="serviceTypeOptions"
+                                        TextProperty="Key"
+                                        ValueProperty="Value"
+                                        TValue="ServiceType"
+                                        AllowClear="false"
+                                        Multiple="false"
+                                        MaxSelectedLabels="1"
+                                        Name="DROP1"
+                                        Change=@(args => OnServiceTypeChange(args)) />
+                        <RadzenLabel Text="Service type (Default HTTP)" Component="DROP1" Style="margin-left: 20px;margin-top:5px" />
+                    </div>
+
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHK5" @bind-Value=@alpacaDiscoveryUseIpV4 TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV4)) />
+                        <RadzenLabel Text="Use IPv4 (Default Yes)" Component="CHK5" Style="margin-left: 20px;" />
+                    </div>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHK6" @bind-Value=@alpacaDiscoveryUseIpV6 TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV6)) />
+                        <RadzenLabel Text="Use IPv6 (Default No)" Component="CHK6" Style="margin-left: 20px;" />
+                    </div>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHK4" @bind-Value=@alpacaDiscoveryResolveName TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.AlpacaDiscoveryResolveName)) />
+                        <RadzenLabel Text="Resolve DNS names (Default No)" Component="CHK4" Style="margin-left: 20px;" />
+                    </div>
+
 
                 </RadzenCard>
+
             </div>
+
+            @if (OperatingSystem.IsWindows())
+            {
+                <div class="row">
+                    <RadzenCard Visible="@isWindowsOs" Style="width:300px; margin-bottom:20px;">
+                        <h3>COM Access Mechanic</h3>
+                        <RadzenDropDown @bind-Value=@comAccessMechanic
+                                        Style="width:245px"
+                                        Data="comAccessMechanicoptions"
+                                        TextProperty="Key"
+                                        ValueProperty="Value"
+                                        TValue="ComAccessMechanic"
+                                        AllowClear="false"
+                                        Multiple="false"
+                                        MaxSelectedLabels="1"
+                                        Change=@(args => OnComAccessModeChange(args)) />
+
+                    </RadzenCard>
+                </div>
+            }
         </RadzenTabsItem>
 
         <RadzenTabsItem Text="Telescope">
@@ -180,8 +239,17 @@
 @*Page code*@
 @code {
 
-    const string topMargin = "10px";
+    void OnServiceTypeChange(object serviceMode)
+    {
+        ServiceType serviceType = (ServiceType)serviceMode;
+        configuration.Settings.AlpacaConfiguration.AccessServiceType = serviceType;
+        SaveConfiguration();
+    }
 
+    private ServiceType alpacaServiceType;
+
+    const string topMargin = "10px";
+    private bool isWindowsOs;
     private enum NumericConfigurationItem
     {
         CameraMaxBinX,
@@ -194,7 +262,11 @@
         ObservingConditionsMaxRetries,
         SwitchReadDelay,
         SwitchWriteDelay,
-        SwitchExtendedNumberTestRange
+        SwitchExtendedNumberTestRange,
+        AlpacaNumberOfDiscoveryPolls,
+        AlpacaDiscoveryPollInterval,
+        AlpacaDiscoveryPort,
+        AlpacaDiscoveryDuration
     }
 
     private enum CheckBoxConfigurationItem
@@ -203,7 +275,10 @@
         DisplayCalls,
         DomeOpenShutter,
         SwitchEnableSet,
-        UpdateCheck
+        UpdateCheck,
+        AlpacaDiscoveryResolveName,
+        AlpacaDiscoveryUseIpV4,
+        AlpacaDiscoveryUseIpV6
     }
 
     // Camera test configuration
@@ -239,11 +314,26 @@
     private DeviceType deviceType;
     private string lastUpdateDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
 
+    // Alpaca configuration
+    private int alpacaNumberOfDiscoveryPolls;
+    private double alpacaDiscoveryPollInterval;
+    private int alpacaDiscoveryPort;
+    private double alpacaDiscoveryDuration;
+    public bool alpacaDiscoveryResolveName;
+    public bool alpacaDiscoveryUseIpV4;
+    public bool alpacaDiscoveryUseIpV6;
+
     private ComAccessMechanic comAccessMechanic = ComAccessMechanic.Native;
     private List<KeyValuePair<string, ComAccessMechanic>> comAccessMechanicoptions = new()
     {
         new KeyValuePair<string, ComAccessMechanic>("Native", ComAccessMechanic.Native),
         new KeyValuePair<string, ComAccessMechanic>("Driver Access", ComAccessMechanic.DriverAccess)
+    };
+
+    private List<KeyValuePair<string, ServiceType>> serviceTypeOptions = new()
+    {
+        new KeyValuePair<string, ServiceType>("HTTP", ServiceType.Http),
+        new KeyValuePair<string, ServiceType>("HTTPS", ServiceType.Https)
     };
 
     protected override void OnInitialized()
@@ -252,6 +342,26 @@
 
         status = configuration.Status;
         SetConfiguration();
+
+        isWindowsOs = OperatingSystem.IsWindows();
+    }
+
+    private void OnDoubleItemChange(double newValue, NumericConfigurationItem numericConfigurationItem)
+    {
+        switch (numericConfigurationItem)
+        {
+            case NumericConfigurationItem.AlpacaDiscoveryDuration:
+                configuration.Settings.AlpacaConfiguration.DiscoveryDuration = newValue;
+                break;
+
+            case NumericConfigurationItem.AlpacaDiscoveryPollInterval:
+                configuration.Settings.AlpacaConfiguration.DiscoveryPollInterval = newValue;
+                break;
+
+            default:
+                throw new InvalidValueException($"OnDoubleItemChange - Unknown numeric configurtation item: {numericConfigurationItem}");
+        }
+        SaveConfiguration();
     }
 
     private void OnIntegerItemChange(int newValue, NumericConfigurationItem numericConfigurationItem)
@@ -300,6 +410,14 @@
 
             case NumericConfigurationItem.SwitchWriteDelay:
                 configuration.Settings.SwitchWriteDelay = newValue;
+                break;
+
+            case NumericConfigurationItem.AlpacaDiscoveryPort:
+                configuration.Settings.AlpacaConfiguration.DiscoveryPort = newValue;
+                break;
+
+            case NumericConfigurationItem.AlpacaNumberOfDiscoveryPolls:
+                configuration.Settings.AlpacaConfiguration.NumberOfDiscoveryPolls = newValue;
                 break;
 
             default:
@@ -372,6 +490,16 @@
         switchExtendedNumberTestRange = configuration.Settings.SwitchExtendedNumberTestRange;
         switchReadDelay = configuration.Settings.SwitchReadDelay;
         switchWriteDelay = configuration.Settings.SwitchWriteDelay;
+
+        // Alpaca configuration
+        alpacaDiscoveryDuration = configuration.Settings.AlpacaConfiguration.DiscoveryDuration;
+        alpacaDiscoveryPollInterval = configuration.Settings.AlpacaConfiguration.DiscoveryPollInterval;
+        alpacaDiscoveryPort = configuration.Settings.AlpacaConfiguration.DiscoveryPort;
+        alpacaNumberOfDiscoveryPolls = configuration.Settings.AlpacaConfiguration.NumberOfDiscoveryPolls;
+        alpacaDiscoveryResolveName = configuration.Settings.AlpacaConfiguration.DiscoveryResolveName;
+        alpacaDiscoveryUseIpV4 = configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4;
+        alpacaDiscoveryUseIpV6 = configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6;
+        alpacaServiceType = configuration.Settings.AlpacaConfiguration.AccessServiceType;
     }
 
     void OnConformTestScopeChange(IEnumerable<int> scope)
@@ -486,6 +614,18 @@
 
             case CheckBoxConfigurationItem.SwitchEnableSet:
                 configuration.Settings.SwitchEnableSet = switchEnableSet;
+                break;
+
+            case CheckBoxConfigurationItem.AlpacaDiscoveryResolveName:
+                configuration.Settings.AlpacaConfiguration.DiscoveryResolveName = alpacaDiscoveryResolveName;
+                break;
+
+            case CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV4:
+                configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4 = alpacaDiscoveryUseIpV4;
+                break;
+
+            case CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV6:
+                configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6 = alpacaDiscoveryUseIpV6;
                 break;
 
             default:
