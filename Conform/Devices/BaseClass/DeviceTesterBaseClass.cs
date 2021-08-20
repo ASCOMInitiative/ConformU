@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using ASCOM;
@@ -666,10 +667,12 @@ namespace ConformU
             DateTime lastModifiedTime = DateTime.MinValue;
             try
             {
-                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                LogMsg("ConformanceCheck", MessageLevel.msgDebug, $"Assembly location: {assembly.Location}");
+                LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"About to get executing assembly...");
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"Got executing assembly...");
+                LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"Assembly location: {assembly.Location}");
                 var fileInfo = new System.IO.FileInfo(assembly.Location);
-                LogMsg("ConformanceCheck", MessageLevel.msgDebug, $"Last write time: {fileInfo.LastWriteTime}");
+                LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"Last write time: {fileInfo.LastWriteTime}");
                 lastModifiedTime = fileInfo.LastWriteTime;
             }
             catch (Exception ex)
@@ -1132,7 +1135,7 @@ namespace ConformU
         internal void LogMsg(string p_Test, MessageLevel p_MsgLevel, string p_Msg)
         {
             const int c_Spacing = 52;
-            const int TEST_NAME_WIDTH = 34;
+            const int TEST_NAME_WIDTH = 45;
             string l_MsgLevelFormatted, l_Msg, l_TestFormatted, l_MsgFormatted;
             int i, j;
             MessageLevel logLevel;

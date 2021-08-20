@@ -29,7 +29,7 @@
   <ItemGroup>
     <PackageReference Include="ASCOM.Standard.AlpacaClients" Version="0.0.15" />
     <PackageReference Include="ASCOM.Standard.COM.DriverAccess" Version="1.0.0-alpha16.1" />
-    <PackageReference Include="ASCOM.Standard.Utilities" Version="1.0.0-alpha16" />
+    <PackageReference Include="ASCOM.Standard.Utilities" Version="1.0.0-alpha18" />
     <PackageReference Include="BlazorPro.BlazorSize" Version="5.0.0" />
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="Radzen.Blazor" Version="3.9.2" />

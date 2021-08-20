@@ -15,10 +15,13 @@ namespace ConformU
 {
     public class ConformLogger : TraceLogger
     {
+        private const int ID_WIDTH = 30;
+
         public ConformLogger(string logFileName, string logFilePath, string loggerName, bool enabled) : base(logFileName, logFilePath, loggerName, enabled)
         {
             Debug = false;
             Console.WriteLine($"CONFORMLOGGER INIT - Log file name: {logFileName}, Log file path: {logFilePath}, Logger name: {loggerName}");
+            base.IdentifierWidth = ID_WIDTH;
         }
 
 
@@ -40,7 +43,7 @@ namespace ConformU
 
         public new void LogMessage(string id, string message)
         {
-            Console.WriteLine($"{id.PadRight(25)} {message}");
+            Console.WriteLine($"{id.PadRight(ID_WIDTH)} {message}");
             base.LogMessage(id, message);
         }
 
