@@ -146,6 +146,14 @@ namespace ConformU
 
         public string Status { get; private set; }
 
+        public bool DebugDiscovery
+        {
+            set
+            {
+                settings.DebugDiscovery = value;
+            }
+        }
+
         private void PersistSettings(Settings settingsToPersist)
         {
             try

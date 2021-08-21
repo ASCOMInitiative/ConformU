@@ -21,5 +21,9 @@ namespace ConformU
             "log file path to create the fully qualified log file name. If filename is fully qualified, any logfilepath parameter wil be ignored. Leave filename blank to use automatic file " +
             "naming, where the file name will be based on the file creation time.")]
         public string LogFileName { get; set; }
+
+        [Option('d', "debugdiscovery", Required = false, HelpText = "'--debugdiscovery' - Write discovery debug information to the log.")]
+        public bool DebugDiscovery { get; set; }
+
     }
 }

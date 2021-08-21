@@ -49,11 +49,6 @@ namespace ConformU
             string logFileName = Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILENAME) ?? "";
             string logFilePath = Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILEPATH) ?? "";
 
-            if (!OperatingSystem.IsWindows())
-            {
-                logFileName = logFileName.ToLowerInvariant();
-            }
-
             // Use fully qualified file name if present, otherwise use log file path and relative file name
             if (Path.IsPathFullyQualified(logFileName)) // Full file name and path provided so split into path and filename and ignore any supplied log file path
             {
@@ -69,8 +64,15 @@ namespace ConformU
             conformLogger.Debug = true;
             services.AddSingleton(conformLogger); // Add the logger component to the list of injectable services
 
+            // Create a ConformConfiguration service
             ConformConfiguration conformConfiguration = new(conformLogger, Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_SETTINGS)); // Create a configuration settings component
-            services.AddSingleton(conformConfiguration); // Add the configuration component to the list of injectable services
+
+            // Enable Alpaca discovery if a command line option requires this
+            string debugDiscovery = Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_SHOW_DISCOVERY) ?? "";
+            if (!string.IsNullOrEmpty(debugDiscovery)) conformConfiguration.DebugDiscovery = true;
+
+            // Add the configuration component to the list of injectable services
+            services.AddSingleton(conformConfiguration);
 
             // Resizeable screen log text area infrastructure
             services.AddResizeListener(options =>

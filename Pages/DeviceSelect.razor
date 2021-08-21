@@ -137,7 +137,7 @@
         // Initialise variables
         selectedDeviceType = (configuration.Settings.DeviceType == DeviceType.NoDeviceType) ? DeviceType.Telescope : configuration.Settings.DeviceType;
         selectedDeviceTypeString = selectedDeviceType.ToString();
-        discovery = new AlpacaDiscovery(null);
+        discovery = new AlpacaDiscovery(configuration.Settings.DebugDiscovery ? conformLogger : null); // Create a discovery component with or without logging
         discovery.AlpacaDevicesUpdated += AlpacaDeviceDiscovered;
         discovery.DiscoveryCompleted += AlpacaDiscoveryCompleted;
 
@@ -194,21 +194,57 @@
 
     private void OnNewAlpacaDeviceSelected(AscomDevice value)
     {
-        selectedDeviceType = Enum.Parse<DeviceType>(selectedDeviceTypeString);
-        configuration.Settings.DeviceType = selectedDeviceType;
-        selectedAlpacaDevice = value;
-        if (value is null) value = new AscomDevice();
-        conformLogger.LogDebug("OnDeviceChanged", $"New Device selected: {value.AscomDeviceName} at {value.IpAddress}");
+        try
+        {
+            // Update the selected device variable or initialise if there is no device
+            selectedAlpacaDevice = (value is not null) ? value : new AscomDevice();
+            ValidateAscomDevice(ref value);
 
-        conformLogger.LogDebug("OnSelectDeviceClick", $"Alpaca device selected: {technologyType}");
-        configuration.Settings.AlpacaDevice = selectedAlpacaDevice;
-        configuration.Settings.DeviceType = Enum.Parse<DeviceType>(selectedAlpacaDevice.AscomDeviceType);
+            selectedDeviceType = Enum.Parse<DeviceType>(selectedDeviceTypeString);
+            configuration.Settings.DeviceType = selectedDeviceType;
 
-        technologyType = DeviceTechnology.Alpaca;
-        configuration.Settings.DeviceTechnology = technologyType;
+            technologyType = DeviceTechnology.Alpaca;
+            configuration.Settings.DeviceTechnology = technologyType;
+            conformLogger.LogDebug("OnNewAlpacaDeviceSelected", $"New {technologyType} {value.AscomDeviceType} device selected: {value.AscomDeviceName} at {value.IpAddress}");
 
-        SaveConfiguration();
+            configuration.Settings.AlpacaDevice = selectedAlpacaDevice;
 
+            SaveConfiguration();
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("OnNewAlpacaDeviceSelected", $"Exception: \r\n{ex}");
+        }
+    }
+
+    private void ValidateAscomDevice(ref AscomDevice ascomDevice)
+    {
+        try
+        {
+            DeviceType deviceType = Enum.Parse<DeviceType>(ascomDevice.AscomDeviceType);
+            // If we get here the device type is correctly formatted to the Enum type
+        }
+        catch
+        {
+            try
+            {
+                DeviceType deviceType = Enum.Parse<DeviceType>(ascomDevice.AscomDeviceType,true);
+                // If we get here the device type is correct but is incorrectly cased compared to the Enum type so we update the object to the correct format
+                if (configuration.Settings.StrictCasing)
+                {
+                    conformLogger.LogMessage("ValidateAscomDevice", MessageLevel.msgWarning, $"Returned device type value: '{ascomDevice.AscomDeviceType}' is not correctly cased. It should be: '{deviceType.ToString()}'.");
+                }
+                else
+                {
+                    // Tolerant mode - no warnings to be given 
+                }
+                ascomDevice.AscomDeviceType = deviceType.ToString(); // Quietly update the stored device type
+            }
+            catch (Exception ex )
+            {
+                conformLogger.LogMessage("ValidateAscomDevice", $"Unable to parse the returned ASCOM device type: '{ascomDevice.AscomDeviceType}' - {ex.Message}");
+            }
+        }
     }
 
     private void OnAlpacaSearchClick()

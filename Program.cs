@@ -92,6 +92,13 @@ namespace ConformU
                 argList.Add(o.LogFilePath);
             }
 
+            // Flag if discovery debug information should be included in the log file
+            if (o.DebugDiscovery)
+            {
+                argList.Add($"--{ConformConstants.COMMAND_OPTION_SHOW_DISCOVERY}");
+                argList.Add("true");
+            }
+
             // Run from command line if requested
             if (o.Run)
             {
@@ -165,13 +172,12 @@ namespace ConformU
                 CancellationTokenSource tokenSource= new();
                 CancellationToken applicationCancellationtoken = tokenSource.Token;
 
-                argList.Add("--environment Development");
-                
                 Console.WriteLine($"Staring web server.");
                 Task t = CreateHostBuilder(argList.ToArray()) // Use the revised argument list because the command line parser is fussy about prefixes and won't accept / 
                      .Build()
                      .RunAsync(applicationCancellationtoken);
 
+                // Don't open a browser if running within Visual Studio
                 if (!Debugger.IsAttached)
                 {
                     OpenBrowser("http://localhost:5000/");
@@ -179,10 +185,6 @@ namespace ConformU
                 t.Wait();
                 return 0;
             }
-
-
-
-
 
             return 0;
         }

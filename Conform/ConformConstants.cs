@@ -66,6 +66,7 @@ namespace ConformU
         public const string COMMAND_OPTION_SETTINGS = "ConformSettings";
         public const string COMMAND_OPTION_LOGFILENAME = "ConformLogFileName";
         public const string COMMAND_OPTION_LOGFILEPATH = "ConformLogFilePath";
+        public const string COMMAND_OPTION_SHOW_DISCOVERY = "ShowDiscovery";
     }
 
 }

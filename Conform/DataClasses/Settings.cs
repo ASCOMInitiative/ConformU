@@ -101,6 +101,9 @@ namespace ConformU
         /// </summary>
         public DeviceType DeviceType { get; set; } = DeviceType.NoDeviceType;
 
+        // Warn if casing is not strictly correct
+        public bool StrictCasing { get; set; } = false;
+
         // Telescope test configuration
         /// <summary>
         /// List of telescope tests that can be enabled / disabled through configuration
@@ -155,5 +158,8 @@ namespace ConformU
         public int SwitchExtendedNumberTestRange { get; set; } = 100;
 
         internal CancellationToken ApplicationCancellationToken { get; set; }
+
+        internal bool DebugDiscovery { get; set; } = false;
+
     }
 }
