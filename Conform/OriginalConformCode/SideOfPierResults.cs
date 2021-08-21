@@ -1,6 +1,6 @@
 ﻿using ASCOM.Standard.Interfaces;
 
-namespace Conform
+namespace ConformU 
 {
     internal class SideOfPierResults
     {

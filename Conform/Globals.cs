@@ -1,13 +1,4 @@
-﻿// Option Strict On
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading;
-using ASCOM.Standard.Utilities;
-using Microsoft.VisualBasic;
-using static ConformU.ConformConstants;
-
-namespace Conform
+﻿namespace ConformU
 {
     static class Globals
     {

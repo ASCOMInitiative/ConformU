@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using ASCOM;
 using Microsoft.VisualBasic.CompilerServices;
-using static Conform.Globals;
+using static ConformU.Globals;
 using ConformU;
 using System.Collections.Generic;
 using System.Threading;
@@ -15,7 +15,7 @@ using ASCOM.Standard.Interfaces;
 using ASCOM.Standard.Utilities;
 using ASCOM.Standard.COM.DriverAccess;
 
-namespace Conform
+namespace ConformU  
 {
     internal class TelescopeTester : DeviceTesterBaseClass, IDisposable
     {

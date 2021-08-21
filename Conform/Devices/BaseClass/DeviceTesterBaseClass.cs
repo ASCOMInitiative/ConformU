@@ -13,7 +13,7 @@ using ASCOM.Standard.Interfaces;
 using ConformU;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.CompilerServices;
-using static Conform.Globals;
+using static ConformU.Globals;
 using static ConformU.ConformConstants;
 
 namespace ConformU

@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Timers;
 using System.Threading.Tasks;
 using System.Threading;
-using ASCOM;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Runtime;
-using System.Text;
-using Conform;
-using static Conform.Globals;
+using static ConformU.Globals;
 
 namespace ConformU
 {
