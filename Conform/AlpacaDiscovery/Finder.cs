@@ -23,6 +23,7 @@ namespace AlpacaDiscovery
         private readonly Action<IPEndPoint, AlpacaDiscoveryResponse> callbackFunctionDelegate;
         private readonly UdpClient udpClient;
         private readonly List<UdpClient> ipV6Discoveryclients = new ();
+        private readonly bool strictCasing;
 
         /// <summary>
         /// A cache of all endpoints found by the server
@@ -37,9 +38,10 @@ namespace AlpacaDiscovery
         /// This may require firewall access
         /// </summary>
         /// <param name="callback">A callback function to receive the endpoint result</param>
-        internal Finder(Action<IPEndPoint, AlpacaDiscoveryResponse> callback, TraceLogger traceLogger)
+        internal Finder(Action<IPEndPoint, AlpacaDiscoveryResponse> callback, bool strictCasing,TraceLogger traceLogger)
         {
             TL = traceLogger; // Save the trace logger object
+            this.strictCasing = strictCasing; // Save the strict JSON de-serialisation casing state
             LogMessage("Finder", "Starting Initialisation...");
             callbackFunctionDelegate = callback;
             udpClient = new UdpClient
@@ -239,7 +241,7 @@ namespace AlpacaDiscovery
                 if (ReceiveString.ToLowerInvariant().Contains(Constants.DISCOVERY_RESPONSE_STRING))
                 {
                     // Extract the discovery response parameters from the device's JSON response
-                    var discoveryResponse = JsonSerializer.Deserialize<AlpacaDiscoveryResponse>(ReceiveString);
+                    var discoveryResponse = JsonSerializer.Deserialize<AlpacaDiscoveryResponse>(ReceiveString, new JsonSerializerOptions { PropertyNameCaseInsensitive = strictCasing });
                     var alpacaApiEndpoint = new IPEndPoint(alpacaBroadcastResponseEndPoint.Address, discoveryResponse.AlpacaPort); // Create 
                     if (!CachedEndpoints.Contains(alpacaApiEndpoint))
                     {

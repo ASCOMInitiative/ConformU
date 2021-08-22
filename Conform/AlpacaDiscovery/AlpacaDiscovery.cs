@@ -52,6 +52,7 @@ namespace AlpacaDiscovery
         private DateTime discoveryStartTime; // Time at which the start discovery command was received
         private bool discoveryCompleteValue; // Discovery completion status
         private readonly object deviceListLockObject = new object(); // Lock object to synchronise access to the Alpaca device list collection, which is not a thread safe collection
+        private bool strictCasing; // Flag indicating whether case sensitive or case insensitive de-serialisation will be used.
 
         #endregion
 
@@ -69,9 +70,10 @@ namespace AlpacaDiscovery
     /// Initialiser that takes a trace logger (Can only be used from .NET clients)
     /// </summary>
     /// <param name="traceLogger">Trace logger instance to use for activity logging</param>
-        internal AlpacaDiscovery(TraceLogger traceLogger)
+        internal AlpacaDiscovery(bool strictCasing,TraceLogger traceLogger)
         {
             TL = traceLogger; // Save the supplied trace logger object
+            this.strictCasing = strictCasing;
             InitialiseClass(); // Initialise using the trace logger
         }
 
@@ -84,15 +86,15 @@ namespace AlpacaDiscovery
                 discoveryCompleteValue = true; // Initialise so that discoveries can be run
 
                 // Initialise utility objects
-                discoveryCompleteTimer = new System.Threading.Timer(OnDiscoveryCompleteTimer);
-                if (finder is object)
+                discoveryCompleteTimer = new Timer(OnDiscoveryCompleteTimer);
+                if (finder is not null)
                 {
                     finder.Dispose();
                     finder = null;
                 }
 
                 // Get a new broadcast response finder
-                finder = new Finder(FoundDeviceEventHandler, TL);
+                finder = new Finder(FoundDeviceEventHandler, strictCasing,TL);
                 LogMessage("AlpacaDiscoveryInitialise", $"Complete - Running on thread {Thread.CurrentThread.ManagedThreadId}");
             }
             catch (Exception ex)
@@ -421,7 +423,7 @@ namespace AlpacaDiscovery
                     LogMessage("GetAlpacaDeviceInformation", $"About to get version information from http://{hostIpAndPort}/management/apiversions at IP endpoint {deviceIpEndPoint.Address} {deviceIpEndPoint.AddressFamily}");
                     string apiVersionsJsonResponse = GetRequest($"http://{hostIpAndPort}/management/apiversions", Convert.ToInt32(discoveryTime * 1000d));
                     LogMessage("GetAlpacaDeviceInformation", $"Received JSON response from {hostIpAndPort}: {apiVersionsJsonResponse}");
-                    var apiVersionsResponse = JsonSerializer.Deserialize<IntArray1DResponse>(apiVersionsJsonResponse);
+                    var apiVersionsResponse = JsonSerializer.Deserialize<IntArray1DResponse>(apiVersionsJsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = strictCasing });
                     lock (deviceListLockObject) // Make sure that only one thread can update the device list dictionary at a time
                     {
                         alpacaDeviceList[deviceIpEndPoint].SupportedInterfaceVersions = apiVersionsResponse.Value;
@@ -436,7 +438,7 @@ namespace AlpacaDiscovery
                 {
                     string deviceDescriptionJsonResponse = GetRequest($"http://{hostIpAndPort}/management/v1/description", Convert.ToInt32(discoveryTime * 1000d));
                     LogMessage("GetAlpacaDeviceInformation", $"Received JSON response from {hostIpAndPort}: {deviceDescriptionJsonResponse}");
-                    var deviceDescriptionResponse = JsonSerializer.Deserialize<AlpacaDescriptionResponse>(deviceDescriptionJsonResponse);
+                    var deviceDescriptionResponse = JsonSerializer.Deserialize<AlpacaDescriptionResponse>(deviceDescriptionJsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = strictCasing });
                     lock (deviceListLockObject) // Make sure that only one thread can update the device list dictionary at a time
                     {
                         alpacaDeviceList[deviceIpEndPoint].ServerName = deviceDescriptionResponse.Value.ServerName;
@@ -453,7 +455,7 @@ namespace AlpacaDiscovery
                 {
                     string configuredDevicesJsonResponse = GetRequest($"http://{hostIpAndPort}/management/v1/configureddevices", Convert.ToInt32(discoveryTime * 1000d));
                     LogMessage("GetAlpacaDeviceInformation", $"Received JSON response from {hostIpAndPort}: {configuredDevicesJsonResponse}");
-                    var configuredDevicesResponse = JsonSerializer.Deserialize<AlpacaConfiguredDevicesResponse>(configuredDevicesJsonResponse);
+                    var configuredDevicesResponse = JsonSerializer.Deserialize<AlpacaConfiguredDevicesResponse>(configuredDevicesJsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = strictCasing });
                     lock (deviceListLockObject) // Make sure that only one thread can update the device list dictionary at a time
                     {
                         alpacaDeviceList[deviceIpEndPoint].ConfiguredDevices = configuredDevicesResponse.Value;

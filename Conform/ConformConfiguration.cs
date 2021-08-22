@@ -49,7 +49,7 @@ namespace ConformU
                     string serialisedSettings = File.ReadAllText(fileSettingsFileName);
                     TL.LogDebug("ConformConfiguration", $"Serialised settings: {serialisedSettings}");
 
-                    settings = JsonSerializer.Deserialize<Settings>(serialisedSettings);
+                    settings = JsonSerializer.Deserialize<Settings>(serialisedSettings, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     Status = "Settings read successfully";
                 }
                 else
@@ -144,8 +144,14 @@ namespace ConformU
             get { return settings; }
         }
 
+        /// <summary>
+        /// Text message describing any issues found when validating the settings
+        /// </summary>
         public string Status { get; private set; }
 
+        /// <summary>
+        /// Enables discovery process messages in the Conform log
+        /// </summary>
         public bool DebugDiscovery
         {
             set
@@ -153,6 +159,12 @@ namespace ConformU
                 settings.DebugDiscovery = value;
             }
         }
+
+        /// <summary>
+        /// Flag indicating whether de-serialisation of Alpaca JSON responses is sensitive to case of JSON element names
+        /// </summary>
+        /// <remarks>If Set TRUE JSON element names that are incorrectly cased will be ignored. If FALSE they will be accepted.</remarks>
+        public bool JsonDeserialisationIsCaseSensitive { get; private set; }
 
         private void PersistSettings(Settings settingsToPersist)
         {

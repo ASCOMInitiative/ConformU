@@ -108,8 +108,13 @@ namespace ConformU
                 {
                     case DeviceTechnology.Alpaca:
                         LogMsg("CreateDevice", MessageLevel.msgInfo, $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
-                        m_Rotator = new AlpacaRotator(settings.AlpacaConfiguration.AccessServiceType.ToString(), settings.AlpacaDevice.IpAddress, settings.AlpacaDevice.IpPort, settings.AlpacaDevice.AlpacaDeviceNumber, settings.AlpacaConfiguration.LogCalls ? logger : null);
-                        //LogMsg("CreateDevice", MessageLevel.Info, $"Alpaca device created OK");
+                        m_Rotator = new AlpacaRotator(settings.AlpacaConfiguration.AccessServiceType.ToString(),
+                            settings.AlpacaDevice.IpAddress,
+                            settings.AlpacaDevice.IpPort,
+                            settings.AlpacaDevice.AlpacaDeviceNumber,
+                            settings.StrictCasing,
+                            settings.AlpacaConfiguration.LogCalls ? logger : null);
+                        logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Alpaca device created OK");
                         break;
 
                     case DeviceTechnology.COM:

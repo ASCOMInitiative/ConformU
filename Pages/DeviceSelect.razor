@@ -137,7 +137,7 @@
         // Initialise variables
         selectedDeviceType = (configuration.Settings.DeviceType == DeviceType.NoDeviceType) ? DeviceType.Telescope : configuration.Settings.DeviceType;
         selectedDeviceTypeString = selectedDeviceType.ToString();
-        discovery = new AlpacaDiscovery(configuration.Settings.DebugDiscovery ? conformLogger : null); // Create a discovery component with or without logging
+        discovery = new AlpacaDiscovery(configuration.Settings.StrictCasing, configuration.Settings.DebugDiscovery ? conformLogger : null); // Create a discovery component with or without logging
         discovery.AlpacaDevicesUpdated += AlpacaDeviceDiscovered;
         discovery.DiscoveryCompleted += AlpacaDiscoveryCompleted;
 
@@ -228,7 +228,7 @@
         {
             try
             {
-                DeviceType deviceType = Enum.Parse<DeviceType>(ascomDevice.AscomDeviceType,true);
+                DeviceType deviceType = Enum.Parse<DeviceType>(ascomDevice.AscomDeviceType, true);
                 // If we get here the device type is correct but is incorrectly cased compared to the Enum type so we update the object to the correct format
                 if (configuration.Settings.StrictCasing)
                 {
@@ -236,11 +236,11 @@
                 }
                 else
                 {
-                    // Tolerant mode - no warnings to be given 
+                    // Tolerant mode - no warnings to be given
                 }
                 ascomDevice.AscomDeviceType = deviceType.ToString(); // Quietly update the stored device type
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
                 conformLogger.LogMessage("ValidateAscomDevice", $"Unable to parse the returned ASCOM device type: '{ascomDevice.AscomDeviceType}' - {ex.Message}");
             }
