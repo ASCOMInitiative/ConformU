@@ -205,7 +205,7 @@ namespace ConformU
             base.CheckCommonMethods(m_Camera, DeviceType.Camera);
         }
 
-        public override void CheckInitialise()
+        public new void CheckInitialise()
         {
             // Set the error type numbers according to the standards adopted by individual authors.
             // Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
@@ -224,7 +224,7 @@ namespace ConformU
                         }
                 }
             }
-            base.CheckInitialise(settings.ComDevice.ProgId);
+            base.CheckInitialise();
         }
         public override void CreateDevice()
         {
@@ -239,7 +239,7 @@ namespace ConformU
                             settings.AlpacaDevice.IpPort, 
                             settings.AlpacaDevice.AlpacaDeviceNumber, 
                             settings.StrictCasing,
-                            settings.AlpacaConfiguration.LogCalls ? logger : null);
+                            settings.DisplayMethodCalls ? logger : null);
                         logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Alpaca device created OK");
                         break;
 

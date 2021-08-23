@@ -22,14 +22,14 @@ namespace ConformU
         public override Task OnConnectionUpAsync(Circuit circuit, CancellationToken cancellationToken)
         {
             logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} ***** OnConnectionUpAsync *****");
-            return Task.CompletedTask;
+            return base.OnCircuitClosedAsync(circuit, cancellationToken);
         }
 
         public override Task OnConnectionDownAsync(Circuit circuit, CancellationToken cancellationToken)
         {
             logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} ***** OnConnectionDownAsync *****");
 
-            return Task.CompletedTask;
+            return base.OnCircuitClosedAsync(circuit, cancellationToken);
         }
 
         public override Task OnCircuitOpenedAsync(Circuit circuit, CancellationToken cancellationToken)
@@ -40,20 +40,26 @@ namespace ConformU
 
         public override Task OnCircuitClosedAsync(Circuit circuit, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} ***** OnCircuitClosedAsync {circuit.Id} *****");
             if (!Debugger.IsAttached) // Only use this mechanic outside of a dev environment
             {
                 logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} About to call StopApplication()");
 
                 lifetime.StopApplication();
                 logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} Called StopApplication(), ending process.");
-                System.Diagnostics.Process.GetCurrentProcess().Kill();
+                logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} About to kill process...");
+                Process.GetCurrentProcess().Kill();
+                logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} Killed process.");
+                logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} About to exit process...");
                 Environment.Exit(0);
+                logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} Exited process");
                 //throw new Exception("END TASK!!");
             }
             else
             {
                 logger.LogInformation($"***** OnCircuitClosedAsync {circuit.Id} *****");
             }
+            logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} ***** END OF OnCircuitClosedAsync {circuit.Id} *****");
             return base.OnCircuitClosedAsync(circuit, cancellationToken);
         }
     }

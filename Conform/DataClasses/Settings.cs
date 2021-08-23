@@ -101,8 +101,8 @@ namespace ConformU
         /// </summary>
         public DeviceType DeviceType { get; set; } = DeviceType.NoDeviceType;
 
-        // Warn if casing is not strictly correct
-        public bool StrictCasing { get; set; } = false;
+        // Alpaca JSON parsing configuration
+        public bool StrictCasing { get; set; } = true;
 
         // Telescope test configuration
         /// <summary>

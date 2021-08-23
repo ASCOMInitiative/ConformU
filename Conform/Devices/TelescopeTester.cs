@@ -261,7 +261,7 @@ namespace ConformU
             CheckCommonMethods(telescopeDevice, DeviceType.Telescope);
         }
 
-        public override void CheckInitialise()
+        public new void CheckInitialise()
         {
             unchecked
             {
@@ -366,7 +366,7 @@ namespace ConformU
                 }
             }
 
-            CheckInitialise(settings.ComDevice.ProgId);
+            CheckInitialise();
         }
 
         public override void CreateDevice()
@@ -382,7 +382,7 @@ namespace ConformU
                             settings.AlpacaDevice.IpPort,
                             settings.AlpacaDevice.AlpacaDeviceNumber,
                             settings.StrictCasing,
-                            settings.AlpacaConfiguration.LogCalls ? logger : null);
+                            settings.DisplayMethodCalls ? logger : null);
                         logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Alpaca device created OK");
                         break;
 
@@ -536,7 +536,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    LogMsg("TimeCheck", MessageLevel.msgError, "Mount UTCDate: .NET Exception - " + ex.ToString());
+                    LogMsg("TimeCheck", MessageLevel.msgError, "Mount UTCDate: .NET Exception - " + ex.Message);
                 }
             }
         }

@@ -1,4 +1,6 @@
 ﻿@inject ILogger<App> logger
+@inject IJSRuntime JsRuntime
+
 <div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">Conform Universal</a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -26,6 +28,7 @@
             </NavLink>
         </li>
     </ul>
+
 </div>
 
 @code {

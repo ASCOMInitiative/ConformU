@@ -99,6 +99,10 @@
                         <RadzenCheckBox Name="CHK4" @bind-Value=@alpacaDiscoveryResolveName TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.AlpacaDiscoveryResolveName)) />
                         <RadzenLabel Text="Resolve DNS names (Default No)" Component="CHK4" Style="margin-left: 20px;" />
                     </div>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHK5" @bind-Value=@strictCasing TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.StrictCasing)) />
+                        <RadzenLabel Text="Use strict JSON casing (Only unset this for testing)" Component="CHK5" Style="margin-left: 20px;" />
+                    </div>
 
 
                 </RadzenCard>
@@ -239,6 +243,7 @@
 @*Page code*@
 @code {
     string alpacaAndComText;
+    bool strictCasing;
 
     void OnServiceTypeChange(object serviceMode)
     {
@@ -279,7 +284,8 @@
         UpdateCheck,
         AlpacaDiscoveryResolveName,
         AlpacaDiscoveryUseIpV4,
-        AlpacaDiscoveryUseIpV6
+        AlpacaDiscoveryUseIpV6,
+        StrictCasing
     }
 
     // Camera test configuration
@@ -510,6 +516,7 @@
         alpacaDiscoveryUseIpV4 = configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4;
         alpacaDiscoveryUseIpV6 = configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6;
         alpacaServiceType = configuration.Settings.AlpacaConfiguration.AccessServiceType;
+        strictCasing = configuration.Settings.StrictCasing;
     }
 
     void OnConformTestScopeChange(IEnumerable<int> scope)
@@ -636,6 +643,10 @@
 
             case CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV6:
                 configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6 = alpacaDiscoveryUseIpV6;
+                break;
+
+            case CheckBoxConfigurationItem.StrictCasing:
+                configuration.Settings.StrictCasing = strictCasing;
                 break;
 
             default:

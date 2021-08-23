@@ -648,16 +648,11 @@ namespace ConformU
             }
         }
 
-        public virtual void CheckInitialise()
-        {
-            LogMsg("ConformanceCheckInitialise", MessageLevel.msgError, "DeviceTester base Class warning message, you should not see this message!");
-        }
-
         /// <summary>
         /// Get error codes.
         /// </summary>
         /// <param name="p_ProgID">The ProgID.</param>
-        protected void CheckInitialise(string p_ProgID)
+        internal void CheckInitialise()
         {
             Status(StatusType.staTest, ""); // Clear status messages
             Status(StatusType.staAction, "");
@@ -677,34 +672,50 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"Last modified exception: {ex}");
+                LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"Exception while trying to determine the last modified time: {ex}");
             }
 
             LogMsg("", MessageLevel.msgAlways, ""); // Blank line
             LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"ASCOM Universal Device Conformance Checker Version {this.GetType().Assembly.GetName().Version.ToString()}, Build time: {lastModifiedTime:ddd dd MMMM yyyy HH:mm:ss}");
 
             LogMsg("", MessageLevel.msgAlways, ""); // Blank line
-            LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"Driver ProgID: {p_ProgID}");
-            LogMsg("", MessageLevel.msgAlways, ""); // Blank line
-            LogMsg("Error handling", MessageLevel.msgAlways, "");
-            LogMsg("Error", MessageLevel.msgAlways, "number for \"Not Implemented\" is: " + Conversion.Hex(g_ExNotImplemented));
-            LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 1\" is: " + Conversion.Hex(g_ExInvalidValue1));
-            if (g_ExInvalidValue2 != 0 & g_ExInvalidValue2 != g_ExInvalidValue1)
-                LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 2\" is: " + Conversion.Hex(g_ExInvalidValue2));
-            if (g_ExInvalidValue3 != 0 & g_ExInvalidValue3 != g_ExInvalidValue2)
-                LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 3\" is: " + Conversion.Hex(g_ExInvalidValue3));
-            if (g_ExInvalidValue4 != 0 & g_ExInvalidValue4 != g_ExInvalidValue3)
-                LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 4\" is: " + Conversion.Hex(g_ExInvalidValue4));
-            if (g_ExInvalidValue5 != 0 & g_ExInvalidValue5 != g_ExInvalidValue4)
-                LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 5\" is: " + Conversion.Hex(g_ExInvalidValue5));
-            if (g_ExInvalidValue6 != 0 & g_ExInvalidValue6 != g_ExInvalidValue5)
-                LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 6\" is: " + Conversion.Hex(g_ExInvalidValue6));
-            LogMsg("Error", MessageLevel.msgAlways, "number for \"Value Not Set 1\" is: " + Conversion.Hex(ErrorCodes.ValueNotSet));
-            LogMsg("Error", MessageLevel.msgAlways, "number for \"Value Not Set 2\" is: " + Conversion.Hex(g_ExNotSet1));
-            if (g_ExNotSet2 != 0 & g_ExNotSet2 != g_ExNotSet1)
-                LogMsg("Error", MessageLevel.msgAlways, "number for \"Value Not Set 3\" is: " + Conversion.Hex(g_ExNotSet2));
 
-            LogMsg("", MessageLevel.msgAlways, "");
+            switch (settings.DeviceTechnology)
+            {
+                case DeviceTechnology.Alpaca:
+                    LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"Alpaca device: {settings.AlpacaDevice.AscomDeviceName} ({settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} {settings.AlpacaDevice.AscomDeviceType}/{settings.AlpacaDevice.AlpacaDeviceNumber})");
+
+                    if (!settings.StrictCasing) LogMsgIssue("ConformanceCheck", "Alpaca strict casing has been disabled, this in only supported for testing devices.");
+
+                    break;
+
+                case DeviceTechnology.COM:
+                    LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"COM Driver ProgID: {settings.ComDevice.ProgId}");
+                    break;
+
+                default:
+                    throw new InvalidValueException($"CheckInitialise - Unknown technology type: {settings.DeviceTechnology}");
+            }
+
+            LogMsg("", MessageLevel.msgAlways, ""); // Blank line
+            //LogMsg("Error", MessageLevel.msgAlways, "number for \"Not Implemented\" is: " + Conversion.Hex(g_ExNotImplemented));
+            //LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 1\" is: " + Conversion.Hex(g_ExInvalidValue1));
+            //if (g_ExInvalidValue2 != 0 & g_ExInvalidValue2 != g_ExInvalidValue1)
+            //    LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 2\" is: " + Conversion.Hex(g_ExInvalidValue2));
+            //if (g_ExInvalidValue3 != 0 & g_ExInvalidValue3 != g_ExInvalidValue2)
+            //    LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 3\" is: " + Conversion.Hex(g_ExInvalidValue3));
+            //if (g_ExInvalidValue4 != 0 & g_ExInvalidValue4 != g_ExInvalidValue3)
+            //    LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 4\" is: " + Conversion.Hex(g_ExInvalidValue4));
+            //if (g_ExInvalidValue5 != 0 & g_ExInvalidValue5 != g_ExInvalidValue4)
+            //    LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 5\" is: " + Conversion.Hex(g_ExInvalidValue5));
+            //if (g_ExInvalidValue6 != 0 & g_ExInvalidValue6 != g_ExInvalidValue5)
+            //    LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 6\" is: " + Conversion.Hex(g_ExInvalidValue6));
+            //LogMsg("Error", MessageLevel.msgAlways, "number for \"Value Not Set 1\" is: " + Conversion.Hex(ErrorCodes.ValueNotSet));
+            //LogMsg("Error", MessageLevel.msgAlways, "number for \"Value Not Set 2\" is: " + Conversion.Hex(g_ExNotSet1));
+            //if (g_ExNotSet2 != 0 & g_ExNotSet2 != g_ExNotSet1)
+            //    LogMsg("Error", MessageLevel.msgAlways, "number for \"Value Not Set 3\" is: " + Conversion.Hex(g_ExNotSet2));
+
+            //LogMsg("", MessageLevel.msgAlways, "");
         }
 
         public virtual void CreateDevice()

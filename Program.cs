@@ -169,20 +169,26 @@ namespace ConformU
                     // Set the working directory to the application directory
                     Directory.SetCurrentDirectory(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
                 }
-                CancellationTokenSource tokenSource= new();
+                CancellationTokenSource tokenSource = new();
                 CancellationToken applicationCancellationtoken = tokenSource.Token;
-
-                Console.WriteLine($"Staring web server.");
-                Task t = CreateHostBuilder(argList.ToArray()) // Use the revised argument list because the command line parser is fussy about prefixes and won't accept / 
-                     .Build()
-                     .RunAsync(applicationCancellationtoken);
-
-                // Don't open a browser if running within Visual Studio
-                if (!Debugger.IsAttached)
+                try
                 {
-                    OpenBrowser("http://localhost:5000/");
+                    Console.WriteLine($"Staring web server.");
+                    Task t = CreateHostBuilder(argList.ToArray()) // Use the revised argument list because the command line parser is fussy about prefixes and won't accept / 
+                         .Build()
+                         .RunAsync(applicationCancellationtoken);
+
+                    // Don't open a browser if running within Visual Studio
+                    if (!Debugger.IsAttached)
+                    {
+                        OpenBrowser("http://localhost:5000/");
+                    }
+                    t.Wait();
                 }
-                t.Wait();
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Exception stating application: {ex.Message}");
+                }
                 return 0;
             }
 
@@ -196,6 +202,8 @@ namespace ConformU
                 {
                     logging.ClearProviders();
                     logging.AddConsole();
+                    //logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Trace);
+                    //logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Trace);
                     logging.AddDebug();
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
@@ -227,5 +235,6 @@ namespace ConformU
                 // throw 
             }
         }
+
     }
 }

@@ -72,7 +72,7 @@ namespace ConformU
 
 
 
-        public override void CheckInitialise()
+        public new void CheckInitialise()
         {
             // Set the error type numbers according to the standards adopted by individual authors.
             // Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
@@ -92,7 +92,7 @@ namespace ConformU
                         }
                 }
             }
-            base.CheckInitialise(settings.ComDevice.ProgId);
+            base.CheckInitialise();
         }
         public override void CreateDevice()
         {
@@ -107,7 +107,7 @@ namespace ConformU
                             settings.AlpacaDevice.IpPort,
                             settings.AlpacaDevice.AlpacaDeviceNumber,
                             settings.StrictCasing,
-                            settings.AlpacaConfiguration.LogCalls ? logger : null);
+                            settings.DisplayMethodCalls ? logger : null);
                         logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Alpaca device created OK");
                         break;
 
@@ -196,7 +196,7 @@ namespace ConformU
         public override void CheckProperties()
         {
             int[] l_Offsets;
-            int l_NNames=0, l_NOffsets=0, l_FilterNumber, l_StartFilterNumber;
+            int l_NNames = 0, l_NOffsets = 0, l_FilterNumber, l_StartFilterNumber;
             string[] l_Names;
 
             DateTime l_StartTime, l_EndTime;

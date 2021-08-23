@@ -32,10 +32,14 @@ namespace ConformU
         {
             // Blazor infrastructure
             services.AddRazorPages();
-            services.AddServerSideBlazor();
+            //services.AddServerSideBlazor();
+            services.AddServerSideBlazor(options => {
+                options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromSeconds(10);
+            });
+         
 
-            // Conform components
-            string loggerName;
+                        // Conform components
+                        string loggerName;
             // Set log name with casing appropriate to OS
             if (OperatingSystem.IsWindows())
             {

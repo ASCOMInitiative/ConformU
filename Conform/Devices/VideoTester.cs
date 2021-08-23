@@ -139,7 +139,7 @@ namespace ConformU
             base.CheckCommonMethods(videoDevice, DeviceType.Camera);
         }
 
-        public override void CheckInitialise()
+        public new void CheckInitialise()
         {
             // Set the error type numbers according to the standards adopted by individual authors.
             // Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
@@ -158,7 +158,7 @@ namespace ConformU
                         }
                 }
             }
-            base.CheckInitialise(settings.ComDevice.ProgId);
+            base.CheckInitialise();
         }
 
         public override void CreateDevice()
