@@ -1,15 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Security;
-using System.Text;
-using Microsoft.VisualBasic;
 using ASCOM.Standard.Interfaces;
 using ASCOM.Standard.AlpacaClients;
 using ASCOM.Standard.COM.DriverAccess;
@@ -821,7 +811,7 @@ namespace ConformU
 
                     default:
                         {
-                            if (Strings.Len(returnValue) <= p_MaxLength)
+                            if (returnValue.Length <= p_MaxLength)
                                 LogMsg(MethodName, MessageLevel.msgOK, returnValue);
                             else
                                 LogMsg(MethodName, MessageLevel.msgError, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);

@@ -1,5 +1,4 @@
 ﻿using System;
-//using Microsoft.VisualBasic;
 using ASCOM.Standard.Interfaces;
 using System.Threading;
 using ASCOM.Standard.AlpacaClients;

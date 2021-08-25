@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections;
-using System.Linq;
 using System.Runtime.InteropServices;
 using ASCOM;
-using Microsoft.VisualBasic.CompilerServices;
-using static ConformU.Globals;
-using ConformU;
 using System.Collections.Generic;
 using System.Threading;
-using static ConformU.ConformConstants;
-using ASCOM.Standard.COM;
 using ASCOM.Standard.AlpacaClients;
 using ASCOM.Standard.Interfaces;
 using ASCOM.Standard.Utilities;
@@ -1658,7 +1652,7 @@ namespace ConformU
             {
                 if (settings.DisplayMethodCalls)
                     LogMsg("SlewSettleTime Read", MessageLevel.msgComment, "About to get SlewSettleTime property");
-                m_SlewSettleTime = Conversions.ToShort(telescopeDevice.SlewSettleTime);
+                m_SlewSettleTime = telescopeDevice.SlewSettleTime;
                 switch (m_SlewSettleTime)
                 {
                     case var case23 when case23 < 0:
@@ -2027,10 +2021,10 @@ namespace ConformU
                         LogMsg("TrackingRates", MessageLevel.msgDebug, "OK - the driver returned an TrackingRates object");
                     }
 
-                    l_Count = Conversions.ToInteger(l_TrackingRates.Count); // Save count for use later if no members are returned in the for each loop test
+                    l_Count = l_TrackingRates.Count; // Save count for use later if no members are returned in the for each loop test
                     LogMsg("TrackingRates Count", MessageLevel.msgDebug, l_Count.ToString());
 
-                    var loopTo = Conversions.ToInteger(l_TrackingRates.Count);
+                    var loopTo = l_TrackingRates.Count;
                     for (int ii = 1; ii <= loopTo; ii++)
                         LogMsg("TrackingRates Count", MessageLevel.msgDebug, "Found drive rate: " + Enum.GetName(typeof(DriveRate), (l_TrackingRates[ii])));
                 }
@@ -2063,7 +2057,7 @@ namespace ConformU
                             LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "Reading Current");
                             l_Obj = l_Enum.Current;
                             LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "Read Current OK, Type: " + l_Obj.GetType().Name);
-                            l_Drv = (DriveRate)Conversions.ToInteger(l_Obj);
+                            l_Drv = (DriveRate)l_Obj;
                             LogMsg("TrackingRates Enum", MessageLevel.msgDebug, "Found drive rate: " + Enum.GetName(typeof(DriveRate), l_Drv));
                         }
 
@@ -2110,7 +2104,7 @@ namespace ConformU
                     if (settings.DisplayMethodCalls)
                         LogMsg("TrackingRates", MessageLevel.msgComment, "About to get TrackingRates property");
                     l_TrackingRates = telescopeDevice.TrackingRates;
-                    LogMsg("TrackingRates", MessageLevel.msgDebug, Conversions.ToString(Operators.ConcatenateObject("Read TrackingRates OK, Count: ", l_TrackingRates.Count)));
+                    LogMsg("TrackingRates", MessageLevel.msgDebug, $"Read TrackingRates OK, Count: {l_TrackingRates.Count}");
                     int l_RateCount = 0;
                     foreach (DriveRate currentL_DriveRate in (IEnumerable)l_TrackingRates)
                     {
@@ -2234,15 +2228,14 @@ namespace ConformU
                                         LogMsg("TrackingRate Write", MessageLevel.msgComment, "About to set TrackingRate property to " + l_DriveRate.ToString());
                                     telescopeDevice.TrackingRate = l_DriveRate;
                                     if (settings.DisplayMethodCalls)
-                                        LogMsg("TrackingRate Write", MessageLevel.msgComment, "About to get TrackingRate property");
-                                    if (Operators.ConditionalCompareObjectEqual(telescopeDevice.TrackingRate, l_DriveRate, false))
-                                    {
-                                        LogMsg("TrackingRate Write", MessageLevel.msgOK, "Successfully set drive rate: " + l_DriveRate.ToString());
-                                    }
-                                    else
-                                    {
-                                        LogMsg("TrackingRate Write", MessageLevel.msgIssue, "Unable to set drive rate: " + l_DriveRate.ToString());
-                                    }
+                                        if (telescopeDevice.TrackingRate == l_DriveRate)
+                                        {
+                                            LogMsg("TrackingRate Write", MessageLevel.msgOK, "Successfully set drive rate: " + l_DriveRate.ToString());
+                                        }
+                                        else
+                                        {
+                                            LogMsg("TrackingRate Write", MessageLevel.msgIssue, "Unable to set drive rate: " + l_DriveRate.ToString());
+                                        }
                                 }
                                 catch (Exception ex)
                                 {
@@ -2321,7 +2314,7 @@ namespace ConformU
             {
                 if (settings.DisplayMethodCalls)
                     LogMsg("UTCDate Read", MessageLevel.msgComment, "About to get UTCDate property");
-                m_UTCDate = Conversions.ToDate(telescopeDevice.UTCDate); // Save starting value
+                m_UTCDate = telescopeDevice.UTCDate; // Save starting value
                 LogMsg("UTCDate Read", MessageLevel.msgOK, m_UTCDate.ToString("dd-MMM-yyyy HH:mm:ss.fff"));
                 try // UTCDate Write is optional since if you are using the PC time as UTCTime then you should not write to the PC clock!
                 {
@@ -3172,7 +3165,7 @@ namespace ConformU
                         // Further side of pier tests
                         if (settings.DisplayMethodCalls)
                             LogMsg("SideOfPier Model Tests", MessageLevel.msgComment, "About to get AlignmentMode property");
-                        if (Operators.ConditionalCompareObjectEqual(telescopeDevice.AlignmentMode, AlignmentMode.GermanPolar, false))
+                        if (telescopeDevice.AlignmentMode == AlignmentMode.GermanPolar)
                         {
                             LogMsg("SideOfPier Model Tests", MessageLevel.msgDebug, "Calling SideOfPierTests()");
                             switch (m_SiteLatitude)
@@ -3690,7 +3683,7 @@ namespace ConformU
 
                                         default:
                                             {
-                                                LogMsg(testName, MessageLevel.msgInfo, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Synced to within ", TelescopeTester.FormatAltitude(difference)), " DD:MM:SS of expected Altitude: "), TelescopeTester.FormatAltitude(syncAlt))));
+                                                LogMsg(testName, MessageLevel.msgInfo, $"Synced to within {TelescopeTester.FormatAltitude(difference)} DD:MM:SS of expected Altitude: {TelescopeTester.FormatAltitude(syncAlt)}");
                                                 showOutcome = true;
                                                 break;
                                             }
@@ -3723,9 +3716,9 @@ namespace ConformU
                                     if (showOutcome)
                                     {
                                         LogMsg(testName, MessageLevel.msgComment, "           Altitude    Azimuth");
-                                        LogMsg(testName, MessageLevel.msgComment, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Original:  ", TelescopeTester.FormatAltitude(currentAlt)), "   "), FormatAzimuth(currentAz))));
-                                        LogMsg(testName, MessageLevel.msgComment, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Sync to:   ", TelescopeTester.FormatAltitude(syncAlt)), "   "), FormatAzimuth(syncAz))));
-                                        LogMsg(testName, MessageLevel.msgComment, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("New:       ", TelescopeTester.FormatAltitude(newAlt)), "   "), FormatAzimuth(newAz))));
+                                        LogMsg(testName, MessageLevel.msgComment, $"Original:  {TelescopeTester.FormatAltitude(currentAlt)}   {FormatAzimuth(currentAz)}");
+                                        LogMsg(testName, MessageLevel.msgComment, $"Sync to:   {TelescopeTester.FormatAltitude(syncAlt)}   {FormatAzimuth(syncAz)}");
+                                        LogMsg(testName, MessageLevel.msgComment, $"New:       {TelescopeTester.FormatAltitude(newAlt)}   {FormatAzimuth(newAz)}");
                                     }
                                 }
                                 else // Can't test effects of a sync
@@ -3917,7 +3910,7 @@ namespace ConformU
 
                     case SlewSyncType.SlewToAltAz:
                         {
-                            LogMsg(p_Name, MessageLevel.msgDebug, Conversions.ToString(Operators.ConcatenateObject("Tracking 1: ", telescopeDevice.Tracking)));
+                            LogMsg(p_Name, MessageLevel.msgDebug, $"Tracking 1: {telescopeDevice.Tracking}");
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property");
                             if (canSetTracking & telescopeDevice.Tracking)
@@ -3930,7 +3923,7 @@ namespace ConformU
 
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property");
-                            LogMsg(p_Name, MessageLevel.msgDebug, Conversions.ToString(Operators.ConcatenateObject("Tracking 2: ", telescopeDevice.Tracking)));
+                            LogMsg(p_Name, MessageLevel.msgDebug, $"Tracking 2: {telescopeDevice.Tracking}");
                             m_TargetAltitude = 50.0d;
                             m_TargetAzimuth = 150.0d;
                             Status(StatusType.staAction, "Slewing to Alt/Az: " + FormatDec(m_TargetAltitude) + " " + FormatDec(m_TargetAzimuth));
@@ -3939,7 +3932,7 @@ namespace ConformU
                             telescopeDevice.SlewToAltAz(m_TargetAzimuth, m_TargetAltitude);
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property");
-                            LogMsg(p_Name, MessageLevel.msgDebug, Conversions.ToString(Operators.ConcatenateObject("Tracking 3: ", telescopeDevice.Tracking)));
+                            LogMsg(p_Name, MessageLevel.msgDebug, $"Tracking 3: {telescopeDevice.Tracking}");
                             break;
                         }
 
@@ -3947,7 +3940,7 @@ namespace ConformU
                         {
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property");
-                            LogMsg(p_Name, MessageLevel.msgDebug, Conversions.ToString(Operators.ConcatenateObject("Tracking 1: ", telescopeDevice.Tracking)));
+                            LogMsg(p_Name, MessageLevel.msgDebug, $"Tracking 1: {telescopeDevice.Tracking}");
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property");
                             if (canSetTracking & telescopeDevice.Tracking)
@@ -3960,7 +3953,7 @@ namespace ConformU
 
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property");
-                            LogMsg(p_Name, MessageLevel.msgDebug, Conversions.ToString(Operators.ConcatenateObject("Tracking 2: ", telescopeDevice.Tracking)));
+                            LogMsg(p_Name, MessageLevel.msgDebug, $"Tracking 2: {telescopeDevice.Tracking}");
                             m_TargetAltitude = 55.0d;
                             m_TargetAzimuth = 155.0d;
                             Status(StatusType.staAction, "Slewing to Alt/Az: " + FormatDec(m_TargetAltitude) + " " + FormatDec(m_TargetAzimuth));
@@ -3969,11 +3962,11 @@ namespace ConformU
                             telescopeDevice.SlewToAltAzAsync(m_TargetAzimuth, m_TargetAltitude);
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property");
-                            LogMsg(p_Name, MessageLevel.msgDebug, Conversions.ToString(Operators.ConcatenateObject("Tracking 3: ", telescopeDevice.Tracking)));
+                            LogMsg(p_Name, MessageLevel.msgDebug, $"Tracking 3: {telescopeDevice.Tracking}");
                             WaitForSlew(p_Name);
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property");
-                            LogMsg(p_Name, MessageLevel.msgDebug, Conversions.ToString(Operators.ConcatenateObject("Tracking 4: ", telescopeDevice.Tracking)));
+                            LogMsg(p_Name, MessageLevel.msgDebug, $"Tracking 4: {telescopeDevice.Tracking}");
                             break;
                         }
 
@@ -4119,19 +4112,19 @@ namespace ConformU
                                 {
                                     case var case4 when case4 <= 1.0d / 3600.0d: // <1 seconds
                                         {
-                                            LogMsg(p_Name, MessageLevel.msgOK, Conversions.ToString(Operators.ConcatenateObject("Slewed to target Altitude OK: ", TelescopeTester.FormatAltitude(m_TargetAltitude))));
+                                            LogMsg(p_Name, MessageLevel.msgOK, $"Slewed to target Altitude OK: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
                                             break;
                                         }
 
                                     case var case5 when case5 <= 2.0d / 3600.0d: // 2 seconds
                                         {
-                                            LogMsg(p_Name, MessageLevel.msgOK, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Slewed to within 2 seconds of Altitude target: ", TelescopeTester.FormatAltitude(m_TargetAltitude)), " Actual Altitude "), TelescopeTester.FormatAltitude(l_ActualAltitude))));
+                                            LogMsg(p_Name, MessageLevel.msgOK, $"Slewed to within 2 seconds of Altitude target: {TelescopeTester.FormatAltitude(m_TargetAltitude)} Actual Altitude {TelescopeTester.FormatAltitude(l_ActualAltitude)}");
                                             break;
                                         }
 
                                     default:
                                         {
-                                            LogMsg(p_Name, MessageLevel.msgInfo, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Slewed to within ", TelescopeTester.FormatAltitude(l_Difference)), " DD:MM:SS of expected Altitude: "), TelescopeTester.FormatAltitude(m_TargetAltitude))));
+                                            LogMsg(p_Name, MessageLevel.msgInfo, $"Slewed to within {TelescopeTester.FormatAltitude(l_Difference)} DD:MM:SS of expected Altitude: { TelescopeTester.FormatAltitude(m_TargetAltitude)}");
                                             break;
                                         }
                                 } // Do nothing
@@ -4571,12 +4564,12 @@ namespace ConformU
                             {
                             } // Attempt to stop any motion that has actually started
 
-                            LogMsg(p_Name, MessageLevel.msgError, Conversions.ToString(Operators.ConcatenateObject("Failed to reject bad Altitude coordinate: ", TelescopeTester.FormatAltitude(m_TargetAltitude))));
+                            LogMsg(p_Name, MessageLevel.msgError, $"Failed to reject bad Altitude coordinate: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
                         }
                         catch (Exception ex)
                         {
                             Status(StatusType.staAction, "Slew rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", Conversions.ToString(Operators.ConcatenateObject("Correctly rejected bad Altitude coordinate: ", TelescopeTester.FormatAltitude(m_TargetAltitude))));
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
                         }
 
                         try
@@ -4638,12 +4631,12 @@ namespace ConformU
                             if (settings.DisplayMethodCalls)
                                 LogMsg(p_Name, MessageLevel.msgComment, "About to call SyncToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
                             telescopeDevice.SyncToAltAz(m_TargetAzimuth, m_TargetAltitude);
-                            LogMsg(p_Name, MessageLevel.msgError, Conversions.ToString(Operators.ConcatenateObject("Failed to reject bad Altitude coordinate: ", TelescopeTester.FormatAltitude(m_TargetAltitude))));
+                            LogMsg(p_Name, MessageLevel.msgError, $"Failed to reject bad Altitude coordinate: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
                         }
                         catch (Exception ex)
                         {
                             Status(StatusType.staAction, "Sync rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Altitude coordinate", Conversions.ToString(Operators.ConcatenateObject("Correctly rejected bad Altitude coordinate: ", TelescopeTester.FormatAltitude(m_TargetAltitude))));
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
                         }
 
                         try
@@ -4753,7 +4746,7 @@ namespace ConformU
 
                         case PerformanceType.tstPerfUTCDate:
                             {
-                                m_UTCDate = Conversions.ToDate(telescopeDevice.UTCDate);
+                                m_UTCDate = telescopeDevice.UTCDate;
                                 break;
                             }
 
@@ -5024,7 +5017,7 @@ namespace ConformU
                         LogMsg(p_Name, MessageLevel.msgDebug, "OK - the driver returned an AxisRates object");
                     }
 
-                    l_Count = Conversions.ToInteger(l_AxisRates.Count); // Save count for use later if no members are returned in the for each loop test
+                    l_Count = l_AxisRates.Count; // Save count for use later if no members are returned in the for each loop test
                     LogMsg(p_Name + " Count", MessageLevel.msgDebug, "The driver returned " + l_Count + " rates");
                     int i;
                     var loopTo = l_Count;
@@ -5086,7 +5079,7 @@ namespace ConformU
                     LogMsg(p_Name + " Enum", MessageLevel.msgError, EX_NET + ex.ToString());
                 }
 
-                if (Operators.ConditionalCompareObjectGreater(l_AxisRates.Count, 0, false))
+                if (l_AxisRates.Count > 0)
                 {
                     try
                     {
@@ -5094,20 +5087,21 @@ namespace ConformU
                         foreach (IRate currentL_Rate in l_AxisRatesIRates)
                         {
                             l_Rate = currentL_Rate;
-                            if ((bool)Operators.OrObject(Operators.ConditionalCompareObjectLess(l_Rate.Minimum, 0, false), Operators.ConditionalCompareObjectLess(l_Rate.Maximum, 0, false))) // Error because negative values are not allowed
+                            if ((l_Rate.Minimum < 0.0d) | (l_Rate.Maximum < 0.0d)) // Error because negative values are not allowed
                             {
                                 LogMsg(p_Name, MessageLevel.msgError, "Minimum or maximum rate is negative: " + l_Rate.Minimum.ToString() + ", " + l_Rate.Maximum.ToString());
                             }
-                            else if (Operators.ConditionalCompareObjectLessEqual(l_Rate.Minimum, l_Rate.Maximum, false)) // All positive values so continue tests
-                                                                                                                         // Minimum <= Maximum so OK
+                            else  // All positive values so continue tests
                             {
-                                LogMsg(p_Name, MessageLevel.msgOK, "Axis rate minimum: " + l_Rate.Minimum.ToString() + " Axis rate maximum: " + l_Rate.Maximum.ToString());
+                                if (l_Rate.Minimum <= l_Rate.Maximum) // Minimum <= Maximum so OK
+                                {
+                                    LogMsg(p_Name, MessageLevel.msgOK, "Axis rate minimum: " + l_Rate.Minimum.ToString() + " Axis rate maximum: " + l_Rate.Maximum.ToString());
+                                }
+                                else // Minimum > Maximum so error!
+                                {
+                                    LogMsg(p_Name, MessageLevel.msgError, "Maximum rate is less than minimum rate - minimum: " + l_Rate.Minimum.ToString() + " maximum: " + l_Rate.Maximum.ToString());
+                                }
                             }
-                            else // Minimum > Maximum so error!
-                            {
-                                LogMsg(p_Name, MessageLevel.msgError, "Maximum rate is less than minimum rate - minimum: " + l_Rate.Minimum.ToString() + " maximum: " + l_Rate.Maximum.ToString());
-                            }
-
                             // Save rates for overlap testing
                             l_NAxisRates += 1;
                             m_AxisRatesArray[l_NAxisRates, AXIS_RATE_MINIMUM] = l_Rate.Minimum;
@@ -6089,7 +6083,7 @@ namespace ConformU
             // Determine lowest and highest tracking rates
             l_RateMinimum = double.PositiveInfinity; // Set to invalid values
             l_RateMaximum = double.NegativeInfinity;
-            LogMsg(p_Name, MessageLevel.msgDebug, Conversions.ToString(Operators.ConcatenateObject("Number of rates found: ", p_AxisRates.Count)));
+            LogMsg(p_Name, MessageLevel.msgDebug, $"Number of rates found: {p_AxisRates.Count}");
             if (p_AxisRates.Count > 0)
             {
                 IAxisRates l_AxisRatesIRates = p_AxisRates;
@@ -6099,7 +6093,7 @@ namespace ConformU
                     l_Rate = currentL_Rate;
                     if (l_Rate.Minimum < l_RateMinimum) l_RateMinimum = l_Rate.Minimum;
                     if (l_Rate.Maximum > l_RateMaximum) l_RateMaximum = l_Rate.Maximum;
-                    LogMsg(p_Name, MessageLevel.msgDebug, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Checking rates: ", l_Rate.Minimum), " "), l_Rate.Maximum), ", Current rates: "), l_RateMinimum), " "), l_RateMaximum)));
+                    LogMsg(p_Name, MessageLevel.msgDebug, $"Checking rates: {l_Rate.Minimum} {l_Rate.Maximum} Current rates: {l_RateMinimum} {l_RateMaximum}");
                     l_RateCount += 1;
                 }
 
@@ -6388,8 +6382,8 @@ namespace ConformU
                                         telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
                                         Status(StatusType.staStatus, "");
                                         if (settings.DisplayMethodCalls)
-                                            LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property false");
-                                        if (Operators.ConditionalCompareObjectEqual(telescopeDevice.Tracking, false, false)) // tracking correctly retained in both states
+                                            LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property");
+                                        if (telescopeDevice.Tracking == false) // tracking correctly retained in both states
                                         {
                                             LogMsg(p_Name, MessageLevel.msgOK, "Tracking state correctly retained for both tracking states");
                                         }
@@ -6417,7 +6411,7 @@ namespace ConformU
                                         Status(StatusType.staStatus, "");
                                         if (settings.DisplayMethodCalls)
                                             LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property");
-                                        if (Operators.ConditionalCompareObjectEqual(telescopeDevice.Tracking, true, false)) // tracking correctly retained in both states
+                                        if (telescopeDevice.Tracking == true) // tracking correctly retained in both states
                                         {
                                             LogMsg(p_Name, MessageLevel.msgOK, "Tracking state correctly retained for both tracking states");
                                         }
@@ -6509,7 +6503,7 @@ namespace ConformU
                 else // Some problem in finding rates inside the AxisRates object
                 {
                     LogMsg(p_Name, MessageLevel.msgInfo, "Found minimum rate: " + l_RateMinimum + " found maximum rate: " + l_RateMaximum);
-                    LogMsg(p_Name, MessageLevel.msgError, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Unable to determine lowest or highest rates, expected ", p_AxisRates.Count), " rates, found "), l_RateCount)));
+                    LogMsg(p_Name, MessageLevel.msgError, $"Unable to determine lowest or highest rates, expected {p_AxisRates.Count} rates, found {l_RateCount}");
                 }
             }
             else
@@ -6560,11 +6554,11 @@ namespace ConformU
             l_PierSidePlus9 = SOPPierTest(TelescopeRAFromHourAngle("SideofPier", +9.0d), l_Declination9, "hour angle +9.0");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            if (l_PierSideMinus3.SideOfPier == l_PierSidePlus9.SideOfPier & l_PierSidePlus3.SideOfPier == l_PierSideMinus9.SideOfPier) // Reporting physical pier side
+            if ((l_PierSideMinus3.SideOfPier == l_PierSidePlus9.SideOfPier) & (l_PierSidePlus3.SideOfPier == l_PierSideMinus9.SideOfPier))// Reporting physical pier side
             {
                 LogMsg("SideofPier", MessageLevel.msgIssue, "SideofPier reports physical pier side rather than pointing state");
             }
-            else if (l_PierSideMinus3.SideOfPier == l_PierSideMinus9.SideOfPier & l_PierSidePlus3.SideOfPier == l_PierSidePlus9.SideOfPier) // Make other tests
+            else if ((l_PierSideMinus3.SideOfPier == l_PierSideMinus9.SideOfPier )& (l_PierSidePlus3.SideOfPier == l_PierSidePlus9.SideOfPier)) // Make other tests
             {
                 LogMsg("SideofPier", MessageLevel.msgOK, "Reports the pointing state of the mount as expected");
             }
@@ -7138,7 +7132,7 @@ namespace ConformU
 
         private static string FormatDec(double Dec)
         {
-            return g_Util.DegreesToDMS(Dec, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(Conversions.ToInteger(Operators.AddObject(9, (DISPLAY_DECIMAL_DIGITS > 0 ? DISPLAY_DECIMAL_DIGITS + 1 : 0))));
+            return g_Util.DegreesToDMS(Dec, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(9 + ((DISPLAY_DECIMAL_DIGITS > 0) ? DISPLAY_DECIMAL_DIGITS + 1 : 0));
         }
 
         private static dynamic FormatAltitude(double Alt)
@@ -7148,7 +7142,7 @@ namespace ConformU
 
         private static string FormatAzimuth(double Az)
         {
-            return g_Util.DegreesToDMS(Az, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(Conversions.ToInteger(Operators.AddObject(9, (DISPLAY_DECIMAL_DIGITS > 0 ? DISPLAY_DECIMAL_DIGITS + 1 : 0))));
+            return g_Util.DegreesToDMS(Az, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(9 + ((DISPLAY_DECIMAL_DIGITS > 0) ? DISPLAY_DECIMAL_DIGITS + 1 : 0));
         }
 
         public static string TranslatePierSide(PointingState p_PierSide, bool p_Long)

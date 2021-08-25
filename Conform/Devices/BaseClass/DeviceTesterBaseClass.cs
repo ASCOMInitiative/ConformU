@@ -1166,15 +1166,6 @@ namespace ConformU
                     i = 1;
                     l_MsgFormatted = p_Msg;
 
-                    // Remove CRLF from the message text
-                    //j = l_MsgFormatted.IndexOf(Microsoft.VisualBasic.Constants.vbCrLf, i);
-                    //while (j > 0)
-                    //{
-                    //    l_MsgFormatted = l_MsgFormatted.Substring(0, j) + Globals.SpaceDup(c_Spacing) + l_MsgFormatted.Substring(j + 2);
-                    //    i = j + c_Spacing + 2;
-                    //    j = l_MsgFormatted.IndexOf(Microsoft.VisualBasic.Constants.vbCrLf, i);
-                    //}
-
                     switch (p_MsgLevel)
                     {
                         case MessageLevel.None:
