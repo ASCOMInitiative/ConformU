@@ -23,7 +23,6 @@ namespace ConformU
 
 #if WINDOWS7_0_OR_GREATER
         internal DriverHostForm driverHostForm;
-        Form comHostForm;
 #endif
 
         #region New and Dispose

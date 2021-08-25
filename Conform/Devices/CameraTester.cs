@@ -1,17 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Security;
-using System.Text;
-//using Microsoft.VisualBasic;
-//using ASCOM.DeviceInterface;
-using System.Collections;
 using System.Threading;
 using ASCOM.Standard.Interfaces;
 using ASCOM.Standard.AlpacaClients;
@@ -2868,7 +2857,14 @@ namespace ConformU
                            :
                                 {
                                     if (m_LastExposureStartTime.Substring(l_i - 1, 1) != "-")
+                                    {
+                                        LogMsgInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not '-'");
                                         l_FormatOK = false;
+                                    }
+                                    else
+                                    {
+
+                                    }
                                     break;
                                 }
 
@@ -2876,7 +2872,14 @@ namespace ConformU
                      :
                                 {
                                     if (m_LastExposureStartTime.Substring(l_i - 1, 1) != "T")
+                                    {
+                                        LogMsgInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not 'T'");
                                         l_FormatOK = false;
+                                    }
+                                    else
+                                    {
+
+                                    }
                                     break;
                                 }
 
@@ -2885,14 +2888,28 @@ namespace ConformU
                      :
                                 {
                                     if (m_LastExposureStartTime.Substring(l_i - 1, 1) != ":")
+                                    {
+                                        LogMsgInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not ':'");
                                         l_FormatOK = false;
+                                    }
+                                    else
+                                    {
+
+                                    }
                                     break;
                                 }
 
                             default:
                                 {
                                     if (!m_LastExposureStartTime.Substring(l_i - 1, 1).IsNumeric())
+                                    {
+                                        LogMsgInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not 'numeric'");
                                         l_FormatOK = false;
+                                    }
+                                    else
+                                    {
+
+                                    }
                                     break;
                                 }
                         }
