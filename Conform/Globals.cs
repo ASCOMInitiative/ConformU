@@ -1,4 +1,6 @@
-﻿namespace ConformU
+﻿using System;
+
+namespace ConformU
 {
     static class Globals
     {
@@ -13,6 +15,12 @@
         internal const int FWTEST_TIMEOUT = 30;
 
         #endregion
+
+
+        public static string SpaceDup(this int n)
+        {
+            return new String(' ', n);
+        }
 
     }
 }

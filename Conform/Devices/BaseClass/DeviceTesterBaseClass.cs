@@ -2,19 +2,10 @@
 // Put all common elements in here
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using ASCOM;
-using ASCOM.Standard.AlpacaClients;
-using ASCOM.Standard.COM.DriverAccess;
-using ASCOM.Standard.Interfaces;
-using ConformU;
-using Microsoft.VisualBasic;
-using Microsoft.VisualBasic.CompilerServices;
 using static ConformU.Globals;
-using static ConformU.ConformConstants;
 using System.IO;
 
 namespace ConformU
@@ -206,7 +197,7 @@ namespace ConformU
             {
                 if (settings.DisplayMethodCalls)
                     LogMsg("InterfaceVersion", MessageLevel.msgComment, "About to get property InterfaceVersion");
-                g_InterfaceVersion = Conversions.ToInteger(baseClassDevice.InterfaceVersion);
+                g_InterfaceVersion = baseClassDevice.InterfaceVersion;
                 switch (g_InterfaceVersion)
                 {
                     case var @case when @case < 1:
@@ -243,7 +234,7 @@ namespace ConformU
                 }
                 catch (COMException ex)
                 {
-                    LogMsg("Connected", MessageLevel.msgError, EX_COM + ex.Message + " " + Conversion.Hex(ex.ErrorCode));
+                    LogMsg("Connected", MessageLevel.msgError, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                 }
                 catch (Exception ex)
                 {
@@ -261,7 +252,7 @@ namespace ConformU
                 {
                     if (settings.DisplayMethodCalls)
                         LogMsg("Description", MessageLevel.msgComment, "About to get property Description");
-                    m_Description = Conversions.ToString(baseClassDevice.Description);
+                    m_Description = baseClassDevice.Description;
                     switch (m_Description ?? "")
                     {
                         case var case1 when case1 == "":
@@ -301,7 +292,7 @@ namespace ConformU
                 {
                     if (settings.DisplayMethodCalls)
                         LogMsg("DriverInfo", MessageLevel.msgComment, "About to get property DriverInfo");
-                    m_DriverInfo = Conversions.ToString(baseClassDevice.DriverInfo);
+                    m_DriverInfo = baseClassDevice.DriverInfo;
                     switch (m_DriverInfo ?? "")
                     {
                         case var case2 when case2 == "":
@@ -333,7 +324,7 @@ namespace ConformU
                 {
                     if (settings.DisplayMethodCalls)
                         LogMsg("DriverVersion", MessageLevel.msgComment, "About to get property DriverVersion");
-                    m_DriverVersion = Conversions.ToString(baseClassDevice.DriverVersion);
+                    m_DriverVersion = baseClassDevice.DriverVersion;
                     switch (m_DriverVersion ?? "")
                     {
                         case var case3 when case3 == "":
@@ -351,7 +342,7 @@ namespace ConformU
                 }
                 catch (COMException ex)
                 {
-                    LogMsg("DriverVersion", MessageLevel.msgError, EX_COM + ex.Message + " " + Conversion.Hex(ex.ErrorCode));
+                    LogMsg("DriverVersion", MessageLevel.msgError, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                 }
                 catch (Exception ex)
                 {
@@ -373,7 +364,7 @@ namespace ConformU
                 {
                     if (settings.DisplayMethodCalls)
                         LogMsg("Name", MessageLevel.msgComment, "About to get property Name");
-                    m_Name = Conversions.ToString(baseClassDevice.Name);
+                    m_Name = baseClassDevice.Name;
                     switch (m_Name ?? "")
                     {
                         case var case4 when case4 == "":
@@ -448,7 +439,7 @@ namespace ConformU
                         i += 1;
                         if (Action.GetType().Name == "String")
                         {
-                            string ActionString = Conversions.ToString(Action);
+                            string ActionString = Action.ToString();
                             string result;
                             const string TEST_PARAMETERS = "Conform test parameters";
                             switch (ActionString ?? "")
@@ -472,7 +463,7 @@ namespace ConformU
                                                 {
                                                     if (settings.DisplayMethodCalls)
                                                         LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action");
-                                                    result = Conversions.ToString(baseClassDevice.Action(ActionString, TEST_PARAMETERS));
+                                                    result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
                                                     LogMsg("SupportedActions", MessageLevel.msgOK, string.Format("OC simulator action {0} gave result: {1}", ActionString, result));
                                                 }
                                                 catch (Exception ex1)
@@ -486,7 +477,7 @@ namespace ConformU
                                                 {
                                                     if (settings.DisplayMethodCalls)
                                                         LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action");
-                                                    result = Conversions.ToString(baseClassDevice.Action(ActionString, TEST_PARAMETERS));
+                                                    result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
                                                     LogMsg("SupportedActions", MessageLevel.msgOK, string.Format("OC simulator action {0} gave result: {1}", ActionString, result));
                                                 }
                                                 catch (Exception ex1)
@@ -500,7 +491,7 @@ namespace ConformU
                                                 {
                                                     if (settings.DisplayMethodCalls)
                                                         LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action");
-                                                    result = Conversions.ToString(baseClassDevice.Action(ActionString, TEST_PARAMETERS));
+                                                    result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
                                                     LogMsg("SupportedActions", MessageLevel.msgOK, string.Format("Switch simulator action {0} gave result: {1}", ActionString, result));
                                                 }
                                                 catch (Exception ex1)
@@ -514,7 +505,7 @@ namespace ConformU
                                                 {
                                                     if (settings.DisplayMethodCalls)
                                                         LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action");
-                                                    result = Conversions.ToString(baseClassDevice.Action(ActionString, TEST_PARAMETERS));
+                                                    result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
                                                     LogMsg("SupportedActions", MessageLevel.msgOK, string.Format("Switch simulator action {0} gave result: {1}", ActionString, result));
                                                 }
                                                 catch (Exception ex1)
@@ -1107,13 +1098,13 @@ namespace ConformU
             if (WaitDuration < 1)
                 WaitDuration = 1;
             // Wait for p_Duration milliseconds
-            l_StartTime = DateAndTime.Now; // Save start time
+            l_StartTime = DateTime.Now; // Save start time
             do
             {
                 Thread.Sleep(WaitDuration);
                 //Application.DoEvents();
             }
-            while ((DateAndTime.Now.Subtract(l_StartTime).TotalMilliseconds <= p_Duration) & !cancellationToken.IsCancellationRequested);
+            while ((DateTime.Now.Subtract(l_StartTime).TotalMilliseconds <= p_Duration) & !cancellationToken.IsCancellationRequested);
         }
 
 
@@ -1170,19 +1161,19 @@ namespace ConformU
                 if (p_MsgLevel >= logLevel)
                 {
                     l_TestFormatted = p_Test.PadRight(TEST_NAME_WIDTH);
-                    l_TestFormatted = Strings.Left(l_TestFormatted, TEST_NAME_WIDTH);
+                    l_TestFormatted = l_TestFormatted.Substring(0, TEST_NAME_WIDTH);
                     l_MsgLevelFormatted = "        ";
                     i = 1;
                     l_MsgFormatted = p_Msg;
 
                     // Remove CRLF from the message text
-                    j = Strings.InStr(i, l_MsgFormatted, Microsoft.VisualBasic.Constants.vbCrLf);
-                    while (j > 0)
-                    {
-                        l_MsgFormatted = Strings.Left(l_MsgFormatted, j + 1) + Strings.StrDup(c_Spacing, " ") + Strings.Mid(l_MsgFormatted, j + 2);
-                        i = j + c_Spacing + 2;
-                        j = Strings.InStr(i, l_MsgFormatted, Microsoft.VisualBasic.Constants.vbCrLf);
-                    }
+                    //j = l_MsgFormatted.IndexOf(Microsoft.VisualBasic.Constants.vbCrLf, i);
+                    //while (j > 0)
+                    //{
+                    //    l_MsgFormatted = l_MsgFormatted.Substring(0, j) + Globals.SpaceDup(c_Spacing) + l_MsgFormatted.Substring(j + 2);
+                    //    i = j + c_Spacing + 2;
+                    //    j = l_MsgFormatted.IndexOf(Microsoft.VisualBasic.Constants.vbCrLf, i);
+                    //}
 
                     switch (p_MsgLevel)
                     {
@@ -1265,7 +1256,7 @@ namespace ConformU
 
                         default:
                             {
-                                l_Msg = Strings.Format(DateAndTime.Now, "HH:mm:ss.fff") + " " + l_TestFormatted + l_MsgLevelFormatted + " " + l_MsgFormatted;
+                                l_Msg = $"{DateTime.Now:HH:mm:ss.fff} {l_TestFormatted} {l_MsgLevelFormatted} {l_MsgFormatted}";
                                 break;
                             }
                     }
@@ -1559,7 +1550,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogMsg(MemberName, MessageLevel.msgError, (Conversions.ToDouble("CONFORM ERROR! - Received unexpected member of 'Required' enum: ") + (double)IsRequired).ToString());
+                            LogMsg(MemberName, MessageLevel.msgError, "CONFORM ERROR! - Received unexpected member of 'Required' enum: " + IsRequired.ToString());
                             break;
                         }
                 }
@@ -1576,11 +1567,11 @@ namespace ConformU
             }
             else if (ex is ASCOM.NotImplementedException)
             {
-                LogMsg(MemberName, MessageLevel.msgIssue, Conversions.ToString(Operators.ConcatenateObject("Received a NotImplementedException instead of a ", Interaction.IIf(TypeOfMember == MemberType.Property, "PropertyNotImplementedException", "MethodNotImplementedException"))));
+                LogMsg(MemberName, MessageLevel.msgIssue, "Received a NotImplementedException instead of a " + ((TypeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException"));
             }
             else if (ex is System.NotImplementedException)
             {
-                LogMsg(MemberName, MessageLevel.msgIssue, Conversions.ToString(Operators.ConcatenateObject("Received a System.NotImplementedException instead of an ASCOM.", Interaction.IIf(TypeOfMember == MemberType.Property, "PropertyNotImplementedException", "MethodNotImplementedException"))));
+                LogMsg(MemberName, MessageLevel.msgIssue, "Received a System.NotImplementedException instead of an ASCOM." + ((TypeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException"));
             }
 
             // Handle all other types of error
