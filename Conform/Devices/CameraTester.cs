@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text;
-using Microsoft.VisualBasic;
+//using Microsoft.VisualBasic;
 //using ASCOM.DeviceInterface;
 using System.Collections;
 using System.Threading;
@@ -398,24 +398,24 @@ namespace ConformU
                 {
                     if (settings.DisplayMethodCalls)
                         LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get Description");
-                    l_VStringPtr = Strings.InStr(m_Camera.Description.ToUpper(), "VERSION "); // Point at the start of the version string
-                    if (l_VStringPtr > 0)
+                    l_VStringPtr = m_Camera.Description.ToUpper().IndexOf("VERSION "); // Point at the start of the version string
+                    if (l_VStringPtr >= 0)
                     {
                         if (settings.DisplayMethodCalls)
                             LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get Description");
-                        string l_VString = Strings.Mid(m_Camera.Description.ToUpper(), l_VStringPtr + 8);
-                        l_VStringPtr = Strings.InStr(l_VString, ".");
-                        if (l_VStringPtr > 1)
+                        string l_VString = m_Camera.Description.ToUpper().Substring(l_VStringPtr, 8);
+                        l_VStringPtr = l_VString.IndexOf(".");
+                        if (l_VStringPtr > 0)
                         {
-                            l_V1 = System.Convert.ToInt32(Strings.Mid(l_VString, 1, l_VStringPtr - 1)); // Extract the number
-                            l_VString = Strings.Mid(l_VString, l_VStringPtr + 1); // Get the second version number part
-                            l_VStringPtr = Strings.InStr(l_VString, ".");
+                            l_V1 = Convert.ToInt32(l_VString.Substring(0, l_VStringPtr - 1)); // Extract the number
+                            l_VString = l_VString.Substring(l_VStringPtr + 1); // Get the second version number part
+                            l_VStringPtr = l_VString.IndexOf(".");
                             if (l_VStringPtr > 1)
                             {
-                                l_V2 = System.Convert.ToInt32(Strings.Mid(l_VString, 1, l_VStringPtr - 1)); // Extract the number
-                                l_VString = Strings.Mid(l_VString, l_VStringPtr + 1); // Get the third version number part
-                                l_V3 = System.Convert.ToInt32(l_VString); // Extract the number
-                                                                          // Turn the version parts into a whole number
+                                l_V2 = Convert.ToInt32(l_VString.Substring(0, l_VStringPtr - 1)); // Extract the number
+                                l_VString = l_VString.Substring(l_VStringPtr + 1); // Get the third version number part
+                                l_V3 = Convert.ToInt32(l_VString); // Extract the number
+                                                                   // Turn the version parts into a whole number
                                 l_V1 = l_V1 * 1000000 + l_V2 * 1000 + l_V3;
                                 if (l_V1 < 5000008)
                                 {
@@ -2140,7 +2140,7 @@ namespace ConformU
 
                     default:
                         {
-                            if (Strings.Len(returnValue) <= p_MaxLength)
+                            if (returnValue.Length <= p_MaxLength)
                                 LogMsg(p_Name, MessageLevel.msgOK, returnValue);
                             else
                                 LogMsg(p_Name, MessageLevel.msgError, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);
@@ -2581,7 +2581,7 @@ namespace ConformU
                                         }
                                     }
 
-                                    Status(StatusType.staAction, "Waiting for " + p_Duration.ToString() + " second exposure to complete: " + Conversion.Int(DateTime.Now.Subtract(l_StartTime).TotalSeconds) + ",   PercentComplete: " + l_PercentCompletedMessage);
+                                    Status(StatusType.staAction, "Waiting for " + p_Duration.ToString() + " second exposure to complete: " + DateTime.Now.Subtract(l_StartTime).TotalSeconds.ToString() + ",   PercentComplete: " + l_PercentCompletedMessage);
                                     WaitFor(CAMERA_SLEEP_TIME);
                                     if (cancellationToken.IsCancellationRequested) return;
                                 }
@@ -2857,7 +2857,7 @@ namespace ConformU
                 // Confirm that the format is as expected
                 bool l_FormatOK;
                 l_FormatOK = true;
-                if (Strings.Len(m_LastExposureStartTime) >= 19)
+                if (m_LastExposureStartTime.Length >= 19)
                 {
                     for (l_i = 1; l_i <= 19; l_i++)
                     {
@@ -2867,7 +2867,7 @@ namespace ConformU
                             case 8 // "-"
                            :
                                 {
-                                    if (Strings.Mid(m_LastExposureStartTime, l_i, 1) != "-")
+                                    if (m_LastExposureStartTime.Substring(l_i - 1, 1) != "-")
                                         l_FormatOK = false;
                                     break;
                                 }
@@ -2875,7 +2875,7 @@ namespace ConformU
                             case 11 // "T"
                      :
                                 {
-                                    if (Strings.Mid(m_LastExposureStartTime, l_i, 1) != "T")
+                                    if (m_LastExposureStartTime.Substring(l_i - 1, 1) != "T")
                                         l_FormatOK = false;
                                     break;
                                 }
@@ -2884,14 +2884,14 @@ namespace ConformU
                             case 17 // ":"
                      :
                                 {
-                                    if (Strings.Mid(m_LastExposureStartTime, l_i, 1) != ":")
+                                    if (m_LastExposureStartTime.Substring(l_i - 1, 1) != ":")
                                         l_FormatOK = false;
                                     break;
                                 }
 
                             default:
                                 {
-                                    if (!Information.IsNumeric(Strings.Mid(m_LastExposureStartTime, l_i, 1)))
+                                    if (!m_LastExposureStartTime.Substring(l_i - 1, 1).IsNumeric())
                                         l_FormatOK = false;
                                     break;
                                 }
@@ -2905,7 +2905,7 @@ namespace ConformU
                             if (p_Start.Subtract(l_StartTime).TotalSeconds < 2.0)
                                 LogMsg("LastExposureStartTime", MessageLevel.msgOK, "LastExposureStartTime is correct to within 2 seconds: " + m_LastExposureStartTime + " UTC");
                             else
-                                LogMsg("LastExposureStartTime", MessageLevel.msgIssue, "LastExposureStartTime is more than 2 seconds inaccurate : " + m_LastExposureStartTime + ", expected: " + Strings.Format(p_Start, "yyyy-MM-ddTHH:mm:ss") + " UTC");
+                                LogMsg("LastExposureStartTime", MessageLevel.msgIssue, "LastExposureStartTime is more than 2 seconds inaccurate : " + m_LastExposureStartTime + ", expected: " + p_Start.ToString("yyyy-MM-ddTHH:mm:ss") + " UTC");
                         }
                         catch (COMException ex)
                         {
@@ -3120,7 +3120,7 @@ namespace ConformU
                     l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
                     if (l_ElapsedTime > l_LastElapsedTime + 1.0)
                     {
-                        Status(StatusType.staStatus, l_Count + " transactions in " + Strings.Format(l_ElapsedTime, "0") + " seconds");
+                        Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
                         l_LastElapsedTime = l_ElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
@@ -3133,25 +3133,25 @@ namespace ConformU
                 {
                     case object _ when l_Rate > 10.0:
                         {
-                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + Strings.Format(l_Rate, "0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case object _ when 2.0 <= l_Rate && l_Rate <= 10.0:
                         {
-                            LogMsg(p_Name, MessageLevel.msgOK, "Transaction rate: " + Strings.Format(l_Rate, "0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.msgOK, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case object _ when 1.0 <= l_Rate && l_Rate <= 2.0:
                         {
-                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + Strings.Format(l_Rate, "0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + Strings.Format(l_Rate, "0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
                 }
