@@ -198,14 +198,20 @@ namespace ConformU
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
 
-                .ConfigureLogging(logging =>
-                {
-                    logging.ClearProviders();
-                    logging.AddConsole();
-                    //logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Trace);
-                    //logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Trace);
-                    logging.AddDebug();
-                })
+                 .ConfigureLogging(logging =>
+                 {
+                     logging.ClearProviders();
+                     logging.AddSimpleConsole(options =>
+                     {
+                         options.SingleLine = false;
+                         options.IncludeScopes = false;
+                         options.TimestampFormat = "HH:mm:ss.fff - ";
+                     });
+                     logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Information);
+                     logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Information);
+                     logging.AddDebug();
+                 })
+
                 .ConfigureWebHostDefaults(webBuilder =>
                     {
                         webBuilder.UseStartup<Startup>();

@@ -15,6 +15,7 @@ using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.CompilerServices;
 using static ConformU.Globals;
 using static ConformU.ConformConstants;
+using System.IO;
 
 namespace ConformU
 {
@@ -662,12 +663,16 @@ namespace ConformU
             DateTime lastModifiedTime = DateTime.MinValue;
             try
             {
-                LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"About to get executing assembly...");
-                Assembly assembly = Assembly.GetExecutingAssembly();
-                LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"Got executing assembly...");
-                LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"Assembly location: {assembly.Location}");
-                var fileInfo = new System.IO.FileInfo(assembly.Location);
-                LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"Last write time: {fileInfo.LastWriteTime}");
+                LogMsg("ConformanceCheck", MessageLevel.msgDebug, $"About to get executing assembly...");
+                    string assemblyName;
+                if (OperatingSystem.IsWindows()) assemblyName = "ConformU.exe";
+                else assemblyName = "conformu";
+                LogMsg("ConformanceCheck", MessageLevel.msgDebug, $"Assembly name: {assemblyName}");
+                string baseDirectory = AppContext.BaseDirectory;
+                LogMsg("ConformanceCheck", MessageLevel.msgDebug, $"Base directory: {baseDirectory}");
+                string assemblyPath = Path.Combine(baseDirectory, assemblyName);
+                var fileInfo = new System.IO.FileInfo(assemblyPath);
+                LogMsg("ConformanceCheck", MessageLevel.msgDebug, $"Last write time: {fileInfo.LastWriteTime}");
                 lastModifiedTime = fileInfo.LastWriteTime;
             }
             catch (Exception ex)

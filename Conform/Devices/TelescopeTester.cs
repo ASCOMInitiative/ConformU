@@ -15,7 +15,7 @@ using ASCOM.Standard.Interfaces;
 using ASCOM.Standard.Utilities;
 using ASCOM.Standard.COM.DriverAccess;
 
-namespace ConformU  
+namespace ConformU
 {
     internal class TelescopeTester : DeviceTesterBaseClass, IDisposable
     {
@@ -5402,7 +5402,7 @@ namespace ConformU
         {
             int l_ct;
             double l_TestDec, l_TestRAOffset;
-            dynamic l_AxisRates = null;
+            IAxisRates l_AxisRates = null;
 
             Status(StatusType.staTest, p_Name);
             LogMsg("TelescopeOptionalMethodsTest", MessageLevel.msgDebug, p_Type.ToString() + " " + p_Name + " " + p_CanTest.ToString());
@@ -5786,6 +5786,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
+                    LogMsgError(p_Name, $"MoveAxis Exception\r\n{ex}");
                     HandleException(p_Name, MemberType.Method, Required.Optional, ex, "");
                 }
             }
@@ -6079,7 +6080,7 @@ namespace ConformU
 
         private void TelescopeMoveAxisTest(string p_Name, TelescopeAxis p_Axis, IAxisRates p_AxisRates)
         {
-            dynamic l_Rate = null;
+            IRate l_Rate = null;
 
             double l_MoveRate = default, l_RateMinimum, l_RateMaximum;
             bool l_TrackingStart, l_TrackingEnd, l_CanSetZero;
@@ -6089,7 +6090,7 @@ namespace ConformU
             l_RateMinimum = double.PositiveInfinity; // Set to invalid values
             l_RateMaximum = double.NegativeInfinity;
             LogMsg(p_Name, MessageLevel.msgDebug, Conversions.ToString(Operators.ConcatenateObject("Number of rates found: ", p_AxisRates.Count)));
-            if (Operators.ConditionalCompareObjectGreater(p_AxisRates.Count, 0, false))
+            if (p_AxisRates.Count > 0)
             {
                 IAxisRates l_AxisRatesIRates = p_AxisRates;
                 l_RateCount = 0;
