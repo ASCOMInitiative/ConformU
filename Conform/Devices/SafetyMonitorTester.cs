@@ -252,7 +252,7 @@ namespace ConformU
                             return;
                     }
                 }
-                while (!(l_ElapsedTime > PERF_LOOP_TIME));
+                while (l_ElapsedTime <= PERF_LOOP_TIME);
                 l_Rate = l_Count / l_ElapsedTime;
                 switch (l_Rate)
                 {

@@ -72,7 +72,7 @@ namespace ConformU
                             if (conformSettings.Debug) logger?.LogMessage("Dispose", MessageLevel.msgDebug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
 
                         }
-                        while (!(remainingObjectCount <= 0 | loopCount == 20));
+                        while (remainingObjectCount > 0 & loopCount <= 20);
                     }
                     catch { }
 

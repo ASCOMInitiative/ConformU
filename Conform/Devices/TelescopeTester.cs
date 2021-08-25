@@ -5639,7 +5639,7 @@ namespace ConformU
                                         //Application.DoEvents();
                                         SetStatus(p_Name, "Waiting for transit through Meridian", Convert.ToInt32(DateTime.Now.Subtract(m_StartTime).TotalSeconds) + "/" + SIDEOFPIER_MERIDIAN_TRACKING_PERIOD / 1000d + " seconds");
                                     }
-                                    while (!(DateTime.Now.Subtract(m_StartTime).TotalMilliseconds > SIDEOFPIER_MERIDIAN_TRACKING_PERIOD | cancellationToken.IsCancellationRequested));
+                                    while ((DateTime.Now.Subtract(m_StartTime).TotalMilliseconds <= SIDEOFPIER_MERIDIAN_TRACKING_PERIOD) & !cancellationToken.IsCancellationRequested);
 
                                     // SlewScope(TelescopeRAFromHourAngle(+0.0833333), 0.0, "Slewing to flip point") '5 minutes past zenith
                                     if (cancellationToken.IsCancellationRequested)
@@ -6935,7 +6935,7 @@ namespace ConformU
                     LogMsg(testName, MessageLevel.msgComment, "About to get Slewing property");
             }
             //while (telescopeDevice.Slewing & (DateTime.Now.Subtract(WaitStartTime).TotalSeconds < WAIT_FOR_SLEW_MINIMUM_DURATION) & !TestStop());
-            while (!(!telescopeDevice.Slewing & (DateTime.Now.Subtract(WaitStartTime).TotalSeconds > WAIT_FOR_SLEW_MINIMUM_DURATION) | cancellationToken.IsCancellationRequested));
+            while (telescopeDevice.Slewing & (DateTime.Now.Subtract(WaitStartTime).TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION) & !cancellationToken.IsCancellationRequested);
             //My.MyProject.Forms.FrmConformMain.staStatus.Text = "Slew completed";
         }
 
@@ -7092,7 +7092,7 @@ namespace ConformU
                     if (l_DeviceObject is null)
                         WaitFor(200);
                 }
-                while (!(l_TryCount == 3 | l_ITelescope is object)); // Exit if created OK
+                while (l_TryCount < 3 & !(l_ITelescope is object)); // Exit if created OK
                 if (l_ITelescope is null)
                 {
                     LogMsg("AccessChecks", MessageLevel.msgInfo, "Device does not expose interface " + TestType.ToString());

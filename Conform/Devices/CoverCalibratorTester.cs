@@ -312,7 +312,7 @@ namespace ConformU
                             asynchronousOpenTime = 0.0;
 
                             // Wait until the cover is no longer moving
-                            while (!!(coverCalibratorDevice.CoverState == CoverStatus.Moving))
+                            while (coverCalibratorDevice.CoverState == CoverStatus.Moving)
                             {
                                 WaitFor(10);
                                 if (cancellationToken.IsCancellationRequested)
@@ -369,7 +369,7 @@ namespace ConformU
                         {
                             canAsynchronousOpen = true;
                             // Wait until the cover is no longer moving
-                            while (!!(coverCalibratorDevice.CoverState == CoverStatus.Moving))
+                            while (coverCalibratorDevice.CoverState == CoverStatus.Moving)
                             {
                                 WaitFor(10);
                                 if (cancellationToken.IsCancellationRequested)
@@ -637,7 +637,7 @@ namespace ConformU
                         {
 
                             // Wait until the cover is no longer moving
-                            while (!!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady))
+                            while (coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady)
                             {
                                 WaitFor(10);
                                 if (cancellationToken.IsCancellationRequested)
@@ -721,7 +721,7 @@ namespace ConformU
                     else
                     {
                         // Wait until the cover is no longer moving
-                        while (!!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady))
+                        while (coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady)
                         {
                             WaitFor(10);
                             if (cancellationToken.IsCancellationRequested)
@@ -867,7 +867,7 @@ namespace ConformU
                             return;
                     }
                 }
-                while (!(elapsedTime > PERF_LOOP_TIME));
+                while (elapsedTime <= PERF_LOOP_TIME);
 
                 loopRate = loopCount / elapsedTime;
                 switch (loopRate)

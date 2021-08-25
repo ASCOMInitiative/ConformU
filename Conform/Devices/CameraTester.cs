@@ -235,9 +235,9 @@ namespace ConformU
                     case DeviceTechnology.Alpaca:
                         logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
                         m_Camera = new AlpacaCamera(settings.AlpacaConfiguration.AccessServiceType.ToString(),
-                            settings.AlpacaDevice.IpAddress, 
-                            settings.AlpacaDevice.IpPort, 
-                            settings.AlpacaDevice.AlpacaDeviceNumber, 
+                            settings.AlpacaDevice.IpAddress,
+                            settings.AlpacaDevice.IpPort,
+                            settings.AlpacaDevice.AlpacaDeviceNumber,
                             settings.StrictCasing,
                             settings.DisplayMethodCalls ? logger : null);
                         logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Alpaca device created OK");
@@ -870,7 +870,7 @@ namespace ConformU
                             l_ExceptionGenerated = true;
                         }
                     }
-                    while (!(l_ExceptionGenerated | (l_SetPoint <= MIN_CAMERA_SETPOINT_TEMPERATURE)))// Reached lower limit so exit loop
+                    while (!l_ExceptionGenerated & (l_SetPoint > MIN_CAMERA_SETPOINT_TEMPERATURE))// Reached lower limit so exit loop
     ;
 
                     if (!l_ExceptionGenerated & (l_SetPoint == MIN_CAMERA_SETPOINT_TEMPERATURE))
@@ -912,8 +912,7 @@ namespace ConformU
                             l_ExceptionGenerated = true;
                         }
                     }
-                    while (!(l_ExceptionGenerated | (l_SetPoint >= MAX_CAMERA_SETPOINT_TEMPERATURE)))// Reached upper limit so exit loop
-    ;
+                    while (!l_ExceptionGenerated & (l_SetPoint < MAX_CAMERA_SETPOINT_TEMPERATURE));// Reached upper limit so exit loop
 
                     if (!l_ExceptionGenerated & (l_SetPoint == MAX_CAMERA_SETPOINT_TEMPERATURE))
                     {
@@ -2525,7 +2524,7 @@ namespace ConformU
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
                                 }
-                                while (!((m_Camera.CameraState == CameraState.Exposing) | (m_Camera.CameraState == CameraState.Error)));
+                                while ((m_Camera.CameraState != CameraState.Exposing) & (m_Camera.CameraState != CameraState.Error));
 
                                 // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
                                 if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageReady");
@@ -2598,7 +2597,7 @@ namespace ConformU
                                     WaitFor(CAMERA_SLEEP_TIME);
                                     if (cancellationToken.IsCancellationRequested) return;
                                 }
-                                while (!((m_Camera.CameraState == CameraState.Idle) | (m_Camera.CameraState == CameraState.Error)));
+                                while ((m_Camera.CameraState != CameraState.Idle) & (m_Camera.CameraState != CameraState.Error));
 
                                 // Wait for image to become ready
                                 Status(StatusType.staAction, "Waiting for image ready");
@@ -2608,7 +2607,7 @@ namespace ConformU
                                     WaitFor(CAMERA_SLEEP_TIME);
                                     if (cancellationToken.IsCancellationRequested) return;
                                 }
-                                while (!((m_Camera.ImageReady) | (m_Camera.CameraState == CameraState.Error)));
+                                while (!m_Camera.ImageReady & (m_Camera.CameraState != CameraState.Error));
 
                                 if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageReady");
                                 if (m_Camera.ImageReady)
@@ -2958,7 +2957,7 @@ namespace ConformU
                             if (cancellationToken.IsCancellationRequested)
                                 return;
                         }
-                        while (!((!m_Camera.IsPulseGuiding) | (DateTime.Now.Subtract(l_StartTime).TotalMilliseconds > 3000))); // Wait for up to 3 seconds
+                        while (m_Camera.IsPulseGuiding & (DateTime.Now.Subtract(l_StartTime).TotalMilliseconds <= 3000)); // Wait for up to 3 seconds
 
                         if (settings.DisplayMethodCalls)
                             LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get IsPulseGuiding");
@@ -3127,7 +3126,7 @@ namespace ConformU
                             return;
                     }
                 }
-                while (!(l_ElapsedTime > PERF_LOOP_TIME));
+                while (l_ElapsedTime <= PERF_LOOP_TIME);
 
                 l_Rate = l_Count / l_ElapsedTime;
                 switch (l_Rate)

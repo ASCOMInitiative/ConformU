@@ -527,7 +527,7 @@ namespace ConformU
                 WaitFor(SLEEP_TIME);
                 Status(StatusType.staStatus, "Slewing Status: " + domeDevice.Slewing + ", Timeout: " + DateTime.Now.Subtract(l_StartTime).TotalSeconds.ToString("#0") + "/" + p_TimeOut + ", press stop to abandon wait");
             }
-            while (!!domeDevice.Slewing | cancellationToken.IsCancellationRequested | (DateTime.Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut));
+            while (domeDevice.Slewing & !cancellationToken.IsCancellationRequested & (DateTime.Now.Subtract(l_StartTime).TotalSeconds <= p_TimeOut));
 
             Status(StatusType.staStatus, "");
             if ((DateTime.Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut))
@@ -859,7 +859,7 @@ namespace ConformU
                                             WaitFor(SLEEP_TIME);
                                             Status(StatusType.staStatus, "Slewing Status: " + domeDevice.Slewing);
                                         }
-                                        while (!!domeDevice.Slewing | cancellationToken.IsCancellationRequested);
+                                        while (domeDevice.Slewing & !cancellationToken.IsCancellationRequested);
                                     }
                                     if (!cancellationToken.IsCancellationRequested)
                                     {
@@ -940,7 +940,7 @@ namespace ConformU
                                             WaitFor(SLEEP_TIME);
                                             Status(StatusType.staStatus, "Slewing Status: " + domeDevice.Slewing);
                                         }
-                                        while (!!domeDevice.Slewing | cancellationToken.IsCancellationRequested);
+                                        while (domeDevice.Slewing & !cancellationToken.IsCancellationRequested);
                                     }
                                     if (!cancellationToken.IsCancellationRequested)
                                     {
@@ -1434,7 +1434,7 @@ namespace ConformU
                     l_ShutterState = domeDevice.ShutterStatus;
                     Status(StatusType.staStatus, "Shutter State: " + l_ShutterState.ToString() + " Timeout: " + DateTime.Now.Subtract(l_StartTime).Seconds + "/" + settings.DomeShutterTimeout);
                 }
-                while (!(l_ShutterState == p_RequiredStatus) | cancellationToken.IsCancellationRequested | (DateTime.Now.Subtract(l_StartTime).TotalSeconds > settings.DomeShutterTimeout));
+                while (!(l_ShutterState == p_RequiredStatus) & !cancellationToken.IsCancellationRequested & (DateTime.Now.Subtract(l_StartTime).TotalSeconds <= settings.DomeShutterTimeout));
                 LogCallToDriver("DomeShutterWait", "About to get ShutterStatus property");
                 if ((domeDevice.ShutterStatus == p_RequiredStatus))
                     domeShutterWait = true; // All worked so return True
@@ -1514,7 +1514,7 @@ namespace ConformU
                             return;
                     }
                 }
-                while (!(l_ElapsedTime > PERF_LOOP_TIME));
+                while (l_ElapsedTime <= PERF_LOOP_TIME);
                 l_Rate = l_Count / l_ElapsedTime;
                 switch (l_Rate)
                 {

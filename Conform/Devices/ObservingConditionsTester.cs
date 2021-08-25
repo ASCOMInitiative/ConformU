@@ -689,8 +689,7 @@ namespace ConformU
                     }
                 }
             }
-            while (!readOK | (retryCount == settings.ObservingConditionsMaxRetries) | unexpectedError)// Lower than minimum value// Higher than maximum value
-    ;
+            while (!readOK & (retryCount <= settings.ObservingConditionsMaxRetries) & !unexpectedError); // Lower than minimum value// Higher than maximum value
 
             if ((!readOK) & (!unexpectedError))
                 LogMsg(MethodName, MessageLevel.msgInfo, "InvalidOperationException persisted for longer than " + settings.ObservingConditionsMaxRetries * settings.ObservingConditionsRetryTime + " seconds.");

@@ -176,7 +176,7 @@ namespace ConformU
                     SetStatus("FilterWheel Pre-run Check", "Waiting for movement to stop", DateTime.Now.Subtract(StartTime).Seconds + " second(s)");
                     WaitFor(SLEEP_TIME);
                 }
-                while (!(m_FilterWheel.Position != FWTEST_IS_MOVING) | (DateTime.Now.Subtract(StartTime).TotalSeconds > FWTEST_TIMEOUT)); // Wait until movement has stopped or 30 seconds have passed
+                while ((m_FilterWheel.Position == FWTEST_IS_MOVING) & (DateTime.Now.Subtract(StartTime).TotalSeconds <= FWTEST_TIMEOUT)); // Wait until movement has stopped or 30 seconds have passed
                 if (m_FilterWheel.Position != FWTEST_IS_MOVING)
                     LogMsg("Pre-run Check", MessageLevel.msgOK, "Filter wheel is stationary, ready to start tests");
             }
@@ -290,9 +290,8 @@ namespace ConformU
                                         do
                                         {
                                             Thread.Sleep(100);
-                                            if (cancellationToken.IsCancellationRequested) break;
                                         }
-                                        while (!(m_FilterWheel.Position == i) | (DateTime.Now.Subtract(l_StartTime).TotalSeconds > FILTER_WHEEL_TIME_OUT) | g_Stop);
+                                        while ((m_FilterWheel.Position != i) & (DateTime.Now.Subtract(l_StartTime).TotalSeconds <= FILTER_WHEEL_TIME_OUT) & !cancellationToken.IsCancellationRequested);
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
 
@@ -399,7 +398,7 @@ namespace ConformU
                             return;
                     }
                 }
-                while (!(l_ElapsedTime > PERF_LOOP_TIME));
+                while (l_ElapsedTime <= PERF_LOOP_TIME);
                 l_Rate = l_Count / l_ElapsedTime;
                 switch (l_Rate)
                 {

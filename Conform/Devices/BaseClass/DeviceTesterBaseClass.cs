@@ -664,7 +664,7 @@ namespace ConformU
             try
             {
                 LogMsg("ConformanceCheck", MessageLevel.msgDebug, $"About to get executing assembly...");
-                    string assemblyName;
+                string assemblyName;
                 if (OperatingSystem.IsWindows()) assemblyName = "ConformU.exe";
                 else assemblyName = "conformu";
                 LogMsg("ConformanceCheck", MessageLevel.msgDebug, $"Assembly name: {assemblyName}");
@@ -1113,7 +1113,7 @@ namespace ConformU
                 Thread.Sleep(WaitDuration);
                 //Application.DoEvents();
             }
-            while (!(DateAndTime.Now.Subtract(l_StartTime).TotalMilliseconds > p_Duration | cancellationToken.IsCancellationRequested));
+            while ((DateAndTime.Now.Subtract(l_StartTime).TotalMilliseconds <= p_Duration) & !cancellationToken.IsCancellationRequested);
         }
 
 
