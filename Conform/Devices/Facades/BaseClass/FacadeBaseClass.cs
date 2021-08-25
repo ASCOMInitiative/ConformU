@@ -1,11 +1,6 @@
-﻿using ASCOM.Standard.AlpacaClients;
-using ASCOM.Standard.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using static ConformU.ConformConstants;
 using System.Threading;
 using System.Collections;
 #if WINDOWS7_0_OR_GREATER
