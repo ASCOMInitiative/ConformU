@@ -241,7 +241,7 @@ namespace ConformU
                                     {
                                         LogMsg("Version Check", MessageLevel.Issue, "*** This version of the dome simulator has known conformance issues, ***");
                                         LogMsg("Version Check", MessageLevel.Issue, "*** please update it from the ASCOM site https://ascom-standards.org/Downloads/Index.htm ***");
-                                        LogMsg("", MessageLevel.None, "");
+                                        LogMsg("", MessageLevel.TestAndMessage, "");
                                     }
                                     else
                                         LogMsg("Version Check", MessageLevel.Debug, "Version check OK");
@@ -1002,10 +1002,8 @@ namespace ConformU
                             if (m_CanSetAltitude)
                             {
                                 Status(StatusType.staTest, p_Name);
-                                /* TODO ERROR: Skipped IfDirectiveTrivia *//* TODO ERROR: Skipped DisabledTextTrivia *//* TODO ERROR: Skipped ElseDirectiveTrivia */
                                 for (l_SlewAngle = 0; l_SlewAngle <= 90; l_SlewAngle += 15)
                                 {
-                                    /* TODO ERROR: Skipped EndIfDirectiveTrivia */
                                     try
                                     {
                                         DomeSlewToAltitude(p_Name, l_SlewAngle);
@@ -1055,10 +1053,8 @@ namespace ConformU
                             if (m_CanSetAzimuth)
                             {
                                 Status(StatusType.staTest, p_Name);
-                                /* TODO ERROR: Skipped IfDirectiveTrivia *//* TODO ERROR: Skipped DisabledTextTrivia *//* TODO ERROR: Skipped ElseDirectiveTrivia */
                                 for (l_SlewAngle = 0; l_SlewAngle <= 315; l_SlewAngle += 45)
                                 {
-                                    /* TODO ERROR: Skipped EndIfDirectiveTrivia */
                                     try
                                     {
                                         DomeSlewToAzimuth(p_Name, l_SlewAngle);

@@ -11,15 +11,15 @@ namespace ConformU
     [DefaultMember("Settings")]
     public class ConformConfiguration
     {
-        private const string FOLDER_NAME = "conform";
-        private const string FOLDER_SETTINGS_FILE = "conform.settings";
+        private const string FOLDER_NAME = "conform"; // Folder name underneath the local application data folder
+        private const string SETTINGS_FILENAME = "conform.settings"; // Settings file name
 
         private readonly ConformLogger TL;
         Settings settings;
         string fileSettingsFileName;
 
         /// <summary>
-        /// Create a Configuration mangement instance and load the current settings
+        /// Create a Configuration management instance and load the current settings
         /// </summary>
         /// <param name="logger">Data logger instance.</param>
         public ConformConfiguration(ConformLogger logger, string configurationFile)
@@ -33,7 +33,7 @@ namespace ConformU
                 if (string.IsNullOrEmpty(configurationFile))
                 {
                     string folderName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), FOLDER_NAME);
-                    fileSettingsFileName = Path.Combine(folderName, FOLDER_SETTINGS_FILE);
+                    fileSettingsFileName = Path.Combine(folderName, SETTINGS_FILENAME);
                     TL.LogDebug("ConformConfiguration", $"Settings folder: {folderName}, Settings file: {fileSettingsFileName}");
                 }
                 else
@@ -78,7 +78,7 @@ namespace ConformU
         {
             string issueList = ""; // Initialise to an empty string indicating that all is OK
 
-            if (settings.DeviceName == ConformConstants.NO_DEVICE_SELECTED) issueList += "\r\nNo device has been selected.";
+            if (settings.DeviceName == Globals.NO_DEVICE_SELECTED) issueList += "\r\nNo device has been selected.";
             if ((settings.DeviceTechnology != DeviceTechnology.Alpaca) & (settings.DeviceTechnology != DeviceTechnology.COM)) issueList += $"\r\nTechnology type is not Alpaca or COM: '{settings.DeviceTechnology}'";
 
             switch (settings.DeviceTechnology)
@@ -156,7 +156,7 @@ namespace ConformU
         {
             set
             {
-                settings.DebugDiscovery = value;
+                settings.DebugAlpacaDiscovery = value;
             }
         }
 

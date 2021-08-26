@@ -21,7 +21,7 @@ namespace ConformU
             if (!OperatingSystem.IsWindows()) throw new InvalidOperationException("Conform.ComDevices.GetRegisteredDrivers can only be used on a Windows operating system");
 
             RegistryKey baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32);
-            RegistryKey profile = baseKey.OpenSubKey(ConformConstants.ASCOM_PROFILE_KEY);
+            RegistryKey profile = baseKey.OpenSubKey(Globals.ASCOM_PROFILE_KEY);
 
             string[] keyNames = profile.GetSubKeyNames();
             foreach (string keyName in keyNames)

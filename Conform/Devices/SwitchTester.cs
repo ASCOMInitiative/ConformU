@@ -927,7 +927,7 @@ namespace ConformU
                                     else
                                         LogMsg("SetSwitch", MessageLevel.Info, "  All write tests have been skipped because the \"Set Switches\" checkbox is unchecked");
 
-                                    LogMsg("", MessageLevel.None, "");
+                                    LogMsg("", MessageLevel.TestAndMessage, "");
                                 }
                                 catch (Exception ex)
                                 {

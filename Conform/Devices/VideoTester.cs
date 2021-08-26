@@ -966,7 +966,7 @@ namespace ConformU
                 MethodName = "?????? Read";
             }
 
-            dynamic returnValue = null/* TODO Change to default(_) if this is not a reference type */;
+            dynamic returnValue = null;
 
             try
             {

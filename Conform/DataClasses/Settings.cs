@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using static ConformU.ConformConstants;
+using static ConformU.Globals;
 
 namespace ConformU
 {
@@ -157,9 +157,10 @@ namespace ConformU
         public int SwitchWriteDelay { get; set; } = 3000;
         public int SwitchExtendedNumberTestRange { get; set; } = 100;
 
-        internal CancellationToken ApplicationCancellationToken { get; set; }
-
-        internal bool DebugDiscovery { get; set; } = false;
+        // Debug output switches
+        internal bool DebugAlpacaDiscovery { get; set; } = false;
+        internal bool DebugComDiscovery { get; set; } = false;
+        internal bool DebugConfigurationPersistence { get; set; } = false;
 
     }
 }

@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using static ConformU.Globals;
 
 namespace ConformU
 {
@@ -72,7 +73,7 @@ namespace ConformU
             if (!string.IsNullOrEmpty(o.SettingsFileLocation))
             {
                 Console.WriteLine($"Settings file location: {o.SettingsFileLocation}");
-                argList.Add($"--{ConformConstants.COMMAND_OPTION_SETTINGS}");
+                argList.Add($"--{COMMAND_OPTION_SETTINGS}");
                 argList.Add(o.SettingsFileLocation);
             }
 
@@ -80,7 +81,7 @@ namespace ConformU
             if (!string.IsNullOrEmpty(o.LogFileName))
             {
                 Console.WriteLine($"Log file location: {o.LogFileName}");
-                argList.Add($"--{ConformConstants.COMMAND_OPTION_LOGFILENAME}");
+                argList.Add($"--{COMMAND_OPTION_LOGFILENAME}");
                 argList.Add(o.LogFileName);
             }
 
@@ -88,14 +89,14 @@ namespace ConformU
             if (!string.IsNullOrEmpty(o.LogFilePath))
             {
                 Console.WriteLine($"Log file path: {o.LogFilePath}");
-                argList.Add($"--{ConformConstants.COMMAND_OPTION_LOGFILEPATH}");
+                argList.Add($"--{COMMAND_OPTION_LOGFILEPATH}");
                 argList.Add(o.LogFilePath);
             }
 
             // Flag if discovery debug information should be included in the log file
             if (o.DebugDiscovery)
             {
-                argList.Add($"--{ConformConstants.COMMAND_OPTION_SHOW_DISCOVERY}");
+                argList.Add($"--{COMMAND_OPTION_SHOW_DISCOVERY}");
                 argList.Add("true");
             }
 
@@ -132,7 +133,6 @@ namespace ConformU
                 }
 
                 ConformLogger conformLogger = new(logFileName, logFilePath, loggerName, true);  // Create a logger component
-                conformLogger.Debug = true;
                 ConformConfiguration settings = new(conformLogger, o.SettingsFileLocation);
 
                 // Validate the supplied configuration and only start if there are no settings issues

@@ -189,7 +189,7 @@ namespace ConformU
 
             // Dim m_Configuration, SC() As String
             bool m_Connected;
-            LogMsg("Common Driver Methods", MessageLevel.None, "");
+            LogMsg("Common Driver Methods", MessageLevel.TestAndMessage, "");
             baseClassDevice = p_DeviceObject; // CType(DeviceObject, IAscomDriverV1)
 
             // InterfaceVersion - Required
@@ -541,7 +541,7 @@ namespace ConformU
 
             if (cancellationToken.IsCancellationRequested)
                 return;
-            LogMsg("", MessageLevel.None, "");
+            LogMsg("", MessageLevel.TestAndMessage, "");
         }
 
         public virtual void CheckCommonMethods()
@@ -665,53 +665,35 @@ namespace ConformU
                 var fileInfo = new System.IO.FileInfo(assemblyPath);
                 LogMsg("ConformanceCheck", MessageLevel.Debug, $"Last write time: {fileInfo.LastWriteTime}");
                 lastModifiedTime = fileInfo.LastWriteTime;
+                LogMsg("", MessageLevel.Debug, ""); // Blank line
             }
             catch (Exception ex)
             {
-                LogMsg("ConformanceCheck", MessageLevel.None, $"Exception while trying to determine the last modified time: {ex}");
+                LogMsg("ConformanceCheck", MessageLevel.TestAndMessage, $"Exception while trying to determine the last modified time: {ex}");
             }
 
-            LogMsg("", MessageLevel.None, ""); // Blank line
-            LogMsg("ConformanceCheck", MessageLevel.None, $"ASCOM Universal Device Conformance Checker Version {this.GetType().Assembly.GetName().Version.ToString()}, Build time: {lastModifiedTime:ddd dd MMMM yyyy HH:mm:ss}");
+            LogMsg($"ASCOM Universal Device Conformance Checker Version {this.GetType().Assembly.GetName().Version.ToString()}, Build time: {lastModifiedTime:ddd dd MMMM yyyy HH:mm:ss}", MessageLevel.TestOnly, "");
 
-            LogMsg("", MessageLevel.None, ""); // Blank line
+            LogMsg("", MessageLevel.TestOnly, ""); // Blank line
 
             switch (settings.DeviceTechnology)
             {
                 case DeviceTechnology.Alpaca:
-                    LogMsg("ConformanceCheck", MessageLevel.None, $"Alpaca device: {settings.AlpacaDevice.AscomDeviceName} ({settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} {settings.AlpacaDevice.AscomDeviceType}/{settings.AlpacaDevice.AlpacaDeviceNumber})");
+                    LogMsg($"Alpaca device: {settings.AlpacaDevice.AscomDeviceName} ({settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} {settings.AlpacaDevice.AscomDeviceType}/{settings.AlpacaDevice.AlpacaDeviceNumber})", MessageLevel.TestOnly, "");
 
                     if (!settings.StrictCasing) LogMsgIssue("ConformanceCheck", "Alpaca strict casing has been disabled, this in only supported for testing devices.");
 
                     break;
 
                 case DeviceTechnology.COM:
-                    LogMsg("ConformanceCheck", MessageLevel.None, $"COM Driver ProgID: {settings.ComDevice.ProgId}");
+                    LogMsg($"COM Driver ProgID: {settings.ComDevice.ProgId}", MessageLevel.TestOnly, "");
                     break;
 
                 default:
                     throw new InvalidValueException($"CheckInitialise - Unknown technology type: {settings.DeviceTechnology}");
             }
 
-            LogMsg("", MessageLevel.None, ""); // Blank line
-            //LogMsg("Error", MessageLevel.msgAlways, "number for \"Not Implemented\" is: " + Conversion.Hex(g_ExNotImplemented));
-            //LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 1\" is: " + Conversion.Hex(g_ExInvalidValue1));
-            //if (g_ExInvalidValue2 != 0 & g_ExInvalidValue2 != g_ExInvalidValue1)
-            //    LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 2\" is: " + Conversion.Hex(g_ExInvalidValue2));
-            //if (g_ExInvalidValue3 != 0 & g_ExInvalidValue3 != g_ExInvalidValue2)
-            //    LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 3\" is: " + Conversion.Hex(g_ExInvalidValue3));
-            //if (g_ExInvalidValue4 != 0 & g_ExInvalidValue4 != g_ExInvalidValue3)
-            //    LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 4\" is: " + Conversion.Hex(g_ExInvalidValue4));
-            //if (g_ExInvalidValue5 != 0 & g_ExInvalidValue5 != g_ExInvalidValue4)
-            //    LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 5\" is: " + Conversion.Hex(g_ExInvalidValue5));
-            //if (g_ExInvalidValue6 != 0 & g_ExInvalidValue6 != g_ExInvalidValue5)
-            //    LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 6\" is: " + Conversion.Hex(g_ExInvalidValue6));
-            //LogMsg("Error", MessageLevel.msgAlways, "number for \"Value Not Set 1\" is: " + Conversion.Hex(ErrorCodes.ValueNotSet));
-            //LogMsg("Error", MessageLevel.msgAlways, "number for \"Value Not Set 2\" is: " + Conversion.Hex(g_ExNotSet1));
-            //if (g_ExNotSet2 != 0 & g_ExNotSet2 != g_ExNotSet1)
-            //    LogMsg("Error", MessageLevel.msgAlways, "number for \"Value Not Set 3\" is: " + Conversion.Hex(g_ExNotSet2));
-
-            //LogMsg("", MessageLevel.msgAlways, "");
+            LogMsg("", MessageLevel.TestOnly, ""); // Blank line
         }
 
         public virtual void CreateDevice()
@@ -1141,7 +1123,6 @@ namespace ConformU
 
         internal void LogMsg(string testName, MessageLevel messageLevel, string message)
         {
-            const int TEST_NAME_WIDTH = 45;
             string testNameFormatted, messageLevelFormatted, messageFormatted, outputMessage;
             MessageLevel logLevel;
 
@@ -1164,12 +1145,6 @@ namespace ConformU
 
                     switch (messageLevel)
                     {
-                        case MessageLevel.None:
-                            {
-                                messageLevelFormatted = "        ";
-                                break;
-                            }
-
                         case MessageLevel.Debug:
                             {
                                 messageLevelFormatted = "DEBUG   ";
@@ -1215,6 +1190,12 @@ namespace ConformU
                                 break;
                             }
 
+                        case MessageLevel.TestOnly:
+                        case MessageLevel.TestAndMessage:
+                            {
+                                messageLevelFormatted = "        ";
+                                break;
+                            }
                         default:
                             {
                                 throw new InvalidValueException($"LogMsg - Unknown message level: {messageLevel}.");
@@ -1223,20 +1204,24 @@ namespace ConformU
 
                     switch (messageLevel)
                     {
-                        case MessageLevel.None:
+                        case MessageLevel.TestAndMessage:
                             {
                                 outputMessage = testName + " " + message;
                                 break;
                             }
-
+                        case MessageLevel.TestOnly:
+                            {
+                                outputMessage = testName;
+                                break;
+                            }
                         default:
                             {
-                                outputMessage = $"{DateTime.Now:HH:mm:ss.fff} {testNameFormatted} {messageLevelFormatted} {messageFormatted}";
+                                outputMessage = $"{testNameFormatted} {messageLevelFormatted} {messageFormatted}";
                                 break;
                             }
                     }
-                    parentClass.OnLogMessageChanged("LogMessage", $"{outputMessage}");
-                    TL.LogMessage(testName, messageLevelFormatted + " " + messageFormatted);
+                    parentClass.OnLogMessageChanged("LogMessage", $"{DateTime.Now:HH:mm:ss.fff} {outputMessage}");
+                    TL.LogMessage(testName, outputMessage);
                 }
             }
             catch (Exception)

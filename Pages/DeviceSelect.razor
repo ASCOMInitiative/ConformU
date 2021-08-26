@@ -3,7 +3,7 @@
 @using System.Net
 @using AlpacaDiscovery
 @using System.Threading
-@using static ConformU.ConformConstants
+@using static ConformU.Globals
 
 @* Activity logger object*@
 @inject ConformLogger conformLogger
@@ -137,7 +137,7 @@
         // Initialise variables
         selectedDeviceType = (configuration.Settings.DeviceType == DeviceType.NoDeviceType) ? DeviceType.Telescope : configuration.Settings.DeviceType;
         selectedDeviceTypeString = selectedDeviceType.ToString();
-        discovery = new AlpacaDiscovery(configuration.Settings.StrictCasing, configuration.Settings.DebugDiscovery ? conformLogger : null); // Create a discovery component with or without logging
+        discovery = new AlpacaDiscovery(configuration.Settings.StrictCasing, configuration.Settings.DebugAlpacaDiscovery ? conformLogger : null); // Create a discovery component with or without logging
         discovery.AlpacaDevicesUpdated += AlpacaDeviceDiscovered;
         discovery.DiscoveryCompleted += AlpacaDiscoveryCompleted;
 

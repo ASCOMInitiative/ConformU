@@ -76,6 +76,9 @@
         tester.OutputChanged += OutputChanged;
         tester.StatusChanged += StatusChanged;
 
+        // Clear the screen log
+        screenLog = "";
+
         // Create a task to run the conformance test
         conformanceTest = new Task(() =>
         {

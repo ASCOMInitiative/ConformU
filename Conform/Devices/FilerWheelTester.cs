@@ -12,9 +12,7 @@ namespace ConformU
         const int FWTEST_IS_MOVING = -1;
         const int FWTEST_TIMEOUT = 30;
 
-        /* TODO ERROR: Skipped IfDirectiveTrivia *//* TODO ERROR: Skipped DisabledTextTrivia *//* TODO ERROR: Skipped ElseDirectiveTrivia */
         private IFilterWheelV2 m_FilterWheel;
-        /* TODO ERROR: Skipped EndIfDirectiveTrivia */
         enum FilterWheelProperties
         {
             FocusOffsets,

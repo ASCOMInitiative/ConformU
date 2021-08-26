@@ -152,8 +152,6 @@ namespace ConformU
                 if (testDevice is null) throw new ASCOM.InvalidOperationException("No test device has been selected.");
                 testDevice.CheckInitialise();
 
-                //l_TestDevice.CheckAccessibility();
-                testDevice.LogMsg("", MessageLevel.None, "");
                 try
                 {
                     testDevice.CreateDevice();
@@ -162,11 +160,11 @@ namespace ConformU
                     // Run pre-connect checks if required
                     if (!cancellationToken.IsCancellationRequested & testDevice.HasPreConnectCheck)
                     {
-                        testDevice.LogMsg("", MessageLevel.None, "");
-                        testDevice.LogMsg("Pre-connect checks", MessageLevel.None, "");
+                        testDevice.LogMsg("", MessageLevel.TestOnly, "");
+                        testDevice.LogMsg("Pre-connect checks", MessageLevel.TestOnly, "");
                         testDevice.PreConnectChecks();
-                        testDevice.LogMsg("", MessageLevel.None, "");
-                        testDevice.LogMsg("Connect", MessageLevel.None, "");
+                        testDevice.LogMsg("", MessageLevel.TestOnly, "");
+                        testDevice.LogMsg("Connect", MessageLevel.TestOnly, "");
                     }
 
                     // Try to set Connected to True
@@ -176,7 +174,7 @@ namespace ConformU
                         if (settings.DisplayMethodCalls) testDevice.LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set Connected property");
                         testDevice.Connected = true;
                         testDevice.LogMsg("ConformanceCheck", MessageLevel.OK, "Connected OK");
-                        testDevice.LogMsg("", MessageLevel.None, "");
+                        testDevice.LogMsg("", MessageLevel.TestOnly, "");
 
                         // Test common methods
                         if (!cancellationToken.IsCancellationRequested & settings.TestProperties)
@@ -187,83 +185,83 @@ namespace ConformU
                         // Test and read Can properties
                         if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasCanProperties)
                         {
-                            testDevice.LogMsg("Can Properties", MessageLevel.None, "");
+                            testDevice.LogMsg("Can Properties", MessageLevel.TestOnly, "");
                             testDevice.ReadCanProperties();
-                            testDevice.LogMsg("", MessageLevel.None, "");
+                            testDevice.LogMsg("", MessageLevel.TestOnly, "");
                         }
 
                         // Carry out pre-test tasks
                         if (!cancellationToken.IsCancellationRequested & testDevice.HasPreRunCheck)
                         {
-                            testDevice.LogMsg("Pre-run Checks", MessageLevel.None, "");
+                            testDevice.LogMsg("Pre-run Checks", MessageLevel.TestOnly, "");
                             testDevice.PreRunCheck();
-                            testDevice.LogMsg("", MessageLevel.None, "");
+                            testDevice.LogMsg("", MessageLevel.TestOnly, "");
                         }
 
                         // Test properties
                         if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasProperties)
                         {
-                            testDevice.LogMsg("Properties", MessageLevel.None, "");
+                            testDevice.LogMsg("Properties", MessageLevel.TestOnly, "");
                             testDevice.CheckProperties();
-                            testDevice.LogMsg("", MessageLevel.None, "");
+                            testDevice.LogMsg("", MessageLevel.TestOnly, "");
                         }
 
                         // Test methods
                         if (!cancellationToken.IsCancellationRequested & settings.TestMethods & testDevice.HasMethods)
                         {
-                            testDevice.LogMsg("Methods", MessageLevel.None, "");
+                            testDevice.LogMsg("Methods", MessageLevel.TestOnly, "");
                             testDevice.CheckMethods();
-                            testDevice.LogMsg("", MessageLevel.None, ""); // Blank line
+                            testDevice.LogMsg("", MessageLevel.TestOnly, ""); // Blank line
                         }
 
                         // Test performance
                         if (!cancellationToken.IsCancellationRequested & settings.TestPerformance & testDevice.HasPerformanceCheck)
                         {
-                            testDevice.LogMsg("Performance", MessageLevel.None, "");
+                            testDevice.LogMsg("Performance", MessageLevel.TestOnly, "");
                             testDevice.CheckPerformance();
-                            testDevice.LogMsg("", MessageLevel.None, "");
+                            testDevice.LogMsg("", MessageLevel.TestOnly, "");
                         }
 
                         // Carry out post-test tasks
                         if (!cancellationToken.IsCancellationRequested & testDevice.HasPostRunCheck)
                         {
-                            testDevice.LogMsg("Post-run Checks", MessageLevel.None, "");
+                            testDevice.LogMsg("Post-run Checks", MessageLevel.TestOnly, "");
                             testDevice.PostRunCheck();
-                            testDevice.LogMsg("", MessageLevel.None, ""); // Blank line
+                            testDevice.LogMsg("", MessageLevel.TestOnly, ""); // Blank line
                         }
 
                         // Display completion or "test cancelled" message
                         if (!cancellationToken.IsCancellationRequested)
                         {
-                            testDevice.LogMsg("Conformance test complete", MessageLevel.None, "");
+                            testDevice.LogMsg("Conformance test complete", MessageLevel.TestOnly, "");
                         }
                         else
                         {
-                            testDevice.LogMsg("Conformance test interrupted by STOP button or to protect the device.", MessageLevel.None, "");
+                            testDevice.LogMsg("Conformance test interrupted by STOP button or to protect the device.", MessageLevel.TestOnly, "");
                         }
                     }
                     catch (Exception ex) // Exception when setting Connected = True
                     {
                         testDevice.LogMsg("Connected", MessageLevel.Error, $"Exception when testing driver: {ex.Message}");
                         testDevice.LogMsg("Connected", MessageLevel.Debug, $"{ex}");
-                        testDevice.LogMsg("", MessageLevel.None, "");
-                        testDevice.LogMsg("ConformanceCheck", MessageLevel.None, "Further tests abandoned.");
+                        testDevice.LogMsg("", MessageLevel.TestOnly, "");
+                        testDevice.LogMsg("ConformanceCheck", MessageLevel.TestAndMessage, "Further tests abandoned.");
                     }
 
                 }
                 catch (Exception ex) // Exception when creating device
                 {
                     testDevice.LogMsg("Initialise", MessageLevel.Error, $"Unable to {(settings.DeviceTechnology == DeviceTechnology.Alpaca ? "access" : "create")} the device: {ex.Message}");
-                    testDevice.LogMsg("", MessageLevel.None, "");
-                    testDevice.LogMsg("ConformanceCheck", MessageLevel.None, "Further tests abandoned as Conform cannot create the driver");
+                    testDevice.LogMsg("", MessageLevel.TestOnly, "");
+                    testDevice.LogMsg("ConformanceCheck", MessageLevel.TestAndMessage, "Further tests abandoned as Conform cannot create the driver");
                 }
 
                 // Report the success or failure of conformance checking
-                testDevice.LogMsg("", MessageLevel.None, "");
+                testDevice.LogMsg("", MessageLevel.TestOnly, "");
                 if (g_CountError == 0 & g_CountWarning == 0 & g_CountIssue == 0 & !cancellationToken.IsCancellationRequested) // No issues - device conforms as expected
                 {
-                    testDevice.LogMsg("No errors, warnings or issues found: your driver passes ASCOM validation!!", MessageLevel.None, "");
-                    testDevice.LogMsg("", MessageLevel.None, "");
+                    testDevice.LogMsg("No errors, warnings or issues found: your driver passes ASCOM validation!!", MessageLevel.TestOnly, "");
+                    testDevice.LogMsg("", MessageLevel.TestOnly, "");
                 }
                 else // Some issues found, the device fails the conformance check
                 {
@@ -276,8 +274,8 @@ namespace ConformU
                     l_Message = l_Message + " and " + g_CountIssue + " issue";
                     if (g_CountWarning != 1)
                         l_Message += "s";
-                    testDevice.LogMsg(l_Message, MessageLevel.None, "");
-                    testDevice.LogMsg("", MessageLevel.None, "");
+                    testDevice.LogMsg(l_Message, MessageLevel.TestOnly, "");
+                    testDevice.LogMsg("", MessageLevel.TestOnly, "");
                 }
             }
             catch (Exception ex)

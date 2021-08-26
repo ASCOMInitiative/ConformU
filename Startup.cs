@@ -34,7 +34,7 @@ namespace ConformU
             services.AddRazorPages();
             //services.AddServerSideBlazor();
             services.AddServerSideBlazor(options => {
-                options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromSeconds(10);
+                options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromSeconds(300);
             });
          
 
@@ -50,8 +50,8 @@ namespace ConformU
                 loggerName = "conformu";
             }
 
-            string logFileName = Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILENAME) ?? "";
-            string logFilePath = Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILEPATH) ?? "";
+            string logFileName = Configuration.GetValue<string>(Globals.COMMAND_OPTION_LOGFILENAME) ?? "";
+            string logFilePath = Configuration.GetValue<string>(Globals.COMMAND_OPTION_LOGFILEPATH) ?? "";
 
             // Use fully qualified file name if present, otherwise use log file path and relative file name
             if (Path.IsPathFullyQualified(logFileName)) // Full file name and path provided so split into path and filename and ignore any supplied log file path
@@ -65,14 +65,13 @@ namespace ConformU
             }
 
             ConformLogger conformLogger = new(logFileName, logFilePath, loggerName, true);  // Create a logger component
-            conformLogger.Debug = true;
             services.AddSingleton(conformLogger); // Add the logger component to the list of injectable services
 
             // Create a ConformConfiguration service
-            ConformConfiguration conformConfiguration = new(conformLogger, Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_SETTINGS)); // Create a configuration settings component
+            ConformConfiguration conformConfiguration = new(conformLogger, Configuration.GetValue<string>(Globals.COMMAND_OPTION_SETTINGS)); // Create a configuration settings component
 
             // Enable Alpaca discovery if a command line option requires this
-            string debugDiscovery = Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_SHOW_DISCOVERY) ?? "";
+            string debugDiscovery = Configuration.GetValue<string>(Globals.COMMAND_OPTION_SHOW_DISCOVERY) ?? "";
             if (!string.IsNullOrEmpty(debugDiscovery)) conformConfiguration.DebugDiscovery = true;
 
             // Add the configuration component to the list of injectable services

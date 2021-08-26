@@ -3153,8 +3153,8 @@ namespace ConformU
 
             if (settings.TestSideOfPierRead)
             {
-                LogMsg("", MessageLevel.None, "");
-                LogMsg("SideOfPier Model Tests", MessageLevel.None, "");
+                LogMsg("", MessageLevel.TestAndMessage, "");
+                LogMsg("SideOfPier Model Tests", MessageLevel.TestAndMessage, "");
                 LogMsg("SideOfPier Model Tests", MessageLevel.Debug, "Starting tests");
                 if (g_InterfaceVersion > 1)
                 {
@@ -7074,7 +7074,7 @@ namespace ConformU
                         catch (Exception)
                         {
                             LogMsg("AccessChecks", MessageLevel.Info, "Device does not expose interface " + TestType.ToString());
-                            LogMsg("", MessageLevel.None, "");
+                            LogMsg("", MessageLevel.TestAndMessage, "");
                         }
                     }
                     catch (Exception ex)

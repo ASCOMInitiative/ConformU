@@ -410,7 +410,7 @@ namespace ConformU
                                 {
                                     LogMsg("Version Check", MessageLevel.Issue, "*** This version of the camera simulator has known conformance issues, ***");
                                     LogMsg("Version Check", MessageLevel.Issue, "*** please update it from the ASCOM site https://ascom-standards.org/Downloads/Index.htm ***");
-                                    LogMsg("", MessageLevel.None, "");
+                                    LogMsg("", MessageLevel.TestAndMessage, "");
                                 }
                             }
                         }
@@ -419,7 +419,7 @@ namespace ConformU
                     {
                         LogMsg("Version Check", MessageLevel.Issue, "*** This version of the camera simulator has known conformance issues, ***");
                         LogMsg("Version Check", MessageLevel.Issue, "*** please update it from the ASCOM site https://ascom-standards.org/Downloads/Index.htm ***");
-                        LogMsg("", MessageLevel.None, "");
+                        LogMsg("", MessageLevel.TestAndMessage, "");
                     }
                 }
                 catch (Exception ex)
@@ -431,9 +431,9 @@ namespace ConformU
             // Run camera tests
             if (!cancellationToken.IsCancellationRequested)
             {
-                LogMsg("", MessageLevel.None, "");
+                LogMsg("", MessageLevel.TestAndMessage, "");
                 // Check LastError throws an exception
-                LogMsg("Last Tests", MessageLevel.None, "");
+                LogMsg("Last Tests", MessageLevel.TestAndMessage, "");
                 try
                 {
                     if (settings.DisplayMethodCalls)
@@ -543,7 +543,7 @@ namespace ConformU
 
             // Use either the maximum values supplied by the camera driver or the maximum values defined in Conform's setup, if these have been set
             if ((settings.CameraMaxBinX > 0) | (settings.CameraMaxBinY > 0))
-                LogMsg("", MessageLevel.None, ""); // Insert a blank line if required
+                LogMsg("", MessageLevel.TestAndMessage, ""); // Insert a blank line if required
             if (settings.CameraMaxBinX > 0)
             {
                 l_MaxBinX = settings.CameraMaxBinX;
@@ -560,14 +560,14 @@ namespace ConformU
                 l_MaxBinY = m_MaxBinY;
 
             if ((settings.CameraMaxBinX > m_MaxBinX) | (settings.CameraMaxBinY > m_MaxBinY))
-                LogMsg("", MessageLevel.None, ""); // Insert a blank line if required
+                LogMsg("", MessageLevel.TestAndMessage, ""); // Insert a blank line if required
             if (settings.CameraMaxBinX > m_MaxBinX)
                 LogMsg("BinXY Write", MessageLevel.Comment, string.Format("WARNING - Conform's configured MaxBinX: {0} is greater than the camera's reported MaxBinX: {1}!", l_MaxBinX, m_MaxBinX));
             if (settings.CameraMaxBinY > m_MaxBinY)
                 LogMsg("BinXY Write", MessageLevel.Comment, string.Format("WARNING - Conform's configured MaxBinY: {0} is greater than the camera's reported MaxBinY: {1}!", l_MaxBinY, m_MaxBinY));
 
             if ((settings.CameraMaxBinX > 0) | (settings.CameraMaxBinY > 0))
-                LogMsg("", MessageLevel.None, ""); // Insert a blank line if required
+                LogMsg("", MessageLevel.TestAndMessage, ""); // Insert a blank line if required
 
             // Write BinX and BinY
             if (m_CanAsymmetricBin)
@@ -2351,7 +2351,7 @@ namespace ConformU
 
             // Use either the maximum values supplied by the camera driver or the maximum values defined in Conform's setup, if these have been set
             if ((settings.CameraMaxBinX > 0) | (settings.CameraMaxBinY > 0))
-                LogMsg("", MessageLevel.None, ""); // Insert a blank line if required
+                LogMsg("", MessageLevel.TestAndMessage, ""); // Insert a blank line if required
             if (settings.CameraMaxBinX > 0)
             {
                 l_MaxBinX = settings.CameraMaxBinX;
@@ -2368,7 +2368,7 @@ namespace ConformU
                 l_MaxBinY = m_MaxBinY;
 
             if ((settings.CameraMaxBinX > m_MaxBinX) | (settings.CameraMaxBinY > m_MaxBinY))
-                LogMsg("", MessageLevel.None, ""); // Insert a blank line if required
+                LogMsg("", MessageLevel.TestAndMessage, ""); // Insert a blank line if required
             if (settings.CameraMaxBinX > m_MaxBinX)
                 LogMsg("StartExposure", MessageLevel.Comment, string.Format("WARNING - Conform's configured MaxBinX: {0} is greater than the camera's reported MaxBinX: {1}!", l_MaxBinX, m_MaxBinX));
             if (settings.CameraMaxBinY > m_MaxBinY)
@@ -2397,8 +2397,8 @@ namespace ConformU
                 }
 
             // StartExposure - Confirm error cases
-            LogMsg("", MessageLevel.None, "");
-            LogMsg("StartExposure error cases", MessageLevel.None, "");
+            LogMsg("", MessageLevel.TestAndMessage, "");
+            LogMsg("StartExposure error cases", MessageLevel.TestAndMessage, "");
 
             // StartExposure - Negative time
             CameraExposure("", 1, 1, 0, 0, m_CameraXSize, m_CameraYSize, -1.0, "negative duration"); if (cancellationToken.IsCancellationRequested)
@@ -2443,8 +2443,8 @@ namespace ConformU
 
             if (p_Description != "")
             {
-                LogMsg("", MessageLevel.None, ""); // Blank Line
-                LogMsg(p_Description, MessageLevel.None, "");
+                LogMsg("", MessageLevel.TestAndMessage, ""); // Blank Line
+                LogMsg(p_Description, MessageLevel.TestAndMessage, "");
             }
             try
             {
