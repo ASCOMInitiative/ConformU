@@ -1,29 +1,19 @@
 ﻿using System;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using ASCOM.Standard.Interfaces;
 using ASCOM.Standard.Utilities;
-using static ConformU.ConformConstants;
 
 namespace ConformU
 {
-    public class ConformLogger : TraceLogger
+    public class ConformLogger : TraceLogger, ASCOM.Standard.Interfaces.ILogger
     {
         private const int ID_WIDTH = 30;
 
         public ConformLogger(string logFileName, string logFilePath, string loggerName, bool enabled) : base(logFileName, logFilePath, loggerName, enabled)
         {
             Debug = false;
-            Console.WriteLine($"CONFORMLOGGER INIT - Log file name: {logFileName}, Log file path: {logFilePath}, Logger name: {loggerName}");
+            Console.WriteLine($"ConformLogger - Creating log file - Name: {logFileName}, Path: {logFilePath}, Type: {loggerName}");
             base.IdentifierWidth = ID_WIDTH;
         }
-
 
         public void LogMessage(string id, MessageLevel logLevel, string message)
         {
@@ -45,6 +35,11 @@ namespace ConformU
         {
             Console.WriteLine($"{id.PadRight(ID_WIDTH)} {message}");
             base.LogMessage(id, message);
+        }
+
+        public new void Log(LogLevel level, string message)
+        {
+            base.Log(level, message);
         }
 
     }

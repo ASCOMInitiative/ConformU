@@ -107,7 +107,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogMsg("Dispose", MessageLevel.msgDebug, "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogMsg("Dispose", MessageLevel.Debug, "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
             if (!disposedValue)
             {
                 if (disposing)
@@ -164,12 +164,12 @@ namespace ConformU
                         switch (settings.ComConfiguration.ComACcessMechanic)
                         {
                             case ComAccessMechanic.Native:
-                                logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
+                                logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
                                 videoDevice = new VideoFacade(settings, logger);
                                 break;
 
                             case ComAccessMechanic.DriverAccess:
-                                logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
+                                logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
                                 videoDevice = (IVideo)new Video(settings.ComDevice.ProgId);
                                 break;
 
@@ -182,7 +182,7 @@ namespace ConformU
                         throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
 
-                LogMsg("CreateDevice", MessageLevel.msgDebug, "Successfully created driver");
+                LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
                 baseClassDevice = videoDevice; // Assign the driver to the base class
 
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
@@ -190,7 +190,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogMsg("CreateDevice", MessageLevel.msgDebug, "Exception thrown: " + ex.Message);
+                LogMsg("CreateDevice", MessageLevel.Debug, "Exception thrown: " + ex.Message);
                 throw; // Re throw exception 
             }
 
@@ -228,24 +228,24 @@ namespace ConformU
                         {
                             LogCallToDriver(p_Type.ToString(), "About to get CanConfigureDeviceProperties property");
                             CanConfigureDeviceProperties = videoDevice.CanConfigureDeviceProperties;
-                            LogMsg(p_Name, MessageLevel.msgOK, CanConfigureDeviceProperties.ToString());
+                            LogMsg(p_Name, MessageLevel.OK, CanConfigureDeviceProperties.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.msgError, "Conform:CanTest: Unknown test type " + p_Type.ToString());
+                            LogMsg(p_Name, MessageLevel.Error, "Conform:CanTest: Unknown test type " + p_Type.ToString());
                             break;
                         }
                 }
             }
             catch (COMException ex)
             {
-                LogMsg(p_Name, MessageLevel.msgError, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                LogMsg(p_Name, MessageLevel.Error, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
             }
             catch (Exception ex)
             {
-                LogMsg(p_Name, MessageLevel.msgError, EX_NET + ex.Message);
+                LogMsg(p_Name, MessageLevel.Error, EX_NET + ex.Message);
             }
         }
 
@@ -264,7 +264,7 @@ namespace ConformU
                 CameraState = VideoCameraState.videoCameraRunning;
                 CameraState = videoDevice.CameraState;
                 CanReadCameraState = true;
-                LogMsg("CameraState Read", MessageLevel.msgOK, CameraState.ToString());
+                LogMsg("CameraState Read", MessageLevel.OK, CameraState.ToString());
             }
             catch (Exception ex)
             {
@@ -277,9 +277,9 @@ namespace ConformU
 
             // Apply tests to resultant exposure values
             if (ExposureMin <= ExposureMax)
-                LogMsg("ExposureMin", MessageLevel.msgOK, "ExposureMin is less than or equal to ExposureMax");
+                LogMsg("ExposureMin", MessageLevel.OK, "ExposureMin is less than or equal to ExposureMax");
             else
-                LogMsg("ExposureMin", MessageLevel.msgError, "ExposureMin is greater than ExposureMax");
+                LogMsg("ExposureMin", MessageLevel.Error, "ExposureMin is greater than ExposureMax");
 
             // FrameRate - Mandatory
             try
@@ -289,7 +289,7 @@ namespace ConformU
                 LogCallToDriver("FrameRate", "About to get FrameRate property");
                 FrameRate = videoDevice.FrameRate;
                 CanReadFrameRate = true;
-                LogMsg("FrameRate Read", MessageLevel.msgOK, FrameRate.ToString());
+                LogMsg("FrameRate Read", MessageLevel.OK, FrameRate.ToString());
             }
             catch (Exception ex)
             {
@@ -306,12 +306,12 @@ namespace ConformU
             if (CanReadGainMin ^ CanReadGainMax)
             {
                 if (CanReadGainMin)
-                    LogMsg("GainMinMax", MessageLevel.msgError, "Can read GainMin but GainMax threw an exception");
+                    LogMsg("GainMinMax", MessageLevel.Error, "Can read GainMin but GainMax threw an exception");
                 else
-                    LogMsg("GainMinMax", MessageLevel.msgError, "Can read GainMax but GainMin threw an exception");
+                    LogMsg("GainMinMax", MessageLevel.Error, "Can read GainMax but GainMin threw an exception");
             }
             else
-                LogMsg("GainMinMax", MessageLevel.msgOK, "Both GainMin and GainMax are readable or both throw exceptions");
+                LogMsg("GainMinMax", MessageLevel.OK, "Both GainMin and GainMax are readable or both throw exceptions");
 
             // Read the Gamma properties - Optional
             GammaMax = TestShort(VideoProperty.GammaMax, 0, short.MaxValue, false);
@@ -323,12 +323,12 @@ namespace ConformU
             if (CanReadGammaMin ^ CanReadGammaMax)
             {
                 if (CanReadGammaMin)
-                    LogMsg("GammaMinMax", MessageLevel.msgError, "Can read GammaMin but GammaMax threw an exception");
+                    LogMsg("GammaMinMax", MessageLevel.Error, "Can read GammaMin but GammaMax threw an exception");
                 else
-                    LogMsg("GammaMinMax", MessageLevel.msgError, "Can read GammaMax but GammaMin threw an exception");
+                    LogMsg("GammaMinMax", MessageLevel.Error, "Can read GammaMax but GammaMin threw an exception");
             }
             else
-                LogMsg("GammaMinMax", MessageLevel.msgOK, "Both GammaMin and GammaMax are readable or both throw exceptions");
+                LogMsg("GammaMinMax", MessageLevel.OK, "Both GammaMin and GammaMax are readable or both throw exceptions");
 
             // Height and width - Mandatory
             Height = TestInteger(VideoProperty.Height, 1, int.MaxValue, true);
@@ -342,12 +342,12 @@ namespace ConformU
             if (CanReadIntegrationRate ^ CanReadSupportedIntegrationRates)
             {
                 if (CanReadIntegrationRate)
-                    LogMsg("IntegrationRates", MessageLevel.msgError, "Can read IntegrationRate but SupportedIntegrationRates threw an exception");
+                    LogMsg("IntegrationRates", MessageLevel.Error, "Can read IntegrationRate but SupportedIntegrationRates threw an exception");
                 else
-                    LogMsg("IntegrationRates", MessageLevel.msgError, "Can read SupportedIntegrationRates but IntegrationRate threw an exception");
+                    LogMsg("IntegrationRates", MessageLevel.Error, "Can read SupportedIntegrationRates but IntegrationRate threw an exception");
             }
             else
-                LogMsg("IntegrationRates", MessageLevel.msgOK, "Both IntegrationRate and SupportedIntegrationRates are readable or both throw exceptions");
+                LogMsg("IntegrationRates", MessageLevel.OK, "Both IntegrationRate and SupportedIntegrationRates are readable or both throw exceptions");
 
             // Pixel size - Mandatory
             PixelSizeX = TestDouble(VideoProperty.PixelSizeX, 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
@@ -366,7 +366,7 @@ namespace ConformU
                 SensorType = videoDevice.SensorType;
                 CanReadSensorType = true; // Set a flag to indicate that we have got a valid SensorType value
                                           // Successfully retrieved a value
-                LogMsg("SensorType", MessageLevel.msgOK, SensorType.ToString());
+                LogMsg("SensorType", MessageLevel.OK, SensorType.ToString());
             }
             catch (Exception ex)
             {
@@ -401,18 +401,18 @@ namespace ConformU
                     ImageArray = LastVideoFrame.ImageArray;
                     try
                     {
-                        LogMsg("ImageArray", MessageLevel.msgOK, "Received an image object from the driver of type: " + ImageArray.GetType().Name);
+                        LogMsg("ImageArray", MessageLevel.OK, "Received an image object from the driver of type: " + ImageArray.GetType().Name);
                     }
                     catch (Exception ex)
                     {
-                        LogMsg("ImageArray", MessageLevel.msgInfo, "Received an image object from the driver of indeterminate type");
+                        LogMsg("ImageArray", MessageLevel.Info, "Received an image object from the driver of indeterminate type");
                     }
 
                     // Check image array dimensions
                     try
                     {
                         ImageArrayAsArray = (Array)ImageArray;
-                        LogMsg("ImageArray", MessageLevel.msgOK, "  Received an array of rank: " + ImageArrayAsArray.Rank + ", length: " + ImageArrayAsArray.LongLength.ToString("#,0") + " and type: " + ImageArrayAsArray.GetType().Name);
+                        LogMsg("ImageArray", MessageLevel.OK, "  Received an array of rank: " + ImageArrayAsArray.Rank + ", length: " + ImageArrayAsArray.LongLength.ToString("#,0") + " and type: " + ImageArrayAsArray.GetType().Name);
 
                         switch (ImageArrayAsArray.Rank)
                         {
@@ -420,9 +420,9 @@ namespace ConformU
                            :
                                 {
                                     if (ImageArrayAsArray.GetType().Equals(typeof(int[])))
-                                        LogMsg("ImageArray", MessageLevel.msgOK, "  Received a 1 dimension Integer array as expected.");
+                                        LogMsg("ImageArray", MessageLevel.OK, "  Received a 1 dimension Integer array as expected.");
                                     else
-                                        LogMsg("ImageArray", MessageLevel.msgError, "  Did not receive a 1 dimension Integer array as expected. Received: " + ImageArrayAsArray.GetType().Name);
+                                        LogMsg("ImageArray", MessageLevel.Error, "  Did not receive a 1 dimension Integer array as expected. Received: " + ImageArrayAsArray.GetType().Name);
                                     break;
                                 }
 
@@ -430,9 +430,9 @@ namespace ConformU
                      :
                                 {
                                     if (ImageArrayAsArray.GetType().Equals(typeof(int[,])))
-                                        LogMsg("ImageArray", MessageLevel.msgOK, "  Received a 2 dimension Integer array as expected.");
+                                        LogMsg("ImageArray", MessageLevel.OK, "  Received a 2 dimension Integer array as expected.");
                                     else
-                                        LogMsg("ImageArray", MessageLevel.msgError, "  Did not receive a 2 dimension Integer array as expected. Received: " + ImageArrayAsArray.GetType().Name);
+                                        LogMsg("ImageArray", MessageLevel.Error, "  Did not receive a 2 dimension Integer array as expected. Received: " + ImageArrayAsArray.GetType().Name);
                                     break;
                                 }
 
@@ -440,15 +440,15 @@ namespace ConformU
                      :
                                 {
                                     if (ImageArrayAsArray.GetType().Equals(typeof(int[,,])))
-                                        LogMsg("ImageArray", MessageLevel.msgOK, "  Received a 3 dimension Integer array as expected.");
+                                        LogMsg("ImageArray", MessageLevel.OK, "  Received a 3 dimension Integer array as expected.");
                                     else
-                                        LogMsg("ImageArray", MessageLevel.msgError, "  Did not receive a 3 dimension Integer array as expected. Received: " + ImageArrayAsArray.GetType().Name);
+                                        LogMsg("ImageArray", MessageLevel.Error, "  Did not receive a 3 dimension Integer array as expected. Received: " + ImageArrayAsArray.GetType().Name);
                                     break;
                                 }
 
                             default:
                                 {
-                                    LogMsg("ImageArray", MessageLevel.msgError, "  Array rank is 0 or exceeds 3: " + ImageArrayAsArray.GetType().Name);
+                                    LogMsg("ImageArray", MessageLevel.Error, "  Array rank is 0 or exceeds 3: " + ImageArrayAsArray.GetType().Name);
                                     break;
                                 }
                         }
@@ -465,8 +465,8 @@ namespace ConformU
                                             case 1 // Invalid configuration
                                            :
                                                 {
-                                                    LogMsg("ImageArray", MessageLevel.msgError, "  The SensorType is Colour and the zero based array rank is 0. For a colour sensor the array rank must be 1 or 2.");
-                                                    LogMsg("ImageArray", MessageLevel.msgInfo, "  Please see the IVideoFrame.ImageArray entry in the Platform Help file for allowed combinations of SensorType and ImageArray format.");
+                                                    LogMsg("ImageArray", MessageLevel.Error, "  The SensorType is Colour and the zero based array rank is 0. For a colour sensor the array rank must be 1 or 2.");
+                                                    LogMsg("ImageArray", MessageLevel.Info, "  Please see the IVideoFrame.ImageArray entry in the Platform Help file for allowed combinations of SensorType and ImageArray format.");
                                                     break;
                                                 }
 
@@ -487,7 +487,7 @@ namespace ConformU
                                             default:
                                                 {
                                                     // This is an unsupported rank 0 or >3 so create an error
-                                                    LogMsg("ImageArray", MessageLevel.msgError, "  The zero based array rank must be 1, 2 or 3 . The returned array had rank: " + ImageArrayAsArray.Rank);
+                                                    LogMsg("ImageArray", MessageLevel.Error, "  The zero based array rank must be 1, 2 or 3 . The returned array had rank: " + ImageArrayAsArray.Rank);
                                                     break;
                                                 }
                                         }
@@ -518,15 +518,15 @@ namespace ConformU
                                             case 3 // Invalid configuration
                                      :
                                                 {
-                                                    LogMsg("ImageArray", MessageLevel.msgError, "  The SensorType is not Colour and the array rank is 3. For non-colour sensors the array rank must be 1 or 2.");
-                                                    LogMsg("ImageArray", MessageLevel.msgInfo, "  Please see the IVideoFrame.ImageArray entry in the Platform Help file for allowed combinations of SensorType and ImageArray format.");
+                                                    LogMsg("ImageArray", MessageLevel.Error, "  The SensorType is not Colour and the array rank is 3. For non-colour sensors the array rank must be 1 or 2.");
+                                                    LogMsg("ImageArray", MessageLevel.Info, "  Please see the IVideoFrame.ImageArray entry in the Platform Help file for allowed combinations of SensorType and ImageArray format.");
                                                     break;
                                                 }
 
                                             default:
                                                 {
                                                     // This is an unsupported rank 0 or >3 so create an error
-                                                    LogMsg("ImageArray", MessageLevel.msgError, "  The ImageArray rank must be 1, 2 or 3. The returned array had rank: " + ImageArrayAsArray.Rank);
+                                                    LogMsg("ImageArray", MessageLevel.Error, "  The ImageArray rank must be 1, 2 or 3. The returned array had rank: " + ImageArrayAsArray.Rank);
                                                     break;
                                                 }
                                         }
@@ -536,15 +536,15 @@ namespace ConformU
                             }
                         }
                         else
-                            LogMsg("ImageArray", MessageLevel.msgInfo, "SensorType could not be determined so ImageArray quality tests have been skipped");
+                            LogMsg("ImageArray", MessageLevel.Info, "SensorType could not be determined so ImageArray quality tests have been skipped");
                     }
                     catch (COMException ex)
                     {
-                        LogMsg("ImageArray", MessageLevel.msgError, "Unexpected COM exception when testing ImageArray: " + ex.ToString());
+                        LogMsg("ImageArray", MessageLevel.Error, "Unexpected COM exception when testing ImageArray: " + ex.ToString());
                     }
                     catch (Exception ex)
                     {
-                        LogMsg("ImageArray", MessageLevel.msgError, "Unexpected .NET exception when testing ImageArray: " + ex.ToString());
+                        LogMsg("ImageArray", MessageLevel.Error, "Unexpected .NET exception when testing ImageArray: " + ex.ToString());
                     }
                 }
                 catch (Exception ex)
@@ -555,7 +555,7 @@ namespace ConformU
                 try
                 {
                     PreviewBitmap = LastVideoFrame.PreviewBitmap;
-                    LogMsg("PreviewBitmap", MessageLevel.msgOK, "Received an array with " + PreviewBitmap.Count().ToString("#,#,#") + " entries");
+                    LogMsg("PreviewBitmap", MessageLevel.OK, "Received an array with " + PreviewBitmap.Count().ToString("#,#,#") + " entries");
                 }
                 catch (Exception ex)
                 {
@@ -563,7 +563,7 @@ namespace ConformU
                 }
             }
             else
-                LogMsg("", MessageLevel.msgInfo, "Skipping VideoFrame contents check because of issue reading LastVideoFrame");
+                LogMsg("", MessageLevel.Info, "Skipping VideoFrame contents check because of issue reading LastVideoFrame");
         }
 
         /// <summary>
@@ -582,9 +582,9 @@ namespace ConformU
             Length = Dimension1 * ((Dimension2 > 0) ? Dimension2 : 1) * ((Dimension3 > 0) ? Dimension3 : 1); // Calculate the overall expected size
 
             if (TestArray.LongLength == Length)
-                LogMsg("CheckImage", MessageLevel.msgOK, "  ImageArray has the expected total number of pixels: " + Length.ToString(CommaFormat));
+                LogMsg("CheckImage", MessageLevel.OK, "  ImageArray has the expected total number of pixels: " + Length.ToString(CommaFormat));
             else
-                LogMsg("CheckImage", MessageLevel.msgError, "  ImageArray returned a total of " + TestArray.Length.ToString(CommaFormat) + " pixels instead of the expected number: " + Length.ToString(CommaFormat));
+                LogMsg("CheckImage", MessageLevel.Error, "  ImageArray returned a total of " + TestArray.Length.ToString(CommaFormat) + " pixels instead of the expected number: " + Length.ToString(CommaFormat));
 
             if (Dimension1 >= 1)
             {
@@ -593,37 +593,37 @@ namespace ConformU
                     if (Dimension3 >= 1)
                     {
                         if (TestArray.GetLongLength(0) == Dimension1)
-                            LogMsg("CheckImage", MessageLevel.msgOK, "  ImageArray dimension 1 has the expected length:: " + Dimension1.ToString(CommaFormat));
+                            LogMsg("CheckImage", MessageLevel.OK, "  ImageArray dimension 1 has the expected length:: " + Dimension1.ToString(CommaFormat));
                         else
-                            LogMsg("CheckImage", MessageLevel.msgError, "  ImageArray dimension 1 does not has the expected length:: " + Dimension1.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(0).ToString(CommaFormat));
+                            LogMsg("CheckImage", MessageLevel.Error, "  ImageArray dimension 1 does not has the expected length:: " + Dimension1.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(0).ToString(CommaFormat));
                         if (TestArray.GetLongLength(1) == Dimension2)
-                            LogMsg("CheckImage", MessageLevel.msgOK, "  ImageArray dimension 2 has the expected length:: " + Dimension2.ToString(CommaFormat));
+                            LogMsg("CheckImage", MessageLevel.OK, "  ImageArray dimension 2 has the expected length:: " + Dimension2.ToString(CommaFormat));
                         else
-                            LogMsg("CheckImage", MessageLevel.msgError, "  ImageArray dimension 2 does not has the expected length:: " + Dimension2.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(1).ToString(CommaFormat));
+                            LogMsg("CheckImage", MessageLevel.Error, "  ImageArray dimension 2 does not has the expected length:: " + Dimension2.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(1).ToString(CommaFormat));
                         if (TestArray.GetLongLength(2) == Dimension3)
-                            LogMsg("CheckImage", MessageLevel.msgOK, "  ImageArray dimension 3 has the expected length:: " + Dimension3.ToString(CommaFormat));
+                            LogMsg("CheckImage", MessageLevel.OK, "  ImageArray dimension 3 has the expected length:: " + Dimension3.ToString(CommaFormat));
                         else
-                            LogMsg("CheckImage", MessageLevel.msgError, "  ImageArray dimension 3 does not has the expected length:: " + Dimension3.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(2).ToString(CommaFormat));
+                            LogMsg("CheckImage", MessageLevel.Error, "  ImageArray dimension 3 does not has the expected length:: " + Dimension3.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(2).ToString(CommaFormat));
                     }
                     else
                     {
                         if (TestArray.GetLongLength(0) == Dimension1)
-                            LogMsg("CheckImage", MessageLevel.msgOK, "  ImageArray dimension 1 has the expected length:: " + Dimension1.ToString(CommaFormat));
+                            LogMsg("CheckImage", MessageLevel.OK, "  ImageArray dimension 1 has the expected length:: " + Dimension1.ToString(CommaFormat));
                         else
-                            LogMsg("CheckImage", MessageLevel.msgError, "  ImageArray dimension 1 does not has the expected length:: " + Dimension1.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(0).ToString(CommaFormat));
+                            LogMsg("CheckImage", MessageLevel.Error, "  ImageArray dimension 1 does not has the expected length:: " + Dimension1.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(0).ToString(CommaFormat));
                         if (TestArray.GetLongLength(1) == Dimension2)
-                            LogMsg("CheckImage", MessageLevel.msgOK, "  ImageArray dimension 2 has the expected length:: " + Dimension2.ToString(CommaFormat));
+                            LogMsg("CheckImage", MessageLevel.OK, "  ImageArray dimension 2 has the expected length:: " + Dimension2.ToString(CommaFormat));
                         else
-                            LogMsg("CheckImage", MessageLevel.msgError, "  ImageArray dimension 2 does not has the expected length:: " + Dimension2.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(1).ToString(CommaFormat));
+                            LogMsg("CheckImage", MessageLevel.Error, "  ImageArray dimension 2 does not has the expected length:: " + Dimension2.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(1).ToString(CommaFormat));
                     }
                 }
                 else if (TestArray.GetLongLength(0) == Dimension1)
-                    LogMsg("CheckImage", MessageLevel.msgOK, "  ImageArray dimension 1 has the expected length:: " + Dimension1.ToString(CommaFormat));
+                    LogMsg("CheckImage", MessageLevel.OK, "  ImageArray dimension 1 has the expected length:: " + Dimension1.ToString(CommaFormat));
                 else
-                    LogMsg("CheckImage", MessageLevel.msgError, "  ImageArray dimension 1 does not has the expected length:: " + Dimension1.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(0).ToString(CommaFormat));
+                    LogMsg("CheckImage", MessageLevel.Error, "  ImageArray dimension 1 does not has the expected length:: " + Dimension1.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(0).ToString(CommaFormat));
             }
             else
-                LogMsg("CheckImage", MessageLevel.msgError, "  Dimension 1 is 0 it should never be!");
+                LogMsg("CheckImage", MessageLevel.Error, "  Dimension 1 is 0 it should never be!");
         }
 
         private short TestShort(VideoProperty p_Type, short p_Min, short p_Max, bool p_Mandatory)
@@ -697,7 +697,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "TestShort: Unknown test type - " + p_Type.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "TestShort: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -708,20 +708,20 @@ namespace ConformU
                     case object _ when returnValue < p_Min // Lower than minimum value
                    :
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "Invalid value: " + returnValue.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     case object _ when returnValue > p_Max // Higher than maximum value
              :
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "Invalid value: " + returnValue.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(MethodName, MessageLevel.msgOK, returnValue.ToString());
+                            LogMsg(MethodName, MessageLevel.OK, returnValue.ToString());
                             break;
                         }
                 }
@@ -742,7 +742,7 @@ namespace ConformU
                 {
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.msgError, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogMsg(p_Name, MessageLevel.Error, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -750,18 +750,18 @@ namespace ConformU
             catch (COMException ex)
             {
                 if (ex.ErrorCode == g_ExNotImplemented | ex.ErrorCode == ErrorCodes.NotImplemented)
-                    LogMsg(p_Name, MessageLevel.msgOK, NOT_IMP_COM);
+                    LogMsg(p_Name, MessageLevel.OK, NOT_IMP_COM);
                 else
-                    LogMsg(p_Name, MessageLevel.msgIssue, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                    LogMsg(p_Name, MessageLevel.Issue, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
 
             }
             catch (PropertyNotImplementedException ex)
             {
-                LogMsg(p_Name, MessageLevel.msgOK, NOT_IMP_NET);
+                LogMsg(p_Name, MessageLevel.OK, NOT_IMP_NET);
             }
             catch (Exception ex)
             {
-                LogMsg(p_Name, MessageLevel.msgIssue, EX_COM + ex.Message + " " + EX_NET + ex.Message);
+                LogMsg(p_Name, MessageLevel.Issue, EX_COM + ex.Message + " " + EX_NET + ex.Message);
             }
             return returnValue; // Return success indicator, True means property did thrown the exception, False means that it did not
         }
@@ -835,7 +835,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "TestInteger: Unknown test type - " + p_Type.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "TestInteger: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -846,20 +846,20 @@ namespace ConformU
                     case object _ when returnValue < p_Min // Lower than minimum value
                    :
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "Invalid value: " + returnValue.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     case object _ when returnValue > p_Max // Higher than maximum value
              :
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "Invalid value: " + returnValue.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(MethodName, MessageLevel.msgOK, returnValue.ToString());
+                            LogMsg(MethodName, MessageLevel.OK, returnValue.ToString());
                             break;
                         }
                 }
@@ -907,7 +907,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "TestInteger: Unknown test type - " + p_Type.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "TestInteger: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -918,20 +918,20 @@ namespace ConformU
                     case object _ when returnValue < p_Min // Lower than minimum value
                    :
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "Invalid value: " + returnValue.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     case object _ when returnValue > p_Max // Higher than maximum value
              :
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "Invalid value: " + returnValue.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(MethodName, MessageLevel.msgOK, returnValue.ToString());
+                            LogMsg(MethodName, MessageLevel.OK, returnValue.ToString());
                             break;
                         }
                 }
@@ -983,13 +983,13 @@ namespace ConformU
 
                     default:
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "TestVideoFrame: Unknown test type - " + p_Type.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "TestVideoFrame: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
 
                 // Successfully retrieved a value
-                LogMsg(MethodName, MessageLevel.msgOK, "Successfully received VideoFrame");
+                LogMsg(MethodName, MessageLevel.OK, "Successfully received VideoFrame");
             }
             catch (Exception ex)
             {
@@ -1051,7 +1051,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "TestDouble: Unknown test type - " + p_Type.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "TestDouble: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -1061,20 +1061,20 @@ namespace ConformU
                     case object _ when returnValue < p_Min // Lower than minimum value
                    :
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "Invalid value: " + returnValue.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     case object _ when returnValue > p_Max // Higher than maximum value
              :
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "Invalid value: " + returnValue.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(MethodName, MessageLevel.msgOK, returnValue.ToString());
+                            LogMsg(MethodName, MessageLevel.OK, returnValue.ToString());
                             break;
                         }
                 }
@@ -1107,12 +1107,12 @@ namespace ConformU
                 {
                     default:
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "TestBoolean: Unknown test type - " + p_Type.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "TestBoolean: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
                 // Successfully retrieved a value
-                LogMsg(MethodName, MessageLevel.msgOK, returnValue.ToString());
+                LogMsg(MethodName, MessageLevel.OK, returnValue.ToString());
             }
             catch (Exception ex)
             {
@@ -1184,21 +1184,21 @@ namespace ConformU
 
                     default:
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "TestArrayList: Unknown test type - " + p_Type.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "TestArrayList: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
 
                 // Successfully retrieved a value
                 Count = 0;
-                LogMsg(MethodName, MessageLevel.msgOK, "Received an array containing " + returnValue.Count + " items.");
+                LogMsg(MethodName, MessageLevel.OK, "Received an array containing " + returnValue.Count + " items.");
 
                 foreach (object ListItem in returnValue)
                 {
                     if (ListItem.GetType().Equals(p_ItemType))
-                        LogMsg(MethodName + "(" + Count + ")", MessageLevel.msgOK, "  " + ListItem.ToString());
+                        LogMsg(MethodName + "(" + Count + ")", MessageLevel.OK, "  " + ListItem.ToString());
                     else
-                        LogMsg(MethodName, MessageLevel.msgError, "  Type of ArrayList item: " + ListItem.GetType().Name + " does not match expected type: " + p_ItemType.Name);
+                        LogMsg(MethodName, MessageLevel.Error, "  Type of ArrayList item: " + ListItem.GetType().Name + " does not match expected type: " + p_ItemType.Name);
                     Count += 1;
                 }
             }
@@ -1262,7 +1262,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogMsg(MethodName, MessageLevel.msgError, "TestString: Unknown test type - " + p_Type.ToString());
+                            LogMsg(MethodName, MessageLevel.Error, "TestString: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -1271,16 +1271,16 @@ namespace ConformU
                 {
                     case object _ when returnValue == "":
                         {
-                            LogMsg(MethodName, MessageLevel.msgOK, "The driver returned an empty string");
+                            LogMsg(MethodName, MessageLevel.OK, "The driver returned an empty string");
                             break;
                         }
 
                     default:
                         {
                             if (returnValue.Length <= p_MaxLength)
-                                LogMsg(MethodName, MessageLevel.msgOK, returnValue);
+                                LogMsg(MethodName, MessageLevel.OK, returnValue);
                             else
-                                LogMsg(MethodName, MessageLevel.msgError, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);
+                                LogMsg(MethodName, MessageLevel.Error, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);
                             break;
                         }
                 }
@@ -1298,15 +1298,15 @@ namespace ConformU
                 switch (p_Type)
                 {
                 }
-                LogMsg(p_Property + " write", MessageLevel.msgOK, "Successfully wrote " + p_TestOK);
+                LogMsg(p_Property + " write", MessageLevel.OK, "Successfully wrote " + p_TestOK);
             }
             catch (COMException ex)
             {
-                LogMsg(p_Property + " write", MessageLevel.msgError, EX_COM + "exception generated when setting legal value: " + p_TestOK.ToString() + " - " + ex.Message);
+                LogMsg(p_Property + " write", MessageLevel.Error, EX_COM + "exception generated when setting legal value: " + p_TestOK.ToString() + " - " + ex.Message);
             }
             catch (Exception ex)
             {
-                LogMsg(p_Property + " write", MessageLevel.msgError, EX_NET + "exception generated when setting legal value: " + p_TestOK.ToString() + " - " + ex.Message);
+                LogMsg(p_Property + " write", MessageLevel.Error, EX_NET + "exception generated when setting legal value: " + p_TestOK.ToString() + " - " + ex.Message);
             }
         }
 
@@ -1341,7 +1341,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogMsg(p_Name, MessageLevel.msgError, "Conform:PerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogMsg(p_Name, MessageLevel.Error, "Conform:PerformanceTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }
@@ -1361,35 +1361,35 @@ namespace ConformU
                 {
                     case object _ when l_Rate > 10.0:
                         {
-                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                             break;
                         }
 
                     case object _ when 2.0 <= l_Rate && l_Rate <= 10.0:
                         {
-                            LogMsg(p_Name, MessageLevel.msgOK, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.OK, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                             break;
                         }
 
                     case object _ when 1.0 <= l_Rate && l_Rate <= 2.0:
                         {
-                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogMsg(p_Name, MessageLevel.msgInfo, "Unable to complete test: " + ex.ToString());
+                LogMsg(p_Name, MessageLevel.Info, "Unable to complete test: " + ex.ToString());
             }
         }
 
@@ -1402,7 +1402,7 @@ namespace ConformU
             catch
             {
             }
-            LogMsg("PostRunCheck", MessageLevel.msgOK, "Camera returned to initial cooler temperature");
+            LogMsg("PostRunCheck", MessageLevel.OK, "Camera returned to initial cooler temperature");
         }
     }
 

@@ -178,7 +178,7 @@ namespace ConformU
 
         public void SetupDialog()
         {
-            if (settings.DisplayMethodCalls) LogMsg("SetupDialog", MessageLevel.msgComment, "About to call SetupDialog");
+            if (settings.DisplayMethodCalls) LogMsg("SetupDialog", MessageLevel.Comment, "About to call SetupDialog");
             baseClassDevice.SetupDialog();
         }
 
@@ -189,26 +189,26 @@ namespace ConformU
 
             // Dim m_Configuration, SC() As String
             bool m_Connected;
-            LogMsg("Common Driver Methods", MessageLevel.msgAlways, "");
+            LogMsg("Common Driver Methods", MessageLevel.None, "");
             baseClassDevice = p_DeviceObject; // CType(DeviceObject, IAscomDriverV1)
 
             // InterfaceVersion - Required
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogMsg("InterfaceVersion", MessageLevel.msgComment, "About to get property InterfaceVersion");
+                    LogMsg("InterfaceVersion", MessageLevel.Comment, "About to get property InterfaceVersion");
                 g_InterfaceVersion = baseClassDevice.InterfaceVersion;
                 switch (g_InterfaceVersion)
                 {
                     case var @case when @case < 1:
                         {
-                            LogMsg("InterfaceVersion", MessageLevel.msgIssue, "InterfaceVersion must be 1 or greater but driver returned: " + g_InterfaceVersion.ToString());
+                            LogMsg("InterfaceVersion", MessageLevel.Issue, "InterfaceVersion must be 1 or greater but driver returned: " + g_InterfaceVersion.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogMsg("InterfaceVersion", MessageLevel.msgOK, g_InterfaceVersion.ToString());
+                            LogMsg("InterfaceVersion", MessageLevel.OK, g_InterfaceVersion.ToString());
                             break;
                         }
                 }
@@ -228,17 +228,17 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("Connected", MessageLevel.msgComment, "About to get property Connected");
+                        LogMsg("Connected", MessageLevel.Comment, "About to get property Connected");
                     m_Connected = baseClassDevice.Connected;
-                    LogMsg("Connected", MessageLevel.msgOK, m_Connected.ToString());
+                    LogMsg("Connected", MessageLevel.OK, m_Connected.ToString());
                 }
                 catch (COMException ex)
                 {
-                    LogMsg("Connected", MessageLevel.msgError, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                    LogMsg("Connected", MessageLevel.Error, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                 }
                 catch (Exception ex)
                 {
-                    LogMsg("Connected", MessageLevel.msgError, ex.Message);
+                    LogMsg("Connected", MessageLevel.Error, ex.Message);
                 }
 
                 if (cancellationToken.IsCancellationRequested)
@@ -251,13 +251,13 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("Description", MessageLevel.msgComment, "About to get property Description");
+                        LogMsg("Description", MessageLevel.Comment, "About to get property Description");
                     m_Description = baseClassDevice.Description;
                     switch (m_Description ?? "")
                     {
                         case var case1 when case1 == "":
                             {
-                                LogMsg("Description", MessageLevel.msgInfo, "No description string");
+                                LogMsg("Description", MessageLevel.Info, "No description string");
                                 break;
                             }
 
@@ -265,11 +265,11 @@ namespace ConformU
                             {
                                 if (m_Description.Length > 68 & p_DeviceType == DeviceType.Camera)
                                 {
-                                    LogMsg("Description", MessageLevel.msgError, "Maximum number of characters is 68 for compatibility with FITS headers, found: " + m_Description.Length + " characters: " + m_Description);
+                                    LogMsg("Description", MessageLevel.Error, "Maximum number of characters is 68 for compatibility with FITS headers, found: " + m_Description.Length + " characters: " + m_Description);
                                 }
                                 else
                                 {
-                                    LogMsg("Description", MessageLevel.msgOK, m_Description.ToString());
+                                    LogMsg("Description", MessageLevel.OK, m_Description.ToString());
                                 }
 
                                 break;
@@ -291,19 +291,19 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("DriverInfo", MessageLevel.msgComment, "About to get property DriverInfo");
+                        LogMsg("DriverInfo", MessageLevel.Comment, "About to get property DriverInfo");
                     m_DriverInfo = baseClassDevice.DriverInfo;
                     switch (m_DriverInfo ?? "")
                     {
                         case var case2 when case2 == "":
                             {
-                                LogMsg("DriverInfo", MessageLevel.msgInfo, "No DriverInfo string");
+                                LogMsg("DriverInfo", MessageLevel.Info, "No DriverInfo string");
                                 break;
                             }
 
                         default:
                             {
-                                LogMsg("DriverInfo", MessageLevel.msgOK, m_DriverInfo.ToString());
+                                LogMsg("DriverInfo", MessageLevel.OK, m_DriverInfo.ToString());
                                 break;
                             }
                     }
@@ -323,30 +323,30 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("DriverVersion", MessageLevel.msgComment, "About to get property DriverVersion");
+                        LogMsg("DriverVersion", MessageLevel.Comment, "About to get property DriverVersion");
                     m_DriverVersion = baseClassDevice.DriverVersion;
                     switch (m_DriverVersion ?? "")
                     {
                         case var case3 when case3 == "":
                             {
-                                LogMsg("DriverVersion", MessageLevel.msgInfo, "No DriverVersion string");
+                                LogMsg("DriverVersion", MessageLevel.Info, "No DriverVersion string");
                                 break;
                             }
 
                         default:
                             {
-                                LogMsg("DriverVersion", MessageLevel.msgOK, m_DriverVersion.ToString());
+                                LogMsg("DriverVersion", MessageLevel.OK, m_DriverVersion.ToString());
                                 break;
                             }
                     }
                 }
                 catch (COMException ex)
                 {
-                    LogMsg("DriverVersion", MessageLevel.msgError, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                    LogMsg("DriverVersion", MessageLevel.Error, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                 }
                 catch (Exception ex)
                 {
-                    LogMsg("DriverVersion", MessageLevel.msgError, ex.Message);
+                    LogMsg("DriverVersion", MessageLevel.Error, ex.Message);
                 }
 
                 if (cancellationToken.IsCancellationRequested)
@@ -354,7 +354,7 @@ namespace ConformU
             }
             else
             {
-                LogMsg("DriverVersion", MessageLevel.msgInfo, "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogMsg("DriverVersion", MessageLevel.Info, "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
             }
 
             // Name - Required
@@ -363,19 +363,19 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("Name", MessageLevel.msgComment, "About to get property Name");
+                        LogMsg("Name", MessageLevel.Comment, "About to get property Name");
                     m_Name = baseClassDevice.Name;
                     switch (m_Name ?? "")
                     {
                         case var case4 when case4 == "":
                             {
-                                LogMsg("Name", MessageLevel.msgInfo, "Name is empty");
+                                LogMsg("Name", MessageLevel.Info, "Name is empty");
                                 break;
                             }
 
                         default:
                             {
-                                LogMsg("Name", MessageLevel.msgOK, m_Name);
+                                LogMsg("Name", MessageLevel.OK, m_Name);
                                 break;
                             }
                     }
@@ -419,17 +419,17 @@ namespace ConformU
             //}
 
             // Action - optional but cannot be tested
-            LogMsg("Action", MessageLevel.msgInfo, "Conform cannot test the Action method");
+            LogMsg("Action", MessageLevel.Info, "Conform cannot test the Action method");
 
             // Supported actions - Optional but Required through DriverAccess
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method SupportedActions");
+                    LogMsg("SupportedActions", MessageLevel.Comment, "About to call method SupportedActions");
                 SA = (IList)baseClassDevice.SupportedActions;
                 if (SA.Count == 0)
                 {
-                    LogMsg("SupportedActions", MessageLevel.msgOK, "Driver returned an empty action list");
+                    LogMsg("SupportedActions", MessageLevel.OK, "Driver returned an empty action list");
                 }
                 else
                 {
@@ -446,13 +446,13 @@ namespace ConformU
                             {
                                 case var case5 when case5 == "":
                                     {
-                                        LogMsg("SupportedActions", MessageLevel.msgError, "Supported action " + i + " Is an empty string"); // List the action that was found
+                                        LogMsg("SupportedActions", MessageLevel.Error, "Supported action " + i + " Is an empty string"); // List the action that was found
                                         break;
                                     }
 
                                 default:
                                     {
-                                        LogMsg("SupportedActions", MessageLevel.msgOK, "Found action: " + ActionString);
+                                        LogMsg("SupportedActions", MessageLevel.OK, "Found action: " + ActionString);
 
                                         // Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
                                         if (p_DeviceType == DeviceType.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.ToUpper() == "ASCOM.OCH.OBSERVINGCONDITIONS")
@@ -462,13 +462,13 @@ namespace ConformU
                                                 try
                                                 {
                                                     if (settings.DisplayMethodCalls)
-                                                        LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action");
+                                                        LogMsg("SupportedActions", MessageLevel.Comment, "About to call method Action");
                                                     result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
-                                                    LogMsg("SupportedActions", MessageLevel.msgOK, string.Format("OC simulator action {0} gave result: {1}", ActionString, result));
+                                                    LogMsg("SupportedActions", MessageLevel.OK, string.Format("OC simulator action {0} gave result: {1}", ActionString, result));
                                                 }
                                                 catch (Exception ex1)
                                                 {
-                                                    LogMsg("SupportedActions", MessageLevel.msgError, string.Format("Exception calling OCH simulator action {0}: {1}", ActionString, ex1.Message));
+                                                    LogMsg("SupportedActions", MessageLevel.Error, string.Format("Exception calling OCH simulator action {0}: {1}", ActionString, ex1.Message));
                                                 }
                                             }
                                             else if (ActionString.ToUpperInvariant().StartsWith("//ASCOM.SIMULATOR.OBSERVINGCONDITIONS:"))
@@ -476,13 +476,13 @@ namespace ConformU
                                                 try
                                                 {
                                                     if (settings.DisplayMethodCalls)
-                                                        LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action");
+                                                        LogMsg("SupportedActions", MessageLevel.Comment, "About to call method Action");
                                                     result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
-                                                    LogMsg("SupportedActions", MessageLevel.msgOK, string.Format("OC simulator action {0} gave result: {1}", ActionString, result));
+                                                    LogMsg("SupportedActions", MessageLevel.OK, string.Format("OC simulator action {0} gave result: {1}", ActionString, result));
                                                 }
                                                 catch (Exception ex1)
                                                 {
-                                                    LogMsg("SupportedActions", MessageLevel.msgError, string.Format("Exception calling OCH simulator action {0}: {1}", ActionString, ex1.Message));
+                                                    LogMsg("SupportedActions", MessageLevel.Error, string.Format("Exception calling OCH simulator action {0}: {1}", ActionString, ex1.Message));
                                                 }
                                             }
                                             else if (ActionString.ToUpperInvariant().StartsWith("//SWITCHSIMULATOR:"))
@@ -490,13 +490,13 @@ namespace ConformU
                                                 try
                                                 {
                                                     if (settings.DisplayMethodCalls)
-                                                        LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action");
+                                                        LogMsg("SupportedActions", MessageLevel.Comment, "About to call method Action");
                                                     result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
-                                                    LogMsg("SupportedActions", MessageLevel.msgOK, string.Format("Switch simulator action {0} gave result: {1}", ActionString, result));
+                                                    LogMsg("SupportedActions", MessageLevel.OK, string.Format("Switch simulator action {0} gave result: {1}", ActionString, result));
                                                 }
                                                 catch (Exception ex1)
                                                 {
-                                                    LogMsg("SupportedActions", MessageLevel.msgError, string.Format("Exception calling switch simulator action {0}: {1}", ActionString, ex1.Message));
+                                                    LogMsg("SupportedActions", MessageLevel.Error, string.Format("Exception calling switch simulator action {0}: {1}", ActionString, ex1.Message));
                                                 }
                                             }
                                             else if (ActionString.ToUpperInvariant().StartsWith("//ASCOM.SIMULATOR.SWITCH:"))
@@ -504,13 +504,13 @@ namespace ConformU
                                                 try
                                                 {
                                                     if (settings.DisplayMethodCalls)
-                                                        LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action");
+                                                        LogMsg("SupportedActions", MessageLevel.Comment, "About to call method Action");
                                                     result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
-                                                    LogMsg("SupportedActions", MessageLevel.msgOK, string.Format("Switch simulator action {0} gave result: {1}", ActionString, result));
+                                                    LogMsg("SupportedActions", MessageLevel.OK, string.Format("Switch simulator action {0} gave result: {1}", ActionString, result));
                                                 }
                                                 catch (Exception ex1)
                                                 {
-                                                    LogMsg("SupportedActions", MessageLevel.msgError, string.Format("Exception calling switch simulator action {0}: {1}", ActionString, ex1.Message));
+                                                    LogMsg("SupportedActions", MessageLevel.Error, string.Format("Exception calling switch simulator action {0}: {1}", ActionString, ex1.Message));
                                                 }
                                             }
                                         }
@@ -521,7 +521,7 @@ namespace ConformU
                         }
                         else
                         {
-                            LogMsg("SupportedActions", MessageLevel.msgError, "Actions must be strings. The type of action " + i + " " + Action.ToString() + " is: " + Action.GetType().Name);
+                            LogMsg("SupportedActions", MessageLevel.Error, "Actions must be strings. The type of action " + i + " " + Action.ToString() + " is: " + Action.GetType().Name);
                         }
                     }
                 }
@@ -530,23 +530,23 @@ namespace ConformU
             {
                 if (p_DeviceType == DeviceType.Switch & ReferenceEquals(ex.GetType(), typeof(MissingMemberException)))
                 {
-                    LogMsg("SupportedActions", MessageLevel.msgOK, "Switch V1 Driver does not have SupportedActions");
+                    LogMsg("SupportedActions", MessageLevel.OK, "Switch V1 Driver does not have SupportedActions");
                 }
                 else
                 {
                     HandleException("SupportedActions", MemberType.Property, Required.Optional, ex, "");
-                    LogMsg("SupportedActions", MessageLevel.msgError, ex.Message);
+                    LogMsg("SupportedActions", MessageLevel.Error, ex.Message);
                 }
             }
 
             if (cancellationToken.IsCancellationRequested)
                 return;
-            LogMsg("", MessageLevel.msgAlways, "");
+            LogMsg("", MessageLevel.None, "");
         }
 
         public virtual void CheckCommonMethods()
         {
-            LogMsg("CheckCommonMethods", MessageLevel.msgError, "DeviceTester base Class warning message, you should not see this message!");
+            LogMsg("CheckCommonMethods", MessageLevel.Error, "DeviceTester base Class warning message, you should not see this message!");
         }
 
         public virtual bool HasCanProperties
@@ -654,46 +654,46 @@ namespace ConformU
             DateTime lastModifiedTime = DateTime.MinValue;
             try
             {
-                LogMsg("ConformanceCheck", MessageLevel.msgDebug, $"About to get executing assembly...");
+                LogMsg("ConformanceCheck", MessageLevel.Debug, $"About to get executing assembly...");
                 string assemblyName;
                 if (OperatingSystem.IsWindows()) assemblyName = "ConformU.exe";
                 else assemblyName = "conformu";
-                LogMsg("ConformanceCheck", MessageLevel.msgDebug, $"Assembly name: {assemblyName}");
+                LogMsg("ConformanceCheck", MessageLevel.Debug, $"Assembly name: {assemblyName}");
                 string baseDirectory = AppContext.BaseDirectory;
-                LogMsg("ConformanceCheck", MessageLevel.msgDebug, $"Base directory: {baseDirectory}");
+                LogMsg("ConformanceCheck", MessageLevel.Debug, $"Base directory: {baseDirectory}");
                 string assemblyPath = Path.Combine(baseDirectory, assemblyName);
                 var fileInfo = new System.IO.FileInfo(assemblyPath);
-                LogMsg("ConformanceCheck", MessageLevel.msgDebug, $"Last write time: {fileInfo.LastWriteTime}");
+                LogMsg("ConformanceCheck", MessageLevel.Debug, $"Last write time: {fileInfo.LastWriteTime}");
                 lastModifiedTime = fileInfo.LastWriteTime;
             }
             catch (Exception ex)
             {
-                LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"Exception while trying to determine the last modified time: {ex}");
+                LogMsg("ConformanceCheck", MessageLevel.None, $"Exception while trying to determine the last modified time: {ex}");
             }
 
-            LogMsg("", MessageLevel.msgAlways, ""); // Blank line
-            LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"ASCOM Universal Device Conformance Checker Version {this.GetType().Assembly.GetName().Version.ToString()}, Build time: {lastModifiedTime:ddd dd MMMM yyyy HH:mm:ss}");
+            LogMsg("", MessageLevel.None, ""); // Blank line
+            LogMsg("ConformanceCheck", MessageLevel.None, $"ASCOM Universal Device Conformance Checker Version {this.GetType().Assembly.GetName().Version.ToString()}, Build time: {lastModifiedTime:ddd dd MMMM yyyy HH:mm:ss}");
 
-            LogMsg("", MessageLevel.msgAlways, ""); // Blank line
+            LogMsg("", MessageLevel.None, ""); // Blank line
 
             switch (settings.DeviceTechnology)
             {
                 case DeviceTechnology.Alpaca:
-                    LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"Alpaca device: {settings.AlpacaDevice.AscomDeviceName} ({settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} {settings.AlpacaDevice.AscomDeviceType}/{settings.AlpacaDevice.AlpacaDeviceNumber})");
+                    LogMsg("ConformanceCheck", MessageLevel.None, $"Alpaca device: {settings.AlpacaDevice.AscomDeviceName} ({settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} {settings.AlpacaDevice.AscomDeviceType}/{settings.AlpacaDevice.AlpacaDeviceNumber})");
 
                     if (!settings.StrictCasing) LogMsgIssue("ConformanceCheck", "Alpaca strict casing has been disabled, this in only supported for testing devices.");
 
                     break;
 
                 case DeviceTechnology.COM:
-                    LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"COM Driver ProgID: {settings.ComDevice.ProgId}");
+                    LogMsg("ConformanceCheck", MessageLevel.None, $"COM Driver ProgID: {settings.ComDevice.ProgId}");
                     break;
 
                 default:
                     throw new InvalidValueException($"CheckInitialise - Unknown technology type: {settings.DeviceTechnology}");
             }
 
-            LogMsg("", MessageLevel.msgAlways, ""); // Blank line
+            LogMsg("", MessageLevel.None, ""); // Blank line
             //LogMsg("Error", MessageLevel.msgAlways, "number for \"Not Implemented\" is: " + Conversion.Hex(g_ExNotImplemented));
             //LogMsg("Error", MessageLevel.msgAlways, "number for \"Invalid Value 1\" is: " + Conversion.Hex(g_ExInvalidValue1));
             //if (g_ExInvalidValue2 != 0 & g_ExInvalidValue2 != g_ExInvalidValue1)
@@ -716,12 +716,12 @@ namespace ConformU
 
         public virtual void CreateDevice()
         {
-            LogMsg("CreateDevice", MessageLevel.msgError, "DeviceTester base Class warning message");
+            LogMsg("CreateDevice", MessageLevel.Error, "DeviceTester base Class warning message");
         }
 
         public virtual void PreConnectChecks()
         {
-            LogMsg("PreConnectChecks", MessageLevel.msgError, "DeviceTester base Class warning message");
+            LogMsg("PreConnectChecks", MessageLevel.Error, "DeviceTester base Class warning message");
         }
 
         public virtual bool Connected
@@ -739,32 +739,32 @@ namespace ConformU
 
         public virtual void ReadCanProperties()
         {
-            LogMsg("ReadCanProperties", MessageLevel.msgError, "DeviceTester base Class warning message, you should not see this message!");
+            LogMsg("ReadCanProperties", MessageLevel.Error, "DeviceTester base Class warning message, you should not see this message!");
         }
 
         public virtual void PreRunCheck()
         {
-            LogMsg("PreSafetyCheck", MessageLevel.msgError, "DeviceTester base Class warning message, you should not see this message!");
+            LogMsg("PreSafetyCheck", MessageLevel.Error, "DeviceTester base Class warning message, you should not see this message!");
         }
 
         public virtual void CheckProperties()
         {
-            LogMsg("CheckProperties", MessageLevel.msgError, "DeviceTester base Class warning message, you should not see this message!");
+            LogMsg("CheckProperties", MessageLevel.Error, "DeviceTester base Class warning message, you should not see this message!");
         }
 
         public virtual void CheckMethods()
         {
-            LogMsg("CheckMethods", MessageLevel.msgError, "DeviceTester base Class warning message, you should not see this message!");
+            LogMsg("CheckMethods", MessageLevel.Error, "DeviceTester base Class warning message, you should not see this message!");
         }
 
         public virtual void CheckPerformance()
         {
-            LogMsg("CheckPerformance", MessageLevel.msgError, "DeviceTester base Class warning message, you should not see this message!");
+            LogMsg("CheckPerformance", MessageLevel.Error, "DeviceTester base Class warning message, you should not see this message!");
         }
 
         public virtual void PostRunCheck()
         {
-            LogMsg("PostSafetyCheck", MessageLevel.msgError, "DeviceTester base Class warning message, you should not see this message!");
+            LogMsg("PostSafetyCheck", MessageLevel.Error, "DeviceTester base Class warning message, you should not see this message!");
         }
 
         public void SpecialTests(SpecialTest p_Test)
@@ -805,22 +805,22 @@ namespace ConformU
 
         protected virtual void SpecialTelescopeSideOfPier()
         {
-            LogMsg("SpecialTelescopeSideOfPier", MessageLevel.msgError, "DeviceTester base Class warning message, you should not see this message!");
+            LogMsg("SpecialTelescopeSideOfPier", MessageLevel.Error, "DeviceTester base Class warning message, you should not see this message!");
         }
 
         protected virtual void SpecialTelescopeDestinationSideOfPier()
         {
-            LogMsg("SpecialTelescopeDestinationSideOfPier", MessageLevel.msgError, "DeviceTester base Class warning message, you should not see this message!");
+            LogMsg("SpecialTelescopeDestinationSideOfPier", MessageLevel.Error, "DeviceTester base Class warning message, you should not see this message!");
         }
 
         protected virtual void SpecialTelescopeSideOfPierAnalysis()
         {
-            LogMsg("SpecialTelescopeFlipRange", MessageLevel.msgError, "DeviceTester base Class warning message, you should not see this message!");
+            LogMsg("SpecialTelescopeFlipRange", MessageLevel.Error, "DeviceTester base Class warning message, you should not see this message!");
         }
 
         protected virtual void SpecialTelescopeCommands()
         {
-            LogMsg("SpecialTelescopeCommands", MessageLevel.msgError, "DeviceTester base Class warning message, you should not see this message!");
+            LogMsg("SpecialTelescopeCommands", MessageLevel.Error, "DeviceTester base Class warning message, you should not see this message!");
         }
 
         #endregion
@@ -1111,148 +1111,132 @@ namespace ConformU
 
         internal void LogMsgOK(string p_Test, string p_Msg)
         {
-            LogMsg(p_Test, MessageLevel.msgOK, p_Msg);
+            LogMsg(p_Test, MessageLevel.OK, p_Msg);
         }
 
         internal void LogMsgDebug(string p_Test, string p_Msg)
         {
-            LogMsg(p_Test, MessageLevel.msgDebug, p_Msg);
+            LogMsg(p_Test, MessageLevel.Debug, p_Msg);
         }
 
         internal void LogMsgInfo(string p_Test, string p_Msg)
         {
-            LogMsg(p_Test, MessageLevel.msgInfo, p_Msg);
+            LogMsg(p_Test, MessageLevel.Info, p_Msg);
         }
 
         internal void LogMsgIssue(string p_Test, string p_Msg)
         {
-            LogMsg(p_Test, MessageLevel.msgIssue, p_Msg);
+            LogMsg(p_Test, MessageLevel.Issue, p_Msg);
         }
 
         internal void LogMsgError(string p_Test, string p_Msg)
         {
-            LogMsg(p_Test, MessageLevel.msgError, p_Msg);
+            LogMsg(p_Test, MessageLevel.Error, p_Msg);
         }
 
         internal void LogMsgWarning(string p_Test, string p_Msg)
         {
-            LogMsg(p_Test, MessageLevel.msgWarning, p_Msg);
+            LogMsg(p_Test, MessageLevel.Warning, p_Msg);
         }
 
-        internal void LogMsg(string p_Test, MessageLevel p_MsgLevel, string p_Msg)
+        internal void LogMsg(string testName, MessageLevel messageLevel, string message)
         {
-            const int c_Spacing = 52;
             const int TEST_NAME_WIDTH = 45;
-            string l_MsgLevelFormatted, l_Msg, l_TestFormatted, l_MsgFormatted;
-            int i, j;
+            string testNameFormatted, messageLevelFormatted, messageFormatted, outputMessage;
             MessageLevel logLevel;
 
             if (settings.Debug)
             {
-                logLevel = MessageLevel.msgDebug;
+                logLevel = MessageLevel.Debug;
             }
             else
             {
-                logLevel = MessageLevel.msgComment;
+                logLevel = MessageLevel.Comment;
             }
 
             try
             {
-                if (p_MsgLevel >= logLevel)
+                if (messageLevel >= logLevel)
                 {
-                    l_TestFormatted = p_Test.PadRight(TEST_NAME_WIDTH);
-                    l_TestFormatted = l_TestFormatted.Substring(0, TEST_NAME_WIDTH);
-                    l_MsgLevelFormatted = "        ";
-                    i = 1;
-                    l_MsgFormatted = p_Msg;
+                    testNameFormatted = testName.PadRight(TEST_NAME_WIDTH).Substring(0, TEST_NAME_WIDTH); // Pad right to required length and limit to the required length
+                    messageLevelFormatted = "        ";
+                    messageFormatted = message;
 
-                    switch (p_MsgLevel)
+                    switch (messageLevel)
                     {
                         case MessageLevel.None:
                             {
-                                l_MsgLevelFormatted = "        ";
+                                messageLevelFormatted = "        ";
                                 break;
                             }
 
-                        case MessageLevel.msgDebug:
+                        case MessageLevel.Debug:
                             {
-                                l_MsgLevelFormatted = "DEBUG   ";
+                                messageLevelFormatted = "DEBUG   ";
                                 break;
                             }
 
-                        case MessageLevel.msgComment:
+                        case MessageLevel.Comment:
                             {
-                                l_MsgLevelFormatted = "        ";
+                                messageLevelFormatted = "        ";
                                 break;
                             }
 
-                        case MessageLevel.msgInfo:
+                        case MessageLevel.Info:
                             {
-                                l_MsgLevelFormatted = "INFO    ";
+                                messageLevelFormatted = "INFO    ";
                                 break;
                             }
 
-                        case MessageLevel.msgOK:
+                        case MessageLevel.OK:
                             {
-                                l_MsgLevelFormatted = "OK      ";
+                                messageLevelFormatted = "OK      ";
                                 break;
                             }
 
-                        case MessageLevel.msgWarning:
+                        case MessageLevel.Warning:
                             {
-                                l_MsgLevelFormatted = "WARNING ";
+                                messageLevelFormatted = "WARNING ";
                                 g_CountWarning += 1;
                                 break;
                             }
 
-                        case MessageLevel.msgIssue:
+                        case MessageLevel.Issue:
                             {
-                                l_MsgLevelFormatted = "ISSUE   ";
+                                messageLevelFormatted = "ISSUE   ";
                                 g_CountIssue += 1;
                                 break;
                             }
 
-                        case MessageLevel.msgError:
+                        case MessageLevel.Error:
                             {
-                                l_MsgLevelFormatted = "ERROR   ";
+                                messageLevelFormatted = "ERROR   ";
                                 g_CountError += 1;
                                 break;
                             }
 
-                        case MessageLevel.msgAlways:
-                            {
-                                l_MsgLevelFormatted = "        ";
-                                break;
-                            }
-
                         default:
                             {
-                                //MessageBox.Show("Conform:LogMsg - UNEXPECTED LogMessageType: " + p_MsgLevel.ToString() + " " + p_Msg);
-                                break;
+                                throw new InvalidValueException($"LogMsg - Unknown message level: {messageLevel}.");
                             }
                     }
 
-                    //if (My.MyProject.Forms.FrmConformMain.txtStatus.TextLength > 50000) // Limit lines to a sensible number
-                    //{
-                    //    My.MyProject.Forms.FrmConformMain.txtStatus.Text = Strings.Right(My.MyProject.Forms.FrmConformMain.txtStatus.Text, 28000);
-                    //}
-
-                    switch (p_MsgLevel)
+                    switch (messageLevel)
                     {
-                        case MessageLevel.msgAlways:
+                        case MessageLevel.None:
                             {
-                                l_Msg = p_Test + " " + p_Msg;
+                                outputMessage = testName + " " + message;
                                 break;
                             }
 
                         default:
                             {
-                                l_Msg = $"{DateTime.Now:HH:mm:ss.fff} {l_TestFormatted} {l_MsgLevelFormatted} {l_MsgFormatted}";
+                                outputMessage = $"{DateTime.Now:HH:mm:ss.fff} {testNameFormatted} {messageLevelFormatted} {messageFormatted}";
                                 break;
                             }
                     }
-                    parentClass.OnLogMessageChanged("LogMessage", $"{l_Msg}");
-                    TL.LogMessage(p_Test, l_MsgLevelFormatted + " " + l_MsgFormatted);
+                    parentClass.OnLogMessageChanged("LogMessage", $"{outputMessage}");
+                    TL.LogMessage(testName, messageLevelFormatted + " " + messageFormatted);
                 }
             }
             catch (Exception)
@@ -1260,8 +1244,6 @@ namespace ConformU
                 // MsgBox(Len(l_Msg) & " *" & l_Msg & "* " & ex.ToString, MsgBoxStyle.Critical)
             }
         }
-
-
 
         /// <summary>
         /// Test a supplied exception for whether it is a MethodNotImplemented type
@@ -1291,7 +1273,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogMsg("IsMethodNotImplementedException", MessageLevel.msgWarning, "Unexpected exception: " + ex.ToString());
+                LogMsg("IsMethodNotImplementedException", MessageLevel.Warning, "Unexpected exception: " + ex.ToString());
             }
 
             return IsMethodNotImplementedExceptionRet;
@@ -1325,7 +1307,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogMsg("IsNotImplementedException", MessageLevel.msgWarning, "Unexpected exception: " + ex.ToString());
+                LogMsg("IsNotImplementedException", MessageLevel.Warning, "Unexpected exception: " + ex.ToString());
             }
 
             return IsNotImplementedExceptionRet;
@@ -1360,7 +1342,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogMsg("IsPropertyNotImplementedException", MessageLevel.msgWarning, "Unexpected exception: " + ex.ToString());
+                LogMsg("IsPropertyNotImplementedException", MessageLevel.Warning, "Unexpected exception: " + ex.ToString());
             }
 
             return IsPropertyNotImplementedExceptionRet;
@@ -1398,18 +1380,18 @@ namespace ConformU
                     DriverException = exception1;
                     if (DriverException.Number == ErrorCodes.InvalidValue) // This is an invalid value exception
                     {
-                        LogMsg(MemberName, MessageLevel.msgIssue, "Received ASCOM.DriverException(0x" + ErrorCodes.InvalidValue.ToString("X8") + "), please use ASCOM.InvalidValueException to report invalid values");
+                        LogMsg(MemberName, MessageLevel.Issue, "Received ASCOM.DriverException(0x" + ErrorCodes.InvalidValue.ToString("X8") + "), please use ASCOM.InvalidValueException to report invalid values");
                     }
                 }
 
                 if (deviceException is System.InvalidOperationException)
                 {
-                    LogMsg(MemberName, MessageLevel.msgIssue, "Received System.InvalidOperationException rather than ASCOM.InvalidValueException");
+                    LogMsg(MemberName, MessageLevel.Issue, "Received System.InvalidOperationException rather than ASCOM.InvalidValueException");
                 }
             }
             catch (Exception ex)
             {
-                LogMsg("IsInvalidValueException", MessageLevel.msgWarning, "Unexpected exception: " + ex.ToString());
+                LogMsg("IsInvalidValueException", MessageLevel.Warning, "Unexpected exception: " + ex.ToString());
             }
 
             return IsInvalidValueExceptionRet;
@@ -1447,18 +1429,18 @@ namespace ConformU
                     DriverException = exception1;
                     if (DriverException.Number == ErrorCodes.InvalidOperationException) // This is an invalid operation exception
                     {
-                        LogMsg(MemberName, MessageLevel.msgIssue, "Received ASCOM.DriverException(0x" + ErrorCodes.InvalidOperationException.ToString("X8") + "), please use ASCOM.InvalidOperationException to report invalid operations");
+                        LogMsg(MemberName, MessageLevel.Issue, "Received ASCOM.DriverException(0x" + ErrorCodes.InvalidOperationException.ToString("X8") + "), please use ASCOM.InvalidOperationException to report invalid operations");
                     }
                 }
 
                 if (deviceException is System.InvalidOperationException)
                 {
-                    LogMsg(MemberName, MessageLevel.msgIssue, "Received System.InvalidOperationException rather than ASCOM.InvalidOperationException");
+                    LogMsg(MemberName, MessageLevel.Issue, "Received System.InvalidOperationException rather than ASCOM.InvalidOperationException");
                 }
             }
             catch (Exception ex)
             {
-                LogMsg("IsInvalidOperationException", MessageLevel.msgWarning, "Unexpected exception: " + ex.ToString());
+                LogMsg("IsInvalidOperationException", MessageLevel.Warning, "Unexpected exception: " + ex.ToString());
             }
 
             return IsInvalidOperationExceptionRet;
@@ -1492,7 +1474,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogMsg("IsNotSetException", MessageLevel.msgWarning, "Unexpected exception: " + ex.ToString());
+                LogMsg("IsNotSetException", MessageLevel.Warning, "Unexpected exception: " + ex.ToString());
             }
 
             return IsNotSetExceptionRet;
@@ -1517,31 +1499,31 @@ namespace ConformU
                 {
                     case Required.Mandatory:
                         {
-                            LogMsg(MemberName, MessageLevel.msgIssue, "This member is mandatory but threw a " + GetExceptionName(ex) + " exception, it must function per the ASCOM specification.");
+                            LogMsg(MemberName, MessageLevel.Issue, "This member is mandatory but threw a " + GetExceptionName(ex) + " exception, it must function per the ASCOM specification.");
                             break;
                         }
 
                     case Required.MustNotBeImplemented:
                         {
-                            LogMsg(MemberName, MessageLevel.msgOK, UserMessage + " and a " + GetExceptionName(ex) + " exception was generated as expected");
+                            LogMsg(MemberName, MessageLevel.OK, UserMessage + " and a " + GetExceptionName(ex) + " exception was generated as expected");
                             break;
                         }
 
                     case Required.MustBeImplemented:
                         {
-                            LogMsg(MemberName, MessageLevel.msgIssue, UserMessage + " and a " + GetExceptionName(ex) + " exception was thrown, this method must function per the ASCOM specification.");
+                            LogMsg(MemberName, MessageLevel.Issue, UserMessage + " and a " + GetExceptionName(ex) + " exception was thrown, this method must function per the ASCOM specification.");
                             break;
                         }
 
                     case Required.Optional:
                         {
-                            LogMsg(MemberName, MessageLevel.msgOK, "Optional member threw a " + GetExceptionName(ex) + " exception.");
+                            LogMsg(MemberName, MessageLevel.OK, "Optional member threw a " + GetExceptionName(ex) + " exception.");
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(MemberName, MessageLevel.msgError, "CONFORM ERROR! - Received unexpected member of 'Required' enum: " + IsRequired.ToString());
+                            LogMsg(MemberName, MessageLevel.Error, "CONFORM ERROR! - Received unexpected member of 'Required' enum: " + IsRequired.ToString());
                             break;
                         }
                 }
@@ -1550,35 +1532,35 @@ namespace ConformU
             // Handle wrong type of not implemented exceptions
             else if (ex is MethodNotImplementedException & TypeOfMember == MemberType.Property) // We got a MethodNotImplementedException so this is an error
             {
-                LogMsg(MemberName, MessageLevel.msgIssue, "Received a MethodNotImplementedException instead of a PropertyNotImplementedException");
+                LogMsg(MemberName, MessageLevel.Issue, "Received a MethodNotImplementedException instead of a PropertyNotImplementedException");
             }
             else if (ex is PropertyNotImplementedException & TypeOfMember == MemberType.Method) // We got a PropertyNotImplementedException so this is an error
             {
-                LogMsg(MemberName, MessageLevel.msgIssue, "Received a PropertyNotImplementedException instead of a MethodNotImplementedException");
+                LogMsg(MemberName, MessageLevel.Issue, "Received a PropertyNotImplementedException instead of a MethodNotImplementedException");
             }
             else if (ex is ASCOM.NotImplementedException)
             {
-                LogMsg(MemberName, MessageLevel.msgIssue, "Received a NotImplementedException instead of a " + ((TypeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException"));
+                LogMsg(MemberName, MessageLevel.Issue, "Received a NotImplementedException instead of a " + ((TypeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException"));
             }
             else if (ex is System.NotImplementedException)
             {
-                LogMsg(MemberName, MessageLevel.msgIssue, "Received a System.NotImplementedException instead of an ASCOM." + ((TypeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException"));
+                LogMsg(MemberName, MessageLevel.Issue, "Received a System.NotImplementedException instead of an ASCOM." + ((TypeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException"));
             }
 
             // Handle all other types of error
             else
             {
-                LogMsg(MemberName, MessageLevel.msgError, "Unexpected " + GetExceptionName(ex) + ", " + UserMessage + ": " + ex.Message);
+                LogMsg(MemberName, MessageLevel.Error, "Unexpected " + GetExceptionName(ex) + ", " + UserMessage + ": " + ex.Message);
             }
 
-            LogMsg(MemberName, MessageLevel.msgDebug, "Exception: " + ex.ToString());
+            LogMsg(MemberName, MessageLevel.Debug, "Exception: " + ex.ToString());
         }
 
         protected void HandleInvalidValueExceptionAsOK(string MemberName, MemberType TypeOfMember, Required IsRequired, Exception ex, string UserAction, string Message)
         {
             if (IsInvalidValueException(MemberName, ex))
             {
-                LogMsg(MemberName, MessageLevel.msgOK, Message);
+                LogMsg(MemberName, MessageLevel.OK, Message);
             }
             else
             {
@@ -1590,7 +1572,7 @@ namespace ConformU
         {
             if (IsInvalidValueException(MemberName, ex))
             {
-                LogMsg(MemberName, MessageLevel.msgInfo, Message);
+                LogMsg(MemberName, MessageLevel.Info, Message);
             }
             else
             {
@@ -1602,7 +1584,7 @@ namespace ConformU
         {
             if (IsInvalidOperationException(MemberName, ex))
             {
-                LogMsg(MemberName, MessageLevel.msgOK, Message);
+                LogMsg(MemberName, MessageLevel.OK, Message);
             }
             else
             {
@@ -1656,12 +1638,12 @@ namespace ConformU
         protected void LogCallToDriver(string test, string memberName)
         {
             if (settings.DisplayMethodCalls)
-                LogMsg(test, MessageLevel.msgComment, memberName);
+                LogMsg(test, MessageLevel.Comment, memberName);
         }
 
         internal void WaitForAbsolute(int p_Duration, string p_Message)
         {
-            LogMsg("WaitForAbsolute", MessageLevel.msgDebug, p_Duration + " " + p_Message);
+            LogMsg("WaitForAbsolute", MessageLevel.Debug, p_Duration + " " + p_Message);
             for (int i = 0, loopTo = (int)Math.Round(p_Duration / 100d); i <= loopTo; i++)
             {
                 Thread.Sleep(100);

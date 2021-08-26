@@ -20,15 +20,15 @@ namespace ConformU
 
             try
             {
-                logger?.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating ProgID: {conformSettings.ComDevice.ProgId}");
+                logger?.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating ProgID: {conformSettings.ComDevice.ProgId}");
                 Type driverType = Type.GetTypeFromProgID(conformSettings.ComDevice.ProgId);
-                logger?.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating Type: {driverType}");
+                logger?.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating Type: {driverType}");
                 driverObject = Activator.CreateInstance(driverType);
                 // comment
             }
             catch (Exception ex)
             {
-                logger.LogMessage("CreateDevice", MessageLevel.msgError, $"Exception creating driver: {ex}");
+                logger.LogMessage("CreateDevice", MessageLevel.Error, $"Exception creating driver: {ex}");
                 throw;
             }
         }
@@ -50,14 +50,14 @@ namespace ConformU
 
                     try
                     {
-                        if (conformSettings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.msgDebug, $"About to set Connected False.");
+                        if (conformSettings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to set Connected False.");
                         driverObject.Connected = false;
                     }
                     catch { }
 
                     try
                     {
-                        if (conformSettings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.msgDebug, $"About to call Dispose method.");
+                        if (conformSettings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to call Dispose method.");
                         driverObject.Dispose();
                     }
                     catch { }
@@ -69,7 +69,7 @@ namespace ConformU
                         {
                             loopCount += 1;
                             remainingObjectCount = Marshal.ReleaseComObject(driverObject);
-                            if (conformSettings.Debug) logger?.LogMessage("Dispose", MessageLevel.msgDebug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
+                            if (conformSettings.Debug) logger?.LogMessage("Dispose", MessageLevel.Debug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
 
                         }
                         while (remainingObjectCount > 0 & loopCount <= 20);

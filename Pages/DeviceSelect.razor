@@ -232,7 +232,7 @@
                 // If we get here the device type is correct but is incorrectly cased compared to the Enum type so we update the object to the correct format
                 if (configuration.Settings.StrictCasing)
                 {
-                    conformLogger.LogMessage("ValidateAscomDevice", MessageLevel.msgWarning, $"Returned device type value: '{ascomDevice.AscomDeviceType}' is not correctly cased. It should be: '{deviceType.ToString()}'.");
+                    conformLogger.LogMessage("ValidateAscomDevice", MessageLevel.Warning, $"Returned device type value: '{ascomDevice.AscomDeviceType}' is not correctly cased. It should be: '{deviceType.ToString()}'.");
                 }
                 else
                 {

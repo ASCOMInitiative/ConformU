@@ -42,7 +42,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogMsg("Dispose", MessageLevel.msgDebug, "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogMsg("Dispose", MessageLevel.Debug, "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
             if (!disposedValue)
             {
                 if (disposing)
@@ -90,26 +90,26 @@ namespace ConformU
                 switch (settings.DeviceTechnology)
                 {
                     case DeviceTechnology.Alpaca:
-                        logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
+                        logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
                         m_FilterWheel = new AlpacaFilterWheel(settings.AlpacaConfiguration.AccessServiceType.ToString(),
                             settings.AlpacaDevice.IpAddress,
                             settings.AlpacaDevice.IpPort,
                             settings.AlpacaDevice.AlpacaDeviceNumber,
                             settings.StrictCasing,
                             settings.DisplayMethodCalls ? logger : null);
-                        logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Alpaca device created OK");
+                        logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Alpaca device created OK");
                         break;
 
                     case DeviceTechnology.COM:
                         switch (settings.ComConfiguration.ComACcessMechanic)
                         {
                             case ComAccessMechanic.Native:
-                                logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
+                                logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
                                 m_FilterWheel = new FilterWheelFacade(settings, logger);
                                 break;
 
                             case ComAccessMechanic.DriverAccess:
-                                logger.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
+                                logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
                                 m_FilterWheel = new FilterWheel(settings.ComDevice.ProgId);
                                 break;
 
@@ -122,7 +122,7 @@ namespace ConformU
                         throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
 
-                LogMsg("CreateDevice", MessageLevel.msgDebug, "Successfully created driver");
+                LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
                 baseClassDevice = m_FilterWheel; // Assign the driver to the base class
 
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
@@ -130,7 +130,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogMsg("CreateDevice", MessageLevel.msgDebug, "Exception thrown: " + ex.Message);
+                LogMsg("CreateDevice", MessageLevel.Debug, "Exception thrown: " + ex.Message);
                 throw; // Re throw exception 
             }
 
@@ -167,12 +167,12 @@ namespace ConformU
                 }
                 while ((m_FilterWheel.Position == FWTEST_IS_MOVING) & (DateTime.Now.Subtract(StartTime).TotalSeconds <= FWTEST_TIMEOUT)); // Wait until movement has stopped or 30 seconds have passed
                 if (m_FilterWheel.Position != FWTEST_IS_MOVING)
-                    LogMsg("Pre-run Check", MessageLevel.msgOK, "Filter wheel is stationary, ready to start tests");
+                    LogMsg("Pre-run Check", MessageLevel.OK, "Filter wheel is stationary, ready to start tests");
             }
             catch (Exception ex)
             {
-                LogMsg("Pre-run Check", MessageLevel.msgInfo, "Unable to determine that the Filter wheel is stationary");
-                LogMsg("Pre-run Check", MessageLevel.msgError, "Exception: " + ex.ToString());
+                LogMsg("Pre-run Check", MessageLevel.Info, "Unable to determine that the Filter wheel is stationary");
+                LogMsg("Pre-run Check", MessageLevel.Error, "Exception: " + ex.ToString());
             }
             SetStatus("", "", "");
         }
@@ -197,14 +197,14 @@ namespace ConformU
                 l_Offsets = m_FilterWheel.FocusOffsets;
                 l_NOffsets = l_Offsets.Length;
                 if (l_NOffsets == 0)
-                    LogMsg("FocusOffsets Get", MessageLevel.msgError, "Found no offset values in the returned array");
+                    LogMsg("FocusOffsets Get", MessageLevel.Error, "Found no offset values in the returned array");
                 else
-                    LogMsg("FocusOffsets Get", MessageLevel.msgOK, "Found " + l_NOffsets.ToString() + " filter offset values");
+                    LogMsg("FocusOffsets Get", MessageLevel.OK, "Found " + l_NOffsets.ToString() + " filter offset values");
 
                 l_FilterNumber = 0;
                 foreach (var offset in l_Offsets)
                 {
-                    LogMsg("FocusOffsets Get", MessageLevel.msgInfo, "Filter " + l_FilterNumber.ToString() + " Offset: " + offset.ToString());
+                    LogMsg("FocusOffsets Get", MessageLevel.Info, "Filter " + l_FilterNumber.ToString() + " Offset: " + offset.ToString());
                     l_FilterNumber += 1;
                     if (cancellationToken.IsCancellationRequested)
                         break;
@@ -222,18 +222,18 @@ namespace ConformU
                 l_Names = m_FilterWheel.Names;
                 l_NNames = l_Names.Length;
                 if (l_NNames == 0)
-                    LogMsg("Names Get", MessageLevel.msgError, "Did not find any names in the returned array");
+                    LogMsg("Names Get", MessageLevel.Error, "Did not find any names in the returned array");
                 else
-                    LogMsg("Names Get", MessageLevel.msgOK, "Found " + l_NNames.ToString() + " filter names");
+                    LogMsg("Names Get", MessageLevel.OK, "Found " + l_NNames.ToString() + " filter names");
                 l_FilterNumber = 0;
                 foreach (var name in l_Names)
                 {
                     if (name == null)
-                        LogMsg("Names Get", MessageLevel.msgWarning, "Filter " + l_FilterNumber.ToString() + " has a value of nothing");
+                        LogMsg("Names Get", MessageLevel.Warning, "Filter " + l_FilterNumber.ToString() + " has a value of nothing");
                     else if (name == "")
-                        LogMsg("Names Get", MessageLevel.msgWarning, "Filter " + l_FilterNumber.ToString() + " has a value of \"\"");
+                        LogMsg("Names Get", MessageLevel.Warning, "Filter " + l_FilterNumber.ToString() + " has a value of \"\"");
                     else
-                        LogMsg("Names Get", MessageLevel.msgInfo, "Filter " + l_FilterNumber.ToString() + " Name: " + name);
+                        LogMsg("Names Get", MessageLevel.Info, "Filter " + l_FilterNumber.ToString() + " Name: " + name);
                     l_FilterNumber += 1;
                 }
             }
@@ -244,16 +244,16 @@ namespace ConformU
 
             // Confirm number of array elements in filter names and filter offsets are the same
             if (l_NNames == l_NOffsets)
-                LogMsg("Names Get", MessageLevel.msgOK, "Number of filter offsets and number of names are the same: " + l_NNames.ToString());
+                LogMsg("Names Get", MessageLevel.OK, "Number of filter offsets and number of names are the same: " + l_NNames.ToString());
             else
-                LogMsg("Names Get", MessageLevel.msgError, "Number of filter offsets and number of names are different: " + l_NOffsets.ToString() + " " + l_NNames.ToString());
+                LogMsg("Names Get", MessageLevel.Error, "Number of filter offsets and number of names are different: " + l_NOffsets.ToString() + " " + l_NNames.ToString());
 
             // Position - Required - Read / Write
             switch (l_NOffsets)
             {
                 case object _ when l_NOffsets <= 0:
                     {
-                        LogMsg("Position", MessageLevel.msgWarning, "Filter position tests skipped as number of filters appears to be 0: " + l_NOffsets.ToString());
+                        LogMsg("Position", MessageLevel.Warning, "Filter position tests skipped as number of filters appears to be 0: " + l_NOffsets.ToString());
                         break;
                     }
 
@@ -264,10 +264,10 @@ namespace ConformU
                             LogCallToDriver("Position Get", "About to get Position property");
                             l_StartFilterNumber = m_FilterWheel.Position;
                             if ((l_StartFilterNumber < 0) | (l_StartFilterNumber >= l_NOffsets))
-                                LogMsg("Position Get", MessageLevel.msgError, "Illegal filter position returned: " + l_StartFilterNumber.ToString());
+                                LogMsg("Position Get", MessageLevel.Error, "Illegal filter position returned: " + l_StartFilterNumber.ToString());
                             else
                             {
-                                LogMsg("Position Get", MessageLevel.msgOK, "Currently at position: " + l_StartFilterNumber.ToString());
+                                LogMsg("Position Get", MessageLevel.OK, "Currently at position: " + l_StartFilterNumber.ToString());
                                 for (short i = 0; i <= Convert.ToInt16(l_NOffsets - 1); i++)
                                 {
                                     try
@@ -286,9 +286,9 @@ namespace ConformU
 
                                         l_EndTime = DateTime.Now;
                                         if (m_FilterWheel.Position == i)
-                                            LogMsg("Position Set", MessageLevel.msgOK, "Reached position: " + i.ToString() + " in: " + l_EndTime.Subtract(l_StartTime).TotalSeconds.ToString("0.0") + " seconds");
+                                            LogMsg("Position Set", MessageLevel.OK, "Reached position: " + i.ToString() + " in: " + l_EndTime.Subtract(l_StartTime).TotalSeconds.ToString("0.0") + " seconds");
                                         else
-                                            LogMsg("Position Set", MessageLevel.msgError, "Filter wheel did not reach specified position: " + i.ToString() + " within timeout of: " + FILTER_WHEEL_TIME_OUT.ToString());
+                                            LogMsg("Position Set", MessageLevel.Error, "Filter wheel did not reach specified position: " + i.ToString() + " within timeout of: " + FILTER_WHEEL_TIME_OUT.ToString());
                                         WaitFor(1000); // Pause to allow filter wheel to stabilise
                                     }
                                     catch (Exception ex)
@@ -300,7 +300,7 @@ namespace ConformU
                                 {
                                     LogCallToDriver("Position Set", "About to set Position property");
                                     m_FilterWheel.Position = -1; // Negative position, positions should never be negative
-                                    LogMsg("Position Set", MessageLevel.msgError, "Failed to generate exception when selecting filter with negative filter number");
+                                    LogMsg("Position Set", MessageLevel.Error, "Failed to generate exception when selecting filter with negative filter number");
                                 }
                                 catch (Exception ex)
                                 {
@@ -310,7 +310,7 @@ namespace ConformU
                                 {
                                     LogCallToDriver("Position Set", "About to set Position property");
                                     m_FilterWheel.Position = (short)l_NOffsets; // This should be 1 above the highest array element returned
-                                    LogMsg("Position Set", MessageLevel.msgError, "Failed to generate exception when selecting filter outside expected range");
+                                    LogMsg("Position Set", MessageLevel.Error, "Failed to generate exception when selecting filter outside expected range");
                                 }
                                 catch (Exception ex)
                                 {
@@ -373,7 +373,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogMsg(p_Name, MessageLevel.msgError, "FilterWheelPerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogMsg(p_Name, MessageLevel.Error, "FilterWheelPerformanceTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }
@@ -393,32 +393,32 @@ namespace ConformU
                 {
                     case object _ when l_Rate > 10.0:
                         {
-                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case object _ when 2.0 <= l_Rate && l_Rate <= 10.0:
                         {
-                            LogMsg(p_Name, MessageLevel.msgOK, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.OK, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case object _ when 1.0 <= l_Rate && l_Rate <= 2.0:
                         {
-                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.msgInfo, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogMsg(p_Name, MessageLevel.msgInfo, "Unable to complete test: " + ex.Message);
+                LogMsg(p_Name, MessageLevel.Info, "Unable to complete test: " + ex.Message);
             }
         }
     }

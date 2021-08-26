@@ -125,10 +125,6 @@ namespace ConformU
                 endpoints.MapFallbackToPage("/_Host");
             });
 
-            //foreach (var c in Configuration.AsEnumerable())
-            //{
-            //    Console.WriteLine($"{c.Key,-40}:{c.Value}");
-            //}
         }
     }
 }

@@ -28,15 +28,15 @@ namespace ConformU
 
             this.FormClosed += DriverHostForm_FormClosed;
             this.Load += DriverHostForm_Load;
-            logger?.LogMessage("DriverHostForm", MessageLevel.msgDebug, $"Form has been instantiated on thread: {Thread.CurrentThread.ManagedThreadId}");
+            logger?.LogMessage("DriverHostForm", MessageLevel.Debug, $"Form has been instantiated on thread: {Thread.CurrentThread.ManagedThreadId}");
 
-            logger?.LogMessage("DriverHostForm", MessageLevel.msgDebug, $"Using direct variable to create ProgID: {progId}");
+            logger?.LogMessage("DriverHostForm", MessageLevel.Debug, $"Using direct variable to create ProgID: {progId}");
             Type driverType = Type.GetTypeFromProgID(progId);
-            logger?.LogMessage("DriverHostForm", MessageLevel.msgDebug, $"Creating Type: {driverType}");
+            logger?.LogMessage("DriverHostForm", MessageLevel.Debug, $"Creating Type: {driverType}");
             driver = Activator.CreateInstance(driverType);
-            logger?.LogMessage("DriverHostForm", MessageLevel.msgDebug, $"Driver {progId} has been created on thread: {Thread.CurrentThread.ManagedThreadId}");
+            logger?.LogMessage("DriverHostForm", MessageLevel.Debug, $"Driver {progId} has been created on thread: {Thread.CurrentThread.ManagedThreadId}");
             this.driver = driver;
-            logger?.LogMessage("DriverHostForm", MessageLevel.msgDebug, $"Driver is not null: {driver is not null}");
+            logger?.LogMessage("DriverHostForm", MessageLevel.Debug, $"Driver is not null: {driver is not null}");
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace ConformU
         private void DriverHostForm_Load(object sender, EventArgs e)
         {
 
-            logger?.LogMessage("DriverHostForm_Load", MessageLevel.msgDebug, $"Form load event has been called on thread: {Thread.CurrentThread.ManagedThreadId}");
+            logger?.LogMessage("DriverHostForm_Load", MessageLevel.Debug, $"Form load event has been called on thread: {Thread.CurrentThread.ManagedThreadId}");
 
         }
 

@@ -46,10 +46,6 @@
 
     protected override void OnInitialized()
     {
-        //Console.WriteLine($"Settings location - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_SETTINGS)}");
-        //Console.WriteLine($"Log file name     - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILENAME)}");
-        //Console.WriteLine($"Log file path     - {Configuration.GetValue<string>(ConformConstants.COMMAND_OPTION_LOGFILEPATH)}");
-
     }
 
     async void StartTest(string buttonName)
@@ -102,7 +98,7 @@
         await conformanceTest.ContinueWith(antecedent =>
         {
             tester.Dispose(); // Dispose of the tester
-        tester = null;
+            tester = null;
             JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
 
             GC.Collect();
@@ -161,7 +157,7 @@
         {
             screenLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
             SetScreenLogRows();
-            InvokeAsync(StateHasChanged); // Display the updated log on the screen
+            InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
         }
         await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
     }
@@ -177,7 +173,7 @@
         {
             statusMessage = $"{e.Message}";  // Add the new log message to the screen display
 
-            InvokeAsync(StateHasChanged); // Display the updated log on the screen
+            InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
         }
     }
 

@@ -29,14 +29,14 @@ namespace ConformU
             try
             {
 #if WINDOWS7_0_OR_GREATER
-                logger?.LogMessage("FacadeBaseClass", MessageLevel.msgDebug, $"Using COM host form to create ProgID: {settings.ComDevice.ProgId}");
-                logger?.LogMessage("FacadeBaseClass", MessageLevel.msgDebug, $"Creating driver {settings.ComDevice.ProgId} on separate thread. This is thread: {Thread.CurrentThread.ManagedThreadId}");
+                logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Using COM host form to create ProgID: {settings.ComDevice.ProgId}");
+                logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Creating driver {settings.ComDevice.ProgId} on separate thread. This is thread: {Thread.CurrentThread.ManagedThreadId}");
                 Thread driverThread = new(DriverOnSeparateThread);
                 driverThread.SetApartmentState(ApartmentState.STA);
                 driverThread.DisableComObjectEagerCleanup();
                 driverThread.IsBackground = true;
                 driverThread.Start(this);
-                logger?.LogMessage("FacadeBaseClass", MessageLevel.msgDebug, $"Thread started successfully for {settings.ComDevice.ProgId}. This is thread: {Thread.CurrentThread.ManagedThreadId}");
+                logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Thread started successfully for {settings.ComDevice.ProgId}. This is thread: {Thread.CurrentThread.ManagedThreadId}");
 
                 do
                 {
@@ -44,19 +44,19 @@ namespace ConformU
                     Application.DoEvents();
                 } while (driverHostForm == null);
 
-                logger?.LogMessage("FacadeBaseClass", MessageLevel.msgDebug, $"Completed create driver delegate for {settings.ComDevice.ProgId} on thread {Thread.CurrentThread.ManagedThreadId}");
+                logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Completed create driver delegate for {settings.ComDevice.ProgId} on thread {Thread.CurrentThread.ManagedThreadId}");
 
 #else
-                logger?.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Using direct variable to create ProgID: {settings.ComDevice.ProgId}");
+                logger?.LogMessage("CreateDevice", MessageLevel.Debug, $"Using direct variable to create ProgID: {settings.ComDevice.ProgId}");
                 Type driverType = Type.GetTypeFromProgID(settings.ComDevice.ProgId);
-                logger?.LogMessage("CreateDevice", MessageLevel.msgDebug, $"Creating Type: {driverType}");
+                logger?.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating Type: {driverType}");
                 driver = Activator.CreateInstance(driverType);
 #endif
-                logger?.LogMessage("FacadeBaseClass", MessageLevel.msgDebug, $"Initialisation completed OK");
+                logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Initialisation completed OK");
             }
             catch (Exception ex)
             {
-                logger.LogMessage("CreateDevice", MessageLevel.msgError, $"Exception creating driver: {ex}");
+                logger.LogMessage("CreateDevice", MessageLevel.Error, $"Exception creating driver: {ex}");
             }
         }
 
@@ -71,14 +71,14 @@ namespace ConformU
                         case DeviceTechnology.Alpaca:
                             try
                             {
-                                if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.msgDebug, $"About to set Connected False.");
+                                if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to set Connected False.");
                                 driver.Connected = false;
                             }
                             catch { }
 
                             try
                             {
-                                if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.msgDebug, $"About to call Dispose method.");
+                                if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to call Dispose method.");
                                 driver.Dispose();
                             }
                             catch { }
@@ -90,14 +90,14 @@ namespace ConformU
                             {
                                 try
                                 {
-                                    if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.msgDebug, $"About to set Connected False.");
+                                    if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to set Connected False.");
                                     driver.Connected = false;
                                 }
                                 catch { }
 
                                 try
                                 {
-                                    if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.msgDebug, $"About to call Dispose method.");
+                                    if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to call Dispose method.");
                                     driver.Dispose();
                                 }
                                 catch { }
@@ -109,7 +109,7 @@ namespace ConformU
                                     {
                                         loopCount += 1;
                                         remainingObjectCount = Marshal.ReleaseComObject(driver);
-                                        if (settings.Debug) logger?.LogMessage("Dispose", MessageLevel.msgDebug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
+                                        if (settings.Debug) logger?.LogMessage("Dispose", MessageLevel.Debug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
 
                                     }
                                     while (remainingObjectCount > 0 & loopCount <= 20);
@@ -225,18 +225,18 @@ namespace ConformU
         private void DriverOnSeparateThread(object arg)
         {
 
-            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.msgDebug, $"About to create driver host form");
+            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"About to create driver host form");
             driverHostForm = new DriverHostForm(settings.ComDevice.ProgId, ref driver, logger); // Create the form
-            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.msgDebug, $"Created driver host form");
+            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Created driver host form");
             driverHostForm.Show(); // Make it come into existence - it doesn't exist until its shown for some reason
-            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.msgDebug, $"Shown driver host form");
+            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Shown driver host form");
             driverHostForm.Hide(); // Hide the form from view
-            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.msgDebug, $"Hidden driver host form");
+            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Hidden driver host form");
 
-            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.msgDebug, $"Starting driver host environment for {settings.ComDevice.ProgId} on thread {Thread.CurrentThread.ManagedThreadId}");
+            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Starting driver host environment for {settings.ComDevice.ProgId} on thread {Thread.CurrentThread.ManagedThreadId}");
             Application.Run();  // Start the message loop on this thread to bring the form to life
 
-            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.msgDebug, $"Environment for driver host {settings.ComDevice.ProgId} shut down on thread {Thread.CurrentThread.ManagedThreadId}");
+            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Environment for driver host {settings.ComDevice.ProgId} shut down on thread {Thread.CurrentThread.ManagedThreadId}");
             driverHostForm.Dispose();
 
         }
