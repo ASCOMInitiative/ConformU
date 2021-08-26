@@ -19,10 +19,9 @@ namespace ConformU
         private bool m_CanSetAltitude, m_CanSetAzimuth, m_CanSetShutter, m_CanSlave, m_CanSyncAzimuth, m_Slaved;
         private ShutterState m_ShutterStatus;
         private bool m_CanReadAltitude, m_CanReadAtPark, m_CanReadAtHome, m_CanReadSlewing, m_CanReadSlaved, m_CanReadShutterStatus, m_CanReadAzimuth, m_CanSlewToAzimuth;
-        private bool m_AsyncSlewAzimuth, m_AsyncSlewAltitude;
 
         // General variables
-        private bool m_Slewing, m_AtHome, m_AtPark, m_CanFindHome, m_CanFindPark, m_CanPark, m_CanSetPark, m_Connected;
+        private bool m_Slewing, m_AtHome, m_AtPark, m_CanFindHome, m_CanPark, m_CanSetPark, m_Connected;
         private string m_Description, m_DriverINfo, m_Name;
         private short m_InterfaceVersion;
         private double m_Altitude, m_Azimuth;
@@ -469,12 +468,10 @@ namespace ConformU
                 {
                     DomeWaitForSlew(settings.DomeAltitudeTimeout); if (cancellationToken.IsCancellationRequested)
                         return;
-                    m_AsyncSlewAltitude = true;
                     LogMsg(p_Name + " " + p_Altitude, MessageLevel.OK, "Asynchronous slew OK");
                 }
                 else
                 {
-                    m_AsyncSlewAltitude = false;
                     LogMsg(p_Name + " " + p_Altitude, MessageLevel.OK, "Synchronous slew OK");
                 }
             }
@@ -504,12 +501,10 @@ namespace ConformU
                 {
                     DomeWaitForSlew(settings.DomeAzimuthTimeout); if (cancellationToken.IsCancellationRequested)
                         return;
-                    m_AsyncSlewAzimuth = true;
                     LogMsg(p_Name + " " + p_Azimuth, MessageLevel.OK, "Asynchronous slew OK");
                 }
                 else
                 {
-                    m_AsyncSlewAzimuth = false;
                     LogMsg(p_Name + " " + p_Azimuth, MessageLevel.OK, "Synchronous slew OK");
                 }
             }

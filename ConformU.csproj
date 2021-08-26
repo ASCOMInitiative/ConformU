@@ -20,11 +20,24 @@
     <AssemblyName>conformu</AssemblyName>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
+    <NoWarn>1701;1702;MSB3042</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net5.0|AnyCPU'">
+    <NoWarn>1701;1702;MSB3042</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
-    <_WebToolingArtifacts Remove="Properties\PublishProfiles\Linux-Arm.pubxml" />
-    <_WebToolingArtifacts Remove="Properties\PublishProfiles\Linux-X64-FTP.pubxml" />
-    <_WebToolingArtifacts Remove="Properties\PublishProfiles\Linux-X64.pubxml" />
-    <_WebToolingArtifacts Remove="Properties\PublishProfiles\Windows.pubxml" />
+    <EmbeddedResource Remove="Conform\Devices\Facades\DriverHostForm.resx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Conform\Devices\Facades\DriverHostForm.resx" />
+    <None Include="Properties\PublishProfiles\Linux-Arm.pubxml.user" />
+    <None Include="Properties\PublishProfiles\Linux-X64-FTP.pubxml.user" />
+    <None Include="Properties\PublishProfiles\Linux-X64.pubxml.user" />
+    <None Include="Properties\PublishProfiles\Windows.pubxml.user" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,7 +51,7 @@
 
   <Target Name="CustomAfterPublishh" AfterTargets="AfterPublish">
     <!-- Insert tasks to run after publish here -->
-    <Message Text="After Publish Task $(CheckoutDirectory)"/>
+    <Message Text="After Publish Task $(CheckoutDirectory)" />
 
   </Target>
 

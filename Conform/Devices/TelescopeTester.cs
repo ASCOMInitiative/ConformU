@@ -5766,7 +5766,9 @@ namespace ConformU
 
                         try
                         {
+#if WINDOWS7_0_OR_GREATER
                             Marshal.ReleaseComObject(l_AxisRates);
+#endif
                         }
                         catch
                         {
@@ -6146,7 +6148,9 @@ namespace ConformU
                         // Clean up and release each object after use
                         try
                         {
+#if WINDOWS7_0_OR_GREATER
                             Marshal.ReleaseComObject(l_Rate);
+#endif
                         }
                         catch
                         {
@@ -6161,7 +6165,9 @@ namespace ConformU
                     // Clean up and release each object after use
                     try
                     {
+#if WINDOWS7_0_OR_GREATER
                         Marshal.ReleaseComObject(l_Rate);
+#endif
                     }
                     catch
                     {
@@ -6184,7 +6190,9 @@ namespace ConformU
                         // Clean up and release each object after use
                         try
                         {
+#if WINDOWS7_0_OR_GREATER
                             Marshal.ReleaseComObject(l_Rate);
+#endif
                         }
                         catch
                         {
@@ -6199,7 +6207,9 @@ namespace ConformU
                     // Clean up and release each object after use
                     try
                     {
+#if WINDOWS7_0_OR_GREATER
                         Marshal.ReleaseComObject(l_Rate);
+#endif
                     }
                     catch
                     {
@@ -6736,9 +6746,9 @@ namespace ConformU
             LogMsg("DestinationSideofPier", MessageLevel.Info, TranslatePierSide(l_PierSideMinus3, false) + TranslatePierSide(l_PierSidePlus3, false));
         }
 
-        #endregion
+#endregion
 
-        #region Support Code
+#region Support Code
 
         private void CheckScopePosition(string testName, string functionName, double expectedRA, double expectedDec)
         {
@@ -7316,7 +7326,7 @@ namespace ConformU
             return success;
         }
 
-        #endregion
+#endregion
 
     }
 }

@@ -19,7 +19,7 @@ namespace ConformU
         }
 
         // Focuser variables
-        private bool m_Absolute, m_IsMoving, m_Link, m_TempComp, m_TempCompAvailable;
+        private bool m_Absolute, m_IsMoving, m_TempComp, m_TempCompAvailable;
         private int m_MaxIncrement, m_MaxStep, m_Position, m_PositionOrg;
         private double m_StepSize, m_Temperature;
         private bool m_TempCompTrueOK, m_TempCompFalseOK; // Variable to confirm that TempComp can be successfully set to True

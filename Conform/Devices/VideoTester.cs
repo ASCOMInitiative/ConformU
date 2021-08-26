@@ -17,8 +17,8 @@ namespace ConformU
         const int CAMERA_PULSE_TOLERANCE = 300; // Tolerance for acceptable;e performance (ms)
 
         // Camera variables
-        private bool CanConfigureDeviceProperties, CanReadCameraState, CanReadSensorType, CanReadGain, CanReadGainMax, CanReadGainMin, CanReadGains, CanReadFrameRate;
-        private bool CanReadGammaMin, CanReadGammaMax, CanReadGamma, CanReadGammas, CanReadIntegrationRate, CanReadSupportedIntegrationRates, CanReadLastVideoFrame;
+        private bool CanConfigureDeviceProperties,  CanReadSensorType,  CanReadGainMax, CanReadGainMin  ;
+        private bool CanReadGammaMin, CanReadGammaMax,   CanReadIntegrationRate, CanReadSupportedIntegrationRates ;
         private bool CanReadVideoFrame;
         private double PixelSizeX, PixelSizeY, ExposureMax, ExposureMin;
         private int BitDepth, Height, Width, IntegrationRate, VideoFramesBufferSize;
@@ -259,11 +259,9 @@ namespace ConformU
             // CameraState - Mandatory
             try
             {
-                CanReadCameraState = false;
                 LogCallToDriver("CameraState", "About to get VideoCameraRunning property");
                 CameraState = VideoCameraState.videoCameraRunning;
                 CameraState = videoDevice.CameraState;
-                CanReadCameraState = true;
                 LogMsg("CameraState Read", MessageLevel.OK, CameraState.ToString());
             }
             catch (Exception ex)
@@ -284,11 +282,9 @@ namespace ConformU
             // FrameRate - Mandatory
             try
             {
-                CanReadFrameRate = false;
                 FrameRate = VideoCameraFrameRate.PAL;
                 LogCallToDriver("FrameRate", "About to get FrameRate property");
                 FrameRate = videoDevice.FrameRate;
-                CanReadFrameRate = true;
                 LogMsg("FrameRate Read", MessageLevel.OK, FrameRate.ToString());
             }
             catch (Exception ex)
@@ -403,7 +399,7 @@ namespace ConformU
                     {
                         LogMsg("ImageArray", MessageLevel.OK, "Received an image object from the driver of type: " + ImageArray.GetType().Name);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         LogMsg("ImageArray", MessageLevel.Info, "Received an image object from the driver of indeterminate type");
                     }
@@ -636,7 +632,7 @@ namespace ConformU
             {
                 MethodName = p_Type.ToString(); // & " Read"
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MethodName = "?????? Read";
             }
@@ -665,9 +661,7 @@ namespace ConformU
 
                     case VideoProperty.Gain:
                         {
-                            CanReadGain = false;
                             returnValue = videoDevice.Gain;
-                            CanReadGain = true;
                             break;
                         }
 
@@ -689,9 +683,7 @@ namespace ConformU
 
                     case VideoProperty.Gamma:
                         {
-                            CanReadGamma = false;
                             returnValue = videoDevice.Gamma;
-                            CanReadGamma = true;
                             break;
                         }
 
@@ -755,7 +747,7 @@ namespace ConformU
                     LogMsg(p_Name, MessageLevel.Issue, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
 
             }
-            catch (PropertyNotImplementedException ex)
+            catch (PropertyNotImplementedException)
             {
                 LogMsg(p_Name, MessageLevel.OK, NOT_IMP_NET);
             }
@@ -784,7 +776,7 @@ namespace ConformU
             {
                 MethodName = p_Type.ToString(); // & " Read"
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MethodName = "?????? Read";
             }
@@ -889,7 +881,7 @@ namespace ConformU
             {
                 MethodName = p_Type.ToString(); // & " Read"
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MethodName = "?????? Read";
             }
@@ -961,7 +953,7 @@ namespace ConformU
             {
                 MethodName = p_Type.ToString(); // & " Read"
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MethodName = "?????? Read";
             }
@@ -1008,7 +1000,7 @@ namespace ConformU
             {
                 MethodName = p_Type.ToString(); // & " Read"
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MethodName = "?????? Read";
             }
@@ -1095,7 +1087,7 @@ namespace ConformU
             {
                 MethodName = p_Type.ToString(); // & " Read"
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MethodName = "?????? Read";
             }
@@ -1142,7 +1134,7 @@ namespace ConformU
             {
                 MethodName = p_Type.ToString(); // & " Read"
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MethodName = "?????? Read";
             }
@@ -1154,17 +1146,13 @@ namespace ConformU
                 {
                     case VideoProperty.Gains:
                         {
-                            CanReadGains = false;
                             returnValue = videoDevice.Gains;
-                            CanReadGains = true;
                             break;
                         }
 
                     case VideoProperty.Gammas:
                         {
-                            CanReadGammas = false;
                             returnValue = videoDevice.Gammas;
-                            CanReadGammas = true;
                             break;
                         }
 
@@ -1291,12 +1279,23 @@ namespace ConformU
             }
             return returnValue;
         }
+        
+        /// <summary>
+        /// Not currently used in ConformU
+        /// </summary>
+        /// <param name="p_Type"></param>
+        /// <param name="p_Property"></param>
+        /// <param name="p_TestOK"></param>
+        /// <param name="p_TestLow"></param>
+        /// <param name="p_TestHigh"></param>
         private void CameraPropertyWriteTest(VideoProperty p_Type, string p_Property, int p_TestOK, int p_TestLow, int p_TestHigh)
         {
             try // OK value first
             {
                 switch (p_Type)
                 {
+                    case VideoProperty.BitDepth:
+                        break;
                 }
                 LogMsg(p_Property + " write", MessageLevel.OK, "Successfully wrote " + p_TestOK);
             }
@@ -1363,20 +1362,17 @@ namespace ConformU
                         {
                             LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
-                            break;
                         }
 
                     case object _ when 2.0 <= l_Rate && l_Rate <= 10.0:
                         {
                             LogMsg(p_Name, MessageLevel.OK, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
-                            break;
                         }
 
                     case object _ when 1.0 <= l_Rate && l_Rate <= 2.0:
                         {
                             LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
-                            break;
                             break;
                         }
 

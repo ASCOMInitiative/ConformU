@@ -8,11 +8,9 @@ namespace ConformU
 {
     internal class SwitchTester : DeviceTesterBaseClass
     {
-        private int m_InterfaceVersion, m_PerformanceGetSwitchName, m_PerformanceGetSwitch;
+        private int m_PerformanceGetSwitchName, m_PerformanceGetSwitch;
         private short m_MaxSwitch;
         private bool m_CanReadMaxSwitch;
-        private string m_SwitchType;
-        private ArrayList m_Switches;
         private int ExtendedSwitchNumberTestRange; // Checks for usable switches either side of the expected range
         private int SWITCH_WRITE_DELAY;
         private int SWITCH_READ_DELAY;
@@ -198,7 +196,7 @@ namespace ConformU
 
                 default:
                     {
-                        LogMsg("Switches", MessageLevel.Error, "Unknown switch interface version: " + m_InterfaceVersion);
+                        LogMsg("Switches", MessageLevel.Error, "Unknown switch interface version: " + g_InterfaceVersion);
                         break;
                     }
             }
@@ -207,9 +205,9 @@ namespace ConformU
         public override void CheckMethods()
         {
             short i;
-            bool l_GetSwitch = false, l_GetSwitchOriginal = false, l_NewSwitchState, l_GetSwitchOK, l_SetSwitchOK, l_GetSwitchValueOK, l_SetSwitchValueMinOK, l_SetSwitchValueMaxOK, l_SwitchIsBoolean, l_SwitchCanWrite;
-            Exception l_GetSwitchException, l_SetSwitchException, l_GetSwitchValueException, l_SetSwitchValueException;
-            double l_GetSwitchValue, l_GetSwitchValueOriginal=0.0, l_SwitchMinimum, l_SwitchMaximum, l_SwitchValue, l_SwitchStep, l_SwitchRange;
+            bool l_GetSwitch = false, l_GetSwitchOriginal = false, l_NewSwitchState, l_GetSwitchOK, l_SetSwitchOK, l_GetSwitchValueOK, l_SetSwitchValueMinOK, l_SetSwitchValueMaxOK,  l_SwitchCanWrite;
+            Exception l_GetSwitchException,  l_GetSwitchValueException;
+            double l_GetSwitchValue, l_GetSwitchValueOriginal=0.0, l_SwitchMinimum, l_SwitchMaximum, l_SwitchStep, l_SwitchRange;
             string l_SwitchName, l_SwitchDescription;
 
             switch (g_InterfaceVersion)
@@ -348,15 +346,11 @@ namespace ConformU
                                 l_GetSwitchValueOK = false;
                                 l_SetSwitchValueMinOK = false;
                                 l_SetSwitchValueMaxOK = false;
-                                l_SwitchIsBoolean = false;
                                 l_SwitchCanWrite = false;
                                 l_GetSwitchException = null;
                                 l_GetSwitchValueException = null;
-                                l_SetSwitchException = null;
-                                l_SetSwitchValueException = null;
                                 l_SwitchName = "Unknown";
                                 l_SwitchDescription = "Unknown";
-                                l_SwitchValue = BAD_SWITCH_VALUE;
                                 l_SwitchMinimum = BAD_SWITCH_VALUE;
                                 l_SwitchMaximum = BAD_SWITCH_VALUE;
                                 l_SwitchRange = BAD_SWITCH_VALUE;
@@ -1141,7 +1135,6 @@ namespace ConformU
         private void TestSetSwitchValue(int i, double Offset, double SwitchMinimum, double SwitchMaximum, double SwitchRange, double SwitchStep)
         {
             double l_MultiStateStepSize, TestValue2, l_SwitchValue;
-            bool l_SetSwitchValueOK;
             MessageLevel msgLevel0, msgLevel1, msgLevel2;
             int l_MultiStateNumberOfSteps;
 
@@ -1174,7 +1167,6 @@ namespace ConformU
                     msgLevel2 = MessageLevel.Info;
                 }
 
-                l_SetSwitchValueOK = true;
                 LogMsg("SetSwitchValue", MessageLevel.Info, "  Testing with steps that are " + Offset.ToString("P0") + " offset from integer SwitchStep values");
 
                 for (double TestValue = SwitchMinimum; TestValue <= SwitchMinimum + l_MultiStateStepSize * l_MultiStateNumberOfSteps; TestValue += l_MultiStateStepSize)
@@ -1214,77 +1206,66 @@ namespace ConformU
                             case object _ when 0.0 <= Math.Abs(l_SwitchValue - TestValue2) && Math.Abs(l_SwitchValue - TestValue2) <= SwitchStep * 0.1:
                                 {
                                     LogMsg("SetSwitchValue " + "Offset: " + Offset.ToString("P0").PadLeft(4), msgLevel2, "   Set/Read differ by 1-10% of SwitchStep. Set: " + TestValue2 + ", Read: " + l_SwitchValue);
-                                    l_SetSwitchValueOK = false;
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(l_SwitchValue - TestValue2) && Math.Abs(l_SwitchValue - TestValue2) <= SwitchStep * 0.2:
                                 {
                                     LogMsg("SetSwitchValue " + "Offset: " + Offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 10-20% of SwitchStep. Set: " + TestValue2 + ", Read: " + l_SwitchValue);
-                                    l_SetSwitchValueOK = false;
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(l_SwitchValue - TestValue2) && Math.Abs(l_SwitchValue - TestValue2) <= SwitchStep * 0.3:
                                 {
                                     LogMsg("SetSwitchValue " + "Offset: " + Offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 20-30% of SwitchStep. Set: " + TestValue2 + ", Read: " + l_SwitchValue);
-                                    l_SetSwitchValueOK = false;
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(l_SwitchValue - TestValue2) && Math.Abs(l_SwitchValue - TestValue2) <= SwitchStep * 0.4:
                                 {
                                     LogMsg("SetSwitchValue " + "Offset: " + Offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 30-40% of SwitchStep. Set: " + TestValue2 + ", Read: " + l_SwitchValue);
-                                    l_SetSwitchValueOK = false;
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(l_SwitchValue - TestValue2) && Math.Abs(l_SwitchValue - TestValue2) <= SwitchStep * 0.5:
                                 {
                                     LogMsg("SetSwitchValue " + "Offset: " + Offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 40-50% of SwitchStep. Set: " + TestValue2 + ", Read: " + l_SwitchValue);
-                                    l_SetSwitchValueOK = false;
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(l_SwitchValue - TestValue2) && Math.Abs(l_SwitchValue - TestValue2) <= SwitchStep * 0.6:
                                 {
                                     LogMsg("SetSwitchValue " + "Offset: " + Offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 50-60% of SwitchStep. Set: " + TestValue2 + ", Read: " + l_SwitchValue);
-                                    l_SetSwitchValueOK = false;
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(l_SwitchValue - TestValue2) && Math.Abs(l_SwitchValue - TestValue2) <= SwitchStep * 0.7:
                                 {
                                     LogMsg("SetSwitchValue " + "Offset: " + Offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 60-70% of SwitchStep. Set: " + TestValue2 + ", Read: " + l_SwitchValue);
-                                    l_SetSwitchValueOK = false;
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(l_SwitchValue - TestValue2) && Math.Abs(l_SwitchValue - TestValue2) <= SwitchStep * 0.8:
                                 {
                                     LogMsg("SetSwitchValue " + "Offset: " + Offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 70-80% of SwitchStep. Set: " + TestValue2 + ", Read: " + l_SwitchValue);
-                                    l_SetSwitchValueOK = false;
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(l_SwitchValue - TestValue2) && Math.Abs(l_SwitchValue - TestValue2) <= SwitchStep * 0.9:
                                 {
                                     LogMsg("SetSwitchValue " + "Offset: " + Offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 80-90% of SwitchStep. Set: " + TestValue2 + ", Read: " + l_SwitchValue);
-                                    l_SetSwitchValueOK = false;
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(l_SwitchValue - TestValue2) && Math.Abs(l_SwitchValue - TestValue2) <= SwitchStep * 1.0:
                                 {
                                     LogMsg("SetSwitchValue " + "Offset: " + Offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 90-100% of SwitchStep. Set: " + TestValue2 + ", Read: " + l_SwitchValue);
-                                    l_SetSwitchValueOK = false;
                                     break;
                                 }
 
                             default:
                                 {
                                     LogMsg("SetSwitchValue " + "Offset: " + Offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by >100% of SwitchStep. Set: " + TestValue2 + ", Read: " + l_SwitchValue);
-                                    l_SetSwitchValueOK = false;
                                     break;
                                 }
                         }

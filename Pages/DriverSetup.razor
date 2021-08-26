@@ -30,9 +30,6 @@
     string alpacaControlsDisplay = "none";
     string comControlsDisplay = "none";
     string noDeviceMessageDisplay = "none";
-    bool alpacaControlsVisible = false;
-    bool comControlsVisible = false;
-    bool noDeviceMessageVisible = false;
 
     protected override void OnInitialized()
     {
@@ -40,17 +37,14 @@
         {
             case DeviceTechnology.NotSelected:
                 noDeviceMessageDisplay = "inline";
-                noDeviceMessageVisible = true;
                 break;
 
             case DeviceTechnology.Alpaca:
                 alpacaControlsDisplay = "inline";
-                alpacaControlsVisible = true;
                 break;
 
             case DeviceTechnology.COM:
                 comControlsDisplay = "inline";
-                comControlsVisible = true;
                 break;
 
             default:

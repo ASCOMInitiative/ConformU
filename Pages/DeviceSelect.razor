@@ -377,7 +377,7 @@
         await InvokeAsync(() => { StateHasChanged(); });
     }
 
-    async void StartDiscovery()
+    private void StartDiscovery()
     {
         discoveredAlpacaDevices.Clear();
         discoveryInProgress = true;
