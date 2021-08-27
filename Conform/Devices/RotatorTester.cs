@@ -57,7 +57,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogMsg("Dispose", MessageLevel.Debug, "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("Dispose", "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
             if (!disposedValue)
             {
                 if (disposing)
@@ -105,7 +105,7 @@ namespace ConformU
                 switch (settings.DeviceTechnology)
                 {
                     case DeviceTechnology.Alpaca:
-                        LogMsg("CreateDevice", MessageLevel.Info, $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
+                        LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
                         m_Rotator = new AlpacaRotator(settings.AlpacaConfiguration.AccessServiceType.ToString(),
                             settings.AlpacaDevice.IpAddress,
                             settings.AlpacaDevice.IpPort,
@@ -119,12 +119,12 @@ namespace ConformU
                         switch (settings.ComConfiguration.ComACcessMechanic)
                         {
                             case ComAccessMechanic.Native:
-                                LogMsg("CreateDevice", MessageLevel.Info, $"Creating Native COM device: {settings.ComDevice.ProgId}");
+                                LogInfo("CreateDevice", $"Creating Native COM device: {settings.ComDevice.ProgId}");
                                 m_Rotator = new RotatorFacade(settings, logger);
                                 break;
 
                             case ComAccessMechanic.DriverAccess:
-                                LogMsg("CreateDevice", MessageLevel.Info, $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
+                                LogInfo("CreateDevice", $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
                                 m_Rotator = new Rotator(settings.ComDevice.ProgId);
                                 break;
 
@@ -132,7 +132,7 @@ namespace ConformU
                                 throw new ASCOM.InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComACcessMechanic}");
                         }
 
-                        LogMsg("CreateDevice", MessageLevel.Info, "Successfully created driver");
+                        LogInfo("CreateDevice", "Successfully created driver");
                         baseClassDevice = m_Rotator; // Assign the driver to the base class
 
                         WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
@@ -146,7 +146,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogMsg("CreateDevice", MessageLevel.Debug, "Exception thrown: " + ex.Message);
+                LogDebug("CreateDevice", "Exception thrown: " + ex.Message);
                 throw; // Re throw exception 
             }
 
@@ -182,7 +182,7 @@ namespace ConformU
             {
                 LogCallToDriver("CanReverse", "About to get CanReverse property");
                 m_CanReverse = m_Rotator.CanReverse;
-                LogMsg("CanReverse", MessageLevel.OK, m_CanReverse.ToString());
+                LogOK("CanReverse", m_CanReverse.ToString());
             }
             catch (Exception ex)
             {
@@ -221,10 +221,10 @@ namespace ConformU
                 }
                 else // Report error message and don't do other tests
                 {
-                    LogMsg("Pre-run Check", MessageLevel.Error, "Rotator still moving after " + ROTATOR_WAIT_LIMIT + "seconds, IsMoving stuck on?");
+                    LogError("Pre-run Check", "Rotator still moving after " + ROTATOR_WAIT_LIMIT + "seconds, IsMoving stuck on?");
                 }
 
-                LogMsg("Pre-run Check", MessageLevel.OK, "Rotator is stationary");
+                LogOK("Pre-run Check", "Rotator is stationary");
             }
             catch
             {
@@ -243,13 +243,13 @@ namespace ConformU
                 m_CanReadIsMoving = true; // Can read OK, doesn't generate an exception
                 if (m_IsMoving)
                 {
-                    LogMsg("IsMoving", MessageLevel.Error, "IsMoving is True before any movement has been commanded!");
-                    LogMsg("IsMoving", MessageLevel.Info, "Further tests have been skipped");
+                    LogError("IsMoving", "IsMoving is True before any movement has been commanded!");
+                    LogInfo("IsMoving", "Further tests have been skipped");
                     g_Stop = true;
                 }
                 else
                 {
-                    LogMsg("IsMoving", MessageLevel.OK, m_IsMoving.ToString());
+                    LogOK("IsMoving", m_IsMoving.ToString());
                 }
             }
             catch (Exception ex)
@@ -289,11 +289,11 @@ namespace ConformU
                 m_Reverse = m_Rotator.Reverse;
                 if (m_CanReverse)
                 {
-                    LogMsg("Reverse Read", MessageLevel.OK, m_Reverse.ToString());
+                    LogOK("Reverse Read", m_Reverse.ToString());
                 }
                 else
                 {
-                    LogMsg("Reverse Read", MessageLevel.Error, "CanReverse is false but no exception generated");
+                    LogError("Reverse Read", "CanReverse is false but no exception generated");
                 }
             }
             catch (Exception ex)
@@ -336,11 +336,11 @@ namespace ConformU
                 m_Rotator.Reverse = m_Reverse; // Restore original value
                 if (m_CanReverse)
                 {
-                    LogMsg("Reverse Write", MessageLevel.OK, "Reverse state successfully changed and restored");
+                    LogOK("Reverse Write", "Reverse state successfully changed and restored");
                 }
                 else
                 {
-                    LogMsg("Reverse Write", MessageLevel.Error, "CanReverse is false but no exception generated");
+                    LogError("Reverse Write", "CanReverse is false but no exception generated");
                 }
             }
             catch (Exception ex)
@@ -377,19 +377,19 @@ namespace ConformU
                     {
                         case var @case when @case < 0.0f: // Lower than minimum value
                             {
-                                LogMsg("MechanicalPosition", MessageLevel.Error, "Invalid value: " + mechanicalPosition.ToString());
+                                LogError("MechanicalPosition", "Invalid value: " + mechanicalPosition.ToString());
                                 break;
                             }
 
                         case var case1 when case1 >= 360.0f: // Higher than maximum value
                             {
-                                LogMsg("MechanicalPosition", MessageLevel.Error, "Invalid value: " + mechanicalPosition.ToString()); // OK value
+                                LogError("MechanicalPosition", "Invalid value: " + mechanicalPosition.ToString()); // OK value
                                 break;
                             }
 
                         default:
                             {
-                                LogMsg("MechanicalPosition", MessageLevel.OK, mechanicalPosition.ToString());
+                                LogOK("MechanicalPosition", mechanicalPosition.ToString());
                                 break;
                             }
                     }
@@ -397,7 +397,7 @@ namespace ConformU
                     // For information show the sync offset, if possible, using OFFSET = SKYPOSITION - MECHANICALPOSITION
                     if (canReadPosition) // Can read synced position and mechanical position
                     {
-                        LogMsgInfo("MechanicalPosition", $"Rotator sync offset: {m_RotatorPosition - mechanicalPosition}");
+                        LogInfo("MechanicalPosition", $"Rotator sync offset: {m_RotatorPosition - mechanicalPosition}");
                     }
                 }
                 catch (Exception ex)
@@ -454,7 +454,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "RotatorPropertyTestSingle: Unknown test type - " + p_Type.ToString());
+                            LogError(p_Name, "RotatorPropertyTestSingle: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -463,19 +463,19 @@ namespace ConformU
                 {
                     case var @case when @case < p_Min: // Lower than minimum value
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "Invalid value: " + RotatorPropertyTestSingleRet.ToString());
+                            LogError(p_Name, "Invalid value: " + RotatorPropertyTestSingleRet.ToString());
                             break;
                         }
 
                     case var case1 when case1 >= p_Max: // Higher than maximum value
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "Invalid value: " + RotatorPropertyTestSingleRet.ToString()); // OK value
+                            LogError(p_Name, "Invalid value: " + RotatorPropertyTestSingleRet.ToString()); // OK value
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.OK, RotatorPropertyTestSingleRet.ToString());
+                            LogOK(p_Name, RotatorPropertyTestSingleRet.ToString());
                             break;
                         }
                 }
@@ -491,14 +491,14 @@ namespace ConformU
         public override void CheckMethods()
         {
             LogCallToDriver("AccessChecks", "About to get Connected property");
-            LogMsg("CheckMethods", MessageLevel.Debug, "Rotator is connected: " + m_Rotator.Connected.ToString());
+            LogDebug("CheckMethods", "Rotator is connected: " + m_Rotator.Connected.ToString());
 
             // Halt - Optional (V1,V2 and V3)
             try
             {
                 LogCallToDriver("Halt", $"About to call Halt method");
                 m_Rotator.Halt();
-                LogMsg("Halt", MessageLevel.OK, "Halt command successful");
+                LogOK("Halt", "Halt command successful");
             }
             catch (Exception ex)
             {
@@ -574,7 +574,7 @@ namespace ConformU
                     }
                     else // Message saying we are skipping tests because we can't read required properties
                     {
-                        LogMsgInfo("MoveMechanical", "Skipping tests because either the MechanicalPosition or Position property cannot be read.");
+                        LogInfo("MoveMechanical", "Skipping tests because either the MechanicalPosition or Position property cannot be read.");
                     }
                 }
                 catch (Exception ex)
@@ -596,7 +596,7 @@ namespace ConformU
                     }
                     else // Message saying we are skipping tests because we can't read required properties
                     {
-                        LogMsgInfo("Sync", "Skipping tests because either the MechanicalPosition or Position property cannot be read.");
+                        LogInfo("Sync", "Skipping tests because either the MechanicalPosition or Position property cannot be read.");
                     }
                 }
                 catch (Exception ex)
@@ -616,17 +616,17 @@ namespace ConformU
             {
                 LogCallToDriver("Sync", $"About to call Sync method");
                 m_Rotator.Sync(SyncAngle);
-                LogMsgOK("Sync", "Synced OK");
+                LogOK("Sync", "Synced OK");
 
                 // Check that Position and MechanicalPosition are now the same
                 syncAngleDifference = m_Rotator.Position - SyncAngle;
                 if (Math.Abs(syncAngleDifference) < ROTATOR_POSITION_TOLERANCE)
                 {
-                    LogMsgOK("Sync", $"Rotator Position has synced to {SyncAngle} OK.");
+                    LogOK("Sync", $"Rotator Position has synced to {SyncAngle} OK.");
                 }
                 else
                 {
-                    LogMsgIssue("Sync", $"Rotator Position is more than {ROTATOR_POSITION_TOLERANCE} different from requested position {SyncAngle}.");
+                    LogIssue("Sync", $"Rotator Position is more than {ROTATOR_POSITION_TOLERANCE} different from requested position {SyncAngle}.");
                 }
             }
             catch (Exception ex)
@@ -640,7 +640,7 @@ namespace ConformU
             float l_RotatorStartPosition = default, rotatorPosition;
             double l_OKLimit, l_PositionOffset;
             LogCallToDriver(p_Name, $"About to get Position property");
-            LogMsg("RotatorMoveTest", MessageLevel.Debug, "Start value, position: " + p_Value.ToString("0.000") + " " + m_Rotator.Position.ToString("0.000"));
+            LogDebug("RotatorMoveTest", "Start value, position: " + p_Value.ToString("0.000") + " " + m_Rotator.Position.ToString("0.000"));
             try
             {
                 // Move to requested position
@@ -648,43 +648,43 @@ namespace ConformU
                 {
                     case RotatorPropertyMethod.Move:
                         {
-                            LogMsg("RotatorMoveTest", MessageLevel.Debug, "Reading rotator start position: " + canReadPosition);
+                            LogDebug("RotatorMoveTest", "Reading rotator start position: " + canReadPosition);
                             if (canReadPosition) // Get us to a starting point of 10 degrees
                             {
                                 LogCallToDriver(p_Name, $"About to get Position property");
                                 l_RotatorStartPosition = m_Rotator.Position;
                             }
 
-                            LogMsg("RotatorMoveTest", MessageLevel.Debug, "Starting relative move");
+                            LogDebug("RotatorMoveTest", "Starting relative move");
                             LogCallToDriver(p_Name, $"About to call Move method");
                             m_Rotator.Move(p_Value);
-                            LogMsg("RotatorMoveTest", MessageLevel.Debug, "Starting relative move");
+                            LogDebug("RotatorMoveTest", "Starting relative move");
                             break;
                         }
 
                     case RotatorPropertyMethod.MoveAbsolute:
                         {
-                            LogMsg("RotatorMoveTest", MessageLevel.Debug, "Starting absolute move");
+                            LogDebug("RotatorMoveTest", "Starting absolute move");
                             l_RotatorStartPosition = 0.0f;
                             LogCallToDriver(p_Name, $"About to call MoveAbsolute method");
                             m_Rotator.MoveAbsolute(p_Value);
-                            LogMsg("RotatorMoveTest", MessageLevel.Debug, "Completed absolute move");
+                            LogDebug("RotatorMoveTest", "Completed absolute move");
                             break;
                         }
 
                     case RotatorPropertyMethod.MoveMechanical:
                         {
-                            LogMsg("RotatorMoveTest", MessageLevel.Debug, "Starting mechanical move");
+                            LogDebug("RotatorMoveTest", "Starting mechanical move");
                             l_RotatorStartPosition = 0.0f;
                             LogCallToDriver(p_Name, $"About to call MoveMechanical method");
                             m_Rotator.MoveMechanical(p_Value);
-                            LogMsg("RotatorMoveTest", MessageLevel.Debug, "Completed mechanical move");
+                            LogDebug("RotatorMoveTest", "Completed mechanical move");
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "RotatorMoveTest: Unknown test type - " + p_type.ToString());
+                            LogError(p_Name, "RotatorMoveTest: Unknown test type - " + p_type.ToString());
                             break;
                         }
                 }
@@ -699,11 +699,11 @@ namespace ConformU
                                 if (canReadPosition)
                                 {
                                     LogCallToDriver(p_Name, $"About to get Position property");
-                                    LogMsg(p_Name, MessageLevel.OK, $"Asynchronous move successful - moved by {p_Value} degrees to: {m_Rotator.Position} degrees");
+                                    LogOK(p_Name, $"Asynchronous move successful - moved by {p_Value} degrees to: {m_Rotator.Position} degrees");
                                 }
                                 else
                                 {
-                                    LogMsg(p_Name, MessageLevel.OK, "Asynchronous move successful");
+                                    LogOK(p_Name, "Asynchronous move successful");
                                 }
 
                                 break;
@@ -719,11 +719,11 @@ namespace ConformU
                                 if (canReadPosition)
                                 {
                                     LogCallToDriver(p_Name, $"About to get Position property");
-                                    LogMsg(p_Name, MessageLevel.OK, $"Asynchronous move successful to: {m_Rotator.Position} degrees");
+                                    LogOK(p_Name, $"Asynchronous move successful to: {m_Rotator.Position} degrees");
                                 }
                                 else
                                 {
-                                    LogMsg(p_Name, MessageLevel.OK, "Asynchronous move successful");
+                                    LogOK(p_Name, "Asynchronous move successful");
                                 }
 
                                 break;
@@ -733,11 +733,11 @@ namespace ConformU
                 else if (canReadPosition) // Synchronous move
                 {
                     LogCallToDriver(p_Name, $"About to get Position property");
-                    LogMsg(p_Name, MessageLevel.OK, $"Synchronous move successful to: {m_Rotator.Position} degrees");
+                    LogOK(p_Name, $"Synchronous move successful to: {m_Rotator.Position} degrees");
                 }
                 else
                 {
-                    LogMsg(p_Name, MessageLevel.OK, "Synchronous move successful");
+                    LogOK(p_Name, "Synchronous move successful");
                 }
 
                 // Now test whether we got to where we expected to go
@@ -753,18 +753,18 @@ namespace ConformU
                     }
 
                     LogCallToDriver(p_Name, $"About to get Position property");
-                    LogMsg(p_Name + "1", MessageLevel.Debug, "Position, value, start, tolerance: " + m_Rotator.Position.ToString("0.000") + " " + p_Value.ToString("0.000") + " " + l_RotatorStartPosition.ToString("0.000") + " " + l_OKLimit.ToString("0.000"));
+                    LogDebug(p_Name + "1", "Position, value, start, tolerance: " + m_Rotator.Position.ToString("0.000") + " " + p_Value.ToString("0.000") + " " + l_RotatorStartPosition.ToString("0.000") + " " + l_OKLimit.ToString("0.000"));
                     LogCallToDriver(p_Name, $"About to get Position property");
                     rotatorPosition = m_Rotator.Position;
                     if (g_InterfaceVersion < 3) // Interface V1 and V2 behaviour
                     {
                         if (rotatorPosition < 0.0d)
-                            LogMsg(p_Name, MessageLevel.Info, "Rotator supports angles < 0.0");
+                            LogInfo(p_Name, "Rotator supports angles < 0.0");
                         if (rotatorPosition > 360.0d)
-                            LogMsg(p_Name, MessageLevel.Info, "Rotator supports angles > 360.0");
+                            LogInfo(p_Name, "Rotator supports angles > 360.0");
                     }
                     else if (rotatorPosition < 0.0d | rotatorPosition >= 360.0d) // Interface V3 behaviour (Position must be 0..359.99999...)
-                        LogMsg(p_Name, MessageLevel.Error, $"Rotator position {rotatorPosition:0.000} is outside the valid range: 0.0 to 359.99999...");
+                        LogError(p_Name, $"Rotator position {rotatorPosition:0.000} is outside the valid range: 0.0 to 359.99999...");
 
                     // Get the relevant position value
                     if (p_type == RotatorPropertyMethod.MoveMechanical) // Use the MechanicalPosition property
@@ -785,25 +785,25 @@ namespace ConformU
                     {
                         case 0.0d:
                             {
-                                LogMsg(p_Name, MessageLevel.OK, $"Rotator is at the expected position: {rotatorPosition}");
+                                LogOK(p_Name, $"Rotator is at the expected position: {rotatorPosition}");
                                 break;
                             }
 
                         case var @case when 0.0d <= @case && @case <= l_OKLimit:
                             {
-                                LogMsg(p_Name, MessageLevel.OK, $"Rotator is within {l_OKLimit:0.000)} {((l_PositionOffset <= 1.0d) ? " degree" : " degrees")} of the expected position: {rotatorPosition}");
+                                LogOK(p_Name, $"Rotator is within {l_OKLimit:0.000)} {((l_PositionOffset <= 1.0d) ? " degree" : " degrees")} of the expected position: {rotatorPosition}");
                                 break;
                             }
 
                         case var case1 when 0.0d <= case1 && case1 <= ROTATOR_INFO_TOLERANCE:
                             {
-                                LogMsg(p_Name, MessageLevel.Info, $"Rotator is {l_PositionOffset.ToString("0.000")} degrees from expected position: {rotatorPosition}");
+                                LogInfo(p_Name, $"Rotator is {l_PositionOffset.ToString("0.000")} degrees from expected position: {rotatorPosition}");
                                 break;
                             }
 
                         default:
                             {
-                                LogMsg(p_Name, MessageLevel.Issue, $"Rotator is {l_PositionOffset.ToString("0.000")} degrees from expected position {rotatorPosition}, which is more than the conformance value of {ROTATOR_INFO_TOLERANCE.ToString("0.0")} degrees");
+                                LogIssue(p_Name, $"Rotator is {l_PositionOffset.ToString("0.000")} degrees from expected position {rotatorPosition}, which is more than the conformance value of {ROTATOR_INFO_TOLERANCE.ToString("0.0")} degrees");
                                 break;
                             }
                     }
@@ -844,14 +844,14 @@ namespace ConformU
 
         private void RotatorWait(RotatorPropertyMethod p_type, string p_Name, float p_value, float p_RotatorStartPosition)
         {
-            LogMsg("RotatorWait", MessageLevel.Debug, "Entered RotatorWait");
+            LogDebug("RotatorWait", "Entered RotatorWait");
             if (m_CanReadIsMoving) // Can read IsMoving so test for asynchronous and synchronous behaviour
             {
-                LogMsg("RotatorWait", MessageLevel.Debug, "Can Read IsMoving OK");
+                LogDebug("RotatorWait", "Can Read IsMoving OK");
                 LogCallToDriver(p_Name, $"About to get Ismoving property");
                 if (m_Rotator.IsMoving)
                 {
-                    LogMsg("RotatorWait", MessageLevel.Debug, "Rotator is moving, waiting for move to complete");
+                    LogDebug("RotatorWait", "Rotator is moving, waiting for move to complete");
                     Status(StatusType.staTest, p_Name + " test");
                     Status(StatusType.staAction, "Waiting for move to complete");
                     LogCallToDriver(p_Name, $"About to get Position and Ismoving properties repeatedly");
@@ -878,7 +878,7 @@ namespace ConformU
 
                     }
                     while (m_Rotator.IsMoving);
-                    LogMsg("RotatorWait", MessageLevel.Debug, "Rotator has stopped moving");
+                    LogDebug("RotatorWait", "Rotator has stopped moving");
                     Status(StatusType.staAction, "");
                     m_LastMoveWasAsync = true;
                 }
@@ -889,7 +889,7 @@ namespace ConformU
             }
             else // Can only test for synchronous move
             {
-                LogMsg("RotatorWait", MessageLevel.Debug, "Cannot Read IsMoving");
+                LogDebug("RotatorWait", "Cannot Read IsMoving");
                 m_LastMoveWasAsync = false;
             }
         }
@@ -933,7 +933,7 @@ namespace ConformU
             }
             else
             {
-                LogMsg("Position", MessageLevel.Info, "Skipping test as property is not supported");
+                LogInfo("Position", "Skipping test as property is not supported");
             }
 
             // TargetPosition
@@ -943,7 +943,7 @@ namespace ConformU
             }
             else
             {
-                LogMsg("TargetPosition", MessageLevel.Info, "Skipping test as property is not supported");
+                LogInfo("TargetPosition", "Skipping test as property is not supported");
             }
 
             // StepSize
@@ -953,7 +953,7 @@ namespace ConformU
             }
             else
             {
-                LogMsg("StepSize", MessageLevel.Info, "Skipping test as property is not supported");
+                LogInfo("StepSize", "Skipping test as property is not supported");
             }
 
             // IsMoving
@@ -963,7 +963,7 @@ namespace ConformU
             }
             else
             {
-                LogMsg("IsMoving", MessageLevel.Info, "Skipping test as property is not supported");
+                LogInfo("IsMoving", "Skipping test as property is not supported");
             }
         }
 
@@ -1011,7 +1011,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogMsg(p_Name, MessageLevel.Error, "RotatorPerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogError(p_Name, "RotatorPerformanceTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }
@@ -1031,32 +1031,32 @@ namespace ConformU
                 {
                     case var @case when @case > 10.0d:
                         {
-                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case var case1 when 2.0d <= case1 && case1 <= 10.0d:
                         {
-                            LogMsg(p_Name, MessageLevel.OK, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogOK(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case var case2 when 1.0d <= case2 && case2 <= 2.0d:
                         {
-                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogMsg(p_Name, MessageLevel.Info, "Unable to complete test: " + ex.Message);
+                LogInfo(p_Name, "Unable to complete test: " + ex.Message);
             }
         }
 

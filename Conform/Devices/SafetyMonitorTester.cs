@@ -45,7 +45,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogMsg("Dispose", MessageLevel.Debug, "Disposing of test device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("Dispose", "Disposing of test device: " + disposing.ToString() + " " + disposedValue.ToString());
             if (!disposedValue)
             {
                 if (disposing)
@@ -125,7 +125,7 @@ namespace ConformU
                         throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
 
-                LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
+                LogDebug("CreateDevice", "Successfully created driver");
                 baseClassDevice = m_SafetyMonitor; // Assign the driver to the base class
 
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
@@ -133,7 +133,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogMsg("CreateDevice", MessageLevel.Debug, "Exception thrown: " + ex.Message);
+                LogDebug("CreateDevice", "Exception thrown: " + ex.Message);
                 throw; // Re throw exception 
             }
 
@@ -148,13 +148,13 @@ namespace ConformU
                 LogCallToDriver("IsSafe", "About to get IsSafe property");
                 m_IsSafe = m_SafetyMonitor.IsSafe;
                 if (!m_IsSafe)
-                    LogMsg("IsSafe", MessageLevel.OK, "Reports false before connection");
+                    LogOK("IsSafe", "Reports false before connection");
                 else
-                    LogMsg("IsSafe", MessageLevel.Issue, "Reports true before connection rather than false");
+                    LogIssue("IsSafe", "Reports true before connection rather than false");
             }
             catch (Exception ex)
             {
-                LogMsg("IsSafe", MessageLevel.Error, "Cannot confirm that IsSafe is false before connection because it threw an exception: " + ex.Message);
+                LogError("IsSafe", "Cannot confirm that IsSafe is false before connection because it threw an exception: " + ex.Message);
             }
         }
         public override bool Connected
@@ -199,13 +199,13 @@ namespace ConformU
                         {
                             m_IsSafe = m_SafetyMonitor.IsSafe;
                             LogCallToDriver("IsSafe", "About to get IsSafe property");
-                            LogMsg(p_Name, MessageLevel.OK, m_IsSafe.ToString());
+                            LogOK(p_Name, m_IsSafe.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "RequiredPropertiesTest: Unknown test type " + p_Type.ToString());
+                            LogError(p_Name, "RequiredPropertiesTest: Unknown test type " + p_Type.ToString());
                             break;
                         }
                 }
@@ -238,7 +238,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogMsg(p_Name, MessageLevel.Error, "PerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogError(p_Name, "PerformanceTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }
@@ -258,32 +258,32 @@ namespace ConformU
                 {
                     case object _ when l_Rate > 10.0:
                         {
-                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case object _ when 2.0 <= l_Rate && l_Rate <= 10.0:
                         {
-                            LogMsg(p_Name, MessageLevel.OK, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogOK(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case object _ when 1.0 <= l_Rate && l_Rate <= 2.0:
                         {
-                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogMsg(p_Name, MessageLevel.Info, "Unable to complete test: " + ex.ToString());
+                LogInfo(p_Name, "Unable to complete test: " + ex.ToString());
             }
         }
     }

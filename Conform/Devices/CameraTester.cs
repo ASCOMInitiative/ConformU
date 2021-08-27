@@ -171,7 +171,7 @@ namespace ConformU
         private bool disposedValue = false;        // To detect redundant calls
         protected override void Dispose(bool disposing)
         {
-            LogMsg("Dispose", MessageLevel.Debug, "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("Dispose", "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
             if (!disposedValue)
             {
                 if (disposing)
@@ -257,12 +257,12 @@ namespace ConformU
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
                 baseClassDevice = m_Camera; // Assign the driver to the base class
                 g_Stop = false;
-                LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
+                LogDebug("CreateDevice", "Successfully created driver");
 
             }
             catch (Exception ex)
             {
-                LogMsg("CreateDevice", MessageLevel.Debug, "Exception thrown: " + ex.Message);
+                LogDebug("CreateDevice", "Exception thrown: " + ex.Message);
                 throw; // Re throw exception 
             }
 
@@ -273,12 +273,12 @@ namespace ConformU
         {
             get
             {
-                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get Connected");
+                if (settings.DisplayMethodCalls) LogComment("ConformanceCheck", "About to get Connected");
                 return m_Camera.Connected;
             }
             set
             {
-                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set Connected");
+                if (settings.DisplayMethodCalls) LogComment("ConformanceCheck", "About to set Connected");
                 m_Camera.Connected = value;
                 g_Stop = false;
             }
@@ -305,69 +305,69 @@ namespace ConformU
                     case CanType.tstCanAbortExposure:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CanAbortExposure");
+                                LogComment("ConformanceCheck", "About to get CanAbortExposure");
                             m_CanAbortExposure = m_Camera.CanAbortExposure;
-                            LogMsg(p_Name, MessageLevel.OK, m_CanAbortExposure.ToString());
+                            LogOK(p_Name, m_CanAbortExposure.ToString());
                             break;
                         }
 
                     case CanType.tstCanAsymmetricBin:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CanAsymmetricBin");
+                                LogComment("ConformanceCheck", "About to get CanAsymmetricBin");
                             m_CanAsymmetricBin = m_Camera.CanAsymmetricBin;
-                            LogMsg(p_Name, MessageLevel.OK, m_CanAsymmetricBin.ToString());
+                            LogOK(p_Name, m_CanAsymmetricBin.ToString());
                             break;
                         }
 
                     case CanType.tstCanGetCoolerPower:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CanGetCoolerPower");
+                                LogComment("ConformanceCheck", "About to get CanGetCoolerPower");
                             m_CanGetCoolerPower = m_Camera.CanGetCoolerPower;
-                            LogMsg(p_Name, MessageLevel.OK, m_CanGetCoolerPower.ToString());
+                            LogOK(p_Name, m_CanGetCoolerPower.ToString());
                             break;
                         }
 
                     case CanType.tstCanPulseGuide:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CanPulseGuide");
+                                LogComment("ConformanceCheck", "About to get CanPulseGuide");
                             m_CanPulseGuide = m_Camera.CanPulseGuide;
-                            LogMsg(p_Name, MessageLevel.OK, m_CanPulseGuide.ToString());
+                            LogOK(p_Name, m_CanPulseGuide.ToString());
                             break;
                         }
 
                     case CanType.tstCanSetCCDTemperature:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CanSetCCDTemperature");
+                                LogComment("ConformanceCheck", "About to get CanSetCCDTemperature");
                             m_CanSetCCDTemperature = m_Camera.CanSetCCDTemperature;
-                            LogMsg(p_Name, MessageLevel.OK, m_CanSetCCDTemperature.ToString());
+                            LogOK(p_Name, m_CanSetCCDTemperature.ToString());
                             break;
                         }
 
                     case CanType.tstCanStopExposure:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CanStopExposure");
+                                LogComment("ConformanceCheck", "About to get CanStopExposure");
                             m_CanStopExposure = m_Camera.CanStopExposure;
-                            LogMsg(p_Name, MessageLevel.OK, m_CanStopExposure.ToString());
+                            LogOK(p_Name, m_CanStopExposure.ToString());
                             break;
                         }
 
                     case CanType.tstCanFastReadout:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CanFastReadout");
+                                LogComment("ConformanceCheck", "About to get CanFastReadout");
                             m_CanFastReadout = m_Camera.CanFastReadout;
-                            LogMsg(p_Name, MessageLevel.OK, m_CanFastReadout.ToString());
+                            LogOK(p_Name, m_CanFastReadout.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "Conform:CanTest: Unknown test type " + p_Type.ToString());
+                            LogError(p_Name, "Conform:CanTest: Unknown test type " + p_Type.ToString());
                             break;
                         }
                 }
@@ -386,12 +386,12 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get Description");
+                        LogComment("ConformanceCheck", "About to get Description");
                     l_VStringPtr = m_Camera.Description.ToUpper().IndexOf("VERSION "); // Point at the start of the version string
                     if (l_VStringPtr >= 0)
                     {
                         if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get Description");
+                            LogComment("ConformanceCheck", "About to get Description");
                         string l_VString = m_Camera.Description.ToUpper().Substring(l_VStringPtr, 8);
                         l_VStringPtr = l_VString.IndexOf(".");
                         if (l_VStringPtr > 0)
@@ -408,62 +408,61 @@ namespace ConformU
                                 l_V1 = l_V1 * 1000000 + l_V2 * 1000 + l_V3;
                                 if (l_V1 < 5000008)
                                 {
-                                    LogMsg("Version Check", MessageLevel.Issue, "*** This version of the camera simulator has known conformance issues, ***");
-                                    LogMsg("Version Check", MessageLevel.Issue, "*** please update it from the ASCOM site https://ascom-standards.org/Downloads/Index.htm ***");
-                                    LogMsg("", MessageLevel.TestAndMessage, "");
+                                    LogIssue("Version Check", "*** This version of the camera simulator has known conformance issues, ***");
+                                    LogIssue("Version Check", "*** please update it from the ASCOM site https://ascom-standards.org/Downloads/Index.htm ***");
+                                    LogNewLine();
                                 }
                             }
                         }
                     }
                     else
                     {
-                        LogMsg("Version Check", MessageLevel.Issue, "*** This version of the camera simulator has known conformance issues, ***");
-                        LogMsg("Version Check", MessageLevel.Issue, "*** please update it from the ASCOM site https://ascom-standards.org/Downloads/Index.htm ***");
-                        LogMsg("", MessageLevel.TestAndMessage, "");
+                        LogIssue("Version Check", "*** This version of the camera simulator has known conformance issues, ***");
+                        LogIssue("Version Check", "*** please update it from the ASCOM site https://ascom-standards.org/Downloads/Index.htm ***");
+                        LogNewLine();
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogMsg("ConformanceCheck", MessageLevel.Error, ex.ToString());
+                    LogError("ConformanceCheck", ex.ToString());
                 }
             }
 
             // Run camera tests
             if (!cancellationToken.IsCancellationRequested)
             {
-                LogMsg("", MessageLevel.TestAndMessage, "");
+                LogNewLine();
                 // Check LastError throws an exception
-                LogMsg("Last Tests", MessageLevel.TestAndMessage, "");
-                try
+                LogTestOnly("Last Tests");                try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get LastExposureDuration");
+                        LogComment("ConformanceCheck", "About to get LastExposureDuration");
                     m_LastExposureDuration = m_Camera.LastExposureDuration;
-                    LogMsg("LastExposureDuration", MessageLevel.Error, "LastExposureDuration did not generate an exception when called before an exposure was made");
+                    LogError("LastExposureDuration", "LastExposureDuration did not generate an exception when called before an exposure was made");
                 }
                 catch (COMException)
                 {
-                    LogMsg("LastExposureDuration", MessageLevel.OK, "LastExposureDuration correctly generated a COM exception before an exposure was made");
+                    LogOK("LastExposureDuration", "LastExposureDuration correctly generated a COM exception before an exposure was made");
                 }
                 catch (Exception)
                 {
-                    LogMsg("LastExposureDuration", MessageLevel.OK, "LastExposureDuration correctly generated a .NET exception before an exposure was made");
+                    LogOK("LastExposureDuration", "LastExposureDuration correctly generated a .NET exception before an exposure was made");
                 }
 
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get LastExposureStartTime");
+                        LogComment("ConformanceCheck", "About to get LastExposureStartTime");
                     m_LastExposureStartTime = m_Camera.LastExposureStartTime;
-                    LogMsg("LastExposureStartTime", MessageLevel.Error, "LastExposureStartTime did not generate an exception when called before an exposure was made");
+                    LogError("LastExposureStartTime", "LastExposureStartTime did not generate an exception when called before an exposure was made");
                 }
                 catch (COMException)
                 {
-                    LogMsg("LastExposureStartTime", MessageLevel.OK, "LastExposureStartTime correctly generated a COM exception before an exposure was made");
+                    LogOK("LastExposureStartTime", "LastExposureStartTime correctly generated a COM exception before an exposure was made");
                 }
                 catch (Exception)
                 {
-                    LogMsg("LastExposureStartTime", MessageLevel.OK, "LastExposureStartTime correctly generated a .NET exception before an exposure was made");
+                    LogOK("LastExposureStartTime", "LastExposureStartTime correctly generated a .NET exception before an exposure was made");
                 }
             }
         }
@@ -482,7 +481,7 @@ namespace ConformU
             if (!m_CanAsymmetricBin)
             {
                 if (m_MaxBinX != m_MaxBinY)
-                    LogMsg("CanAsymmetricBin", MessageLevel.Error, "CanAsymmetricBin is false but MaxBinX and MaxBinY are not equal!");
+                    LogError("CanAsymmetricBin", "CanAsymmetricBin is false but MaxBinX and MaxBinY are not equal!");
             }
 
             m_BinX = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.BinX, "BinX Read", 1, 1)); if (cancellationToken.IsCancellationRequested)
@@ -492,82 +491,82 @@ namespace ConformU
             if (!m_CanAsymmetricBin)
             {
                 if (m_BinX != m_BinY)
-                    LogMsg("CanAsymmetricBin", MessageLevel.Error, "CanAsymmetricBin is false but BinX and BinY are not equal!");
+                    LogError("CanAsymmetricBin", "CanAsymmetricBin is false but BinX and BinY are not equal!");
             }
 
             // Test writing low and high Bin values outside maximum range
             try // Invalid low value
             {
                 if (settings.DisplayMethodCalls)
-                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set BinX");
+                    LogComment("ConformanceCheck", "About to set BinX");
                 m_Camera.BinX = 0;
-                LogMsg("BinX Write", MessageLevel.Error, "Invalid value 0 written but no exception generated");
+                LogError("BinX Write", "Invalid value 0 written but no exception generated");
             }
             catch (Exception)
             {
-                LogMsg("BinX Write", MessageLevel.OK, "Exception correctly generated on setting BinX to 0");
+                LogOK("BinX Write", "Exception correctly generated on setting BinX to 0");
             }
             try // Invalid high value
             {
                 if (settings.DisplayMethodCalls)
-                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set BinX");
+                    LogComment("ConformanceCheck", "About to set BinX");
                 m_Camera.BinX = (short)(m_MaxBinX + 1);
-                LogMsg("BinX Write", MessageLevel.Error, "Invalid value " + m_MaxBinX + 1 + " written but no exception generated");
+                LogError("BinX Write", "Invalid value " + m_MaxBinX + 1 + " written but no exception generated");
             }
             catch (Exception)
             {
-                LogMsg("BinX Write", MessageLevel.OK, "Exception correctly generated on setting BinX to " + m_MaxBinX + 1);
+                LogOK("BinX Write", "Exception correctly generated on setting BinX to " + m_MaxBinX + 1);
             }
             try // Invalid low value
             {
                 if (settings.DisplayMethodCalls)
-                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set BinY");
+                    LogComment("ConformanceCheck", "About to set BinY");
                 m_Camera.BinY = 0;
-                LogMsg("BinY Write", MessageLevel.Error, "Invalid value 0 written but no exception generated");
+                LogError("BinY Write", "Invalid value 0 written but no exception generated");
             }
             catch (Exception)
             {
-                LogMsg("BinY Write", MessageLevel.OK, "Exception correctly generated on setting BinY to 0");
+                LogOK("BinY Write", "Exception correctly generated on setting BinY to 0");
             }
             try // Invalid high value
             {
                 if (settings.DisplayMethodCalls)
-                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set BinY");
+                    LogComment("ConformanceCheck", "About to set BinY");
                 m_Camera.BinY = (short)(m_MaxBinY + 1);
-                LogMsg("BinY Write", MessageLevel.Error, "Invalid value " + m_MaxBinY + 1 + " written but no exception generated");
+                LogError("BinY Write", "Invalid value " + m_MaxBinY + 1 + " written but no exception generated");
             }
             catch (Exception)
             {
-                LogMsg("BinY Write", MessageLevel.OK, "Exception correctly generated on setting BinY to " + m_MaxBinY + 1);
+                LogOK("BinY Write", "Exception correctly generated on setting BinY to " + m_MaxBinY + 1);
             }
 
             // Use either the maximum values supplied by the camera driver or the maximum values defined in Conform's setup, if these have been set
             if ((settings.CameraMaxBinX > 0) | (settings.CameraMaxBinY > 0))
-                LogMsg("", MessageLevel.TestAndMessage, ""); // Insert a blank line if required
+                LogNewLine(); // Insert a blank line if required
             if (settings.CameraMaxBinX > 0)
             {
                 l_MaxBinX = settings.CameraMaxBinX;
-                LogMsg("BinXY Write", MessageLevel.Comment, string.Format("Test range set to MaxBinX = {0} by Conform configuration, camera MaxBinX = {1}", l_MaxBinX, m_MaxBinX));
+                LogComment("BinXY Write", string.Format("Test range set to MaxBinX = {0} by Conform configuration, camera MaxBinX = {1}", l_MaxBinX, m_MaxBinX));
             }
             else
                 l_MaxBinX = m_MaxBinX;
             if (settings.CameraMaxBinY > 0)
             {
                 l_MaxBinY = settings.CameraMaxBinY;
-                LogMsg("BinXY Write", MessageLevel.Comment, string.Format("Test range set to MaxBinY = {0} by Conform configuration, camera MaxBinY = {1}", l_MaxBinY, m_MaxBinY));
+                LogComment("BinXY Write", string.Format("Test range set to MaxBinY = {0} by Conform configuration, camera MaxBinY = {1}", l_MaxBinY, m_MaxBinY));
             }
             else
                 l_MaxBinY = m_MaxBinY;
 
             if ((settings.CameraMaxBinX > m_MaxBinX) | (settings.CameraMaxBinY > m_MaxBinY))
-                LogMsg("", MessageLevel.TestAndMessage, ""); // Insert a blank line if required
+                LogNewLine(); // Insert a blank line if required
             if (settings.CameraMaxBinX > m_MaxBinX)
-                LogMsg("BinXY Write", MessageLevel.Comment, string.Format("WARNING - Conform's configured MaxBinX: {0} is greater than the camera's reported MaxBinX: {1}!", l_MaxBinX, m_MaxBinX));
+                LogComment("BinXY Write", string.Format("WARNING - Conform's configured MaxBinX: {0} is greater than the camera's reported MaxBinX: {1}!", l_MaxBinX, m_MaxBinX));
             if (settings.CameraMaxBinY > m_MaxBinY)
-                LogMsg("BinXY Write", MessageLevel.Comment, string.Format("WARNING - Conform's configured MaxBinY: {0} is greater than the camera's reported MaxBinY: {1}!", l_MaxBinY, m_MaxBinY));
+                LogComment("BinXY Write", string.Format("WARNING - Conform's configured MaxBinY: {0} is greater than the camera's reported MaxBinY: {1}!", l_MaxBinY, m_MaxBinY));
 
             if ((settings.CameraMaxBinX > 0) | (settings.CameraMaxBinY > 0))
-                LogMsg("", MessageLevel.TestAndMessage, ""); // Insert a blank line if required
+                LogNewLine(); // Insert a blank line if required
 
             // Write BinX and BinY
             if (m_CanAsymmetricBin)
@@ -579,14 +578,14 @@ namespace ConformU
                         try
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set BinY");
+                                LogComment("ConformanceCheck", "About to set BinY");
                             m_Camera.BinY = (short)l_BinY;
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set BinX");
+                                    LogComment("ConformanceCheck", "About to set BinX");
                                 m_Camera.BinX = (short)l_BinX;
-                                LogMsg("BinXY Write", MessageLevel.OK, "Successfully set asymmetric xy binning: " + l_BinX + " x " + l_BinY);
+                                LogOK("BinXY Write", "Successfully set asymmetric xy binning: " + l_BinX + " x " + l_BinY);
                             }
                             catch (Exception ex1)
                             {
@@ -606,14 +605,14 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set BinY");
+                            LogComment("ConformanceCheck", "About to set BinY");
                         m_Camera.BinY = (short)l_BinX;
                         try
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set BinX");
+                                LogComment("ConformanceCheck", "About to set BinX");
                             m_Camera.BinX = (short)l_BinX;
-                            LogMsg("BinXY Write", MessageLevel.OK, "Successfully set symmetric xy binning: " + l_BinX + " x " + l_BinX);
+                            LogOK("BinXY Write", "Successfully set symmetric xy binning: " + l_BinX + " x " + l_BinX);
                         }
                         catch (Exception ex1)
                         {
@@ -628,7 +627,7 @@ namespace ConformU
 
             // Reset binning to 1x1 state
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set BinX");
+                LogComment("ConformanceCheck", "About to set BinX");
             try
             {
                 m_Camera.BinX = 1;
@@ -637,7 +636,7 @@ namespace ConformU
             {
             }
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set BinY");
+                LogComment("ConformanceCheck", "About to set BinY");
             try
             {
                 m_Camera.BinY = 1;
@@ -664,7 +663,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set CoolerOn");
+                    LogComment("ConformanceCheck", "About to set CoolerOn");
                 l_OriginalCoolerState = m_Camera.CoolerOn;
                 if (l_OriginalCoolerState)
                     l_TargetCoolerState = "off";
@@ -675,16 +674,16 @@ namespace ConformU
                     if (l_OriginalCoolerState)
                     {
                         if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set CoolerOn");
+                            LogComment("ConformanceCheck", "About to set CoolerOn");
                         m_Camera.CoolerOn = false;
                     }
                     else
                     {
                         if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set CoolerOn");
+                            LogComment("ConformanceCheck", "About to set CoolerOn");
                         m_Camera.CoolerOn = true;
                     }
-                    LogMsg("CoolerOn Write", MessageLevel.OK, "Successfully changed CoolerOn state");
+                    LogOK("CoolerOn Write", "Successfully changed CoolerOn state");
                 }
                 catch (Exception ex)
                 {
@@ -692,7 +691,7 @@ namespace ConformU
                 }
                 // Restore Cooler state
                 if (settings.DisplayMethodCalls)
-                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set CoolerOn");
+                    LogComment("ConformanceCheck", "About to set CoolerOn");
                 try
                 {
                     m_Camera.CoolerOn = l_OriginalCoolerState;
@@ -721,32 +720,32 @@ namespace ConformU
             m_ImageReady = CameraPropertyTestBoolean(CamPropertyType.ImageReady, "ImageReady", false); if (cancellationToken.IsCancellationRequested)
                 return;
             if (m_ImageReady)
-                LogMsg("ImageReady", MessageLevel.Error, "Image is flagged as ready but no exposure has been started!");
+                LogError("ImageReady", "Image is flagged as ready but no exposure has been started!");
             if (m_ImageReady)
             {
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ImageArray");
+                        LogComment("ConformanceCheck", "About to get ImageArray");
                     m_ImageArray = (int[,])m_Camera.ImageArray;
-                    LogMsg("ImageArray", MessageLevel.Error, "No image has been taken but ImageArray has not generated an exception");
+                    LogError("ImageArray", "No image has been taken but ImageArray has not generated an exception");
                 }
                 catch (Exception)
                 {
-                    LogMsg("ImageArray", MessageLevel.OK, "Exception correctly generated before an image has been taken");
+                    LogOK("ImageArray", "Exception correctly generated before an image has been taken");
                 }
             }
             else
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ImageArray");
+                        LogComment("ConformanceCheck", "About to get ImageArray");
                     m_ImageArray = (int[,])m_Camera.ImageArray;
-                    LogMsg("ImageArray", MessageLevel.Error, "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
+                    LogError("ImageArray", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                 }
                 catch (Exception)
                 {
-                    LogMsg("ImageArray", MessageLevel.OK, "Exception correctly generated when ImageReady is false");
+                    LogOK("ImageArray", "Exception correctly generated when ImageReady is false");
                 }
 
             m_ImageArray = null;
@@ -759,27 +758,27 @@ namespace ConformU
                 {
                     object ImageArrayVariantObject;
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ImageArrayVariant");
+                        LogComment("ConformanceCheck", "About to get ImageArrayVariant");
                     ImageArrayVariantObject = m_Camera.ImageArrayVariant;
                     m_ImageArrayVariant = (int[,])ImageArrayVariantObject;
-                    LogMsg("ImageArrayVariant", MessageLevel.Error, "No image has been taken but ImageArray has not generated an exception");
+                    LogError("ImageArrayVariant", "No image has been taken but ImageArray has not generated an exception");
                 }
                 catch (Exception)
                 {
-                    LogMsg("ImageArrayVariant", MessageLevel.OK, "Exception correctly generated before an image has been taken");
+                    LogOK("ImageArrayVariant", "Exception correctly generated before an image has been taken");
                 }
             }
             else
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ImageArrayVariant");
+                        LogComment("ConformanceCheck", "About to get ImageArrayVariant");
                     m_ImageArrayVariant = (int[,])m_Camera.ImageArrayVariant;
-                    LogMsg("ImageArrayVariant", MessageLevel.Error, "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
+                    LogError("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                 }
                 catch (Exception)
                 {
-                    LogMsg("ImageArrayVariant", MessageLevel.OK, "Exception correctly generated when ImageReady is false");
+                    LogOK("ImageArrayVariant", "Exception correctly generated when ImageReady is false");
                 }
 
             try
@@ -809,7 +808,7 @@ namespace ConformU
             m_IsPulseGuiding = CameraPropertyTestBoolean(CamPropertyType.IsPulseGuiding, "IsPulseGuiding", false); if (cancellationToken.IsCancellationRequested)
                 return;
             if (m_IsPulseGuiding)
-                LogMsg("IsPulseGuiding", MessageLevel.Error, "Camera is showing pulse guiding underway although no PulseGuide command has been issued!");
+                LogError("IsPulseGuiding", "Camera is showing pulse guiding underway although no PulseGuide command has been issued!");
 
             m_MaxADU = CameraPropertyTestInteger(CamPropertyType.MaxADU, "MaxADU", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested)
                 return;
@@ -834,9 +833,9 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set SetCCDTemperature");
+                        LogComment("ConformanceCheck", "About to set SetCCDTemperature");
                     m_Camera.SetCCDTemperature = 0.0; // Try an acceptable value
-                    LogMsg("SetCCDTemperature Write", MessageLevel.OK, "Successfully wrote 0.0");
+                    LogOK("SetCCDTemperature Write", "Successfully wrote 0.0");
 
                     // Execution only gets here if the CCD temperature can be set successfully
                     bool l_ExceptionGenerated;
@@ -845,7 +844,7 @@ namespace ConformU
                     // Find low setpoint at which an exception is generated, stop at -280 as this is unphysical
                     l_ExceptionGenerated = false;
                     l_SetPoint = -0.0;
-                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set SetCCDTemperature multiple times...");
+                    LogComment("ConformanceCheck", "About to set SetCCDTemperature multiple times...");
                     do
                     {
                         try
@@ -876,19 +875,19 @@ namespace ConformU
                         }// Reached lower limit
 
                         if (l_ExceptionGenerated)
-                            LogMsg("SetCCDTemperature Write", MessageLevel.Info, $"Setpoint can be set to {MIN_CAMERA_SETPOINT_TEMPERATURE} degrees");
+                            LogInfo("SetCCDTemperature Write", $"Setpoint can be set to {MIN_CAMERA_SETPOINT_TEMPERATURE} degrees");
                         else
-                            LogMsg("SetCCDTemperature Write", MessageLevel.Issue, $"Setpoint can be set below {MIN_CAMERA_SETPOINT_TEMPERATURE} degrees, which is below absolute zero!");
+                            LogIssue("SetCCDTemperature Write", $"Setpoint can be set below {MIN_CAMERA_SETPOINT_TEMPERATURE} degrees, which is below absolute zero!");
                     }
                     else
-                        LogMsg("SetCCDTemperature Write", MessageLevel.Info, $"Setpoint lower limit found in the range {l_SetPoint + 5.0} to {l_SetPoint + 0.001} degrees");
+                        LogInfo("SetCCDTemperature Write", $"Setpoint lower limit found in the range {l_SetPoint + 5.0} to {l_SetPoint + 0.001} degrees");
 
                     // Find high setpoint at which an exception is generated, stop at MAX_CAMERA_SETPOINT_TEMPERATURE as this is a suitably high value
                     l_ExceptionGenerated = false;
                     l_SetPoint = 0.0; // Start at 0.0C
 
                     // Loop upward in 5 degree temperature steps to find the maximum temperature that can be set
-                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set SetCCDTemperature multiple times...");
+                    LogComment("ConformanceCheck", "About to set SetCCDTemperature multiple times...");
                     do
                     {
                         try
@@ -910,7 +909,7 @@ namespace ConformU
                         try
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set SetCCDTemperature");
+                                LogComment("ConformanceCheck", "About to set SetCCDTemperature");
                             m_Camera.SetCCDTemperature = MAX_CAMERA_SETPOINT_TEMPERATURE + CAMERA_SETPOINT_TEST_INCREMENT;
                         }
                         catch (Exception)
@@ -919,12 +918,12 @@ namespace ConformU
                         }// Reached upper limit
 
                         if (l_ExceptionGenerated)
-                            LogMsg("SetCCDTemperature Write", MessageLevel.Info, $"Setpoint can be set to {MAX_CAMERA_SETPOINT_TEMPERATURE} degrees");
+                            LogInfo("SetCCDTemperature Write", $"Setpoint can be set to {MAX_CAMERA_SETPOINT_TEMPERATURE} degrees");
                         else
-                            LogMsg("SetCCDTemperature Write", MessageLevel.Issue, $"Setpoint can be set in excess of {MAX_CAMERA_SETPOINT_TEMPERATURE} degrees");
+                            LogIssue("SetCCDTemperature Write", $"Setpoint can be set in excess of {MAX_CAMERA_SETPOINT_TEMPERATURE} degrees");
                     }
                     else
-                        LogMsg("SetCCDTemperature Write", MessageLevel.Info, $"Setpoint upper limit found in the range {l_SetPoint - 5.0} to {l_SetPoint - 0.001} degrees");
+                        LogInfo("SetCCDTemperature Write", $"Setpoint upper limit found in the range {l_SetPoint - 5.0} to {l_SetPoint - 0.001} degrees");
                 }
                 catch (Exception ex)
                 {
@@ -933,7 +932,7 @@ namespace ConformU
 
                 // Restore original value
                 if (settings.DisplayMethodCalls)
-                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set SetCCDTemperature");
+                    LogComment("ConformanceCheck", "About to set SetCCDTemperature");
                 try
                 {
                     m_Camera.SetCCDTemperature = m_SetCCDTemperature;
@@ -946,9 +945,9 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set SetCCDTemperature");
+                        LogComment("ConformanceCheck", "About to set SetCCDTemperature");
                     m_Camera.SetCCDTemperature = 0;
-                    LogMsg("SetCCDTemperature Write", MessageLevel.Error, "CanSetCCDTemperature is false but no exception generated on write");
+                    LogError("SetCCDTemperature Write", "CanSetCCDTemperature is false but no exception generated on write");
                 }
                 catch (Exception ex)
                 {
@@ -965,7 +964,7 @@ namespace ConformU
 
 
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get InterfaceVersion");
+                LogComment("ConformanceCheck", "About to get InterfaceVersion");
             if (m_Camera.InterfaceVersion > 1)
             {
                 // SensorType - Mandatory
@@ -973,11 +972,11 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get Sensortype");
+                        LogComment("ConformanceCheck", "About to get Sensortype");
                     m_SensorType = m_Camera.SensorType;
                     m_CanReadSensorType = true; // Set a flag to indicate that we have got a valid SensorType value
                                                 // Successfully retrieved a value
-                    LogMsg("SensorType Read", MessageLevel.OK, m_SensorType.ToString());
+                    LogOK("SensorType Read", m_SensorType.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1001,7 +1000,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogMsg("BayerOffset Read", MessageLevel.Info, "Unable to read SensorType value; assuming that the sensor is Monochrome");
+                    LogInfo("BayerOffset Read", "Unable to read SensorType value; assuming that the sensor is Monochrome");
                     // Monochrome so both BayerOffset properties should throw not implemented exceptions
                     CameraPropertyMustNotImplemented(CamPropertyType.BayerOffsetX, "BayerOffsetX Read");
                     CameraPropertyMustNotImplemented(CamPropertyType.BayerOffsetY, "BayerOffsetY Read");
@@ -1011,16 +1010,16 @@ namespace ConformU
                 m_ExposureMax = CameraPropertyTestDouble(CamPropertyType.ExposureMax, "ExposureMax Read", 0.0001, double.MaxValue, true);
                 m_ExposureMin = CameraPropertyTestDouble(CamPropertyType.ExposureMin, "ExposureMin Read", 0.0, double.MaxValue, true);
                 if (m_ExposureMin <= m_ExposureMax)
-                    LogMsg("ExposureMin", MessageLevel.OK, "ExposureMin is less than or equal to ExposureMax");
+                    LogOK("ExposureMin", "ExposureMin is less than or equal to ExposureMax");
                 else
-                    LogMsg("ExposureMin", MessageLevel.Error, "ExposureMin is greater than ExposureMax");
+                    LogError("ExposureMin", "ExposureMin is greater than ExposureMax");
 
                 // ExposureResolution Read
                 m_ExposureResolution = CameraPropertyTestDouble(CamPropertyType.ExposureResolution, "ExposureResolution Read", 0.0, double.MaxValue, true);
                 if (m_ExposureResolution <= m_ExposureMax)
-                    LogMsg("ExposureResolution", MessageLevel.OK, "ExposureResolution is less than or equal to ExposureMax");
+                    LogOK("ExposureResolution", "ExposureResolution is less than or equal to ExposureMax");
                 else
-                    LogMsg("ExposureResolution", MessageLevel.Error, "ExposureResolution is greater than ExposureMax");
+                    LogError("ExposureResolution", "ExposureResolution is greater than ExposureMax");
 
                 // FastReadout Read Optional
                 if (m_CanFastReadout)
@@ -1029,9 +1028,9 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get FastReadout");
+                            LogComment("ConformanceCheck", "About to get FastReadout");
                         m_FastReadout = m_Camera.FastReadout;
-                        LogMsg("FastReadout Read", MessageLevel.Error, "CanFastReadout is False but a PropertyNotImplementedException was not thrown");
+                        LogError("FastReadout Read", "CanFastReadout is False but a PropertyNotImplementedException was not thrown");
                     }
                     catch (Exception ex)
                     {
@@ -1044,12 +1043,12 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set FastReadout");
+                            LogComment("ConformanceCheck", "About to set FastReadout");
                         m_Camera.FastReadout = !m_FastReadout;
                         if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set FastReadout");
+                            LogComment("ConformanceCheck", "About to set FastReadout");
                         m_Camera.FastReadout = m_FastReadout;
-                        LogMsg("FastReadout Write", MessageLevel.OK, "Able to change the FastReadout state OK");
+                        LogOK("FastReadout Write", "Able to change the FastReadout state OK");
                     }
                     catch (Exception ex)
                     {
@@ -1060,9 +1059,9 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set FastReadout");
+                            LogComment("ConformanceCheck", "About to set FastReadout");
                         m_Camera.FastReadout = true;
-                        LogMsg("FastReadout Write", MessageLevel.Error, "CanFastReadout is False but a PropertyNotImplementedException was not thrown");
+                        LogError("FastReadout Write", "CanFastReadout is False but a PropertyNotImplementedException was not thrown");
                     }
                     catch (Exception ex)
                     {
@@ -1074,11 +1073,11 @@ namespace ConformU
                 {
                     m_CanReadGainMin = false;
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get GainMin");
+                        LogComment("ConformanceCheck", "About to get GainMin");
                     m_GainMin = m_Camera.GainMin;
                     // Successfully retrieved a value
                     m_CanReadGainMin = true;
-                    LogMsg("GainMin Read", MessageLevel.OK, m_GainMin.ToString());
+                    LogOK("GainMin Read", m_GainMin.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1090,11 +1089,11 @@ namespace ConformU
                 {
                     m_CanReadGainMax = false;
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get GainMax");
+                        LogComment("ConformanceCheck", "About to get GainMax");
                     m_GainMax = m_Camera.GainMax;
                     // Successfully retrieved a value
                     m_CanReadGainMax = true;
-                    LogMsg("GainMax Read", MessageLevel.OK, m_GainMax.ToString());
+                    LogOK("GainMax Read", m_GainMax.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1106,12 +1105,12 @@ namespace ConformU
                 {
                     m_CanReadGains = false;
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get Gains");
+                        LogComment("ConformanceCheck", "About to get Gains");
                     m_Gains = m_Camera.Gains;
                     // Successfully retrieved a value
                     m_CanReadGains = true;
                     foreach (string Gain in m_Gains)
-                        LogMsg("Gains Read", MessageLevel.OK, Gain.ToString());
+                        LogOK("Gains Read", Gain.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1119,7 +1118,7 @@ namespace ConformU
                 }
 
                 if (m_CanReadGainMax & m_CanReadGainMin & m_CanReadGains)
-                    LogMsg("Gains", MessageLevel.Error, "GainMin, GainMax and Gains are all readable. Only one of GainMin/Max as a pair or Gains should be used, the other should throw a PropertyNotImplementedException");
+                    LogError("Gains", "GainMin, GainMax and Gains are all readable. Only one of GainMin/Max as a pair or Gains should be used, the other should throw a PropertyNotImplementedException");
                 else
                 {
                 }
@@ -1129,13 +1128,13 @@ namespace ConformU
                 {
                     m_CanReadGain = false; // Set default value to indicate can't read gain
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get Gain");
+                        LogComment("ConformanceCheck", "About to get Gain");
                     m_Gain = m_Camera.Gain;
                     m_CanReadGain = true; // Flag that we can read Gain OK
                     if (m_CanReadGains)
-                        LogMsg("Gain Read", MessageLevel.OK, m_Gain + " " + m_Gains[0].ToString());
+                        LogOK("Gain Read", m_Gain + " " + m_Gains[0].ToString());
                     else
-                        LogMsg("Gain Read", MessageLevel.OK, m_Gain.ToString());
+                        LogOK("Gain Read", m_Gain.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1144,33 +1143,33 @@ namespace ConformU
 
                 // Now check that gain property groups are implemented to handle the three gain modes: NotImplemented, Gain Index (Gain + Gains) and Gain Value (Gain + GainMin + GainMax)
                 if (!m_CanReadGain & !m_CanReadGains & !m_CanReadGainMin & !m_CanReadGainMax)
-                    LogMsgOK("Gain Read", "All four gain properties throw exceptions - the driver is in \"Gain Not Implemented\" mode.");
+                    LogOK("Gain Read", "All four gain properties throw exceptions - the driver is in \"Gain Not Implemented\" mode.");
                 else if (m_CanReadGain)
                 {
                     // Test for Gain Index mode
                     if ((m_CanReadGain & m_CanReadGains & !m_CanReadGainMin & !m_CanReadGainMax))
                     {
                         m_GainMode = GainOffsetMode.IndexMode;
-                        LogMsgOK("Gain Read", "Gain and Gains can be read while GainMin and GainMax throw exceptions - the driver is in \"Gain Index\" mode.");
+                        LogOK("Gain Read", "Gain and Gains can be read while GainMin and GainMax throw exceptions - the driver is in \"Gain Index\" mode.");
                     }
                     else if ((m_CanReadGain & !m_CanReadGains & m_CanReadGainMin & m_CanReadGainMax))
                     {
                         m_GainMode = GainOffsetMode.ValueMode;
-                        LogMsgOK("Gain Read", "Gain, GainMin and GainMax can be read OK while Gains throws an exception - the driver is in \"Gain Value\" mode.");
+                        LogOK("Gain Read", "Gain, GainMin and GainMax can be read OK while Gains throws an exception - the driver is in \"Gain Value\" mode.");
                     }
                     else
                     {
-                        LogMsgError("Gain Read", $"Unable to determine whether the driver is in \"Gain Not Implemented\", \"Gain Index\" or \"Gain Value\" mode. Please check the interface specification.");
-                        LogMsgInfo("Gain Read", $"Gain threw an exception: {m_CanReadGain}, Gains threw an exception: {m_CanReadGains}, GainMin threw an exception: {m_CanReadGainMin}, GainMax threw an exception: {m_CanReadGainMax}.");
-                        LogMsgInfo("Gain Read", $"\"Gain Not Implemented\" mode: Gain, Gains, GainMin and GainMax must all throw exceptions.");
-                        LogMsgInfo("Gain Read", $"\"Gain Index\" mode: Gain and Gains must work while GainMin and GainMax must throw exceptions.");
-                        LogMsgInfo("Gain Read", $"\"Gain Value\" mode: Gain, GainMin and GainMax must work while Gains must throw an exception.");
+                        LogError("Gain Read", $"Unable to determine whether the driver is in \"Gain Not Implemented\", \"Gain Index\" or \"Gain Value\" mode. Please check the interface specification.");
+                        LogInfo("Gain Read", $"Gain threw an exception: {m_CanReadGain}, Gains threw an exception: {m_CanReadGains}, GainMin threw an exception: {m_CanReadGainMin}, GainMax threw an exception: {m_CanReadGainMax}.");
+                        LogInfo("Gain Read", $"\"Gain Not Implemented\" mode: Gain, Gains, GainMin and GainMax must all throw exceptions.");
+                        LogInfo("Gain Read", $"\"Gain Index\" mode: Gain and Gains must work while GainMin and GainMax must throw exceptions.");
+                        LogInfo("Gain Read", $"\"Gain Value\" mode: Gain, GainMin and GainMax must work while Gains must throw an exception.");
                     }
                 }
                 else
                 {
-                    LogMsgError("Gain Read", $"Gain Read threw an exception but at least one of Gains, GainMin Or GainMax did not throw an exception. If Gain throws an exception, all the other gain properties should do likewise.");
-                    LogMsgInfo("Gain Read", $"Gains threw an exception: {m_CanReadGains}, GainMin threw an exception: {m_CanReadGainMin}, GainMax threw an exception: {m_CanReadGainMax}.");
+                    LogError("Gain Read", $"Gain Read threw an exception but at least one of Gains, GainMin Or GainMax did not throw an exception. If Gain throws an exception, all the other gain properties should do likewise.");
+                    LogInfo("Gain Read", $"Gains threw an exception: {m_CanReadGains}, GainMin threw an exception: {m_CanReadGainMin}, GainMax threw an exception: {m_CanReadGainMax}.");
                 }
 
                 // Gain write - Optional when neither gain index nor gain value mode is supported; must be implemented if either mode is supported
@@ -1181,9 +1180,9 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set Gain");
+                            LogComment("ConformanceCheck", "About to set Gain");
                         m_Camera.Gain = 0;
-                        LogMsgIssue("Gain Write", "Writing to Gain did not throw a PropertyNotImplementedException when reading Gain did.");
+                        LogIssue("Gain Write", "Writing to Gain did not throw a PropertyNotImplementedException when reading Gain did.");
                     }
                     catch (Exception ex)
                     {
@@ -1195,7 +1194,7 @@ namespace ConformU
                     {
                         case GainOffsetMode.Unknown:
                             {
-                                LogMsgIssue("Gain Write", "Cannot test Gain Write because of issues with other gain properties - skipping test");
+                                LogIssue("Gain Write", "Cannot test Gain Write because of issues with other gain properties - skipping test");
                                 break;
                             }
 
@@ -1210,9 +1209,9 @@ namespace ConformU
                                 try
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set Gain");
+                                        LogComment("ConformanceCheck", "About to set Gain");
                                     m_Camera.Gain = m_GainMin;
-                                    LogMsgOK("Gain Write", $"Successfully set gain minimum value {m_GainMin}.");
+                                    LogOK("Gain Write", $"Successfully set gain minimum value {m_GainMin}.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -1223,9 +1222,9 @@ namespace ConformU
                                 try
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set Gain");
+                                        LogComment("ConformanceCheck", "About to set Gain");
                                     m_Camera.Gain = m_GainMax;
-                                    LogMsgOK("Gain Write", $"Successfully set gain maximum value {m_GainMax}.");
+                                    LogOK("Gain Write", $"Successfully set gain maximum value {m_GainMax}.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -1236,9 +1235,9 @@ namespace ConformU
                                 try
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set Gain");
+                                        LogComment("ConformanceCheck", "About to set Gain");
                                     m_Camera.Gain = (short)(m_GainMin - 1);
-                                    LogMsgIssue("Gain Write", $"Successfully set an gain below the minimum value ({m_GainMin - 1}), this should have resulted in an InvalidValueException.");
+                                    LogIssue("Gain Write", $"Successfully set an gain below the minimum value ({m_GainMin - 1}), this should have resulted in an InvalidValueException.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -1249,9 +1248,9 @@ namespace ConformU
                                 try
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set Gain");
+                                        LogComment("ConformanceCheck", "About to set Gain");
                                     m_Camera.Gain = (short)(m_GainMax + 1);
-                                    LogMsgIssue("Gain Write", $"Successfully set an gain above the maximum value({m_GainMax + 1}), this should have resulted in an InvalidValueException.");
+                                    LogIssue("Gain Write", $"Successfully set an gain above the maximum value({m_GainMax + 1}), this should have resulted in an InvalidValueException.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -1263,7 +1262,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogMsgError("Gain Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {m_GainMode}");
+                                LogError("Gain Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {m_GainMode}");
                                 break;
                             }
                     }
@@ -1272,27 +1271,27 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get PercentCompleted");
+                        LogComment("ConformanceCheck", "About to get PercentCompleted");
                     m_PercentCompleted = m_Camera.PercentCompleted;
                     switch (m_PercentCompleted)
                     {
                         case object _ when m_PercentCompleted < 0 // Lower than minimum value
                        :
                             {
-                                LogMsg("PercentCompleted Read", MessageLevel.Error, "Invalid value: " + m_PercentCompleted.ToString());
+                                LogError("PercentCompleted Read", "Invalid value: " + m_PercentCompleted.ToString());
                                 break;
                             }
 
                         case object _ when m_PercentCompleted > 100 // Higher than maximum value
                  :
                             {
-                                LogMsg("PercentCompleted Read", MessageLevel.Error, "Invalid value: " + m_PercentCompleted.ToString());
+                                LogError("PercentCompleted Read", "Invalid value: " + m_PercentCompleted.ToString());
                                 break;
                             }
 
                         default:
                             {
-                                LogMsg("PercentCompleted Read", MessageLevel.OK, m_PercentCompleted.ToString());
+                                LogOK("PercentCompleted Read", m_PercentCompleted.ToString());
                                 break;
                             }
                     }
@@ -1307,12 +1306,12 @@ namespace ConformU
                 {
                     m_CanReadReadoutModes = false;
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ReadoutModes");
+                        LogComment("ConformanceCheck", "About to get ReadoutModes");
                     m_ReadoutModes = m_Camera.ReadoutModes;
                     // Successfully retrieved a value
                     m_CanReadReadoutModes = true;
                     foreach (string ReadoutMode in m_ReadoutModes)
-                        LogMsg("ReadoutModes Read", MessageLevel.OK, ReadoutMode.ToString());
+                        LogOK("ReadoutModes Read", ReadoutMode.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1327,20 +1326,20 @@ namespace ConformU
                     {
                         if (m_ReadoutMode < m_ReadoutModes.Count)
                         {
-                            LogMsg("ReadoutMode Index", MessageLevel.OK, "ReadReadoutMode is within the bounds of the ReadoutModes ArrayList");
-                            LogMsg("ReadoutMode Index", MessageLevel.Info, "Current value: " + m_ReadoutModes[m_ReadoutMode].ToString());
+                            LogOK("ReadoutMode Index", "ReadReadoutMode is within the bounds of the ReadoutModes ArrayList");
+                            LogInfo("ReadoutMode Index", "Current value: " + m_ReadoutModes[m_ReadoutMode].ToString());
                         }
                         else
-                            LogMsg("ReadoutMode Index", MessageLevel.Error, "ReadReadoutMode is outside the bounds of the ReadoutModes ArrayList");
+                            LogError("ReadoutMode Index", "ReadReadoutMode is outside the bounds of the ReadoutModes ArrayList");
                     }
                     catch (Exception ex)
                     {
-                        LogMsg("ReadoutMode Index", MessageLevel.Error, "Exception: " + ex.Message);
-                        LogMsg("ReadoutMode Index", MessageLevel.Debug, ex.ToString());
+                        LogError("ReadoutMode Index", "Exception: " + ex.Message);
+                        LogDebug("ReadoutMode Index", ex.ToString());
                     }
                 }
                 else
-                    LogMsg("ReadoutMode Index", MessageLevel.Info, "Skipping ReadReadoutMode index test because ReadoutModes is unavailable");
+                    LogInfo("ReadoutMode Index", "Skipping ReadReadoutMode index test because ReadoutModes is unavailable");
 
                 // SensorName
                 m_SensorName = CameraPropertyTestString(CamPropertyType.SensorName, "SensorName Read", 250, true);
@@ -1349,7 +1348,7 @@ namespace ConformU
 
 
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get InterfaceVersion");
+                LogComment("ConformanceCheck", "About to get InterfaceVersion");
             if (m_Camera.InterfaceVersion > 2)
             {
                 // OffsetMin Read - Optional
@@ -1357,11 +1356,11 @@ namespace ConformU
                 {
                     m_CanReadOffsetMin = false;
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get OffsetMin");
+                        LogComment("ConformanceCheck", "About to get OffsetMin");
                     m_OffsetMin = m_Camera.OffsetMin;
                     // Successfully retrieved a value
                     m_CanReadOffsetMin = true;
-                    LogMsg("OffsetMin Read", MessageLevel.OK, m_OffsetMin.ToString());
+                    LogOK("OffsetMin Read", m_OffsetMin.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1373,11 +1372,11 @@ namespace ConformU
                 {
                     m_CanReadOffsetMax = false;
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get OffsetMax");
+                        LogComment("ConformanceCheck", "About to get OffsetMax");
                     m_OffsetMax = m_Camera.OffsetMax;
                     // Successfully retrieved a value
                     m_CanReadOffsetMax = true;
-                    LogMsg("OffsetMax Read", MessageLevel.OK, m_OffsetMax.ToString());
+                    LogOK("OffsetMax Read", m_OffsetMax.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1389,12 +1388,12 @@ namespace ConformU
                 {
                     m_CanReadOffsets = false;
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get Offsets");
+                        LogComment("ConformanceCheck", "About to get Offsets");
                     m_Offsets = m_Camera.Offsets;
                     // Successfully retrieved a value
                     m_CanReadOffsets = true;
                     foreach (string Offset in m_Offsets)
-                        LogMsg("Offsets Read", MessageLevel.OK, Offset.ToString());
+                        LogOK("Offsets Read", Offset.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1402,7 +1401,7 @@ namespace ConformU
                 }
 
                 if (m_CanReadOffsetMax & m_CanReadOffsetMin & m_CanReadOffsets)
-                    LogMsg("Offsets", MessageLevel.Error, "OffsetMin, OffsetMax and Offsets are all readable. Only one of OffsetMin/Max as a pair or Offsets should be used, the other should throw a PropertyNotImplementedException");
+                    LogError("Offsets", "OffsetMin, OffsetMax and Offsets are all readable. Only one of OffsetMin/Max as a pair or Offsets should be used, the other should throw a PropertyNotImplementedException");
                 else
                 {
                 }
@@ -1412,13 +1411,13 @@ namespace ConformU
                 {
                     m_CanReadOffset = false; // Set default value to indicate can't read offset
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get Offset");
+                        LogComment("ConformanceCheck", "About to get Offset");
                     m_Offset = m_Camera.Offset;
                     m_CanReadOffset = true; // Flag that we can read Offset OK
                     if (m_CanReadOffsets)
-                        LogMsg("Offset Read", MessageLevel.OK, m_Offset + " " + m_Offsets[0].ToString());
+                        LogOK("Offset Read", m_Offset + " " + m_Offsets[0].ToString());
                     else
-                        LogMsg("Offset Read", MessageLevel.OK, m_Offset.ToString());
+                        LogOK("Offset Read", m_Offset.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1427,34 +1426,34 @@ namespace ConformU
 
                 // Now check that offset property groups are implemented to handle the three offset modes: NotImplemented, Offset Index (Offset + Offsets) and Offset Value (Offset + OffsetMin + OffsetMax)
                 if (!m_CanReadOffset & !m_CanReadOffsets & !m_CanReadOffsetMin & !m_CanReadOffsetMax)
-                    LogMsgOK("Offset Read", "All four offset properties throw exceptions - the driver is in \"Offset Not Implemented\" mode.");
+                    LogOK("Offset Read", "All four offset properties throw exceptions - the driver is in \"Offset Not Implemented\" mode.");
                 else if (m_CanReadOffset)
                 {
                     // Test for Offset Index mode
                     if ((m_CanReadOffset & m_CanReadOffsets & !m_CanReadOffsetMin & !m_CanReadOffsetMax))
                     {
                         m_OffsetMode = GainOffsetMode.IndexMode;
-                        LogMsgOK("Offset Read", "Offset and Offsets can be read while OffsetMin and OffsetMax throw exceptions - the driver is in \"Offset Index\" mode.");
+                        LogOK("Offset Read", "Offset and Offsets can be read while OffsetMin and OffsetMax throw exceptions - the driver is in \"Offset Index\" mode.");
                     }
                     else if ((m_CanReadOffset & !m_CanReadOffsets & m_CanReadOffsetMin & m_CanReadOffsetMax))
                     {
                         m_OffsetMode = GainOffsetMode.ValueMode;
-                        LogMsgOK("Offset Read", "Offset, OffsetMin and OffsetMax can be read OK while Offsets throws an exception - the driver is in \"Offset Value\" mode.");
+                        LogOK("Offset Read", "Offset, OffsetMin and OffsetMax can be read OK while Offsets throws an exception - the driver is in \"Offset Value\" mode.");
                     }
                     else
                     {
                         m_OffsetMode = GainOffsetMode.Unknown;
-                        LogMsgIssue("Offset Read", $"Unable to determine whether the driver is in \"Offset Not Implemented\", \"Offset Index\" or \"Offset Value\" mode. Please check the interface specification.");
-                        LogMsgInfo("Offset Read", $"Offset threw an exception: {m_CanReadOffset}, Offsets threw an exception: {m_CanReadOffsets}, OffsetMin threw an exception: {m_CanReadOffsetMin}, OffsetMax threw an exception: {m_CanReadOffsetMax}.");
-                        LogMsgInfo("Offset Read", $"\"Offset Not Implemented\" mode: Offset, Offsets, OffsetMin and OffsetMax must all throw exceptions.");
-                        LogMsgInfo("Offset Read", $"\"Offset Index\" mode: Offset and Offsets must work while OffsetMin and OffsetMax must throw exceptions.");
-                        LogMsgInfo("Offset Read", $"\"Offset Value\" mode: Offset, OffsetMin and OffsetMax must work while Offsets must throw an exception.");
+                        LogIssue("Offset Read", $"Unable to determine whether the driver is in \"Offset Not Implemented\", \"Offset Index\" or \"Offset Value\" mode. Please check the interface specification.");
+                        LogInfo("Offset Read", $"Offset threw an exception: {m_CanReadOffset}, Offsets threw an exception: {m_CanReadOffsets}, OffsetMin threw an exception: {m_CanReadOffsetMin}, OffsetMax threw an exception: {m_CanReadOffsetMax}.");
+                        LogInfo("Offset Read", $"\"Offset Not Implemented\" mode: Offset, Offsets, OffsetMin and OffsetMax must all throw exceptions.");
+                        LogInfo("Offset Read", $"\"Offset Index\" mode: Offset and Offsets must work while OffsetMin and OffsetMax must throw exceptions.");
+                        LogInfo("Offset Read", $"\"Offset Value\" mode: Offset, OffsetMin and OffsetMax must work while Offsets must throw an exception.");
                     }
                 }
                 else
                 {
-                    LogMsgError("Offset Read", $"Offset Read threw an exception but at least one of Offsets, OffsetMin Or OffsetMax did not throw an exception. If Offset throws an exception, all the other offset properties should do likewise.");
-                    LogMsgInfo("Offset Read", $"Offsets threw an exception: {m_CanReadOffsets}, OffsetMin threw an exception: {m_CanReadOffsetMin}, OffsetMax threw an exception: {m_CanReadOffsetMax}.");
+                    LogError("Offset Read", $"Offset Read threw an exception but at least one of Offsets, OffsetMin Or OffsetMax did not throw an exception. If Offset throws an exception, all the other offset properties should do likewise.");
+                    LogInfo("Offset Read", $"Offsets threw an exception: {m_CanReadOffsets}, OffsetMin threw an exception: {m_CanReadOffsetMin}, OffsetMax threw an exception: {m_CanReadOffsetMax}.");
                 }
 
                 // Offset write - Optional when neither offset index nor offset value mode is supported; must be implemented if either mode is supported
@@ -1465,9 +1464,9 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set Offset");
+                            LogComment("ConformanceCheck", "About to set Offset");
                         m_Camera.Offset = 0;
-                        LogMsgIssue("Offset Write", "Writing to Offset did not throw a PropertyNotImplementedException when reading Offset did.");
+                        LogIssue("Offset Write", "Writing to Offset did not throw a PropertyNotImplementedException when reading Offset did.");
                     }
                     catch (Exception ex)
                     {
@@ -1479,7 +1478,7 @@ namespace ConformU
                     {
                         case GainOffsetMode.Unknown:
                             {
-                                LogMsgIssue("Offset Write", "Cannot test Offset Write because of issues with other offset properties - skipping test");
+                                LogIssue("Offset Write", "Cannot test Offset Write because of issues with other offset properties - skipping test");
                                 break;
                             }
 
@@ -1494,9 +1493,9 @@ namespace ConformU
                                 try
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set Offset");
+                                        LogComment("ConformanceCheck", "About to set Offset");
                                     m_Camera.Offset = m_OffsetMin;
-                                    LogMsgOK("Offset Write", $"Successfully set offset minimum value {m_OffsetMin}.");
+                                    LogOK("Offset Write", $"Successfully set offset minimum value {m_OffsetMin}.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -1507,9 +1506,9 @@ namespace ConformU
                                 try
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set Offset");
+                                        LogComment("ConformanceCheck", "About to set Offset");
                                     m_Camera.Offset = m_OffsetMax;
-                                    LogMsgOK("Offset Write", $"Successfully set offset maximum value {m_OffsetMax}.");
+                                    LogOK("Offset Write", $"Successfully set offset maximum value {m_OffsetMax}.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -1520,9 +1519,9 @@ namespace ConformU
                                 try
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set Offset");
+                                        LogComment("ConformanceCheck", "About to set Offset");
                                     m_Camera.Offset = m_OffsetMin - 1;
-                                    LogMsgIssue("Offset Write", $"Successfully set an offset below the minimum value ({m_OffsetMin - 1}), this should have resulted in an InvalidValueException.");
+                                    LogIssue("Offset Write", $"Successfully set an offset below the minimum value ({m_OffsetMin - 1}), this should have resulted in an InvalidValueException.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -1533,9 +1532,9 @@ namespace ConformU
                                 try
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set Offset");
+                                        LogComment("ConformanceCheck", "About to set Offset");
                                     m_Camera.Offset = m_OffsetMax + 1;
-                                    LogMsgIssue("Offset Write", $"Successfully set an offset above the maximum value({m_OffsetMax + 1}), this should have resulted in an InvalidValueException.");
+                                    LogIssue("Offset Write", $"Successfully set an offset above the maximum value({m_OffsetMax + 1}), this should have resulted in an InvalidValueException.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -1547,7 +1546,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogMsgError("Offset Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {m_OffsetMode}");
+                                LogError("Offset Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {m_OffsetMode}");
                                 break;
                             }
                     }
@@ -1560,9 +1559,9 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set SubExposureDuration");
+                        LogComment("ConformanceCheck", "About to set SubExposureDuration");
                     m_Camera.SubExposureDuration = m_SubExposureDuration;
-                    LogMsg("SubExposureDuration write", MessageLevel.OK, $"Successfully wrote {m_SubExposureDuration}");
+                    LogOK("SubExposureDuration write", $"Successfully wrote {m_SubExposureDuration}");
                 }
                 catch (Exception ex)
                 {
@@ -1581,18 +1580,18 @@ namespace ConformU
                     case CamPropertyType.CameraState:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CameraState");
+                                LogComment("ConformanceCheck", "About to get CameraState");
                             returnValue = m_Camera.CameraState;
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogError(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
-                LogMsg(p_Name, MessageLevel.OK, returnValue.ToString());
+                LogOK(p_Name, returnValue.ToString());
             }
             catch (Exception ex)
             {
@@ -1612,7 +1611,7 @@ namespace ConformU
                     case CamPropertyType.BayerOffsetX:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get BayerOffsetX");
+                                LogComment("ConformanceCheck", "About to get BayerOffsetX");
                             returnValue = m_Camera.BayerOffsetX;
                             break;
                         }
@@ -1620,7 +1619,7 @@ namespace ConformU
                     case CamPropertyType.BayerOffsetY:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get BayerOffsetY");
+                                LogComment("ConformanceCheck", "About to get BayerOffsetY");
                             returnValue = m_Camera.BayerOffsetY;
                             break;
                         }
@@ -1628,7 +1627,7 @@ namespace ConformU
                     case CamPropertyType.PercentCompleted:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get PercentCompleted");
+                                LogComment("ConformanceCheck", "About to get PercentCompleted");
                             returnValue = m_Camera.PercentCompleted;
                             break;
                         }
@@ -1636,14 +1635,14 @@ namespace ConformU
                     case CamPropertyType.ReadoutMode:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ReadoutMode");
+                                LogComment("ConformanceCheck", "About to get ReadoutMode");
                             returnValue = m_Camera.ReadoutMode;
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogError(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -1653,20 +1652,20 @@ namespace ConformU
                     case object _ when returnValue < p_Min // Lower than minimum value
                    :
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "Invalid value: " + returnValue.ToString());
+                            LogError(p_Name, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     case object _ when returnValue > p_Max // Higher than maximum value
              :
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "Invalid value: " + returnValue.ToString());
+                            LogError(p_Name, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.OK, returnValue.ToString());
+                            LogOK(p_Name, returnValue.ToString());
                             break;
                         }
                 }
@@ -1690,26 +1689,26 @@ namespace ConformU
                     case CamPropertyType.BayerOffsetX:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get BayerOffsetX");
+                                LogComment("ConformanceCheck", "About to get BayerOffsetX");
                             TestShort = m_Camera.BayerOffsetX;
                             returnValue = false; // Property should throw an exception but did not so record that fact
-                            LogMsg(p_Name, MessageLevel.Error, "Sensor type is Monochrome so this property must throw a PropertyNotImplementedException; it must not return a value");
+                            LogError(p_Name, "Sensor type is Monochrome so this property must throw a PropertyNotImplementedException; it must not return a value");
                             break;
                         }
 
                     case CamPropertyType.BayerOffsetY:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get BayerOffsetY");
+                                LogComment("ConformanceCheck", "About to get BayerOffsetY");
                             TestShort = m_Camera.BayerOffsetY;
                             returnValue = false; // Property should throw an exception but did not so record that fact
-                            LogMsg(p_Name, MessageLevel.Error, "Sensor type is Monochrome so this property must throw a PropertyNotImplementedException; it must not return a value");
+                            LogError(p_Name, "Sensor type is Monochrome so this property must throw a PropertyNotImplementedException; it must not return a value");
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogError(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -1731,7 +1730,7 @@ namespace ConformU
                     case CamPropertyType.BinX:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get BinX");
+                                LogComment("ConformanceCheck", "About to get BinX");
                             returnValue = m_Camera.BinX;
                             break;
                         }
@@ -1739,7 +1738,7 @@ namespace ConformU
                     case CamPropertyType.BinY:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get BinY");
+                                LogComment("ConformanceCheck", "About to get BinY");
                             returnValue = m_Camera.BinY;
                             break;
                         }
@@ -1747,7 +1746,7 @@ namespace ConformU
                     case CamPropertyType.CameraState:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CameraState");
+                                LogComment("ConformanceCheck", "About to get CameraState");
                             returnValue = (int)m_Camera.CameraState;
                             break;
                         }
@@ -1755,7 +1754,7 @@ namespace ConformU
                     case CamPropertyType.CameraXSize:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CameraXSize");
+                                LogComment("ConformanceCheck", "About to get CameraXSize");
                             returnValue = m_Camera.CameraXSize;
                             break;
                         }
@@ -1763,7 +1762,7 @@ namespace ConformU
                     case CamPropertyType.CameraYSize:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CameraYSize");
+                                LogComment("ConformanceCheck", "About to get CameraYSize");
                             returnValue = m_Camera.CameraYSize;
                             break;
                         }
@@ -1771,7 +1770,7 @@ namespace ConformU
                     case CamPropertyType.MaxADU:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get MaxADU");
+                                LogComment("ConformanceCheck", "About to get MaxADU");
                             returnValue = m_Camera.MaxADU;
                             break;
                         }
@@ -1779,7 +1778,7 @@ namespace ConformU
                     case CamPropertyType.MaxBinX:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get MaxBinX");
+                                LogComment("ConformanceCheck", "About to get MaxBinX");
                             returnValue = m_Camera.MaxBinX;
                             break;
                         }
@@ -1787,7 +1786,7 @@ namespace ConformU
                     case CamPropertyType.MaxBinY:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get MaxBinY");
+                                LogComment("ConformanceCheck", "About to get MaxBinY");
                             returnValue = m_Camera.MaxBinY;
                             break;
                         }
@@ -1795,7 +1794,7 @@ namespace ConformU
                     case CamPropertyType.NumX:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get NumX");
+                                LogComment("ConformanceCheck", "About to get NumX");
                             returnValue = m_Camera.NumX;
                             break;
                         }
@@ -1803,7 +1802,7 @@ namespace ConformU
                     case CamPropertyType.NumY:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get NumY");
+                                LogComment("ConformanceCheck", "About to get NumY");
                             returnValue = m_Camera.NumY;
                             break;
                         }
@@ -1811,7 +1810,7 @@ namespace ConformU
                     case CamPropertyType.StartX:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get StartX");
+                                LogComment("ConformanceCheck", "About to get StartX");
                             returnValue = m_Camera.StartX;
                             break;
                         }
@@ -1819,14 +1818,14 @@ namespace ConformU
                     case CamPropertyType.StartY:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get StartY");
+                                LogComment("ConformanceCheck", "About to get StartY");
                             returnValue = m_Camera.StartY;
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogError(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -1836,7 +1835,7 @@ namespace ConformU
                     case object _ when returnValue < p_Min // Lower than minimum value
                    :
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "Invalid value: " + returnValue.ToString());
+                            LogError(p_Name, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
@@ -1848,20 +1847,20 @@ namespace ConformU
                                 case CamPropertyType.MaxBinX // Informational message for MaxBinX
                                :
                                     {
-                                        LogMsg(p_Name, MessageLevel.Info, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_X}. Is this intended?");
+                                        LogInfo(p_Name, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_X}. Is this intended?");
                                         break;
                                     }
 
                                 case CamPropertyType.MaxBinY // Informational message for MaxBinY
                          :
                                     {
-                                        LogMsg(p_Name, MessageLevel.Info, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_Y}. Is this intended?");
+                                        LogInfo(p_Name, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_Y}. Is this intended?");
                                         break;
                                     }
 
                                 default:
                                     {
-                                        LogMsg(p_Name, MessageLevel.Error, "Invalid value: " + returnValue.ToString());
+                                        LogError(p_Name, "Invalid value: " + returnValue.ToString());
                                         break;
                                     }
                             }
@@ -1871,7 +1870,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.OK, returnValue.ToString());
+                            LogOK(p_Name, returnValue.ToString());
                             break;
                         }
                 }
@@ -1893,7 +1892,7 @@ namespace ConformU
                     case CamPropertyType.CCDTemperature:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CCDTemperature");
+                                LogComment("ConformanceCheck", "About to get CCDTemperature");
                             returnValue = m_Camera.CCDTemperature;
                             break;
                         }
@@ -1901,7 +1900,7 @@ namespace ConformU
                     case CamPropertyType.CoolerPower:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CoolerPower");
+                                LogComment("ConformanceCheck", "About to get CoolerPower");
                             returnValue = m_Camera.CoolerPower;
                             break;
                         }
@@ -1909,7 +1908,7 @@ namespace ConformU
                     case CamPropertyType.ElectronsPerADU:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ElectronsPerADU");
+                                LogComment("ConformanceCheck", "About to get ElectronsPerADU");
                             returnValue = m_Camera.ElectronsPerADU;
                             break;
                         }
@@ -1917,7 +1916,7 @@ namespace ConformU
                     case CamPropertyType.FullWellCapacity:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get FullWellCapacity");
+                                LogComment("ConformanceCheck", "About to get FullWellCapacity");
                             returnValue = m_Camera.FullWellCapacity;
                             break;
                         }
@@ -1925,7 +1924,7 @@ namespace ConformU
                     case CamPropertyType.HeatSinkTemperature:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get HeatSinkTemperature");
+                                LogComment("ConformanceCheck", "About to get HeatSinkTemperature");
                             returnValue = m_Camera.HeatSinkTemperature;
                             break;
                         }
@@ -1933,7 +1932,7 @@ namespace ConformU
                     case CamPropertyType.PixelSizeX:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get PixelSizeX");
+                                LogComment("ConformanceCheck", "About to get PixelSizeX");
                             returnValue = m_Camera.PixelSizeX;
                             break;
                         }
@@ -1941,7 +1940,7 @@ namespace ConformU
                     case CamPropertyType.PixelSizeY:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get PixelSizeY");
+                                LogComment("ConformanceCheck", "About to get PixelSizeY");
                             returnValue = m_Camera.PixelSizeY;
                             break;
                         }
@@ -1949,7 +1948,7 @@ namespace ConformU
                     case CamPropertyType.SetCCDTemperature:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get SetCCDTemperature");
+                                LogComment("ConformanceCheck", "About to get SetCCDTemperature");
                             returnValue = m_Camera.SetCCDTemperature;
                             break;
                         }
@@ -1957,7 +1956,7 @@ namespace ConformU
                     case CamPropertyType.ExposureMax:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ExposureMax");
+                                LogComment("ConformanceCheck", "About to get ExposureMax");
                             returnValue = m_Camera.ExposureMax;
                             break;
                         }
@@ -1965,7 +1964,7 @@ namespace ConformU
                     case CamPropertyType.ExposureMin:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ExposureMin");
+                                LogComment("ConformanceCheck", "About to get ExposureMin");
                             returnValue = m_Camera.ExposureMin;
                             break;
                         }
@@ -1973,7 +1972,7 @@ namespace ConformU
                     case CamPropertyType.ExposureResolution:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ExposureResolution");
+                                LogComment("ConformanceCheck", "About to get ExposureResolution");
                             returnValue = m_Camera.ExposureResolution;
                             break;
                         }
@@ -1981,14 +1980,14 @@ namespace ConformU
                     case CamPropertyType.SubExposureDuration:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get SubExposureDuration");
+                                LogComment("ConformanceCheck", "About to get SubExposureDuration");
                             returnValue = m_Camera.SubExposureDuration;
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogError(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -1998,20 +1997,20 @@ namespace ConformU
                     case double _ when returnValue < p_Min // Lower than minimum value
                    :
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "Invalid value: " + returnValue.ToString());
+                            LogError(p_Name, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     case double _ when returnValue > p_Max // Higher than maximum value
              :
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "Invalid value: " + returnValue.ToString());
+                            LogError(p_Name, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.OK, returnValue.ToString());
+                            LogOK(p_Name, returnValue.ToString());
                             break;
                         }
                 }
@@ -2034,7 +2033,7 @@ namespace ConformU
                     case CamPropertyType.CoolerOn:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CoolerOn");
+                                LogComment("ConformanceCheck", "About to get CoolerOn");
                             returnValue = m_Camera.CoolerOn;
                             break;
                         }
@@ -2042,7 +2041,7 @@ namespace ConformU
                     case CamPropertyType.HasShutter:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get HasShutter");
+                                LogComment("ConformanceCheck", "About to get HasShutter");
                             returnValue = m_Camera.HasShutter;
                             break;
                         }
@@ -2050,7 +2049,7 @@ namespace ConformU
                     case CamPropertyType.ImageReady:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ImageReady");
+                                LogComment("ConformanceCheck", "About to get ImageReady");
                             returnValue = m_Camera.ImageReady;
                             break;
                         }
@@ -2059,7 +2058,7 @@ namespace ConformU
                         {
                             m_IsPulseGuidingSupported = false;
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get IsPulseGuiding");
+                                LogComment("ConformanceCheck", "About to get IsPulseGuiding");
                             returnValue = m_Camera.IsPulseGuiding;
                             m_IsPulseGuidingSupported = true; // Command works properly and doesn't cause a not implemented exception
                             break;
@@ -2068,19 +2067,19 @@ namespace ConformU
                     case CamPropertyType.FastReadout:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get FastReadout");
+                                LogComment("ConformanceCheck", "About to get FastReadout");
                             returnValue = m_Camera.FastReadout;
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogError(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
                 // Successfully retrieved a value
-                LogMsg(p_Name, MessageLevel.OK, returnValue.ToString());
+                LogOK(p_Name, returnValue.ToString());
             }
             catch (Exception ex)
             {
@@ -2099,7 +2098,7 @@ namespace ConformU
                     case CamPropertyType.Description:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get Description");
+                                LogComment("ConformanceCheck", "About to get Description");
                             returnValue = m_Camera.Description;
                             break;
                         }
@@ -2107,14 +2106,14 @@ namespace ConformU
                     case CamPropertyType.SensorName:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get SensorName");
+                                LogComment("ConformanceCheck", "About to get SensorName");
                             returnValue = m_Camera.SensorName;
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Error, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogError(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -2123,16 +2122,16 @@ namespace ConformU
                 {
                     case object _ when returnValue == "":
                         {
-                            LogMsg(p_Name, MessageLevel.OK, "The driver returned an empty string");
+                            LogOK(p_Name, "The driver returned an empty string");
                             break;
                         }
 
                     default:
                         {
                             if (returnValue.Length <= p_MaxLength)
-                                LogMsg(p_Name, MessageLevel.OK, returnValue);
+                                LogOK(p_Name, returnValue);
                             else
-                                LogMsg(p_Name, MessageLevel.Error, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);
+                                LogError(p_Name, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);
                             break;
                         }
                 }
@@ -2156,7 +2155,7 @@ namespace ConformU
                     case CamPropertyType.NumX:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set NumX");
+                                LogComment("ConformanceCheck", "About to set NumX");
                             m_Camera.NumX = p_TestOK;
                             break;
                         }
@@ -2164,7 +2163,7 @@ namespace ConformU
                     case CamPropertyType.NumY:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set NumY");
+                                LogComment("ConformanceCheck", "About to set NumY");
                             m_Camera.NumY = p_TestOK;
                             break;
                         }
@@ -2172,7 +2171,7 @@ namespace ConformU
                     case CamPropertyType.StartX:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set StartX");
+                                LogComment("ConformanceCheck", "About to set StartX");
                             m_Camera.StartX = p_TestOK;
                             break;
                         }
@@ -2180,12 +2179,12 @@ namespace ConformU
                     case CamPropertyType.StartY:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set StartY");
+                                LogComment("ConformanceCheck", "About to set StartY");
                             m_Camera.StartY = p_TestOK;
                             break;
                         }
                 }
-                LogMsg(p_Property + " write", MessageLevel.OK, "Successfully wrote " + p_TestOK);
+                LogOK(p_Property + " write", "Successfully wrote " + p_TestOK);
             }
             catch (Exception ex)
             {
@@ -2200,7 +2199,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CameraState");
+                    LogComment("ConformanceCheck", "About to get CameraState");
                 m_CameraState = m_Camera.CameraState;
                 switch (m_CameraState)
                 {
@@ -2210,26 +2209,26 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to call AbortExposure");
+                                    LogComment("ConformanceCheck", "About to call AbortExposure");
                                 m_Camera.AbortExposure();
                                 if (m_CanAbortExposure)
-                                    LogMsg("AbortExposure", MessageLevel.OK, "No exception generated when camera is already idle");
+                                    LogOK("AbortExposure", "No exception generated when camera is already idle");
                                 else
-                                    LogMsg("AbortExposure", MessageLevel.Error, "CanAbortExposure is false but no exception is generated when AbortExposure is called");
+                                    LogError("AbortExposure", "CanAbortExposure is false but no exception is generated when AbortExposure is called");
                             }
                             catch (COMException)
                             {
                                 if (m_CanAbortExposure)
-                                    LogMsg("AbortExposure", MessageLevel.Error, EX_COM + "exception incorrectly generated when camera is idle");
+                                    LogError("AbortExposure", EX_COM + "exception incorrectly generated when camera is idle");
                                 else
-                                    LogMsg("AbortExposure", MessageLevel.OK, "CanAbortExposure is false and COM exception correctly generated");
+                                    LogOK("AbortExposure", "CanAbortExposure is false and COM exception correctly generated");
                             }
                             catch (Exception)
                             {
                                 if (m_CanAbortExposure)
-                                    LogMsg("AbortExposure", MessageLevel.Error, EX_NET + "exception incorrectly generated when camera is idle");
+                                    LogError("AbortExposure", EX_NET + "exception incorrectly generated when camera is idle");
                                 else
-                                    LogMsg("AbortExposure", MessageLevel.OK, "CanAbortExposure is false and .NET exception correctly generated");
+                                    LogOK("AbortExposure", "CanAbortExposure is false and .NET exception correctly generated");
                             }
 
                             break;
@@ -2237,18 +2236,18 @@ namespace ConformU
 
                     default:
                         {
-                            LogMsg("AbortExposure", MessageLevel.Error, EX_COM + "camera is not idle, further AbortExposure tests skipped: " + m_CameraState.ToString());
+                            LogError("AbortExposure", EX_COM + "camera is not idle, further AbortExposure tests skipped: " + m_CameraState.ToString());
                             break;
                         }
                 }
             }
             catch (COMException)
             {
-                LogMsg("AbortExposure", MessageLevel.Error, EX_COM + "exception generated when reading camera state, further AbortExposure tests skipped");
+                LogError("AbortExposure", EX_COM + "exception generated when reading camera state, further AbortExposure tests skipped");
             }
             catch (Exception)
             {
-                LogMsg("AbortExposure", MessageLevel.Error, EX_NET + "exception generated when reading camera state, further AbortExposure tests skipped");
+                LogError("AbortExposure", EX_NET + "exception generated when reading camera state, further AbortExposure tests skipped");
             }
             // PulseGuide
             if (m_CanPulseGuide)
@@ -2266,39 +2265,39 @@ namespace ConformU
                 }
                 catch (COMException ex)
                 {
-                    LogMsg("PulseGuide", MessageLevel.Error, EX_COM + "CanPulseGuide is true but exception generated when calling method - " + ex.ToString());
+                    LogError("PulseGuide", EX_COM + "CanPulseGuide is true but exception generated when calling method - " + ex.ToString());
                 }
                 catch (Exception ex)
                 {
-                    LogMsg("PulseGuide", MessageLevel.Error, EX_NET + "CanPulseGuide is true but exception generated when calling method - " + ex.ToString());
+                    LogError("PulseGuide", EX_NET + "CanPulseGuide is true but exception generated when calling method - " + ex.ToString());
                 }
             }
             else
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to call PulseGuide - North");
+                        LogComment("ConformanceCheck", "About to call PulseGuide - North");
                     m_Camera.PulseGuide(GuideDirection.North, 0);
-                    LogMsg("PulseGuide", MessageLevel.Error, "CanPulseGuide is false but no exception generated when calling method");
+                    LogError("PulseGuide", "CanPulseGuide is false but no exception generated when calling method");
                 }
                 catch (COMException)
                 {
-                    LogMsg("PulseGuide", MessageLevel.OK, "CanPulseGuide is false and exception correctly generated when calling method");
+                    LogOK("PulseGuide", "CanPulseGuide is false and exception correctly generated when calling method");
                 }
                 catch (MethodNotImplementedException)
                 {
-                    LogMsg("PulseGuide", MessageLevel.OK, "CanPulseGuide is false and PulseGuide is not implemented in this driver");
+                    LogOK("PulseGuide", "CanPulseGuide is false and PulseGuide is not implemented in this driver");
                 }
                 catch (Exception)
                 {
-                    LogMsg("PulseGuide", MessageLevel.OK, "CanPulseGuide is false and exception correctly generated when calling method");
+                    LogOK("PulseGuide", "CanPulseGuide is false and exception correctly generated when calling method");
                 }
 
             // StopExposure
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CameraState");
+                    LogComment("ConformanceCheck", "About to get CameraState");
                 m_CameraState = m_Camera.CameraState;
                 switch (m_CameraState)
                 {
@@ -2308,26 +2307,26 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to call StopExposure");
+                                    LogComment("ConformanceCheck", "About to call StopExposure");
                                 m_Camera.StopExposure();
                                 if (m_CanStopExposure)
-                                    LogMsg("StopExposure", MessageLevel.OK, "No exception generated when camera is already idle");
+                                    LogOK("StopExposure", "No exception generated when camera is already idle");
                                 else
-                                    LogMsg("StopExposure", MessageLevel.Error, "CanStopExposure is false but no exception is generated when StopExposure is called");
+                                    LogError("StopExposure", "CanStopExposure is false but no exception is generated when StopExposure is called");
                             }
                             catch (COMException)
                             {
                                 if (m_CanStopExposure)
-                                    LogMsg("StopExposure", MessageLevel.Error, EX_COM + "exception incorrectly generated when camera is idle");
+                                    LogError("StopExposure", EX_COM + "exception incorrectly generated when camera is idle");
                                 else
-                                    LogMsg("StopExposure", MessageLevel.OK, "CanStopExposure is false and COM exception correctly generated");
+                                    LogOK("StopExposure", "CanStopExposure is false and COM exception correctly generated");
                             }
                             catch (Exception)
                             {
                                 if (m_CanStopExposure)
-                                    LogMsg("StopExposure", MessageLevel.Error, EX_NET + "exception incorrectly generated when camera is idle");
+                                    LogError("StopExposure", EX_NET + "exception incorrectly generated when camera is idle");
                                 else
-                                    LogMsg("StopExposure", MessageLevel.OK, "CanStopExposure is false and .NET exception correctly generated");
+                                    LogOK("StopExposure", "CanStopExposure is false and .NET exception correctly generated");
                             }
 
                             break;
@@ -2335,44 +2334,44 @@ namespace ConformU
 
                     default:
                         {
-                            LogMsg("StopExposure", MessageLevel.Error, EX_COM + "camera is not idle, further StopExposure tests skipped: " + m_CameraState.ToString());
+                            LogError("StopExposure", EX_COM + "camera is not idle, further StopExposure tests skipped: " + m_CameraState.ToString());
                             break;
                         }
                 }
             }
             catch (COMException)
             {
-                LogMsg("StopExposure", MessageLevel.Error, EX_COM + "exception generated when reading camera state, further StopExposure tests skipped");
+                LogError("StopExposure", EX_COM + "exception generated when reading camera state, further StopExposure tests skipped");
             }
             catch (Exception)
             {
-                LogMsg("StopExposure", MessageLevel.Error, EX_NET + "exception generated when reading camera state, further StopExposure tests skipped");
+                LogError("StopExposure", EX_NET + "exception generated when reading camera state, further StopExposure tests skipped");
             }
 
             // Use either the maximum values supplied by the camera driver or the maximum values defined in Conform's setup, if these have been set
             if ((settings.CameraMaxBinX > 0) | (settings.CameraMaxBinY > 0))
-                LogMsg("", MessageLevel.TestAndMessage, ""); // Insert a blank line if required
+                LogNewLine(); // Insert a blank line if required
             if (settings.CameraMaxBinX > 0)
             {
                 l_MaxBinX = settings.CameraMaxBinX;
-                LogMsg("StartExposure", MessageLevel.Comment, string.Format("Test range set to MaxBinX = {0} by Conform configuration, camera MaxBinX = {1}", l_MaxBinX, m_MaxBinX));
+                LogComment("StartExposure", string.Format("Test range set to MaxBinX = {0} by Conform configuration, camera MaxBinX = {1}", l_MaxBinX, m_MaxBinX));
             }
             else
                 l_MaxBinX = m_MaxBinX;
             if (settings.CameraMaxBinY > 0)
             {
                 l_MaxBinY = settings.CameraMaxBinY;
-                LogMsg("StartExposure", MessageLevel.Comment, string.Format("Test range set to MaxBinY = {0} by Conform configuration, camera MaxBinY = {1}", l_MaxBinY, m_MaxBinY));
+                LogComment("StartExposure", string.Format("Test range set to MaxBinY = {0} by Conform configuration, camera MaxBinY = {1}", l_MaxBinY, m_MaxBinY));
             }
             else
                 l_MaxBinY = m_MaxBinY;
 
             if ((settings.CameraMaxBinX > m_MaxBinX) | (settings.CameraMaxBinY > m_MaxBinY))
-                LogMsg("", MessageLevel.TestAndMessage, ""); // Insert a blank line if required
+                LogNewLine(); // Insert a blank line if required
             if (settings.CameraMaxBinX > m_MaxBinX)
-                LogMsg("StartExposure", MessageLevel.Comment, string.Format("WARNING - Conform's configured MaxBinX: {0} is greater than the camera's reported MaxBinX: {1}!", l_MaxBinX, m_MaxBinX));
+                LogComment("StartExposure", string.Format("WARNING - Conform's configured MaxBinX: {0} is greater than the camera's reported MaxBinX: {1}!", l_MaxBinX, m_MaxBinX));
             if (settings.CameraMaxBinY > m_MaxBinY)
-                LogMsg("StartExposure", MessageLevel.Comment, string.Format("WARNING - Conform's configured MaxBinY: {0} is greater than the camera's reported MaxBinY: {1}!", l_MaxBinY, m_MaxBinY));
+                LogComment("StartExposure", string.Format("WARNING - Conform's configured MaxBinY: {0} is greater than the camera's reported MaxBinY: {1}!", l_MaxBinY, m_MaxBinY));
 
             // StartExposure - Confirm that correct operation occurs
             int l_BinX, l_BinY;
@@ -2397,9 +2396,8 @@ namespace ConformU
                 }
 
             // StartExposure - Confirm error cases
-            LogMsg("", MessageLevel.TestAndMessage, "");
-            LogMsg("StartExposure error cases", MessageLevel.TestAndMessage, "");
-
+            LogNewLine();
+            LogTestOnly("StartExposure error cases");
             // StartExposure - Negative time
             CameraExposure("", 1, 1, 0, 0, m_CameraXSize, m_CameraYSize, -1.0, "negative duration"); if (cancellationToken.IsCancellationRequested)
                 return; // Test that negative duration generates an error
@@ -2443,31 +2441,30 @@ namespace ConformU
 
             if (p_Description != "")
             {
-                LogMsg("", MessageLevel.TestAndMessage, ""); // Blank Line
-                LogMsg(p_Description, MessageLevel.TestAndMessage, "");
-            }
+                LogNewLine(); // Blank Line
+                LogTestOnly(p_Description);            }
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set BinX");
+                    LogComment("ConformanceCheck", "About to set BinX");
                 m_Camera.BinX = (short)p_BinX;
                 if (settings.DisplayMethodCalls)
-                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set BinY");
+                    LogComment("ConformanceCheck", "About to set BinY");
                 m_Camera.BinY = (short)p_BinY;
                 try
                 {
                     l_ExposeOK = false; // Start off by assuming the worst
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set StartX");
+                        LogComment("ConformanceCheck", "About to set StartX");
                     m_Camera.StartX = p_StartX;
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set StartY");
+                        LogComment("ConformanceCheck", "About to set StartY");
                     m_Camera.StartY = p_StartY;
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set NumX");
+                        LogComment("ConformanceCheck", "About to set NumX");
                     m_Camera.NumX = p_NumX;
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set NumY");
+                        LogComment("ConformanceCheck", "About to set NumY");
                     m_Camera.NumY = p_NumY;
                     try
                     {
@@ -2477,7 +2474,7 @@ namespace ConformU
                         l_StartTime = DateTime.Now;
                         l_StartTimeUTC = DateTime.UtcNow;
                         if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to call StartExposure");
+                            LogComment("ConformanceCheck", "About to call StartExposure");
                         m_Camera.StartExposure(p_Duration, true);
 
                         if (p_ExpectedErrorMessage == "")
@@ -2486,27 +2483,27 @@ namespace ConformU
 
                             // Test whether we have a synchronous or asynchronous camera
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ImageReady and CameraState");
+                                LogComment("ConformanceCheck", "About to get ImageReady and CameraState");
                             if (m_Camera.ImageReady & (m_Camera.CameraState == CameraState.Idle))
                             {
                                 if (l_EndTime.Subtract(l_StartTime).TotalSeconds >= p_Duration)
                                 {
-                                    LogMsg("StartExposure", MessageLevel.OK, "Synchronous exposure found OK: " + p_Duration + " seconds");
+                                    LogOK("StartExposure", "Synchronous exposure found OK: " + p_Duration + " seconds");
                                     CameraTestLast(p_Duration, l_StartTimeUTC);
                                 }
                                 else
-                                    LogMsg("StartExposure", MessageLevel.Error, "Synchronous exposure found but image was returned before exposure time was complete");
+                                    LogError("StartExposure", "Synchronous exposure found but image was returned before exposure time was complete");
                             }
                             else
                             {
                                 Status(StatusType.staAction, "Waiting for exposure to start");
 
                                 // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
-                                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ImageReady");
+                                if (settings.DisplayMethodCalls) LogComment("ConformanceCheck", "About to get ImageReady");
                                 imageReadyTooEarly = System.Convert.ToBoolean(m_Camera.ImageReady);
 
                                 // Wait for exposing state
-                                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CameraState multiple times");
+                                if (settings.DisplayMethodCalls) LogComment("ConformanceCheck", "About to get CameraState multiple times");
                                 do
                                 {
                                     WaitFor(CAMERA_SLEEP_TIME);
@@ -2516,13 +2513,13 @@ namespace ConformU
                                 while ((m_Camera.CameraState != CameraState.Exposing) & (m_Camera.CameraState != CameraState.Error));
 
                                 // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
-                                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ImageReady");
+                                if (settings.DisplayMethodCalls) LogComment("ConformanceCheck", "About to get ImageReady");
                                 imageReadyTooEarly = m_Camera.ImageReady;
 
                                 // Wait for the exposing state to finish
                                 l_StartTime = DateTime.Now;
                                 l_StartTimeUTC = DateTime.UtcNow;
-                                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
+                                if (settings.DisplayMethodCalls) LogComment("ConformanceCheck", "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
                                 do
                                 {
                                     l_PercentCompletedMessage = "Not present in a V1 driver";
@@ -2580,7 +2577,7 @@ namespace ConformU
                                 // Wait for camera to become idle
                                 l_EndTime = DateTime.Now;
                                 Status(StatusType.staAction, "Waiting for camera idle state, reading/downloading image");
-                                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CameraState multiple times");
+                                if (settings.DisplayMethodCalls) LogComment("ConformanceCheck", "About to get CameraState multiple times");
                                 do
                                 {
                                     WaitFor(CAMERA_SLEEP_TIME);
@@ -2590,7 +2587,7 @@ namespace ConformU
 
                                 // Wait for image to become ready
                                 Status(StatusType.staAction, "Waiting for image ready");
-                                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get CameraState multiple times");
+                                if (settings.DisplayMethodCalls) LogComment("ConformanceCheck", "About to get CameraState multiple times");
                                 do
                                 {
                                     WaitFor(CAMERA_SLEEP_TIME);
@@ -2598,39 +2595,39 @@ namespace ConformU
                                 }
                                 while (!m_Camera.ImageReady & (m_Camera.CameraState != CameraState.Error));
 
-                                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ImageReady");
+                                if (settings.DisplayMethodCalls) LogComment("ConformanceCheck", "About to get ImageReady");
                                 if (m_Camera.ImageReady)
                                 {
-                                    LogMsg("StartExposure", MessageLevel.OK, "Asynchronous exposure found OK: " + p_Duration + " seconds");
+                                    LogOK("StartExposure", "Asynchronous exposure found OK: " + p_Duration + " seconds");
                                     CameraTestLast(p_Duration, l_StartTimeUTC);
                                 }
                                 else
-                                    LogMsg("StartExposure", MessageLevel.Error, "Camera state is CameraError");
+                                    LogError("StartExposure", "Camera state is CameraError");
                             }
 
                             // Display a warning if ImageReady was set too early
                             if (imageReadyTooEarly)
                             {
-                                LogMsg("StartExposure", MessageLevel.Issue, "ImageReady was set True before the camera completed its exposure.");
+                                LogIssue("StartExposure", "ImageReady was set True before the camera completed its exposure.");
                             }
                             // Camera exposed OK and didn't generate an exception
                             else
                             {
                                 l_ExposeOK = true;
                             }
-                            LogMsg("StartExposure", MessageLevel.Debug, $"Camera exposed image OK: {l_ExposeOK}");
+                            LogDebug("StartExposure", $"Camera exposed image OK: {l_ExposeOK}");
 
                             // Check image array dimensions
                             try
                             {
                                 // Retrieve the image array
                                 if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ImageArray");
+                                    LogComment("ConformanceCheck", "About to get ImageArray");
                                 sw.Restart();
                                 m_ImageArray = (Array)m_Camera.ImageArray;
                                 sw.Stop();
                                 if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.Comment, "Get ImageArray completed in " + sw.ElapsedMilliseconds + "ms");
+                                    LogComment("ConformanceCheck", "Get ImageArray completed in " + sw.ElapsedMilliseconds + "ms");
 
                                 // Examine the returned array
                                 if ((m_ImageArray.GetLength(0) == p_NumX) & (m_ImageArray.GetLength(1) == p_NumY))
@@ -2645,23 +2642,23 @@ namespace ConformU
                                             if (m_ImageArray.GetUpperBound(2) > 0)
                                                 l_NumPlanes = System.Convert.ToString(m_ImageArray.GetUpperBound(2) + 1) + " planes";
                                         }
-                                        LogMsg("ImageArray", MessageLevel.OK, "Successfully read 32 bit integer array (" + l_NumPlanes + ") " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1) + " pixels");
+                                        LogOK("ImageArray", "Successfully read 32 bit integer array (" + l_NumPlanes + ") " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1) + " pixels");
                                     }
                                     else
-                                        LogMsg("ImageArray", MessageLevel.Error, "Expected 32 bit integer array, actually got: " + m_ImageArray.GetType().ToString());
+                                        LogError("ImageArray", "Expected 32 bit integer array, actually got: " + m_ImageArray.GetType().ToString());
                                 }
                                 else if ((m_ImageArray.GetLength(0) == p_NumY) & (m_ImageArray.GetLength(1) == p_NumX))
-                                    LogMsg("ImageArray", MessageLevel.Error, "Camera image dimensions swapped, expected values: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
+                                    LogError("ImageArray", "Camera image dimensions swapped, expected values: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
                                 else
-                                    LogMsg("ImageArray", MessageLevel.Error, "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
+                                    LogError("ImageArray", "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
                             }
                             catch (COMException ex)
                             {
-                                LogMsg("StartExposure", MessageLevel.Error, EX_COM + "exception when reading ImageArray" + ex.ToString());
+                                LogError("StartExposure", EX_COM + "exception when reading ImageArray" + ex.ToString());
                             }
                             catch (Exception ex)
                             {
-                                LogMsg("StartExposure", MessageLevel.Error, EX_NET + "exception when reading ImageArray" + ex.ToString());
+                                LogError("StartExposure", EX_NET + "exception when reading ImageArray" + ex.ToString());
                             }
 
                             m_ImageArray = null;
@@ -2673,17 +2670,17 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get ImageArrayVariant");
+                                    LogComment("ConformanceCheck", "About to get ImageArrayVariant");
                                 sw.Restart();
                                 imageArrayObject = (Array)m_Camera.ImageArrayVariant;
                                 sw.Stop();
                                 if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.Comment, "Get ImageArrayVariant completed in " + sw.ElapsedMilliseconds + "ms");
+                                    LogComment("ConformanceCheck", "Get ImageArrayVariant completed in " + sw.ElapsedMilliseconds + "ms");
                                 sw.Restart();
                                 m_ImageArrayVariant = (Array)imageArrayObject;
                                 sw.Stop();
                                 if (settings.DisplayMethodCalls)
-                                    LogMsg("ConformanceCheck", MessageLevel.Comment, "Conversion to Array completed in " + sw.ElapsedMilliseconds + "ms");
+                                    LogComment("ConformanceCheck", "Conversion to Array completed in " + sw.ElapsedMilliseconds + "ms");
                                 if ((m_ImageArrayVariant.GetLength(0) == p_NumX) & (m_ImageArrayVariant.GetLength(1) == p_NumY))
                                 {
                                     if (m_ImageArrayVariant.GetType().ToString() == "System.Object[,]" | m_ImageArrayVariant.GetType().ToString() == "System.Object[,,]")
@@ -2704,23 +2701,23 @@ namespace ConformU
                                             else
                                                 l_VariantType = ((object[,])m_ImageArrayVariant)[0, 0].GetType().ToString();
                                         }
-                                        LogMsg("ImageArrayVariant", MessageLevel.OK, "Successfully read variant array (" + l_NumPlanes + ") with " + l_VariantType + " elements " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1) + " pixels");
+                                        LogOK("ImageArrayVariant", "Successfully read variant array (" + l_NumPlanes + ") with " + l_VariantType + " elements " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1) + " pixels");
                                     }
                                     else
-                                        LogMsg("ImageArrayVariant", MessageLevel.Error, "Expected variant array, actually got: " + m_ImageArrayVariant.GetType().ToString());
+                                        LogError("ImageArrayVariant", "Expected variant array, actually got: " + m_ImageArrayVariant.GetType().ToString());
                                 }
                                 else if ((m_ImageArrayVariant.GetLength(0) == p_NumY) & (m_ImageArrayVariant.GetLength(1) == p_NumX))
-                                    LogMsg("ImageArrayVariant", MessageLevel.Error, "Camera image dimensions swapped, expected values: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
+                                    LogError("ImageArrayVariant", "Camera image dimensions swapped, expected values: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
                                 else
-                                    LogMsg("ImageArrayVariant", MessageLevel.Error, "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
+                                    LogError("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
                             }
                             catch (COMException ex)
                             {
-                                LogMsg("ImageArrayVariant", MessageLevel.Error, EX_COM + "exception when reading ImageArrayVariant" + ex.ToString());
+                                LogError("ImageArrayVariant", EX_COM + "exception when reading ImageArrayVariant" + ex.ToString());
                             }
                             catch (Exception ex)
                             {
-                                LogMsg("ImageArrayVariant", MessageLevel.Error, EX_NET + "exception when reading ImageArrayVariant" + ex.ToString());
+                                LogError("ImageArrayVariant", EX_NET + "exception when reading ImageArrayVariant" + ex.ToString());
                             }
 
                             // Release large image objects from memory
@@ -2730,10 +2727,10 @@ namespace ConformU
                         }
                         else
                         {
-                            LogMsg("StartExposure", MessageLevel.Comment, "Test: " + p_ExpectedErrorMessage);
-                            LogMsg("StartExposure", MessageLevel.Error, "Expected an exception and didn't get one - BinX:" + p_BinX + " BinY:" + p_BinY + " StartX:" + p_StartX + " StartY:" + p_StartY + " NumX:" + p_NumX + " NumY:" + p_NumY);
+                            LogComment("StartExposure", "Test: " + p_ExpectedErrorMessage);
+                            LogError("StartExposure", "Expected an exception and didn't get one - BinX:" + p_BinX + " BinY:" + p_BinY + " StartX:" + p_StartX + " StartY:" + p_StartY + " NumX:" + p_NumX + " NumY:" + p_NumY);
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to call StopExposure");
+                                LogComment("ConformanceCheck", "About to call StopExposure");
                             try
                             {
                                 m_Camera.StopExposure();
@@ -2742,7 +2739,7 @@ namespace ConformU
                             {
                             } // Try and do some clean up
                             if (settings.DisplayMethodCalls)
-                                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to call AbortExposure");
+                                LogComment("ConformanceCheck", "About to call AbortExposure");
                             try
                             {
                                 m_Camera.AbortExposure();
@@ -2755,30 +2752,30 @@ namespace ConformU
                     catch (COMException ex)
                     {
                         if (p_ExpectedErrorMessage != "")
-                            LogMsg("StartExposure", MessageLevel.OK, "Exception correctly generated for " + p_ExpectedErrorMessage);
+                            LogOK("StartExposure", "Exception correctly generated for " + p_ExpectedErrorMessage);
                         else
                         {
-                            LogMsg("", MessageLevel.Info, p_ExpectedErrorMessage);
-                            LogMsg("StartExposure", MessageLevel.Error, EX_COM + "exception generated when exposing, further StartExposure tests skipped - " + ex.ToString());
+                            LogInfo("", p_ExpectedErrorMessage);
+                            LogError("StartExposure", EX_COM + "exception generated when exposing, further StartExposure tests skipped - " + ex.ToString());
                         }
                     }
                     catch (Exception ex)
                     {
                         if (p_ExpectedErrorMessage != "")
-                            LogMsg("StartExposure", MessageLevel.OK, "Exception correctly generated for " + p_ExpectedErrorMessage);
+                            LogOK("StartExposure", "Exception correctly generated for " + p_ExpectedErrorMessage);
                         else
-                            LogMsg("StartExposure", MessageLevel.Error, EX_NET + "exception generated when exposing, further StartExposure tests skipped - " + ex.ToString());
+                            LogError("StartExposure", EX_NET + "exception generated when exposing, further StartExposure tests skipped - " + ex.ToString());
                     }
                 }
                 catch (COMException ex)
                 {
-                    LogMsg("StartExposure", MessageLevel.Info, "COM Exception: " + ex.Message);
-                    LogMsg("StartExposure", MessageLevel.Error, "Exception generated when setting camera properties, further StartExposure tests skipped");
+                    LogInfo("StartExposure", "COM Exception: " + ex.Message);
+                    LogError("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
                 }
                 catch (Exception ex)
                 {
-                    LogMsg("StartExposure", MessageLevel.Info, ".NET Exception: " + ex.Message);
-                    LogMsg("StartExposure", MessageLevel.Error, "Exception generated when setting camera properties, further StartExposure tests skipped");
+                    LogInfo("StartExposure", ".NET Exception: " + ex.Message);
+                    LogError("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
                 }
             }
             catch (COMException ex)
@@ -2793,27 +2790,27 @@ namespace ConformU
                     case int n when n == g_ExInvalidValue5:
                     case int o when o == g_ExInvalidValue6:
                         {
-                            LogMsg("StartExposure", MessageLevel.Info, ex.Message);
+                            LogInfo("StartExposure", ex.Message);
                             break;
                         }
 
                     default:
                         {
-                            LogMsg("StartExposure", MessageLevel.Info, "COM Exception: " + ex.Message);
-                            LogMsg("StartExposure", MessageLevel.Error, "Exception generated when setting camera properties, further StartExposure tests skipped");
+                            LogInfo("StartExposure", "COM Exception: " + ex.Message);
+                            LogError("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
                             break;
                         }
                 }
             }
             catch (InvalidValueException ex)
             {
-                LogMsg("BinXY Write", MessageLevel.Info, "Exposure skipped because BinX or BinY cannot be set. Exception message:");
-                LogMsg("BinXY Write", MessageLevel.Comment, ex.Message);
+                LogInfo("BinXY Write", "Exposure skipped because BinX or BinY cannot be set. Exception message:");
+                LogComment("BinXY Write", ex.Message);
             }
             catch (Exception ex)
             {
-                LogMsg("StartExposure", MessageLevel.Info, ".NET Exception: " + ex.Message);
-                LogMsg("StartExposure", MessageLevel.Error, "Exception generated when setting camera properties, further StartExposure tests skipped");
+                LogInfo("StartExposure", ".NET Exception: " + ex.Message);
+                LogError("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
             }
 
             Status(StatusType.staAction, "");
@@ -2825,12 +2822,12 @@ namespace ConformU
             // LastExposureDuration
             try
             {
-                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get LastExposureDuration");
+                if (settings.DisplayMethodCalls) LogComment("ConformanceCheck", "About to get LastExposureDuration");
                 m_LastExposureDuration = m_Camera.LastExposureDuration;
                 if ((Math.Abs(m_LastExposureDuration - p_Duration) / p_Duration) < 0.02)
-                    LogMsg("LastExposureDuration", MessageLevel.OK, "LastExposureDuration is: " + m_LastExposureDuration + " seconds");
+                    LogOK("LastExposureDuration", "LastExposureDuration is: " + m_LastExposureDuration + " seconds");
                 else
-                    LogMsg("LastExposureDuration", MessageLevel.Issue, "LastExposureDuration is not the same as image duration: " + m_LastExposureDuration + " " + p_Duration);
+                    LogIssue("LastExposureDuration", "LastExposureDuration is not the same as image duration: " + m_LastExposureDuration + " " + p_Duration);
             }
             catch (Exception ex)
             {
@@ -2840,7 +2837,7 @@ namespace ConformU
             // LastExposurestartTime
             try // Confirm that it can be read
             {
-                if (settings.DisplayMethodCalls) LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get LastExposureStartTime");
+                if (settings.DisplayMethodCalls) LogComment("ConformanceCheck", "About to get LastExposureStartTime");
                 m_LastExposureStartTime = m_Camera.LastExposureStartTime;
                 int l_i;
                 // Confirm that the format is as expected
@@ -2858,7 +2855,7 @@ namespace ConformU
                                 {
                                     if (m_LastExposureStartTime.Substring(l_i - 1, 1) != "-")
                                     {
-                                        LogMsgInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not '-'");
+                                        LogInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not '-'");
                                         l_FormatOK = false;
                                     }
                                     else
@@ -2873,7 +2870,7 @@ namespace ConformU
                                 {
                                     if (m_LastExposureStartTime.Substring(l_i - 1, 1) != "T")
                                     {
-                                        LogMsgInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not 'T'");
+                                        LogInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not 'T'");
                                         l_FormatOK = false;
                                     }
                                     else
@@ -2889,7 +2886,7 @@ namespace ConformU
                                 {
                                     if (m_LastExposureStartTime.Substring(l_i - 1, 1) != ":")
                                     {
-                                        LogMsgInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not ':'");
+                                        LogInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not ':'");
                                         l_FormatOK = false;
                                     }
                                     else
@@ -2903,7 +2900,7 @@ namespace ConformU
                                 {
                                     if (!m_LastExposureStartTime.Substring(l_i - 1, 1).IsNumeric())
                                     {
-                                        LogMsgInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not 'numeric'");
+                                        LogInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not 'numeric'");
                                         l_FormatOK = false;
                                     }
                                     else
@@ -2920,26 +2917,26 @@ namespace ConformU
                         {
                             l_StartTime = DateTime.Parse(m_LastExposureStartTime);
                             if (p_Start.Subtract(l_StartTime).TotalSeconds < 2.0)
-                                LogMsg("LastExposureStartTime", MessageLevel.OK, "LastExposureStartTime is correct to within 2 seconds: " + m_LastExposureStartTime + " UTC");
+                                LogOK("LastExposureStartTime", "LastExposureStartTime is correct to within 2 seconds: " + m_LastExposureStartTime + " UTC");
                             else
-                                LogMsg("LastExposureStartTime", MessageLevel.Issue, "LastExposureStartTime is more than 2 seconds inaccurate : " + m_LastExposureStartTime + ", expected: " + p_Start.ToString("yyyy-MM-ddTHH:mm:ss") + " UTC");
+                                LogIssue("LastExposureStartTime", "LastExposureStartTime is more than 2 seconds inaccurate : " + m_LastExposureStartTime + ", expected: " + p_Start.ToString("yyyy-MM-ddTHH:mm:ss") + " UTC");
                         }
                         catch (COMException ex)
                         {
-                            LogMsg("LastExposureStartTime", MessageLevel.Error, EX_COM + "parsing LastExposureStartTime - " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                            LogError("LastExposureStartTime", EX_COM + "parsing LastExposureStartTime - " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                         }
                         catch (Exception ex)
                         {
-                            LogMsg("LastExposureStartTime", MessageLevel.Error, EX_NET + "parsing LastExposureStartTime - " + ex.Message + " " + m_LastExposureStartTime);
+                            LogError("LastExposureStartTime", EX_NET + "parsing LastExposureStartTime - " + ex.Message + " " + m_LastExposureStartTime);
                         }
                     }
                     else
-                        LogMsg("LastExposureStartTime", MessageLevel.Error, "LastExposureStartTime not in the expected format yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
+                        LogError("LastExposureStartTime", "LastExposureStartTime not in the expected format yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
                 }
                 else if (m_LastExposureStartTime == "")
-                    LogMsg("LastExposureStartTime", MessageLevel.Error, "LastExposureStartTime has returned an empty string - expected yyyy-mm-ddThh:mm:ss");
+                    LogError("LastExposureStartTime", "LastExposureStartTime has returned an empty string - expected yyyy-mm-ddThh:mm:ss");
                 else
-                    LogMsg("LastExposureStartTime", MessageLevel.Error, "LastExposureStartTime is less than 19 characters - expected yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
+                    LogError("LastExposureStartTime", "LastExposureStartTime is less than 19 characters - expected yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
             }
             catch (Exception ex)
             {
@@ -2954,7 +2951,7 @@ namespace ConformU
             l_StartTime = DateTime.Now;
             Status(StatusType.staAction, "Start " + CAMERA_PULSE_DURATION / (double)1000 + " second pulse guide " + p_Direction.ToString());
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, $"About to call PulseGuide - {p_Direction}");
+                LogComment("ConformanceCheck", $"About to call PulseGuide - {p_Direction}");
             m_Camera.PulseGuide(p_Direction, CAMERA_PULSE_DURATION); // Start a 2 second pulse
             l_EndTime = DateTime.Now;
 
@@ -2963,11 +2960,11 @@ namespace ConformU
                 if (l_EndTime.Subtract(l_StartTime).TotalMilliseconds < (CAMERA_PULSE_DURATION - 500))
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get IsPulseGuiding");
+                        LogComment("ConformanceCheck", "About to get IsPulseGuiding");
                     if (m_Camera.IsPulseGuiding)
                     {
                         if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get IsPulseGuiding multiple times");
+                            LogComment("ConformanceCheck", "About to get IsPulseGuiding multiple times");
                         do
                         {
                             WaitFor(SLEEP_TIME);
@@ -2977,23 +2974,23 @@ namespace ConformU
                         while (m_Camera.IsPulseGuiding & (DateTime.Now.Subtract(l_StartTime).TotalMilliseconds <= 3000)); // Wait for up to 3 seconds
 
                         if (settings.DisplayMethodCalls)
-                            LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get IsPulseGuiding");
+                            LogComment("ConformanceCheck", "About to get IsPulseGuiding");
                         if (!m_Camera.IsPulseGuiding)
-                            LogMsg("PulseGuide " + p_Direction.ToString(), MessageLevel.OK, "Asynchronous pulse guide found OK");
+                            LogOK("PulseGuide " + p_Direction.ToString(), "Asynchronous pulse guide found OK");
                         else
-                            LogMsg("PulseGuide " + p_Direction.ToString(), MessageLevel.Issue, "Asynchronous pulse guide expected but IsPulseGuiding is TRUE beyond expected time of 2 seconds");
+                            LogIssue("PulseGuide " + p_Direction.ToString(), "Asynchronous pulse guide expected but IsPulseGuiding is TRUE beyond expected time of 2 seconds");
                     }
                     else
-                        LogMsg("PulseGuide " + p_Direction.ToString(), MessageLevel.Issue, "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE");
+                        LogIssue("PulseGuide " + p_Direction.ToString(), "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE");
                 }
                 else
                 {
                     if (settings.DisplayMethodCalls)
-                        LogMsg("ConformanceCheck", MessageLevel.Comment, "About to get IsPulseGuiding");
+                        LogComment("ConformanceCheck", "About to get IsPulseGuiding");
                     if (!m_Camera.IsPulseGuiding)
-                        LogMsg("PulseGuide " + p_Direction.ToString(), MessageLevel.OK, "Synchronous pulse guide found OK");
+                        LogOK("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide found OK");
                     else
-                        LogMsg("PulseGuide " + p_Direction.ToString(), MessageLevel.Issue, "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE");
+                        LogIssue("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE");
                 }
             }
             else
@@ -3002,20 +2999,20 @@ namespace ConformU
                     case object _ when l_EndTime.Subtract(l_StartTime).TotalMilliseconds - CAMERA_PULSE_DURATION > CAMERA_PULSE_TOLERANCE // Duration was more than 0.5 seconds longer than expected
                    :
                         {
-                            LogMsg("PulseGuide " + p_Direction.ToString(), MessageLevel.Issue, "Synchronous pulse guide longer than expected " + (CAMERA_PULSE_DURATION) / (double)1000 + " seconds: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
+                            LogIssue("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide longer than expected " + (CAMERA_PULSE_DURATION) / (double)1000 + " seconds: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
                             break;
                         }
 
                     case object _ when l_EndTime.Subtract(l_StartTime).TotalMilliseconds - CAMERA_PULSE_DURATION < 20 // Duration was more than 20ms shorter than expected
              :
                         {
-                            LogMsg("PulseGuide " + p_Direction.ToString(), MessageLevel.Issue, "Synchronous pulse guide shorter than expected " + (CAMERA_PULSE_DURATION) / (double)1000 + " seconds: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
+                            LogIssue("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide shorter than expected " + (CAMERA_PULSE_DURATION) / (double)1000 + " seconds: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
                             break;
                         }
 
                     default:
                         {
-                            LogMsg("PulseGuide " + p_Direction.ToString(), MessageLevel.OK, "Synchronous pulse guide found OK: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
+                            LogOK("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide found OK: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
                             break;
                         }
                 }
@@ -3034,29 +3031,29 @@ namespace ConformU
             Status(StatusType.staAction, "Exposure for ImageArray Test");
             Status(StatusType.staStatus, "Start");
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set BinX");
+                LogComment("ConformanceCheck", "About to set BinX");
             m_Camera.BinX = 1;
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set BinY");
+                LogComment("ConformanceCheck", "About to set BinY");
             m_Camera.BinY = 1;
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set StartX");
+                LogComment("ConformanceCheck", "About to set StartX");
             m_Camera.StartX = 0;
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set StartY");
+                LogComment("ConformanceCheck", "About to set StartY");
             m_Camera.StartY = 0;
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set MaxBinX");
+                LogComment("ConformanceCheck", "About to set MaxBinX");
             m_Camera.NumX = m_Camera.MaxBinX;
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set MaxBinY");
+                LogComment("ConformanceCheck", "About to set MaxBinY");
             m_Camera.NumY = m_Camera.MaxBinY;
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to call StartExposure");
+                LogComment("ConformanceCheck", "About to call StartExposure");
             m_Camera.StartExposure(1, true); // 1 second exposure
 
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to call ImageReady multiple times");
+                LogComment("ConformanceCheck", "About to call ImageReady multiple times");
             do
                 Status(StatusType.staStatus, "Waiting for ImageReady");
             while (!m_Camera.ImageReady);
@@ -3129,7 +3126,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogMsg(p_Name, MessageLevel.Error, "Conform:PerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogError(p_Name, "Conform:PerformanceTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }
@@ -3150,39 +3147,39 @@ namespace ConformU
                 {
                     case object _ when l_Rate > 10.0:
                         {
-                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case object _ when 2.0 <= l_Rate && l_Rate <= 10.0:
                         {
-                            LogMsg(p_Name, MessageLevel.OK, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogOK(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case object _ when 1.0 <= l_Rate && l_Rate <= 2.0:
                         {
-                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
 
                     default:
                         {
-                            LogMsg(p_Name, MessageLevel.Info, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogMsg(p_Name, MessageLevel.Info, "Unable to complete test: " + ex.ToString());
+                LogInfo(p_Name, "Unable to complete test: " + ex.ToString());
             }
         }
 
         public override void PostRunCheck()
         {
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to call AbortExposure");
+                LogComment("ConformanceCheck", "About to call AbortExposure");
             if (m_CanAbortExposure)
             {
                 try
@@ -3194,7 +3191,7 @@ namespace ConformU
                 }
             }
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to call StopExposure");
+                LogComment("ConformanceCheck", "About to call StopExposure");
             if (m_CanStopExposure)
             {
                 try
@@ -3206,7 +3203,7 @@ namespace ConformU
                 }
             }
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set SetCCDTemperature");
+                LogComment("ConformanceCheck", "About to set SetCCDTemperature");
             if (m_CanSetCCDTemperature)
             {
                 try
@@ -3218,7 +3215,7 @@ namespace ConformU
                 }
             }
             if (settings.DisplayMethodCalls)
-                LogMsg("ConformanceCheck", MessageLevel.Comment, "About to set CoolerOn");
+                LogComment("ConformanceCheck", "About to set CoolerOn");
             try
             {
                 m_Camera.CoolerOn = m_CoolerOn;
@@ -3226,7 +3223,7 @@ namespace ConformU
             catch
             {
             }
-            LogMsg("PostRunCheck", MessageLevel.OK, "Camera returned to initial cooler temperature");
+            LogOK("PostRunCheck", "Camera returned to initial cooler temperature");
         }
     }
 

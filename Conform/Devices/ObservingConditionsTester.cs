@@ -114,7 +114,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogMsg("Dispose", MessageLevel.Debug, "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("Dispose", "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
             if (!disposedValue)
             {
                 if (disposing)
@@ -193,7 +193,7 @@ namespace ConformU
                         throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
 
-                LogMsg("CreateDevice", MessageLevel.Debug, "Successfully created driver");
+                LogDebug("CreateDevice", "Successfully created driver");
                 baseClassDevice = m_ObservingConditions; // Assign the driver to the base class
 
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
@@ -201,7 +201,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogMsg("CreateDevice", MessageLevel.Debug, "Exception thrown: " + ex.Message);
+                LogDebug("CreateDevice", "Exception thrown: " + ex.Message);
                 throw; // Re throw exception 
             }
 
@@ -239,7 +239,7 @@ namespace ConformU
                 {
                     LogCallToDriver("AveragePeriod Write", "About to set AveragePeriod property");
                     m_ObservingConditions.AveragePeriod = -2.0;
-                    LogMsgIssue("AveragePeriod Write", "No error generated on setting the average period < -1.0");
+                    LogIssue("AveragePeriod Write", "No error generated on setting the average period < -1.0");
                 }
                 catch (Exception ex)
                 {
@@ -251,7 +251,7 @@ namespace ConformU
                 {
                     LogCallToDriver("AveragePeriod Write", "About to set AveragePeriod property");
                     m_ObservingConditions.AveragePeriod = 0.0;
-                    LogMsgOK("AveragePeriod Write", "Successfully set average period to 0.0");
+                    LogOK("AveragePeriod Write", "Successfully set average period to 0.0");
                 }
                 catch (Exception ex)
                 {
@@ -263,7 +263,7 @@ namespace ConformU
                 {
                     LogCallToDriver("AveragePeriod Write", "About to set AveragePeriod property");
                     m_ObservingConditions.AveragePeriod = 5.0;
-                    LogMsgOK("AveragePeriod Write", "Successfully set average period to 5.0");
+                    LogOK("AveragePeriod Write", "Successfully set average period to 5.0");
                 }
                 catch (Exception ex)
                 {
@@ -275,27 +275,27 @@ namespace ConformU
                 {
                     LogCallToDriver("AveragePeriod Write", "About to set AveragePeriod property");
                     m_ObservingConditions.AveragePeriod = averageperiod;
-                    LogMsgOK("AveragePeriod Write", "Successfully restored original average period: " + averageperiod);
+                    LogOK("AveragePeriod Write", "Successfully restored original average period: " + averageperiod);
                 }
                 catch (Exception ex)
                 {
-                    LogMsgInfo("AveragePeriod Write", "Unable to restore original average period");
+                    LogInfo("AveragePeriod Write", "Unable to restore original average period");
                     HandleException("AveragePeriod Write", MemberType.Property, Required.Mandatory, ex, "");
                 }
             }
             else
-                LogMsgInfo("AveragePeriod Write", "Test skipped because AveragePerid cold not be read");
+                LogInfo("AveragePeriod Write", "Test skipped because AveragePerid cold not be read");
 
             cloudCover = TestDouble(PROPERTY_CLOUDCOVER, ObservingConditionsProperty.CloudCover, 0.0, 100.0, Required.Optional);
             dewPoint = TestDouble(PROPERTY_DEWPOINT, ObservingConditionsProperty.DewPoint, ABSOLUTE_ZERO, WATER_BOILING_POINT, Required.Optional);
             humidity = TestDouble(PROPERTY_HUMIDITY, ObservingConditionsProperty.Humidity, 0.0, 100.0, Required.Optional);
 
             if ((IsGoodValue(dewPoint) & IsGoodValue(humidity)))
-                LogMsg("DewPoint & Humidity", MessageLevel.OK, "Dew point and humidity are both implemented per the interface specification");
+                LogOK("DewPoint & Humidity", "Dew point and humidity are both implemented per the interface specification");
             else if ((!IsGoodValue(dewPoint) & !IsGoodValue(humidity)))
-                LogMsg("DewPoint & Humidity", MessageLevel.OK, "Dew point and humidity are both not implemented per the interface specification");
+                LogOK("DewPoint & Humidity", "Dew point and humidity are both not implemented per the interface specification");
             else
-                LogMsg("DewPoint & Humidity", MessageLevel.Issue, "One of Dew point or humidity is implemented and the other is not. Both must be implemented or both must not be implemented per the interface specification");
+                LogIssue("DewPoint & Humidity", "One of Dew point or humidity is implemented and the other is not. Both must be implemented or both must not be implemented per the interface specification");
 
             pressure = TestDouble(PROPERTY_PRESSURE, ObservingConditionsProperty.Pressure, 0.0, 1100.0, Required.Optional);
             rainRate = TestDouble(PROPERTY_RAINRATE, ObservingConditionsProperty.RainRate, 0.0, 20000.0, Required.Optional);
@@ -312,9 +312,9 @@ namespace ConformU
             if ((windSpeed == 0.0))
             {
                 if ((windDirection == 0.0))
-                    LogMsg(PROPERTY_WINDSPEED, MessageLevel.OK, "Wind direction is reported as 0.0 when wind speed is 0.0");
+                    LogOK(PROPERTY_WINDSPEED, "Wind direction is reported as 0.0 when wind speed is 0.0");
                 else
-                    LogMsg(PROPERTY_WINDSPEED, MessageLevel.Error, string.Format("When wind speed is reported as 0.0, wind direction should also be reported as 0.0, it is actually reported as {0}", windDirection));
+                    LogError(PROPERTY_WINDSPEED, string.Format("When wind speed is reported as 0.0, wind direction should also be reported as 0.0, it is actually reported as {0}", windDirection));
             }
         }
 
@@ -334,11 +334,11 @@ namespace ConformU
             LastUpdateTimeHumidity = TestDouble(PROPERTY_HUMIDITY, ObservingConditionsProperty.TimeSinceLastUpdateHumidity, -1.0, double.MaxValue, Required.Optional);
 
             if ((IsGoodValue(LastUpdateTimeDewPoint) & IsGoodValue(LastUpdateTimeHumidity)))
-                LogMsg("DewPoint & Humidity", MessageLevel.OK, "Dew point and humidity are both implemented per the interface specification");
+                LogOK("DewPoint & Humidity", "Dew point and humidity are both implemented per the interface specification");
             else if ((!IsGoodValue(LastUpdateTimeDewPoint) & !IsGoodValue(LastUpdateTimeHumidity)))
-                LogMsg("DewPoint & Humidity", MessageLevel.OK, "Dew point and humidity are both not implemented per the interface specification");
+                LogOK("DewPoint & Humidity", "Dew point and humidity are both not implemented per the interface specification");
             else
-                LogMsg("DewPoint & Humidity", MessageLevel.Issue, "One of Dew point or humidity is implemented and the other is not. Both must be implemented or both must not be implemented per the interface specification");
+                LogIssue("DewPoint & Humidity", "One of Dew point or humidity is implemented and the other is not. Both must be implemented or both must not be implemented per the interface specification");
 
             LastUpdateTimePressure = TestDouble(PROPERTY_PRESSURE, ObservingConditionsProperty.TimeSinceLastUpdatePressure, double.MinValue, double.MaxValue, Required.Optional);
             LastUpdateTimeRainRate = TestDouble(PROPERTY_RAINRATE, ObservingConditionsProperty.TimeSinceLastUpdateRainRate, double.MinValue, double.MaxValue, Required.Optional);
@@ -356,7 +356,7 @@ namespace ConformU
             {
                 LogCallToDriver("AveragePeriod Write", "About to call Refresh method");
                 m_ObservingConditions.Refresh();
-                LogMsg("Refresh", MessageLevel.OK, "Refreshed OK");
+                LogOK("Refresh", "Refreshed OK");
             }
             catch (Exception ex)
             {
@@ -369,11 +369,11 @@ namespace ConformU
             SensorDescriptionHumidity = TestSensorDescription(PROPERTY_HUMIDITY, ObservingConditionsProperty.SensorDescriptionHumidity, int.MaxValue, Required.Optional);
 
             if (((SensorDescriptionDewPoint == null) & (SensorDescriptionHumidity == null)))
-                LogMsg("DewPoint & Humidity", MessageLevel.OK, "Dew point and humidity are both not implemented per the interface specification");
+                LogOK("DewPoint & Humidity", "Dew point and humidity are both not implemented per the interface specification");
             else if (((!(SensorDescriptionDewPoint == null)) & (!(SensorDescriptionHumidity == null))))
-                LogMsg("DewPoint & Humidity", MessageLevel.OK, "Dew point and humidity are both implemented per the interface specification");
+                LogOK("DewPoint & Humidity", "Dew point and humidity are both implemented per the interface specification");
             else
-                LogMsg("DewPoint & Humidity", MessageLevel.Issue, "One of Dew point or humidity is implemented and the other is not. Both must be implemented or both must not be implemented per the interface specification");
+                LogIssue("DewPoint & Humidity", "One of Dew point or humidity is implemented and the other is not. Both must be implemented or both must not be implemented per the interface specification");
 
             SensorDescriptionPressure = TestSensorDescription(PROPERTY_PRESSURE, ObservingConditionsProperty.SensorDescriptionPressure, int.MaxValue, Required.Optional);
             SensorDescriptionRainRate = TestSensorDescription(PROPERTY_RAINRATE, ObservingConditionsProperty.SensorDescriptionRainRate, int.MaxValue, Required.Optional);
@@ -389,15 +389,15 @@ namespace ConformU
             // Now check that the sensor value, description and last updated time are all either implemented or not implemented
             foreach (string sensorName in ValidSensors)
             {
-                LogMsg("Consistency", MessageLevel.Debug, "Sensor name: " + sensorName);
+                LogDebug("Consistency", "Sensor name: " + sensorName);
                 if ((sensorisImplemented[sensorName] & sensorHasDescription[sensorName] & sensorHasTimeOfLastUpdate[sensorName]))
-                    LogMsg("Consistency - " + sensorName, MessageLevel.OK, "Sensor value, description and time since last update are all implemented as required by the specification");
+                    LogOK("Consistency - " + sensorName, "Sensor value, description and time since last update are all implemented as required by the specification");
                 else if (((!sensorisImplemented[sensorName]) & (!sensorHasDescription[sensorName]) & (!sensorHasTimeOfLastUpdate[sensorName])))
-                    LogMsg("Consistency - " + sensorName, MessageLevel.OK, "Sensor value, description and time since last update are all not implemented as required by the specification");
+                    LogOK("Consistency - " + sensorName, "Sensor value, description and time since last update are all not implemented as required by the specification");
                 else
                 {
-                    LogMsg("Consistency - " + sensorName, MessageLevel.Issue, "Sensor value is implemented: " + sensorisImplemented[sensorName] + ", Sensor description is implemented: " + sensorHasDescription[sensorName] + ", Sensor time since last update is implemented: " + sensorHasTimeOfLastUpdate[sensorName]);
-                    LogMsg("Consistency - " + sensorName, MessageLevel.Info, "The ASCOM specification requires that sensor value, description and time since last update must either all be implemented or all not be implemented.");
+                    LogIssue("Consistency - " + sensorName, "Sensor value is implemented: " + sensorisImplemented[sensorName] + ", Sensor description is implemented: " + sensorHasDescription[sensorName] + ", Sensor time since last update is implemented: " + sensorHasTimeOfLastUpdate[sensorName]);
+                    LogInfo("Consistency - " + sensorName, "The ASCOM specification requires that sensor value, description and time since last update must either all be implemented or all not be implemented.");
                 }
             }
         }
@@ -448,7 +448,7 @@ namespace ConformU
                 SensorName = MethodName;
                 LogCallToDriver(MethodName, $"About to get {SensorName} property");
             }
-            LogMsg("returnValue", MessageLevel.Debug, "methodName: " + MethodName + ", SensorName: " + SensorName);
+            LogDebug("returnValue", "methodName: " + MethodName + ", SensorName: " + SensorName);
             sensorHasTimeOfLastUpdate[SensorName] = false;
 
             do
@@ -628,7 +628,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogMsg(MethodName, MessageLevel.Error, "returnValue: Unknown test type - " + p_Type.ToString());
+                                LogError(MethodName, "returnValue: Unknown test type - " + p_Type.ToString());
                                 break;
                             }
                     }
@@ -640,19 +640,19 @@ namespace ConformU
                     {
                         case object _ when returnValue < p_Min:
                             {
-                                LogMsg(MethodName, MessageLevel.Error, "Invalid value (below minimum expected - " + p_Min.ToString() + "): " + returnValue.ToString());
+                                LogError(MethodName, "Invalid value (below minimum expected - " + p_Min.ToString() + "): " + returnValue.ToString());
                                 break;
                             }
 
                         case object _ when returnValue > p_Max:
                             {
-                                LogMsg(MethodName, MessageLevel.Error, "Invalid value (above maximum expected - " + p_Max.ToString() + "): " + returnValue.ToString());
+                                LogError(MethodName, "Invalid value (above maximum expected - " + p_Max.ToString() + "): " + returnValue.ToString());
                                 break;
                             }
 
                         default:
                             {
-                                LogMsg(MethodName, MessageLevel.OK, returnValue.ToString());
+                                LogOK(MethodName, returnValue.ToString());
                                 break;
                             }
                     }
@@ -668,7 +668,7 @@ namespace ConformU
                     {
                         returnValue = BAD_VALUE;
                         retryCount = retryCount + 1;
-                        LogMsg(MethodName, MessageLevel.Info, "Sensor not ready, received InvalidOperationException, waiting " + settings.ObservingConditionsRetryTime + " second to retry. Attempt " + retryCount + " out of " + settings.ObservingConditionsMaxRetries);
+                        LogInfo(MethodName, "Sensor not ready, received InvalidOperationException, waiting " + settings.ObservingConditionsRetryTime + " second to retry. Attempt " + retryCount + " out of " + settings.ObservingConditionsMaxRetries);
                         WaitFor(settings.ObservingConditionsRetryTime * 1000);
                     }
                     else
@@ -682,7 +682,7 @@ namespace ConformU
             while (!readOK & (retryCount <= settings.ObservingConditionsMaxRetries) & !unexpectedError); // Lower than minimum value// Higher than maximum value
 
             if ((!readOK) & (!unexpectedError))
-                LogMsg(MethodName, MessageLevel.Info, "InvalidOperationException persisted for longer than " + settings.ObservingConditionsMaxRetries * settings.ObservingConditionsRetryTime + " seconds.");
+                LogInfo(MethodName, "InvalidOperationException persisted for longer than " + settings.ObservingConditionsMaxRetries * settings.ObservingConditionsRetryTime + " seconds.");
             return returnValue;
 
         }
@@ -789,7 +789,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogMsg(MethodName, MessageLevel.Error, "TestString: Unknown test type - " + p_Type.ToString());
+                            LogError(MethodName, "TestString: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -799,22 +799,22 @@ namespace ConformU
                 {
                     case object _ when returnValue == null:
                         {
-                            LogMsg(MethodName, MessageLevel.Error, "The driver did not return any string at all: Nothing (VB), null (C#)");
+                            LogError(MethodName, "The driver did not return any string at all: Nothing (VB), null (C#)");
                             break;
                         }
 
                     case object _ when returnValue == "":
                         {
-                            LogMsg(MethodName, MessageLevel.OK, "The driver returned an empty string: \"\"");
+                            LogOK(MethodName, "The driver returned an empty string: \"\"");
                             break;
                         }
 
                     default:
                         {
                             if (returnValue.Length <= p_MaxLength)
-                                LogMsg(MethodName, MessageLevel.OK, returnValue);
+                                LogOK(MethodName, returnValue);
                             else
-                                LogMsg(MethodName, MessageLevel.Error, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);
+                                LogError(MethodName, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);
                             break;
                         }
                 }

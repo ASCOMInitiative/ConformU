@@ -20,13 +20,15 @@ namespace ConformU
         internal const string COMMAND_OPTION_SHOW_DISCOVERY = "ShowDiscovery";
 
         internal const int TEST_NAME_WIDTH = 35; // Width allowed for test names in screen display and log files
-        
+
         #endregion
 
         #region Global Variables
 
         // Variables shared between the test manager and device testers        
-        internal static int g_CountError, g_CountWarning, g_CountIssue;
+        internal static int g_CountError; // Internal Conform errors
+        internal static int g_CountIssue; // Deviations from the ASCOM specification
+
         #endregion
 
     }
@@ -68,11 +70,10 @@ namespace ConformU
         Comment = 1,
         Info = 2,
         OK = 3,
-        Warning = 4,
-        Issue = 5,
-        Error = 6,
-        TestAndMessage = 7,
-        TestOnly=8
+        Issue = 4,
+        Error = 5,
+        TestAndMessage = 6,
+        TestOnly = 7
     }
 
     // Must be valid service types because they are used as values in Alpaca access code i.e. ServiceType.http.ToString()
