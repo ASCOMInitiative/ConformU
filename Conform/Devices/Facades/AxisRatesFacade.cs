@@ -11,11 +11,11 @@ namespace ConformU
 {
     public class AxisRatesFacade : IAxisRates, IEnumerable, IEnumerator, IDisposable
     {
-        private TelescopeAxis m_axis;
+        private readonly TelescopeAxis m_axis;
         private RateFacade[] m_Rates;
 
         private int pos;
-        ILogger logger;
+        readonly ILogger logger;
 
         // Default constructor - Internal prevents public creation instances.
         internal AxisRatesFacade(TelescopeAxis Axis, dynamic driver, TelescopeFacade telescopeFacade, ILogger logger)

@@ -10,7 +10,7 @@ namespace ConformU
 
     internal class ObservingConditionsTester : DeviceTesterBaseClass
     {
-        private double averageperiod, cloudCover, dewPoint, humidity, pressure, rainRate, skyBrightness, skyQuality, starFWHM, skyTemperature, temperature, windDirection, windGust, windSpeed;
+        private double averageperiod, dewPoint, humidity, windDirection, windSpeed;
 
         // Variables to indicate whether each function is or is not implemented to that it is possible to check that for any given sensor, all three either are or are not implemented
         private readonly Dictionary<string, bool> sensorisImplemented = new();
@@ -40,14 +40,12 @@ namespace ConformU
         private const string PROPERTY_AVERAGEPERIOD = "AveragePeriod";
         private const string PROPERTY_LATESTUPDATETIME = "LatestUpdateTime";
         private const string PROPERTY_TIMESINCELASTUPDATE = "TimeSinceLastUpdate";
-        private const string PROPERTY_LASTUPDATETIME = "LastUpdateTime";
 
         // List of valid ObservingConditions sensor properties
-        private List<string> ValidSensors = new List<string>() { PROPERTY_CLOUDCOVER, PROPERTY_DEWPOINT, PROPERTY_HUMIDITY, PROPERTY_PRESSURE, PROPERTY_RAINRATE, PROPERTY_SKYBRIGHTNESS, PROPERTY_SKYQUALITY, PROPERTY_SKYTEMPERATURE, PROPERTY_STARFWHM, PROPERTY_TEMPERATURE, PROPERTY_WINDDIRECTION, PROPERTY_WINDGUST, PROPERTY_WINDSPEED };
+        private readonly List<string> ValidSensors = new() { PROPERTY_CLOUDCOVER, PROPERTY_DEWPOINT, PROPERTY_HUMIDITY, PROPERTY_PRESSURE, PROPERTY_RAINRATE, PROPERTY_SKYBRIGHTNESS, PROPERTY_SKYQUALITY, PROPERTY_SKYTEMPERATURE, PROPERTY_STARFWHM, PROPERTY_TEMPERATURE, PROPERTY_WINDDIRECTION, PROPERTY_WINDGUST, PROPERTY_WINDSPEED };
 
         // Helper variables
         private IObservingConditions m_ObservingConditions;
-        private readonly CancellationToken cancellationToken;
         private readonly Settings settings;
         private readonly ConformLogger logger;
 
@@ -105,7 +103,6 @@ namespace ConformU
         public ObservingConditionsTester(ConformanceTestManager parent, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(false, true, true, false, false, true, false, parent, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
         {
             settings = conformConfiguration.Settings;
-            cancellationToken = conformCancellationToken;
             this.logger = logger;
         }
 
@@ -286,7 +283,7 @@ namespace ConformU
             else
                 LogInfo("AveragePeriod Write", "Test skipped because AveragePerid cold not be read");
 
-            cloudCover = TestDouble(PROPERTY_CLOUDCOVER, ObservingConditionsProperty.CloudCover, 0.0, 100.0, Required.Optional);
+            TestDouble(PROPERTY_CLOUDCOVER, ObservingConditionsProperty.CloudCover, 0.0, 100.0, Required.Optional);
             dewPoint = TestDouble(PROPERTY_DEWPOINT, ObservingConditionsProperty.DewPoint, ABSOLUTE_ZERO, WATER_BOILING_POINT, Required.Optional);
             humidity = TestDouble(PROPERTY_HUMIDITY, ObservingConditionsProperty.Humidity, 0.0, 100.0, Required.Optional);
 
@@ -297,15 +294,15 @@ namespace ConformU
             else
                 LogIssue("DewPoint & Humidity", "One of Dew point or humidity is implemented and the other is not. Both must be implemented or both must not be implemented per the interface specification");
 
-            pressure = TestDouble(PROPERTY_PRESSURE, ObservingConditionsProperty.Pressure, 0.0, 1100.0, Required.Optional);
-            rainRate = TestDouble(PROPERTY_RAINRATE, ObservingConditionsProperty.RainRate, 0.0, 20000.0, Required.Optional);
-            skyBrightness = TestDouble(PROPERTY_SKYBRIGHTNESS, ObservingConditionsProperty.SkyBrightness, 0.0, 1000000.0, Required.Optional);
-            skyQuality = TestDouble(PROPERTY_SKYQUALITY, ObservingConditionsProperty.SkyQuality, -20.0, 30.0, Required.Optional);
-            starFWHM = TestDouble(PROPERTY_STARFWHM, ObservingConditionsProperty.StarFWHM, 0.0, 1000.0, Required.Optional);
-            skyTemperature = TestDouble(PROPERTY_SKYTEMPERATURE, ObservingConditionsProperty.SkyTemperature, ABSOLUTE_ZERO, WATER_BOILING_POINT, Required.Optional);
-            temperature = TestDouble(PROPERTY_TEMPERATURE, ObservingConditionsProperty.Temperature, ABSOLUTE_ZERO, WATER_BOILING_POINT, Required.Optional);
+            TestDouble(PROPERTY_PRESSURE, ObservingConditionsProperty.Pressure, 0.0, 1100.0, Required.Optional);
+            TestDouble(PROPERTY_RAINRATE, ObservingConditionsProperty.RainRate, 0.0, 20000.0, Required.Optional);
+            TestDouble(PROPERTY_SKYBRIGHTNESS, ObservingConditionsProperty.SkyBrightness, 0.0, 1000000.0, Required.Optional);
+            TestDouble(PROPERTY_SKYQUALITY, ObservingConditionsProperty.SkyQuality, -20.0, 30.0, Required.Optional);
+            TestDouble(PROPERTY_STARFWHM, ObservingConditionsProperty.StarFWHM, 0.0, 1000.0, Required.Optional);
+            TestDouble(PROPERTY_SKYTEMPERATURE, ObservingConditionsProperty.SkyTemperature, ABSOLUTE_ZERO, WATER_BOILING_POINT, Required.Optional);
+            TestDouble(PROPERTY_TEMPERATURE, ObservingConditionsProperty.Temperature, ABSOLUTE_ZERO, WATER_BOILING_POINT, Required.Optional);
             windDirection = TestDouble(PROPERTY_WINDDIRECTION, ObservingConditionsProperty.WindDirection, 0.0, 360.0, Required.Optional);
-            windGust = TestDouble(PROPERTY_WINDGUST, ObservingConditionsProperty.WindGust, 0.0, 1000.0, Required.Optional);
+            TestDouble(PROPERTY_WINDGUST, ObservingConditionsProperty.WindGust, 0.0, 1000.0, Required.Optional);
             windSpeed = TestDouble(PROPERTY_WINDSPEED, ObservingConditionsProperty.WindSpeed, 0.0, 1000.0, Required.Optional);
 
             // Additional test to confirm that the reported direction is 0.0 if the wind speed is reported as 0.0
@@ -320,16 +317,14 @@ namespace ConformU
 
         public override void CheckMethods()
         {
-            double LastUpdateTimeLatest, LastUpdateTimeCloudCover, LastUpdateTimeDewPoint, LastUpdateTimeHumidity, LastUpdateTimePressure, LastUpdateTimeRainRate, LastUpdateTimeSkyBrightness, LastUpdateTimeSkyQuality;
-            double LastUpdateTimeStarFWHM, LastUpdateTimeSkyTemperature, LastUpdateTimeTemperature, LastUpdateTimeWindDirection, LastUpdateTimeWindGust, LastUpdateTimeWindSpeed;
+            double LastUpdateTimeDewPoint, LastUpdateTimeHumidity;
 
-            string SensorDescriptionCloudCover, SensorDescriptionDewPoint, SensorDescriptionHumidity, SensorDescriptionPressure, SensorDescriptionRainRate, SensorDescriptionSkyBrightness, SensorDescriptionSkyQuality;
-            string SensorDescriptionStarFWHM, SensorDescriptionSkyTemperature, SensorDescriptionTemperature, SensorDescriptionWindDirection, SensorDescriptionWindGust, SensorDescriptionWindSpeed;
+            string SensorDescriptionDewPoint, SensorDescriptionHumidity;
 
             // TimeSinceLastUpdate
-            LastUpdateTimeLatest = TestDouble(PROPERTY_LATESTUPDATETIME, ObservingConditionsProperty.TimeSinceLastUpdateLatest, -1.0, double.MaxValue, Required.Mandatory);
+            TestDouble(PROPERTY_LATESTUPDATETIME, ObservingConditionsProperty.TimeSinceLastUpdateLatest, -1.0, double.MaxValue, Required.Mandatory);
 
-            LastUpdateTimeCloudCover = TestDouble(PROPERTY_CLOUDCOVER, ObservingConditionsProperty.TimeSinceLastUpdateCloudCover, -1.0, double.MaxValue, Required.Optional);
+            TestDouble(PROPERTY_CLOUDCOVER, ObservingConditionsProperty.TimeSinceLastUpdateCloudCover, -1.0, double.MaxValue, Required.Optional);
             LastUpdateTimeDewPoint = TestDouble(PROPERTY_DEWPOINT, ObservingConditionsProperty.TimeSinceLastUpdateDewPoint, -1.0, double.MaxValue, Required.Optional);
             LastUpdateTimeHumidity = TestDouble(PROPERTY_HUMIDITY, ObservingConditionsProperty.TimeSinceLastUpdateHumidity, -1.0, double.MaxValue, Required.Optional);
 
@@ -340,16 +335,16 @@ namespace ConformU
             else
                 LogIssue("DewPoint & Humidity", "One of Dew point or humidity is implemented and the other is not. Both must be implemented or both must not be implemented per the interface specification");
 
-            LastUpdateTimePressure = TestDouble(PROPERTY_PRESSURE, ObservingConditionsProperty.TimeSinceLastUpdatePressure, double.MinValue, double.MaxValue, Required.Optional);
-            LastUpdateTimeRainRate = TestDouble(PROPERTY_RAINRATE, ObservingConditionsProperty.TimeSinceLastUpdateRainRate, double.MinValue, double.MaxValue, Required.Optional);
-            LastUpdateTimeSkyBrightness = TestDouble(PROPERTY_SKYBRIGHTNESS, ObservingConditionsProperty.TimeSinceLastUpdateSkyBrightness, double.MinValue, double.MaxValue, Required.Optional);
-            LastUpdateTimeSkyQuality = TestDouble(PROPERTY_SKYQUALITY, ObservingConditionsProperty.TimeSinceLastUpdateSkyQuality, double.MinValue, double.MaxValue, Required.Optional);
-            LastUpdateTimeStarFWHM = TestDouble(PROPERTY_STARFWHM, ObservingConditionsProperty.TimeSinceLastUpdateStarFWHM, double.MinValue, double.MaxValue, Required.Optional);
-            LastUpdateTimeSkyTemperature = TestDouble(PROPERTY_SKYTEMPERATURE, ObservingConditionsProperty.TimeSinceLastUpdateSkyTemperature, double.MinValue, double.MaxValue, Required.Optional);
-            LastUpdateTimeTemperature = TestDouble(PROPERTY_TEMPERATURE, ObservingConditionsProperty.TimeSinceLastUpdateTemperature, double.MinValue, double.MaxValue, Required.Optional);
-            LastUpdateTimeWindDirection = TestDouble(PROPERTY_WINDDIRECTION, ObservingConditionsProperty.TimeSinceLastUpdateWindDirection, double.MinValue, double.MaxValue, Required.Optional);
-            LastUpdateTimeWindGust = TestDouble(PROPERTY_WINDGUST, ObservingConditionsProperty.TimeSinceLastUpdateWindGust, double.MinValue, double.MaxValue, Required.Optional);
-            LastUpdateTimeWindSpeed = TestDouble(PROPERTY_WINDSPEED, ObservingConditionsProperty.TimeSinceLastUpdateWindSpeed, double.MinValue, double.MaxValue, Required.Optional);
+            TestDouble(PROPERTY_PRESSURE, ObservingConditionsProperty.TimeSinceLastUpdatePressure, double.MinValue, double.MaxValue, Required.Optional);
+            TestDouble(PROPERTY_RAINRATE, ObservingConditionsProperty.TimeSinceLastUpdateRainRate, double.MinValue, double.MaxValue, Required.Optional);
+            TestDouble(PROPERTY_SKYBRIGHTNESS, ObservingConditionsProperty.TimeSinceLastUpdateSkyBrightness, double.MinValue, double.MaxValue, Required.Optional);
+            TestDouble(PROPERTY_SKYQUALITY, ObservingConditionsProperty.TimeSinceLastUpdateSkyQuality, double.MinValue, double.MaxValue, Required.Optional);
+            TestDouble(PROPERTY_STARFWHM, ObservingConditionsProperty.TimeSinceLastUpdateStarFWHM, double.MinValue, double.MaxValue, Required.Optional);
+            TestDouble(PROPERTY_SKYTEMPERATURE, ObservingConditionsProperty.TimeSinceLastUpdateSkyTemperature, double.MinValue, double.MaxValue, Required.Optional);
+            TestDouble(PROPERTY_TEMPERATURE, ObservingConditionsProperty.TimeSinceLastUpdateTemperature, double.MinValue, double.MaxValue, Required.Optional);
+            TestDouble(PROPERTY_WINDDIRECTION, ObservingConditionsProperty.TimeSinceLastUpdateWindDirection, double.MinValue, double.MaxValue, Required.Optional);
+            TestDouble(PROPERTY_WINDGUST, ObservingConditionsProperty.TimeSinceLastUpdateWindGust, double.MinValue, double.MaxValue, Required.Optional);
+            TestDouble(PROPERTY_WINDSPEED, ObservingConditionsProperty.TimeSinceLastUpdateWindSpeed, double.MinValue, double.MaxValue, Required.Optional);
 
             // Refresh
             try
@@ -364,7 +359,7 @@ namespace ConformU
             }
 
             // SensorDescrtiption
-            SensorDescriptionCloudCover = TestSensorDescription(PROPERTY_CLOUDCOVER, ObservingConditionsProperty.SensorDescriptionCloudCover, int.MaxValue, Required.Optional);
+            TestSensorDescription(PROPERTY_CLOUDCOVER, ObservingConditionsProperty.SensorDescriptionCloudCover, int.MaxValue, Required.Optional);
             SensorDescriptionDewPoint = TestSensorDescription(PROPERTY_DEWPOINT, ObservingConditionsProperty.SensorDescriptionDewPoint, int.MaxValue, Required.Optional);
             SensorDescriptionHumidity = TestSensorDescription(PROPERTY_HUMIDITY, ObservingConditionsProperty.SensorDescriptionHumidity, int.MaxValue, Required.Optional);
 
@@ -375,16 +370,16 @@ namespace ConformU
             else
                 LogIssue("DewPoint & Humidity", "One of Dew point or humidity is implemented and the other is not. Both must be implemented or both must not be implemented per the interface specification");
 
-            SensorDescriptionPressure = TestSensorDescription(PROPERTY_PRESSURE, ObservingConditionsProperty.SensorDescriptionPressure, int.MaxValue, Required.Optional);
-            SensorDescriptionRainRate = TestSensorDescription(PROPERTY_RAINRATE, ObservingConditionsProperty.SensorDescriptionRainRate, int.MaxValue, Required.Optional);
-            SensorDescriptionSkyBrightness = TestSensorDescription(PROPERTY_SKYBRIGHTNESS, ObservingConditionsProperty.SensorDescriptionSkyBrightness, int.MaxValue, Required.Optional);
-            SensorDescriptionSkyQuality = TestSensorDescription(PROPERTY_SKYQUALITY, ObservingConditionsProperty.SensorDescriptionSkyQuality, int.MaxValue, Required.Optional);
-            SensorDescriptionStarFWHM = TestSensorDescription(PROPERTY_STARFWHM, ObservingConditionsProperty.SensorDescriptionStarFWHM, int.MaxValue, Required.Optional);
-            SensorDescriptionSkyTemperature = TestSensorDescription(PROPERTY_SKYTEMPERATURE, ObservingConditionsProperty.SensorDescriptionSkyTemperature, int.MaxValue, Required.Optional);
-            SensorDescriptionTemperature = TestSensorDescription(PROPERTY_TEMPERATURE, ObservingConditionsProperty.SensorDescriptionTemperature, int.MaxValue, Required.Optional);
-            SensorDescriptionWindDirection = TestSensorDescription(PROPERTY_WINDDIRECTION, ObservingConditionsProperty.SensorDescriptionWindDirection, int.MaxValue, Required.Optional);
-            SensorDescriptionWindGust = TestSensorDescription(PROPERTY_WINDGUST, ObservingConditionsProperty.SensorDescriptionWindGust, int.MaxValue, Required.Optional);
-            SensorDescriptionWindSpeed = TestSensorDescription(PROPERTY_WINDSPEED, ObservingConditionsProperty.SensorDescriptionWindSpeed, int.MaxValue, Required.Optional);
+            TestSensorDescription(PROPERTY_PRESSURE, ObservingConditionsProperty.SensorDescriptionPressure, int.MaxValue, Required.Optional);
+            TestSensorDescription(PROPERTY_RAINRATE, ObservingConditionsProperty.SensorDescriptionRainRate, int.MaxValue, Required.Optional);
+            TestSensorDescription(PROPERTY_SKYBRIGHTNESS, ObservingConditionsProperty.SensorDescriptionSkyBrightness, int.MaxValue, Required.Optional);
+            TestSensorDescription(PROPERTY_SKYQUALITY, ObservingConditionsProperty.SensorDescriptionSkyQuality, int.MaxValue, Required.Optional);
+            TestSensorDescription(PROPERTY_STARFWHM, ObservingConditionsProperty.SensorDescriptionStarFWHM, int.MaxValue, Required.Optional);
+            TestSensorDescription(PROPERTY_SKYTEMPERATURE, ObservingConditionsProperty.SensorDescriptionSkyTemperature, int.MaxValue, Required.Optional);
+            TestSensorDescription(PROPERTY_TEMPERATURE, ObservingConditionsProperty.SensorDescriptionTemperature, int.MaxValue, Required.Optional);
+            TestSensorDescription(PROPERTY_WINDDIRECTION, ObservingConditionsProperty.SensorDescriptionWindDirection, int.MaxValue, Required.Optional);
+            TestSensorDescription(PROPERTY_WINDGUST, ObservingConditionsProperty.SensorDescriptionWindGust, int.MaxValue, Required.Optional);
+            TestSensorDescription(PROPERTY_WINDSPEED, ObservingConditionsProperty.SensorDescriptionWindSpeed, int.MaxValue, Required.Optional);
 
             // Now check that the sensor value, description and last updated time are all either implemented or not implemented
             foreach (string sensorName in ValidSensors)
@@ -415,7 +410,7 @@ namespace ConformU
         ///     ''' <param name="value">Variable to be tested</param>
         ///     ''' <returns>Returns True if the variable has a good value, otherwise returns False</returns>
         ///     ''' <remarks></remarks>
-        private bool IsGoodValue(double value)
+        private static bool IsGoodValue(double value)
         {
             return !double.IsNaN(value);
         }
@@ -440,7 +435,7 @@ namespace ConformU
             }
             if (MethodName.StartsWith(PROPERTY_TIMESINCELASTUPDATE))
             {
-                SensorName = MethodName.Substring(PROPERTY_TIMESINCELASTUPDATE.Length);
+                SensorName = MethodName[PROPERTY_TIMESINCELASTUPDATE.Length..];
                 LogCallToDriver(MethodName, $"About to call TimeSinceLastUpdate({SensorName}) method");
             }
             else
@@ -667,7 +662,7 @@ namespace ConformU
                     if (IsInvalidOperationException(p_Nmae, ex))
                     {
                         returnValue = BAD_VALUE;
-                        retryCount = retryCount + 1;
+                        retryCount += 1;
                         LogInfo(MethodName, "Sensor not ready, received InvalidOperationException, waiting " + settings.ObservingConditionsRetryTime + " second to retry. Attempt " + retryCount + " out of " + settings.ObservingConditionsMaxRetries);
                         WaitFor(settings.ObservingConditionsRetryTime * 1000);
                     }

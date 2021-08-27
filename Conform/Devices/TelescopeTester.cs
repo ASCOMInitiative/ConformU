@@ -2161,7 +2161,6 @@ namespace ConformU
                         }
                         catch { }
                     }
-                    l_TrackingRates = null;
                 }
 
                 // Test the TrackingRates.Dispose() method
@@ -2192,7 +2191,6 @@ namespace ConformU
                     catch { }
                 }
 
-                l_TrackingRates = null;
                 if (cancellationToken.IsCancellationRequested)
                     return;
 
@@ -5249,8 +5247,6 @@ namespace ConformU
                     }
                     catch { }
                 }
-
-                l_Rate = null;
             }
 
             if (l_CanGetAxisRates) // The driver does return a viable AxisRates object that can be tested for correct AxisRates.Dispose() and Rate.Dispose() operation

@@ -189,7 +189,8 @@ namespace ConformU
 
             // Dim m_Configuration, SC() As String
             bool m_Connected;
-            LogTestOnly("Common Driver Methods");            baseClassDevice = p_DeviceObject; // CType(DeviceObject, IAscomDriverV1)
+            LogTestOnly("Common Driver Methods");
+            baseClassDevice = p_DeviceObject; // CType(DeviceObject, IAscomDriverV1)
 
             // InterfaceVersion - Required
             try
@@ -671,7 +672,7 @@ namespace ConformU
                 LogMsg("ConformanceCheck", MessageLevel.TestAndMessage, $"Exception while trying to determine the last modified time: {ex}");
             }
 
-            LogTestOnly($"ASCOM Universal Device Conformance Checker Version {this.GetType().Assembly.GetName().Version.ToString()}, Build time: {lastModifiedTime:ddd dd MMMM yyyy HH:mm:ss}");
+            LogTestOnly($"ASCOM Universal Device Conformance Checker Version {this.GetType().Assembly.GetName().Version}, Build time: {lastModifiedTime:ddd dd MMMM yyyy HH:mm:ss}");
             LogNewLine(); // Blank line
 
             switch (settings.DeviceTechnology)
@@ -683,7 +684,7 @@ namespace ConformU
                     break;
 
                 case DeviceTechnology.COM:
-                    LogTestOnly($"COM Driver ProgID: {settings.ComDevice.ProgId}");                    break;
+                    LogTestOnly($"COM Driver ProgID: {settings.ComDevice.ProgId}"); break;
 
                 default:
                     throw new InvalidValueException($"CheckInitialise - Unknown technology type: {settings.DeviceTechnology}");
@@ -1085,7 +1086,6 @@ namespace ConformU
             while ((DateTime.Now.Subtract(l_StartTime).TotalMilliseconds <= p_Duration) & !cancellationToken.IsCancellationRequested);
         }
 
-
         internal void LogNewLine()
         {
             LogTestOnly("");
@@ -1093,7 +1093,7 @@ namespace ConformU
 
         internal void LogTestOnly(string p_Test)
         {
-            LogMsg(p_Test, MessageLevel.Comment,"");
+            LogMsg(p_Test, MessageLevel.TestOnly, "");
         }
 
         internal void LogComment(string p_Test, string p_Msg)
@@ -1118,11 +1118,13 @@ namespace ConformU
 
         internal void LogIssue(string p_Test, string p_Msg)
         {
+            conformResults.Issues.Add(new System.Collections.Generic.KeyValuePair<string, string>(p_Test, p_Msg));
             LogMsg(p_Test, MessageLevel.Issue, p_Msg);
         }
 
         internal void LogError(string p_Test, string p_Msg)
         {
+            conformResults.Errors.Add(new System.Collections.Generic.KeyValuePair<string, string>(p_Test, p_Msg));
             LogMsg(p_Test, MessageLevel.Error, p_Msg);
         }
 

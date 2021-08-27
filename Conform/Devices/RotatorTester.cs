@@ -18,7 +18,7 @@ namespace ConformU
         // Rotator variables
         private bool m_CanReadIsMoving, canReadPosition, m_CanReadTargetPosition, m_CanReadStepSize;
         private bool m_CanReverse, m_IsMoving;
-        private float m_TargetPosition, m_RotatorStepSize, m_RotatorPosition, mechanicalPosition;
+        private float m_RotatorStepSize, m_RotatorPosition, mechanicalPosition;
         private bool m_Reverse;
         private bool m_LastMoveWasAsync;
         private bool canReadMechanicalPosition;
@@ -158,9 +158,8 @@ namespace ConformU
         {
             get
             {
-                bool ConnectedRet = default;
                 LogCallToDriver("Connected", "About to get Connected property");
-                ConnectedRet = m_Rotator.Connected;
+                bool ConnectedRet = m_Rotator.Connected;
                 return ConnectedRet;
             }
 
@@ -273,7 +272,7 @@ namespace ConformU
                 return;
 
             // TargetPosition - Optional (V1,V2), Mandatory (V3)
-            m_TargetPosition = RotatorPropertyTestSingle(RotatorPropertyMethod.TargetPosition, "TargetPosition", 0.0f, 360.0f, Required.Mandatory);
+            RotatorPropertyTestSingle(RotatorPropertyMethod.TargetPosition, "TargetPosition", 0.0f, 360.0f, Required.Mandatory);
             if (cancellationToken.IsCancellationRequested)
                 return;
 
@@ -797,13 +796,13 @@ namespace ConformU
 
                         case var case1 when 0.0d <= case1 && case1 <= ROTATOR_INFO_TOLERANCE:
                             {
-                                LogInfo(p_Name, $"Rotator is {l_PositionOffset.ToString("0.000")} degrees from expected position: {rotatorPosition}");
+                                LogInfo(p_Name, $"Rotator is {l_PositionOffset:0.000} degrees from expected position: {rotatorPosition}");
                                 break;
                             }
 
                         default:
                             {
-                                LogIssue(p_Name, $"Rotator is {l_PositionOffset.ToString("0.000")} degrees from expected position {rotatorPosition}, which is more than the conformance value of {ROTATOR_INFO_TOLERANCE.ToString("0.0")} degrees");
+                                LogIssue(p_Name, $"Rotator is {l_PositionOffset:0.000} degrees from expected position {rotatorPosition}, which is more than the conformance value of {ROTATOR_INFO_TOLERANCE:0.0} degrees");
                                 break;
                             }
                     }

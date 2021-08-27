@@ -20,11 +20,26 @@ namespace ConformU
         public Settings() { }
 
         // Conform application configuration 
-        public bool Debug { get; set; } = false;
         public bool DisplayMethodCalls { get; set; } = false;
         public bool UpdateCheck { get; set; } = true;
         public DateTime UpdateDate { get; set; } = DateTime.MinValue;
         public bool WarningMessageDisplayed { get; set; } = false;
+
+        // Debug output switches
+        public bool Debug { get; set; } = false;
+        public bool DebugAlpacaDiscovery { get; set; } = false;
+        public bool DebugComDiscovery { get; set; } = false;
+        public bool DebugConfigurationPersistence { get; set; } = false;
+
+        // Conformance test configuration 
+        public bool TestProperties { get; set; } = true;
+        public bool TestMethods { get; set; } = true;
+        public bool TestPerformance { get; set; } = false;
+        public bool TestSideOfPierRead { get; set; } = false;
+        public bool TestSideOfPierWrite { get; set; } = false;
+
+        // Alpaca JSON parsing configuration
+        public bool StrictCasing { get; set; } = true;
 
         /// <summary>
         /// Details of the currently selected Alpaca device
@@ -79,20 +94,13 @@ namespace ConformU
             set
             {
                 deviceTechnology = value;
-                switch (deviceTechnology)
+                DeviceName = deviceTechnology switch
                 {
-                    case DeviceTechnology.NotSelected:
-                        DeviceName = "No device selected";
-                        break;
-                    case DeviceTechnology.Alpaca:
-                        DeviceName = AlpacaDevice.AscomDeviceName;
-                        break;
-                    case DeviceTechnology.COM:
-                        DeviceName = ComDevice.DisplayName;
-                        break;
-                    default:
-                        throw new InvalidValueException($"Unknown technology type: {value}");
-                }
+                    DeviceTechnology.NotSelected => "No device selected",
+                    DeviceTechnology.Alpaca => AlpacaDevice.AscomDeviceName,
+                    DeviceTechnology.COM => ComDevice.DisplayName,
+                    _ => throw new InvalidValueException($"Unknown technology type: {value}"),
+                };
             }
         }
 
@@ -101,8 +109,7 @@ namespace ConformU
         /// </summary>
         public DeviceType DeviceType { get; set; } = DeviceType.NoDeviceType;
 
-        // Alpaca JSON parsing configuration
-        public bool StrictCasing { get; set; } = true;
+        #region Device test configuration
 
         // Telescope test configuration
         /// <summary>
@@ -133,13 +140,6 @@ namespace ConformU
         public int CameraMaxBinX { get; set; }
         public int CameraMaxBinY { get; set; }
 
-        // Conformance test configuration 
-        public bool TestProperties { get; set; } = true;
-        public bool TestMethods { get; set; } = true;
-        public bool TestPerformance { get; set; } = false;
-        public bool TestSideOfPierRead { get; set; } = false;
-        public bool TestSideOfPierWrite { get; set; } = false;
-
         // Dome test configuration
         public int DomeShutterTimeout { get; set; } = 240;
         public int DomeAzimuthTimeout { get; set; } = 240;
@@ -157,10 +157,7 @@ namespace ConformU
         public int SwitchWriteDelay { get; set; } = 3000;
         public int SwitchExtendedNumberTestRange { get; set; } = 100;
 
-        // Debug output switches
-        internal bool DebugAlpacaDiscovery { get; set; } = false;
-        internal bool DebugComDiscovery { get; set; } = false;
-        internal bool DebugConfigurationPersistence { get; set; } = false;
+        #endregion
 
     }
 }

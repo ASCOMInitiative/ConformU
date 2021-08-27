@@ -382,7 +382,7 @@ namespace ConformU
             VideoFramesBufferSize = TestInteger(VideoProperty.VideoFramesBufferSize, 0, int.MaxValue, true);
 
             // LastVideoFrame
-            LastVideoFrame = TestVideoFrame(VideoProperty.LastVideoFrame, 0, 0, true);
+            LastVideoFrame = TestVideoFrame(VideoProperty.LastVideoFrame, true);
 
             // Check contents of received frame
             if (CanReadVideoFrame)
@@ -551,7 +551,7 @@ namespace ConformU
                 try
                 {
                     PreviewBitmap = LastVideoFrame.PreviewBitmap;
-                    LogOK("PreviewBitmap", "Received an array with " + PreviewBitmap.Count().ToString("#,#,#") + " entries");
+                    LogOK("PreviewBitmap", "Received an array with " + PreviewBitmap.Length.ToString("#,#,#") + " entries");
                 }
                 catch (Exception ex)
                 {
@@ -944,7 +944,7 @@ namespace ConformU
         ///     ''' <param name="p_Mandatory">Mandatory method</param>
         ///     ''' <returns>Integer value returned by the driver</returns>
         ///     ''' <remarks></remarks>
-        private dynamic TestVideoFrame(VideoProperty p_Type, int p_Min, int p_Max, bool p_Mandatory)
+        private dynamic TestVideoFrame(VideoProperty p_Type, bool p_Mandatory)
         {
             string MethodName;
 
@@ -1288,7 +1288,7 @@ namespace ConformU
         /// <param name="p_TestOK"></param>
         /// <param name="p_TestLow"></param>
         /// <param name="p_TestHigh"></param>
-        private void CameraPropertyWriteTest(VideoProperty p_Type, string p_Property, int p_TestOK, int p_TestLow, int p_TestHigh)
+        private void CameraPropertyWriteTest(VideoProperty p_Type, string p_Property, int p_TestOK)
         {
             try // OK value first
             {

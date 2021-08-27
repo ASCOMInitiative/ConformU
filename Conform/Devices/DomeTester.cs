@@ -206,7 +206,6 @@ namespace ConformU
             // Add a test for a back level version of the Dome simulator - just abandon this process if any errors occur
             if (settings.ComDevice.ProgId.ToUpper() == "DOMESIM.DOME")
             {
-                l_VString = "";
                 try
                 {
                     LogCallToDriver("PreRunCheck", "About to get DriverInfo property");
@@ -214,17 +213,17 @@ namespace ConformU
                     if (l_VStringPtr > 0)
                     {
                         LogCallToDriver("PreRunCheck", "About to get DriverInfo property");
-                        l_VString = domeDevice.DriverInfo.ToUpper().Substring(l_VStringPtr + 21); // Get the version string
+                        l_VString = domeDevice.DriverInfo.ToUpper()[(l_VStringPtr + 21)..]; // Get the version string
                         l_VStringPtr = l_VString.IndexOf(".");
                         if (l_VStringPtr > 1)
                         {
-                            l_V1 = System.Convert.ToInt32(l_VString.Substring(1, l_VStringPtr - 1)); // Extract the number
-                            l_VString = l_VString.Substring(l_VStringPtr + 1); // Get the second version number part
+                            l_V1 = System.Convert.ToInt32(l_VString[1..l_VStringPtr]); // Extract the number
+                            l_VString = l_VString[(l_VStringPtr + 1)..]; // Get the second version number part
                             l_VStringPtr = l_VString.IndexOf(".");
                             if (l_VStringPtr > 1)
                             {
-                                l_V2 = int.Parse(l_VString.Substring(1, l_VStringPtr - 1)); // Extract the number
-                                l_VString = l_VString.Substring(l_VStringPtr + 1); // Get the third version number part
+                                l_V2 = int.Parse(l_VString[1..l_VStringPtr]); // Extract the number
+                                l_VString = l_VString[(l_VStringPtr + 1)..]; // Get the third version number part
                                                                                    // Find the next non numeric character
                                 l_VStringPtr = 0;
                                 do
@@ -233,7 +232,7 @@ namespace ConformU
 
                                 if (l_VStringPtr > 1)
                                 {
-                                    l_V3 = System.Convert.ToInt32(l_VString.Substring(1, l_VStringPtr - 1)); // Extract the number
+                                    l_V3 = System.Convert.ToInt32(l_VString[1..l_VStringPtr]); // Extract the number
                                                                                                              // Turn the version parts into a whole number
                                     l_V1 = l_V1 * 1000000 + l_V2 * 1000 + l_V3;
                                     if (l_V1 < 5000007)
@@ -452,8 +451,6 @@ namespace ConformU
 
         private void DomeSlewToAltitude(string p_Name, double p_Altitude)
         {
-            DateTime l_StartTime;
-
             if (!settings.DomeOpenShutter)
                 LogInfo("SlewToAltitude", "You have configured Conform not to open the shutter so the following slew may fail.");
 
@@ -462,7 +459,6 @@ namespace ConformU
             domeDevice.SlewToAltitude(p_Altitude);
             if (m_CanReadSlewing)
             {
-                l_StartTime = DateTime.Now;
                 LogCallToDriver(p_Name, "About to get Slewing property");
                 if (domeDevice.Slewing)
                 {
@@ -1353,8 +1349,7 @@ namespace ConformU
                         {
                             LogCallToDriver(p_Name, "About to get ShutterStatus property");
                             l_ShutterState = domeDevice.ShutterStatus;
-                            LogCallToDriver(p_Name, "About to get ShutterStatus property");
-                            LogError(p_Name, "Unable to close shutter - ShutterStatus: " + domeDevice.ShutterStatus.ToString());
+                            LogError(p_Name, "Unable to close shutter - ShutterStatus: " + l_ShutterState.ToString());
                             return;
                         }
                         else
@@ -1371,8 +1366,7 @@ namespace ConformU
                         {
                             LogCallToDriver(p_Name, "About to get ShutterStatus property");
                             l_ShutterState = domeDevice.ShutterStatus;
-                            LogCallToDriver(p_Name, "About to get ShutterStatus property");
-                            LogError(p_Name, "Unable to open shutter - ShutterStatus: " + domeDevice.ShutterStatus.ToString());
+                            LogError(p_Name, "Unable to open shutter - ShutterStatus: " + l_ShutterState.ToString());
                             return;
                         }
                         else

@@ -8,8 +8,8 @@ namespace ConformU
 {
     public class DriverHost : IDisposable
     {
-        ConformLogger logger;
-        Settings conformSettings;
+        readonly ConformLogger logger;
+        readonly Settings conformSettings;
         dynamic driverObject;
         private bool disposedValue;
 

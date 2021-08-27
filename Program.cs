@@ -158,7 +158,6 @@ namespace ConformU
                     Console.WriteLine($"StartTest - Exception: \r\n {ex}");
                 }
                 tester.Dispose(); // Dispose of the tester
-                tester = null;
 
                 GC.Collect();
             }

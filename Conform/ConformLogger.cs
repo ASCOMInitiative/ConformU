@@ -29,7 +29,7 @@ namespace ConformU
 
         public new void LogMessage(string id, string message)
         {
-            Console.WriteLine($"{id.PadRight(TEST_NAME_WIDTH)} {message}");
+            Console.WriteLine($"{id,-TEST_NAME_WIDTH} {message}");
             base.LogMessage(id, message);
         }
 

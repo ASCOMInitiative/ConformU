@@ -40,19 +40,19 @@ namespace AlpacaDiscovery
         #region Variables
 
         // Utility objects
-        private TraceLogger TL;
+        private readonly TraceLogger TL;
         private Finder finder;
         private System.Threading.Timer discoveryCompleteTimer;
 
         // Private variables
-        private Dictionary<IPEndPoint, AlpacaDevice> alpacaDeviceList = new Dictionary<IPEndPoint, AlpacaDevice>(); // List of discovered Alpaca devices keyed on IP:Port
+        private readonly Dictionary<IPEndPoint, AlpacaDevice> alpacaDeviceList = new Dictionary<IPEndPoint, AlpacaDevice>(); // List of discovered Alpaca devices keyed on IP:Port
         private bool disposedValue = false; // To detect redundant Dispose() method calls
         private double discoveryTime; // Length of the discovery phase before it times out
         private bool tryDnsNameResolution; // Flag indicating whether to attempt name resolution on the host IP address
         private DateTime discoveryStartTime; // Time at which the start discovery command was received
         private bool discoveryCompleteValue; // Discovery completion status
         private readonly object deviceListLockObject = new object(); // Lock object to synchronise access to the Alpaca device list collection, which is not a thread safe collection
-        private bool strictCasing; // Flag indicating whether case sensitive or case insensitive de-serialisation will be used.
+        private readonly bool strictCasing; // Flag indicating whether case sensitive or case insensitive de-serialisation will be used.
 
         #endregion
 

@@ -10,7 +10,7 @@ namespace ConformU
 {
     public class TrackingRatesFacade : ITrackingRates, IEnumerable, IEnumerator, IDisposable
     {
-        private DriveRate[] m_TrackingRates;
+        private readonly DriveRate[] m_TrackingRates;
         private int _pos = -1;
 
         // Default constructor - Internal prevents public creation instances.

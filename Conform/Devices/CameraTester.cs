@@ -28,11 +28,11 @@ namespace ConformU
 
         // Camera variables
         private bool m_CanAbortExposure, m_CanAsymmetricBin, m_CanGetCoolerPower, m_CanSetCCDTemperature, m_CanStopExposure, m_CanFastReadout;
-        private bool m_CoolerOn, m_HasShutter, m_ImageReady;
-        private int m_CameraXSize, m_CameraYSize, m_MaxADU, m_NumX, m_NumY, m_StartX, m_StartY;
+        private bool m_CoolerOn, m_ImageReady;
+        private int m_CameraXSize, m_CameraYSize;
         private short m_MaxBinX, m_MaxBinY, m_BinX, m_BinY;
-        private double m_CCDTemperature, m_CoolerPower, m_ElectronsPerADU, m_FullWellCapacity, m_HeatSinkTemperature, m_LastExposureDuration;
-        private double m_PixelSizeX, m_PixelSizeY, m_SetCCDTemperature;
+        private double m_LastExposureDuration;
+        private double m_SetCCDTemperature;
         private string m_LastExposureStartTime;
         private CameraState m_CameraState;
         private Array m_ImageArray, m_ImageArrayVariant;
@@ -40,12 +40,11 @@ namespace ConformU
         private bool m_CanPulseGuide;
         private bool m_IsPulseGuiding;
         // ICameraV2 properties
-        private short m_BayerOffsetX, m_BayerOffsetY, m_Gain, m_GainMax, m_GainMin, m_PercentCompleted, m_ReadoutMode;
+        private short m_Gain, m_GainMax, m_GainMin, m_PercentCompleted, m_ReadoutMode;
         private double m_ExposureMax, m_ExposureMin, m_ExposureResolution;
         private bool m_FastReadout, m_CanReadGain, m_CanReadGainMax, m_CanReadGainMin, m_CanReadGains, m_CanReadReadoutModes;
         private IList<string> m_Gains;
         private IList<string> m_ReadoutModes;
-        private string m_SensorName;
         private SensorType m_SensorType;
         private bool m_CanReadSensorType = false;
         private readonly Stopwatch sw = new();
@@ -397,12 +396,12 @@ namespace ConformU
                         if (l_VStringPtr > 0)
                         {
                             l_V1 = Convert.ToInt32(l_VString.Substring(0, l_VStringPtr - 1)); // Extract the number
-                            l_VString = l_VString.Substring(l_VStringPtr + 1); // Get the second version number part
+                            l_VString = l_VString[(l_VStringPtr + 1)..]; // Get the second version number part
                             l_VStringPtr = l_VString.IndexOf(".");
                             if (l_VStringPtr > 1)
                             {
                                 l_V2 = Convert.ToInt32(l_VString.Substring(0, l_VStringPtr - 1)); // Extract the number
-                                l_VString = l_VString.Substring(l_VStringPtr + 1); // Get the third version number part
+                                l_VString = l_VString[(l_VStringPtr + 1)..]; // Get the third version number part
                                 l_V3 = Convert.ToInt32(l_VString); // Extract the number
                                                                    // Turn the version parts into a whole number
                                 l_V1 = l_V1 * 1000000 + l_V2 * 1000 + l_V3;
@@ -433,7 +432,7 @@ namespace ConformU
             {
                 LogNewLine();
                 // Check LastError throws an exception
-                LogTestOnly("Last Tests");                try
+                LogTestOnly("Last Tests"); try
                 {
                     if (settings.DisplayMethodCalls)
                         LogComment("ConformanceCheck", "About to get LastExposureDuration");
@@ -652,7 +651,7 @@ namespace ConformU
             m_CameraYSize = CameraPropertyTestInteger(CamPropertyType.CameraYSize, "CameraYSize", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested)
                 return;
 
-            m_CCDTemperature = CameraPropertyTestDouble(CamPropertyType.CCDTemperature, "CCDTemperature", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested)
+            CameraPropertyTestDouble(CamPropertyType.CCDTemperature, "CCDTemperature", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested)
                 return;
             m_CoolerOn = CameraPropertyTestBoolean(CamPropertyType.CoolerOn, "CoolerOn Read", false); if (cancellationToken.IsCancellationRequested)
                 return;
@@ -706,15 +705,15 @@ namespace ConformU
                 HandleException("CoolerOn Read", MemberType.Property, Required.Optional, ex, "");
             }
 
-            m_CoolerPower = CameraPropertyTestDouble(CamPropertyType.CoolerPower, "CoolerPower", 0.0, 100.0, false); if (cancellationToken.IsCancellationRequested)
+            CameraPropertyTestDouble(CamPropertyType.CoolerPower, "CoolerPower", 0.0, 100.0, false); if (cancellationToken.IsCancellationRequested)
                 return;
-            m_ElectronsPerADU = CameraPropertyTestDouble(CamPropertyType.ElectronsPerADU, "ElectronsPerADU", 0.00001, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
+            CameraPropertyTestDouble(CamPropertyType.ElectronsPerADU, "ElectronsPerADU", 0.00001, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
                 return;
-            m_FullWellCapacity = CameraPropertyTestDouble(CamPropertyType.FullWellCapacity, "FullWellCapacity", 0.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
+            CameraPropertyTestDouble(CamPropertyType.FullWellCapacity, "FullWellCapacity", 0.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
                 return;
-            m_HasShutter = CameraPropertyTestBoolean(CamPropertyType.HasShutter, "HasShutter", false); if (cancellationToken.IsCancellationRequested)
+            CameraPropertyTestBoolean(CamPropertyType.HasShutter, "HasShutter", false); if (cancellationToken.IsCancellationRequested)
                 return;
-            m_HeatSinkTemperature = CameraPropertyTestDouble(CamPropertyType.HeatSinkTemperature, "HeatSinkTemperature", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested)
+            CameraPropertyTestDouble(CamPropertyType.HeatSinkTemperature, "HeatSinkTemperature", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested)
                 return;
 
             m_ImageReady = CameraPropertyTestBoolean(CamPropertyType.ImageReady, "ImageReady", false); if (cancellationToken.IsCancellationRequested)
@@ -810,20 +809,20 @@ namespace ConformU
             if (m_IsPulseGuiding)
                 LogError("IsPulseGuiding", "Camera is showing pulse guiding underway although no PulseGuide command has been issued!");
 
-            m_MaxADU = CameraPropertyTestInteger(CamPropertyType.MaxADU, "MaxADU", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested)
+            CameraPropertyTestInteger(CamPropertyType.MaxADU, "MaxADU", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested)
                 return;
 
-            m_NumX = CameraPropertyTestInteger(CamPropertyType.NumX, "NumX Read", 1, m_CameraXSize); if (cancellationToken.IsCancellationRequested)
+            CameraPropertyTestInteger(CamPropertyType.NumX, "NumX Read", 1, m_CameraXSize); if (cancellationToken.IsCancellationRequested)
                 return;
             CameraPropertyWriteTest(CamPropertyType.NumX, "NumX", System.Convert.ToInt32(m_CameraXSize / (double)2));
 
-            m_NumY = CameraPropertyTestInteger(CamPropertyType.NumY, "NumY Read", 1, m_CameraYSize); if (cancellationToken.IsCancellationRequested)
+            CameraPropertyTestInteger(CamPropertyType.NumY, "NumY Read", 1, m_CameraYSize); if (cancellationToken.IsCancellationRequested)
                 return;
             CameraPropertyWriteTest(CamPropertyType.NumY, "NumY", System.Convert.ToInt32(m_CameraYSize / (double)2));
 
-            m_PixelSizeX = CameraPropertyTestDouble(CamPropertyType.PixelSizeX, "PixelSizeX", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
+            CameraPropertyTestDouble(CamPropertyType.PixelSizeX, "PixelSizeX", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
                 return;
-            m_PixelSizeY = CameraPropertyTestDouble(CamPropertyType.PixelSizeY, "PixelSizeY", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
+            CameraPropertyTestDouble(CamPropertyType.PixelSizeY, "PixelSizeY", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
                 return;
 
             m_SetCCDTemperature = CameraPropertyTestDouble(CamPropertyType.SetCCDTemperature, "SetCCDTemperature Read", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_SETPOINT_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested)
@@ -954,10 +953,10 @@ namespace ConformU
                     HandleException("SetCCDTemperature Write", MemberType.Property, Required.Optional, ex, "");
                 }
 
-            m_StartX = CameraPropertyTestInteger(CamPropertyType.StartX, "StartX Read", 0, m_CameraXSize - 1); if (cancellationToken.IsCancellationRequested)
+            CameraPropertyTestInteger(CamPropertyType.StartX, "StartX Read", 0, m_CameraXSize - 1); if (cancellationToken.IsCancellationRequested)
                 return;
             CameraPropertyWriteTest(CamPropertyType.StartX, "StartX", System.Convert.ToInt32(m_CameraXSize / (double)2));
-            m_StartY = CameraPropertyTestInteger(CamPropertyType.StartY, "StartY Read", 0, m_CameraYSize - 1); if (cancellationToken.IsCancellationRequested)
+            CameraPropertyTestInteger(CamPropertyType.StartY, "StartY Read", 0, m_CameraYSize - 1); if (cancellationToken.IsCancellationRequested)
                 return;
             CameraPropertyWriteTest(CamPropertyType.StartY, "StartY", System.Convert.ToInt32(m_CameraYSize / (double)2));
 
@@ -994,8 +993,8 @@ namespace ConformU
                     }
                     else
                     {
-                        m_BayerOffsetX = CameraPropertyTestShort(CamPropertyType.BayerOffsetX, "BayerOffsetX Read", 0, 10000, true);
-                        m_BayerOffsetY = CameraPropertyTestShort(CamPropertyType.BayerOffsetY, "BayerOffsetY Read", 0, 10000, true);
+                        CameraPropertyTestShort(CamPropertyType.BayerOffsetX, "BayerOffsetX Read", 0, 10000, true);
+                        CameraPropertyTestShort(CamPropertyType.BayerOffsetY, "BayerOffsetY Read", 0, 10000, true);
                     }
                 }
                 else
@@ -1342,7 +1341,7 @@ namespace ConformU
                     LogInfo("ReadoutMode Index", "Skipping ReadReadoutMode index test because ReadoutModes is unavailable");
 
                 // SensorName
-                m_SensorName = CameraPropertyTestString(CamPropertyType.SensorName, "SensorName Read", 250, true);
+                CameraPropertyTestString(CamPropertyType.SensorName, "SensorName Read", 250, true);
             }
 
 
@@ -2442,7 +2441,8 @@ namespace ConformU
             if (p_Description != "")
             {
                 LogNewLine(); // Blank Line
-                LogTestOnly(p_Description);            }
+                LogTestOnly(p_Description);
+            }
             try
             {
                 if (settings.DisplayMethodCalls)
@@ -3084,19 +3084,19 @@ namespace ConformU
 
                         case CameraPerformance.CCDTemperature:
                             {
-                                m_CCDTemperature = m_Camera.CCDTemperature;
+                                _ = m_Camera.CCDTemperature;
                                 break;
                             }
 
                         case CameraPerformance.CoolerPower:
                             {
-                                m_CoolerPower = m_Camera.CoolerPower;
+                                _ = m_Camera.CoolerPower;
                                 break;
                             }
 
                         case CameraPerformance.HeatSinkTemperature:
                             {
-                                m_HeatSinkTemperature = m_Camera.HeatSinkTemperature;
+                                _ = m_Camera.HeatSinkTemperature;
                                 break;
                             }
 

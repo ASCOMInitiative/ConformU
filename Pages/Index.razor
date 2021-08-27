@@ -34,8 +34,11 @@
     string screenLog = "Conform log.";
     object screenLogLockObject = new object();
     object statusLockObject = new object();
-    string statusMessage = "Conformance run status";
-
+#if WINDOWS
+    string statusMessage = "Windows Build";
+#else
+    string statusMessage = "Linux build";
+#endif
     ConformanceTestManager tester;
 
     // Task and cancellation support

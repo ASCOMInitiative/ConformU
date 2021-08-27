@@ -11,9 +11,9 @@ namespace ConformU
         private int m_PerformanceGetSwitchName, m_PerformanceGetSwitch;
         private short m_MaxSwitch;
         private bool m_CanReadMaxSwitch;
-        private int ExtendedSwitchNumberTestRange; // Checks for usable switches either side of the expected range
-        private int SWITCH_WRITE_DELAY;
-        private int SWITCH_READ_DELAY;
+        private readonly int ExtendedSwitchNumberTestRange; // Checks for usable switches either side of the expected range
+        private readonly int SWITCH_WRITE_DELAY;
+        private readonly int SWITCH_READ_DELAY;
 
         const int NUMBER_OF_SWITCH_TEST_STATES = 10;
         const double BAD_SWITCH_VALUE = double.NaN; // Do not change this value, the Double.IsNaN method is used in various tests in the code below
@@ -341,19 +341,8 @@ namespace ConformU
                                 Status(StatusType.staStatus, i.ToString());
 
                                 // Initialise status variables
-                                l_GetSwitchOK = false;
-                                l_SetSwitchOK = false;
-                                l_GetSwitchValueOK = false;
                                 l_SetSwitchValueMinOK = false;
                                 l_SetSwitchValueMaxOK = false;
-                                l_SwitchCanWrite = false;
-                                l_GetSwitchException = null;
-                                l_GetSwitchValueException = null;
-                                l_SwitchName = "Unknown";
-                                l_SwitchDescription = "Unknown";
-                                l_SwitchMinimum = BAD_SWITCH_VALUE;
-                                l_SwitchMaximum = BAD_SWITCH_VALUE;
-                                l_SwitchRange = BAD_SWITCH_VALUE;
                                 l_SwitchStep = BAD_SWITCH_VALUE;
 
                                 try // Read switch name to determine whether this is a valid switch
@@ -1118,7 +1107,7 @@ namespace ConformU
         ///     ''' <param name="value">Variable to be tested</param>
         ///     ''' <returns>Returns True if the variable has a good value, otherwise returns False</returns>
         ///     ''' <remarks></remarks>
-        private bool IsGoodValue(double value)
+        private static bool IsGoodValue(double value)
         {
             return !double.IsNaN(value);
         }

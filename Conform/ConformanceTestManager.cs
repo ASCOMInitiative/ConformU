@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Threading;
 using static ConformU.Globals;
+using System.Text.Json;
 
 namespace ConformU
 {
@@ -141,6 +142,7 @@ namespace ConformU
             // Initialise error counters
             g_CountError = 0;
             g_CountIssue = 0;
+            conformResults = new();
 
             // Assign a tester relevant to the device type being tested
             AssignTestDevice();
@@ -160,9 +162,10 @@ namespace ConformU
                     if (!cancellationToken.IsCancellationRequested & testDevice.HasPreConnectCheck)
                     {
                         testDevice.LogNewLine();
-                        testDevice.LogTestOnly("Pre-connect checks");                        testDevice.PreConnectChecks();
+                        testDevice.LogTestOnly("Pre-connect checks"); testDevice.PreConnectChecks();
                         testDevice.LogNewLine();
-                        testDevice.LogTestOnly("Connect");                    }
+                        testDevice.LogTestOnly("Connect");
+                    }
 
                     // Try to set Connected to True
                     try
@@ -182,52 +185,54 @@ namespace ConformU
                         // Test and read Can properties
                         if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasCanProperties)
                         {
-                            testDevice.LogTestOnly("Can Properties");                            testDevice.ReadCanProperties();
+                            testDevice.LogTestOnly("Can Properties"); testDevice.ReadCanProperties();
                             testDevice.LogNewLine();
                         }
 
                         // Carry out pre-test tasks
                         if (!cancellationToken.IsCancellationRequested & testDevice.HasPreRunCheck)
                         {
-                            testDevice.LogTestOnly("Pre-run Checks");                            testDevice.PreRunCheck();
+                            testDevice.LogTestOnly("Pre-run Checks"); testDevice.PreRunCheck();
                             testDevice.LogNewLine();
                         }
 
                         // Test properties
                         if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasProperties)
                         {
-                            testDevice.LogTestOnly("Properties");                            testDevice.CheckProperties();
+                            testDevice.LogTestOnly("Properties"); testDevice.CheckProperties();
                             testDevice.LogNewLine();
                         }
 
                         // Test methods
                         if (!cancellationToken.IsCancellationRequested & settings.TestMethods & testDevice.HasMethods)
                         {
-                            testDevice.LogTestOnly("Methods");                            testDevice.CheckMethods();
+                            testDevice.LogTestOnly("Methods"); testDevice.CheckMethods();
                             testDevice.LogNewLine(); // Blank line
                         }
 
                         // Test performance
                         if (!cancellationToken.IsCancellationRequested & settings.TestPerformance & testDevice.HasPerformanceCheck)
                         {
-                            testDevice.LogTestOnly("Performance");                            testDevice.CheckPerformance();
+                            testDevice.LogTestOnly("Performance"); testDevice.CheckPerformance();
                             testDevice.LogNewLine();
                         }
 
                         // Carry out post-test tasks
                         if (!cancellationToken.IsCancellationRequested & testDevice.HasPostRunCheck)
                         {
-                            testDevice.LogTestOnly("Post-run Checks");                            testDevice.PostRunCheck();
+                            testDevice.LogTestOnly("Post-run Checks"); testDevice.PostRunCheck();
                             testDevice.LogNewLine(); // Blank line
                         }
 
                         // Display completion or "test cancelled" message
                         if (!cancellationToken.IsCancellationRequested)
                         {
-                            testDevice.LogTestOnly("Conformance test complete");                        }
+                            testDevice.LogTestOnly("Conformance test complete");
+                        }
                         else
                         {
-                            testDevice.LogTestOnly("Conformance test interrupted by STOP button or to protect the device.");                        }
+                            testDevice.LogTestOnly("Conformance test interrupted by STOP button or to protect the device.");
+                        }
                     }
                     catch (Exception ex) // Exception when setting Connected = True
                     {
@@ -249,7 +254,7 @@ namespace ConformU
                 testDevice.LogNewLine();
                 if (g_CountError == 0 & g_CountIssue == 0 & !cancellationToken.IsCancellationRequested) // No issues - device conforms as expected
                 {
-                    testDevice.LogTestOnly("No errors, warnings or issues found: your driver passes ASCOM validation!!");                    testDevice.LogNewLine();
+                    testDevice.LogTestOnly("No errors, warnings or issues found: your driver passes ASCOM validation!!"); testDevice.LogNewLine();
                 }
                 else // Some issues found, the device fails the conformance check
                 {
@@ -259,8 +264,14 @@ namespace ConformU
                     l_Message = l_Message + " and " + g_CountIssue + " issue";
                     if (g_CountIssue != 1)
                         l_Message += "s";
-                    testDevice.LogTestOnly(l_Message);                    testDevice.LogNewLine();
+                    testDevice.LogTestOnly(l_Message); testDevice.LogNewLine();
                 }
+                JsonSerializerOptions options = new();
+                options.WriteIndented = true;
+                string json = JsonSerializer.Serialize<ConformResults>(conformResults, options);
+                testDevice.LogTestOnly(json); testDevice.LogNewLine();
+
+
             }
             catch (Exception ex)
             {

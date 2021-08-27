@@ -28,7 +28,7 @@ namespace ConformU
             this.logger = logger;
             try
             {
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
                 logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Using COM host form to create ProgID: {settings.ComDevice.ProgId}");
                 logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Creating driver {settings.ComDevice.ProgId} on separate thread. This is thread: {Thread.CurrentThread.ManagedThreadId}");
                 Thread driverThread = new(DriverOnSeparateThread);

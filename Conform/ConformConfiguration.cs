@@ -16,7 +16,7 @@ namespace ConformU
 
         private readonly ConformLogger TL;
         Settings settings;
-        string fileSettingsFileName;
+        readonly string fileSettingsFileName;
 
         /// <summary>
         /// Create a Configuration management instance and load the current settings

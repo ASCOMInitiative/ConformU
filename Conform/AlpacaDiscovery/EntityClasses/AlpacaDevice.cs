@@ -17,7 +17,7 @@ namespace AlpacaDiscovery
     public class AlpacaDevice
     {
         private List<ConfiguredDevice> configuredDevicesValue;
-        private ArrayList configuredDevicesAsArrayListValue;
+        private readonly ArrayList configuredDevicesAsArrayListValue;
         private string hostNameValue, ipAddressValue, serverNameValue, manufacturerValue, manufacturerVersionValue, locationValue;
 
         /// <summary>

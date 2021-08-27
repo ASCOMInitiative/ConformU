@@ -9,9 +9,9 @@ namespace ConformU
 
     public partial class DriverHostForm : Form
     {
-        private string progId;
-        private ConformLogger logger;
-        private dynamic driver;
+        private readonly string progId;
+        private readonly ConformLogger logger;
+        private readonly dynamic driver;
 
         public DriverHostForm(string progId, ref dynamic driver, ConformLogger logger)
         {

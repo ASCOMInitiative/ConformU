@@ -10,12 +10,13 @@ namespace ConformU
 {
     public class CircuitHandlerService : CircuitHandler
     {
-        private IHostApplicationLifetime lifetime = null;
-        private ILogger<Startup> logger = null;
+        //private readonly IHostApplicationLifetime lifetime = null; // This is required if the StopApplication method is used.
+        private readonly ILogger<Startup> logger = null;
 
-        public CircuitHandlerService(IHostApplicationLifetime lifetime, ILogger<Startup> logger)
+        //public CircuitHandlerService(IHostApplicationLifetime lifetime, ILogger<Startup> logger)
+        public CircuitHandlerService(ILogger<Startup> logger)
         {
-            this.lifetime = lifetime;
+            //this.lifetime = lifetime; // This is required if the StopApplication method is used.
             this.logger = logger;
         }
 
@@ -43,8 +44,8 @@ namespace ConformU
             logger.LogWarning($"{DateTime.Now:HH:mm:ss.fff} ***** OnCircuitClosedAsync {circuit.Id} *****");
             if (!Debugger.IsAttached) // Only use this mechanic outside of a dev environment
             {
-                // At the time of writing any attempt to use Environment.Exit or lifetime.StopApplication() reults in an undefined wait time before the 
-                // console hosting appllication closes. For this reason the more brutal Kill option is used to terminate the process immediately.
+                // At the time of writing any attempt to use Environment.Exit or lifetime.StopApplication() results in an undefined wait time before the 
+                // console hosting application closes. For this reason the more brutal Kill option is used to terminate the process immediately.
                 logger.LogWarning($"{DateTime.Now:HH:mm:ss.fff} About to kill process...");
                 Process.GetCurrentProcess().Kill();
                 logger.LogWarning($"{DateTime.Now:HH:mm:ss.fff} Killed process.");

@@ -291,9 +291,9 @@ namespace ConformU
                         {
                             canAsynchronousOpen = false;
                             if (coverCalibratorDevice.CoverState == CoverStatus.Open)
-                                LogOK("OpenCover", $"OpenCover was successful. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds");
+                                LogOK("OpenCover", $"OpenCover was successful. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                             else
-                                LogError("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds");
+                                LogError("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
                         else
                         {
@@ -310,10 +310,10 @@ namespace ConformU
                             if (coverCalibratorDevice.CoverState == CoverStatus.Open)
                             {
                                 asynchronousOpenTime = DateTime.Now.Subtract(startTime).TotalSeconds;
-                                LogOK("OpenCover", $"OpenCover was successful. The asynchronous open took {asynchronousOpenTime.ToString("0.0")} seconds");
+                                LogOK("OpenCover", $"OpenCover was successful. The asynchronous open took {asynchronousOpenTime:0.0} seconds");
                             }
                             else
-                                LogError("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The asynchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds");
+                                LogError("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The asynchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
                     }
                     else
@@ -350,9 +350,9 @@ namespace ConformU
                         {
                             canAsynchronousOpen = false;
                             if (coverCalibratorDevice.CoverState == CoverStatus.Closed)
-                                LogOK("CloseCover", $"CloseCover was successful. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds");
+                                LogOK("CloseCover", $"CloseCover was successful. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                             else
-                                LogError("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds");
+                                LogError("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
                         else
                         {
@@ -367,10 +367,10 @@ namespace ConformU
                             if (coverCalibratorDevice.CoverState == CoverStatus.Closed)
                             {
                                 asynchronousCloseTime = DateTime.Now.Subtract(startTime).TotalSeconds;
-                                LogOK("CloseCover", $"CloseCover was successful. The asynchronous close took {asynchronousCloseTime.ToString("0.0")} seconds");
+                                LogOK("CloseCover", $"CloseCover was successful. The asynchronous close took {asynchronousCloseTime:0.0} seconds");
                             }
                             else
-                                LogError("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The asynchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds");
+                                LogError("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The asynchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
                     }
                     else
@@ -609,7 +609,7 @@ namespace ConformU
                         {
                             if (coverCalibratorDevice.CalibratorState == CalibratorStatus.Off)
                             {
-                                LogOK("CalibratorOff", $"CalibratorOff was successful. The synchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds");
+                                LogOK("CalibratorOff", $"CalibratorOff was successful. The synchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
 
                                 // Confirm that Brightness returns to zero when calibrator is turned off
                                 if (settings.DisplayMethodCalls)
@@ -620,7 +620,7 @@ namespace ConformU
                                     LogIssue("CalibratorOff", $"Brightness is not set to zero when the calibrator is turned off");
                             }
                             else
-                                LogError("CalibratorOff", $"CalibratorOff was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Off'. The synchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds");
+                                LogError("CalibratorOff", $"CalibratorOff was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Off'. The synchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
                         else
                         {
@@ -634,7 +634,7 @@ namespace ConformU
                             }
                             if (coverCalibratorDevice.CalibratorState == CalibratorStatus.Off)
                             {
-                                LogOK("CalibratorOff", $"CalibratorOff was successful. The asynchronous action took {asynchronousCloseTime.ToString("0.0")} seconds");
+                                LogOK("CalibratorOff", $"CalibratorOff was successful. The asynchronous action took {asynchronousCloseTime:0.0} seconds");
 
                                 // Confirm that Brightness returns to zero when calibrator is turned off
                                 if (settings.DisplayMethodCalls)
@@ -645,7 +645,7 @@ namespace ConformU
                                     LogIssue("CalibratorOff", $"Brightness is not set to zero when the calibrator is turned off");
                             }
                             else
-                                LogError("CalibratorOff", $"CalibratorOff was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Off'. The asynchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds");
+                                LogError("CalibratorOff", $"CalibratorOff was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Off'. The asynchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
                     }
                     catch (Exception ex)
@@ -692,7 +692,7 @@ namespace ConformU
                             LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} should have thrown an InvalidValueException but did not.");
                         else if (coverCalibratorDevice.CalibratorState == CalibratorStatus.Ready)
                         {
-                            LogOK("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was successful. The synchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds");
+                            LogOK("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was successful. The synchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
 
                             // Confirm that the brightness value is what was set
                             if (settings.DisplayMethodCalls)
@@ -705,7 +705,7 @@ namespace ConformU
                                 LogIssue("CalibratorOn", $"The Brightness property value: {returnedBrightness} does not match the value that was set: {requestedBrightness}");
                         }
                         else
-                            LogError("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Ready'. The synchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds");
+                            LogError("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Ready'. The synchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                     }
                     else
                     {
@@ -720,9 +720,9 @@ namespace ConformU
                         if ((requestedBrightness < 0) | (requestedBrightness > maxBrightness))
                             LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} should have thrown an InvalidValueException but did not.");
                         else if (coverCalibratorDevice.CalibratorState == CalibratorStatus.Ready)
-                            LogOK("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was successful. The asynchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds");
+                            LogOK("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was successful. The asynchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         else
-                            LogError("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Ready'. The asynchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds");
+                            LogError("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Ready'. The asynchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                     }
                 }
                 catch (Exception ex)
