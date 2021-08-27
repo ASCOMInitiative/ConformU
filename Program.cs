@@ -225,12 +225,7 @@ namespace ConformU
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                ProcessStartInfo startInfo = new();
-                startInfo.WorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                startInfo.FileName = "xdg-open";
-                startInfo.Arguments = url;
-                Process.Start(startInfo);
-                //Process.Start("xdg-open", url);
+                Process.Start("xdg-open", url);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {

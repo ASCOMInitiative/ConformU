@@ -1123,7 +1123,7 @@ namespace ConformU
 
         internal void LogMsg(string testName, MessageLevel messageLevel, string message)
         {
-            string testNameFormatted, messageLevelFormatted, messageFormatted, outputMessage;
+            string testNameFormatted, messageLevelFormatted, screenMessage, logFileMessage;
             MessageLevel logLevel;
 
             if (settings.Debug)
@@ -1141,7 +1141,6 @@ namespace ConformU
                 {
                     testNameFormatted = testName.PadRight(TEST_NAME_WIDTH).Substring(0, TEST_NAME_WIDTH); // Pad right to required length and limit to the required length
                     messageLevelFormatted = "        ";
-                    messageFormatted = message;
 
                     switch (messageLevel)
                     {
@@ -1202,26 +1201,30 @@ namespace ConformU
                             }
                     }
 
+                    // Cater for screen display, which requires test name, message level and message in one string and log file, which requires test name separate from message level and message.
                     switch (messageLevel)
                     {
                         case MessageLevel.TestAndMessage:
                             {
-                                outputMessage = testName + " " + message;
+                                screenMessage = testName + " " + message;
+                                logFileMessage = message;
                                 break;
                             }
                         case MessageLevel.TestOnly:
                             {
-                                outputMessage = testName;
+                                screenMessage = testName;
+                                logFileMessage = "";
                                 break;
                             }
                         default:
                             {
-                                outputMessage = $"{testNameFormatted} {messageLevelFormatted} {messageFormatted}";
+                                screenMessage = $"{testNameFormatted} {messageLevelFormatted} {message}";
+                                logFileMessage= $"{messageLevelFormatted} {message}";
                                 break;
                             }
                     }
-                    parentClass.OnLogMessageChanged("LogMessage", $"{DateTime.Now:HH:mm:ss.fff} {outputMessage}");
-                    TL.LogMessage(testName, outputMessage);
+                    parentClass.OnLogMessageChanged("LogMessage", $"{DateTime.Now:HH:mm:ss.fff} {screenMessage}");
+                    TL.LogMessage(testName, logFileMessage);
                 }
             }
             catch (Exception)
@@ -1297,7 +1300,6 @@ namespace ConformU
 
             return IsNotImplementedExceptionRet;
         }
-
 
         /// <summary>
         /// Test a supplied exception for whether it is a PropertyNotImplementedException type

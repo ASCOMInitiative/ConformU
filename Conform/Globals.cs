@@ -4,6 +4,7 @@ namespace ConformU
 {
     internal static class Globals
     {
+
         #region Global constants
 
         internal const string TECHNOLOGY_ALPACA = "Alpaca";
@@ -11,14 +12,14 @@ namespace ConformU
 
         internal const string ASCOM_PROFILE_KEY = @"SOFTWARE\ASCOM";
 
-        internal const string NO_DEVICE_SELECTED = "No device selected"; // Text indicating that no device has been sleected
+        internal const string NO_DEVICE_SELECTED = "No device selected"; // Text indicating that no device has been selected
 
         internal const string COMMAND_OPTION_SETTINGS = "ConformSettings";
         internal const string COMMAND_OPTION_LOGFILENAME = "ConformLogFileName";
         internal const string COMMAND_OPTION_LOGFILEPATH = "ConformLogFilePath";
         internal const string COMMAND_OPTION_SHOW_DISCOVERY = "ShowDiscovery";
 
-        internal const int TEST_NAME_WIDTH = 45;
+        internal const int TEST_NAME_WIDTH = 35; // Width allowed for test names in screen display and log files
         
         #endregion
 
@@ -28,9 +29,9 @@ namespace ConformU
         internal static int g_CountError, g_CountWarning, g_CountIssue;
         #endregion
 
-
-
     }
+
+    #region Enums
 
     public enum ComAccessMechanic
     {
@@ -80,5 +81,7 @@ namespace ConformU
         Http = 0,
         Https = 1
     }
+
+    #endregion
 
 }

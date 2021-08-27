@@ -11,7 +11,7 @@
     <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
     <UserSecretsId>c49fec0a-dd2c-4e60-9e85-407d8d9bdd9f</UserSecretsId>
     <Platforms>AnyCPU</Platforms>
-    <ApplicationIcon />
+    <ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
     <AssemblyVersion>0.1.5.0</AssemblyVersion>
     <FileVersion>0.1.5.0</FileVersion>
     <SignAssembly>true</SignAssembly>
@@ -20,11 +20,15 @@
     <AssemblyName>conformu</AssemblyName>
   </PropertyGroup>
 
+  <!--
+  Keep for reference
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
     <NoWarn>1701;1702;MSB3042</NoWarn>
   </PropertyGroup>
+ -->
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net5.0|AnyCPU'">
+  <!-- Always ignore MSB3042 warning - Flags that Namespace/Class is inside a compiler conditional expression -->
+  <PropertyGroup>
     <NoWarn>1701;1702;MSB3042</NoWarn>
   </PropertyGroup>
 
