@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using static ConformU.Globals;
 using System.Text.Json;
+using System.Collections.Generic;
 
 namespace ConformU
 {
@@ -139,9 +140,7 @@ namespace ConformU
 
         public void TestDevice()
         {
-            // Initialise error counters
-            g_CountError = 0;
-            g_CountIssue = 0;
+            // Initialise error recorder
             conformResults = new();
 
             // Assign a tester relevant to the device type being tested
@@ -252,25 +251,46 @@ namespace ConformU
 
                 // Report the success or failure of conformance checking
                 testDevice.LogNewLine();
-                if (g_CountError == 0 & g_CountIssue == 0 & !cancellationToken.IsCancellationRequested) // No issues - device conforms as expected
+                if (conformResults.ErrorCount == 0 & conformResults.IssueCount == 0 & !cancellationToken.IsCancellationRequested) // No issues - device conforms as expected
                 {
                     testDevice.LogTestOnly("No errors, warnings or issues found: your driver passes ASCOM validation!!"); testDevice.LogNewLine();
                 }
                 else // Some issues found, the device fails the conformance check
                 {
-                    l_Message = "Your driver had " + g_CountError + " error";
-                    if (g_CountError != 1)
+                    l_Message = "Your driver had " + conformResults.ErrorCount + " error";
+                    if (conformResults.ErrorCount != 1)
                         l_Message += "s";
-                    l_Message = l_Message + " and " + g_CountIssue + " issue";
-                    if (g_CountIssue != 1)
+                    l_Message = l_Message + " and " + conformResults.IssueCount + " issue";
+                    if (conformResults.IssueCount != 1)
                         l_Message += "s";
-                    testDevice.LogTestOnly(l_Message); testDevice.LogNewLine();
+                    testDevice.LogTestOnly(l_Message);
                 }
-                JsonSerializerOptions options = new();
-                options.WriteIndented = true;
-                string json = JsonSerializer.Serialize<ConformResults>(conformResults, options);
-                testDevice.LogTestOnly(json); testDevice.LogNewLine();
 
+                // List issues and errors
+                if (conformResults.ErrorCount > 0)
+                {
+                    testDevice.LogNewLine();
+                    testDevice.LogTestOnly("Error Summary");
+                    foreach (KeyValuePair<string, string> kvp in conformResults.Errors)
+                    {
+                        testDevice.LogMsg(kvp.Key, MessageLevel.Error, kvp.Value);
+                    }
+                }
+
+                if (conformResults.IssueCount > 0)
+                {
+                    testDevice.LogNewLine();
+                    testDevice.LogTestOnly("Issue Summary");
+                    foreach (KeyValuePair<string, string> kvp in conformResults.Issues)
+                    {
+                        testDevice.LogMsg(kvp.Key, MessageLevel.Issue, kvp.Value);
+                    }
+                }
+
+                //JsonSerializerOptions options = new();
+                //options.WriteIndented = true;
+                //string json = JsonSerializer.Serialize<ConformResults>(conformResults, options);
+                //testDevice.LogTestOnly(json); testDevice.LogNewLine();
 
             }
             catch (Exception ex)

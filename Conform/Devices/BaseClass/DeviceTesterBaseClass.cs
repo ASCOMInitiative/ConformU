@@ -742,62 +742,6 @@ namespace ConformU
             LogError("PostSafetyCheck", "DeviceTester base Class warning message, you should not see this message!");
         }
 
-        public void SpecialTests(SpecialTest p_Test)
-        {
-            switch (p_Test)
-            {
-                case SpecialTest.TelescopeSideOfPier:
-                    {
-                        SpecialTelescopeSideOfPier();
-                        break;
-                    }
-
-                case SpecialTest.TelescopeDestinationSideOfPier:
-                    {
-                        SpecialTelescopeDestinationSideOfPier();
-                        break;
-                    }
-
-                case SpecialTest.TelescopeSideOfPierAnalysis:
-                    {
-                        SpecialTelescopeSideOfPierAnalysis();
-                        break;
-                    }
-
-                case SpecialTest.TelescopeCommands:
-                    {
-                        SpecialTelescopeCommands();
-                        break;
-                    }
-
-                default:
-                    {
-                        LogError("DeviceTesterBaseClass:SpecialTests", $"Unknown test: {p_Test}");
-                        break;
-                    }
-            }
-        }
-
-        protected virtual void SpecialTelescopeSideOfPier()
-        {
-            LogError("SpecialTelescopeSideOfPier", "DeviceTester base Class warning message, you should not see this message!");
-        }
-
-        protected virtual void SpecialTelescopeDestinationSideOfPier()
-        {
-            LogError("SpecialTelescopeDestinationSideOfPier", "DeviceTester base Class warning message, you should not see this message!");
-        }
-
-        protected virtual void SpecialTelescopeSideOfPierAnalysis()
-        {
-            LogError("SpecialTelescopeFlipRange", "DeviceTester base Class warning message, you should not see this message!");
-        }
-
-        protected virtual void SpecialTelescopeCommands()
-        {
-            LogError("SpecialTelescopeCommands", "DeviceTester base Class warning message, you should not see this message!");
-        }
-
         #endregion
 
         #region Base class support Code
@@ -1174,14 +1118,12 @@ namespace ConformU
                         case MessageLevel.Issue:
                             {
                                 messageLevelFormatted = "ISSUE   ";
-                                g_CountIssue += 1;
                                 break;
                             }
 
                         case MessageLevel.Error:
                             {
                                 messageLevelFormatted = "ERROR   ";
-                                g_CountError += 1;
                                 break;
                             }
 
@@ -1636,7 +1578,65 @@ namespace ConformU
             SetStatus("", "", "");
         }
 
-
         #endregion
+
+        #region Private tests
+        public void SpecialTests(SpecialTest p_Test)
+        {
+            switch (p_Test)
+            {
+                case SpecialTest.TelescopeSideOfPier:
+                    {
+                        SpecialTelescopeSideOfPier();
+                        break;
+                    }
+
+                case SpecialTest.TelescopeDestinationSideOfPier:
+                    {
+                        SpecialTelescopeDestinationSideOfPier();
+                        break;
+                    }
+
+                case SpecialTest.TelescopeSideOfPierAnalysis:
+                    {
+                        SpecialTelescopeSideOfPierAnalysis();
+                        break;
+                    }
+
+                case SpecialTest.TelescopeCommands:
+                    {
+                        SpecialTelescopeCommands();
+                        break;
+                    }
+
+                default:
+                    {
+                        LogError("DeviceTesterBaseClass:SpecialTests", $"Unknown test: {p_Test}");
+                        break;
+                    }
+            }
+        }
+
+        protected virtual void SpecialTelescopeSideOfPier()
+        {
+            LogError("SpecialTelescopeSideOfPier", "DeviceTester base Class warning message, you should not see this message!");
+        }
+
+        protected virtual void SpecialTelescopeDestinationSideOfPier()
+        {
+            LogError("SpecialTelescopeDestinationSideOfPier", "DeviceTester base Class warning message, you should not see this message!");
+        }
+
+        protected virtual void SpecialTelescopeSideOfPierAnalysis()
+        {
+            LogError("SpecialTelescopeFlipRange", "DeviceTester base Class warning message, you should not see this message!");
+        }
+
+        protected virtual void SpecialTelescopeCommands()
+        {
+            LogError("SpecialTelescopeCommands", "DeviceTester base Class warning message, you should not see this message!");
+        }
+        #endregion
+
     }
 }

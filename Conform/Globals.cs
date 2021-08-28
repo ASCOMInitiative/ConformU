@@ -26,8 +26,6 @@ namespace ConformU
         #region Global Variables
 
         // Variables shared between the test manager and device testers        
-        internal static int g_CountError; // Internal Conform errors
-        internal static int g_CountIssue; // Deviations from the ASCOM specification
         internal static ConformResults conformResults;
 
         #endregion
