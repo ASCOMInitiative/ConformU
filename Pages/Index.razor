@@ -34,7 +34,7 @@
     string screenLog = "Conform log.";
     object screenLogLockObject = new object();
     object statusLockObject = new object();
-#if WINDOWS
+#if WINDOWS7_0_OR_GREATER
     string statusMessage = "Windows Build";
 #else
     string statusMessage = "Linux build";

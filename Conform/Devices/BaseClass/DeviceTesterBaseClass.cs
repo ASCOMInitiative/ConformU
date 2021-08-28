@@ -50,9 +50,6 @@ namespace ConformU
         internal int g_ExNotImplemented, g_ExNotSet1, g_ExNotSet2;
         internal int g_ExInvalidValue1, g_ExInvalidValue2, g_ExInvalidValue3, g_ExInvalidValue4, g_ExInvalidValue5, g_ExInvalidValue6;
 
-        // Exception number variables
-        internal static bool g_Stop = false;
-
         #endregion
 
         #region Enums
@@ -649,7 +646,6 @@ namespace ConformU
             Status(StatusType.staTest, ""); // Clear status messages
             Status(StatusType.staAction, "");
             Status(StatusType.staStatus, "");
-            g_Stop = true; // Initialise stop flag to stop
 
             DateTime lastModifiedTime = DateTime.MinValue;
             try
@@ -776,7 +772,7 @@ namespace ConformU
 
                 default:
                     {
-                        //MessageBox.Show("DeviceTesterBaseClass:SpecialTests - Unknown test: " + p_Test.ToString(), "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        LogError("DeviceTesterBaseClass:SpecialTests", $"Unknown test: {p_Test}");
                         break;
                     }
             }
@@ -1227,9 +1223,9 @@ namespace ConformU
                     TL.LogMessage(testName, logFileMessage);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // MsgBox(Len(l_Msg) & " *" & l_Msg & "* " & ex.ToString, MsgBoxStyle.Critical)
+                Console.WriteLine($"Exception in DeviceTesterbaseClass.LogMsg method: \r\n{ex}");
             }
         }
 

@@ -255,7 +255,7 @@ namespace ConformU
 
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
                 baseClassDevice = m_Camera; // Assign the driver to the base class
-                g_Stop = false;
+
                 LogDebug("CreateDevice", "Successfully created driver");
 
             }
@@ -265,7 +265,6 @@ namespace ConformU
                 throw; // Re throw exception 
             }
 
-            if (g_Stop) WaitFor(200);
         }
 
         public override bool Connected
@@ -279,7 +278,7 @@ namespace ConformU
             {
                 if (settings.DisplayMethodCalls) LogComment("ConformanceCheck", "About to set Connected");
                 m_Camera.Connected = value;
-                g_Stop = false;
+
             }
         }
         public override void ReadCanProperties()

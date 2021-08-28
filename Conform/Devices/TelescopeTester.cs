@@ -405,7 +405,7 @@ namespace ConformU
                 LogDebug("CreateDevice", "Successfully created driver");
                 baseClassDevice = telescopeDevice; // Assign the driver to the base class
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
-                g_Stop = false;
+
             }
             catch (Exception ex)
             {
@@ -413,7 +413,6 @@ namespace ConformU
                 throw; // Re throw exception 
             }
 
-            if (g_Stop) WaitFor(200);
         }
 
         public override bool Connected
@@ -431,7 +430,6 @@ namespace ConformU
                 if (settings.DisplayMethodCalls)
                     LogComment("ConformanceCheck", "About to set Connected property " + value.ToString());
                 telescopeDevice.Connected = value;
-                g_Stop = false;
             }
         }
 
@@ -454,7 +452,6 @@ namespace ConformU
                     else
                     {
                         LogError("Mount Safety", "Scope reports that it is parked but CanUnPark is false - please manually unpark the scope");
-                        g_Stop = true;
                     }
                 }
                 else
@@ -1818,8 +1815,6 @@ namespace ConformU
                                 default:
                                     {
                                         LogError("SiderealTime", "Scope and ASCOM sidereal times are more than 1 hour apart, Scope: " + FormatRA(m_SiderealTimeScope) + ", ASCOM: " + FormatRA(m_SiderealTimeASCOM));
-                                        //MessageBox.Show("Following tests rely on correct sidereal time to calculate target RAs. The sidereal time returned by this driver is more than 1 hour from the expected value based on your computer clock and site longitude, so this program will end now to protect your mount from potential harm caused by slewing to an inappropriate location." + Constants.vbCrLf + Constants.vbCrLf + "Please check the longitude set by the driver and your PC clock (time, time zone and summer time) before checking the sidereal time code in your driver or your mount. Thanks, Peter", "CONFORM - MOUNT PROTECTION", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                        g_Stop = true;
                                         return;
                                     }
                             }
@@ -2591,7 +2586,6 @@ namespace ConformU
                                         }
                                         // Create user interface message asking for manual scope UnPark
                                         LogComment("UnPark", "CanUnPark is false so you need to unpark manually");
-                                        //MessageBox.Show("This scope cannot be unparked automatically, please unpark it now", "UnPark", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                     }
                                 }
                                 catch (COMException ex)
@@ -7290,7 +7284,7 @@ namespace ConformU
 
                             default:
                                 {
-                                    //MessageBox.Show(string.Format("Conform internal error - Unknown Axis value: {0}", Axis.ToString()));
+                                    LogError("TestRADecRate",$"Conform internal error - Unknown Axis: {Axis}");
                                     break;
                                 }
                         }

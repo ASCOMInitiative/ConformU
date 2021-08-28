@@ -137,7 +137,7 @@ namespace ConformU
                 baseClassDevice = coverCalibratorDevice; // Assign the driver to the base class
 
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
-                g_Stop = false;
+
             }
             catch (Exception ex)
             {
@@ -145,7 +145,6 @@ namespace ConformU
                 throw; // Re throw exception 
             }
 
-            if (g_Stop) WaitFor(200);
         }
 
         public override void PreConnectChecks()

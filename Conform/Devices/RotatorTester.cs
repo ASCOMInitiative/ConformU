@@ -142,15 +142,13 @@ namespace ConformU
                         throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
 
-                g_Stop = false;
+
             }
             catch (Exception ex)
             {
                 LogDebug("CreateDevice", "Exception thrown: " + ex.Message);
                 throw; // Re throw exception 
             }
-
-            if (g_Stop) WaitFor(200);
 
         }
 
@@ -193,7 +191,6 @@ namespace ConformU
         {
             DateTime l_Now;
             // Get the rotator into a standard state
-            g_Stop = true;
             LogCallToDriver("PreRunCheck", "About to call Halt method");
             try
             {
@@ -216,7 +213,7 @@ namespace ConformU
                 while (m_Rotator.IsMoving & DateTime.Now.Subtract(l_Now).TotalSeconds <= ROTATOR_WAIT_LIMIT);
                 if (!m_Rotator.IsMoving) // Rotator is stopped so OK
                 {
-                    g_Stop = false; // Clear stop flag to allow other tests to run
+     // Clear stop flag to allow other tests to run
                 }
                 else // Report error message and don't do other tests
                 {
@@ -244,7 +241,6 @@ namespace ConformU
                 {
                     LogError("IsMoving", "IsMoving is True before any movement has been commanded!");
                     LogInfo("IsMoving", "Further tests have been skipped");
-                    g_Stop = true;
                 }
                 else
                 {
@@ -625,7 +621,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogIssue("Sync", $"Rotator Position is more than {ROTATOR_POSITION_TOLERANCE} different from requested position {SyncAngle}.");
+                    LogIssue("Sync", $"Rotator Position is {syncAngleDifference} degrees from the requested position {SyncAngle}. Alert tolerance is {ROTATOR_POSITION_TOLERANCE} degrees.");
                 }
             }
             catch (Exception ex)

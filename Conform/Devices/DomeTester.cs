@@ -168,7 +168,7 @@ namespace ConformU
                 baseClassDevice = domeDevice; // Assign the driver to the base class
 
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
-                g_Stop = false;
+
             }
             catch (Exception ex)
             {
@@ -176,7 +176,6 @@ namespace ConformU
                 throw; // Re throw exception 
             }
 
-            if (g_Stop) WaitFor(200);
         }
 
         public override bool Connected
@@ -190,7 +189,7 @@ namespace ConformU
             {
                 LogCallToDriver("Connected", "About to set Connected property");
                 domeDevice.Connected = value;
-                g_Stop = false;
+
             }
         }
         public override void CheckCommonMethods()
