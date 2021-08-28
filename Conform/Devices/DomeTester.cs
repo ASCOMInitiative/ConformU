@@ -270,7 +270,7 @@ namespace ConformU
                 }// Log the full message in debug mode
                 if (settings.DomeOpenShutter)
                 {
-                    LogComment("DomeSafety", "Attempting to open shutter as some tests may fail if it is closed...");
+                    LogTestAndMessage("DomeSafety", "Attempting to open shutter as some tests may fail if it is closed...");
                     try
                     {
                         LogCallToDriver("PreRunCheck", "About to call OpenShutter");
@@ -285,7 +285,7 @@ namespace ConformU
                         if (cancellationToken.IsCancellationRequested)
                         {
                             LogCallToDriver("PreRunCheck", "About to get ShutterStatus property");
-                            LogComment("DomeSafety", "Stop button pressed, further testing abandoned, shutter status: " + domeDevice.ShutterStatus.ToString());
+                            LogTestAndMessage("DomeSafety", "Stop button pressed, further testing abandoned, shutter status: " + domeDevice.ShutterStatus.ToString());
                         }
                         else
                         {
@@ -304,12 +304,12 @@ namespace ConformU
                     }
                     catch (Exception ex)
                     {
-                        LogComment("DomeSafety", "Unable to open shutter, some tests may fail: " + ex.Message);
+                        LogTestAndMessage("DomeSafety", "Unable to open shutter, some tests may fail: " + ex.Message);
                     }
                     Status(StatusType.staTest, "");
                 }
                 else
-                    LogComment("DomeSafety", "Open shutter check box is unchecked so shutter not opened");
+                    LogTestAndMessage("DomeSafety", "Open shutter check box is unchecked so shutter not opened");
             }
         }
         public override void ReadCanProperties()
@@ -419,8 +419,8 @@ namespace ConformU
                     }
                     catch (Exception ex)
                     {
-                        LogComment("DomeSafety", "Exception closing shutter: " + ex.Message);
-                        LogComment("DomeSafety", "Please close shutter manually");
+                        LogTestAndMessage("DomeSafety", "Exception closing shutter: " + ex.Message);
+                        LogTestAndMessage("DomeSafety", "Please close shutter manually");
                     }
                 }
                 else
@@ -1397,7 +1397,7 @@ namespace ConformU
                 Status(StatusType.staStatus, "");
             }
             else
-                LogComment("DomeSafety", "Open shutter check box is unchecked so shutter test bypassed");
+                LogTestAndMessage("DomeSafety", "Open shutter check box is unchecked so shutter test bypassed");
         }
 
         private bool DomeShutterWait(ShutterState p_RequiredStatus)

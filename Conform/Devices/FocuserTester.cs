@@ -767,9 +767,9 @@ namespace ConformU
             {
                 // Move the focuser
                 if (m_Absolute)
-                    LogComment(testName, "Moving to position: " + newPosition.ToString());
+                    LogTestAndMessage(testName, "Moving to position: " + newPosition.ToString());
                 else
-                    LogComment(testName, "Moving by: " + newPosition.ToString());
+                    LogTestAndMessage(testName, "Moving by: " + newPosition.ToString());
 
                 Status(StatusType.staAction, "Moving to new position");
                 l_StartTime = DateTime.Now;
@@ -784,7 +784,7 @@ namespace ConformU
                     if (m_Focuser.IsMoving)
                         LogIssue(testName, "Synchronous move expected but focuser is moving after return from Focuser.Move");
                     else
-                        LogComment(testName, "Synchronous move found");
+                        LogTestAndMessage(testName, "Synchronous move found");
                 }
                 else
                 {
@@ -796,7 +796,7 @@ namespace ConformU
                             Status(StatusType.staStatus, "Waiting for asynchronous move to complete, Position: " + m_Focuser.Position + " / " + newPosition);
                         WaitFor(500);
                     }
-                    LogComment(testName, "Asynchronous move found");
+                    LogTestAndMessage(testName, "Asynchronous move found");
                 }
             }
         }

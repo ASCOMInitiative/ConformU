@@ -175,7 +175,7 @@ namespace ConformU
 
         public void SetupDialog()
         {
-            if (settings.DisplayMethodCalls) LogComment("SetupDialog", "About to call SetupDialog");
+            if (settings.DisplayMethodCalls) LogTestAndMessage("SetupDialog", "About to call SetupDialog");
             baseClassDevice.SetupDialog();
         }
 
@@ -193,7 +193,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("InterfaceVersion", "About to get property InterfaceVersion");
+                    LogTestAndMessage("InterfaceVersion", "About to get property InterfaceVersion");
                 g_InterfaceVersion = baseClassDevice.InterfaceVersion;
                 switch (g_InterfaceVersion)
                 {
@@ -225,7 +225,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("Connected", "About to get property Connected");
+                        LogTestAndMessage("Connected", "About to get property Connected");
                     m_Connected = baseClassDevice.Connected;
                     LogOK("Connected", m_Connected.ToString());
                 }
@@ -248,7 +248,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("Description", "About to get property Description");
+                        LogTestAndMessage("Description", "About to get property Description");
                     m_Description = baseClassDevice.Description;
                     switch (m_Description ?? "")
                     {
@@ -288,7 +288,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("DriverInfo", "About to get property DriverInfo");
+                        LogTestAndMessage("DriverInfo", "About to get property DriverInfo");
                     m_DriverInfo = baseClassDevice.DriverInfo;
                     switch (m_DriverInfo ?? "")
                     {
@@ -320,7 +320,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("DriverVersion", "About to get property DriverVersion");
+                        LogTestAndMessage("DriverVersion", "About to get property DriverVersion");
                     m_DriverVersion = baseClassDevice.DriverVersion;
                     switch (m_DriverVersion ?? "")
                     {
@@ -360,7 +360,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("Name", "About to get property Name");
+                        LogTestAndMessage("Name", "About to get property Name");
                     m_Name = baseClassDevice.Name;
                     switch (m_Name ?? "")
                     {
@@ -422,7 +422,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("SupportedActions", "About to call method SupportedActions");
+                    LogTestAndMessage("SupportedActions", "About to call method SupportedActions");
                 SA = (IList)baseClassDevice.SupportedActions;
                 if (SA.Count == 0)
                 {
@@ -459,7 +459,7 @@ namespace ConformU
                                                 try
                                                 {
                                                     if (settings.DisplayMethodCalls)
-                                                        LogComment("SupportedActions", "About to call method Action");
+                                                        LogTestAndMessage("SupportedActions", "About to call method Action");
                                                     result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
                                                     LogOK("SupportedActions", string.Format("OC simulator action {0} gave result: {1}", ActionString, result));
                                                 }
@@ -473,7 +473,7 @@ namespace ConformU
                                                 try
                                                 {
                                                     if (settings.DisplayMethodCalls)
-                                                        LogComment("SupportedActions", "About to call method Action");
+                                                        LogTestAndMessage("SupportedActions", "About to call method Action");
                                                     result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
                                                     LogOK("SupportedActions", string.Format("OC simulator action {0} gave result: {1}", ActionString, result));
                                                 }
@@ -487,7 +487,7 @@ namespace ConformU
                                                 try
                                                 {
                                                     if (settings.DisplayMethodCalls)
-                                                        LogComment("SupportedActions", "About to call method Action");
+                                                        LogTestAndMessage("SupportedActions", "About to call method Action");
                                                     result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
                                                     LogOK("SupportedActions", string.Format("Switch simulator action {0} gave result: {1}", ActionString, result));
                                                 }
@@ -501,7 +501,7 @@ namespace ConformU
                                                 try
                                                 {
                                                     if (settings.DisplayMethodCalls)
-                                                        LogComment("SupportedActions", "About to call method Action");
+                                                        LogTestAndMessage("SupportedActions", "About to call method Action");
                                                     result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
                                                     LogOK("SupportedActions", string.Format("Switch simulator action {0} gave result: {1}", ActionString, result));
                                                 }
@@ -1036,9 +1036,9 @@ namespace ConformU
             LogMsg(p_Test, MessageLevel.TestOnly, "");
         }
 
-        internal void LogComment(string p_Test, string p_Msg)
+        internal void LogTestAndMessage(string p_Test, string p_Msg)
         {
-            LogMsg(p_Test, MessageLevel.Comment, p_Msg);
+            LogMsg(p_Test, MessageLevel.TestAndMessage, p_Msg);
         }
 
         internal void LogOK(string p_Test, string p_Msg)
@@ -1070,105 +1070,7 @@ namespace ConformU
 
         internal void LogMsg(string testName, MessageLevel messageLevel, string message)
         {
-            string testNameFormatted, messageLevelFormatted, screenMessage, logFileMessage;
-            MessageLevel logLevel;
-
-            if (settings.Debug)
-            {
-                logLevel = MessageLevel.Debug;
-            }
-            else
-            {
-                logLevel = MessageLevel.Comment;
-            }
-
-            try
-            {
-                if (messageLevel >= logLevel)
-                {
-                    testNameFormatted = testName.PadRight(TEST_NAME_WIDTH).Substring(0, TEST_NAME_WIDTH); // Pad right to required length and limit to the required length
-                    messageLevelFormatted = "        ";
-
-                    switch (messageLevel)
-                    {
-                        case MessageLevel.Debug:
-                            {
-                                messageLevelFormatted = "DEBUG   ";
-                                break;
-                            }
-
-                        case MessageLevel.Comment:
-                            {
-                                messageLevelFormatted = "        ";
-                                break;
-                            }
-
-                        case MessageLevel.Info:
-                            {
-                                messageLevelFormatted = "INFO    ";
-                                break;
-                            }
-
-                        case MessageLevel.OK:
-                            {
-                                messageLevelFormatted = "OK      ";
-                                break;
-                            }
-
-                        case MessageLevel.Issue:
-                            {
-                                messageLevelFormatted = "ISSUE   ";
-                                break;
-                            }
-
-                        case MessageLevel.Error:
-                            {
-                                messageLevelFormatted = "ERROR   ";
-                                break;
-                            }
-
-                        case MessageLevel.TestOnly:
-                        case MessageLevel.TestAndMessage:
-                            {
-                                messageLevelFormatted = "        ";
-                                break;
-                            }
-                        default:
-                            {
-                                throw new InvalidValueException($"LogMsg - Unknown message level: {messageLevel}.");
-                            }
-                    }
-
-                    // Cater for screen display, which requires test name, message level and message in one string and log file, which requires test name separate from message level and message.
-                    switch (messageLevel)
-                    {
-                        case MessageLevel.TestAndMessage:
-                            {
-                                screenMessage = testName + " " + message;
-                                logFileMessage = message;
-                                break;
-                            }
-                        case MessageLevel.TestOnly:
-                            {
-                                screenMessage = testName;
-                                logFileMessage = "";
-                                break;
-                            }
-                        default:
-                            {
-                                screenMessage = $"{testNameFormatted} {messageLevelFormatted} {message}";
-                                logFileMessage = $"{messageLevelFormatted} {message}";
-                                break;
-                            }
-                    }
-                    parentClass.OnLogMessageChanged("LogMessage", $"{DateTime.Now:HH:mm:ss.fff} {screenMessage}");
-                    TL.LogMessage(testName, logFileMessage);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception in DeviceTesterbaseClass.LogMsg method: \r\n{ex}");
-            }
+            Globals.LogMessage(testName, messageLevel, message, settings.Debug, parentClass, TL);
         }
 
         /// <summary>
@@ -1563,7 +1465,7 @@ namespace ConformU
         protected void LogCallToDriver(string test, string memberName)
         {
             if (settings.DisplayMethodCalls)
-                LogComment(test, memberName);
+                LogTestAndMessage(test, memberName);
         }
 
         internal void WaitForAbsolute(int p_Duration, string p_Message)

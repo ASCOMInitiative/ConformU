@@ -420,7 +420,7 @@ namespace ConformU
             get
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("ConformanceCheck", "About to get Connected property");
+                    LogTestAndMessage("ConformanceCheck", "About to get Connected property");
                 bool ConnectedRet = telescopeDevice.Connected;
                 return ConnectedRet;
             }
@@ -428,7 +428,7 @@ namespace ConformU
             set
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("ConformanceCheck", "About to set Connected property " + value.ToString());
+                    LogTestAndMessage("ConformanceCheck", "About to set Connected property " + value.ToString());
                 telescopeDevice.Connected = value;
             }
         }
@@ -439,13 +439,13 @@ namespace ConformU
             if (g_InterfaceVersion > 1)
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("Mount Safety", "About to get AtPark property");
+                    LogTestAndMessage("Mount Safety", "About to get AtPark property");
                 if (telescopeDevice.AtPark)
                 {
                     if (canUnpark)
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("Mount Safety", "About to call Unpark method");
+                            LogTestAndMessage("Mount Safety", "About to call Unpark method");
                         telescopeDevice.UnPark();
                         LogInfo("Mount Safety", "Scope is parked, so it has been unparked for testing");
                     }
@@ -467,7 +467,7 @@ namespace ConformU
                     if (canUnpark)
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("Mount Safety", "About to call Unpark method");
+                            LogTestAndMessage("Mount Safety", "About to call Unpark method");
                         telescopeDevice.UnPark();
                         LogOK("Mount Safety", "Scope has been unparked for testing");
                     }
@@ -485,7 +485,7 @@ namespace ConformU
             if (!cancellationToken.IsCancellationRequested & canSetTracking)
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("Mount Safety", "About to set Tracking property true");
+                    LogTestAndMessage("Mount Safety", "About to set Tracking property true");
                 telescopeDevice.Tracking = true;
                 LogInfo("Mount Safety", "Scope tracking has been enabled");
             }
@@ -505,7 +505,7 @@ namespace ConformU
                 // v1.0.12.0 Added catch logic for any UTCDate issues
                 try
                 {
-                    if (settings.DisplayMethodCalls) LogComment("TimeCheck", "About to get UTCDate property");
+                    if (settings.DisplayMethodCalls) LogTestAndMessage("TimeCheck", "About to get UTCDate property");
                     DateTime mountTime = telescopeDevice.UTCDate;
                     LogDebug("TimeCheck", $"Mount UTCDate Unformatted: {telescopeDevice.UTCDate}");
                     LogInfo("TimeCheck", $"Mount UTCDate: {telescopeDevice.UTCDate:dd-MMM-yyyy HH:mm:ss.fff}");
@@ -575,7 +575,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("AlignmentMode", "About to get AlignmentMode property");
+                    LogTestAndMessage("AlignmentMode", "About to get AlignmentMode property");
                 m_AlignmentMode = (AlignmentMode)telescopeDevice.AlignmentMode;
                 LogOK("AlignmentMode", m_AlignmentMode.ToString());
             }
@@ -592,7 +592,7 @@ namespace ConformU
             {
                 canReadAltitide = false;
                 if (settings.DisplayMethodCalls)
-                    LogComment("Altitude", "About to get Altitude property");
+                    LogTestAndMessage("Altitude", "About to get Altitude property");
                 m_Altitude = telescopeDevice.Altitude;
                 canReadAltitide = true; // Read successfully
                 switch (m_Altitude)
@@ -628,7 +628,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("ApertureArea", "About to get ApertureArea property");
+                    LogTestAndMessage("ApertureArea", "About to get ApertureArea property");
                 m_ApertureArea = telescopeDevice.ApertureArea;
                 switch (m_ApertureArea)
                 {
@@ -663,7 +663,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("ApertureDiameter", "About to get ApertureDiameter property");
+                    LogTestAndMessage("ApertureDiameter", "About to get ApertureDiameter property");
                 m_ApertureDiameter = telescopeDevice.ApertureDiameter;
                 switch (m_ApertureDiameter)
                 {
@@ -700,7 +700,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("AtHome", "About to get AtHome property");
+                        LogTestAndMessage("AtHome", "About to get AtHome property");
                     m_AtHome = telescopeDevice.AtHome;
                     LogOK("AtHome", m_AtHome.ToString());
                 }
@@ -723,7 +723,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("AtPark", "About to get AtPark property");
+                        LogTestAndMessage("AtPark", "About to get AtPark property");
                     m_AtPark = telescopeDevice.AtPark;
                     LogOK("AtPark", m_AtPark.ToString());
                 }
@@ -745,7 +745,7 @@ namespace ConformU
             {
                 canReadAzimuth = false;
                 if (settings.DisplayMethodCalls)
-                    LogComment("Azimuth", "About to get Azimuth property");
+                    LogTestAndMessage("Azimuth", "About to get Azimuth property");
                 m_Azimuth = telescopeDevice.Azimuth;
                 canReadAzimuth = true; // Read successfully
                 switch (m_Azimuth)
@@ -781,7 +781,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("Declination", "About to get Declination property");
+                    LogTestAndMessage("Declination", "About to get Declination property");
                 m_Declination = telescopeDevice.Declination;
                 switch (m_Declination)
                 {
@@ -811,7 +811,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("DeclinationRate Read", "About to get DeclinationRate property");
+                    LogTestAndMessage("DeclinationRate Read", "About to get DeclinationRate property");
                 m_DeclinationRate = telescopeDevice.DeclinationRate;
                 // Read has been successful
                 if (canSetDeclinationRate) // Any value is acceptable
@@ -876,7 +876,7 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("DeclinationRate Write", "About to set DeclinationRate property to 0.0");
+                            LogTestAndMessage("DeclinationRate Write", "About to set DeclinationRate property to 0.0");
                         telescopeDevice.DeclinationRate = 0.0d; // Set to a harmless value
                         LogIssue("DeclinationRate", "CanSetDeclinationRate is False but setting DeclinationRate did not generate an error");
                     }
@@ -891,7 +891,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("DeclinationRate Write", "About to set DeclinationRate property to 0.0");
+                        LogTestAndMessage("DeclinationRate Write", "About to set DeclinationRate property to 0.0");
                     telescopeDevice.DeclinationRate = 0.0d; // Set to a harmless value
                     LogOK("DeclinationRate Write", m_DeclinationRate.ToString("0.00"));
                 }
@@ -910,7 +910,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("DoesRefraction Read", "About to DoesRefraction get property");
+                        LogTestAndMessage("DoesRefraction Read", "About to DoesRefraction get property");
                     m_DoesRefraction = telescopeDevice.DoesRefraction;
                     LogOK("DoesRefraction Read", m_DoesRefraction.ToString());
                 }
@@ -935,7 +935,7 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("DoesRefraction Write", "About to set DoesRefraction property false");
+                            LogTestAndMessage("DoesRefraction Write", "About to set DoesRefraction property false");
                         telescopeDevice.DoesRefraction = false;
                         LogOK("DoesRefraction Write", "Can set DoesRefraction to False");
                     }
@@ -949,7 +949,7 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("DoesRefraction Write", "About to set DoesRefraction property true");
+                            LogTestAndMessage("DoesRefraction Write", "About to set DoesRefraction property true");
                         telescopeDevice.DoesRefraction = true;
                         LogOK("DoesRefraction Write", "Can set DoesRefraction to True");
                     }
@@ -973,7 +973,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("EquatorialSystem", "About to get EquatorialSystem property");
+                        LogTestAndMessage("EquatorialSystem", "About to get EquatorialSystem property");
                     m_EquatorialSystem = (EquatorialCoordinateType)telescopeDevice.EquatorialSystem;
                     LogOK("EquatorialSystem", m_EquatorialSystem.ToString());
                 }
@@ -994,7 +994,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("FocalLength", "About to get FocalLength property");
+                    LogTestAndMessage("FocalLength", "About to get FocalLength property");
                 m_FocalLength = telescopeDevice.FocalLength;
                 switch (m_FocalLength)
                 {
@@ -1033,7 +1033,7 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("GuideRateDeclination Read", "About to get GuideRateDeclination property");
+                            LogTestAndMessage("GuideRateDeclination Read", "About to get GuideRateDeclination property");
                         m_GuideRateDeclination = telescopeDevice.GuideRateDeclination; // Read guiderateDEC
                         switch (m_GuideRateDeclination)
                         {
@@ -1058,7 +1058,7 @@ namespace ConformU
                     try // Read OK so now try to write
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("GuideRateDeclination Read", "About to set GuideRateDeclination property to " + m_GuideRateDeclination);
+                            LogTestAndMessage("GuideRateDeclination Read", "About to set GuideRateDeclination property to " + m_GuideRateDeclination);
                         telescopeDevice.GuideRateDeclination = m_GuideRateDeclination;
                         LogOK("GuideRateDeclination Write", "Can write Declination Guide Rate OK");
                     }
@@ -1072,7 +1072,7 @@ namespace ConformU
                     try // Cannot set guide rates so Read is Optional and may generate an error
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("GuideRateDeclination Read", "About to get GuideRateDeclination property");
+                            LogTestAndMessage("GuideRateDeclination Read", "About to get GuideRateDeclination property");
                         m_GuideRateDeclination = telescopeDevice.GuideRateDeclination;
                         switch (m_GuideRateDeclination)
                         {
@@ -1097,7 +1097,7 @@ namespace ConformU
                     try // Write should definitely raise an error
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("GuideRateDeclination Write", "About to set GuideRateDeclination property to " + m_GuideRateDeclination);
+                            LogTestAndMessage("GuideRateDeclination Write", "About to set GuideRateDeclination property to " + m_GuideRateDeclination);
                         telescopeDevice.GuideRateDeclination = m_GuideRateDeclination;
                         LogIssue("GuideRateDeclination Write", "CanSetGuideRates is false but no exception generated; value returned: " + m_GuideRateDeclination.ToString("0.00"));
                     }
@@ -1123,7 +1123,7 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("GuideRateRightAscension Read", "About to get GuideRateRightAscension property");
+                            LogTestAndMessage("GuideRateRightAscension Read", "About to get GuideRateRightAscension property");
                         m_GuideRateRightAscension = telescopeDevice.GuideRateRightAscension; // Read guiderateRA
                         switch (m_GuideRateDeclination)
                         {
@@ -1148,7 +1148,7 @@ namespace ConformU
                     try // Read OK so now try to write
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("GuideRateRightAscension Read", "About to set GuideRateRightAscension property to " + m_GuideRateRightAscension);
+                            LogTestAndMessage("GuideRateRightAscension Read", "About to set GuideRateRightAscension property to " + m_GuideRateRightAscension);
                         telescopeDevice.GuideRateRightAscension = m_GuideRateRightAscension;
                         LogOK("GuideRateRightAscension Write", "Can set RightAscension Guide OK");
                     }
@@ -1162,7 +1162,7 @@ namespace ConformU
                     try // Cannot set guide rates so read may generate an error
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("GuideRateRightAscension Read", "About to get GuideRateRightAscension property");
+                            LogTestAndMessage("GuideRateRightAscension Read", "About to get GuideRateRightAscension property");
                         m_GuideRateRightAscension = telescopeDevice.GuideRateRightAscension; // Read guiderateRA
                         switch (m_GuideRateDeclination)
                         {
@@ -1187,7 +1187,7 @@ namespace ConformU
                     try // Write should definitely raise an error
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("GuideRateRightAscension Write", "About to set GuideRateRightAscension property to " + m_GuideRateRightAscension);
+                            LogTestAndMessage("GuideRateRightAscension Write", "About to set GuideRateRightAscension property to " + m_GuideRateRightAscension);
                         telescopeDevice.GuideRateRightAscension = m_GuideRateRightAscension;
                         LogIssue("GuideRateRightAscension Write", "CanSetGuideRates is false but no exception generated; value returned: " + m_GuideRateRightAscension.ToString("0.00"));
                     }
@@ -1213,7 +1213,7 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("IsPulseGuiding", "About to get IsPulseGuiding property");
+                            LogTestAndMessage("IsPulseGuiding", "About to get IsPulseGuiding property");
                         m_IsPulseGuiding = telescopeDevice.IsPulseGuiding;
                         LogOK("IsPulseGuiding", m_IsPulseGuiding.ToString());
                     }
@@ -1227,7 +1227,7 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("IsPulseGuiding", "About to get IsPulseGuiding property");
+                            LogTestAndMessage("IsPulseGuiding", "About to get IsPulseGuiding property");
                         m_IsPulseGuiding = telescopeDevice.IsPulseGuiding;
                         LogIssue("IsPulseGuiding", "CanPulseGuide is False but no error was raised on calling IsPulseGuiding");
                     }
@@ -1249,7 +1249,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("RightAscension", "About to get RightAscension property");
+                    LogTestAndMessage("RightAscension", "About to get RightAscension property");
                 m_RightAscension = telescopeDevice.RightAscension;
                 switch (m_RightAscension)
                 {
@@ -1279,7 +1279,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("RightAscensionRate Read", "About to get RightAscensionRate property");
+                    LogTestAndMessage("RightAscensionRate Read", "About to get RightAscensionRate property");
                 m_RightAscensionRate = telescopeDevice.RightAscensionRate;
                 // Read has been successful
                 if (canSetRightAscensionRate) // Any value is acceptable
@@ -1344,7 +1344,7 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("RightAscensionRate Write", "About to set RightAscensionRate property to 0.00");
+                            LogTestAndMessage("RightAscensionRate Write", "About to set RightAscensionRate property to 0.00");
                         telescopeDevice.RightAscensionRate = 0.0d; // Set to a harmless value
                         LogIssue("RightAscensionRate Write", "CanSetRightAscensionRate is False but setting RightAscensionRate did not generate an error");
                     }
@@ -1359,7 +1359,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("RightAscensionRate Write", "About to set RightAscensionRate property to 0.00");
+                        LogTestAndMessage("RightAscensionRate Write", "About to set RightAscensionRate property to 0.00");
                     telescopeDevice.RightAscensionRate = 0.0d; // Set to a harmless value
                     LogOK("RightAscensionRate Write", m_RightAscensionRate.ToString("0.00"));
                 }
@@ -1376,7 +1376,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("SiteElevation Read", "About to get SiteElevation property");
+                    LogTestAndMessage("SiteElevation Read", "About to get SiteElevation property");
                 m_SiteElevation = telescopeDevice.SiteElevation;
                 switch (m_SiteElevation)
                 {
@@ -1411,7 +1411,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("SiteElevation Write", "About to set SiteElevation property to -301.0");
+                    LogTestAndMessage("SiteElevation Write", "About to set SiteElevation property to -301.0");
                 telescopeDevice.SiteElevation = -301.0d;
                 LogIssue("SiteElevation Write", "No error generated on set site elevation < -300m");
             }
@@ -1423,7 +1423,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("SiteElevation Write", "About to set SiteElevation property to 100001.0");
+                    LogTestAndMessage("SiteElevation Write", "About to set SiteElevation property to 100001.0");
                 telescopeDevice.SiteElevation = 10001.0d;
                 LogIssue("SiteElevation Write", "No error generated on set site elevation > 10,000m");
             }
@@ -1437,7 +1437,7 @@ namespace ConformU
                 if (m_SiteElevation < -300.0d | m_SiteElevation > 10000.0d)
                     m_SiteElevation = 1000d;
                 if (settings.DisplayMethodCalls)
-                    LogComment("SiteElevation Write", "About to set SiteElevation property to " + m_SiteElevation);
+                    LogTestAndMessage("SiteElevation Write", "About to set SiteElevation property to " + m_SiteElevation);
                 telescopeDevice.SiteElevation = m_SiteElevation; // Restore original value
                 LogOK("SiteElevation Write", "Legal value " + m_SiteElevation.ToString() + "m written successfully");
             }
@@ -1453,7 +1453,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("SiteLatitude Read", "About to get SiteLatitude property");
+                    LogTestAndMessage("SiteLatitude Read", "About to get SiteLatitude property");
                 m_SiteLatitude = telescopeDevice.SiteLatitude;
                 switch (m_SiteLatitude)
                 {
@@ -1488,7 +1488,7 @@ namespace ConformU
             try // Invalid low value
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("SiteLatitude Write", "About to set SiteLatitude property to -91.0");
+                    LogTestAndMessage("SiteLatitude Write", "About to set SiteLatitude property to -91.0");
                 telescopeDevice.SiteLatitude = -91.0d;
                 LogIssue("SiteLatitude Write", "No error generated on set site latitude < -90 degrees");
             }
@@ -1500,7 +1500,7 @@ namespace ConformU
             try // Invalid high value
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("SiteLatitude Write", "About to set SiteLatitude property to 91.0");
+                    LogTestAndMessage("SiteLatitude Write", "About to set SiteLatitude property to 91.0");
                 telescopeDevice.SiteLatitude = 91.0d;
                 LogIssue("SiteLatitude Write", "No error generated on set site latitude > 90 degrees");
             }
@@ -1514,7 +1514,7 @@ namespace ConformU
                 if (m_SiteLatitude < -90.0d | m_SiteLatitude > 90.0d)
                     m_SiteLatitude = 45.0d;
                 if (settings.DisplayMethodCalls)
-                    LogComment("SiteLatitude Write", "About to set SiteLatitude property to " + m_SiteLatitude);
+                    LogTestAndMessage("SiteLatitude Write", "About to set SiteLatitude property to " + m_SiteLatitude);
                 telescopeDevice.SiteLatitude = m_SiteLatitude; // Restore original value
                 LogOK("SiteLatitude Write", "Legal value " + FormatDec(m_SiteLatitude) + " degrees written successfully");
             }
@@ -1542,7 +1542,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("SiteLongitude Read", "About to get SiteLongitude property");
+                    LogTestAndMessage("SiteLongitude Read", "About to get SiteLongitude property");
                 m_SiteLongitude = telescopeDevice.SiteLongitude;
                 switch (m_SiteLongitude)
                 {
@@ -1577,7 +1577,7 @@ namespace ConformU
             try // Invalid low value
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("SiteLongitude Write", "About to set SiteLongitude property to -181.0");
+                    LogTestAndMessage("SiteLongitude Write", "About to set SiteLongitude property to -181.0");
                 telescopeDevice.SiteLongitude = -181.0d;
                 LogIssue("SiteLongitude Write", "No error generated on set site longitude < -180 degrees");
             }
@@ -1589,7 +1589,7 @@ namespace ConformU
             try // Invalid high value
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("SiteLongitude Write", "About to set SiteLongitude property to 181.0");
+                    LogTestAndMessage("SiteLongitude Write", "About to set SiteLongitude property to 181.0");
                 telescopeDevice.SiteLongitude = 181.0d;
                 LogIssue("SiteLongitude Write", "No error generated on set site longitude > 180 degrees");
             }
@@ -1603,7 +1603,7 @@ namespace ConformU
                 if (m_SiteLongitude < -180.0d | m_SiteLongitude > 180.0d)
                     m_SiteLongitude = 60.0d;
                 if (settings.DisplayMethodCalls)
-                    LogComment("SiteLongitude Write", "About to set SiteLongitude property to " + m_SiteLongitude);
+                    LogTestAndMessage("SiteLongitude Write", "About to set SiteLongitude property to " + m_SiteLongitude);
                 telescopeDevice.SiteLongitude = m_SiteLongitude; // Restore original value
                 LogOK("SiteLongitude Write", "Legal value " + FormatDec(m_SiteLongitude) + " degrees written successfully");
             }
@@ -1619,7 +1619,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("Slewing", "About to get Slewing property");
+                    LogTestAndMessage("Slewing", "About to get Slewing property");
                 m_Slewing = telescopeDevice.Slewing;
                 switch (m_Slewing)
                 {
@@ -1648,7 +1648,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("SlewSettleTime Read", "About to get SlewSettleTime property");
+                    LogTestAndMessage("SlewSettleTime Read", "About to get SlewSettleTime property");
                 m_SlewSettleTime = telescopeDevice.SlewSettleTime;
                 switch (m_SlewSettleTime)
                 {
@@ -1683,7 +1683,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("SlewSettleTime Write", "About to set SlewSettleTime property to -1");
+                    LogTestAndMessage("SlewSettleTime Write", "About to set SlewSettleTime property to -1");
                 telescopeDevice.SlewSettleTime = -1;
                 LogIssue("SlewSettleTime Write", "No error generated on set SlewSettleTime < 0 seconds");
             }
@@ -1697,7 +1697,7 @@ namespace ConformU
                 if (m_SlewSettleTime < 0)
                     m_SlewSettleTime = 0;
                 if (settings.DisplayMethodCalls)
-                    LogComment("SlewSettleTime Write", "About to set SlewSettleTime property to " + m_SlewSettleTime);
+                    LogTestAndMessage("SlewSettleTime Write", "About to set SlewSettleTime property to " + m_SlewSettleTime);
                 telescopeDevice.SlewSettleTime = m_SlewSettleTime; // Restore original value
                 LogOK("SlewSettleTime Write", "Legal value " + m_SlewSettleTime.ToString() + " seconds written successfully");
             }
@@ -1716,7 +1716,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("SideOfPier Read", "About to get SideOfPier property");
+                        LogTestAndMessage("SideOfPier Read", "About to get SideOfPier property");
                     m_SideOfPier = (PointingState)telescopeDevice.SideOfPier;
                     LogOK("SideOfPier Read", m_SideOfPier.ToString());
                     m_CanReadSideOfPier = true; // Flag that it is OK to read SideOfPier
@@ -1739,7 +1739,7 @@ namespace ConformU
             {
                 canReadSiderealTime = false;
                 if (settings.DisplayMethodCalls)
-                    LogComment("SiderealTime", "About to get SiderealTime property");
+                    LogTestAndMessage("SiderealTime", "About to get SiderealTime property");
                 m_SiderealTimeScope = telescopeDevice.SiderealTime;
                 canReadSiderealTime = true;
                 m_SiderealTimeASCOM = (18.697374558d + 24.065709824419081d * (DateTime.UtcNow.ToOADate() + 2415018.5 - 2451545.0d) + m_SiteLongitude / 15.0d) % 24.0d;
@@ -1835,7 +1835,7 @@ namespace ConformU
             try // First read should fail!
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("TargetDeclination Read", "About to get TargetDeclination property");
+                    LogTestAndMessage("TargetDeclination Read", "About to get TargetDeclination property");
                 m_TargetDeclination = telescopeDevice.TargetDeclination;
                 LogIssue("TargetDeclination Read", "Read before write should generate an error and didn't");
             }
@@ -1874,7 +1874,7 @@ namespace ConformU
             try // First read should fail!
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("TargetRightAscension Read", "About to get TargetRightAscension property");
+                    LogTestAndMessage("TargetRightAscension Read", "About to get TargetRightAscension property");
                 m_TargetRightAscension = telescopeDevice.TargetRightAscension;
                 LogIssue("TargetRightAscension Read", "Read before write should generate an error and didn't");
             }
@@ -1913,7 +1913,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("Tracking Read", "About to get Tracking property");
+                    LogTestAndMessage("Tracking Read", "About to get Tracking property");
                 m_Tracking = telescopeDevice.Tracking; // Read of tracking state is mandatory
                 LogOK("Tracking Read", m_Tracking.ToString());
             }
@@ -1934,19 +1934,19 @@ namespace ConformU
                     if (m_Tracking) // OK try turning tracking off
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("Tracking Write", "About to set Tracking property false");
+                            LogTestAndMessage("Tracking Write", "About to set Tracking property false");
                         telescopeDevice.Tracking = false;
                     }
                     else // OK try turning tracking on
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("Tracking Write", "About to set Tracking property true");
+                            LogTestAndMessage("Tracking Write", "About to set Tracking property true");
                         telescopeDevice.Tracking = true;
                     }
 
                     WaitFor(TRACKING_COMMAND_DELAY); // Wait for a short time to allow mounts to implement the tracking state change
                     if (settings.DisplayMethodCalls)
-                        LogComment("Tracking Write", "About to get Tracking property");
+                        LogTestAndMessage("Tracking Write", "About to get Tracking property");
                     m_Tracking = telescopeDevice.Tracking;
                     if (m_Tracking != l_OriginalTrackingState)
                     {
@@ -1958,7 +1958,7 @@ namespace ConformU
                     }
 
                     if (settings.DisplayMethodCalls)
-                        LogComment("Tracking Write", "About to set Tracking property " + l_OriginalTrackingState);
+                        LogTestAndMessage("Tracking Write", "About to set Tracking property " + l_OriginalTrackingState);
                     telescopeDevice.Tracking = l_OriginalTrackingState; // Restore original state
                     WaitFor(TRACKING_COMMAND_DELAY); // Wait for a short time to allow mounts to implement the tracking state change
                 }
@@ -1974,18 +1974,18 @@ namespace ConformU
                     if (m_Tracking) // OK try turning tracking off
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("Tracking Write", "About to set Tracking property false");
+                            LogTestAndMessage("Tracking Write", "About to set Tracking property false");
                         telescopeDevice.Tracking = false;
                     }
                     else // OK try turning tracking on
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("Tracking Write", "About to set Tracking property true");
+                            LogTestAndMessage("Tracking Write", "About to set Tracking property true");
                         telescopeDevice.Tracking = true;
                     }
 
                     if (settings.DisplayMethodCalls)
-                        LogComment("Tracking Write", "About to get Tracking property");
+                        LogTestAndMessage("Tracking Write", "About to get Tracking property");
                     m_Tracking = telescopeDevice.Tracking;
                     LogIssue("Tracking Write", "CanSetTracking is false but no error generated when value is set");
                 }
@@ -2005,7 +2005,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("TrackingRates", "About to get TrackingRates property");
+                        LogTestAndMessage("TrackingRates", "About to get TrackingRates property");
                     l_TrackingRates = telescopeDevice.TrackingRates;
                     if (l_TrackingRates is null)
                     {
@@ -2097,14 +2097,14 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("TrackingRates", "About to get TrackingRates property");
+                        LogTestAndMessage("TrackingRates", "About to get TrackingRates property");
                     l_TrackingRates = telescopeDevice.TrackingRates;
                     LogDebug("TrackingRates", $"Read TrackingRates OK, Count: {l_TrackingRates.Count}");
                     int l_RateCount = 0;
                     foreach (DriveRate currentL_DriveRate in (IEnumerable)l_TrackingRates)
                     {
                         l_DriveRate = currentL_DriveRate;
-                        LogComment("TrackingRates", "Found drive rate: " + l_DriveRate.ToString());
+                        LogTestAndMessage("TrackingRates", "Found drive rate: " + l_DriveRate.ToString());
                         l_RateCount += 1;
                     }
 
@@ -2194,13 +2194,13 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("TrackingRates", "About to get TrackingRates property");
+                        LogTestAndMessage("TrackingRates", "About to get TrackingRates property");
                     l_TrackingRates = telescopeDevice.TrackingRates;
                     if (l_TrackingRates is object) // Make sure that we have received a TrackingRates object after the Dispose() method was called
                     {
                         LogOK("TrackingRates", "Successfully obtained a TrackingRates object after the previous TrackingRates object was disposed");
                         if (settings.DisplayMethodCalls)
-                            LogComment("TrackingRate Read", "About to get TrackingRate property");
+                            LogTestAndMessage("TrackingRate Read", "About to get TrackingRate property");
                         l_TrackingRate = (DriveRate)telescopeDevice.TrackingRate;
                         LogOK("TrackingRate Read", l_TrackingRate.ToString());
 
@@ -2218,7 +2218,7 @@ namespace ConformU
                                 try
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment("TrackingRate Write", "About to set TrackingRate property to " + l_DriveRate.ToString());
+                                        LogTestAndMessage("TrackingRate Write", "About to set TrackingRate property to " + l_DriveRate.ToString());
                                     telescopeDevice.TrackingRate = l_DriveRate;
                                     if (settings.DisplayMethodCalls)
                                         if (telescopeDevice.TrackingRate == l_DriveRate)
@@ -2250,7 +2250,7 @@ namespace ConformU
                         try
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment("TrackingRate Write", "About to set TrackingRate property to invalid value (5)");
+                                LogTestAndMessage("TrackingRate Write", "About to set TrackingRate property to invalid value (5)");
                             telescopeDevice.TrackingRate = (DriveRate)5;
                             LogIssue("TrackingRate Write", "No error generated when TrackingRate is set to an invalid value (5)");
                         }
@@ -2263,7 +2263,7 @@ namespace ConformU
                         try
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment("TrackingRate Write", "About to set TrackingRate property to invalid value (-1)");
+                                LogTestAndMessage("TrackingRate Write", "About to set TrackingRate property to invalid value (-1)");
                             telescopeDevice.TrackingRate = (DriveRate)(0 - 1); // Done this way to fool the compiler into allowing me to attempt to set a negative, invalid value
                             LogIssue("TrackingRate Write", "No error generated when TrackingRate is set to an invalid value (-1)");
                         }
@@ -2276,7 +2276,7 @@ namespace ConformU
                         try
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment("TrackingRate Write", "About to set TrackingRate property to " + l_TrackingRate.ToString());
+                                LogTestAndMessage("TrackingRate Write", "About to set TrackingRate property to " + l_TrackingRate.ToString());
                             telescopeDevice.TrackingRate = l_TrackingRate;
                         }
                         catch (Exception ex)
@@ -2306,17 +2306,17 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("UTCDate Read", "About to get UTCDate property");
+                    LogTestAndMessage("UTCDate Read", "About to get UTCDate property");
                 m_UTCDate = telescopeDevice.UTCDate; // Save starting value
                 LogOK("UTCDate Read", m_UTCDate.ToString("dd-MMM-yyyy HH:mm:ss.fff"));
                 try // UTCDate Write is optional since if you are using the PC time as UTCTime then you should not write to the PC clock!
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("UTCDate Write", "About to set UTCDate property to " + m_UTCDate.AddHours(1.0d).ToString());
+                        LogTestAndMessage("UTCDate Write", "About to set UTCDate property to " + m_UTCDate.AddHours(1.0d).ToString());
                     telescopeDevice.UTCDate = m_UTCDate.AddHours(1.0d); // Try and write a new UTCDate in the future
                     LogOK("UTCDate Write", "New UTCDate written successfully: " + m_UTCDate.AddHours(1.0d).ToString());
                     if (settings.DisplayMethodCalls)
-                        LogComment("UTCDate Write", "About to set UTCDate property to " + m_UTCDate.ToString());
+                        LogTestAndMessage("UTCDate Write", "About to set UTCDate property to " + m_UTCDate.ToString());
                     telescopeDevice.UTCDate = m_UTCDate; // Restore original value
                 }
                 catch (Exception ex)
@@ -2371,7 +2371,7 @@ namespace ConformU
                         try
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment("Park", "About to get AtPark property");
+                                LogTestAndMessage("Park", "About to get AtPark property");
                             if (!telescopeDevice.AtPark) // OK We are unparked so check that no error is generated
                             {
                                 Status(StatusType.staTest, "Park");
@@ -2379,7 +2379,7 @@ namespace ConformU
                                 {
                                     Status(StatusType.staAction, "Park scope");
                                     if (settings.DisplayMethodCalls)
-                                        LogComment("Park", "About to call Park method");
+                                        LogTestAndMessage("Park", "About to call Park method");
                                     telescopeDevice.Park();
                                     Status(StatusType.staStatus, "Waiting for scope to park");
                                     do
@@ -2387,7 +2387,7 @@ namespace ConformU
                                         WaitFor(SLEEP_TIME);
                                         //Application.DoEvents();
                                         if (settings.DisplayMethodCalls)
-                                            LogComment("Park", "About to get AtPark property");
+                                            LogTestAndMessage("Park", "About to get AtPark property");
                                     }
                                     while (!telescopeDevice.AtPark & !cancellationToken.IsCancellationRequested);
                                     if (cancellationToken.IsCancellationRequested)
@@ -2399,7 +2399,7 @@ namespace ConformU
                                     try // Confirm second park is harmless
                                     {
                                         if (settings.DisplayMethodCalls)
-                                            LogComment("Park", "About to Park call method");
+                                            LogTestAndMessage("Park", "About to Park call method");
                                         telescopeDevice.Park();
                                         LogOK("Park", "Success if already parked");
                                     }
@@ -2504,14 +2504,14 @@ namespace ConformU
                                         {
                                             Status(StatusType.staAction, "UnPark scope after park");
                                             if (settings.DisplayMethodCalls)
-                                                LogComment("UnPark", "About to call UnPark method");
+                                                LogTestAndMessage("UnPark", "About to call UnPark method");
                                             telescopeDevice.UnPark();
                                             do
                                             {
                                                 WaitFor(SLEEP_TIME);
                                                 //Application.DoEvents();
                                                 if (settings.DisplayMethodCalls)
-                                                    LogComment("UnPark", "About to get AtPark property");
+                                                    LogTestAndMessage("UnPark", "About to get AtPark property");
                                             }
                                             while (telescopeDevice.AtPark & !cancellationToken.IsCancellationRequested);
                                             if (cancellationToken.IsCancellationRequested)
@@ -2519,7 +2519,7 @@ namespace ConformU
                                             try // Make sure tracking doesn't generate an error if it is not implemented
                                             {
                                                 if (settings.DisplayMethodCalls)
-                                                    LogComment("UnPark", "About to set Tracking property true");
+                                                    LogTestAndMessage("UnPark", "About to set Tracking property true");
                                                 telescopeDevice.Tracking = true;
                                             }
                                             catch (Exception)
@@ -2533,7 +2533,7 @@ namespace ConformU
                                             try // Confirm UnPark is harmless if already unparked
                                             {
                                                 if (settings.DisplayMethodCalls)
-                                                    LogComment("UnPark", "About to call UnPark method");
+                                                    LogTestAndMessage("UnPark", "About to call UnPark method");
                                                 telescopeDevice.UnPark();
                                                 LogOK("UnPark", "Success if already unparked");
                                             }
@@ -2561,7 +2561,7 @@ namespace ConformU
                                         try
                                         {
                                             if (settings.DisplayMethodCalls)
-                                                LogComment("UnPark", "About to call UnPark method");
+                                                LogTestAndMessage("UnPark", "About to call UnPark method");
                                             telescopeDevice.UnPark();
                                             LogIssue("UnPark", "No exception thrown by UnPark when CanUnPark is false");
                                         }
@@ -2585,7 +2585,7 @@ namespace ConformU
                                             LogIssue("UnPark", EX_NET + ex.Message);
                                         }
                                         // Create user interface message asking for manual scope UnPark
-                                        LogComment("UnPark", "CanUnPark is false so you need to unpark manually");
+                                        LogTestAndMessage("UnPark", "CanUnPark is false so you need to unpark manually");
                                     }
                                 }
                                 catch (COMException ex)
@@ -2612,7 +2612,7 @@ namespace ConformU
                         try
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment("UnPark", "About to call Park method");
+                                LogTestAndMessage("UnPark", "About to call Park method");
                             telescopeDevice.Park();
                             LogError("Park", "CanPark is false but no exception was generated on use");
                         }
@@ -2627,7 +2627,7 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("UnPark", "About to call UnPark method");
+                                    LogTestAndMessage("UnPark", "About to call UnPark method");
                                 telescopeDevice.UnPark();
                                 LogOK("UnPark", "CanPark is false and CanUnPark is true; no exception generated as expected");
                             }
@@ -2641,7 +2641,7 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("UnPark", "About to call UnPark method");
+                                    LogTestAndMessage("UnPark", "About to call UnPark method");
                                 telescopeDevice.UnPark();
                                 LogError("UnPark", "CanPark and CanUnPark are false but no exception was generated on use");
                             }
@@ -2812,7 +2812,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("TargetRightAscension Write", "About to set TargetRightAscension property to -1.0");
+                    LogTestAndMessage("TargetRightAscension Write", "About to set TargetRightAscension property to -1.0");
                 telescopeDevice.TargetRightAscension = -1.0d;
                 LogIssue("TargetRightAscension Write", "No error generated on set TargetRightAscension < 0 hours");
             }
@@ -2824,7 +2824,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("TargetRightAscension Write", "About to set TargetRightAscension property to 25.0");
+                    LogTestAndMessage("TargetRightAscension Write", "About to set TargetRightAscension property to 25.0");
                 telescopeDevice.TargetRightAscension = 25.0d;
                 LogIssue("TargetRightAscension Write", "No error generated on set TargetRightAscension > 24 hours");
             }
@@ -2837,12 +2837,12 @@ namespace ConformU
             {
                 m_TargetRightAscension = TelescopeRAFromSiderealTime("TargetRightAscension Write", -4.0d);
                 if (settings.DisplayMethodCalls)
-                    LogComment("TargetRightAscension Write", "About to set TargetRightAscension property to " + m_TargetRightAscension);
+                    LogTestAndMessage("TargetRightAscension Write", "About to set TargetRightAscension property to " + m_TargetRightAscension);
                 telescopeDevice.TargetRightAscension = m_TargetRightAscension; // Set a valid value
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("TargetRightAscension Write", "About to get TargetRightAscension property");
+                        LogTestAndMessage("TargetRightAscension Write", "About to get TargetRightAscension property");
                     switch (Math.Abs(telescopeDevice.TargetRightAscension - m_TargetRightAscension))
                     {
                         case 0.0d:
@@ -2893,7 +2893,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("TargetDeclination Write", "About to set TargetDeclination property to -91.0");
+                    LogTestAndMessage("TargetDeclination Write", "About to set TargetDeclination property to -91.0");
                 telescopeDevice.TargetDeclination = -91.0d;
                 LogIssue("TargetDeclination Write", "No error generated on set TargetDeclination < -90 degrees");
             }
@@ -2905,7 +2905,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("TargetDeclination Write", "About to set TargetDeclination property to 91.0");
+                    LogTestAndMessage("TargetDeclination Write", "About to set TargetDeclination property to 91.0");
                 telescopeDevice.TargetDeclination = 91.0d;
                 LogIssue("TargetDeclination Write", "No error generated on set TargetDeclination > 90 degrees");
             }
@@ -2918,12 +2918,12 @@ namespace ConformU
             {
                 m_TargetDeclination = 1.0d;
                 if (settings.DisplayMethodCalls)
-                    LogComment("TargetDeclination Write", "About to set TargetDeclination property to " + m_TargetDeclination);
+                    LogTestAndMessage("TargetDeclination Write", "About to set TargetDeclination property to " + m_TargetDeclination);
                 telescopeDevice.TargetDeclination = m_TargetDeclination; // Set a valid value
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("TargetDeclination Write", "About to get TargetDeclination property");
+                        LogTestAndMessage("TargetDeclination Write", "About to get TargetDeclination property");
                     switch (Math.Abs(telescopeDevice.TargetDeclination - m_TargetDeclination))
                     {
                         case 0.0d:
@@ -3025,7 +3025,7 @@ namespace ConformU
                     }
                     else
                     {
-                        LogComment("DestinationSideOfPier", "Test skipped as AligmentMode is not German Polar");
+                        LogTestAndMessage("DestinationSideOfPier", "Test skipped as AligmentMode is not German Polar");
                     }
                 }
                 else
@@ -3155,7 +3155,7 @@ namespace ConformU
 
                         // Further side of pier tests
                         if (settings.DisplayMethodCalls)
-                            LogComment("SideOfPier Model Tests", "About to get AlignmentMode property");
+                            LogTestAndMessage("SideOfPier Model Tests", "About to get AlignmentMode property");
                         if (telescopeDevice.AlignmentMode == AlignmentMode.GermanPolar)
                         {
                             LogDebug("SideOfPier Model Tests", "Calling SideOfPierTests()");
@@ -3337,10 +3337,10 @@ namespace ConformU
 
             // Basic test to make sure the method is either implemented OK or fails as expected if it is not supported in this driver.
             if (settings.DisplayMethodCalls)
-                LogComment(testName, "About to get RightAscension property");
+                LogTestAndMessage(testName, "About to get RightAscension property");
             syncRA = telescopeDevice.RightAscension;
             if (settings.DisplayMethodCalls)
-                LogComment(testName, "About to get Declination property");
+                LogTestAndMessage(testName, "About to get Declination property");
             syncDEC = telescopeDevice.Declination;
             if (!driverSupportsMethod) // Call should fail
             {
@@ -3351,17 +3351,17 @@ namespace ConformU
                         case SlewSyncType.SyncToCoordinates: // SyncToCoordinates
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(testName, "About to get Tracking property");
+                                    LogTestAndMessage(testName, "About to get Tracking property");
                                 if (canSetTracking & !telescopeDevice.Tracking)
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(testName, "About to set Tracking property to true");
+                                        LogTestAndMessage(testName, "About to set Tracking property to true");
                                     telescopeDevice.Tracking = true;
                                 }
 
                                 LogDebug(testName, "SyncToCoordinates: " + FormatRA(syncRA) + " " + FormatDec(syncDEC));
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(testName, "About to call SyncToCoordinates method, RA: " + FormatRA(syncRA) + ", Declination: " + FormatDec(syncDEC));
+                                    LogTestAndMessage(testName, "About to call SyncToCoordinates method, RA: " + FormatRA(syncRA) + ", Declination: " + FormatDec(syncDEC));
                                 telescopeDevice.SyncToCoordinates(syncRA, syncDEC);
                                 LogError(testName, "CanSyncToCoordinates is False but call to SyncToCoordinates did not throw an exception.");
                                 break;
@@ -3370,11 +3370,11 @@ namespace ConformU
                         case SlewSyncType.SyncToTarget: // SyncToTarget
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(testName, "About to get Tracking property");
+                                    LogTestAndMessage(testName, "About to get Tracking property");
                                 if (canSetTracking & !telescopeDevice.Tracking)
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(testName, "About to set Tracking property to true");
+                                        LogTestAndMessage(testName, "About to set Tracking property to true");
                                     telescopeDevice.Tracking = true;
                                 }
 
@@ -3382,7 +3382,7 @@ namespace ConformU
                                 {
                                     LogDebug(testName, "Setting TargetRightAscension: " + FormatRA(syncRA));
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(testName, "About to set TargetRightAscension property to " + FormatRA(syncRA));
+                                        LogTestAndMessage(testName, "About to set TargetRightAscension property to " + FormatRA(syncRA));
                                     telescopeDevice.TargetRightAscension = syncRA;
                                     LogDebug(testName, "Completed Set TargetRightAscension");
                                 }
@@ -3395,7 +3395,7 @@ namespace ConformU
                                 {
                                     LogDebug(testName, "Setting TargetDeclination: " + FormatDec(syncDEC));
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(testName, "About to set TargetDeclination property to " + FormatDec(syncDEC));
+                                        LogTestAndMessage(testName, "About to set TargetDeclination property to " + FormatDec(syncDEC));
                                     telescopeDevice.TargetDeclination = syncDEC;
                                     LogDebug(testName, "Completed Set TargetDeclination");
                                 }
@@ -3405,7 +3405,7 @@ namespace ConformU
                                 }
 
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(testName, "About to call SyncToTarget method");
+                                    LogTestAndMessage(testName, "About to call SyncToTarget method");
                                 telescopeDevice.SyncToTarget(); // Sync to target coordinates
                                 LogError(testName, "CanSyncToTarget is False but call to SyncToTarget did not throw an exception.");
                                 break;
@@ -3416,28 +3416,28 @@ namespace ConformU
                                 if (canReadAltitide)
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(testName, "About to get Altitude property");
+                                        LogTestAndMessage(testName, "About to get Altitude property");
                                     syncAlt = telescopeDevice.Altitude;
                                 }
 
                                 if (canReadAzimuth)
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(testName, "About to get Azimuth property");
+                                        LogTestAndMessage(testName, "About to get Azimuth property");
                                     syncAz = telescopeDevice.Azimuth;
                                 }
 
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(testName, "About to get Tracking property");
+                                    LogTestAndMessage(testName, "About to get Tracking property");
                                 if (canSetTracking & telescopeDevice.Tracking)
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(testName, "About to set Tracking property to false");
+                                        LogTestAndMessage(testName, "About to set Tracking property to false");
                                     telescopeDevice.Tracking = false;
                                 }
 
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(testName, "About to call SyncToAltAz method, Altitude: " + FormatDec(syncAlt) + ", Azimuth: " + FormatDec(syncAz));
+                                    LogTestAndMessage(testName, "About to call SyncToAltAz method, Altitude: " + FormatDec(syncAlt) + ", Azimuth: " + FormatDec(syncAz));
                                 telescopeDevice.SyncToAltAz(syncAz, syncAlt); // Sync to new Alt Az
                                 LogError(testName, "CanSyncToAltAz is False but call to SyncToAltAz did not throw an exception.");
                                 break;
@@ -3617,14 +3617,14 @@ namespace ConformU
                                 if (canReadAltitide)
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(testName, "About to get Altitude property");
+                                        LogTestAndMessage(testName, "About to get Altitude property");
                                     currentAlt = telescopeDevice.Altitude;
                                 }
 
                                 if (canReadAzimuth)
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(testName, "About to get Azimuth property");
+                                        LogTestAndMessage(testName, "About to get Azimuth property");
                                     currentAz = telescopeDevice.Azimuth;
                                 }
 
@@ -3635,24 +3635,24 @@ namespace ConformU
                                 if (syncAz > 359.0d)
                                     syncAz = 358.0d; // Ensure legal Az
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(testName, "About to get Tracking property");
+                                    LogTestAndMessage(testName, "About to get Tracking property");
                                 if (canSetTracking & telescopeDevice.Tracking)
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(testName, "About to set Tracking property to false");
+                                        LogTestAndMessage(testName, "About to set Tracking property to false");
                                     telescopeDevice.Tracking = false;
                                 }
 
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(testName, "About to call SyncToAltAz method, Altitude: " + FormatDec(syncAlt) + ", Azimuth: " + FormatDec(syncAz));
+                                    LogTestAndMessage(testName, "About to call SyncToAltAz method, Altitude: " + FormatDec(syncAlt) + ", Azimuth: " + FormatDec(syncAz));
                                 telescopeDevice.SyncToAltAz(syncAz, syncAlt); // Sync to new Alt Az
                                 if (canReadAltitide & canReadAzimuth) // Can check effects of a sync
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(testName, "About to get Altitude property");
+                                        LogTestAndMessage(testName, "About to get Altitude property");
                                     newAlt = telescopeDevice.Altitude;
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(testName, "About to get Azimuth property");
+                                        LogTestAndMessage(testName, "About to get Azimuth property");
                                     newAz = telescopeDevice.Azimuth;
 
                                     // Compare old and new values
@@ -3706,10 +3706,10 @@ namespace ConformU
 
                                     if (showOutcome)
                                     {
-                                        LogComment(testName, "           Altitude    Azimuth");
-                                        LogComment(testName, $"Original:  {TelescopeTester.FormatAltitude(currentAlt)}   {FormatAzimuth(currentAz)}");
-                                        LogComment(testName, $"Sync to:   {TelescopeTester.FormatAltitude(syncAlt)}   {FormatAzimuth(syncAz)}");
-                                        LogComment(testName, $"New:       {TelescopeTester.FormatAltitude(newAlt)}   {FormatAzimuth(newAz)}");
+                                        LogTestAndMessage(testName, "           Altitude    Azimuth");
+                                        LogTestAndMessage(testName, $"Original:  {TelescopeTester.FormatAltitude(currentAlt)}   {FormatAzimuth(currentAz)}");
+                                        LogTestAndMessage(testName, $"Sync to:   {TelescopeTester.FormatAltitude(syncAlt)}   {FormatAzimuth(syncAz)}");
+                                        LogTestAndMessage(testName, $"New:       {TelescopeTester.FormatAltitude(newAlt)}   {FormatAzimuth(newAz)}");
                                     }
                                 }
                                 else // Can't test effects of a sync
@@ -3738,7 +3738,7 @@ namespace ConformU
             double l_Difference, l_ActualAltitude, l_ActualAzimuth, actualRA, actualDec;
             Status(StatusType.staTest, p_Name);
             if (settings.DisplayMethodCalls)
-                LogComment(p_Name, "About to set Tracking property to true");
+                LogTestAndMessage(p_Name, "About to set Tracking property to true");
             if (canSetTracking)
                 telescopeDevice.Tracking = true; // Enable tracking for these tests
             try
@@ -3748,11 +3748,11 @@ namespace ConformU
                     case SlewSyncType.SlewToCoordinates:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to get Tracking property");
+                                LogTestAndMessage(p_Name, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set Tracking property to true");
+                                    LogTestAndMessage(p_Name, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
@@ -3760,7 +3760,7 @@ namespace ConformU
                             m_TargetDeclination = 1.0d;
                             Status(StatusType.staAction, "Slewing");
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
+                                LogTestAndMessage(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
                             telescopeDevice.SlewToCoordinates(m_TargetRightAscension, m_TargetDeclination);
                             break;
                         }
@@ -3768,11 +3768,11 @@ namespace ConformU
                     case SlewSyncType.SlewToCoordinatesAsync:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to get Tracking property");
+                                LogTestAndMessage(p_Name, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set Tracking property to true");
+                                    LogTestAndMessage(p_Name, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
@@ -3780,7 +3780,7 @@ namespace ConformU
                             m_TargetDeclination = 2.0d;
                             Status(StatusType.staAction, "Slewing");
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
+                                LogTestAndMessage(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
                             telescopeDevice.SlewToCoordinatesAsync(m_TargetRightAscension, m_TargetDeclination);
                             WaitForSlew(p_Name);
                             break;
@@ -3789,11 +3789,11 @@ namespace ConformU
                     case SlewSyncType.SlewToTarget:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to get Tracking property");
+                                LogTestAndMessage(p_Name, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set Tracking property to true");
+                                    LogTestAndMessage(p_Name, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
@@ -3802,7 +3802,7 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
+                                    LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
                                 telescopeDevice.TargetRightAscension = m_TargetRightAscension;
                             }
                             catch (Exception ex)
@@ -3820,7 +3820,7 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
+                                    LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
                                 telescopeDevice.TargetDeclination = m_TargetDeclination;
                             }
                             catch (Exception ex)
@@ -3837,7 +3837,7 @@ namespace ConformU
 
                             Status(StatusType.staAction, "Slewing");
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call SlewToTarget method");
+                                LogTestAndMessage(p_Name, "About to call SlewToTarget method");
                             telescopeDevice.SlewToTarget();
                             break;
                         }
@@ -3845,11 +3845,11 @@ namespace ConformU
                     case SlewSyncType.SlewToTargetAsync: // SlewToTargetAsync
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to get Tracking property");
+                                LogTestAndMessage(p_Name, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set Tracking property to true");
+                                    LogTestAndMessage(p_Name, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
@@ -3858,7 +3858,7 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
+                                    LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
                                 telescopeDevice.TargetRightAscension = m_TargetRightAscension;
                             }
                             catch (Exception ex)
@@ -3876,7 +3876,7 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
+                                    LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
                                 telescopeDevice.TargetDeclination = m_TargetDeclination;
                             }
                             catch (Exception ex)
@@ -3893,7 +3893,7 @@ namespace ConformU
 
                             Status(StatusType.staAction, "Slewing");
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call SlewToTargetAsync method");
+                                LogTestAndMessage(p_Name, "About to call SlewToTargetAsync method");
                             telescopeDevice.SlewToTargetAsync();
                             WaitForSlew(p_Name);
                             break;
@@ -3903,26 +3903,26 @@ namespace ConformU
                         {
                             LogDebug(p_Name, $"Tracking 1: {telescopeDevice.Tracking}");
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to get Tracking property");
+                                LogTestAndMessage(p_Name, "About to get Tracking property");
                             if (canSetTracking & telescopeDevice.Tracking)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set property Tracking to false");
+                                    LogTestAndMessage(p_Name, "About to set property Tracking to false");
                                 telescopeDevice.Tracking = false;
                                 LogDebug(p_Name, "Tracking turned off");
                             }
 
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to get Tracking property");
+                                LogTestAndMessage(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 2: {telescopeDevice.Tracking}");
                             m_TargetAltitude = 50.0d;
                             m_TargetAzimuth = 150.0d;
                             Status(StatusType.staAction, "Slewing to Alt/Az: " + FormatDec(m_TargetAltitude) + " " + FormatDec(m_TargetAzimuth));
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
+                                LogTestAndMessage(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
                             telescopeDevice.SlewToAltAz(m_TargetAzimuth, m_TargetAltitude);
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to get Tracking property");
+                                LogTestAndMessage(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 3: {telescopeDevice.Tracking}");
                             break;
                         }
@@ -3930,33 +3930,33 @@ namespace ConformU
                     case SlewSyncType.SlewToAltAzAsync:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to get Tracking property");
+                                LogTestAndMessage(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 1: {telescopeDevice.Tracking}");
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to get Tracking property");
+                                LogTestAndMessage(p_Name, "About to get Tracking property");
                             if (canSetTracking & telescopeDevice.Tracking)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set Tracking property false");
+                                    LogTestAndMessage(p_Name, "About to set Tracking property false");
                                 telescopeDevice.Tracking = false;
                                 LogDebug(p_Name, "Tracking turned off");
                             }
 
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to get Tracking property");
+                                LogTestAndMessage(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 2: {telescopeDevice.Tracking}");
                             m_TargetAltitude = 55.0d;
                             m_TargetAzimuth = 155.0d;
                             Status(StatusType.staAction, "Slewing to Alt/Az: " + FormatDec(m_TargetAltitude) + " " + FormatDec(m_TargetAzimuth));
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call SlewToAltAzAsync method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
+                                LogTestAndMessage(p_Name, "About to call SlewToAltAzAsync method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
                             telescopeDevice.SlewToAltAzAsync(m_TargetAzimuth, m_TargetAltitude);
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to get Tracking property");
+                                LogTestAndMessage(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 3: {telescopeDevice.Tracking}");
                             WaitForSlew(p_Name);
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to get Tracking property");
+                                LogTestAndMessage(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 4: {telescopeDevice.Tracking}");
                             break;
                         }
@@ -4069,10 +4069,10 @@ namespace ConformU
                                 Status(StatusType.staAction, "Slew completed");
                                 // Test how close the slew was to the required coordinates
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to get Azimuth property");
+                                    LogTestAndMessage(p_Name, "About to get Azimuth property");
                                 l_ActualAzimuth = telescopeDevice.Azimuth;
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to get Altitude property");
+                                    LogTestAndMessage(p_Name, "About to get Altitude property");
                                 l_ActualAltitude = telescopeDevice.Altitude;
                                 l_Difference = Math.Abs(l_ActualAzimuth - m_TargetAzimuth);
                                 if (l_Difference > 350.0d)
@@ -4164,11 +4164,11 @@ namespace ConformU
                 case SlewSyncType.SlewToCoordinatesAsync:
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment(p_Name, "About to get Tracking property");
+                            LogTestAndMessage(p_Name, "About to get Tracking property");
                         if (canSetTracking & !telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to set Tracking property to true");
+                                LogTestAndMessage(p_Name, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
 
@@ -4180,13 +4180,13 @@ namespace ConformU
                             if (p_Test == SlewSyncType.SlewToCoordinates)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
+                                    LogTestAndMessage(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
                                 telescopeDevice.SlewToCoordinates(m_TargetRightAscension, m_TargetDeclination);
                             }
                             else
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
+                                    LogTestAndMessage(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
                                 telescopeDevice.SlewToCoordinatesAsync(m_TargetRightAscension, m_TargetDeclination);
                             }
 
@@ -4194,7 +4194,7 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call AbortSlew method");
+                                    LogTestAndMessage(p_Name, "About to call AbortSlew method");
                                 telescopeDevice.AbortSlew();
                             }
                             catch
@@ -4217,13 +4217,13 @@ namespace ConformU
                             if (p_Test == SlewSyncType.SlewToCoordinates)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
+                                    LogTestAndMessage(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
                                 telescopeDevice.SlewToCoordinates(m_TargetRightAscension, m_TargetDeclination);
                             }
                             else
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
+                                    LogTestAndMessage(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
                                 telescopeDevice.SlewToCoordinatesAsync(m_TargetRightAscension, m_TargetDeclination);
                             }
 
@@ -4231,7 +4231,7 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call AbortSlew method");
+                                    LogTestAndMessage(p_Name, "About to call AbortSlew method");
                                 telescopeDevice.AbortSlew();
                             }
                             catch
@@ -4252,11 +4252,11 @@ namespace ConformU
                 case SlewSyncType.SyncToCoordinates:
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment(p_Name, "About to get Tracking property");
+                            LogTestAndMessage(p_Name, "About to get Tracking property");
                         if (canSetTracking & !telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to set Tracking property to true");
+                                LogTestAndMessage(p_Name, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
 
@@ -4266,7 +4266,7 @@ namespace ConformU
                             m_TargetRightAscension = BadCoordinate1;
                             m_TargetDeclination = 0.0d;
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call SyncToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
+                                LogTestAndMessage(p_Name, "About to call SyncToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
                             telescopeDevice.SyncToCoordinates(m_TargetRightAscension, m_TargetDeclination);
                             LogError(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(m_TargetRightAscension));
                         }
@@ -4282,7 +4282,7 @@ namespace ConformU
                             m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -3.0d);
                             m_TargetDeclination = BadCoordinate2;
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call SyncToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
+                                LogTestAndMessage(p_Name, "About to call SyncToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
                             telescopeDevice.SyncToCoordinates(m_TargetRightAscension, m_TargetDeclination);
                             LogError(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(m_TargetDeclination));
                         }
@@ -4299,11 +4299,11 @@ namespace ConformU
                 case SlewSyncType.SlewToTargetAsync:
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment(p_Name, "About to get Tracking property");
+                            LogTestAndMessage(p_Name, "About to get Tracking property");
                         if (canSetTracking & !telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to set Tracking property to true");
+                                LogTestAndMessage(p_Name, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
 
@@ -4313,13 +4313,13 @@ namespace ConformU
                             m_TargetRightAscension = BadCoordinate1;
                             m_TargetDeclination = 0.0d;
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
+                                LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
                             telescopeDevice.TargetRightAscension = m_TargetRightAscension;
                             // Successfully set bad RA coordinate so now set the good Dec coordinate and see whether the move fails when the slew is attempted
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
+                                    LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
                                 telescopeDevice.TargetDeclination = m_TargetDeclination;
                             }
                             catch
@@ -4331,13 +4331,13 @@ namespace ConformU
                                 if (p_Test == SlewSyncType.SlewToTarget)
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to call SlewToTarget method");
+                                        LogTestAndMessage(p_Name, "About to call SlewToTarget method");
                                     telescopeDevice.SlewToTarget();
                                 }
                                 else
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to call SlewToTargetAsync method");
+                                        LogTestAndMessage(p_Name, "About to call SlewToTargetAsync method");
                                     telescopeDevice.SlewToTargetAsync();
                                 }
 
@@ -4345,7 +4345,7 @@ namespace ConformU
                                 try
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to call AbortSlew method");
+                                        LogTestAndMessage(p_Name, "About to call AbortSlew method");
                                     telescopeDevice.AbortSlew();
                                 }
                                 catch
@@ -4371,13 +4371,13 @@ namespace ConformU
                             m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
                             m_TargetDeclination = BadCoordinate2;
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
+                                LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
                             telescopeDevice.TargetDeclination = m_TargetDeclination;
                             // Successfully set bad Dec coordinate so now set the good RA coordinate and see whether the move fails when the slew is attempted
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
+                                    LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
                                 telescopeDevice.TargetRightAscension = m_TargetRightAscension;
                             }
                             catch
@@ -4389,13 +4389,13 @@ namespace ConformU
                                 if (p_Test == SlewSyncType.SlewToTarget)
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to call SlewToTarget method");
+                                        LogTestAndMessage(p_Name, "About to call SlewToTarget method");
                                     telescopeDevice.SlewToTarget();
                                 }
                                 else
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to call SlewToTargetAsync method");
+                                        LogTestAndMessage(p_Name, "About to call SlewToTargetAsync method");
                                     telescopeDevice.SlewToTargetAsync();
                                 }
 
@@ -4403,7 +4403,7 @@ namespace ConformU
                                 try
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to call AbortSlew method");
+                                        LogTestAndMessage(p_Name, "About to call AbortSlew method");
                                     telescopeDevice.AbortSlew();
                                 }
                                 catch
@@ -4429,11 +4429,11 @@ namespace ConformU
                 case SlewSyncType.SyncToTarget:
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment(p_Name, "About to get Tracking property");
+                            LogTestAndMessage(p_Name, "About to get Tracking property");
                         if (canSetTracking & !telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to set Tracking property to true");
+                                LogTestAndMessage(p_Name, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
 
@@ -4443,13 +4443,13 @@ namespace ConformU
                             m_TargetRightAscension = BadCoordinate1;
                             m_TargetDeclination = 0.0d;
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
+                                LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
                             telescopeDevice.TargetRightAscension = m_TargetRightAscension;
                             // Successfully set bad RA coordinate so now set the good Dec coordinate and see whether the move fails when the slew is attempted
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
+                                    LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
                                 telescopeDevice.TargetDeclination = m_TargetDeclination;
                             }
                             catch
@@ -4459,7 +4459,7 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call SyncToTarget method");
+                                    LogTestAndMessage(p_Name, "About to call SyncToTarget method");
                                 telescopeDevice.SyncToTarget();
                                 LogError(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(m_TargetRightAscension));
                             }
@@ -4480,13 +4480,13 @@ namespace ConformU
                             m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -3.0d);
                             m_TargetDeclination = BadCoordinate2;
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
+                                LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
                             telescopeDevice.TargetDeclination = m_TargetDeclination;
                             // Successfully set bad Dec coordinate so now set the good RA coordinate and see whether the move fails when the slew is attempted
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
+                                    LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
                                 telescopeDevice.TargetRightAscension = m_TargetRightAscension;
                             }
                             catch
@@ -4496,7 +4496,7 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call SyncToTarget method");
+                                    LogTestAndMessage(p_Name, "About to call SyncToTarget method");
                                 telescopeDevice.SyncToTarget();
                                 LogError(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(m_TargetDeclination));
                             }
@@ -4518,11 +4518,11 @@ namespace ConformU
                 case SlewSyncType.SlewToAltAzAsync:
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment(p_Name, "About to get Tracking property");
+                            LogTestAndMessage(p_Name, "About to get Tracking property");
                         if (canSetTracking & telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to set Tracking property to false");
+                                LogTestAndMessage(p_Name, "About to set Tracking property to false");
                             telescopeDevice.Tracking = false;
                         }
 
@@ -4534,13 +4534,13 @@ namespace ConformU
                             if (p_Test == SlewSyncType.SlewToAltAz)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
+                                    LogTestAndMessage(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
                                 telescopeDevice.SlewToAltAz(m_TargetAzimuth, m_TargetAltitude);
                             }
                             else
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About To call SlewToAltAzAsync method, Altitude:  " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
+                                    LogTestAndMessage(p_Name, "About To call SlewToAltAzAsync method, Altitude:  " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
                                 telescopeDevice.SlewToAltAzAsync(m_TargetAzimuth, m_TargetAltitude);
                             }
 
@@ -4548,7 +4548,7 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call AbortSlew method");
+                                    LogTestAndMessage(p_Name, "About to call AbortSlew method");
                                 telescopeDevice.AbortSlew();
                             }
                             catch
@@ -4571,13 +4571,13 @@ namespace ConformU
                             if (p_Test == SlewSyncType.SlewToAltAz)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
+                                    LogTestAndMessage(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
                                 telescopeDevice.SlewToAltAz(m_TargetAzimuth, m_TargetAltitude);
                             }
                             else
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call SlewToAltAzAsync method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
+                                    LogTestAndMessage(p_Name, "About to call SlewToAltAzAsync method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
                                 telescopeDevice.SlewToAltAzAsync(m_TargetAzimuth, m_TargetAltitude);
                             }
 
@@ -4585,7 +4585,7 @@ namespace ConformU
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call AbortSlew method");
+                                    LogTestAndMessage(p_Name, "About to call AbortSlew method");
                                 telescopeDevice.AbortSlew();
                             }
                             catch
@@ -4606,11 +4606,11 @@ namespace ConformU
                 case SlewSyncType.SyncToAltAz:
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment(p_Name, "About to get Tracking property");
+                            LogTestAndMessage(p_Name, "About to get Tracking property");
                         if (canSetTracking & telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to set Tracking property to false");
+                                LogTestAndMessage(p_Name, "About to set Tracking property to false");
                             telescopeDevice.Tracking = false;
                         }
 
@@ -4620,7 +4620,7 @@ namespace ConformU
                             m_TargetAltitude = BadCoordinate1;
                             m_TargetAzimuth = 45.0d;
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call SyncToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
+                                LogTestAndMessage(p_Name, "About to call SyncToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
                             telescopeDevice.SyncToAltAz(m_TargetAzimuth, m_TargetAltitude);
                             LogError(p_Name, $"Failed to reject bad Altitude coordinate: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
                         }
@@ -4636,7 +4636,7 @@ namespace ConformU
                             m_TargetAltitude = 45.0d;
                             m_TargetAzimuth = BadCoordinate2;
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call SyncToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
+                                LogTestAndMessage(p_Name, "About to call SyncToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
                             telescopeDevice.SyncToAltAz(m_TargetAzimuth, m_TargetAltitude);
                             LogError(p_Name, "Failed to reject bad Azimuth coordinate: " + FormatAzimuth(m_TargetAzimuth));
                         }
@@ -4797,7 +4797,7 @@ namespace ConformU
         {
             double l_TargetRA;
             if (settings.DisplayMethodCalls)
-                LogComment("Parked:" + p_Name, "About to get AtPark property");
+                LogTestAndMessage("Parked:" + p_Name, "About to get AtPark property");
             if (telescopeDevice.AtPark) // We are still parked so test AbortSlew
             {
                 try
@@ -4807,7 +4807,7 @@ namespace ConformU
                         case ParkedExceptionType.tstPExcepAbortSlew:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to call AbortSlew method");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to call AbortSlew method");
                                 telescopeDevice.AbortSlew();
                                 break;
                             }
@@ -4815,7 +4815,7 @@ namespace ConformU
                         case ParkedExceptionType.tstPExcepFindHome:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to call FindHome method");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to call FindHome method");
                                 telescopeDevice.FindHome();
                                 break;
                             }
@@ -4823,7 +4823,7 @@ namespace ConformU
                         case ParkedExceptionType.tstPExcepMoveAxisPrimary:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to call MoveAxis(Primary, 0.0) method");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to call MoveAxis(Primary, 0.0) method");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Primary, 0.0d);
                                 break;
                             }
@@ -4831,7 +4831,7 @@ namespace ConformU
                         case ParkedExceptionType.tstPExcepMoveAxisSecondary:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to call MoveAxis(Secondary, 0.0) method");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to call MoveAxis(Secondary, 0.0) method");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Secondary, 0.0d);
                                 break;
                             }
@@ -4839,7 +4839,7 @@ namespace ConformU
                         case ParkedExceptionType.tstPExcepMoveAxisTertiary:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to call MoveAxis(Tertiary, 0.0) method");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to call MoveAxis(Tertiary, 0.0) method");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Tertiary, 0.0d);
                                 break;
                             }
@@ -4847,7 +4847,7 @@ namespace ConformU
                         case ParkedExceptionType.tstPExcepPulseGuide:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to call PulseGuide(East, 0.0) method");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to call PulseGuide(East, 0.0) method");
                                 telescopeDevice.PulseGuide(GuideDirection.East, 0);
                                 break;
                             }
@@ -4855,7 +4855,7 @@ namespace ConformU
                         case ParkedExceptionType.tstPExcepSlewToCoordinates:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to call SlewToCoordinates method");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to call SlewToCoordinates method");
                                 telescopeDevice.SlewToCoordinates(TelescopeRAFromSiderealTime("Parked:" + p_Name, 1.0d), 0.0d);
                                 break;
                             }
@@ -4863,7 +4863,7 @@ namespace ConformU
                         case ParkedExceptionType.tstPExcepSlewToCoordinatesAsync:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to call SlewToCoordinatesAsync method");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to call SlewToCoordinatesAsync method");
                                 telescopeDevice.SlewToCoordinatesAsync(TelescopeRAFromSiderealTime("Parked:" + p_Name, 1.0d), 0.0d);
                                 WaitForSlew("Parked:" + p_Name);
                                 break;
@@ -4873,13 +4873,13 @@ namespace ConformU
                             {
                                 l_TargetRA = TelescopeRAFromSiderealTime("Parked:" + p_Name, 1.0d);
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to set property TargetRightAscension to " + FormatRA(l_TargetRA));
+                                    LogTestAndMessage("Parked:" + p_Name, "About to set property TargetRightAscension to " + FormatRA(l_TargetRA));
                                 telescopeDevice.TargetRightAscension = l_TargetRA;
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to set property TargetDeclination to 0.0");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to set property TargetDeclination to 0.0");
                                 telescopeDevice.TargetDeclination = 0.0d;
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to call SlewToTarget method");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to call SlewToTarget method");
                                 telescopeDevice.SlewToTarget();
                                 break;
                             }
@@ -4888,13 +4888,13 @@ namespace ConformU
                             {
                                 l_TargetRA = TelescopeRAFromSiderealTime("Parked:" + p_Name, 1.0d);
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to set property to " + FormatRA(l_TargetRA));
+                                    LogTestAndMessage("Parked:" + p_Name, "About to set property to " + FormatRA(l_TargetRA));
                                 telescopeDevice.TargetRightAscension = l_TargetRA;
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to set property to 0.0");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to set property to 0.0");
                                 telescopeDevice.TargetDeclination = 0.0d;
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to call method");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to call method");
                                 telescopeDevice.SlewToTargetAsync();
                                 WaitForSlew("Parked:" + p_Name);
                                 break;
@@ -4904,7 +4904,7 @@ namespace ConformU
                             {
                                 l_TargetRA = TelescopeRAFromSiderealTime("Parked:" + p_Name, 1.0d);
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to call method, RA: " + FormatRA(l_TargetRA) + ", Declination: 0.0");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to call method, RA: " + FormatRA(l_TargetRA) + ", Declination: 0.0");
                                 telescopeDevice.SyncToCoordinates(l_TargetRA, 0.0d);
                                 break;
                             }
@@ -4913,13 +4913,13 @@ namespace ConformU
                             {
                                 l_TargetRA = TelescopeRAFromSiderealTime("Parked:" + p_Name, 1.0d);
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to set property to " + FormatRA(l_TargetRA));
+                                    LogTestAndMessage("Parked:" + p_Name, "About to set property to " + FormatRA(l_TargetRA));
                                 telescopeDevice.TargetRightAscension = l_TargetRA;
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to set property to 0.0");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to set property to 0.0");
                                 telescopeDevice.TargetDeclination = 0.0d;
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("Parked:" + p_Name, "About to call SyncToTarget method");
+                                    LogTestAndMessage("Parked:" + p_Name, "About to call SyncToTarget method");
                                 telescopeDevice.SyncToTarget();
                                 break;
                             }
@@ -4939,7 +4939,7 @@ namespace ConformU
                 }
                 // Check that Telescope is still parked after issuing the command!
                 if (settings.DisplayMethodCalls)
-                    LogComment("Parked:" + p_Name, "About to get AtPark property");
+                    LogTestAndMessage("Parked:" + p_Name, "About to get AtPark property");
                 if (!telescopeDevice.AtPark)
                     LogIssue("Parked:" + p_Name, "Telescope was unparked by the " + p_Name + " command. This should not happen!");
             }
@@ -4969,7 +4969,7 @@ namespace ConformU
                     case TelescopeAxis.Primary:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call AxisRates method, Axis: " + ((int)TelescopeAxis.Primary).ToString());
+                                LogTestAndMessage(p_Name, "About to call AxisRates method, Axis: " + ((int)TelescopeAxis.Primary).ToString());
                             l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary); // Get primary axis rates
                             break;
                         }
@@ -4977,7 +4977,7 @@ namespace ConformU
                     case TelescopeAxis.Secondary:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call AxisRates method, Axis: " + ((int)TelescopeAxis.Secondary).ToString());
+                                LogTestAndMessage(p_Name, "About to call AxisRates method, Axis: " + ((int)TelescopeAxis.Secondary).ToString());
                             l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary); // Get secondary axis rates
                             break;
                         }
@@ -4985,7 +4985,7 @@ namespace ConformU
                     case TelescopeAxis.Tertiary:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call AxisRates method, Axis: " + ((int)TelescopeAxis.Tertiary).ToString());
+                                LogTestAndMessage(p_Name, "About to call AxisRates method, Axis: " + ((int)TelescopeAxis.Tertiary).ToString());
                             l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary); // Get tertiary axis rates
                             break;
                         }
@@ -5340,7 +5340,7 @@ namespace ConformU
                     case RequiredMethodType.tstCanMoveAxisPrimary:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call CanMoveAxis method " + ((int)TelescopeAxis.Primary).ToString());
+                                LogTestAndMessage(p_Name, "About to call CanMoveAxis method " + ((int)TelescopeAxis.Primary).ToString());
                             m_CanMoveAxisPrimary = telescopeDevice.CanMoveAxis(TelescopeAxis.Primary);
                             LogOK(p_Name, p_Name + " " + m_CanMoveAxisPrimary.ToString());
                             break;
@@ -5349,7 +5349,7 @@ namespace ConformU
                     case RequiredMethodType.tstCanMoveAxisSecondary:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call CanMoveAxis method " + ((int)TelescopeAxis.Secondary).ToString());
+                                LogTestAndMessage(p_Name, "About to call CanMoveAxis method " + ((int)TelescopeAxis.Secondary).ToString());
                             m_CanMoveAxisSecondary = telescopeDevice.CanMoveAxis(TelescopeAxis.Secondary);
                             LogOK(p_Name, p_Name + " " + m_CanMoveAxisSecondary.ToString());
                             break;
@@ -5358,7 +5358,7 @@ namespace ConformU
                     case RequiredMethodType.tstCanMoveAxisTertiary:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(p_Name, "About to call CanMoveAxis method " + ((int)TelescopeAxis.Tertiary).ToString());
+                                LogTestAndMessage(p_Name, "About to call CanMoveAxis method " + ((int)TelescopeAxis.Tertiary).ToString());
                             m_CanMoveAxisTertiary = telescopeDevice.CanMoveAxis(TelescopeAxis.Tertiary);
                             LogOK(p_Name, p_Name + " " + m_CanMoveAxisTertiary.ToString());
                             break;
@@ -5410,7 +5410,7 @@ namespace ConformU
                         case OptionalMethodType.AbortSlew:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call AbortSlew method");
+                                    LogTestAndMessage(p_Name, "About to call AbortSlew method");
                                 telescopeDevice.AbortSlew();
                                 LogOK("AbortSlew", "AbortSlew OK when not slewing");
                                 break;
@@ -5421,14 +5421,14 @@ namespace ConformU
                                 // Get the DestinationSideOfPier for a target in the West i.e. for a German mount when the tube is on the East side of the pier
                                 m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -l_TestRAOffset);
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(l_TestDec));
+                                    LogTestAndMessage(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(l_TestDec));
                                 m_DestinationSideOfPierEast = (PointingState)telescopeDevice.DestinationSideOfPier(m_TargetRightAscension, l_TestDec);
                                 LogDebug(p_Name, "German mount - scope on the pier's East side, target in the West : " + FormatRA(m_TargetRightAscension) + " " + FormatDec(l_TestDec) + " " + m_DestinationSideOfPierEast.ToString());
 
                                 // Get the DestinationSideOfPier for a target in the East i.e. for a German mount when the tube is on the West side of the pier
                                 m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, l_TestRAOffset);
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(l_TestDec));
+                                    LogTestAndMessage(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(l_TestDec));
                                 m_DestinationSideOfPierWest = (PointingState)telescopeDevice.DestinationSideOfPier(m_TargetRightAscension, l_TestDec);
                                 LogDebug(p_Name, "German mount - scope on the pier's West side, target in the East: " + FormatRA(m_TargetRightAscension) + " " + FormatDec(l_TestDec) + " " + m_DestinationSideOfPierWest.ToString());
 
@@ -5454,7 +5454,7 @@ namespace ConformU
                                 if (g_InterfaceVersion > 1)
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to call FindHome method");
+                                        LogTestAndMessage(p_Name, "About to call FindHome method");
                                     telescopeDevice.FindHome();
                                     m_StartTime = DateTime.Now;
                                     Status(StatusType.staAction, "Waiting for mount to home");
@@ -5464,11 +5464,11 @@ namespace ConformU
                                         WaitFor(SLEEP_TIME);
                                         l_ct += 1;
                                         if (settings.DisplayMethodCalls)
-                                            LogComment(p_Name, "About to get AtHome property");
+                                            LogTestAndMessage(p_Name, "About to get AtHome property");
                                     }
                                     while (!telescopeDevice.AtHome & !cancellationToken.IsCancellationRequested & (DateTime.Now.Subtract(m_StartTime).TotalMilliseconds < 60000)); // Wait up to a minute to find home
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to get AtHome property");
+                                        LogTestAndMessage(p_Name, "About to get AtHome property");
                                     if (telescopeDevice.AtHome)
                                     {
                                         LogOK(p_Name, "Found home OK.");
@@ -5479,12 +5479,12 @@ namespace ConformU
                                     }
 
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to get AtPark property");
+                                        LogTestAndMessage(p_Name, "About to get AtPark property");
                                     if (telescopeDevice.AtPark)
                                     {
                                         LogIssue(p_Name, "FindHome has parked the scope as well as finding home");
                                         if (settings.DisplayMethodCalls)
-                                            LogComment(p_Name, "About to call UnPark method");
+                                            LogTestAndMessage(p_Name, "About to call UnPark method");
                                         telescopeDevice.UnPark(); // Unpark it ready for further tests
                                     }
                                 }
@@ -5492,11 +5492,11 @@ namespace ConformU
                                 {
                                     Status(StatusType.staAction, "Waiting for mount to home");
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to call FindHome method");
+                                        LogTestAndMessage(p_Name, "About to call FindHome method");
                                     telescopeDevice.FindHome();
                                     LogOK(p_Name, "Found home OK.");
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to call Unpark method");
+                                        LogTestAndMessage(p_Name, "About to call Unpark method");
                                     telescopeDevice.UnPark();
                                 } // Make sure we are still  unparked!
 
@@ -5507,7 +5507,7 @@ namespace ConformU
                             {
                                 // Get axis rates for primary axis
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call AxisRates method for axis " + ((int)TelescopeAxis.Primary).ToString());
+                                    LogTestAndMessage(p_Name, "About to call AxisRates method for axis " + ((int)TelescopeAxis.Primary).ToString());
                                 l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary);
                                 TelescopeMoveAxisTest(p_Name, TelescopeAxis.Primary, l_AxisRates);
                                 break;
@@ -5532,7 +5532,7 @@ namespace ConformU
                         case OptionalMethodType.PulseGuide:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to get IsPulseGuiding property");
+                                    LogTestAndMessage(p_Name, "About to get IsPulseGuiding property");
                                 if (telescopeDevice.IsPulseGuiding) // IsPulseGuiding is true before we've started so this is an error and voids a real test
                                 {
                                     LogError(p_Name, "IsPulseGuiding is True when not pulse guiding - PulseGuide test omitted");
@@ -5542,7 +5542,7 @@ namespace ConformU
                                     Status(StatusType.staAction, "Start PulseGuide");
                                     m_StartTime = DateTime.Now;
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to call PulseGuide method, Direction: " + ((int)GuideDirection.East).ToString() + ", Duration: " + PULSEGUIDE_MOVEMENT_TIME * 1000 + "ms");
+                                        LogTestAndMessage(p_Name, "About to call PulseGuide method, Direction: " + ((int)GuideDirection.East).ToString() + ", Duration: " + PULSEGUIDE_MOVEMENT_TIME * 1000 + "ms");
                                     telescopeDevice.PulseGuide(GuideDirection.East, PULSEGUIDE_MOVEMENT_TIME * 1000); // Start a 2 second pulse
                                     m_EndTime = DateTime.Now;
                                     LogDebug(p_Name, "PulseGuide command time: " + PULSEGUIDE_MOVEMENT_TIME * 1000 + " milliseconds, PulseGuide call duration: " + m_EndTime.Subtract(m_StartTime).TotalMilliseconds + " milliseconds");
@@ -5550,7 +5550,7 @@ namespace ConformU
                                     {
                                         l_ct = 0;
                                         if (settings.DisplayMethodCalls)
-                                            LogComment(p_Name, "About to get IsPulseGuiding property");
+                                            LogTestAndMessage(p_Name, "About to get IsPulseGuiding property");
                                         if (telescopeDevice.IsPulseGuiding)
                                         {
                                             do
@@ -5560,11 +5560,11 @@ namespace ConformU
                                                 if (cancellationToken.IsCancellationRequested)
                                                     return;
                                                 if (settings.DisplayMethodCalls)
-                                                    LogComment(p_Name, "About to get IsPulseGuiding property");
+                                                    LogTestAndMessage(p_Name, "About to get IsPulseGuiding property");
                                             }
                                             while (telescopeDevice.IsPulseGuiding & DateTime.Now.Subtract(m_StartTime).TotalMilliseconds < PULSEGUIDE_TIMEOUT_TIME * 1000); // Wait for success or timeout
                                             if (settings.DisplayMethodCalls)
-                                                LogComment(p_Name, "About to get IsPulseGuiding property");
+                                                LogTestAndMessage(p_Name, "About to get IsPulseGuiding property");
                                             if (!telescopeDevice.IsPulseGuiding)
                                             {
                                                 LogOK(p_Name, "Asynchronous pulse guide found OK");
@@ -5583,7 +5583,7 @@ namespace ConformU
                                     else // Assume synchronous pulse guide and that IsPulseGuiding is false
                                     {
                                         if (settings.DisplayMethodCalls)
-                                            LogComment(p_Name, "About to get IsPulseGuiding property");
+                                            LogTestAndMessage(p_Name, "About to get IsPulseGuiding property");
                                         if (!telescopeDevice.IsPulseGuiding)
                                         {
                                             LogOK(p_Name, "Synchronous pulse guide found OK");
@@ -5628,7 +5628,7 @@ namespace ConformU
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to get SideOfPier property");
+                                        LogTestAndMessage(p_Name, "About to get SideOfPier property");
                                     switch (telescopeDevice.SideOfPier)
                                     {
                                         case PointingState.Normal: // We are on pierEast so try pierWest
@@ -5637,13 +5637,13 @@ namespace ConformU
                                                 {
                                                     LogDebug(p_Name, "Scope is pierEast so flipping West");
                                                     if (settings.DisplayMethodCalls)
-                                                        LogComment(p_Name, "About to set SideOfPier property to " + ((int)PointingState.ThroughThePole).ToString());
+                                                        LogTestAndMessage(p_Name, "About to set SideOfPier property to " + ((int)PointingState.ThroughThePole).ToString());
                                                     telescopeDevice.SideOfPier = PointingState.ThroughThePole;
                                                     WaitForSlew(p_Name);
                                                     if (cancellationToken.IsCancellationRequested)
                                                         return;
                                                     if (settings.DisplayMethodCalls)
-                                                        LogComment(p_Name, "About to get SideOfPier property");
+                                                        LogTestAndMessage(p_Name, "About to get SideOfPier property");
                                                     m_SideOfPier = (PointingState)telescopeDevice.SideOfPier;
                                                     if (m_SideOfPier == PointingState.ThroughThePole)
                                                     {
@@ -5668,13 +5668,13 @@ namespace ConformU
                                                 {
                                                     LogDebug(p_Name, "Scope is pierWest so flipping East");
                                                     if (settings.DisplayMethodCalls)
-                                                        LogComment(p_Name, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
+                                                        LogTestAndMessage(p_Name, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
                                                     telescopeDevice.SideOfPier = PointingState.Normal;
                                                     WaitForSlew(p_Name);
                                                     if (cancellationToken.IsCancellationRequested)
                                                         return;
                                                     if (settings.DisplayMethodCalls)
-                                                        LogComment(p_Name, "About to get SideOfPier property");
+                                                        LogTestAndMessage(p_Name, "About to get SideOfPier property");
                                                     m_SideOfPier = (PointingState)telescopeDevice.SideOfPier;
                                                     if (m_SideOfPier == PointingState.Normal)
                                                     {
@@ -5706,7 +5706,7 @@ namespace ConformU
                                     {
                                         LogDebug(p_Name, "Attempting to set SideOfPier");
                                         if (settings.DisplayMethodCalls)
-                                            LogComment(p_Name, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
+                                            LogTestAndMessage(p_Name, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
                                         telescopeDevice.SideOfPier = PointingState.Normal;
                                         LogDebug(p_Name, "SideOfPier set OK to pierEast but should have thrown an error");
                                         WaitForSlew(p_Name);
@@ -5723,7 +5723,7 @@ namespace ConformU
                                 }
 
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set Tracking property to false");
+                                    LogTestAndMessage(p_Name, "About to set Tracking property to false");
                                 telescopeDevice.Tracking = false;
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
@@ -5742,7 +5742,7 @@ namespace ConformU
                     {
                         try
                         {
-                            if (settings.DisplayMethodCalls) LogComment(p_Name, "About to dispose of AxisRates object");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to dispose of AxisRates object");
                             l_AxisRates.Dispose();
 
                             LogOK(p_Name, "AxisRates object successfully disposed");
@@ -5784,7 +5784,7 @@ namespace ConformU
                         case OptionalMethodType.AbortSlew:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call AbortSlew method");
+                                    LogTestAndMessage(p_Name, "About to call AbortSlew method");
                                 telescopeDevice.AbortSlew();
                                 break;
                             }
@@ -5793,7 +5793,7 @@ namespace ConformU
                             {
                                 m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -1.0d);
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(0.0d));
+                                    LogTestAndMessage(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(0.0d));
                                 m_DestinationSideOfPier = (PointingState)telescopeDevice.DestinationSideOfPier(m_TargetRightAscension, 0.0d);
                                 break;
                             }
@@ -5801,7 +5801,7 @@ namespace ConformU
                         case OptionalMethodType.FindHome:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call FindHome method");
+                                    LogTestAndMessage(p_Name, "About to call FindHome method");
                                 telescopeDevice.FindHome();
                                 break;
                             }
@@ -5809,7 +5809,7 @@ namespace ConformU
                         case OptionalMethodType.MoveAxisPrimary:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)TelescopeAxis.Primary).ToString() + " at speed 0");
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)TelescopeAxis.Primary).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Primary, 0.0d);
                                 break;
                             }
@@ -5817,7 +5817,7 @@ namespace ConformU
                         case OptionalMethodType.MoveAxisSecondary:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)TelescopeAxis.Secondary).ToString() + " at speed 0");
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)TelescopeAxis.Secondary).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Secondary, 0.0d);
                                 break;
                             }
@@ -5825,7 +5825,7 @@ namespace ConformU
                         case OptionalMethodType.MoveAxisTertiary:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)TelescopeAxis.Tertiary).ToString() + " at speed 0");
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)TelescopeAxis.Tertiary).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Tertiary, 0.0d);
                                 break;
                             }
@@ -5833,7 +5833,7 @@ namespace ConformU
                         case OptionalMethodType.PulseGuide:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call PulseGuide method, Direction: " + ((int)GuideDirection.East).ToString() + ", Duration: 0ms");
+                                    LogTestAndMessage(p_Name, "About to call PulseGuide method, Direction: " + ((int)GuideDirection.East).ToString() + ", Duration: 0ms");
                                 telescopeDevice.PulseGuide(GuideDirection.East, 0);
                                 break;
                             }
@@ -5841,7 +5841,7 @@ namespace ConformU
                         case OptionalMethodType.SideOfPierWrite:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
+                                    LogTestAndMessage(p_Name, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
                                 telescopeDevice.SideOfPier = PointingState.Normal;
                                 break;
                             }
@@ -5879,7 +5879,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment(p_Name, string.Format("About to get {0} property", p_Type.ToString()));
+                    LogTestAndMessage(p_Name, string.Format("About to get {0} property", p_Type.ToString()));
                 switch (p_Type)
                 {
                     case CanType.CanFindHome:
@@ -6098,7 +6098,7 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
+                            LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                         telescopeDevice.MoveAxis(p_Axis, 0.0d); // Set a value of zero
                         LogOK(p_Name, "Can successfully set a movement rate of zero");
                         l_CanSetZero = true;
@@ -6131,7 +6131,7 @@ namespace ConformU
 
                         LogDebug(p_Name, "Using minimum rate: " + l_MoveRate);
                         if (settings.DisplayMethodCalls)
-                            LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_MoveRate);
+                            LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_MoveRate);
                         telescopeDevice.MoveAxis(p_Axis, l_MoveRate); // Set a value lower than the minimum
                         LogIssue(p_Name, "No exception raised when move axis value < minimum rate: " + l_MoveRate);
                         // Clean up and release each object after use
@@ -6173,7 +6173,7 @@ namespace ConformU
                         l_MoveRate = l_RateMaximum + 1.0d;
                         LogDebug(p_Name, "Using maximum rate: " + l_MoveRate);
                         if (settings.DisplayMethodCalls)
-                            LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_MoveRate);
+                            LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_MoveRate);
                         telescopeDevice.MoveAxis(p_Axis, l_MoveRate); // Set a value higher than the maximum
                         LogIssue(p_Name, "No exception raised when move axis value > maximum rate: " + l_MoveRate);
                         // Clean up and release each object after use
@@ -6217,24 +6217,24 @@ namespace ConformU
                             {
                                 Status(StatusType.staStatus, "Moving forward");
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMinimum);
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMinimum);
                                 telescopeDevice.MoveAxis(p_Axis, l_RateMinimum); // Set the minimum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
                                 Status(StatusType.staStatus, "Moving back");
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMinimum);
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMinimum);
                                 telescopeDevice.MoveAxis(p_Axis, -l_RateMinimum); // Set the minimum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 // v1.0.12 Next line added because movement wasn't stopped
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
                                 LogOK(p_Name, "Successfully moved axis at minimum rate: " + l_RateMinimum);
                             }
@@ -6261,7 +6261,7 @@ namespace ConformU
                             {
                                 // Confirm not slewing first
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to get Slewing property");
+                                    LogTestAndMessage(p_Name, "About to get Slewing property");
                                 if (telescopeDevice.Slewing)
                                 {
                                     LogIssue(p_Name, "Slewing was true before start of MoveAxis but should have been false, remaining tests skipped");
@@ -6270,26 +6270,26 @@ namespace ConformU
 
                                 Status(StatusType.staStatus, "Moving forward");
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMaximum);
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMaximum);
                                 telescopeDevice.MoveAxis(p_Axis, l_RateMaximum); // Set the minimum rate
                                                                                  // Confirm that slewing is active when the move is underway
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to get Slewing property");
+                                    LogTestAndMessage(p_Name, "About to get Slewing property");
                                 if (!telescopeDevice.Slewing)
                                     LogIssue(p_Name, "Slewing is not true immediately after axis starts moving in positive direction");
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to get Slewing property");
+                                    LogTestAndMessage(p_Name, "About to get Slewing property");
                                 if (!telescopeDevice.Slewing)
                                     LogIssue(p_Name, "Slewing is not true after " + MOVE_AXIS_TIME / 1000d + " seconds moving in positive direction");
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
                                                                         // Confirm that slewing is false when movement is stopped
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to get property");
+                                    LogTestAndMessage(p_Name, "About to get property");
                                 if (telescopeDevice.Slewing)
                                 {
                                     LogIssue(p_Name, "Slewing incorrectly remains true after stopping positive axis movement, remaining test skipped");
@@ -6298,7 +6298,7 @@ namespace ConformU
 
                                 Status(StatusType.staStatus, "Moving back");
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
                                 telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the minimum rate
                                                                                   // Confirm that slewing is active when the move is underway
                                 if (!telescopeDevice.Slewing)
@@ -6310,11 +6310,11 @@ namespace ConformU
                                     LogIssue(p_Name, "Slewing is not true after " + MOVE_AXIS_TIME / 1000d + " seconds moving in negative direction");
                                 // Confirm that slewing is false when movement is stopped
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
                                                                         // Confirm that slewing is false when movement is stopped
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to get Slewing property");
+                                    LogTestAndMessage(p_Name, "About to get Slewing property");
                                 if (telescopeDevice.Slewing)
                                 {
                                     LogIssue(p_Name, "Slewing incorrectly remains true after stopping negative axis movement, remaining test skipped");
@@ -6345,21 +6345,21 @@ namespace ConformU
                             if (canSetTracking)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to get Tracking property");
+                                    LogTestAndMessage(p_Name, "About to get Tracking property");
                                 l_TrackingStart = telescopeDevice.Tracking; // Save the start tracking state
                                 Status(StatusType.staStatus, "Moving forward");
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMaximum);
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMaximum);
                                 telescopeDevice.MoveAxis(p_Axis, l_RateMaximum); // Set the maximum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 Status(StatusType.staStatus, "Stop movement");
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to get Tracking property");
+                                    LogTestAndMessage(p_Name, "About to get Tracking property");
                                 l_TrackingEnd = telescopeDevice.Tracking; // Save the final tracking state
                                 if (l_TrackingStart == l_TrackingEnd) // Successfully retained tracking state
                                 {
@@ -6367,21 +6367,21 @@ namespace ConformU
                                     {
                                         Status(StatusType.staStatus, "Set tracking off");
                                         if (settings.DisplayMethodCalls)
-                                            LogComment(p_Name, "About to set Tracking property false");
+                                            LogTestAndMessage(p_Name, "About to set Tracking property false");
                                         telescopeDevice.Tracking = false;
                                         Status(StatusType.staStatus, "Move back");
                                         if (settings.DisplayMethodCalls)
-                                            LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
+                                            LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
                                         telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the maximum rate
                                         WaitFor(MOVE_AXIS_TIME);
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                         if (settings.DisplayMethodCalls)
-                                            LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
+                                            LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                         telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
                                         Status(StatusType.staStatus, "");
                                         if (settings.DisplayMethodCalls)
-                                            LogComment(p_Name, "About to get Tracking property");
+                                            LogTestAndMessage(p_Name, "About to get Tracking property");
                                         if (telescopeDevice.Tracking == false) // tracking correctly retained in both states
                                         {
                                             LogOK(p_Name, "Tracking state correctly retained for both tracking states");
@@ -6395,21 +6395,21 @@ namespace ConformU
                                     {
                                         Status(StatusType.staStatus, "Set tracking on");
                                         if (settings.DisplayMethodCalls)
-                                            LogComment(p_Name, "About to set Tracking property true");
+                                            LogTestAndMessage(p_Name, "About to set Tracking property true");
                                         telescopeDevice.Tracking = true;
                                         Status(StatusType.staStatus, "Move back");
                                         if (settings.DisplayMethodCalls)
-                                            LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
+                                            LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
                                         telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the maximum rate
                                         WaitFor(MOVE_AXIS_TIME);
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                         if (settings.DisplayMethodCalls)
-                                            LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
+                                            LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                         telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
                                         Status(StatusType.staStatus, "");
                                         if (settings.DisplayMethodCalls)
-                                            LogComment(p_Name, "About to get Tracking property");
+                                            LogTestAndMessage(p_Name, "About to get Tracking property");
                                         if (telescopeDevice.Tracking == true) // tracking correctly retained in both states
                                         {
                                             LogOK(p_Name, "Tracking state correctly retained for both tracking states");
@@ -6426,17 +6426,17 @@ namespace ConformU
                                 {
                                     Status(StatusType.staStatus, "Move back");
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
+                                        LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
                                     telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the maximum rate
                                     WaitFor(MOVE_AXIS_TIME);
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
                                     Status(StatusType.staStatus, "");
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
+                                        LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                     telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to set Tracking property " + l_TrackingStart);
+                                        LogTestAndMessage(p_Name, "About to set Tracking property " + l_TrackingStart);
                                     telescopeDevice.Tracking = l_TrackingStart; // Restore original value
                                     LogIssue(p_Name, "Tracking state not correctly restored after MoveAxis when CanSetTracking is true");
                                 }
@@ -6444,32 +6444,32 @@ namespace ConformU
                             else // Can't set tracking so just test the current state
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to get Tracking property");
+                                    LogTestAndMessage(p_Name, "About to get Tracking property");
                                 l_TrackingStart = telescopeDevice.Tracking;
                                 Status(StatusType.staStatus, "Moving forward");
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMaximum);
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMaximum);
                                 telescopeDevice.MoveAxis(p_Axis, l_RateMaximum); // Set the maximum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 Status(StatusType.staStatus, "Stop movement");
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to get Tracking property");
+                                    LogTestAndMessage(p_Name, "About to get Tracking property");
                                 l_TrackingEnd = telescopeDevice.Tracking; // Save tracking state
                                 Status(StatusType.staStatus, "Move back");
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call method MoveAxis for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
+                                    LogTestAndMessage(p_Name, "About to call method MoveAxis for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
                                 telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the maximum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 // v1.0.12 next line added because movement wasn't stopped
                                 if (settings.DisplayMethodCalls)
-                                    LogComment(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
+                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
                                 if (l_TrackingStart == l_TrackingEnd)
                                 {
@@ -6478,7 +6478,7 @@ namespace ConformU
                                 else
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(p_Name, "About to set Tracking property to " + l_TrackingStart);
+                                        LogTestAndMessage(p_Name, "About to set Tracking property to " + l_TrackingStart);
                                     telescopeDevice.Tracking = l_TrackingStart; // Restore correct value
                                     LogIssue(p_Name, "Tracking state not correctly restored after MoveAxis when CanSetTracking is false");
                                 }
@@ -6743,11 +6743,11 @@ namespace ConformU
         {
             double actualRA, actualDec, difference;
             if (settings.DisplayMethodCalls)
-                LogComment(testName, "About to get RightAscension property");
+                LogTestAndMessage(testName, "About to get RightAscension property");
             actualRA = telescopeDevice.RightAscension;
             LogDebug(testName, "Read RightAscension: " + FormatRA(actualRA));
             if (settings.DisplayMethodCalls)
-                LogComment(testName, "About to get Declination property");
+                LogTestAndMessage(testName, "About to get Declination property");
             actualDec = telescopeDevice.Declination;
             LogDebug(testName, "Read Declination: " + FormatDec(actualDec));
 
@@ -6807,16 +6807,16 @@ namespace ConformU
                 case SlewSyncType.SyncToCoordinates: // SyncToCoordinates
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment(testName, "About to get Tracking property");
+                            LogTestAndMessage(testName, "About to get Tracking property");
                         if (canSetTracking & !telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(testName, "About to set Tracking property to true");
+                                LogTestAndMessage(testName, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
 
                         if (settings.DisplayMethodCalls)
-                            LogComment(testName, "About to call SyncToCoordinates method, RA: " + FormatRA(syncRA) + ", Declination: " + FormatDec(syncDec));
+                            LogTestAndMessage(testName, "About to call SyncToCoordinates method, RA: " + FormatRA(syncRA) + ", Declination: " + FormatDec(syncDec));
                         telescopeDevice.SyncToCoordinates(syncRA, syncDec); // Sync to slightly different coordinates
                         LogDebug(testName, "Completed SyncToCoordinates");
                         break;
@@ -6825,18 +6825,18 @@ namespace ConformU
                 case SlewSyncType.SyncToTarget: // SyncToTarget
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment(testName, "About to get Tracking property");
+                            LogTestAndMessage(testName, "About to get Tracking property");
                         if (canSetTracking & !telescopeDevice.Tracking)
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(testName, "About to set Tracking property to true");
+                                LogTestAndMessage(testName, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
 
                         try
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(testName, "About to set TargetRightAscension property to " + FormatRA(syncRA));
+                                LogTestAndMessage(testName, "About to set TargetRightAscension property to " + FormatRA(syncRA));
                             telescopeDevice.TargetRightAscension = syncRA;
                             LogDebug(testName, "Completed Set TargetRightAscension");
                         }
@@ -6848,7 +6848,7 @@ namespace ConformU
                         try
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment(testName, "About to set TargetDeclination property to " + FormatDec(syncDec));
+                                LogTestAndMessage(testName, "About to set TargetDeclination property to " + FormatDec(syncDec));
                             telescopeDevice.TargetDeclination = syncDec;
                             LogDebug(testName, "Completed Set TargetDeclination");
                         }
@@ -6858,7 +6858,7 @@ namespace ConformU
                         }
 
                         if (settings.DisplayMethodCalls)
-                            LogComment(testName, "About to call SyncToTarget method");
+                            LogTestAndMessage(testName, "About to call SyncToTarget method");
                         telescopeDevice.SyncToTarget(); // Sync to slightly different coordinates
                         LogDebug(testName, "Completed SyncToTarget");
                         break;
@@ -6877,7 +6877,7 @@ namespace ConformU
             if (canSetTracking)
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment("SlewScope", "About to set Tracking property to true");
+                    LogTestAndMessage("SlewScope", "About to set Tracking property to true");
                 telescopeDevice.Tracking = true;
             }
 
@@ -6888,7 +6888,7 @@ namespace ConformU
                 {
                     LogDebug("SlewScope", "Slewing asynchronously to " + p_Msg + " " + FormatRA(p_RA) + " " + FormatDec(p_DEC));
                     if (settings.DisplayMethodCalls)
-                        LogComment("SlewScope", "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(p_RA) + ", Declination: " + FormatDec(p_DEC));
+                        LogTestAndMessage("SlewScope", "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(p_RA) + ", Declination: " + FormatDec(p_DEC));
                     telescopeDevice.SlewToCoordinatesAsync(p_RA, p_DEC);
                     WaitForSlew("SlewScope");
                 }
@@ -6896,14 +6896,14 @@ namespace ConformU
                 {
                     LogDebug("SlewScope", "Slewing synchronously to " + p_Msg + " " + FormatRA(p_RA) + " " + FormatDec(p_DEC));
                     if (settings.DisplayMethodCalls)
-                        LogComment("SlewScope", "About to call SlewToCoordinates method, RA: " + FormatRA(p_RA) + ", Declination: " + FormatDec(p_DEC));
+                        LogTestAndMessage("SlewScope", "About to call SlewToCoordinates method, RA: " + FormatRA(p_RA) + ", Declination: " + FormatDec(p_DEC));
                     telescopeDevice.SlewToCoordinates(p_RA, p_DEC);
                 }
 
                 if (m_CanReadSideOfPier)
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("SlewScope", "About to get SideOfPier property");
+                        LogTestAndMessage("SlewScope", "About to get SideOfPier property");
                     LogDebug("SlewScope", "SideOfPier: " + telescopeDevice.SideOfPier.ToString());
                 }
             }
@@ -6925,7 +6925,7 @@ namespace ConformU
                 //My.MyProject.Forms.FrmConformMain.staStatus.Text = "Slewing";
                 //Application.DoEvents();
                 if (settings.DisplayMethodCalls)
-                    LogComment(testName, "About to get Slewing property");
+                    LogTestAndMessage(testName, "About to get Slewing property");
             }
             //while (telescopeDevice.Slewing & (DateTime.Now.Subtract(WaitStartTime).TotalSeconds < WAIT_FOR_SLEW_MINIMUM_DURATION) & !TestStop());
             while (telescopeDevice.Slewing & (DateTime.Now.Subtract(WaitStartTime).TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION) & !cancellationToken.IsCancellationRequested);
@@ -6941,7 +6941,7 @@ namespace ConformU
             {
                 // Create a legal RA based on an offset from Sidereal time
                 if (settings.DisplayMethodCalls)
-                    LogComment(testName, "About to get SiderealTime property");
+                    LogTestAndMessage(testName, "About to get SiderealTime property");
                 TelescopeRAFromHourAngleRet = telescopeDevice.SiderealTime - p_Offset;
                 switch (TelescopeRAFromHourAngleRet)
                 {
@@ -6976,7 +6976,7 @@ namespace ConformU
             {
                 // Create a legal RA based on an offset from Sidereal time
                 if (settings.DisplayMethodCalls)
-                    LogComment(testName, "About to get SiderealTime property");
+                    LogTestAndMessage(testName, "About to get SiderealTime property");
                 CurrentSiderealTime = telescopeDevice.SiderealTime;
                 switch (CurrentSiderealTime) // Deal with possibility that sidereal time from the driver is bad
                 {
@@ -7033,7 +7033,7 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("AccessChecks", "About to create driver object with CreateObject");
+                            LogTestAndMessage("AccessChecks", "About to create driver object with CreateObject");
                         LogDebug("AccessChecks", "Creating late bound object for interface test");
                         Type driverType = Type.GetTypeFromProgID(settings.ComDevice.ProgId);
                         l_DeviceObject = Activator.CreateInstance(driverType);
@@ -7063,11 +7063,11 @@ namespace ConformU
                         try
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment("AccessChecks", "About to set Connected property true");
+                                LogTestAndMessage("AccessChecks", "About to set Connected property true");
                             l_ITelescope.Connected = true;
                             LogInfo("AccessChecks", "Device exposes interface " + TestType.ToString());
                             if (settings.DisplayMethodCalls)
-                                LogComment("AccessChecks", "About to set Connected property false");
+                                LogTestAndMessage("AccessChecks", "About to set Connected property false");
                             l_ITelescope.Connected = false;
                         }
                         catch (Exception)
@@ -7207,7 +7207,7 @@ namespace ConformU
             try
             {
                 if (settings.DisplayMethodCalls)
-                    LogComment(TestName, string.Format("{0} - About to get Slewing property", Description));
+                    LogTestAndMessage(TestName, string.Format("{0} - About to get Slewing property", Description));
                 m_Slewing = telescopeDevice.Slewing;
                 if (!m_Slewing | SkipSlewiingTest) // Slewing should be false at this point or we are ignoring the test!
                 {
@@ -7219,17 +7219,17 @@ namespace ConformU
                             case Axis.RA:
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(TestName, string.Format("{0} - About to set RightAscensionRate property to {1}", Description, Rate));
+                                        LogTestAndMessage(TestName, string.Format("{0} - About to set RightAscensionRate property to {1}", Description, Rate));
                                     telescopeDevice.RightAscensionRate = Rate;
                                     SetStatus(string.Format("Watling for mount to settle after setting RightAcensionRate to {0}", Rate), "", "");
                                     WaitFor(2000); // Give a short wait to allow the mount to settle
 
                                     // Value set OK, now check that the new rate is returned by RightAscensionRate Get and that Slewing is false
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(TestName, string.Format("{0} - About to get RightAscensionRate property", Description));
+                                        LogTestAndMessage(TestName, string.Format("{0} - About to get RightAscensionRate property", Description));
                                     m_RightAscensionRate = telescopeDevice.RightAscensionRate;
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(TestName, string.Format("{0} - About to get Slewing property", Description));
+                                        LogTestAndMessage(TestName, string.Format("{0} - About to get Slewing property", Description));
                                     m_Slewing = telescopeDevice.Slewing;
                                     if (m_RightAscensionRate == Rate & !m_Slewing)
                                     {
@@ -7252,17 +7252,17 @@ namespace ConformU
                             case Axis.Dec:
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(TestName, string.Format("{0} - About to set DeclinationRate property to {1}", Description, Rate));
+                                        LogTestAndMessage(TestName, string.Format("{0} - About to set DeclinationRate property to {1}", Description, Rate));
                                     telescopeDevice.DeclinationRate = Rate;
                                     SetStatus(string.Format("Watling for mount to settle after setting DeclinationRate to {0}", Rate), "", "");
                                     WaitFor(2000); // Give a short wait to allow the mount to settle
 
                                     // Value set OK, now check that the new rate is returned by DeclinationRate Get and that Slewing is false
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(TestName, string.Format("{0} - About to get DeclinationRate property", Description));
+                                        LogTestAndMessage(TestName, string.Format("{0} - About to get DeclinationRate property", Description));
                                     m_DeclinationRate = telescopeDevice.DeclinationRate;
                                     if (settings.DisplayMethodCalls)
-                                        LogComment(TestName, string.Format("{0} - About to get Slewing property", Description));
+                                        LogTestAndMessage(TestName, string.Format("{0} - About to get Slewing property", Description));
                                     m_Slewing = telescopeDevice.Slewing;
                                     if (m_DeclinationRate == Rate & !m_Slewing)
                                     {

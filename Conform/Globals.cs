@@ -30,6 +30,149 @@ namespace ConformU
 
         #endregion
 
+        /// <summary>
+        /// Static method to print to screen and log file
+        /// </summary>
+        /// <param name="testName"></param>
+        /// <param name="messageLevel"></param>
+        /// <param name="message"></param>
+        /// <param name="debug"></param>
+        /// <param name="parentClass"></param>
+        /// <param name="TL"></param>
+        /// <remarks>Used by DevicetesterbaseClass and ConformtestManager</remarks>
+        internal static void LogMessage(string testName, MessageLevel messageLevel, string message, bool debug, ConformanceTestManager parentClass, ConformLogger TL)
+        {
+            string testNameFormatted, messageLevelFormatted, screenMessage, logFileMessage;
+            MessageLevel logLevel;
+
+            if (debug)
+            {
+                logLevel = MessageLevel.Debug;
+            }
+            else
+            {
+                logLevel = MessageLevel.Info;
+            }
+
+            try
+            {
+                if (messageLevel >= logLevel)
+                {
+                    testNameFormatted = testName.PadRight(TEST_NAME_WIDTH).Substring(0, TEST_NAME_WIDTH); // Pad right to required length and limit to the required length
+                    messageLevelFormatted = "        ";
+
+                    switch (messageLevel)
+                    {
+                        case MessageLevel.Debug:
+                            {
+                                messageLevelFormatted = "DEBUG   ";
+                                break;
+                            }
+
+                        case MessageLevel.Info:
+                            {
+                                messageLevelFormatted = "INFO    ";
+                                break;
+                            }
+
+                        case MessageLevel.OK:
+                            {
+                                messageLevelFormatted = "OK      ";
+                                break;
+                            }
+
+                        case MessageLevel.Issue:
+                            {
+                                messageLevelFormatted = "ISSUE   ";
+                                break;
+                            }
+
+                        case MessageLevel.Error:
+                            {
+                                messageLevelFormatted = "ERROR   ";
+                                break;
+                            }
+
+                        case MessageLevel.TestOnly:
+                        case MessageLevel.TestAndMessage:
+                            {
+                                messageLevelFormatted = "        ";
+                                break;
+                            }
+                        default:
+                            {
+                                throw new ASCOM.InvalidValueException($"LogMsg - Unknown message level: {messageLevel}.");
+                            }
+                    }
+
+                    // Cater for screen display, which requires test name, message level and message in one string and log file, which requires test name separate from message level and message.
+                    switch (messageLevel)
+                    {
+                        case MessageLevel.TestOnly:
+                            {
+                                screenMessage = testName;
+                                logFileMessage = "";
+                                break;
+                            }
+                        default:
+                            {
+                                screenMessage = $"{testNameFormatted} {messageLevelFormatted} {message}";
+                                logFileMessage = $"{messageLevelFormatted} {message}";
+                                break;
+                            }
+                    }
+                    parentClass.OnLogMessageChanged("LogMessage", $"{DateTime.Now:HH:mm:ss.fff} {screenMessage}");
+                    TL.LogMessage(testName, logFileMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception in DeviceTesterbaseClass.LogMsg method: \r\n{ex}");
+            }
+        }
+
+        internal static void LogNewLine(bool debug, ConformanceTestManager parentClass, ConformLogger TL)
+        {
+            LogTestOnly("", debug, parentClass, TL);
+        }
+
+        internal static void LogTestOnly(string p_Test, bool debug, ConformanceTestManager parentClass, ConformLogger TL)
+        {
+            LogMessage(p_Test, MessageLevel.TestOnly, "", debug, parentClass, TL);
+        }
+
+        internal static void LogTestAndMessage(string p_Test, string p_Msg, bool debug, ConformanceTestManager parentClass, ConformLogger TL)
+        {
+            LogMessage(p_Test, MessageLevel.TestAndMessage, p_Msg, debug, parentClass, TL);
+        }
+
+        internal static void LogOK(string p_Test, string p_Msg, bool debug, ConformanceTestManager parentClass, ConformLogger TL)
+        {
+            LogMessage(p_Test, MessageLevel.OK, p_Msg, debug, parentClass, TL);
+        }
+
+        internal static void LogDebug(string p_Test, string p_Msg, bool debug, ConformanceTestManager parentClass, ConformLogger TL)
+        {
+            LogMessage(p_Test, MessageLevel.Debug, p_Msg, debug, parentClass, TL);
+        }
+
+        internal static void LogInfo(string p_Test, string p_Msg, bool debug, ConformanceTestManager parentClass, ConformLogger TL)
+        {
+            LogMessage(p_Test, MessageLevel.Info, p_Msg, debug, parentClass, TL);
+        }
+
+        internal static void LogIssue(string p_Test, string p_Msg, bool debug, ConformanceTestManager parentClass, ConformLogger TL)
+        {
+            conformResults.Issues.Add(new System.Collections.Generic.KeyValuePair<string, string>(p_Test, p_Msg));
+            LogMessage(p_Test, MessageLevel.Issue, p_Msg, debug, parentClass, TL);
+        }
+
+        internal static void LogError(string p_Test, string p_Msg, bool debug, ConformanceTestManager parentClass, ConformLogger TL)
+        {
+            conformResults.Errors.Add(new System.Collections.Generic.KeyValuePair<string, string>(p_Test, p_Msg));
+            LogMessage(p_Test, MessageLevel.Error, p_Msg, debug, parentClass, TL);
+        }
+
     }
 
     #region Enums
@@ -66,13 +209,12 @@ namespace ConformU
     public enum MessageLevel
     {
         Debug = 0,
-        Comment = 1,
-        Info = 2,
-        OK = 3,
-        Issue = 4,
-        Error = 5,
-        TestAndMessage = 6,
-        TestOnly = 7
+        Info = 1,
+        OK = 2,
+        Issue = 3,
+        Error = 4,
+        TestAndMessage = 5,
+        TestOnly = 6
     }
 
     // Must be valid service types because they are used as values in Alpaca access code i.e. ServiceType.http.ToString()

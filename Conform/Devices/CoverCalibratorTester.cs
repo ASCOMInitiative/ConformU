@@ -187,7 +187,7 @@ namespace ConformU
                 {
                     maxBrightness = 0; // Initialise to a 'bad' value
                     if (settings.DisplayMethodCalls)
-                        LogComment("MaxBrightness", "About to call MaxBrightness property");
+                        LogTestAndMessage("MaxBrightness", "About to call MaxBrightness property");
                     maxBrightness = coverCalibratorDevice.MaxBrightness;
 
                     if (!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotPresent))
@@ -224,7 +224,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("Brightness", "About to call Brightness property");
+                        LogTestAndMessage("Brightness", "About to call Brightness property");
                     brightness = coverCalibratorDevice.Brightness;
                     brightnessOk = true;
 
@@ -280,7 +280,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("OpenCover", "About to call OpenCover method");
+                        LogTestAndMessage("OpenCover", "About to call OpenCover method");
                     startTime = DateTime.Now;
 
                     coverCalibratorDevice.OpenCover();
@@ -338,7 +338,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("CloseCover", "About to call CloseCover method");
+                        LogTestAndMessage("CloseCover", "About to call CloseCover method");
                     startTime = DateTime.Now;
                     asynchronousCloseTime = 0.0;
 
@@ -401,7 +401,7 @@ namespace ConformU
 
                             // Initiate a cover open first
                             if (settings.DisplayMethodCalls)
-                                LogComment("HaltCover", "About to call OpenCover method");
+                                LogTestAndMessage("HaltCover", "About to call OpenCover method");
                             coverCalibratorDevice.OpenCover();
 
                             // Wait for half of the expected cover open time
@@ -414,7 +414,7 @@ namespace ConformU
                                 {
                                     // Issue a halt command
                                     if (settings.DisplayMethodCalls)
-                                        LogComment("HaltCover", "About to call HaltCover method");
+                                        LogTestAndMessage("HaltCover", "About to call HaltCover method");
                                     coverCalibratorDevice.HaltCover();
 
                                     // Confirm that the cover is no longer moving
@@ -439,7 +439,7 @@ namespace ConformU
                         {
                             // Since the cover opens synchronously the HaltCover method should return a MethodNotImplementedException
                             if (settings.DisplayMethodCalls)
-                                LogComment("HaltCover", "About to call HaltCover method");
+                                LogTestAndMessage("HaltCover", "About to call HaltCover method");
                             coverCalibratorDevice.HaltCover();
                             LogError("HaltCover", "The cover operates synchronously but did not throw a MethodNotImplementedException in response to the HaltCover command");
                         }
@@ -455,7 +455,7 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("HaltCover", "About to call HaltCover method");
+                            LogTestAndMessage("HaltCover", "About to call HaltCover method");
                         coverCalibratorDevice.HaltCover();
                         // Should never get here...
                         LogError("HaltCover", "CoverStatus is 'NotPresent' but HaltCover did not throw a MethodNotImplementedException");
@@ -601,7 +601,7 @@ namespace ConformU
                         startTime = DateTime.Now;
 
                         if (settings.DisplayMethodCalls)
-                            LogComment("CalibratorOff", "About to call CalibratorOff method");
+                            LogTestAndMessage("CalibratorOff", "About to call CalibratorOff method");
                         coverCalibratorDevice.CalibratorOff();
 
                         if (!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady))
@@ -612,7 +612,7 @@ namespace ConformU
 
                                 // Confirm that Brightness returns to zero when calibrator is turned off
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("CalibratorOff", "About to call Brightness property");
+                                    LogTestAndMessage("CalibratorOff", "About to call Brightness property");
                                 if (coverCalibratorDevice.Brightness == 0)
                                     LogOK("CalibratorOff", $"Brightness is set to zero when the calibrator is turned off");
                                 else
@@ -637,7 +637,7 @@ namespace ConformU
 
                                 // Confirm that Brightness returns to zero when calibrator is turned off
                                 if (settings.DisplayMethodCalls)
-                                    LogComment("CalibratorOff", "About to call Brightness property");
+                                    LogTestAndMessage("CalibratorOff", "About to call Brightness property");
                                 if (coverCalibratorDevice.Brightness == 0)
                                     LogOK("CalibratorOff", $"Brightness is set to zero when the calibrator is turned off");
                                 else
@@ -656,7 +656,7 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogComment("CalibratorOff", "About to call CalibratorOff method");
+                            LogTestAndMessage("CalibratorOff", "About to call CalibratorOff method");
                         coverCalibratorDevice.CalibratorOff();
                         // Should never get here...
                         LogError("CalibratorOff", $"CalibratorStatus is 'NotPresent'but CalibratorOff did not throw a MethodNotImplementedException.");
@@ -682,7 +682,7 @@ namespace ConformU
                     startTime = DateTime.Now;
 
                     if (settings.DisplayMethodCalls)
-                        LogComment("CalibratorOn", $"About to call CalibratorOn method with brightness: {requestedBrightness}");
+                        LogTestAndMessage("CalibratorOn", $"About to call CalibratorOn method with brightness: {requestedBrightness}");
                     coverCalibratorDevice.CalibratorOn(requestedBrightness);
 
                     if (!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady))
@@ -695,7 +695,7 @@ namespace ConformU
 
                             // Confirm that the brightness value is what was set
                             if (settings.DisplayMethodCalls)
-                                LogComment("CalibratorOn", $"About to call Brightness property.");
+                                LogTestAndMessage("CalibratorOn", $"About to call Brightness property.");
                             returnedBrightness = coverCalibratorDevice.Brightness;
 
                             if (returnedBrightness == requestedBrightness)
@@ -741,7 +741,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogComment("CalibratorOn", $"About to call CalibratorOn method with brightness: {requestedBrightness}");
+                        LogTestAndMessage("CalibratorOn", $"About to call CalibratorOn method with brightness: {requestedBrightness}");
                     coverCalibratorDevice.CalibratorOn(requestedBrightness);
                     // Should never get here...
                     LogError("CalibratorOn", $"CalibratorStatus is 'NotPresent'but CalibratorOn did not throw a MethodNotImplementedException.");
@@ -777,7 +777,7 @@ namespace ConformU
                     case RequiredProperty.CalibratorState:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment("CalibratorState", "About to call CalibratorState property");
+                                LogTestAndMessage("CalibratorState", "About to call CalibratorState property");
                             calibratorState = coverCalibratorDevice.CalibratorState;
                             LogOK(propertyName, calibratorState.ToString());
                             break;
@@ -786,7 +786,7 @@ namespace ConformU
                     case RequiredProperty.CoverState:
                         {
                             if (settings.DisplayMethodCalls)
-                                LogComment("CoverState", "About to call CoverState property");
+                                LogTestAndMessage("CoverState", "About to call CoverState property");
                             coverState = coverCalibratorDevice.CoverState;
                             LogOK(propertyName, coverState.ToString());
                             break;
