@@ -17,7 +17,7 @@ namespace ConformU
         internal const string COMMAND_OPTION_SETTINGS = "ConformSettings";
         internal const string COMMAND_OPTION_LOGFILENAME = "ConformLogFileName";
         internal const string COMMAND_OPTION_LOGFILEPATH = "ConformLogFilePath";
-        internal const string COMMAND_OPTION_SHOW_DISCOVERY = "ShowDiscovery";
+        internal const string COMMAND_OPTION_DEBUG_DISCOVERY = "DebugDiscovery";
 
         internal const int TEST_NAME_WIDTH = 35; // Width allowed for test names in screen display and log files
 

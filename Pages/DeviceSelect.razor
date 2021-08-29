@@ -137,7 +137,7 @@
         // Initialise variables
         selectedDeviceType = (configuration.Settings.DeviceType == DeviceType.NoDeviceType) ? DeviceType.Telescope : configuration.Settings.DeviceType;
         selectedDeviceTypeString = selectedDeviceType.ToString();
-        discovery = new AlpacaDiscovery(configuration.Settings.StrictCasing, configuration.Settings.DebugAlpacaDiscovery ? conformLogger : null); // Create a discovery component with or without logging
+        discovery = new AlpacaDiscovery(configuration.Settings.StrictCasing, configuration.Settings.TraceDiscovery ? conformLogger : null); // Create a discovery component with or without logging
         discovery.AlpacaDevicesUpdated += AlpacaDeviceDiscovered;
         discovery.DiscoveryCompleted += AlpacaDiscoveryCompleted;
 
@@ -156,7 +156,6 @@
     void OnTabChange(int tabIndex)
     {
         selectedTabNumber = tabIndex;
-        conformLogger.LogMessage("OnTabChange", $"Selected new tab: {tabIndex}");
 
         switch (tabIndex)
         {
@@ -353,13 +352,20 @@
     private void UpdateComDevices()
     {
         comDeviceList.Clear();
-        Dictionary<string, string> registeredDevices = ComDevices.GetRegisteredDrivers(Enum.Parse<DeviceType>(selectedDeviceTypeString).ToString(), conformLogger);
+        if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", $"Getting registered {selectedDeviceTypeString} drivers...");
+        Dictionary<string, string> registeredDevices = ComDevices.GetRegisteredDrivers(Enum.Parse<DeviceType>(selectedDeviceTypeString).ToString(), configuration.Settings.TraceDiscovery ? conformLogger : null);
         foreach (KeyValuePair<string, string> kvp in registeredDevices)
         {
-            conformLogger.LogMessage("UpdateComDevices", $"Found device: {kvp.Key} {kvp.Value}");
+            if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", $"Found device: {kvp.Key} - {kvp.Value}");
             ComDevice comDevice = new ComDevice($"{kvp.Value} ({kvp.Key})", kvp.Key);
             comDeviceList.Add(new ComDeviceListItem($"{kvp.Value} ({kvp.Key})", comDevice));
-            if ((comDevice.ProgId == configuration.Settings.ComDevice.ProgId) & (comDevice.DisplayName == configuration.Settings.ComDevice.DisplayName) & (configuration.Settings.DeviceTechnology == DeviceTechnology.COM)) this.comDevice = comDevice;
+            if ((comDevice.ProgId == configuration.Settings.ComDevice.ProgId) &
+                (comDevice.DisplayName == configuration.Settings.ComDevice.DisplayName) &
+                (configuration.Settings.DeviceTechnology == DeviceTechnology.COM))
+            {
+                if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", $"Selecting device : {kvp.Key} - {kvp.Value}");
+                this.comDevice = comDevice;
+            }
         }
 
     }

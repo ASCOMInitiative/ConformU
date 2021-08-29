@@ -19,9 +19,19 @@ namespace ConformU
 {
     public class Startup
     {
+        ConformConfiguration conformConfiguration;
+        ConformLogger conformLogger;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+        }
+
+        private void DisposeObject(object toDispose)
+        {
+            Console.WriteLine("OnShutdown - Disposing object...");
+
+            ((IDisposable)toDispose).Dispose();
         }
 
         public IConfiguration Configuration { get; set; }
@@ -33,13 +43,14 @@ namespace ConformU
             // Blazor infrastructure
             services.AddRazorPages();
             //services.AddServerSideBlazor();
-            services.AddServerSideBlazor(options => {
+            services.AddServerSideBlazor(options =>
+            {
                 options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromSeconds(300);
             });
-         
 
-                        // Conform components
-                        string loggerName;
+
+            // Conform components
+            string loggerName;
             // Set log name with casing appropriate to OS
             if (OperatingSystem.IsWindows())
             {
@@ -64,14 +75,14 @@ namespace ConformU
                 // No action required
             }
 
-            ConformLogger conformLogger = new(logFileName, logFilePath, loggerName, true);  // Create a logger component
+            conformLogger = new(logFileName, logFilePath, loggerName, true);  // Create a logger component
             services.AddSingleton(conformLogger); // Add the logger component to the list of injectable services
 
             // Create a ConformConfiguration service
-            ConformConfiguration conformConfiguration = new(conformLogger, Configuration.GetValue<string>(Globals.COMMAND_OPTION_SETTINGS)); // Create a configuration settings component
+            conformConfiguration = new(conformLogger, Configuration.GetValue<string>(Globals.COMMAND_OPTION_SETTINGS)); // Create a configuration settings component
 
             // Enable Alpaca discovery if a command line option requires this
-            string debugDiscovery = Configuration.GetValue<string>(Globals.COMMAND_OPTION_SHOW_DISCOVERY) ?? "";
+            string debugDiscovery = Configuration.GetValue<string>(Globals.COMMAND_OPTION_DEBUG_DISCOVERY) ?? "";
             if (!string.IsNullOrEmpty(debugDiscovery)) conformConfiguration.DebugDiscovery = true;
 
             // Add the configuration component to the list of injectable services
@@ -93,8 +104,11 @@ namespace ConformU
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        //public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, IHostApplicationLifetime applicationLifetime, ConformConfiguration conformConfiguration, ConformLogger conformLogger)
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
+            //applicationLifetime.ApplicationStopping.Register(DisposeObject, conformConfiguration);
+            //applicationLifetime.ApplicationStopping.Register(DisposeObject, conformLogger);
 
             if (env.IsDevelopment())
             {

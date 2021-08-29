@@ -29,7 +29,7 @@
 </div>
 
 @code {
-
+    private bool disposedValue;
     int screenLogRows = 10;
     string screenLog = "Conform log.";
     object screenLogLockObject = new object();
@@ -70,44 +70,55 @@
         // Setting have validated OK so start the test
 
         // Create a task cancellation token source and cancellation token
-        cancellationTokenSource = new CancellationTokenSource();
-        cancelConformToken = cancellationTokenSource.Token;
 
-        // Create a test manager instance to oversee the test
-        tester = new ConformanceTestManager(settings, conformLogger, cancelConformToken);
-        tester.OutputChanged += OutputChanged;
-        tester.StatusChanged += StatusChanged;
-
-        // Clear the screen log
-        screenLog = "";
-
-        // Create a task to run the conformance test
-        conformanceTest = new Task(() =>
+        using (cancellationTokenSource = new CancellationTokenSource())
         {
-            try
+            cancelConformToken = cancellationTokenSource.Token;
+
+            // Create a test manager instance to oversee the test
+            using (tester = new ConformanceTestManager(settings, conformLogger, cancelConformToken))
             {
-                tester.TestDevice();
+                tester.OutputChanged += OutputChanged;
+                tester.StatusChanged += StatusChanged;
+
+                // Clear the screen log
+                screenLog = "";
+
+                // Create a task to run the conformance test
+                conformanceTest = new Task(() =>
+                {
+                    try
+                    {
+                        tester.TestDevice();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogMsg("StartTest", $"Exception: \r\n {ex}");
+
+                    }
+
+                }, cancelConformToken);
+
+                // Start the conformnance test task
+                conformanceTest.Start();
+
+                // Execute this continuation task when the conformance test finishes to ensure that the tester is disposed even when the conformance task itself is cancelled.
+                await conformanceTest;
+
+                tester.OutputChanged -= OutputChanged;
+                tester.StatusChanged -= StatusChanged;
+
+
+                // await conformanceTest.ContinueWith(antecedent =>
+                //{
+                //    tester.Dispose(); // Dispose of the tester
+                //    tester = null;
+                //});
             }
-            catch (Exception ex)
-            {
-                LogMsg("StartTest", $"Exception: \r\n {ex}");
+        }
+        await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
 
-            }
-
-        }, cancelConformToken);
-
-        // Start the conformnance test task
-        conformanceTest.Start();
-
-        // Execute this continuation task when the conformance test finishes to ensure that the tester is disposed even when the conformance task itself is cancelled.
-        await conformanceTest.ContinueWith(antecedent =>
-        {
-            tester.Dispose(); // Dispose of the tester
-            tester = null;
-            JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
-
-            GC.Collect();
-        });
+        GC.Collect();
     }
 
     void StopTest(string buttonName)
@@ -217,13 +228,36 @@
 
     void IDisposable.Dispose()
     {
+        Console.WriteLine("Index.Razor.Dispos() has been called...");
         // Always use IDisposable in your component to unsubscribe from the event.
         // Be a good citizen and leave things how you found them.
         // This way event handlers aren't called when nobody is listening.
         listener.OnResized -= WindowResized;
     }
 
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                Console.WriteLine("Index.Razor.Dispos() has been called...");
+                listener.OnResized -= WindowResized;
+            }
+
+            disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
     #endregion
+
     private async void ShowNotification(NotificationMessage message)
     {
         notificationService.Notify(message);

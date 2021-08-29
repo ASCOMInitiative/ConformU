@@ -96,7 +96,7 @@ namespace ConformU
             // Flag if discovery debug information should be included in the log file
             if (o.DebugDiscovery)
             {
-                argList.Add($"--{COMMAND_OPTION_SHOW_DISCOVERY}");
+                argList.Add($"--{COMMAND_OPTION_DEBUG_DISCOVERY}");
                 argList.Add("true");
             }
 

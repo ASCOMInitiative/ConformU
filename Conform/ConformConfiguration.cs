@@ -9,13 +9,14 @@ using System.Threading.Tasks;
 namespace ConformU
 {
     [DefaultMember("Settings")]
-    public class ConformConfiguration
+    public class ConformConfiguration : IDisposable
     {
         private const string FOLDER_NAME = "conform"; // Folder name underneath the local application data folder
         private const string SETTINGS_FILENAME = "conform.settings"; // Settings file name
 
-        private readonly ConformLogger TL;
+        private ConformLogger TL;
         Settings settings;
+        private bool disposedValue;
         readonly string fileSettingsFileName;
 
         /// <summary>
@@ -156,7 +157,7 @@ namespace ConformU
         {
             set
             {
-                settings.DebugAlpacaDiscovery = value;
+                settings.TraceDiscovery = value;
             }
         }
 
@@ -191,6 +192,37 @@ namespace ConformU
                 TL.LogMessage("PersistSettings", ex.ToString());
             }
 
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    Console.WriteLine("ConformConfiguration.Dispose()...");
+                    TL = null;
+                    settings = null;
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~ConformConfiguration()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

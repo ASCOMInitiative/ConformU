@@ -353,11 +353,16 @@ namespace ConformU
 
         protected virtual void Dispose(bool disposing)
         {
+            Console.WriteLine($"ConformanceTestManager.Dispose() {disposing}");
             if (!disposedValue)
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects)
+                    if (testDevice is not null)
+                    {
+                        testDevice.Dispose();
+                        testDevice = null;
+                    }
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
@@ -365,13 +370,6 @@ namespace ConformU
                 disposedValue = true;
             }
         }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~DeviceConformanceTester()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose()
         {

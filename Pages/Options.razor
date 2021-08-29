@@ -34,12 +34,13 @@
                     </RadzenCheckBoxList>
                 </RadzenCard>
 
-                <RadzenCard Style="width:410px; margin-bottom:20px;height:270px;">
+                <RadzenCard Style="width:410px; margin-bottom:20px;height:270px; margin-right: 20px">
                     <h3 style="margin-bottom:0;">Operation</h3>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
-                        <RadzenCheckBox Style="margin-top:6px;" Name="CHK1" @bind-Value=@chkUpdates TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
-                        <RadzenLabel Text="Check for updates" Component="CHK1" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
-                        <RadzenTextBox @bind-Value="lastUpdateDate" Disabled=true />
+                        <RadzenCheckBox Style="margin-top:6px;" Name="CHK1" @bind-Value=@chkUpdates TValue="bool" Change=@(args =>
+                            OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
+                            <RadzenLabel Text="Check for updates" Component="CHK1" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
+                            <RadzenTextBox @bind-Value="lastUpdateDate" Disabled=true />
                     </div>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Name="CHK2" @bind-Value=@chkDisplayCalls TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.DisplayCalls)) /> <RadzenLabel Text="Display method calls" Component="CHK2" Style="margin-left: 5px;" />
@@ -48,6 +49,32 @@
                         <RadzenCheckBox Name="CHK3" @bind-Value=@chkDebug TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.Debug)) /> <RadzenLabel Text="Debug enabled" Component="CHK3" Style="margin-left: 5px;" />
                     </div>
                 </RadzenCard>
+
+                <RadzenCard Style="width:410px; margin-bottom:20px;height:270px;">
+                    <h3 style="margin-bottom:0;">Additional Tracing</h3>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHK4"
+                                        @bind-Value=@chkTraceDiscovery 
+                                        TValue="bool" 
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TraceDiscovery)) /> 
+                        <RadzenLabel Text="Trace discovery" Component="CHK4" Style="margin-left: 5px;" />
+                    </div>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHK5" 
+                                        @bind-Value=@chkDebug 
+                                        TValue="bool" 
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.Debug)) /> 
+                        <RadzenLabel Text="Debug enabled" Component="CHK5" Style="margin-left: 5px;" />
+                    </div>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHK6" 
+                                        @bind-Value=@chkDebug 
+                                        TValue="bool" 
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.Debug)) /> 
+                        <RadzenLabel Text="Debug enabled" Component="CHK6" Style="margin-left: 5px;" />
+                    </div>
+                </RadzenCard>
+
             </div>
         </RadzenTabsItem>
 
@@ -244,6 +271,7 @@
 @code {
     string alpacaAndComText;
     bool strictCasing;
+    bool chkTraceDiscovery;
 
     void OnServiceTypeChange(object serviceMode)
     {
@@ -285,7 +313,8 @@
         AlpacaDiscoveryResolveName,
         AlpacaDiscoveryUseIpV4,
         AlpacaDiscoveryUseIpV6,
-        StrictCasing
+        StrictCasing,
+        TraceDiscovery
     }
 
     // Camera test configuration
@@ -318,7 +347,6 @@
     private bool chkUpdates;
     private bool chkDisplayCalls;
     private bool chkDebug;
-    private DeviceType deviceType;
     private string lastUpdateDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
 
     // Alpaca configuration
@@ -352,7 +380,7 @@
 
         isWindowsOs = OperatingSystem.IsWindows();
 
-        if(isWindowsOs)
+        if (isWindowsOs)
         {
             alpacaAndComText = "Alpaca and COM";
         }
@@ -469,12 +497,13 @@
         if (configuration.Settings.TestPerformance) newScope.Add(4);
         conformanceTestScope = newScope;
 
-        // Set other general settings
+        // Operation settings
         chkUpdates = configuration.Settings.UpdateCheck;
         chkDisplayCalls = configuration.Settings.DisplayMethodCalls;
         chkDebug = configuration.Settings.Debug;
 
-        deviceType = configuration.Settings.DeviceType;
+        // Trace settings
+        chkTraceDiscovery = configuration.Settings.TraceDiscovery;
 
         // COM Settings
         comAccessMechanic = configuration.Settings.ComConfiguration.ComACcessMechanic;
@@ -649,12 +678,14 @@
                 configuration.Settings.StrictCasing = strictCasing;
                 break;
 
+            case CheckBoxConfigurationItem.TraceDiscovery:
+                configuration.Settings.TraceDiscovery = chkTraceDiscovery;
+                break;
+
             default:
                 throw new InvalidValueException($"OnCheckboxChange - Unknown checkbox name: {name}");
         }
 
-        //configuration.Save();
-        //status = configuration.Status;
         SaveConfiguration();
     }
 

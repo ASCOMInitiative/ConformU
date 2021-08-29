@@ -27,8 +27,7 @@ namespace ConformU
 
         // Debug output switches
         public bool Debug { get; set; } = false;
-        public bool DebugAlpacaDiscovery { get; set; } = false;
-        public bool DebugComDiscovery { get; set; } = false;
+        public bool TraceDiscovery { get; set; } = false;
         public bool DebugConfigurationPersistence { get; set; } = false;
 
         // Conformance test configuration 
