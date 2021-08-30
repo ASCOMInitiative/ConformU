@@ -50,7 +50,7 @@
                     </div>
                 </RadzenCard>
 
-                <RadzenCard Style="width:410px; margin-bottom:20px;height:270px;">
+                <RadzenCard Style="width:300px; margin-bottom:20px;height:270px;">
                     <h3 style="margin-bottom:0;">Additional Tracing</h3>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHK4"
@@ -61,17 +61,17 @@
                     </div>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHK5" 
-                                        @bind-Value=@chkDebug 
+                                        @bind-Value=@chkTraceSettings 
                                         TValue="bool" 
-                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.Debug)) /> 
-                        <RadzenLabel Text="Debug enabled" Component="CHK5" Style="margin-left: 5px;" />
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TraceSettings)) /> 
+                        <RadzenLabel Text="Log settings values" Component="CHK5" Style="margin-left: 5px;" />
                     </div>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHK6" 
-                                        @bind-Value=@chkDebug 
+                                        @bind-Value=@chkTraceAlpacaCalls 
                                         TValue="bool" 
-                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.Debug)) /> 
-                        <RadzenLabel Text="Debug enabled" Component="CHK6" Style="margin-left: 5px;" />
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TraceAlpacaCalls)) /> 
+                        <RadzenLabel Text="Trace Alpaca calls" Component="CHK6" Style="margin-left: 5px;" />
                     </div>
                 </RadzenCard>
 
@@ -272,6 +272,8 @@
     string alpacaAndComText;
     bool strictCasing;
     bool chkTraceDiscovery;
+    bool chkTraceSettings;
+    bool chkTraceAlpacaCalls;
 
     void OnServiceTypeChange(object serviceMode)
     {
@@ -314,7 +316,9 @@
         AlpacaDiscoveryUseIpV4,
         AlpacaDiscoveryUseIpV6,
         StrictCasing,
-        TraceDiscovery
+        TraceDiscovery,
+        TraceSettings,
+        TraceAlpacaCalls
     }
 
     // Camera test configuration
@@ -504,6 +508,8 @@
 
         // Trace settings
         chkTraceDiscovery = configuration.Settings.TraceDiscovery;
+        chkTraceSettings = configuration.Settings.TraceDiscovery;
+        chkTraceAlpacaCalls= configuration.Settings.TraceAlpacaCalls;
 
         // COM Settings
         comAccessMechanic = configuration.Settings.ComConfiguration.ComACcessMechanic;
@@ -680,6 +686,14 @@
 
             case CheckBoxConfigurationItem.TraceDiscovery:
                 configuration.Settings.TraceDiscovery = chkTraceDiscovery;
+                break;
+
+            case CheckBoxConfigurationItem.TraceSettings:
+                configuration.Settings.TraceSettings = chkTraceSettings;
+                break;
+
+            case CheckBoxConfigurationItem.TraceAlpacaCalls:
+                configuration.Settings.TraceAlpacaCalls = chkTraceAlpacaCalls;
                 break;
 
             default:

@@ -35,20 +35,20 @@ namespace ConformU
                 {
                     string folderName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), FOLDER_NAME);
                     fileSettingsFileName = Path.Combine(folderName, SETTINGS_FILENAME);
-                    TL.LogDebug("ConformConfiguration", $"Settings folder: {folderName}, Settings file: {fileSettingsFileName}");
+                    TL?.LogMessage("ConformConfiguration", $"Settings folder: {folderName}, Settings file: {fileSettingsFileName}");
                 }
                 else
                 {
                     fileSettingsFileName = configurationFile;
-                    TL.LogDebug("ConformConfiguration", $"Settings file: {fileSettingsFileName}");
+                    TL?.LogMessage("ConformConfiguration", $"Settings file: {fileSettingsFileName}");
                 }
 
 
                 if (File.Exists(fileSettingsFileName))
                 {
-                    TL.LogDebug("ConformConfiguration", "File exists and read OK");
+                    TL?.LogMessage("ConformConfiguration", "File exists and read OK");
                     string serialisedSettings = File.ReadAllText(fileSettingsFileName);
-                    TL.LogDebug("ConformConfiguration", $"Serialised settings: {serialisedSettings}");
+                    TL?.LogMessage("ConformConfiguration", $"Serialised settings: {serialisedSettings}");
 
                     settings = JsonSerializer.Deserialize<Settings>(serialisedSettings, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     Status = "Settings read successfully";
@@ -62,12 +62,12 @@ namespace ConformU
             }
             catch (JsonException ex)
             {
-                TL.LogDebug("ConformConfiguration", $"Error parsing Conform settings file: {ex.Message}");
+                TL?.LogMessage("ConformConfiguration", $"Error parsing Conform settings file: {ex.Message}");
                 Status = "Settings file corrupted, please reset to default values";
             }
             catch (Exception ex)
             {
-                TL.LogDebug("ConformConfiguration", ex.ToString());
+                TL?.LogMessage("ConformConfiguration", ex.ToString());
                 Status = "Exception reading settings, default values are in use.";
             }
         }
@@ -108,7 +108,7 @@ namespace ConformU
         /// </summary>
         public void Save()
         {
-            TL.LogDebug("Save", "persisting settings to settings file");
+            TL?.LogMessage("Save", "persisting settings to settings file");
             PersistSettings(settings);
             Status = $"Settings saved at {DateTime.Now:HH:mm:ss.f}.";
 
@@ -120,15 +120,15 @@ namespace ConformU
             if (ConfigurationChanged is not null)
             {
                 EventArgs args = new();
-                TL.LogDebug("RaiseConfigurationChnagedEvent", "About to call configuration changed event handler");
+                TL?.LogMessage("RaiseConfigurationChnagedEvent", "About to call configuration changed event handler");
                 ConfigurationChanged(this, args);
-                TL.LogDebug("RaiseConfigurationChnagedEvent", "Returned from configuration changed event handler");
+                TL?.LogMessage("RaiseConfigurationChnagedEvent", "Returned from configuration changed event handler");
             }
         }
 
         public void Reset()
         {
-            TL.LogDebug("Reset", "Resetting settings file to default values");
+            TL?.LogMessage("Reset", "Resetting settings file to default values");
             settings = new();
             PersistSettings(settings);
             Status = $"Settings reset at {DateTime.Now:HH:mm:ss.f}.";
@@ -176,7 +176,7 @@ namespace ConformU
                     throw new ArgumentNullException(nameof(settingsToPersist));
                 }
 
-                TL.LogDebug("PersistSettings", $"Settings file: {fileSettingsFileName}");
+                TL?.LogMessage("PersistSettings", $"Settings file: {fileSettingsFileName}");
 
                 JsonSerializerOptions options = new()
                 {

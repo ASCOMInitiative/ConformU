@@ -99,7 +99,7 @@ namespace ConformU
                             settings.AlpacaDevice.IpPort,
                             settings.AlpacaDevice.AlpacaDeviceNumber,
                             settings.StrictCasing,
-                            settings.DisplayMethodCalls ? logger : null);
+                            settings.TraceAlpacaCalls ? logger : null);
                         logger.LogMessage("CreateDevice", MessageLevel.Debug, $"Alpaca device created OK");
                         break;
 
