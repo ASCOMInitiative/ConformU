@@ -56,7 +56,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                logger.LogMessage("CreateDevice", MessageLevel.Error, $"Exception creating driver: {ex}");
+                logger?.LogMessage("CreateDevice", MessageLevel.Error, $"Exception creating driver: {ex}");
             }
         }
 

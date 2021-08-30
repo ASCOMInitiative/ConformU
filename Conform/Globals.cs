@@ -19,6 +19,7 @@ namespace ConformU
         internal const string COMMAND_OPTION_LOGFILEPATH = "ConformLogFilePath";
         internal const string COMMAND_OPTION_DEBUG_DISCOVERY = "DebugDiscovery";
 
+        internal const int MESSAGE_LEVEL_WIDTH = 8; // Width to which the message level will be padded
         internal const int TEST_NAME_WIDTH = 35; // Width allowed for test names in screen display and log files
 
         #endregion
@@ -64,39 +65,19 @@ namespace ConformU
                     switch (messageLevel)
                     {
                         case MessageLevel.Debug:
-                            {
-                                messageLevelFormatted = "DEBUG   ";
-                                break;
-                            }
-
                         case MessageLevel.Info:
-                            {
-                                messageLevelFormatted = "INFO    ";
-                                break;
-                            }
-
                         case MessageLevel.OK:
-                            {
-                                messageLevelFormatted = "OK      ";
-                                break;
-                            }
-
                         case MessageLevel.Issue:
-                            {
-                                messageLevelFormatted = "ISSUE   ";
-                                break;
-                            }
-
                         case MessageLevel.Error:
                             {
-                                messageLevelFormatted = "ERROR   ";
+                                messageLevelFormatted = messageLevel.ToString().ToUpperInvariant();
                                 break;
                             }
 
                         case MessageLevel.TestOnly:
                         case MessageLevel.TestAndMessage:
                             {
-                                messageLevelFormatted = "        ";
+                                messageLevelFormatted = "";
                                 break;
                             }
                         default:
@@ -104,6 +85,7 @@ namespace ConformU
                                 throw new ASCOM.InvalidValueException($"LogMsg - Unknown message level: {messageLevel}.");
                             }
                     }
+                    messageLevelFormatted = messageLevelFormatted.PadRight(MESSAGE_LEVEL_WIDTH);
 
                     // Cater for screen display, which requires test name, message level and message in one string and log file, which requires test name separate from message level and message.
                     switch (messageLevel)

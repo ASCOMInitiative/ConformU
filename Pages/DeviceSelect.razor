@@ -204,7 +204,6 @@
 
             technologyType = DeviceTechnology.Alpaca;
             configuration.Settings.DeviceTechnology = technologyType;
-            conformLogger.LogDebug("OnNewAlpacaDeviceSelected", $"New {technologyType} {value.AscomDeviceType} device selected: {value.AscomDeviceName} at {value.IpAddress}");
 
             configuration.Settings.AlpacaDevice = selectedAlpacaDevice;
 
@@ -264,7 +263,6 @@
         }
         else
         {
-            conformLogger.LogDebug("OnSelectDeviceClick", $"Alpaca device selected: {technologyType}");
             configuration.Settings.AlpacaDevice = selectedAlpacaDevice;
             configuration.Settings.DeviceType = Enum.Parse<DeviceType>(selectedAlpacaDevice.AscomDeviceType);
         }
@@ -283,11 +281,9 @@
     {
         selectedComDevice = value;
         if (value is null) value = new ComDevice("Unknown", "Unknown");
-        conformLogger.LogDebug("OnComDeviceChanged", $"New COM Device selected: {value.ProgId}, description: {value.DisplayName}");
 
         selectedDeviceType = Enum.Parse<DeviceType>(selectedDeviceTypeString);
         configuration.Settings.DeviceType = selectedDeviceType;
-        conformLogger.LogDebug("OnSelectDeviceClick", $"COM device selected: {technologyType}");
         configuration.Settings.ComDevice = selectedComDevice;
 
         technologyType = DeviceTechnology.COM;
@@ -311,7 +307,6 @@
 
     private void AlpacaDiscoveryCompleted(object caller, EventArgs args)
     {
-        conformLogger.LogDebug("AlpacaDiscoveryCompleted", $"Discovery complete");
         alpacaDiscoveryProgress += $"Discovery complete!";
         SetStatusAreaHeight();
         ascomDevices = new();

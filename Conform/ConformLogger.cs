@@ -19,14 +19,6 @@ namespace ConformU
             LogMessage(id, formattedMessage);
         }
 
-        public void LogDebug(string id, string message)
-        {
-            if (base.LoggingLevel==LogLevel.Debug)
-            {
-                base.LogMessage(id, message);
-            }
-        }
-
         public new void LogMessage(string id, string message)
         {
             Console.WriteLine($"{id,-TEST_NAME_WIDTH} {message}");
