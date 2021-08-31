@@ -41,7 +41,6 @@ namespace ConformU
 
         private string test, action, status;
 
-        private readonly ConformanceTestManager parentClass;
         private readonly ConformLogger TL;
         private readonly CancellationToken cancellationToken;
 
@@ -133,7 +132,7 @@ namespace ConformU
         /// <param name="HasPerformanceCheck">Device has a performance test</param>
         /// <param name="HasPostRunCheck">Device requires a post run safety check</param>
         /// <remarks></remarks>
-        public DeviceTesterBaseClass(bool HasCanProperties, bool HasProperties, bool HasMethods, bool HasPreRunCheck, bool HasPreConnectCheck, bool HasPerformanceCheck, bool HasPostRunCheck, ConformanceTestManager parent, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken cancellationToken) : base()
+        public DeviceTesterBaseClass(bool HasCanProperties, bool HasProperties, bool HasMethods, bool HasPreRunCheck, bool HasPreConnectCheck, bool HasPerformanceCheck, bool HasPostRunCheck, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken cancellationToken) : base()
         {
             l_HasPreConnectCheck = HasPreConnectCheck;
             l_Connected = false;
@@ -143,7 +142,6 @@ namespace ConformU
             l_HasMethods = HasMethods;
             l_HasPostRunCheck = HasPostRunCheck;
             l_HasPerformanceCheck = HasPerformanceCheck;
-            parentClass = parent;
             TL = logger;
             this.cancellationToken = cancellationToken;
             settings = conformConfiguration.Settings;
@@ -775,7 +773,7 @@ namespace ConformU
                     }
             }
 
-            parentClass.OnStatusChanged($"{test} {action} {status}");
+            TL.OnStatusChanged($"{test} {action} {status}");
         }
 
         /// <summary>
@@ -791,7 +789,7 @@ namespace ConformU
             action = newAction;
             status = newStatus;
 
-            parentClass.OnStatusChanged($"{test} {action} {status}");
+            TL.OnStatusChanged($"{test} {action} {status}");
         }
 
         private static bool IncludeMethod(MandatoryMethod p_Method, DeviceType p_DeviceType, int p_InterfaceVersion)
@@ -1070,7 +1068,7 @@ namespace ConformU
 
         internal void LogMsg(string testName, MessageLevel messageLevel, string message)
         {
-            Globals.LogMessage(testName, messageLevel, message, settings.Debug, parentClass, TL);
+            TL.LogMessage(testName, messageLevel, message);
         }
 
         /// <summary>

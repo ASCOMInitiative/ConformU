@@ -78,8 +78,8 @@
             // Create a test manager instance to oversee the test
             using (tester = new ConformanceTestManager(settings, conformLogger, cancelConformToken))
             {
-                tester.OutputChanged += OutputChanged;
-                tester.StatusChanged += StatusChanged;
+                conformLogger.OutputChanged += OutputChanged;
+                conformLogger.StatusChanged += StatusChanged;
 
                 // Clear the screen log
                 screenLog = "";
@@ -105,8 +105,8 @@
                 // Execute this continuation task when the conformance test finishes to ensure that the tester is disposed even when the conformance task itself is cancelled.
                 await conformanceTest;
 
-                tester.OutputChanged -= OutputChanged;
-                tester.StatusChanged -= StatusChanged;
+                conformLogger.OutputChanged -= OutputChanged;
+                conformLogger.StatusChanged -= StatusChanged;
 
 
                 // await conformanceTest.ContinueWith(antecedent =>
