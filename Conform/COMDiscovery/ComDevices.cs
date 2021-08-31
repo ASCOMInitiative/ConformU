@@ -26,19 +26,19 @@ namespace ConformU
             string[] keyNames = profile.GetSubKeyNames();
             foreach (string keyName in keyNames)
             {
-                TL?.LogMessage("GetRegisteredDrivers", $"Found key name {keyName}");
+                TL?.LogMessage("GetRegisteredDrivers", MessageLevel.Debug,$"Found key name {keyName}");
                 if (keyName.ToUpperInvariant() == $"{requiredDeviceType} Drivers".ToUpperInvariant())
                 {
-                    TL?.LogMessage("GetRegisteredDrivers", $"Found DRIVERS of type {keyName}");
+                    TL?.LogMessage("GetRegisteredDrivers", MessageLevel.Debug, $"Found DRIVERS of type {keyName}");
                     RegistryKey drivers = profile.OpenSubKey($"{requiredDeviceType} Drivers");
                     string[] driverNames = drivers.GetSubKeyNames();
                     foreach (string driverName in driverNames)
                     {
-                        TL?.LogMessage("GetRegisteredDrivers", $"Found Driver: {driverName}");
+                        TL?.LogMessage("GetRegisteredDrivers", MessageLevel.Debug, $"Found Driver: {driverName}");
                         RegistryKey driver = drivers.OpenSubKey(driverName);
                         string description = (string)driver.GetValue("");
                         result.Add(driverName, description);
-                        TL?.LogMessage("GetRegisteredDrivers", $"Added Driver: {driverName} {description}");
+                        TL?.LogMessage("GetRegisteredDrivers", MessageLevel.Debug, $"Added Driver: {driverName} {description}");
                     }
 
                 }

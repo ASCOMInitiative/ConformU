@@ -101,7 +101,7 @@ namespace ConformU
 
                 default:
                     {
-                        TL.LogMessage("Conform:ConformanceCheck", $"Unknown device type: {settings.DeviceType}. You need to add it to the ConformanceCheck subroutine");
+                        TL.LogMessage("Conform:ConformanceCheck", MessageLevel.Error, $"Unknown device type: {settings.DeviceType}. You need to add it to the ConformanceCheck subroutine");
                         throw new ASCOM.InvalidValueException($"Conform:ConformanceCheck - Unknown device type: {settings.DeviceType}. You need to add it to the ConformanceCheck subroutine");
                     }
             }
@@ -126,7 +126,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                TL.LogMessage("TestManager:SetupDialog", $"Exception \r\n{ex}");
+                TL.LogMessage("TestManager:SetupDialog", MessageLevel.Error, $"Exception \r\n{ex}");
             }
             finally
             {
@@ -294,7 +294,7 @@ namespace ConformU
             catch (Exception ex)
             {
                 //LogMsgError("Conform:ConformanceCheck Exception: ", ex.ToString());
-                TL.LogMessage("ConformanceTestManager", ex.ToString());
+                TL.LogMessage("ConformanceTestManager", MessageLevel.Error, ex.ToString());
                 //OnLogMessageChanged("ConformanceTestManager", $"{DateTime.Now:HH:mm:ss.fff}  ERROR  ConformanceTestManager - {ex}");
             }
 

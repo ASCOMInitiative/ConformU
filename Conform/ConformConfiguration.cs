@@ -35,39 +35,39 @@ namespace ConformU
                 {
                     string folderName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), FOLDER_NAME);
                     fileSettingsFileName = Path.Combine(folderName, SETTINGS_FILENAME);
-                    TL?.LogMessage("ConformConfiguration", $"Settings folder: {folderName}, Settings file: {fileSettingsFileName}");
+                    TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Settings folder: {folderName}, Settings file: {fileSettingsFileName}");
                 }
                 else
                 {
                     fileSettingsFileName = configurationFile;
-                    TL?.LogMessage("ConformConfiguration", $"Settings file: {fileSettingsFileName}");
+                    TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Settings file: {fileSettingsFileName}");
                 }
 
 
                 if (File.Exists(fileSettingsFileName))
                 {
-                    TL?.LogMessage("ConformConfiguration", "File exists and read OK");
+                    TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, "File exists and read OK");
                     string serialisedSettings = File.ReadAllText(fileSettingsFileName);
-                    TL?.LogMessage("ConformConfiguration", $"Serialised settings: {serialisedSettings}");
+                    TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Serialised settings: {serialisedSettings}");
 
                     settings = JsonSerializer.Deserialize<Settings>(serialisedSettings, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     Status = "Settings read successfully";
                 }
                 else
                 {
-                    TL.LogMessage("ConformConfiguration", $"Configuration file does not exist, initialising new file: {fileSettingsFileName}");
+                    TL.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Configuration file does not exist, initialising new file: {fileSettingsFileName}");
                     PersistSettings(settings);
                     Status = "Settings set to defaults on first time use.";
                 }
             }
             catch (JsonException ex)
             {
-                TL?.LogMessage("ConformConfiguration", $"Error parsing Conform settings file: {ex.Message}");
+                TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Error parsing Conform settings file: {ex.Message}");
                 Status = "Settings file corrupted, please reset to default values";
             }
             catch (Exception ex)
             {
-                TL?.LogMessage("ConformConfiguration", ex.ToString());
+                TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, ex.ToString());
                 Status = "Exception reading settings, default values are in use.";
             }
         }
@@ -108,7 +108,7 @@ namespace ConformU
         /// </summary>
         public void Save()
         {
-            TL?.LogMessage("Save", "persisting settings to settings file");
+            TL?.LogMessage("Save", MessageLevel.Debug, "Persisting settings to settings file");
             PersistSettings(settings);
             Status = $"Settings saved at {DateTime.Now:HH:mm:ss.f}.";
 
@@ -120,15 +120,15 @@ namespace ConformU
             if (ConfigurationChanged is not null)
             {
                 EventArgs args = new();
-                TL?.LogMessage("RaiseConfigurationChnagedEvent", "About to call configuration changed event handler");
+                TL?.LogMessage("RaiseConfigurationChnagedEvent", MessageLevel.Debug, "About to call configuration changed event handler");
                 ConfigurationChanged(this, args);
-                TL?.LogMessage("RaiseConfigurationChnagedEvent", "Returned from configuration changed event handler");
+                TL?.LogMessage("RaiseConfigurationChnagedEvent", MessageLevel.Debug, "Returned from configuration changed event handler");
             }
         }
 
         public void Reset()
         {
-            TL?.LogMessage("Reset", "Resetting settings file to default values");
+            TL?.LogMessage("Reset", MessageLevel.Debug, "Resetting settings file to default values");
             settings = new();
             PersistSettings(settings);
             Status = $"Settings reset at {DateTime.Now:HH:mm:ss.f}.";
@@ -176,7 +176,7 @@ namespace ConformU
                     throw new ArgumentNullException(nameof(settingsToPersist));
                 }
 
-                TL?.LogMessage("PersistSettings", $"Settings file: {fileSettingsFileName}");
+                TL?.LogMessage("PersistSettings", MessageLevel.Debug, $"Settings file: {fileSettingsFileName}");
 
                 JsonSerializerOptions options = new()
                 {
@@ -189,7 +189,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                TL.LogMessage("PersistSettings", ex.ToString());
+                TL.LogMessage("PersistSettings", MessageLevel.Debug, ex.ToString());
             }
 
         }

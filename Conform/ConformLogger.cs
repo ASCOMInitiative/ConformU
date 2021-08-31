@@ -16,12 +16,14 @@ namespace ConformU
         public event EventHandler<MessageEventArgs> OutputChanged;
         public event EventHandler<MessageEventArgs> StatusChanged;
 
+        public bool Debug { get; set; }
+
         public void LogMessage(string id, MessageLevel logLevel, string message)
         {
-            string formattedMessage = logLevel.ToString().PadRight(MESSAGE_LEVEL_WIDTH) + message;
-            string screenMessage;
+            string screenMessage,messageLevelFormatted;
 
-            string messageLevelFormatted = "        ";
+            // Ignore debug messages when not in Debug mode
+            if ((logLevel == MessageLevel.Debug) & !Debug) return;
 
             switch (logLevel)
             {
@@ -48,7 +50,6 @@ namespace ConformU
             }
             messageLevelFormatted = messageLevelFormatted.PadRight(MESSAGE_LEVEL_WIDTH);
 
-
             switch (logLevel)
             {
                 case MessageLevel.TestOnly:
@@ -62,16 +63,10 @@ namespace ConformU
                         break;
                     }
             }
-            LogMessage(id, formattedMessage);
-        }
-
-        public new void LogMessage(string id, string message)
-        {
             Console.WriteLine($"{id,-TEST_NAME_WIDTH} {message}");
             base.LogMessage(id, message);
 
-            OnLogMessageChanged("LogMessage", $"{DateTime.Now:HH:mm:ss.fff} {message}");
-
+            OnLogMessageChanged($"{DateTime.Now:HH:mm:ss.fff} {screenMessage}");
         }
 
         public new void Log(LogLevel level, string message)
@@ -79,11 +74,10 @@ namespace ConformU
             base.Log(level, message);
         }
 
-        internal void OnLogMessageChanged(string id, string message)
+        internal void OnLogMessageChanged(string message)
         {
-            MessageEventArgs e = new()
+            MessageEventArgs eventArgs = new()
             {
-                Id = id,
                 Message = message
             };
 
@@ -91,15 +85,14 @@ namespace ConformU
 
             if (messageEventHandler is not null)
             {
-                messageEventHandler(this, e);
+                messageEventHandler(this, eventArgs);
             }
         }
 
         internal void OnStatusChanged(string status)
         {
-            MessageEventArgs e = new()
+            MessageEventArgs eventArgs = new()
             {
-                Id = "Status",
                 Message = status
             };
 
@@ -107,7 +100,7 @@ namespace ConformU
 
             if (messageEventHandler is not null)
             {
-                messageEventHandler(this, e);
+                messageEventHandler(this, eventArgs);
             }
         }
 

@@ -663,7 +663,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogMsg("ConformanceCheck", MessageLevel.TestAndMessage, $"Exception while trying to determine the last modified time: {ex}");
+                LogTestAndMessage("ConformanceCheck", $"Exception while trying to determine the last modified time: {ex}");
             }
 
             LogTestOnly($"ASCOM Universal Device Conformance Checker Version {this.GetType().Assembly.GetName().Version}, Build time: {lastModifiedTime:ddd dd MMMM yyyy HH:mm:ss}");
@@ -1031,39 +1031,39 @@ namespace ConformU
 
         internal void LogTestOnly(string p_Test)
         {
-            LogMsg(p_Test, MessageLevel.TestOnly, "");
+            TL.LogMessage(p_Test, MessageLevel.TestOnly, "");
         }
 
         internal void LogTestAndMessage(string p_Test, string p_Msg)
         {
-            LogMsg(p_Test, MessageLevel.TestAndMessage, p_Msg);
+            TL.LogMessage(p_Test, MessageLevel.TestAndMessage, p_Msg);
         }
 
         internal void LogOK(string p_Test, string p_Msg)
         {
-            LogMsg(p_Test, MessageLevel.OK, p_Msg);
+            TL.LogMessage(p_Test, MessageLevel.OK, p_Msg);
         }
 
         internal void LogDebug(string p_Test, string p_Msg)
         {
-            LogMsg(p_Test, MessageLevel.Debug, p_Msg);
+            TL.LogMessage(p_Test, MessageLevel.Debug, p_Msg);
         }
 
         internal void LogInfo(string p_Test, string p_Msg)
         {
-            LogMsg(p_Test, MessageLevel.Info, p_Msg);
+            TL.LogMessage(p_Test, MessageLevel.Info, p_Msg);
         }
 
         internal void LogIssue(string p_Test, string p_Msg)
         {
             conformResults.Issues.Add(new System.Collections.Generic.KeyValuePair<string, string>(p_Test, p_Msg));
-            LogMsg(p_Test, MessageLevel.Issue, p_Msg);
+            TL.LogMessage(p_Test, MessageLevel.Issue, p_Msg);
         }
 
         internal void LogError(string p_Test, string p_Msg)
         {
             conformResults.Errors.Add(new System.Collections.Generic.KeyValuePair<string, string>(p_Test, p_Msg));
-            LogMsg(p_Test, MessageLevel.Error, p_Msg);
+            TL.LogMessage(p_Test, MessageLevel.Error, p_Msg);
         }
 
         internal void LogMsg(string testName, MessageLevel messageLevel, string message)

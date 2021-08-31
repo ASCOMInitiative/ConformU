@@ -112,7 +112,7 @@ namespace ConformU
                             settings.AlpacaDevice.AlpacaDeviceNumber,
                             settings.StrictCasing,
                             settings.TraceAlpacaCalls ? logger : null);
-                        LogMsg("CreateDevice", MessageLevel.Debug, $"Alpaca device created OK");
+                        LogDebug("CreateDevice", $"Alpaca device created OK");
                         break;
 
                     case DeviceTechnology.COM:

@@ -96,26 +96,26 @@ namespace ConformU
                 switch (settings.DeviceTechnology)
                 {
                     case DeviceTechnology.Alpaca:
-                        LogMsg("CreateDevice", MessageLevel.Debug, $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
+                        LogDebug("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
                         m_Focuser = new AlpacaFocuser(settings.AlpacaConfiguration.AccessServiceType.ToString(),
                             settings.AlpacaDevice.IpAddress,
                             settings.AlpacaDevice.IpPort,
                             settings.AlpacaDevice.AlpacaDeviceNumber,
                             settings.StrictCasing,
                             settings.TraceAlpacaCalls ? logger : null);
-                        LogMsg("CreateDevice", MessageLevel.Debug, $"Alpaca device created OK");
+                        LogDebug("CreateDevice", $"Alpaca device created OK");
                         break;
 
                     case DeviceTechnology.COM:
                         switch (settings.ComConfiguration.ComACcessMechanic)
                         {
                             case ComAccessMechanic.Native:
-                                LogMsg("CreateDevice", MessageLevel.Debug, $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
+                                LogDebug("CreateDevice", $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
                                 m_Focuser = new FocuserFacade(settings, logger);
                                 break;
 
                             case ComAccessMechanic.DriverAccess:
-                                LogMsg("CreateDevice", MessageLevel.Debug, $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
+                                LogDebug("CreateDevice", $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
                                 m_Focuser = new Focuser(settings.ComDevice.ProgId);
                                 break;
 

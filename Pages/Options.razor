@@ -483,7 +483,6 @@
     {
         ComAccessMechanic comMechanic = (ComAccessMechanic)accessMode;
         configuration.Settings.ComConfiguration.ComACcessMechanic = comAccessMechanic;
-        //configuration.Save();
         SaveConfiguration();
     }
 
@@ -608,7 +607,6 @@
                         configuration.Settings.TestSideOfPierRead = false;
                         configuration.Settings.TestSideOfPierWrite = false;
                     }
-                    ;
                 }
             }
         }
@@ -709,7 +707,6 @@
         }
         configuration.Settings.TelescopeTests = changedTests;
 
-        //configuration.Save();
         SaveConfiguration();
         SetConfiguration();
         StateHasChanged();
@@ -717,7 +714,7 @@
 
     void OnTelescopeTestsChange(IEnumerable<string> value, string asd)
     {
-        conformLogger.LogMessage("OnTelescopeTestsChange", $"Start of enabled test list");
+        conformLogger.LogMessage("OnTelescopeTestsChange", MessageLevel.Debug, $"Start of enabled test list");
 
         Dictionary<string, bool> newTelescopetestValues = new();
         foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
@@ -727,12 +724,11 @@
 
         foreach (string i in value)
         {
-            conformLogger.LogMessage("OnTelescopeTestsChange", $"Setting value: {i} true");
+            conformLogger.LogMessage("OnTelescopeTestsChange", MessageLevel.Debug, $"Setting value: {i} true");
             newTelescopetestValues[i] = true;
         }
         configuration.Settings.TelescopeTests = newTelescopetestValues;
-        conformLogger.LogMessage("OnTelescopeTestsChange", $"End of enabled test list");
-        //configuration.Save();
+        conformLogger.LogMessage("OnTelescopeTestsChange", MessageLevel.Debug, $"End of enabled test list");
         SaveConfiguration();
     }
 
