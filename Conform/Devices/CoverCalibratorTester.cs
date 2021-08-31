@@ -269,7 +269,7 @@ namespace ConformU
         public override void CheckMethods()
         {
             DateTime startTime;
-            SetStatus("", "", "");  // Clear status messages
+            ClearStatus();  // Clear status messages
 
             if (cancellationToken.IsCancellationRequested)
                 return;

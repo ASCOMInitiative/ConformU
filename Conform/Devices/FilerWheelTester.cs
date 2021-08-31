@@ -171,7 +171,7 @@ namespace ConformU
                 LogInfo("Pre-run Check", "Unable to determine that the Filter wheel is stationary");
                 LogError("Pre-run Check", "Exception: " + ex.ToString());
             }
-            SetStatus("", "", "");
+            ClearStatus();
         }
 
         public override void CheckCommonMethods()

@@ -119,6 +119,7 @@ namespace ConformU
             l_HasMethods = true;
             l_HasPostRunCheck = false;
             l_HasPerformanceCheck = true;
+            ClearStatus();
         }
 
         /// <summary>
@@ -132,7 +133,7 @@ namespace ConformU
         /// <param name="HasPerformanceCheck">Device has a performance test</param>
         /// <param name="HasPostRunCheck">Device requires a post run safety check</param>
         /// <remarks></remarks>
-        public DeviceTesterBaseClass(bool HasCanProperties, bool HasProperties, bool HasMethods, bool HasPreRunCheck, bool HasPreConnectCheck, bool HasPerformanceCheck, bool HasPostRunCheck, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken cancellationToken) : base()
+        public DeviceTesterBaseClass(bool HasCanProperties, bool HasProperties, bool HasMethods, bool HasPreRunCheck, bool HasPreConnectCheck, bool HasPerformanceCheck, bool HasPostRunCheck, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken cancellationToken) : this()
         {
             l_HasPreConnectCheck = HasPreConnectCheck;
             l_Connected = false;
@@ -148,7 +149,6 @@ namespace ConformU
         }
 
         private bool disposedValue = false;        // To detect redundant calls
-                                                   // IDisposable
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -161,7 +161,7 @@ namespace ConformU
             disposedValue = true;
         }
 
-        // This code added by Visual Basic to correctly implement the disposable pattern.
+        // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
             // Do not change this code.  Put clean-up code in Dispose(ByVal disposing As Boolean) above.
@@ -742,7 +742,7 @@ namespace ConformU
 
         #endregion
 
-        #region Base class support Code
+        #region Common methods for all device tester classes
 
         /// <summary>
         /// Update the status display
@@ -773,7 +773,7 @@ namespace ConformU
                     }
             }
 
-            TL.OnStatusChanged($"{test} {action} {status}");
+            TL?.OnStatusChanged($"{test} {action} {status}");
         }
 
         /// <summary>
@@ -789,216 +789,21 @@ namespace ConformU
             action = newAction;
             status = newStatus;
 
-            TL.OnStatusChanged($"{test} {action} {status}");
+            TL?.OnStatusChanged($"{test} {action} {status}");
         }
 
-        private static bool IncludeMethod(MandatoryMethod p_Method, DeviceType p_DeviceType, int p_InterfaceVersion)
+        /// <summary>
+        ///Clear all status fields
+        ///</summary>
+        ///<remarks></remarks>
+        public void ClearStatus()
         {
-            // This mechanic allows individual tests for particular devices to be skipped. It is no longer required because this is handled by DriverAccess
-            // The code is left in place in case it is ever needed in the future
+            test = "";
+            action = "";
+            status = "";
 
-            bool RetVal = true; // Default to true as most methods will be tested , we just list the exceptions to this below
-
-            // Matrix controlling what tests
-            switch (p_DeviceType)
-            {
-                case DeviceType.Telescope:
-                    {
-                        switch (p_InterfaceVersion)
-                        {
-                            case 1: // Telescope interface V1 does not have Driver Version
-                                {
-                                    if (p_Method == MandatoryMethod.DriverVersion)
-                                        RetVal = false;
-                                    break;
-                                }
-
-                            default:
-                                {
-                                    RetVal = true; // All methods in all interface versions are mandatory
-                                    break;
-                                }
-                        }
-
-                        break;
-                    }
-
-                case DeviceType.Camera:
-                    {
-                        RetVal = true;
-                        break;
-                    }
-            }
-
-            return RetVal;
+            TL?.OnStatusChanged($"{test} {action} {status}");
         }
-
-        //private void CommandTest(CommandType p_Type, string p_Name)
-        //{
-        //    string l_CmdSent = "!! Unknown Value !!";
-        //    string m_CommandString;
-        //    bool m_CommandBool;
-        //    g_Status.Test = p_Name;
-        //    try
-        //    {
-        //        switch (p_Type)
-        //        {
-        //            case CommandType.tstCommandBlind:
-        //                {
-        //                    if (g_CmdStrings.CommandBlind is object)
-        //                    {
-        //                        l_CmdSent = g_CmdStrings.CommandBlind;
-        //                        Device.CommandBlind(l_CmdSent, false);
-        //                        LogMsgOK(p_Name, "Sent string \"" + g_CmdStrings.CommandBlind + "\"");
-        //                    }
-        //                    else
-        //                    {
-        //                        LogMsgInfo(p_Name, "Skipped CommandBlind test");
-        //                    }
-
-        //                    break;
-        //                }
-
-        //            case CommandType.tstCommandBool:
-        //                {
-        //                    if (g_CmdStrings.CommandBool is object)
-        //                    {
-        //                        l_CmdSent = g_CmdStrings.CommandBool;
-        //                        m_CommandBool = Conversions.ToBoolean(Device.CommandBool(l_CmdSent, (object)false));
-        //                        if (m_CommandBool == g_CmdStrings.ReturnBool)
-        //                        {
-        //                            LogMsgOK(p_Name, "Sent string \"" + g_CmdStrings.CommandBool + "\" - Received expected return value: " + m_CommandBool);
-        //                        }
-        //                        else
-        //                        {
-        //                            LogMsgError(p_Name, "Sent string \"" + g_CmdStrings.CommandBool + "\" - Received unexpected return value: " + m_CommandBool);
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        LogMsgInfo(p_Name, "Skipped CommandBool test");
-        //                    }
-
-        //                    break;
-        //                }
-
-        //            case CommandType.tstCommandString:
-        //                {
-        //                    if (g_CmdStrings.CommandString is object)
-        //                    {
-        //                        l_CmdSent = g_CmdStrings.CommandString;
-        //                        m_CommandString = Conversions.ToString(Device.CommandString(l_CmdSent, (object)false));
-        //                        if (g_CmdStrings.ReturnString is object) // Valid return string to test
-        //                        {
-        //                            if ((m_CommandString ?? "") == (g_CmdStrings.ReturnString ?? ""))
-        //                            {
-        //                                LogMsgOK(p_Name, "Sent string \"" + g_CmdStrings.CommandString + "\" - Received string: \"" + m_CommandString + "\"");
-        //                            }
-        //                            else
-        //                            {
-        //                                LogMsgError(p_Name, "Sent string \"" + g_CmdStrings.CommandString + "\" - Received string: \"" + m_CommandString + "\" - Expected string: \"" + g_CmdStrings.ReturnString + "\"");
-        //                            }
-        //                        }
-        //                        else // Skip the return string test
-        //                        {
-        //                            LogMsgOK(p_Name, "Sent string \"" + g_CmdStrings.CommandString + "\" - Return string test skipped");
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        LogMsgInfo(p_Name, "Skipped CommandString test");
-        //                    }
-
-        //                    break;
-        //                }
-
-        //            case CommandType.tstCommandBlindRaw:
-        //                {
-        //                    if (g_CmdStringsRaw.CommandBlind is object)
-        //                    {
-        //                        l_CmdSent = g_CmdStringsRaw.CommandBlind;
-        //                        Device.CommandBlind(l_CmdSent, true);
-        //                        LogMsgOK(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandBlind + "\"");
-        //                    }
-        //                    else
-        //                    {
-        //                        LogMsgInfo(p_Name, "Skipped CommandBlind Raw test");
-        //                    }
-
-        //                    break;
-        //                }
-
-        //            case CommandType.tstCommandBoolRaw:
-        //                {
-        //                    if (g_CmdStringsRaw.CommandBool is object)
-        //                    {
-        //                        l_CmdSent = g_CmdStringsRaw.CommandBool;
-        //                        m_CommandBool = Conversions.ToBoolean(Device.CommandBool(l_CmdSent, (object)true));
-        //                        if (m_CommandBool == g_CmdStringsRaw.ReturnBool)
-        //                        {
-        //                            LogMsgOK(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandBool + "\" - Received expected return value: " + m_CommandBool);
-        //                        }
-        //                        else
-        //                        {
-        //                            LogMsgError(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandBool + "\" - Received unexpected return value: " + m_CommandBool);
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        LogMsgInfo(p_Name, "Skipped CommandBool Raw test");
-        //                    }
-
-        //                    break;
-        //                }
-
-        //            case CommandType.tstCommandStringRaw:
-        //                {
-        //                    if (g_CmdStringsRaw.CommandString is object)
-        //                    {
-        //                        l_CmdSent = g_CmdStringsRaw.CommandString;
-        //                        m_CommandString = Conversions.ToString(Device.CommandString(l_CmdSent, (object)true));
-        //                        if (g_CmdStringsRaw.ReturnString is object) // Valid return string to test
-        //                        {
-        //                            if ((m_CommandString ?? "") == (g_CmdStringsRaw.ReturnString ?? ""))
-        //                            {
-        //                                LogMsgOK(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandString + "\" - Received string: \"" + m_CommandString + "\"");
-        //                            }
-        //                            else
-        //                            {
-        //                                LogMsgError(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandString + "\" - Received string: \"" + m_CommandString + "\" - Expected string: \"" + g_CmdStringsRaw.ReturnString + "\"");
-        //                            }
-        //                        }
-        //                        else // Skip the return string test
-        //                        {
-        //                            LogMsgOK(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandString + "\" - Return string test skipped");
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        LogMsgInfo(p_Name, "Skipped CommandString Raw test");
-        //                    }
-
-        //                    break;
-        //                }
-
-        //            default:
-        //                {
-        //                    LogMsgError(p_Name, "Conform:CommandTest: Unknown test type " + p_Type.ToString());
-        //                    break;
-        //                }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        HandleException(p_Name, MemberType.Method, Required.Optional, ex, "");
-        //    }
-
-        //    g_Status.Clear();  // Clear status messages
-        //}
-
-        #endregion
-
-        #region Common methods for all device tester classes
 
         /// <summary>
         /// Delays execution for the given time period in milliseconds
@@ -1031,44 +836,44 @@ namespace ConformU
 
         internal void LogTestOnly(string p_Test)
         {
-            TL.LogMessage(p_Test, MessageLevel.TestOnly, "");
+            TL?.LogMessage(p_Test, MessageLevel.TestOnly, "");
         }
 
         internal void LogTestAndMessage(string p_Test, string p_Msg)
         {
-            TL.LogMessage(p_Test, MessageLevel.TestAndMessage, p_Msg);
+            TL?.LogMessage(p_Test, MessageLevel.TestAndMessage, p_Msg);
         }
 
         internal void LogOK(string p_Test, string p_Msg)
         {
-            TL.LogMessage(p_Test, MessageLevel.OK, p_Msg);
+            TL?.LogMessage(p_Test, MessageLevel.OK, p_Msg);
         }
 
         internal void LogDebug(string p_Test, string p_Msg)
         {
-            TL.LogMessage(p_Test, MessageLevel.Debug, p_Msg);
+            TL?.LogMessage(p_Test, MessageLevel.Debug, p_Msg);
         }
 
         internal void LogInfo(string p_Test, string p_Msg)
         {
-            TL.LogMessage(p_Test, MessageLevel.Info, p_Msg);
+            TL?.LogMessage(p_Test, MessageLevel.Info, p_Msg);
         }
 
         internal void LogIssue(string p_Test, string p_Msg)
         {
             conformResults.Issues.Add(new System.Collections.Generic.KeyValuePair<string, string>(p_Test, p_Msg));
-            TL.LogMessage(p_Test, MessageLevel.Issue, p_Msg);
+            TL?.LogMessage(p_Test, MessageLevel.Issue, p_Msg);
         }
 
         internal void LogError(string p_Test, string p_Msg)
         {
             conformResults.Errors.Add(new System.Collections.Generic.KeyValuePair<string, string>(p_Test, p_Msg));
-            TL.LogMessage(p_Test, MessageLevel.Error, p_Msg);
+            TL?.LogMessage(p_Test, MessageLevel.Error, p_Msg);
         }
 
         internal void LogMsg(string testName, MessageLevel messageLevel, string message)
         {
-            TL.LogMessage(testName, messageLevel, message);
+            TL?.LogMessage(testName, messageLevel, message);
         }
 
         /// <summary>
@@ -1475,8 +1280,216 @@ namespace ConformU
                 SetStatus(p_Message, ((p_Duration / 100d - i) / 10d).ToString(), "");
             }
 
-            SetStatus("", "", "");
+            ClearStatus();
         }
+
+        #endregion
+
+        #region Base class support Code
+
+        private static bool IncludeMethod(MandatoryMethod p_Method, DeviceType p_DeviceType, int p_InterfaceVersion)
+        {
+            // This mechanic allows individual tests for particular devices to be skipped. It is no longer required because this is handled by DriverAccess
+            // The code is left in place in case it is ever needed in the future
+
+            bool RetVal = true; // Default to true as most methods will be tested , we just list the exceptions to this below
+
+            // Matrix controlling what tests
+            switch (p_DeviceType)
+            {
+                case DeviceType.Telescope:
+                    {
+                        switch (p_InterfaceVersion)
+                        {
+                            case 1: // Telescope interface V1 does not have Driver Version
+                                {
+                                    if (p_Method == MandatoryMethod.DriverVersion)
+                                        RetVal = false;
+                                    break;
+                                }
+
+                            default:
+                                {
+                                    RetVal = true; // All methods in all interface versions are mandatory
+                                    break;
+                                }
+                        }
+
+                        break;
+                    }
+
+                case DeviceType.Camera:
+                    {
+                        RetVal = true;
+                        break;
+                    }
+            }
+
+            return RetVal;
+        }
+
+        //private void CommandTest(CommandType p_Type, string p_Name)
+        //{
+        //    string l_CmdSent = "!! Unknown Value !!";
+        //    string m_CommandString;
+        //    bool m_CommandBool;
+        //    g_Status.Test = p_Name;
+        //    try
+        //    {
+        //        switch (p_Type)
+        //        {
+        //            case CommandType.tstCommandBlind:
+        //                {
+        //                    if (g_CmdStrings.CommandBlind is object)
+        //                    {
+        //                        l_CmdSent = g_CmdStrings.CommandBlind;
+        //                        Device.CommandBlind(l_CmdSent, false);
+        //                        LogMsgOK(p_Name, "Sent string \"" + g_CmdStrings.CommandBlind + "\"");
+        //                    }
+        //                    else
+        //                    {
+        //                        LogMsgInfo(p_Name, "Skipped CommandBlind test");
+        //                    }
+
+        //                    break;
+        //                }
+
+        //            case CommandType.tstCommandBool:
+        //                {
+        //                    if (g_CmdStrings.CommandBool is object)
+        //                    {
+        //                        l_CmdSent = g_CmdStrings.CommandBool;
+        //                        m_CommandBool = Conversions.ToBoolean(Device.CommandBool(l_CmdSent, (object)false));
+        //                        if (m_CommandBool == g_CmdStrings.ReturnBool)
+        //                        {
+        //                            LogMsgOK(p_Name, "Sent string \"" + g_CmdStrings.CommandBool + "\" - Received expected return value: " + m_CommandBool);
+        //                        }
+        //                        else
+        //                        {
+        //                            LogMsgError(p_Name, "Sent string \"" + g_CmdStrings.CommandBool + "\" - Received unexpected return value: " + m_CommandBool);
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        LogMsgInfo(p_Name, "Skipped CommandBool test");
+        //                    }
+
+        //                    break;
+        //                }
+
+        //            case CommandType.tstCommandString:
+        //                {
+        //                    if (g_CmdStrings.CommandString is object)
+        //                    {
+        //                        l_CmdSent = g_CmdStrings.CommandString;
+        //                        m_CommandString = Conversions.ToString(Device.CommandString(l_CmdSent, (object)false));
+        //                        if (g_CmdStrings.ReturnString is object) // Valid return string to test
+        //                        {
+        //                            if ((m_CommandString ?? "") == (g_CmdStrings.ReturnString ?? ""))
+        //                            {
+        //                                LogMsgOK(p_Name, "Sent string \"" + g_CmdStrings.CommandString + "\" - Received string: \"" + m_CommandString + "\"");
+        //                            }
+        //                            else
+        //                            {
+        //                                LogMsgError(p_Name, "Sent string \"" + g_CmdStrings.CommandString + "\" - Received string: \"" + m_CommandString + "\" - Expected string: \"" + g_CmdStrings.ReturnString + "\"");
+        //                            }
+        //                        }
+        //                        else // Skip the return string test
+        //                        {
+        //                            LogMsgOK(p_Name, "Sent string \"" + g_CmdStrings.CommandString + "\" - Return string test skipped");
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        LogMsgInfo(p_Name, "Skipped CommandString test");
+        //                    }
+
+        //                    break;
+        //                }
+
+        //            case CommandType.tstCommandBlindRaw:
+        //                {
+        //                    if (g_CmdStringsRaw.CommandBlind is object)
+        //                    {
+        //                        l_CmdSent = g_CmdStringsRaw.CommandBlind;
+        //                        Device.CommandBlind(l_CmdSent, true);
+        //                        LogMsgOK(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandBlind + "\"");
+        //                    }
+        //                    else
+        //                    {
+        //                        LogMsgInfo(p_Name, "Skipped CommandBlind Raw test");
+        //                    }
+
+        //                    break;
+        //                }
+
+        //            case CommandType.tstCommandBoolRaw:
+        //                {
+        //                    if (g_CmdStringsRaw.CommandBool is object)
+        //                    {
+        //                        l_CmdSent = g_CmdStringsRaw.CommandBool;
+        //                        m_CommandBool = Conversions.ToBoolean(Device.CommandBool(l_CmdSent, (object)true));
+        //                        if (m_CommandBool == g_CmdStringsRaw.ReturnBool)
+        //                        {
+        //                            LogMsgOK(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandBool + "\" - Received expected return value: " + m_CommandBool);
+        //                        }
+        //                        else
+        //                        {
+        //                            LogMsgError(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandBool + "\" - Received unexpected return value: " + m_CommandBool);
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        LogMsgInfo(p_Name, "Skipped CommandBool Raw test");
+        //                    }
+
+        //                    break;
+        //                }
+
+        //            case CommandType.tstCommandStringRaw:
+        //                {
+        //                    if (g_CmdStringsRaw.CommandString is object)
+        //                    {
+        //                        l_CmdSent = g_CmdStringsRaw.CommandString;
+        //                        m_CommandString = Conversions.ToString(Device.CommandString(l_CmdSent, (object)true));
+        //                        if (g_CmdStringsRaw.ReturnString is object) // Valid return string to test
+        //                        {
+        //                            if ((m_CommandString ?? "") == (g_CmdStringsRaw.ReturnString ?? ""))
+        //                            {
+        //                                LogMsgOK(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandString + "\" - Received string: \"" + m_CommandString + "\"");
+        //                            }
+        //                            else
+        //                            {
+        //                                LogMsgError(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandString + "\" - Received string: \"" + m_CommandString + "\" - Expected string: \"" + g_CmdStringsRaw.ReturnString + "\"");
+        //                            }
+        //                        }
+        //                        else // Skip the return string test
+        //                        {
+        //                            LogMsgOK(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandString + "\" - Return string test skipped");
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        LogMsgInfo(p_Name, "Skipped CommandString Raw test");
+        //                    }
+
+        //                    break;
+        //                }
+
+        //            default:
+        //                {
+        //                    LogMsgError(p_Name, "Conform:CommandTest: Unknown test type " + p_Type.ToString());
+        //                    break;
+        //                }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        HandleException(p_Name, MemberType.Method, Required.Optional, ex, "");
+        //    }
+
+        //    g_Status.Clear();  // Clear status messages
+        //}
 
         #endregion
 

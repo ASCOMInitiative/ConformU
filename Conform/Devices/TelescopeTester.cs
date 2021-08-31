@@ -7311,7 +7311,7 @@ namespace ConformU
                 HandleException(TestName, MemberType.Property, Required.MustBeImplemented, ex, "Tried to read Slewing property");
             }
 
-            SetStatus("", "", "");
+            ClearStatus();
             return success;
         }
 
