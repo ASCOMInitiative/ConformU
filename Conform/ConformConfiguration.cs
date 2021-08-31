@@ -151,17 +151,6 @@ namespace ConformU
         public string Status { get; private set; }
 
         /// <summary>
-        /// Enables discovery process messages in the Conform log
-        /// </summary>
-        public bool DebugDiscovery
-        {
-            set
-            {
-                settings.TraceDiscovery = value;
-            }
-        }
-
-        /// <summary>
         /// Flag indicating whether de-serialisation of Alpaca JSON responses is sensitive to case of JSON element names
         /// </summary>
         /// <remarks>If Set TRUE JSON element names that are incorrectly cased will be ignored. If FALSE they will be accepted.</remarks>

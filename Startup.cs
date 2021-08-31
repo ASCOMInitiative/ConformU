@@ -83,7 +83,7 @@ namespace ConformU
 
             // Enable Alpaca discovery if a command line option requires this
             string debugDiscovery = Configuration.GetValue<string>(Globals.COMMAND_OPTION_DEBUG_DISCOVERY) ?? "";
-            if (!string.IsNullOrEmpty(debugDiscovery)) conformConfiguration.DebugDiscovery = true;
+            if (!string.IsNullOrEmpty(debugDiscovery)) conformConfiguration.Settings.TraceDiscovery = true;
 
             // Add the configuration component to the list of injectable services
             services.AddSingleton(conformConfiguration);
