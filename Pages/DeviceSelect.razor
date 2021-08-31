@@ -40,44 +40,77 @@
 
         @* Alpaca device search tab *@
         <RadzenTabsItem Text="Alpaca Devices">
+            <RadzenCard Style="width:1270px; margin-bottom: 20px; min-height:120px;  height:fit-content; margin-right: 20px; overflow: auto;">
 
-            <div class="row">
+                <div class="row">
 
-                @* Alpaca device selection radio buttons *@
-                <RadzenCard Style="width:600px; margin-bottom: 20px; min-height:120px;  height:fit-content; margin-right: 20px; overflow: auto;">
+                    @* Alpaca device selection radio buttons *@
+                    <RadzenCard Style="width:600px; margin-bottom: 20px; min-height:120px;  height:fit-content; margin-right: 20px; overflow: auto;">
 
-                    <RadzenRadioButtonList @bind-Value=@ascomDevice
-                                           Orientation="Orientation.Vertical"
-                                           Data=@ascomDevices
-                                           TValue="AscomDevice"
-                                           TextProperty="DisplayName"
-                                           ValueProperty="AscomDevice"
-                                           Change=@(args => OnNewAlpacaDeviceSelected(args)) />
+                        <RadzenRadioButtonList @bind-Value=@ascomDevice
+                                               Orientation="Orientation.Vertical"
+                                               Data=@ascomDevices
+                                               TValue="AscomDevice"
+                                               TextProperty="DisplayName"
+                                               ValueProperty="AscomDevice"
+                                               Change=@(args => OnNewAlpacaDeviceSelected(args)) />
 
-                </RadzenCard>
+                    </RadzenCard>
 
-                @* Alpaca discovery progress information *@
-                <RadzenCard Style="width: 600px; margin-bottom: 20px; height: fit-content; margin-right: 20px">
+                    @* Alpaca discovery progress information *@
+                    <RadzenCard Style="width: 600px; margin-bottom: 20px; height: fit-content; margin-right: 20px">
 
-                    <RadzenTextArea Style="line-height:1.3; height: fit-content;"
-                                    Cols="300"
-                                    Rows="@statusBoxHeight"
-                                    @bind-Value=@alpacaDiscoveryProgress />
+                        <RadzenTextArea Style="line-height:1.3; height: fit-content;"
+                                        Cols="300"
+                                        Rows="@statusBoxHeight"
+                                        @bind-Value=@alpacaDiscoveryProgress />
 
-                </RadzenCard>
+                    </RadzenCard>
 
-            </div>
+                </div>
+                @* Alpaca search and device selection buttons *@
+                <div class="row">
 
-            @* Alpaca search and device selection buttons *@
-            <div class="row">
+                    <RadzenButton Style="margin-bottom: 20px; width: 150px; margin-left: 20px;"
+                                  Text="Rediscover"
+                                  Disabled="@discoveryInProgress"
+                                  Click=@(args => OnAlpacaSearchClick()) />
 
-                <RadzenButton Style="margin-bottom: 20px; width: 150px; margin-left: 20px;"
-                              Text="Rediscover"
-                              Disabled="@discoveryInProgress"
-                              Click=@(args => OnAlpacaSearchClick()) />
+                </div>
 
-            </div>
+            </RadzenCard>
 
+            @* Alpaca manual device configuration *@
+            <RadzenCard Style="width:600px; margin-bottom: 20px; min-height:120px;  height:fit-content; margin-right: 20px; overflow: auto;">
+
+                <div class="row">
+                    <RadzenCard Style="width: 600px; margin-bottom: 20px; height: fit-content; margin-right: 20px">
+                        <h3>Manual Alpaca device configuration</h3>
+                        <div class="row">
+                            <RadzenTextBox @bind-Value=@manualIpAddress Style="margin-left: 20px" />
+                            <RadzenLabel Text="IP address" Style="margin-left: 20px;" />
+                        </div>
+                        <div style="margin-top:20px" class="row">
+                            <RadzenNumeric Style="margin-left: 20px" @bind-Value="manualPortNumber" TValue="int" Min="1" />
+                            <p style="margin-left: 20px;margin-top: 5px;">IP port number</p>
+                        </div>
+                        <div style="margin-top:20px" class="row">
+                            <RadzenNumeric Style="margin-left: 20px" @bind-Value="manualAlpacaDeviceNumber" TValue="int" Min="0" />
+                            <p style="margin-left: 20px;margin-top: 5px;">Alpaca device number</p>
+                        </div>
+                        <div class="row">
+
+                            <RadzenButton Style="margin-bottom: 20px; width: 150px; margin-left: 20px;"
+                                          Text="Select"
+                                          Disabled="@discoveryInProgress"
+                                          Click=@(args => OnManualAlpacaDeviceSelect()) />
+                        </div>
+
+
+                    </RadzenCard>
+                </div>
+
+            </RadzenCard>
         </RadzenTabsItem>
 
         @* COM device search tab *@
@@ -108,6 +141,10 @@
 </RadzenTabs>
 
 @code {
+    string manualIpAddress = "127.0.0.1";
+    int manualPortNumber = 11111;
+    int manualAlpacaDeviceNumber = 0;
+
     AscomDevice ascomDevice;
     ComDevice comDevice;
     bool discoveryInProgress = false;
@@ -191,6 +228,39 @@
 
     #region Alpaca TAB event handlers
 
+    private void OnManualAlpacaDeviceSelect()
+    {
+        try
+        {
+            // Update the selected device variable or initialise if there is no device
+
+            selectedDeviceType = Enum.Parse<DeviceType>(selectedDeviceTypeString);
+            configuration.Settings.DeviceType = selectedDeviceType;
+
+            technologyType = DeviceTechnology.Alpaca;
+            configuration.Settings.DeviceTechnology = technologyType;
+
+
+
+            selectedAlpacaDevice = new AscomDevice("Manually configured device",
+                selectedDeviceType.ToString(),
+                manualAlpacaDeviceNumber,
+                "UniqueID",
+                new IPEndPoint(IPAddress.Parse(manualIpAddress),manualPortNumber),
+                manualIpAddress,
+                1,
+                "Alpaca device status message");
+
+            configuration.Settings.AlpacaDevice = selectedAlpacaDevice;
+            SaveConfiguration();
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("OnNewAlpacaDeviceSelected", MessageLevel.Error, $"Exception: \r\n{ex}");
+        }
+
+    }
+
     private void OnNewAlpacaDeviceSelected(AscomDevice value)
     {
         try
@@ -230,7 +300,7 @@
                 // If we get here the device type is correct but is incorrectly cased compared to the Enum type so we update the object to the correct format
                 if (configuration.Settings.StrictCasing)
                 {
-                    conformLogger.LogMessage("ValidateAscomDevice",MessageLevel.Issue, $" Returned device type value: '{ascomDevice.AscomDeviceType}' is not correctly cased. It should be: '{deviceType.ToString()}'.");
+                    conformLogger.LogMessage("ValidateAscomDevice", MessageLevel.Issue, $" Returned device type value: '{ascomDevice.AscomDeviceType}' is not correctly cased. It should be: '{deviceType.ToString()}'.");
                 }
                 else
                 {
@@ -240,7 +310,7 @@
             }
             catch (Exception ex)
             {
-                conformLogger.LogMessage("ValidateAscomDevice",MessageLevel.Issue, $"Unable to parse the returned ASCOM device type: '{ascomDevice.AscomDeviceType}' - {ex.Message}");
+                conformLogger.LogMessage("ValidateAscomDevice", MessageLevel.Issue, $"Unable to parse the returned ASCOM device type: '{ascomDevice.AscomDeviceType}' - {ex.Message}");
             }
         }
     }
