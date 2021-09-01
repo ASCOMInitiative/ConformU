@@ -40,13 +40,13 @@
 
         @* Alpaca device search tab *@
         <RadzenTabsItem Text="Alpaca Devices">
-            <RadzenCard Style="width:1270px; margin-bottom: 20px; min-height:120px;  height:fit-content; margin-right: 20px; overflow: auto;">
+            <RadzenCard Style="margin-bottom: 20px; min-height:120px; width:fit-content; height:fit-content; margin-right: 20px; overflow: auto;">
 
                 <div class="row">
 
                     @* Alpaca device selection radio buttons *@
                     <RadzenCard Style="width:600px; margin-bottom: 20px; min-height:120px;  height:fit-content; margin-right: 20px; overflow: auto;">
-
+                        <h3 style="color: #479cc8; margin-bottom:-4px">Automatically Discovered Devices</h3>
                         <RadzenRadioButtonList @bind-Value=@ascomDevice
                                                Orientation="Orientation.Vertical"
                                                Data=@ascomDevices
@@ -59,7 +59,7 @@
 
                     @* Alpaca discovery progress information *@
                     <RadzenCard Style="width: 600px; margin-bottom: 20px; height: fit-content; margin-right: 20px">
-
+                        <h3 style="color: #479cc8; margin-bottom:10px">Discovery Status</h3>
                         <RadzenTextArea Style="line-height:1.3; height: fit-content;"
                                         Cols="300"
                                         Rows="@statusBoxHeight"
@@ -68,10 +68,10 @@
                     </RadzenCard>
 
                 </div>
-                @* Alpaca search and device selection buttons *@
+                @* Alpaca rediscover button *@
                 <div class="row">
 
-                    <RadzenButton Style="margin-bottom: 20px; width: 150px; margin-left: 20px;"
+                    <RadzenButton Style="width: 150px; margin-left: 20px;"
                                   Text="Rediscover"
                                   Disabled="@discoveryInProgress"
                                   Click=@(args => OnAlpacaSearchClick()) />
@@ -85,7 +85,7 @@
 
                 <div class="row">
                     <RadzenCard Style="width: 600px; margin-bottom: 20px; height: fit-content; margin-right: 20px">
-                        <h3>Manual Alpaca device configuration</h3>
+                        <h3 style="color: #479cc8">Manual Alpaca device configuration</h3>
                         <div class="row">
                             <RadzenTextBox @bind-Value=@manualIpAddress Style="margin-left: 20px" />
                             <RadzenLabel Text="IP address" Style="margin-left: 20px;" />
@@ -100,7 +100,7 @@
                         </div>
                         <div class="row">
 
-                            <RadzenButton Style="margin-bottom: 20px; width: 150px; margin-left: 20px;"
+                            <RadzenButton Style="margin-top: 20px; width: 150px; margin-left: 20px;"
                                           Text="Select"
                                           Disabled="@discoveryInProgress"
                                           Click=@(args => OnManualAlpacaDeviceSelect()) />
@@ -246,7 +246,7 @@
                 selectedDeviceType.ToString(),
                 manualAlpacaDeviceNumber,
                 "UniqueID",
-                new IPEndPoint(IPAddress.Parse(manualIpAddress),manualPortNumber),
+                new IPEndPoint(IPAddress.Parse(manualIpAddress), manualPortNumber),
                 manualIpAddress,
                 1,
                 "Alpaca device status message");
@@ -386,6 +386,8 @@
             if ((device.AscomDeviceName == configuration.Settings.AlpacaDevice.AscomDeviceName) & (device.IpAddress == configuration.Settings.AlpacaDevice.IpAddress) & (configuration.Settings.DeviceTechnology == DeviceTechnology.Alpaca)) ascomDevice = device;
         }
         discoveryInProgress = false;
+        configuration.Settings.OperationInProgress = false;
+        configuration.RaiseConfigurationChnagedEvent();
         InvokeAsync(StateHasChanged);
     }
 
@@ -402,8 +404,6 @@
                 alpacaDiscoveryProgress += $"{deviceKey}\r\n";
                 SetStatusAreaHeight();
             }
-
-
         }
         //conformLogger.LogDebug("AlpacaDeviceDiscovered", $"Found {newDevices.Count} devices.");
 
@@ -450,6 +450,8 @@
 
     private void StartDiscovery()
     {
+        configuration.Settings.OperationInProgress = true;
+        configuration.RaiseConfigurationChnagedEvent();
         discoveredAlpacaDevices.Clear();
         discoveryInProgress = true;
         alpacaDiscoveryProgress = $"Discovery started (Duration {configuration.Settings.AlpacaConfiguration.DiscoveryDuration:0.0} seconds)...\r\n";
@@ -463,7 +465,7 @@
             configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4,
             configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6)
         );
-
+        StateHasChanged();
         //t.Wait();
     }
 

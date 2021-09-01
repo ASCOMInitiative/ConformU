@@ -1,5 +1,6 @@
 ﻿@inject ILogger<App> logger
 @inject IJSRuntime JsRuntime
+@inject ConformConfiguration configuration
 
 <div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">Conform Universal</a>
@@ -8,33 +9,61 @@
     </button>
 </div>
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav flex-column">
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-            <NavLink class="nav-link" href="/DeviceSelection" Match="NavLinkMatch.All">
-                <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Select Device
-            </NavLink>
-            <NavLink class="nav-link" href="/DeviceSelectionTest" Match="NavLinkMatch.All">
-                <span class="oi oi-zoom-in" aria-hidden="true"></span> Device Setup
-            </NavLink>
-            <NavLink class="nav-link" href="/Settings" Match="NavLinkMatch.All">
-                <span class="oi oi-wrench" aria-hidden="true"></span> Settings
-            </NavLink>
-            <NavLink class="nav-link" href="/Help" Match="NavLinkMatch.All">
-                <span class="oi oi-question-mark" aria-hidden="true"></span> Help
-            </NavLink>
-        </li>
-    </ul>
+@if (configuration.Settings.OperationInProgress)
+{
+    <div style="margin-top: 80px;text-align:center">
+        <p style="color:yellow"><b> Operation in progress</b></p>
+    </div>
+}
+else
+{
+    <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+        <ul class="nav flex-column">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="oi oi-home" aria-hidden="true"></span> Home
+                </NavLink>
+                <NavLink class="nav-link" href="/DeviceSelection" Match="NavLinkMatch.All">
+                    <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Select Device
+                </NavLink>
+                <NavLink class="nav-link" href="/DeviceSelectionTest" Match="NavLinkMatch.All">
+                    <span class="oi oi-zoom-in" aria-hidden="true"></span> Device Setup
+                </NavLink>
+                <NavLink class="nav-link" href="/Settings" Match="NavLinkMatch.All">
+                    <span class="oi oi-wrench" aria-hidden="true"></span> Settings
+                </NavLink>
+                <NavLink class="nav-link" href="/Help" Match="NavLinkMatch.All">
+                    <span class="oi oi-question-mark" aria-hidden="true"></span> Help
+                </NavLink>
+            </li>
+        </ul>
 
-</div>
-
+    </div>
+}
 @code {
     private bool collapseNavMenu = true;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    /// <summary>
+    /// Event handler for page initialised event
+    /// </summary>
+    /// <remarks>Hook up an event handler to redisplay the page header whenever the configuraiton is changed. </remarks>
+    protected override void OnInitialized()
+    {
+        configuration.ConfigurationChanged += OnConfigurationChanged;
+    }
+
+    /// <summary>
+    /// Event hander called when the configuration is changed
+    /// </summary>
+    /// <param name="caller"></param>
+    /// <param name="args"></param>
+    private void OnConfigurationChanged(object caller, EventArgs args)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
 
     private void ToggleNavMenu()
     {

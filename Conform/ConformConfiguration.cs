@@ -115,7 +115,7 @@ namespace ConformU
             RaiseConfigurationChnagedEvent();
         }
 
-        private void RaiseConfigurationChnagedEvent()
+        internal void RaiseConfigurationChnagedEvent()
         {
             if (ConfigurationChanged is not null)
             {

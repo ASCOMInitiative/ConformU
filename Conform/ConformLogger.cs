@@ -83,7 +83,7 @@ namespace ConformU
 
             EventHandler<MessageEventArgs> messageEventHandler = OutputChanged;
 
-            if (messageEventHandler is not null)
+            if (OutputChanged is not null)
             {
                 messageEventHandler(this, eventArgs);
             }

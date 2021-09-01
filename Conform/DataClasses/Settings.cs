@@ -159,5 +159,11 @@ namespace ConformU
 
         #endregion
 
+        #region Internal state variables - not persisted
+
+        internal bool OperationInProgress { get; set; }
+        
+        #endregion
+
     }
 }

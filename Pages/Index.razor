@@ -13,8 +13,8 @@
 <div>
     <h1>Welcome to Conform Universal!</h1>
     <div>
-        <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Icon="account_circle" Style="margin-bottom: 20px; width: 150px" />
-        <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Icon="account_circle" Style="margin-bottom: 20px; width: 150px" />
+        <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Icon="account_circle" Style="margin-bottom: 20px; width: 150px" Disabled=@settings.Settings.OperationInProgress />
+        <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Icon="account_circle" Style="margin-bottom: 20px; width: 150px" Disabled=@(!settings.Settings.OperationInProgress) />
         <RadzenTextBox Id="Status" Style="width: 50em; margin-left: 40px;" @bind-Value=@statusMessage />
     </div>
 
@@ -52,74 +52,91 @@ string statusMessage = "Linux build";
 
     async void StartTest(string buttonName)
     {
-        // Validate the supplied configuraiton and only start if there are no settings issues
-        string validationMessage = settings.Validate();
-        if (!string.IsNullOrEmpty(validationMessage)) // There is a configuraiton issue so present an error message
+        try
         {
-            // Find the current position of the start button in the viewport
-            BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "StartButton");
-            int x = (int)(result.Left);
-            int y = (int)(result.Top) + 100;
+            // Set the operation in progress flag and refresh state throughout the page and navigation menu.
+            settings.Settings.OperationInProgress = true;
+            settings.RaiseConfigurationChnagedEvent();
+            StateHasChanged();
 
-            // Display the error message left aligned and below the start button
-            ShowNotification(new NotificationMessage { Style = $"position: fixed; left: {x}px; top:{y}px;", Severity = NotificationSeverity.Error, Summary = "Test Device", Detail = $"Cannot start test: {validationMessage}", Duration = 4000 });
-
-            return;
-        }
-
-        // Setting have validated OK so start the test
-
-        // Create a task cancellation token source and cancellation token
-
-        using (cancellationTokenSource = new CancellationTokenSource())
-        {
-            cancelConformToken = cancellationTokenSource.Token;
-
-            // Create a test manager instance to oversee the test
-            using (tester = new ConformanceTestManager(settings, conformLogger, cancelConformToken))
+            // Validate the supplied configuraiton and only start if there are no settings issues
+            string validationMessage = settings.Validate();
+            if (!string.IsNullOrEmpty(validationMessage)) // There is a configuraiton issue so present an error message
             {
-                conformLogger.OutputChanged += OutputChanged;
-                conformLogger.StatusChanged += StatusChanged;
-                conformLogger.Debug = settings.Settings.Debug;
+                // Find the current position of the start button in the viewport
+                BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "StartButton");
+                int x = (int)(result.Left);
+                int y = (int)(result.Top) + 100;
 
-                // Clear the screen log
-                screenLog = "";
+                // Display the error message left aligned and below the start button
+                ShowNotification(new NotificationMessage { Style = $"position: fixed; left: {x}px; top:{y}px;", Severity = NotificationSeverity.Error, Summary = "Test Device", Detail = $"Cannot start test: {validationMessage}", Duration = 4000 });
 
-                // Create a task to run the conformance test
-                conformanceTest = new Task(() =>
-                {
-                    try
-                    {
-                        tester.TestDevice();
-                    }
-                    catch (Exception ex)
-                    {
-                        conformLogger.LogMessage("StartTest", MessageLevel.Info, $"Exception: \r\n {ex}");
-
-                    }
-
-                }, cancelConformToken);
-
-                // Start the conformnance test task
-                conformanceTest.Start();
-
-                // Execute this continuation task when the conformance test finishes to ensure that the tester is disposed even when the conformance task itself is cancelled.
-                await conformanceTest;
-
-                conformLogger.OutputChanged -= OutputChanged;
-                conformLogger.StatusChanged -= StatusChanged;
-
-
-                // await conformanceTest.ContinueWith(antecedent =>
-                //{
-                //    tester.Dispose(); // Dispose of the tester
-                //    tester = null;
-                //});
+                return;
             }
-        }
-        await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
 
-        GC.Collect();
+            // Setting have validated OK so start the test
+
+            // Create a task cancellation token source and cancellation token
+
+            using (cancellationTokenSource = new CancellationTokenSource())
+            {
+                cancelConformToken = cancellationTokenSource.Token;
+
+                // Create a test manager instance to oversee the test
+                using (tester = new ConformanceTestManager(settings, conformLogger, cancelConformToken))
+                {
+                    conformLogger.OutputChanged += OutputChanged;
+                    conformLogger.StatusChanged += StatusChanged;
+                    conformLogger.Debug = settings.Settings.Debug;
+
+                    // Clear the screen log
+                    screenLog = "";
+
+                    // Create a task to run the conformance test
+                    conformanceTest = new Task(() =>
+                    {
+                        try
+                        {
+                            tester.TestDevice();
+                        }
+                        catch (Exception ex)
+                        {
+                            conformLogger.LogMessage("StartTest", MessageLevel.Info, $"Exception: \r\n {ex}");
+
+                        }
+
+                    }, cancelConformToken);
+                    conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Starting conformance test");
+                    // Start the conformnance test task
+                    conformanceTest.Start();
+                    conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Conformance test started OK");
+
+                    // Execute this continuation task when the conformance test finishes to ensure that the tester is disposed even when the conformance task itself is cancelled.
+                    conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Awaiting conformance task completion");
+                    await conformanceTest;
+                    conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Conformance task completed");
+
+                    conformLogger.OutputChanged -= OutputChanged;
+                    conformLogger.StatusChanged -= StatusChanged;
+                }
+            }
+            conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Awaiting Scroll to bottom");
+            await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
+            conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Scroll to bottom completed");
+
+            GC.Collect();
+        }
+        catch (Exception ex)
+        {
+            try { conformLogger.LogMessage("INDEX.RAZOR-StartTest", MessageLevel.Error, $"{ex}"); } catch (Exception) { throw; }
+            try { Console.WriteLine($"INDEX.RAZOR-StartTest Exception: {ex}"); } catch (Exception) { throw; }
+        }
+        finally
+        {
+            settings.Settings.OperationInProgress = false;
+            settings.RaiseConfigurationChnagedEvent();
+            StateHasChanged();
+        }
     }
 
     void StopTest(string buttonName)
