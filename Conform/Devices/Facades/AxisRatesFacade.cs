@@ -15,10 +15,10 @@ namespace ConformU
         private RateFacade[] m_Rates;
 
         private int pos;
-        readonly ILogger logger;
+        readonly ASCOM.Standard.Interfaces.ILogger logger;
 
         // Default constructor - Internal prevents public creation instances.
-        internal AxisRatesFacade(TelescopeAxis Axis, dynamic driver, TelescopeFacade telescopeFacade, ILogger logger)
+        internal AxisRatesFacade(TelescopeAxis Axis, dynamic driver, TelescopeFacade telescopeFacade, ASCOM.Standard.Interfaces.ILogger logger)
         {
             m_Rates = Array.Empty<RateFacade>(); // Initialise to an empty array
 

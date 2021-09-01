@@ -50,7 +50,7 @@
     <PackageReference Include="ASCOM.Standard.Utilities" Version="1.0.0-alpha19" />
     <PackageReference Include="BlazorPro.BlazorSize" Version="5.0.0" />
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
-    <PackageReference Include="Radzen.Blazor" Version="3.9.5" />
+    <PackageReference Include="Radzen.Blazor" Version="3.9.7" />
   </ItemGroup>
 
   <Target Name="CustomAfterPublishh" AfterTargets="AfterPublish">

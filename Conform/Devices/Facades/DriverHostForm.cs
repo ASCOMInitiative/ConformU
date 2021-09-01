@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 #if WINDOWS7_0_OR_GREATER
@@ -11,7 +12,7 @@ namespace ConformU
     {
         private readonly string progId;
         private readonly ConformLogger logger;
-        private readonly dynamic driver;
+        private dynamic driver;
 
         public DriverHostForm(string progId, ref dynamic driver, ConformLogger logger)
         {
@@ -51,6 +52,62 @@ namespace ConformU
         /// <param name="e"></param>
         private void DriverHostForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            int remainingObjectCount, loopCount;
+            if (driver is not null)
+            {
+                try
+                {
+                    logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"About to set Connected False.");
+                    driver.Connected = false;
+                }
+                catch (Exception ex)
+                {
+                    logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Exception setting Connected false: \r\n{ex}");
+                }
+
+                try
+                {
+                    logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"About to call Dispose method.");
+                    driver.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Exception disposing driver: \r\n{ex}");
+                }
+
+                try
+                {
+                    loopCount = 0;
+                    do
+                    {
+                        loopCount += 1;
+                        remainingObjectCount = Marshal.ReleaseComObject(driver);
+                        logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
+
+                    }
+                    while (remainingObjectCount > 0 & loopCount <= 20);
+                }
+                catch (Exception ex)
+                {
+                    logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Exception releaseing COM object: \r\n{ex}");
+                }
+
+                try
+                {
+#if WINDOWS7_0_OR_GREATER
+                    logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Ending COM facade application.");
+                    Application.Exit();
+                    logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"COM facade application ended.");
+#endif
+                    driver = null;
+                    GC.Collect();
+                }
+                catch (Exception ex)
+                {
+                    logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Exception ending application: \r\n{ex}");
+                }
+            }
+
             Application.ExitThread();
         }
 

@@ -85,37 +85,6 @@ namespace ConformU
                             break;
 
                         case DeviceTechnology.COM:
-                            int remainingObjectCount, loopCount;
-                            if (driver is not null)
-                            {
-                                try
-                                {
-                                    if (settings.DisplayMethodCalls) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"About to set Connected False.");
-                                    driver.Connected = false;
-                                }
-                                catch { }
-
-                                try
-                                {
-                                    if (settings.DisplayMethodCalls) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"About to call Dispose method.");
-                                    driver.Dispose();
-                                }
-                                catch { }
-
-                                try
-                                {
-                                    loopCount = 0;
-                                    do
-                                    {
-                                        loopCount += 1;
-                                        remainingObjectCount = Marshal.ReleaseComObject(driver);
-                                        if (settings.Debug) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
-
-                                    }
-                                    while (remainingObjectCount > 0 & loopCount <= 20);
-                                }
-                                catch { }
-
                                 try
                                 {
 #if WINDOWS7_0_OR_GREATER
@@ -130,6 +99,47 @@ namespace ConformU
                                 {
                                     logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception ending application: \r\n{ex}");
                                 }
+
+                            int remainingObjectCount, loopCount;
+                            if (driver is not null)
+                            {
+                                try
+                                {
+                                    if (settings.DisplayMethodCalls) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"About to set Connected False.");
+                                    driver.Connected = false;
+                                }
+                                catch (Exception ex)
+                                {
+                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception setting Connected false: \r\n{ex}");
+                                }
+
+                                try
+                                {
+                                    if (settings.DisplayMethodCalls) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"About to call Dispose method.");
+                                    driver.Dispose();
+                                }
+                                catch (Exception ex)
+                                {
+                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception disposing driver: \r\n{ex}");
+                                }
+
+                                try
+                                {
+                                    loopCount = 0;
+                                    do
+                                    {
+                                        loopCount += 1;
+                                        remainingObjectCount = Marshal.ReleaseComObject(driver);
+                                        if (settings.Debug) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
+
+                                    }
+                                    while (remainingObjectCount > 0 & loopCount <= 20);
+                                }
+                                catch (Exception ex)
+                                {
+                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception releaseing COM object: \r\n{ex}");
+                                }
+
                             }
 
                             break;

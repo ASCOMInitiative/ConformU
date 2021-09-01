@@ -27,13 +27,6 @@ namespace ConformU
             Configuration = configuration;
         }
 
-        private void DisposeObject(object toDispose)
-        {
-            Console.WriteLine("OnShutdown - Disposing object...");
-
-            ((IDisposable)toDispose).Dispose();
-        }
-
         public IConfiguration Configuration { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
