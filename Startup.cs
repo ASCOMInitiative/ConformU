@@ -84,7 +84,7 @@ namespace ConformU
             // Resizeable screen log text area infrastructure
             services.AddResizeListener(options =>
                 {
-                    options.ReportRate = 100; // Milliseconds between update notifications (I think - documentation not clear)
+                    options.ReportRate = 10; // Milliseconds between update notifications (I think - documentation not clear)
                     options.EnableLogging = false; // Better performance
                     options.SuppressInitEvent = false; // Ensure the event fires when the application is first loaded
                 });

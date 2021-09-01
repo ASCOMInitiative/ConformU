@@ -150,25 +150,6 @@ string statusMessage = "Linux build";
         }
     }
 
-    async void SetScreenLogRows()
-    {
-        // Find the current position of the Conform log text area in the viewport
-        BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ConformLog");
-        int x = (int)(result.Left);
-        int y = (int)(result.Top) + 100;
-
-        //screenLogRows = (int)((browser.Height - result.Top) / 20);
-        //conformLogger.LogMessage("SetScreenLogRows", $"Browserheight: {browser.Height}, LogAreaTop: {result.Top}, LogAreaHeight: {result.Height}, ScreenLogRows: {screenLogRows}");
-
-        int crCount = screenLog.Count((f) => f == (char)10);
-
-        int heightCount = Convert.ToInt32(((double)browser.Height - 200.0) / 20.0) + (browser.Height / 300) - 1;
-
-        //screenLogRows = Math.Min(crCount, heightCount);
-        screenLogRows = heightCount;
-        //conformLogger.LogMessage("SetScreenLogRows", $"screenLogRows: {screenLogRows}");
-    }
-
     /// <summary>
     /// Event handler for messages returned from the tester
     /// </summary>
@@ -180,8 +161,8 @@ string statusMessage = "Linux build";
         {
             screenLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
             SetScreenLogRows();
-            InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
         }
+        await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
         await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
     }
 
@@ -221,12 +202,18 @@ string statusMessage = "Linux build";
         // Get the browsers's width / height
         browser = window;
         SetScreenLogRows();
-
-        // Log the new window size and number of rows
-        // We're outside of the component's lifecycle, be sure to let it know it has to re-render.
-        //conformLogger.LogMessage("WindowResized", $"Browser height: {browser.Height}, Browser width: {browser.Width}");
-
         StateHasChanged();
+    }
+
+    async void SetScreenLogRows()
+    {
+        // Find the current position of the Conform log text area in the viewport
+        BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ConformLog");
+        int x = (int)(result.Left);
+        int y = (int)(result.Top) + 100;
+
+        screenLogRows = Convert.ToInt32(((Convert.ToDouble(browser.Height) - result.Top - 34.0) / 18.1));
+        //conformLogger.LogMessage("SetScreenLogRows", $"Browserheight: {browser.Height}, LogAreaTop: {result.Top}, LogAreaHeight: {result.Height}, ScreenLogRows: {screenLogRows}");
     }
 
     #endregion
