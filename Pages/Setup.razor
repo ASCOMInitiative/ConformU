@@ -1,0 +1,161 @@
+﻿@page "/Setup"
+@inject ConformLogger conformLogger
+@inject ConformConfiguration configuration
+@inject IJSRuntime JSRuntime
+
+@using System.Threading
+
+<h1>Device and Driver Setup</h1>
+
+<div style="margin-top: 20px;">
+
+
+    <div style="margin-top: 20px; display: @noDeviceMessageDisplay">
+        <h3>No device has been selected.</h3>
+    </div>
+
+    <div style="margin-top: 20px; display: @comControlsDisplay">
+        <h3>COM Driver Setup</h3>
+        <RadzenButton Click=@(args => SetupCom()) Text="Open Setup Dialogue" Style="width: 250px;" Disabled=@configuration.Settings.OperationInProgress />
+        <RadzenButton Click=@(args => CancelSetup()) Text="Cancel Setup" Style="width: 200px;" Visible=@configuration.Settings.OperationInProgress />
+    </div>
+
+    <div style="margin-top: 20px; display: @alpacaControlsDisplay">
+        <h3>Alpaca Device Setup</h3>
+        <RadzenButton Click=@(args => SetupAlpacaMain()) Text="Main Setup Page" Style="margin-right: 20px; width: 200px;" />
+        <RadzenButton Click=@(args => SetupAlpacaDevice()) Text="Device Setup Page" Style="width: 200px;" />
+    </div>
+</div>
+
+@code{
+    string alpacaControlsDisplay = "none";
+    string comControlsDisplay = "none";
+    string noDeviceMessageDisplay = "none";
+
+    CancellationTokenSource setupCancellationTokenSource;
+    CancellationToken setupCancelConformToken;
+
+    protected override void OnInitialized()
+    {
+        conformLogger.Debug = configuration.Settings.Debug;
+
+        // Enable the appropriate page heading
+        switch (configuration.Settings.DeviceTechnology)
+        {
+            case DeviceTechnology.NotSelected:
+                noDeviceMessageDisplay = "inline";
+                break;
+
+            case DeviceTechnology.Alpaca:
+                alpacaControlsDisplay = "inline";
+                break;
+
+            case DeviceTechnology.COM:
+                comControlsDisplay = "inline";
+                break;
+
+            default:
+                conformLogger.LogMessage("DEVICESETUP.RAZOR - OnInitialized", MessageLevel.Error, $"Invalid device technology type: {configuration.Settings.DeviceTechnology}");
+                throw new ASCOM.InvalidValueException($"DriverSetupForm.razor - Invalid device technology type: {configuration.Settings.DeviceTechnology}");
+        }
+
+    }
+
+    async void SetupAlpacaMain()
+    {
+        string url = "";
+        try
+        {
+            url = $"{configuration.Settings.AlpacaConfiguration.AccessServiceType}://{configuration.Settings.AlpacaDevice.IpAddress}:{configuration.Settings.AlpacaDevice.IpPort}/setup".ToLowerInvariant();
+            conformLogger.LogMessage("SetupAlpacaMain", MessageLevel.Debug, $"URL: {url}");
+            await JSRuntime.InvokeAsync<object>("open", url, "_blank");
+            conformLogger.LogMessage("SetupAlpacaMain", MessageLevel.Debug, $"Returned from URL: {url}");
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("SetupAlpacaMain", MessageLevel.Issue, $"Exception setting up main Alpaca device:\r\n{ex}");
+        }
+    }
+
+    async void SetupAlpacaDevice()
+    {
+        string url = "";
+        try
+        {
+            url = $"{configuration.Settings.AlpacaConfiguration.AccessServiceType}://{configuration.Settings.AlpacaDevice.IpAddress}:{configuration.Settings.AlpacaDevice.IpPort}/setup/v1/{configuration.Settings.AlpacaDevice.AscomDeviceType}/{configuration.Settings.AlpacaDevice.AlpacaDeviceNumber}/setup".ToLowerInvariant();
+            conformLogger.LogMessage("SetupAlpacaDevice", MessageLevel.Debug, $"URL: {url}");
+            await JSRuntime.InvokeAsync<object>("open", url, "_blank");
+            conformLogger.LogMessage("SetupAlpacaDevice", MessageLevel.Debug, $"Returned from URL: {url}");
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("SetupAlpacaDevice", MessageLevel.Issue, $"Exception setting up Alpaca device {url}:\r\n{ex}");
+        }
+
+    }
+
+    void CancelSetup()
+    {
+        conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "About to cancel setup task");
+        setupCancellationTokenSource.Cancel();
+        conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, $"Setup task cancelled IsCancellationRequested: {setupCancelConformToken.IsCancellationRequested}");
+    }
+
+    async void SetupCom()
+    {
+        try
+        {
+            configuration.Settings.OperationInProgress = true;
+            configuration.RaiseConfigurationChangedEvent();
+            StateHasChanged();
+
+            conformLogger.Debug = configuration.Settings.Debug;
+
+            // Create a task cancellation token source and cancellation token
+            setupCancellationTokenSource = new CancellationTokenSource();
+            setupCancelConformToken = setupCancellationTokenSource.Token;
+            setupCancelConformToken.ThrowIfCancellationRequested();
+            CancellationToken taskCancellationToken = setupCancellationTokenSource.Token;
+
+            using (ConformanceTestManager testManager = new(configuration, conformLogger, setupCancelConformToken))
+            {
+                // Create a task to run the conformance test
+                Task conformanceTest = new Task(() =>
+                {
+                    try
+                    {
+                        testManager.SetupDialog();
+                    }
+                    catch (Exception ex)
+                    {
+                        conformLogger.LogMessage("StartTest", MessageLevel.Info, $"Exception: \r\n {ex}");
+                    }
+
+                }, taskCancellationToken);
+
+                conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Starting conformance test");
+                // Start the conformnance test task
+                conformanceTest.Start();
+                conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Conformance test started OK");
+
+                // Wait for the task to complete.
+                conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Awaiting conformance task completion");
+                await conformanceTest;
+                conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Conformance task completed");
+
+            }
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("SetupCom", MessageLevel.Issue, $"Exception setting up COM driver {configuration.Settings.ComDevice.DisplayName} ({configuration.Settings.ComDevice.ProgId}):\r\n{ex}");
+        }
+        finally
+        {
+            // Renable the button and remove operationin progress status
+            configuration.Settings.OperationInProgress = false;
+            configuration.RaiseConfigurationChangedEvent();
+            StateHasChanged();
+        }
+    }
+
+}

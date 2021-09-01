@@ -15,7 +15,7 @@ namespace ConformU
     /// Base class for device tester classes. Contains common code and placeholders for the 
     /// methods that must be implemented in the device tester class
     /// </summary>
-    internal class DeviceTesterBaseClass
+    internal class DeviceTesterBaseClass : IDisposable
     {
         // Implements IDisposable
 
@@ -155,6 +155,10 @@ namespace ConformU
             {
                 if (disposing)
                 {
+                    TL.LogMessage("DeviceTesterbaseClass","Dispose called");
+                    try { baseClassDevice.Dispose(); } catch (Exception ex){ TL.LogMessage("DeviceTesterbaseClass", $"Exception\r\n{ex}"); }
+                    baseClassDevice = null;
+                    TL.LogMessage("DeviceTesterbaseClass", "Dispose finished");
                 }
             }
 
@@ -164,8 +168,9 @@ namespace ConformU
         // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
-            // Do not change this code.  Put clean-up code in Dispose(ByVal disposing As Boolean) above.
-            Dispose(true);
+            // Do not change this code. Put clean-up code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
         #endregion
 

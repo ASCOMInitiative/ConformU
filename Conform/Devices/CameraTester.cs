@@ -170,7 +170,7 @@ namespace ConformU
         private bool disposedValue = false;        // To detect redundant calls
         protected override void Dispose(bool disposing)
         {
-            LogDebug("Dispose", "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("CameraTester.Dispose", "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
             if (!disposedValue)
             {
                 if (disposing)

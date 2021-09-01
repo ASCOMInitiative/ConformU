@@ -112,10 +112,10 @@ namespace ConformU
             PersistSettings(settings);
             Status = $"Settings saved at {DateTime.Now:HH:mm:ss.f}.";
 
-            RaiseConfigurationChnagedEvent();
+            RaiseConfigurationChangedEvent();
         }
 
-        internal void RaiseConfigurationChnagedEvent()
+        internal void RaiseConfigurationChangedEvent()
         {
             if (ConfigurationChanged is not null)
             {
@@ -132,7 +132,7 @@ namespace ConformU
             settings = new();
             PersistSettings(settings);
             Status = $"Settings reset at {DateTime.Now:HH:mm:ss.f}.";
-            RaiseConfigurationChnagedEvent();
+            RaiseConfigurationChangedEvent();
 
         }
 

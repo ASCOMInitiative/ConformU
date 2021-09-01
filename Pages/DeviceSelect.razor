@@ -387,7 +387,7 @@
         }
         discoveryInProgress = false;
         configuration.Settings.OperationInProgress = false;
-        configuration.RaiseConfigurationChnagedEvent();
+        configuration.RaiseConfigurationChangedEvent();
         InvokeAsync(StateHasChanged);
     }
 
@@ -451,7 +451,7 @@
     private void StartDiscovery()
     {
         configuration.Settings.OperationInProgress = true;
-        configuration.RaiseConfigurationChnagedEvent();
+        configuration.RaiseConfigurationChangedEvent();
         discoveredAlpacaDevices.Clear();
         discoveryInProgress = true;
         alpacaDiscoveryProgress = $"Discovery started (Duration {configuration.Settings.AlpacaConfiguration.DiscoveryDuration:0.0} seconds)...\r\n";

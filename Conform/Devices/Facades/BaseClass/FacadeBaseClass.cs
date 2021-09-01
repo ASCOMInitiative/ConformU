@@ -33,7 +33,7 @@ namespace ConformU
                 logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Creating driver {settings.ComDevice.ProgId} on separate thread. This is thread: {Thread.CurrentThread.ManagedThreadId}");
                 Thread driverThread = new(DriverOnSeparateThread);
                 driverThread.SetApartmentState(ApartmentState.STA);
-                driverThread.DisableComObjectEagerCleanup();
+                //driverThread.DisableComObjectEagerCleanup();
                 driverThread.IsBackground = true;
                 driverThread.Start(this);
                 logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Thread started successfully for {settings.ComDevice.ProgId}. This is thread: {Thread.CurrentThread.ManagedThreadId}");
@@ -56,7 +56,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                logger?.LogMessage("CreateDevice", MessageLevel.Error, $"Exception creating driver: {ex}");
+                logger?.LogMessage("FacadeBaseClass", MessageLevel.Error, $"Exception creating driver: {ex}");
             }
         }
 
@@ -71,14 +71,14 @@ namespace ConformU
                         case DeviceTechnology.Alpaca:
                             try
                             {
-                                if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to set Connected False.");
+                                if (settings.DisplayMethodCalls) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"About to set Connected False.");
                                 driver.Connected = false;
                             }
                             catch { }
 
                             try
                             {
-                                if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to call Dispose method.");
+                                if (settings.DisplayMethodCalls) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"About to call Dispose method.");
                                 driver.Dispose();
                             }
                             catch { }
@@ -90,14 +90,14 @@ namespace ConformU
                             {
                                 try
                                 {
-                                    if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to set Connected False.");
+                                    if (settings.DisplayMethodCalls) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"About to set Connected False.");
                                     driver.Connected = false;
                                 }
                                 catch { }
 
                                 try
                                 {
-                                    if (settings.DisplayMethodCalls) logger?.LogMessage("Dispose", MessageLevel.Debug, $"About to call Dispose method.");
+                                    if (settings.DisplayMethodCalls) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"About to call Dispose method.");
                                     driver.Dispose();
                                 }
                                 catch { }
@@ -109,7 +109,7 @@ namespace ConformU
                                     {
                                         loopCount += 1;
                                         remainingObjectCount = Marshal.ReleaseComObject(driver);
-                                        if (settings.Debug) logger?.LogMessage("Dispose", MessageLevel.Debug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
+                                        if (settings.Debug) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
 
                                     }
                                     while (remainingObjectCount > 0 & loopCount <= 20);
@@ -118,10 +118,18 @@ namespace ConformU
 
                                 try
                                 {
+#if WINDOWS7_0_OR_GREATER
+                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Ending COM facade application.");
+                                    Application.Exit();
+                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"COM facade application ended.");
+#endif
                                     driver = null;
                                     GC.Collect();
                                 }
-                                catch { }
+                                catch (Exception ex)
+                                {
+                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception ending application: \r\n{ex}");
+                                }
                             }
 
                             break;

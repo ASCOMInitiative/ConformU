@@ -4,6 +4,8 @@ using System.Threading;
 using static ConformU.Globals;
 using System.Text.Json;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Security.Permissions;
 
 namespace ConformU
 {
@@ -119,10 +121,19 @@ namespace ConformU
                 testDevice.CreateDevice();
 
                 // Run the SetupDialog method on a separate thread
-                Task setupDialog = Task.Factory.StartNew(() => testDevice.SetupDialog());
+                Task setupDialogTask = new(() =>
+                {
+                    testDevice.SetupDialog();
+                }, cancellationToken);
+                setupDialogTask.Start();
 
-                // Wait for the setup dialogue to be closed
-                setupDialog.Wait();
+                // Test whether we are being cancelled
+                Task waitForCancelTask = new(() => WaitForCancel(), cancellationToken);
+                waitForCancelTask.Start();
+                //Wait for either task finish or cancel
+                Task.WaitAny(setupDialogTask, waitForCancelTask);
+
+                TL.LogMessage("TestManager:SetupDialog", MessageLevel.Error, $"setup dialog status: {setupDialogTask.Status}, cancel task status: {waitForCancelTask.Status}");
             }
             catch (Exception ex)
             {
@@ -133,6 +144,14 @@ namespace ConformU
                 // Always dispose of the device
                 try { testDevice.Dispose(); } catch { }
             }
+        }
+
+        private void WaitForCancel()
+        {
+            do
+            {
+                Thread.Sleep(10);
+            } while (!cancellationToken.IsCancellationRequested);
         }
 
         public void TestDevice()
@@ -157,9 +176,9 @@ namespace ConformU
                     // Run pre-connect checks if required
                     if (!cancellationToken.IsCancellationRequested & testDevice.HasPreConnectCheck)
                     {
-                        TL.LogMessage("",MessageLevel.TestOnly,"");
+                        TL.LogMessage("", MessageLevel.TestOnly, "");
                         TL.LogMessage("Pre-connect checks", MessageLevel.TestOnly, ""); testDevice.PreConnectChecks();
-                        TL.LogMessage("",MessageLevel.TestOnly,"");
+                        TL.LogMessage("", MessageLevel.TestOnly, "");
                         TL.LogMessage("Connect", MessageLevel.TestOnly, "");
                     }
 
@@ -170,7 +189,7 @@ namespace ConformU
                         if (settings.DisplayMethodCalls) TL.LogMessage("ConformanceCheck", MessageLevel.TestAndMessage, "About to set Connected property");
                         testDevice.Connected = true;
                         TL.LogMessage("ConformanceCheck", MessageLevel.OK, "Connected OK");
-                        TL.LogMessage("",MessageLevel.TestOnly,"");
+                        TL.LogMessage("", MessageLevel.TestOnly, "");
 
                         // Test common methods
                         if (!cancellationToken.IsCancellationRequested & settings.TestProperties)
@@ -182,42 +201,42 @@ namespace ConformU
                         if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasCanProperties)
                         {
                             TL.LogMessage("Can Properties", MessageLevel.TestOnly, ""); testDevice.ReadCanProperties();
-                            TL.LogMessage("",MessageLevel.TestOnly,"");
+                            TL.LogMessage("", MessageLevel.TestOnly, "");
                         }
 
                         // Carry out pre-test tasks
                         if (!cancellationToken.IsCancellationRequested & testDevice.HasPreRunCheck)
                         {
                             TL.LogMessage("Pre-run Checks", MessageLevel.TestOnly, ""); testDevice.PreRunCheck();
-                            TL.LogMessage("",MessageLevel.TestOnly,"");
+                            TL.LogMessage("", MessageLevel.TestOnly, "");
                         }
 
                         // Test properties
                         if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasProperties)
                         {
                             TL.LogMessage("Properties", MessageLevel.TestOnly, ""); testDevice.CheckProperties();
-                            TL.LogMessage("",MessageLevel.TestOnly,"");
+                            TL.LogMessage("", MessageLevel.TestOnly, "");
                         }
 
                         // Test methods
                         if (!cancellationToken.IsCancellationRequested & settings.TestMethods & testDevice.HasMethods)
                         {
                             TL.LogMessage("Methods", MessageLevel.TestOnly, ""); testDevice.CheckMethods();
-                            TL.LogMessage("",MessageLevel.TestOnly,""); // Blank line
+                            TL.LogMessage("", MessageLevel.TestOnly, ""); // Blank line
                         }
 
                         // Test performance
                         if (!cancellationToken.IsCancellationRequested & settings.TestPerformance & testDevice.HasPerformanceCheck)
                         {
                             TL.LogMessage("Performance", MessageLevel.TestOnly, ""); testDevice.CheckPerformance();
-                            TL.LogMessage("",MessageLevel.TestOnly,"");
+                            TL.LogMessage("", MessageLevel.TestOnly, "");
                         }
 
                         // Carry out post-test tasks
                         if (!cancellationToken.IsCancellationRequested & testDevice.HasPostRunCheck)
                         {
                             TL.LogMessage("Post-run Checks", MessageLevel.TestOnly, ""); testDevice.PostRunCheck();
-                            TL.LogMessage("",MessageLevel.TestOnly,""); // Blank line
+                            TL.LogMessage("", MessageLevel.TestOnly, ""); // Blank line
                         }
 
                         // Display completion or "test cancelled" message
@@ -227,31 +246,31 @@ namespace ConformU
                         }
                         else
                         {
-                            TL.LogMessage("Conformance test interrupted by STOP button or to protect the device.", MessageLevel.TestOnly,"");
+                            TL.LogMessage("Conformance test interrupted by STOP button or to protect the device.", MessageLevel.TestOnly, "");
                         }
                     }
                     catch (Exception ex) // Exception when setting Connected = True
                     {
                         TL.LogMessage("Connected", MessageLevel.Error, $"Exception when testing driver: {ex.Message}");
                         TL.LogMessage("Connected", MessageLevel.Debug, $"{ex}");
-                        TL.LogMessage("",MessageLevel.TestOnly,"");
+                        TL.LogMessage("", MessageLevel.TestOnly, "");
                         TL.LogMessage("ConformanceCheck", MessageLevel.TestAndMessage, "Further tests abandoned.");
                     }
 
                 }
                 catch (Exception ex) // Exception when creating device
                 {
-                    TL.LogMessage("Initialise",MessageLevel.Error, $"Unable to {(settings.DeviceTechnology == DeviceTechnology.Alpaca ? "access" : "create")} the device: {ex.Message}");
-                    TL.LogMessage("",MessageLevel.TestOnly,"");
+                    TL.LogMessage("Initialise", MessageLevel.Error, $"Unable to {(settings.DeviceTechnology == DeviceTechnology.Alpaca ? "access" : "create")} the device: {ex.Message}");
+                    TL.LogMessage("", MessageLevel.TestOnly, "");
                     TL.LogMessage("ConformanceCheck", MessageLevel.TestAndMessage, "Further tests abandoned as Conform cannot create the driver");
                 }
 
                 // Report the success or failure of conformance checking
-                TL.LogMessage("",MessageLevel.TestOnly,"");
+                TL.LogMessage("", MessageLevel.TestOnly, "");
                 if (conformResults.ErrorCount == 0 & conformResults.IssueCount == 0 & !cancellationToken.IsCancellationRequested) // No issues - device conforms as expected
                 {
                     TL.LogMessage("No errors, warnings or issues found: your driver passes ASCOM validation!!", MessageLevel.TestOnly, "");
-                    TL.LogMessage("",MessageLevel.TestOnly,"");
+                    TL.LogMessage("", MessageLevel.TestOnly, "");
                 }
                 else // Some issues found, the device fails the conformance check
                 {
@@ -261,14 +280,14 @@ namespace ConformU
                     l_Message = l_Message + " and " + conformResults.IssueCount + " issue";
                     if (conformResults.IssueCount != 1)
                         l_Message += "s";
-                    TL.LogMessage(l_Message, MessageLevel.TestOnly,"");
+                    TL.LogMessage(l_Message, MessageLevel.TestOnly, "");
                 }
 
                 // List issues and errors
                 if (conformResults.ErrorCount > 0)
                 {
-                    TL.LogMessage("",MessageLevel.TestOnly,"");
-                    TL.LogMessage("Error Summary", MessageLevel.TestOnly,"");
+                    TL.LogMessage("", MessageLevel.TestOnly, "");
+                    TL.LogMessage("Error Summary", MessageLevel.TestOnly, "");
                     foreach (KeyValuePair<string, string> kvp in conformResults.Errors)
                     {
                         TL.LogMessage(kvp.Key, MessageLevel.Error, kvp.Value);
@@ -277,8 +296,8 @@ namespace ConformU
 
                 if (conformResults.IssueCount > 0)
                 {
-                    TL.LogMessage("",MessageLevel.TestOnly,"");
-                    TL.LogMessage("Issue Summary", MessageLevel.TestOnly,"");
+                    TL.LogMessage("", MessageLevel.TestOnly, "");
+                    TL.LogMessage("Issue Summary", MessageLevel.TestOnly, "");
                     foreach (KeyValuePair<string, string> kvp in conformResults.Issues)
                     {
                         TL.LogMessage(kvp.Key, MessageLevel.Issue, kvp.Value);

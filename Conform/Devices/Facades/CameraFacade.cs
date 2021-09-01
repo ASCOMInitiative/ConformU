@@ -1,12 +1,10 @@
 ﻿using ASCOM.Standard.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ConformU
 {
-    public class CameraFacade : FacadeBaseClass, ICameraV3
+    public class CameraFacade : FacadeBaseClass, ICameraV3, IDisposable
     {
 
         // Create the test device in the facade base class
@@ -36,7 +34,7 @@ namespace ConformU
 
         public double CCDTemperature => (double)FunctionNoParameters(() => driver.CCDTemperature);
 
-        public bool CoolerOn { get => (bool)FunctionNoParameters(() => driver.CoolerOn); set => Method1Parameter((i) => driver.CoolerOn = i,value); }
+        public bool CoolerOn { get => (bool)FunctionNoParameters(() => driver.CoolerOn); set => Method1Parameter((i) => driver.CoolerOn = i, value); }
 
         public double CoolerPower => (double)FunctionNoParameters(() => driver.CoolerPower);
 
@@ -66,7 +64,7 @@ namespace ConformU
 
         public short MaxBinY => (short)FunctionNoParameters(() => driver.MaxBinY);
 
-        public int NumX { get => (int)FunctionNoParameters(() => driver.NumX); set => Method1Parameter((i) => driver.NumX = i,value); }
+        public int NumX { get => (int)FunctionNoParameters(() => driver.NumX); set => Method1Parameter((i) => driver.NumX = i, value); }
 
         public int NumY { get => (int)FunctionNoParameters(() => driver.NumY); set => Method1Parameter((i) => driver.NumY = i, value); }
 
