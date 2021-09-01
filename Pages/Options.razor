@@ -22,7 +22,7 @@
         <RadzenTabsItem Text="Conform">
             <div class="row" style="margin-top:@topMargin;">
                 <RadzenCard Style="width:300px; margin-bottom: 20px; height:270px; margin-right: 20px">
-                    <h3 style="margin-bottom:0;">Test Scope</h3>
+                    <h3 style="color: #479cc8; margin-bottom: 0;">Test Scope</h3>
                     <RadzenCheckBoxList @bind-Value=@conformanceTestScope TValue="int" Orientation="Orientation.Vertical" Change=@(args => OnConformTestScopeChange(args))>
                         <Items>
                             <RadzenCheckBoxListItem Text="Test Properties" Value="0" />
@@ -35,7 +35,7 @@
                 </RadzenCard>
 
                 <RadzenCard Style="width:410px; margin-bottom:20px;height:270px; margin-right: 20px">
-                    <h3 style="margin-bottom:0;">Operation</h3>
+                    <h3 style="color: #479cc8; margin-bottom: 0;">Operation</h3>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Style="margin-top:6px;" Name="CHK1" @bind-Value=@chkUpdates TValue="bool" Change=@(args =>
                             OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
@@ -51,7 +51,7 @@
                 </RadzenCard>
 
                 <RadzenCard Style="width:300px; margin-bottom:20px;height:270px;">
-                    <h3 style="margin-bottom:0;">Additional Tracing</h3>
+                    <h3 style="color: #479cc8; margin-bottom: 0;">Additional Tracing</h3>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHK4"
                                         @bind-Value=@chkTraceDiscovery 
@@ -81,7 +81,7 @@
         <RadzenTabsItem Text=@alpacaAndComText>
             <div class="row" style="margin-top:@topMargin;">
                 <RadzenCard Style="width:560px; margin-bottom: 20px;  margin-right: 20px">
-                    <h3 style="margin-bottom:0;">Alpaca Configuration</h3>
+                    <h3 style="color: #479cc8; margin-bottom: 0;">Alpaca Discovery and Access</h3>
                     <div class="row" style="margin-top: 15px">
                         <RadzenNumeric Style="margin-left: 20px; width: 8em" @bind-Value="alpacaNumberOfDiscoveryPolls" TValue="int" Min="1" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.AlpacaNumberOfDiscoveryPolls)) />
                         <p style="margin-left: 20px;margin-top: 5px;">Number of discovery polls (Default 1)</p>
@@ -140,7 +140,7 @@
             {
                 <div class="row">
                     <RadzenCard Visible="@isWindowsOs" Style="width:300px; margin-bottom:20px;">
-                        <h3>COM Access Mechanic</h3>
+                        <h3 style="color: #479cc8">COM Access Mechanic</h3>
                         <RadzenDropDown @bind-Value=@comAccessMechanic
                                         Style="width:245px"
                                         Data="comAccessMechanicoptions"

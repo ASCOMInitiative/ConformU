@@ -45,7 +45,7 @@
                 <div class="row">
 
                     @* Alpaca device selection radio buttons *@
-                    <RadzenCard Style="width:600px; margin-bottom: 20px; min-height:120px;  height:fit-content; margin-right: 20px; overflow: auto;">
+                    <RadzenCard Style="width:600px; margin-bottom: 20px; min-height:155px;  height:fit-content; margin-right: 20px; overflow: auto;">
                         <h3 style="color: #479cc8; margin-bottom:-4px">Automatically Discovered Devices</h3>
                         <RadzenRadioButtonList @bind-Value=@ascomDevice
                                                Orientation="Orientation.Vertical"
@@ -58,11 +58,12 @@
                     </RadzenCard>
 
                     @* Alpaca discovery progress information *@
-                    <RadzenCard Style="width: 600px; margin-bottom: 20px; height: fit-content; margin-right: 20px">
+                    <RadzenCard Style="width: 600px; margin-bottom: 20px; height: stretch; margin-right: 20px">
                         <h3 style="color: #479cc8; margin-bottom:10px">Discovery Status</h3>
-                        <RadzenTextArea Style="line-height:1.3; height: fit-content;"
+                        <RadzenTextArea Style="line-height:1.5; height: stretch;"
                                         Cols="300"
                                         Rows="@statusBoxHeight"
+                                        ReadOnly="true"
                                         @bind-Value=@alpacaDiscoveryProgress />
 
                     </RadzenCard>
@@ -388,6 +389,9 @@
         discoveryInProgress = false;
         configuration.Settings.OperationInProgress = false;
         configuration.RaiseConfigurationChangedEvent();
+
+        ascomDevices.Sort((a, b) => a.DisplayName.CompareTo(b.DisplayName));
+
         InvokeAsync(StateHasChanged);
     }
 
@@ -432,6 +436,7 @@
                 this.comDevice = comDevice;
             }
         }
+        comDeviceList.Sort((a, b) => a.DisplayName.CompareTo(b.DisplayName));
 
     }
 
@@ -455,7 +460,7 @@
         discoveredAlpacaDevices.Clear();
         discoveryInProgress = true;
         alpacaDiscoveryProgress = $"Discovery started (Duration {configuration.Settings.AlpacaConfiguration.DiscoveryDuration:0.0} seconds)...\r\n";
-        statusBoxHeight = 3; // Initual status area height
+        statusBoxHeight = 1; // Initual status area height
         Task t = Task.Run(() =>
             discovery.StartDiscovery(configuration.Settings.AlpacaConfiguration.NumberOfDiscoveryPolls,
             (int)(configuration.Settings.AlpacaConfiguration.DiscoveryPollInterval * 1000),
