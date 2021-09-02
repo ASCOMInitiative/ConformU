@@ -94,7 +94,7 @@ string statusMessage = "Linux build";
                 // Create a test manager instance to oversee the test
                 using (tester = new ConformanceTestManager(configuration, conformLogger, cancelConformToken))
                 {
-                    conformLogger.OutputChanged += OutputChanged;
+                    conformLogger.MessageLogChanged += OutputChanged;
                     conformLogger.StatusChanged += StatusChanged;
                     conformLogger.Debug = configuration.Settings.Debug;
 
@@ -110,7 +110,7 @@ string statusMessage = "Linux build";
                         }
                         catch (Exception ex)
                         {
-                            conformLogger.LogMessage("StartTest", MessageLevel.Info, $"Exception: \r\n {ex}");
+                            conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
 
                         }
 
@@ -125,7 +125,7 @@ string statusMessage = "Linux build";
                     await conformanceTest;
                     conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Conformance task completed");
 
-                    conformLogger.OutputChanged -= OutputChanged;
+                    conformLogger.MessageLogChanged -= OutputChanged;
                     conformLogger.StatusChanged -= StatusChanged;
                 }
             }

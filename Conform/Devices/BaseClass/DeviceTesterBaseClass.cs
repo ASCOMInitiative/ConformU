@@ -778,7 +778,7 @@ namespace ConformU
                     }
             }
 
-            TL?.OnStatusChanged($"{test} {action} {status}");
+            TL?.SetStatusMessage($"{test} {action} {status}");
         }
 
         /// <summary>
@@ -794,7 +794,7 @@ namespace ConformU
             action = newAction;
             status = newStatus;
 
-            TL?.OnStatusChanged($"{test} {action} {status}");
+            TL?.SetStatusMessage($"{test} {action} {status}");
         }
 
         /// <summary>
@@ -807,7 +807,7 @@ namespace ConformU
             action = "";
             status = "";
 
-            TL?.OnStatusChanged($"{test} {action} {status}");
+            TL?.SetStatusMessage($"{test} {action} {status}");
         }
 
         /// <summary>

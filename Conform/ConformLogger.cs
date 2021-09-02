@@ -5,7 +5,7 @@ using static ConformU.Globals;
 
 namespace ConformU
 {
-    public class ConformLogger : TraceLogger, ILogger
+    public class ConformLogger : TraceLogger, ILogger, IDisposable
     {
         public ConformLogger(string logFileName, string logFilePath, string loggerName, bool enabled) : base(logFileName, logFilePath, loggerName, enabled)
         {
@@ -13,18 +13,36 @@ namespace ConformU
             base.IdentifierWidth = TEST_NAME_WIDTH;
         }
 
-        public event EventHandler<MessageEventArgs> OutputChanged;
+        /// <summary>
+        ///  Event fired when the message log changes.
+        /// </summary>
+        public event EventHandler<MessageEventArgs> MessageLogChanged;
+
+        /// <summary>
+        /// Event fired when the status message changes.
+        /// </summary>
         public event EventHandler<MessageEventArgs> StatusChanged;
 
+        /// <summary>
+        /// Flag indicating whether debug messages should be included in the log.
+        /// </summary>
         public bool Debug { get; set; }
 
+        /// <summary>
+        /// Log a message on the screen, console and log file
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="logLevel"></param>
+        /// <param name="message"></param>
         public void LogMessage(string id, MessageLevel logLevel, string message)
         {
-            string screenMessage,messageLevelFormatted;
+            string screenMessage, messageLevel;
 
             // Ignore debug messages when not in Debug mode
             if ((logLevel == MessageLevel.Debug) & !Debug) return;
 
+
+            // Format the message level string
             switch (logLevel)
             {
                 case MessageLevel.Debug:
@@ -33,14 +51,14 @@ namespace ConformU
                 case MessageLevel.Issue:
                 case MessageLevel.Error:
                     {
-                        messageLevelFormatted = logLevel.ToString().ToUpperInvariant();
+                        messageLevel = logLevel.ToString().ToUpperInvariant().PadRight(MESSAGE_LEVEL_WIDTH);
                         break;
                     }
 
                 case MessageLevel.TestOnly:
                 case MessageLevel.TestAndMessage:
                     {
-                        messageLevelFormatted = "";
+                        messageLevel = "".PadRight(MESSAGE_LEVEL_WIDTH);
                         break;
                     }
                 default:
@@ -48,8 +66,8 @@ namespace ConformU
                         throw new ASCOM.InvalidValueException($"LogMsg - Unknown message level: {logLevel}.");
                     }
             }
-            messageLevelFormatted = messageLevelFormatted.PadRight(MESSAGE_LEVEL_WIDTH);
 
+            // Format the screen message to be consistent with the messages in the log file 
             switch (logLevel)
             {
                 case MessageLevel.TestOnly:
@@ -59,32 +77,35 @@ namespace ConformU
                     }
                 default:
                     {
-                        screenMessage = $"{id.PadRight(TEST_NAME_WIDTH)} {messageLevelFormatted} {message}";
+                        screenMessage = $"{id,-TEST_NAME_WIDTH} {messageLevel} {message}";
                         break;
                     }
             }
+
+            // Write the message to the console
             Console.WriteLine($"{id,-TEST_NAME_WIDTH} {message}");
+
+            // Write the message to the log file
             base.LogMessage(id, message);
 
-            OnLogMessageChanged($"{DateTime.Now:HH:mm:ss.fff} {screenMessage}");
-        }
-
-        internal void OnLogMessageChanged(string message)
-        {
+            // Raise the MessaegLogChanged event to Write the message to the screen
             MessageEventArgs eventArgs = new()
             {
-                Message = message
+                Message = $"{DateTime.Now:HH:mm:ss.fff} {screenMessage}"
             };
 
-            EventHandler<MessageEventArgs> messageEventHandler = OutputChanged;
+            MessageLogChanged?.Invoke(this, eventArgs);
 
-            if (OutputChanged is not null)
-            {
-                messageEventHandler(this, eventArgs);
-            }
         }
 
-        internal void OnStatusChanged(string status)
+        /// <summary>
+        /// Raises an event notifying that the status message has changed
+        /// </summary>
+        /// <param name="status">new status message.</param>
+        /// <remarks>
+        /// This is part of ConformLogger for convenience because the logger is used everywhere in the application and already supports the LogMessageChanged event.
+        /// </remarks>
+        public void SetStatusMessage(string status)
         {
             MessageEventArgs eventArgs = new()
             {
@@ -97,6 +118,16 @@ namespace ConformU
             {
                 messageEventHandler(this, eventArgs);
             }
+        }
+
+        /// <summary>
+        /// Override this method to force consistent use of the LogMessage method.
+        /// </summary>
+        /// <param name="logLevel"></param>
+        /// <param name="message"></param>
+        public new void Log(LogLevel logLevel, string message)
+        {
+            LogMessage("ConformLogger.Log", MessageLevel.Error, $"For consistency, please use LogMessage(id, logLevel, message) instead of Log(logLevel, message).\r\n{logLevel} - {message}");
         }
 
     }

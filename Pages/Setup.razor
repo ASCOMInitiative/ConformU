@@ -73,7 +73,7 @@
         }
         catch (Exception ex)
         {
-            conformLogger.LogMessage("SetupAlpacaMain", MessageLevel.Issue, $"Exception setting up main Alpaca device:\r\n{ex}");
+            conformLogger.LogMessage("SetupAlpacaMain", MessageLevel.Error, $"Exception setting up main Alpaca device:\r\n{ex}");
         }
     }
 
@@ -89,7 +89,7 @@
         }
         catch (Exception ex)
         {
-            conformLogger.LogMessage("SetupAlpacaDevice", MessageLevel.Issue, $"Exception setting up Alpaca device {url}:\r\n{ex}");
+            conformLogger.LogMessage("SetupAlpacaDevice", MessageLevel.Error, $"Exception setting up Alpaca device {url}:\r\n{ex}");
         }
 
     }
@@ -128,7 +128,7 @@
                     }
                     catch (Exception ex)
                     {
-                        conformLogger.LogMessage("StartTest", MessageLevel.Info, $"Exception: \r\n {ex}");
+                        conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
                     }
 
                 }, taskCancellationToken);
@@ -147,7 +147,7 @@
         }
         catch (Exception ex)
         {
-            conformLogger.LogMessage("SetupCom", MessageLevel.Issue, $"Exception setting up COM driver {configuration.Settings.ComDevice.DisplayName} ({configuration.Settings.ComDevice.ProgId}):\r\n{ex}");
+            conformLogger.LogMessage("SetupCom", MessageLevel.Error, $"Exception setting up COM driver {configuration.Settings.ComDevice.DisplayName} ({configuration.Settings.ComDevice.ProgId}):\r\n{ex}");
         }
         finally
         {

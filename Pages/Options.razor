@@ -714,8 +714,6 @@
 
     void OnTelescopeTestsChange(IEnumerable<string> value, string asd)
     {
-        conformLogger.LogMessage("OnTelescopeTestsChange", MessageLevel.Debug, $"Start of enabled test list");
-
         Dictionary<string, bool> newTelescopetestValues = new();
         foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
         {
@@ -724,11 +722,9 @@
 
         foreach (string i in value)
         {
-            conformLogger.LogMessage("OnTelescopeTestsChange", MessageLevel.Debug, $"Setting value: {i} true");
             newTelescopetestValues[i] = true;
         }
         configuration.Settings.TelescopeTests = newTelescopetestValues;
-        conformLogger.LogMessage("OnTelescopeTestsChange", MessageLevel.Debug, $"End of enabled test list");
         SaveConfiguration();
     }
 
