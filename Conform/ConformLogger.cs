@@ -5,7 +5,7 @@ using static ConformU.Globals;
 
 namespace ConformU
 {
-    public class ConformLogger : TraceLogger, ASCOM.Standard.Interfaces.ILogger
+    public class ConformLogger : TraceLogger, ILogger
     {
         public ConformLogger(string logFileName, string logFilePath, string loggerName, bool enabled) : base(logFileName, logFilePath, loggerName, enabled)
         {
@@ -67,11 +67,6 @@ namespace ConformU
             base.LogMessage(id, message);
 
             OnLogMessageChanged($"{DateTime.Now:HH:mm:ss.fff} {screenMessage}");
-        }
-
-        public new void Log(ASCOM.Standard.Interfaces.LogLevel level, string message)
-        {
-            base.Log(level, message);
         }
 
         internal void OnLogMessageChanged(string message)

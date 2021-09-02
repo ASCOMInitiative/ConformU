@@ -158,20 +158,20 @@ namespace ConformU
                 switch (settings.DeviceTechnology)
                 {
                     case DeviceTechnology.Alpaca:
-                        throw new ASCOM.NotImplementedException("The Alpaca implementation does not suport video devices.");
+                        LogError("CreateDevice", "The Alpaca implementation does not support video devices.");
+                        throw new Exception("The Alpaca implementation does not support video devices.");
 
                     case DeviceTechnology.COM:
                         switch (settings.ComConfiguration.ComACcessMechanic)
                         {
                             case ComAccessMechanic.Native:
-                                LogDebug("CreateDevice", $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
+                                LogInfo("CreateDevice", $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
                                 videoDevice = new VideoFacade(settings, logger);
                                 break;
 
                             case ComAccessMechanic.DriverAccess:
-                                LogDebug("CreateDevice", $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
-                                videoDevice = (IVideo)new Video(settings.ComDevice.ProgId);
-                                break;
+                                LogError("CreateDevice", "The DriverAccess implementation does not support video devices.");
+                                throw new Exception("The DriverAccess implementation does not support video devices.");
 
                             default:
                                 throw new ASCOM.InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComACcessMechanic}");
@@ -182,7 +182,7 @@ namespace ConformU
                         throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
 
-                LogDebug("CreateDevice", "Successfully created driver");
+                LogInfo("CreateDevice", "Successfully created driver");
                 baseClassDevice = videoDevice; // Assign the driver to the base class
 
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");

@@ -88,26 +88,26 @@ namespace ConformU
                 switch (settings.DeviceTechnology)
                 {
                     case DeviceTechnology.Alpaca:
-                        LogDebug("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
+                        LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
                         m_FilterWheel = new AlpacaFilterWheel(settings.AlpacaConfiguration.AccessServiceType.ToString(),
                             settings.AlpacaDevice.IpAddress,
                             settings.AlpacaDevice.IpPort,
                             settings.AlpacaDevice.AlpacaDeviceNumber,
                             settings.StrictCasing,
                             settings.TraceAlpacaCalls ? logger : null);
-                        LogDebug("CreateDevice", $"Alpaca device created OK");
+                        LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;
 
                     case DeviceTechnology.COM:
                         switch (settings.ComConfiguration.ComACcessMechanic)
                         {
                             case ComAccessMechanic.Native:
-                                LogDebug("CreateDevice", $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
+                                LogInfo("CreateDevice", $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
                                 m_FilterWheel = new FilterWheelFacade(settings, logger);
                                 break;
 
                             case ComAccessMechanic.DriverAccess:
-                                LogDebug("CreateDevice", $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
+                                LogInfo("CreateDevice", $"Creating DRIVERACCESS device: {settings.ComDevice.ProgId}");
                                 m_FilterWheel = new FilterWheel(settings.ComDevice.ProgId);
                                 break;
 
@@ -120,7 +120,7 @@ namespace ConformU
                         throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
 
-                LogDebug("CreateDevice", "Successfully created driver");
+                LogInfo("CreateDevice", "Successfully created driver");
                 baseClassDevice = m_FilterWheel; // Assign the driver to the base class
 
                 WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");

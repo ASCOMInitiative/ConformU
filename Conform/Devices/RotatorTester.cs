@@ -112,7 +112,7 @@ namespace ConformU
                             settings.AlpacaDevice.AlpacaDeviceNumber,
                             settings.StrictCasing,
                             settings.TraceAlpacaCalls ? logger : null);
-                        LogDebug("CreateDevice", $"Alpaca device created OK");
+                        LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;
 
                     case DeviceTechnology.COM:
@@ -124,7 +124,7 @@ namespace ConformU
                                 break;
 
                             case ComAccessMechanic.DriverAccess:
-                                LogInfo("CreateDevice", $"Creating DriverAccess device: {settings.ComDevice.ProgId}");
+                                LogInfo("CreateDevice", $"Creating DRIVERACCESS device: {settings.ComDevice.ProgId}");
                                 m_Rotator = new Rotator(settings.ComDevice.ProgId);
                                 break;
 
@@ -146,7 +146,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogDebug("CreateDevice", "Exception thrown: " + ex.Message);
+                LogInfo("CreateDevice", "Exception thrown: " + ex.Message);
                 throw; // Re throw exception 
             }
 
