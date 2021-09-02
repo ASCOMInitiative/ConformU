@@ -3,7 +3,30 @@
 @inject ConformConfiguration configuration
 
 <div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">Conform Universal</a>
+
+    @if (configuration.Settings.OperationInProgress)@* Operation is in progress *@
+    {
+        if (IsSmall) @* Operation in progress and screen is small *@
+        {
+            <span class="navbar-brand">Conform Universal</span> <span style="text-align:left; color: yellow"><b>Operation in progress</b></span>
+        }
+        else @* Operation in progress and normal screen *@
+        {
+            <span class="navbar-brand" style="width: 100%; text-align: center">Conform Universal</span>
+        }
+    }
+    else @* No operation is in progress *@
+    {
+        if (IsSmall) @* No operation and screen is small *@
+        {
+            <span class="navbar-brand" style="text-align: center">Conform Universal</span>
+        }
+        else @* No operation and screen is normal *@
+        {
+            <span class="navbar-brand" style="width: 100%; text-align: center">Conform Universal</span>
+        }
+    }
+
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -11,9 +34,13 @@
 
 @if (configuration.Settings.OperationInProgress)
 {
-    <div style="margin-top: 80px;text-align:center">
-        <p style="color:yellow"><b> Operation in progress</b></p>
-    </div>
+    @* Only display the Operation in progress status in the navigation menu when running on a large screen. On small screens it appear in the title area *@
+    @if (!IsSmall)
+    {
+        <div style="margin-top: 80px;text-align:center">
+            <p style="color:yellow"><b> Operation in progress</b></p>
+        </div>
+    }
 }
 else
 {
@@ -40,7 +67,11 @@ else
 
     </div>
 }
+<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="IsSmall" />
+
 @code {
+    bool IsSmall = false;
+
     private bool collapseNavMenu = true;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
@@ -63,7 +94,6 @@ else
     {
         InvokeAsync(StateHasChanged);
     }
-
 
     private void ToggleNavMenu()
     {

@@ -6197,7 +6197,7 @@ namespace ConformU
                     try
                     {
 #if WINDOWS7_0_OR_GREATER
-                        Marshal.ReleaseComObject(l_Rate);
+                        if (l_Rate is not null) Marshal.ReleaseComObject(l_Rate);
 #endif
                     }
                     catch

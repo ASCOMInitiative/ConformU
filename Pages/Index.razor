@@ -11,24 +11,31 @@
 @inject NotificationService notificationService
 
 <div>
-    <h1>Welcome to Conform Universal!</h1>
+    @if (IsSmall)
+    {
+        <h2>Welcome to Conform Universal!</h2>
+    }
+    else
+    {
+        <h1>Welcome to Conform Universal!</h1>
+    }
+
     <div>
         <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Icon="account_circle" Style="margin-bottom: 20px; width: 150px" Disabled=@configuration.Settings.OperationInProgress />
-        <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Icon="account_circle" Style="margin-bottom: 20px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
-        <RadzenTextBox Id="Status" Style="width: 50em; margin-left: 40px;" @bind-Value=@statusMessage />
+        <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Icon="account_circle" Style="margin-bottom: 20px; margin-right: 40px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
+        <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:20px; margin-right:20px" @bind-Value=@statusMessage />
     </div>
 
-    @*<div style="height:100%; max-height:100%">*@
-
     <h4>Conform Log</h4>
-    <RadzenTextArea Id="ConformLog" Style="line-height:1.3;" Name="ScreenLog" @bind-Value=@screenLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
+    <RadzenTextArea Id="ConformLog" Style="line-height: 18px; padding-bottom: 0px" Name="ScreenLog" @bind-Value=@screenLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
 
-    @*Rows="@screenLogRows"*@
-
-    @*</div>*@
 </div>
 
+<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="IsSmall" />
+
 @code {
+    bool IsSmall = false;
+
     private bool disposedValue;
     int screenLogRows = 10;
     string screenLog = "Conform log.";
@@ -160,9 +167,7 @@ string statusMessage = "Linux build";
         lock (screenLogLockObject)
         {
             screenLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
-            SetScreenLogRows();
         }
-        await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
         await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
     }
 
@@ -183,8 +188,6 @@ string statusMessage = "Linux build";
 
     #region Log textarea - resize support
 
-    BrowserWindowSize browser = new BrowserWindowSize();
-
     protected override void OnAfterRender(bool firstRender)
     {
 
@@ -197,23 +200,28 @@ string statusMessage = "Linux build";
 
     // This method will be called when the window resizes.
     // It is ONLY called when the user stops dragging the window's edge. (It is already throttled to protect your app from perf. nightmares)
-    void WindowResized(object _, BrowserWindowSize window)
+    async void WindowResized(object _, BrowserWindowSize window)
     {
-        // Get the browsers's width / height
-        browser = window;
-        SetScreenLogRows();
-        StateHasChanged();
-    }
+        try
+        {
+            // Get the browsers's width / height
+            // Find the current position of the Conform log text area in the viewport
+            BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ConformLog");
 
-    async void SetScreenLogRows()
-    {
-        // Find the current position of the Conform log text area in the viewport
-        BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ConformLog");
-        int x = (int)(result.Left);
-        int y = (int)(result.Top) + 100;
+            screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 2;
+            string browser = "";
+            browser = await JS.InvokeAsync<string>(identifier: "IdentifyBrowser");
 
-        screenLogRows = Convert.ToInt32(((Convert.ToDouble(browser.Height) - result.Top - 34.0) / 18.1));
-        //conformLogger.LogMessage("SetScreenLogRows", $"Browserheight: {browser.Height}, LogAreaTop: {result.Top}, LogAreaHeight: {result.Height}, ScreenLogRows: {screenLogRows}");
+            if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
+
+            conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $" Browser: {browser}, Browserheight: {window.Height}, LogAreaTop: {result.Top}, LogAreaHeight: {result.Height}, ScreenLogRows: {screenLogRows}");
+            await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
+
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
+        }
     }
 
     #endregion

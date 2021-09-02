@@ -81,13 +81,16 @@ namespace ConformU
             // Add the configuration component to the list of injectable services
             services.AddSingleton(conformConfiguration);
 
-            // Resizeable screen log text area infrastructure
+            // Add BlazorPro screen resize listener 
             services.AddResizeListener(options =>
                 {
                     options.ReportRate = 10; // Milliseconds between update notifications (I think - documentation not clear)
                     options.EnableLogging = false; // Better performance
                     options.SuppressInitEvent = false; // Ensure the event fires when the application is first loaded
                 });
+            
+            // Add BlazorPro MediaQuery support
+            services.AddMediaQueryService();
 
             // Radzen services
             services.AddScoped<NotificationService>();

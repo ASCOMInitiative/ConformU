@@ -1,5 +1,13 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
+/* Override the Radzen small screen size font incr4ease to 1 rem */
+@media (max-width: 768px) {
+    .rz-colorpicker, .rz-lookup-search input, .rz-spinner, .rz-calendar .rz-inputtext, .rz-multiselect, .rz-dropdown, .mask, .rz-textarea, .rz-textbox,
+    input {
+        font-size: 0.875rem;
+    }
+}
+
 @font-face {
     font-family: 'Icons';
     src: url('https://fonts.googleapis.com/icon?family=Material+Icons') format('woff');
@@ -206,7 +214,7 @@ app {
         display: block;
     }
 
-    /* Radzeb table ordering */
+    /* Radzen table ordering */
     ul[role=tablist] {
         flex-wrap: wrap;
     }
