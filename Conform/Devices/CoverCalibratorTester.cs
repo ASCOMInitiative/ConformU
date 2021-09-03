@@ -201,7 +201,7 @@ namespace ConformU
                             LogIssue("MaxBrightness", $"The returned MaxBrightness value {maxBrightness} is invalid, it must be >= 1");
                     }
                     else
-                        LogError("MaxBrightness", $" CalibratorStatus is 'NotPresent' but MaxBrightness did not throw a PropertyNotImplementedException. It returned: {maxBrightness}.");
+                        LogIssue("MaxBrightness", $" CalibratorStatus is 'NotPresent' but MaxBrightness did not throw a PropertyNotImplementedException. It returned: {maxBrightness}.");
                 }
                 catch (Exception ex)
                 {
@@ -237,7 +237,7 @@ namespace ConformU
                                 if (brightness <= maxBrightness)
                                     LogOK("Brightness", maxBrightness.ToString());
                                 else
-                                    LogError("Brightness", $"The returned Brightness {brightness} is greater than MaxBrightness {maxBrightness}");
+                                    LogIssue("Brightness", $"The returned Brightness {brightness} is greater than MaxBrightness {maxBrightness}");
                             }
                             else
                                 LogIssue("Brightness", $"Skipping Brightness test because MaxBrightness did not return a value.");
@@ -246,7 +246,7 @@ namespace ConformU
                             LogIssue("Brightness", $"The returned Brightness value {brightness} is invalid, it must be >= 0");
                     }
                     else
-                        LogError("Brightness", $" CalibratorStatus is 'NotPresent' but Brightness did not throw a PropertyNotImplementedException. It returned: {brightness}.");
+                        LogIssue("Brightness", $" CalibratorStatus is 'NotPresent' but Brightness did not throw a PropertyNotImplementedException. It returned: {brightness}.");
                 }
                 catch (Exception ex)
                 {
@@ -292,7 +292,7 @@ namespace ConformU
                             if (coverCalibratorDevice.CoverState == CoverStatus.Open)
                                 LogOK("OpenCover", $"OpenCover was successful. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                             else
-                                LogError("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                                LogIssue("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
                         else
                         {
@@ -312,11 +312,11 @@ namespace ConformU
                                 LogOK("OpenCover", $"OpenCover was successful. The asynchronous open took {asynchronousOpenTime:0.0} seconds");
                             }
                             else
-                                LogError("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The asynchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                                LogIssue("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The asynchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
                     }
                     else
-                        LogError("OpenCover", $"CoverStatus is 'NotPresent' but OpenCover did not throw a MethodNotImplementedException.");
+                        LogIssue("OpenCover", $"CoverStatus is 'NotPresent' but OpenCover did not throw a MethodNotImplementedException.");
                 }
                 catch (Exception ex)
                 {
@@ -351,7 +351,7 @@ namespace ConformU
                             if (coverCalibratorDevice.CoverState == CoverStatus.Closed)
                                 LogOK("CloseCover", $"CloseCover was successful. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                             else
-                                LogError("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                                LogIssue("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
                         else
                         {
@@ -369,11 +369,11 @@ namespace ConformU
                                 LogOK("CloseCover", $"CloseCover was successful. The asynchronous close took {asynchronousCloseTime:0.0} seconds");
                             }
                             else
-                                LogError("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The asynchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                                LogIssue("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The asynchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
                     }
                     else
-                        LogError("CloseCover", $"CoverStatus is 'NotPresent' but CloseCover did not throw a MethodNotImplementedException.");
+                        LogIssue("CloseCover", $"CoverStatus is 'NotPresent' but CloseCover did not throw a MethodNotImplementedException.");
                 }
                 catch (Exception ex)
                 {
@@ -421,7 +421,7 @@ namespace ConformU
                                     if (!(coverCalibratorDevice.CoverState == CoverStatus.Moving))
                                         LogOK("HaltCover", "Cover is no longer moving after issuing the HaltCover command");
                                     else
-                                        LogError("HaltCover", "Cover is still moving after issuing the HaltCover command");
+                                        LogIssue("HaltCover", "Cover is still moving after issuing the HaltCover command");
                                 }
                                 catch (Exception ex)
                                 {
@@ -441,7 +441,7 @@ namespace ConformU
                             if (settings.DisplayMethodCalls)
                                 LogTestAndMessage("HaltCover", "About to call HaltCover method");
                             coverCalibratorDevice.HaltCover();
-                            LogError("HaltCover", "The cover operates synchronously but did not throw a MethodNotImplementedException in response to the HaltCover command");
+                            LogIssue("HaltCover", "The cover operates synchronously but did not throw a MethodNotImplementedException in response to the HaltCover command");
                         }
                         catch (Exception ex)
                         {
@@ -458,7 +458,7 @@ namespace ConformU
                             LogTestAndMessage("HaltCover", "About to call HaltCover method");
                         coverCalibratorDevice.HaltCover();
                         // Should never get here...
-                        LogError("HaltCover", "CoverStatus is 'NotPresent' but HaltCover did not throw a MethodNotImplementedException");
+                        LogIssue("HaltCover", "CoverStatus is 'NotPresent' but HaltCover did not throw a MethodNotImplementedException");
                     }
                     catch (Exception ex)
                     {
@@ -619,7 +619,7 @@ namespace ConformU
                                     LogIssue("CalibratorOff", $"Brightness is not set to zero when the calibrator is turned off");
                             }
                             else
-                                LogError("CalibratorOff", $"CalibratorOff was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Off'. The synchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                                LogIssue("CalibratorOff", $"CalibratorOff was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Off'. The synchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
                         else
                         {
@@ -644,7 +644,7 @@ namespace ConformU
                                     LogIssue("CalibratorOff", $"Brightness is not set to zero when the calibrator is turned off");
                             }
                             else
-                                LogError("CalibratorOff", $"CalibratorOff was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Off'. The asynchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                                LogIssue("CalibratorOff", $"CalibratorOff was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Off'. The asynchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
                     }
                     catch (Exception ex)
@@ -659,7 +659,7 @@ namespace ConformU
                             LogTestAndMessage("CalibratorOff", "About to call CalibratorOff method");
                         coverCalibratorDevice.CalibratorOff();
                         // Should never get here...
-                        LogError("CalibratorOff", $"CalibratorStatus is 'NotPresent'but CalibratorOff did not throw a MethodNotImplementedException.");
+                        LogIssue("CalibratorOff", $"CalibratorStatus is 'NotPresent'but CalibratorOff did not throw a MethodNotImplementedException.");
                     }
                     catch (Exception ex)
                     {
@@ -704,7 +704,7 @@ namespace ConformU
                                 LogIssue("CalibratorOn", $"The Brightness property value: {returnedBrightness} does not match the value that was set: {requestedBrightness}");
                         }
                         else
-                            LogError("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Ready'. The synchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                            LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Ready'. The synchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                     }
                     else
                     {
@@ -721,7 +721,7 @@ namespace ConformU
                         else if (coverCalibratorDevice.CalibratorState == CalibratorStatus.Ready)
                             LogOK("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was successful. The asynchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         else
-                            LogError("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Ready'. The asynchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                            LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Ready'. The asynchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                     }
                 }
                 catch (Exception ex)
@@ -731,7 +731,7 @@ namespace ConformU
                         if (IsInvalidValueException("CalibratorOn", ex))
                             LogOK("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} threw an InvalidValueException as expected");
                         else
-                            LogError("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} threw an {ex.GetType().Name} exception an InvalidValueException was expected");
+                            LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} threw an {ex.GetType().Name} exception an InvalidValueException was expected");
                     }
                     else
                         HandleException("CalibratorOn", MemberType.Method, Required.MustBeImplemented, ex, "CalibratorStatus indicates that the device is a calibrator");
@@ -744,7 +744,7 @@ namespace ConformU
                         LogTestAndMessage("CalibratorOn", $"About to call CalibratorOn method with brightness: {requestedBrightness}");
                     coverCalibratorDevice.CalibratorOn(requestedBrightness);
                     // Should never get here...
-                    LogError("CalibratorOn", $"CalibratorStatus is 'NotPresent'but CalibratorOn did not throw a MethodNotImplementedException.");
+                    LogIssue("CalibratorOn", $"CalibratorStatus is 'NotPresent'but CalibratorOn did not throw a MethodNotImplementedException.");
                 }
                 catch (Exception ex)
                 {
@@ -795,7 +795,7 @@ namespace ConformU
                     default:
                         {
                             testWasSuccessful = false; // Flag that an issue occurred
-                            LogError(propertyName, "RequiredPropertiesTest: Unknown test type " + propertyToTest.ToString());
+                            LogIssue(propertyName, "RequiredPropertiesTest: Unknown test type " + propertyToTest.ToString());
                             break;
                         }
                 }
@@ -841,7 +841,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError(propertyName, "PerformanceTest: Unknown test type " + propertyToTest.ToString());
+                                LogIssue(propertyName, "PerformanceTest: Unknown test type " + propertyToTest.ToString());
                                 break;
                             }
                     }

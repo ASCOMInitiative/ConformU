@@ -365,7 +365,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(p_Name, "Conform:CanTest: Unknown test type " + p_Type.ToString());
+                            LogIssue(p_Name, "Conform:CanTest: Unknown test type " + p_Type.ToString());
                             break;
                         }
                 }
@@ -422,7 +422,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    LogError("ConformanceCheck", ex.ToString());
+                    LogIssue("ConformanceCheck", ex.ToString());
                 }
             }
 
@@ -436,7 +436,7 @@ namespace ConformU
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("ConformanceCheck", "About to get LastExposureDuration");
                     m_LastExposureDuration = m_Camera.LastExposureDuration;
-                    LogError("LastExposureDuration", "LastExposureDuration did not generate an exception when called before an exposure was made");
+                    LogIssue("LastExposureDuration", "LastExposureDuration did not generate an exception when called before an exposure was made");
                 }
                 catch (COMException)
                 {
@@ -452,7 +452,7 @@ namespace ConformU
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("ConformanceCheck", "About to get LastExposureStartTime");
                     m_LastExposureStartTime = m_Camera.LastExposureStartTime;
-                    LogError("LastExposureStartTime", "LastExposureStartTime did not generate an exception when called before an exposure was made");
+                    LogIssue("LastExposureStartTime", "LastExposureStartTime did not generate an exception when called before an exposure was made");
                 }
                 catch (COMException)
                 {
@@ -479,7 +479,7 @@ namespace ConformU
             if (!m_CanAsymmetricBin)
             {
                 if (m_MaxBinX != m_MaxBinY)
-                    LogError("CanAsymmetricBin", "CanAsymmetricBin is false but MaxBinX and MaxBinY are not equal!");
+                    LogIssue("CanAsymmetricBin", "CanAsymmetricBin is false but MaxBinX and MaxBinY are not equal!");
             }
 
             m_BinX = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.BinX, "BinX Read", 1, 1)); if (cancellationToken.IsCancellationRequested)
@@ -489,7 +489,7 @@ namespace ConformU
             if (!m_CanAsymmetricBin)
             {
                 if (m_BinX != m_BinY)
-                    LogError("CanAsymmetricBin", "CanAsymmetricBin is false but BinX and BinY are not equal!");
+                    LogIssue("CanAsymmetricBin", "CanAsymmetricBin is false but BinX and BinY are not equal!");
             }
 
             // Test writing low and high Bin values outside maximum range
@@ -498,7 +498,7 @@ namespace ConformU
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("ConformanceCheck", "About to set BinX");
                 m_Camera.BinX = 0;
-                LogError("BinX Write", "Invalid value 0 written but no exception generated");
+                LogIssue("BinX Write", "Invalid value 0 written but no exception generated");
             }
             catch (Exception)
             {
@@ -509,7 +509,7 @@ namespace ConformU
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("ConformanceCheck", "About to set BinX");
                 m_Camera.BinX = (short)(m_MaxBinX + 1);
-                LogError("BinX Write", "Invalid value " + m_MaxBinX + 1 + " written but no exception generated");
+                LogIssue("BinX Write", "Invalid value " + m_MaxBinX + 1 + " written but no exception generated");
             }
             catch (Exception)
             {
@@ -520,7 +520,7 @@ namespace ConformU
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("ConformanceCheck", "About to set BinY");
                 m_Camera.BinY = 0;
-                LogError("BinY Write", "Invalid value 0 written but no exception generated");
+                LogIssue("BinY Write", "Invalid value 0 written but no exception generated");
             }
             catch (Exception)
             {
@@ -531,7 +531,7 @@ namespace ConformU
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("ConformanceCheck", "About to set BinY");
                 m_Camera.BinY = (short)(m_MaxBinY + 1);
-                LogError("BinY Write", "Invalid value " + m_MaxBinY + 1 + " written but no exception generated");
+                LogIssue("BinY Write", "Invalid value " + m_MaxBinY + 1 + " written but no exception generated");
             }
             catch (Exception)
             {
@@ -718,7 +718,7 @@ namespace ConformU
             m_ImageReady = CameraPropertyTestBoolean(CamPropertyType.ImageReady, "ImageReady", false); if (cancellationToken.IsCancellationRequested)
                 return;
             if (m_ImageReady)
-                LogError("ImageReady", "Image is flagged as ready but no exposure has been started!");
+                LogIssue("ImageReady", "Image is flagged as ready but no exposure has been started!");
             if (m_ImageReady)
             {
                 try
@@ -726,7 +726,7 @@ namespace ConformU
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
                     m_ImageArray = (int[,])m_Camera.ImageArray;
-                    LogError("ImageArray", "No image has been taken but ImageArray has not generated an exception");
+                    LogIssue("ImageArray", "No image has been taken but ImageArray has not generated an exception");
                 }
                 catch (Exception)
                 {
@@ -739,7 +739,7 @@ namespace ConformU
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
                     m_ImageArray = (int[,])m_Camera.ImageArray;
-                    LogError("ImageArray", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
+                    LogIssue("ImageArray", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                 }
                 catch (Exception)
                 {
@@ -759,7 +759,7 @@ namespace ConformU
                         LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
                     ImageArrayVariantObject = m_Camera.ImageArrayVariant;
                     m_ImageArrayVariant = (int[,])ImageArrayVariantObject;
-                    LogError("ImageArrayVariant", "No image has been taken but ImageArray has not generated an exception");
+                    LogIssue("ImageArrayVariant", "No image has been taken but ImageArray has not generated an exception");
                 }
                 catch (Exception)
                 {
@@ -772,7 +772,7 @@ namespace ConformU
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
                     m_ImageArrayVariant = (int[,])m_Camera.ImageArrayVariant;
-                    LogError("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
+                    LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                 }
                 catch (Exception)
                 {
@@ -806,7 +806,7 @@ namespace ConformU
             m_IsPulseGuiding = CameraPropertyTestBoolean(CamPropertyType.IsPulseGuiding, "IsPulseGuiding", false); if (cancellationToken.IsCancellationRequested)
                 return;
             if (m_IsPulseGuiding)
-                LogError("IsPulseGuiding", "Camera is showing pulse guiding underway although no PulseGuide command has been issued!");
+                LogIssue("IsPulseGuiding", "Camera is showing pulse guiding underway although no PulseGuide command has been issued!");
 
             CameraPropertyTestInteger(CamPropertyType.MaxADU, "MaxADU", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested)
                 return;
@@ -945,7 +945,7 @@ namespace ConformU
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("ConformanceCheck", "About to set SetCCDTemperature");
                     m_Camera.SetCCDTemperature = 0;
-                    LogError("SetCCDTemperature Write", "CanSetCCDTemperature is false but no exception generated on write");
+                    LogIssue("SetCCDTemperature Write", "CanSetCCDTemperature is false but no exception generated on write");
                 }
                 catch (Exception ex)
                 {
@@ -1010,14 +1010,14 @@ namespace ConformU
                 if (m_ExposureMin <= m_ExposureMax)
                     LogOK("ExposureMin", "ExposureMin is less than or equal to ExposureMax");
                 else
-                    LogError("ExposureMin", "ExposureMin is greater than ExposureMax");
+                    LogIssue("ExposureMin", "ExposureMin is greater than ExposureMax");
 
                 // ExposureResolution Read
                 m_ExposureResolution = CameraPropertyTestDouble(CamPropertyType.ExposureResolution, "ExposureResolution Read", 0.0, double.MaxValue, true);
                 if (m_ExposureResolution <= m_ExposureMax)
                     LogOK("ExposureResolution", "ExposureResolution is less than or equal to ExposureMax");
                 else
-                    LogError("ExposureResolution", "ExposureResolution is greater than ExposureMax");
+                    LogIssue("ExposureResolution", "ExposureResolution is greater than ExposureMax");
 
                 // FastReadout Read Optional
                 if (m_CanFastReadout)
@@ -1028,7 +1028,7 @@ namespace ConformU
                         if (settings.DisplayMethodCalls)
                             LogTestAndMessage("ConformanceCheck", "About to get FastReadout");
                         m_FastReadout = m_Camera.FastReadout;
-                        LogError("FastReadout Read", "CanFastReadout is False but a PropertyNotImplementedException was not thrown");
+                        LogIssue("FastReadout Read", "CanFastReadout is False but a PropertyNotImplementedException was not thrown");
                     }
                     catch (Exception ex)
                     {
@@ -1059,7 +1059,7 @@ namespace ConformU
                         if (settings.DisplayMethodCalls)
                             LogTestAndMessage("ConformanceCheck", "About to set FastReadout");
                         m_Camera.FastReadout = true;
-                        LogError("FastReadout Write", "CanFastReadout is False but a PropertyNotImplementedException was not thrown");
+                        LogIssue("FastReadout Write", "CanFastReadout is False but a PropertyNotImplementedException was not thrown");
                     }
                     catch (Exception ex)
                     {
@@ -1116,7 +1116,7 @@ namespace ConformU
                 }
 
                 if (m_CanReadGainMax & m_CanReadGainMin & m_CanReadGains)
-                    LogError("Gains", "GainMin, GainMax and Gains are all readable. Only one of GainMin/Max as a pair or Gains should be used, the other should throw a PropertyNotImplementedException");
+                    LogIssue("Gains", "GainMin, GainMax and Gains are all readable. Only one of GainMin/Max as a pair or Gains should be used, the other should throw a PropertyNotImplementedException");
                 else
                 {
                 }
@@ -1157,7 +1157,7 @@ namespace ConformU
                     }
                     else
                     {
-                        LogError("Gain Read", $"Unable to determine whether the driver is in \"Gain Not Implemented\", \"Gain Index\" or \"Gain Value\" mode. Please check the interface specification.");
+                        LogIssue("Gain Read", $"Unable to determine whether the driver is in \"Gain Not Implemented\", \"Gain Index\" or \"Gain Value\" mode. Please check the interface specification.");
                         LogInfo("Gain Read", $"Gain threw an exception: {m_CanReadGain}, Gains threw an exception: {m_CanReadGains}, GainMin threw an exception: {m_CanReadGainMin}, GainMax threw an exception: {m_CanReadGainMax}.");
                         LogInfo("Gain Read", $"\"Gain Not Implemented\" mode: Gain, Gains, GainMin and GainMax must all throw exceptions.");
                         LogInfo("Gain Read", $"\"Gain Index\" mode: Gain and Gains must work while GainMin and GainMax must throw exceptions.");
@@ -1166,7 +1166,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogError("Gain Read", $"Gain Read threw an exception but at least one of Gains, GainMin Or GainMax did not throw an exception. If Gain throws an exception, all the other gain properties should do likewise.");
+                    LogIssue("Gain Read", $"Gain Read threw an exception but at least one of Gains, GainMin Or GainMax did not throw an exception. If Gain throws an exception, all the other gain properties should do likewise.");
                     LogInfo("Gain Read", $"Gains threw an exception: {m_CanReadGains}, GainMin threw an exception: {m_CanReadGainMin}, GainMax threw an exception: {m_CanReadGainMax}.");
                 }
 
@@ -1260,7 +1260,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError("Gain Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {m_GainMode}");
+                                LogIssue("Gain Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {m_GainMode}");
                                 break;
                             }
                     }
@@ -1276,14 +1276,14 @@ namespace ConformU
                         case object _ when m_PercentCompleted < 0 // Lower than minimum value
                        :
                             {
-                                LogError("PercentCompleted Read", "Invalid value: " + m_PercentCompleted.ToString());
+                                LogIssue("PercentCompleted Read", "Invalid value: " + m_PercentCompleted.ToString());
                                 break;
                             }
 
                         case object _ when m_PercentCompleted > 100 // Higher than maximum value
                  :
                             {
-                                LogError("PercentCompleted Read", "Invalid value: " + m_PercentCompleted.ToString());
+                                LogIssue("PercentCompleted Read", "Invalid value: " + m_PercentCompleted.ToString());
                                 break;
                             }
 
@@ -1328,11 +1328,11 @@ namespace ConformU
                             LogInfo("ReadoutMode Index", "Current value: " + m_ReadoutModes[m_ReadoutMode].ToString());
                         }
                         else
-                            LogError("ReadoutMode Index", "ReadReadoutMode is outside the bounds of the ReadoutModes ArrayList");
+                            LogIssue("ReadoutMode Index", "ReadReadoutMode is outside the bounds of the ReadoutModes ArrayList");
                     }
                     catch (Exception ex)
                     {
-                        LogError("ReadoutMode Index", "Exception: " + ex.Message);
+                        LogIssue("ReadoutMode Index", "Exception: " + ex.Message);
                         LogDebug("ReadoutMode Index", ex.ToString());
                     }
                 }
@@ -1399,7 +1399,7 @@ namespace ConformU
                 }
 
                 if (m_CanReadOffsetMax & m_CanReadOffsetMin & m_CanReadOffsets)
-                    LogError("Offsets", "OffsetMin, OffsetMax and Offsets are all readable. Only one of OffsetMin/Max as a pair or Offsets should be used, the other should throw a PropertyNotImplementedException");
+                    LogIssue("Offsets", "OffsetMin, OffsetMax and Offsets are all readable. Only one of OffsetMin/Max as a pair or Offsets should be used, the other should throw a PropertyNotImplementedException");
                 else
                 {
                 }
@@ -1450,7 +1450,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogError("Offset Read", $"Offset Read threw an exception but at least one of Offsets, OffsetMin Or OffsetMax did not throw an exception. If Offset throws an exception, all the other offset properties should do likewise.");
+                    LogIssue("Offset Read", $"Offset Read threw an exception but at least one of Offsets, OffsetMin Or OffsetMax did not throw an exception. If Offset throws an exception, all the other offset properties should do likewise.");
                     LogInfo("Offset Read", $"Offsets threw an exception: {m_CanReadOffsets}, OffsetMin threw an exception: {m_CanReadOffsetMin}, OffsetMax threw an exception: {m_CanReadOffsetMax}.");
                 }
 
@@ -1544,7 +1544,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError("Offset Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {m_OffsetMode}");
+                                LogIssue("Offset Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {m_OffsetMode}");
                                 break;
                             }
                     }
@@ -1585,7 +1585,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -1640,7 +1640,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -1650,14 +1650,14 @@ namespace ConformU
                     case object _ when returnValue < p_Min // Lower than minimum value
                    :
                         {
-                            LogError(p_Name, "Invalid value: " + returnValue.ToString());
+                            LogIssue(p_Name, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     case object _ when returnValue > p_Max // Higher than maximum value
              :
                         {
-                            LogError(p_Name, "Invalid value: " + returnValue.ToString());
+                            LogIssue(p_Name, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
@@ -1690,7 +1690,7 @@ namespace ConformU
                                 LogTestAndMessage("ConformanceCheck", "About to get BayerOffsetX");
                             TestShort = m_Camera.BayerOffsetX;
                             returnValue = false; // Property should throw an exception but did not so record that fact
-                            LogError(p_Name, "Sensor type is Monochrome so this property must throw a PropertyNotImplementedException; it must not return a value");
+                            LogIssue(p_Name, "Sensor type is Monochrome so this property must throw a PropertyNotImplementedException; it must not return a value");
                             break;
                         }
 
@@ -1700,13 +1700,13 @@ namespace ConformU
                                 LogTestAndMessage("ConformanceCheck", "About to get BayerOffsetY");
                             TestShort = m_Camera.BayerOffsetY;
                             returnValue = false; // Property should throw an exception but did not so record that fact
-                            LogError(p_Name, "Sensor type is Monochrome so this property must throw a PropertyNotImplementedException; it must not return a value");
+                            LogIssue(p_Name, "Sensor type is Monochrome so this property must throw a PropertyNotImplementedException; it must not return a value");
                             break;
                         }
 
                     default:
                         {
-                            LogError(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -1823,7 +1823,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -1833,7 +1833,7 @@ namespace ConformU
                     case object _ when returnValue < p_Min // Lower than minimum value
                    :
                         {
-                            LogError(p_Name, "Invalid value: " + returnValue.ToString());
+                            LogIssue(p_Name, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
@@ -1858,7 +1858,7 @@ namespace ConformU
 
                                 default:
                                     {
-                                        LogError(p_Name, "Invalid value: " + returnValue.ToString());
+                                        LogIssue(p_Name, "Invalid value: " + returnValue.ToString());
                                         break;
                                     }
                             }
@@ -1985,7 +1985,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -1995,14 +1995,14 @@ namespace ConformU
                     case double _ when returnValue < p_Min // Lower than minimum value
                    :
                         {
-                            LogError(p_Name, "Invalid value: " + returnValue.ToString());
+                            LogIssue(p_Name, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     case double _ when returnValue > p_Max // Higher than maximum value
              :
                         {
-                            LogError(p_Name, "Invalid value: " + returnValue.ToString());
+                            LogIssue(p_Name, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
@@ -2072,7 +2072,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -2111,7 +2111,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -2129,7 +2129,7 @@ namespace ConformU
                             if (returnValue.Length <= p_MaxLength)
                                 LogOK(p_Name, returnValue);
                             else
-                                LogError(p_Name, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);
+                                LogIssue(p_Name, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);
                             break;
                         }
                 }
@@ -2212,19 +2212,19 @@ namespace ConformU
                                 if (m_CanAbortExposure)
                                     LogOK("AbortExposure", "No exception generated when camera is already idle");
                                 else
-                                    LogError("AbortExposure", "CanAbortExposure is false but no exception is generated when AbortExposure is called");
+                                    LogIssue("AbortExposure", "CanAbortExposure is false but no exception is generated when AbortExposure is called");
                             }
                             catch (COMException)
                             {
                                 if (m_CanAbortExposure)
-                                    LogError("AbortExposure", EX_COM + "exception incorrectly generated when camera is idle");
+                                    LogIssue("AbortExposure", EX_COM + "exception incorrectly generated when camera is idle");
                                 else
                                     LogOK("AbortExposure", "CanAbortExposure is false and COM exception correctly generated");
                             }
                             catch (Exception)
                             {
                                 if (m_CanAbortExposure)
-                                    LogError("AbortExposure", EX_NET + "exception incorrectly generated when camera is idle");
+                                    LogIssue("AbortExposure", EX_NET + "exception incorrectly generated when camera is idle");
                                 else
                                     LogOK("AbortExposure", "CanAbortExposure is false and .NET exception correctly generated");
                             }
@@ -2234,18 +2234,18 @@ namespace ConformU
 
                     default:
                         {
-                            LogError("AbortExposure", EX_COM + "camera is not idle, further AbortExposure tests skipped: " + m_CameraState.ToString());
+                            LogIssue("AbortExposure", EX_COM + "camera is not idle, further AbortExposure tests skipped: " + m_CameraState.ToString());
                             break;
                         }
                 }
             }
             catch (COMException)
             {
-                LogError("AbortExposure", EX_COM + "exception generated when reading camera state, further AbortExposure tests skipped");
+                LogIssue("AbortExposure", EX_COM + "exception generated when reading camera state, further AbortExposure tests skipped");
             }
             catch (Exception)
             {
-                LogError("AbortExposure", EX_NET + "exception generated when reading camera state, further AbortExposure tests skipped");
+                LogIssue("AbortExposure", EX_NET + "exception generated when reading camera state, further AbortExposure tests skipped");
             }
             // PulseGuide
             if (m_CanPulseGuide)
@@ -2263,11 +2263,11 @@ namespace ConformU
                 }
                 catch (COMException ex)
                 {
-                    LogError("PulseGuide", EX_COM + "CanPulseGuide is true but exception generated when calling method - " + ex.ToString());
+                    LogIssue("PulseGuide", EX_COM + "CanPulseGuide is true but exception generated when calling method - " + ex.ToString());
                 }
                 catch (Exception ex)
                 {
-                    LogError("PulseGuide", EX_NET + "CanPulseGuide is true but exception generated when calling method - " + ex.ToString());
+                    LogIssue("PulseGuide", EX_NET + "CanPulseGuide is true but exception generated when calling method - " + ex.ToString());
                 }
             }
             else
@@ -2276,7 +2276,7 @@ namespace ConformU
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("ConformanceCheck", "About to call PulseGuide - North");
                     m_Camera.PulseGuide(GuideDirection.North, 0);
-                    LogError("PulseGuide", "CanPulseGuide is false but no exception generated when calling method");
+                    LogIssue("PulseGuide", "CanPulseGuide is false but no exception generated when calling method");
                 }
                 catch (COMException)
                 {
@@ -2310,19 +2310,19 @@ namespace ConformU
                                 if (m_CanStopExposure)
                                     LogOK("StopExposure", "No exception generated when camera is already idle");
                                 else
-                                    LogError("StopExposure", "CanStopExposure is false but no exception is generated when StopExposure is called");
+                                    LogIssue("StopExposure", "CanStopExposure is false but no exception is generated when StopExposure is called");
                             }
                             catch (COMException)
                             {
                                 if (m_CanStopExposure)
-                                    LogError("StopExposure", EX_COM + "exception incorrectly generated when camera is idle");
+                                    LogIssue("StopExposure", EX_COM + "exception incorrectly generated when camera is idle");
                                 else
                                     LogOK("StopExposure", "CanStopExposure is false and COM exception correctly generated");
                             }
                             catch (Exception)
                             {
                                 if (m_CanStopExposure)
-                                    LogError("StopExposure", EX_NET + "exception incorrectly generated when camera is idle");
+                                    LogIssue("StopExposure", EX_NET + "exception incorrectly generated when camera is idle");
                                 else
                                     LogOK("StopExposure", "CanStopExposure is false and .NET exception correctly generated");
                             }
@@ -2332,18 +2332,18 @@ namespace ConformU
 
                     default:
                         {
-                            LogError("StopExposure", EX_COM + "camera is not idle, further StopExposure tests skipped: " + m_CameraState.ToString());
+                            LogIssue("StopExposure", EX_COM + "camera is not idle, further StopExposure tests skipped: " + m_CameraState.ToString());
                             break;
                         }
                 }
             }
             catch (COMException)
             {
-                LogError("StopExposure", EX_COM + "exception generated when reading camera state, further StopExposure tests skipped");
+                LogIssue("StopExposure", EX_COM + "exception generated when reading camera state, further StopExposure tests skipped");
             }
             catch (Exception)
             {
-                LogError("StopExposure", EX_NET + "exception generated when reading camera state, further StopExposure tests skipped");
+                LogIssue("StopExposure", EX_NET + "exception generated when reading camera state, further StopExposure tests skipped");
             }
 
             // Use either the maximum values supplied by the camera driver or the maximum values defined in Conform's setup, if these have been set
@@ -2491,7 +2491,7 @@ namespace ConformU
                                     CameraTestLast(p_Duration, l_StartTimeUTC);
                                 }
                                 else
-                                    LogError("StartExposure", "Synchronous exposure found but image was returned before exposure time was complete");
+                                    LogIssue("StartExposure", "Synchronous exposure found but image was returned before exposure time was complete");
                             }
                             else
                             {
@@ -2601,7 +2601,7 @@ namespace ConformU
                                     CameraTestLast(p_Duration, l_StartTimeUTC);
                                 }
                                 else
-                                    LogError("StartExposure", "Camera state is CameraError");
+                                    LogIssue("StartExposure", "Camera state is CameraError");
                             }
 
                             // Display a warning if ImageReady was set too early
@@ -2644,20 +2644,20 @@ namespace ConformU
                                         LogOK("ImageArray", "Successfully read 32 bit integer array (" + l_NumPlanes + ") " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1) + " pixels");
                                     }
                                     else
-                                        LogError("ImageArray", "Expected 32 bit integer array, actually got: " + m_ImageArray.GetType().ToString());
+                                        LogIssue("ImageArray", "Expected 32 bit integer array, actually got: " + m_ImageArray.GetType().ToString());
                                 }
                                 else if ((m_ImageArray.GetLength(0) == p_NumY) & (m_ImageArray.GetLength(1) == p_NumX))
-                                    LogError("ImageArray", "Camera image dimensions swapped, expected values: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
+                                    LogIssue("ImageArray", "Camera image dimensions swapped, expected values: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
                                 else
-                                    LogError("ImageArray", "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
+                                    LogIssue("ImageArray", "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
                             }
                             catch (COMException ex)
                             {
-                                LogError("StartExposure", EX_COM + "exception when reading ImageArray" + ex.ToString());
+                                LogIssue("StartExposure", EX_COM + "exception when reading ImageArray" + ex.ToString());
                             }
                             catch (Exception ex)
                             {
-                                LogError("StartExposure", EX_NET + "exception when reading ImageArray" + ex.ToString());
+                                LogIssue("StartExposure", EX_NET + "exception when reading ImageArray" + ex.ToString());
                             }
 
                             m_ImageArray = null;
@@ -2703,20 +2703,20 @@ namespace ConformU
                                         LogOK("ImageArrayVariant", "Successfully read variant array (" + l_NumPlanes + ") with " + l_VariantType + " elements " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1) + " pixels");
                                     }
                                     else
-                                        LogError("ImageArrayVariant", "Expected variant array, actually got: " + m_ImageArrayVariant.GetType().ToString());
+                                        LogIssue("ImageArrayVariant", "Expected variant array, actually got: " + m_ImageArrayVariant.GetType().ToString());
                                 }
                                 else if ((m_ImageArrayVariant.GetLength(0) == p_NumY) & (m_ImageArrayVariant.GetLength(1) == p_NumX))
-                                    LogError("ImageArrayVariant", "Camera image dimensions swapped, expected values: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
+                                    LogIssue("ImageArrayVariant", "Camera image dimensions swapped, expected values: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
                                 else
-                                    LogError("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
+                                    LogIssue("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
                             }
                             catch (COMException ex)
                             {
-                                LogError("ImageArrayVariant", EX_COM + "exception when reading ImageArrayVariant" + ex.ToString());
+                                LogIssue("ImageArrayVariant", EX_COM + "exception when reading ImageArrayVariant" + ex.ToString());
                             }
                             catch (Exception ex)
                             {
-                                LogError("ImageArrayVariant", EX_NET + "exception when reading ImageArrayVariant" + ex.ToString());
+                                LogIssue("ImageArrayVariant", EX_NET + "exception when reading ImageArrayVariant" + ex.ToString());
                             }
 
                             // Release large image objects from memory
@@ -2727,7 +2727,7 @@ namespace ConformU
                         else
                         {
                             LogTestAndMessage("StartExposure", "Test: " + p_ExpectedErrorMessage);
-                            LogError("StartExposure", "Expected an exception and didn't get one - BinX:" + p_BinX + " BinY:" + p_BinY + " StartX:" + p_StartX + " StartY:" + p_StartY + " NumX:" + p_NumX + " NumY:" + p_NumY);
+                            LogIssue("StartExposure", "Expected an exception and didn't get one - BinX:" + p_BinX + " BinY:" + p_BinY + " StartX:" + p_StartX + " StartY:" + p_StartY + " NumX:" + p_NumX + " NumY:" + p_NumY);
                             if (settings.DisplayMethodCalls)
                                 LogTestAndMessage("ConformanceCheck", "About to call StopExposure");
                             try
@@ -2755,7 +2755,7 @@ namespace ConformU
                         else
                         {
                             LogInfo("", p_ExpectedErrorMessage);
-                            LogError("StartExposure", EX_COM + "exception generated when exposing, further StartExposure tests skipped - " + ex.ToString());
+                            LogIssue("StartExposure", EX_COM + "exception generated when exposing, further StartExposure tests skipped - " + ex.ToString());
                         }
                     }
                     catch (Exception ex)
@@ -2763,18 +2763,18 @@ namespace ConformU
                         if (p_ExpectedErrorMessage != "")
                             LogOK("StartExposure", "Exception correctly generated for " + p_ExpectedErrorMessage);
                         else
-                            LogError("StartExposure", EX_NET + "exception generated when exposing, further StartExposure tests skipped - " + ex.ToString());
+                            LogIssue("StartExposure", EX_NET + "exception generated when exposing, further StartExposure tests skipped - " + ex.ToString());
                     }
                 }
                 catch (COMException ex)
                 {
                     LogInfo("StartExposure", "COM Exception: " + ex.Message);
-                    LogError("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
+                    LogIssue("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
                 }
                 catch (Exception ex)
                 {
                     LogInfo("StartExposure", ".NET Exception: " + ex.Message);
-                    LogError("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
+                    LogIssue("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
                 }
             }
             catch (COMException ex)
@@ -2796,7 +2796,7 @@ namespace ConformU
                     default:
                         {
                             LogInfo("StartExposure", "COM Exception: " + ex.Message);
-                            LogError("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
+                            LogIssue("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
                             break;
                         }
                 }
@@ -2809,7 +2809,7 @@ namespace ConformU
             catch (Exception ex)
             {
                 LogInfo("StartExposure", ".NET Exception: " + ex.Message);
-                LogError("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
+                LogIssue("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
             }
 
             Status(StatusType.staAction, "");
@@ -2922,20 +2922,20 @@ namespace ConformU
                         }
                         catch (COMException ex)
                         {
-                            LogError("LastExposureStartTime", EX_COM + "parsing LastExposureStartTime - " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                            LogIssue("LastExposureStartTime", EX_COM + "parsing LastExposureStartTime - " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                         }
                         catch (Exception ex)
                         {
-                            LogError("LastExposureStartTime", EX_NET + "parsing LastExposureStartTime - " + ex.Message + " " + m_LastExposureStartTime);
+                            LogIssue("LastExposureStartTime", EX_NET + "parsing LastExposureStartTime - " + ex.Message + " " + m_LastExposureStartTime);
                         }
                     }
                     else
-                        LogError("LastExposureStartTime", "LastExposureStartTime not in the expected format yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
+                        LogIssue("LastExposureStartTime", "LastExposureStartTime not in the expected format yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
                 }
                 else if (m_LastExposureStartTime == "")
-                    LogError("LastExposureStartTime", "LastExposureStartTime has returned an empty string - expected yyyy-mm-ddThh:mm:ss");
+                    LogIssue("LastExposureStartTime", "LastExposureStartTime has returned an empty string - expected yyyy-mm-ddThh:mm:ss");
                 else
-                    LogError("LastExposureStartTime", "LastExposureStartTime is less than 19 characters - expected yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
+                    LogIssue("LastExposureStartTime", "LastExposureStartTime is less than 19 characters - expected yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
             }
             catch (Exception ex)
             {
@@ -3125,7 +3125,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError(p_Name, "Conform:PerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(p_Name, "Conform:PerformanceTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }

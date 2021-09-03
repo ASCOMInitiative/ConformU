@@ -195,7 +195,7 @@ namespace ConformU
 
                 default:
                     {
-                        LogError("Switches", "Unknown switch interface version: " + g_InterfaceVersion);
+                        LogIssue("Switches", "Unknown switch interface version: " + g_InterfaceVersion);
                         break;
                     }
             }
@@ -296,9 +296,9 @@ namespace ConformU
                                         }
                                     }
                                     else if (l_SwitchName == "")
-                                        LogError("GetSwitchName " + i, "Switch name returns null string but switch can neither read nor write!");
+                                        LogIssue("GetSwitchName " + i, "Switch name returns null string but switch can neither read nor write!");
                                     else
-                                        LogError("GetSwitchName " + i, "Found switch, name:  " + l_SwitchName + " which can neither read nor write!");
+                                        LogIssue("GetSwitchName " + i, "Found switch, name:  " + l_SwitchName + " which can neither read nor write!");
                                 }
                                 catch (Exception ex)
                                 {
@@ -310,7 +310,7 @@ namespace ConformU
                             Status(StatusType.staStatus, "");
                         }
                         else
-                            LogError("SwitchCheckMethods", "Skipping further tests as there is no valid value for MaxSwitch");
+                            LogIssue("SwitchCheckMethods", "Skipping further tests as there is no valid value for MaxSwitch");
                         break;
                     }
 
@@ -370,7 +370,7 @@ namespace ConformU
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogError("GetSwitchDescription ", "Mandatory parameter threw an exception: " + ex.Message);
+                                        LogIssue("GetSwitchDescription ", "Mandatory parameter threw an exception: " + ex.Message);
                                     }
 
                                     try // Read switch minimum value
@@ -382,7 +382,7 @@ namespace ConformU
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogError("MinSwitchValue ", "Mandatory parameter threw an exception: " + ex.Message);
+                                        LogIssue("MinSwitchValue ", "Mandatory parameter threw an exception: " + ex.Message);
                                         l_SwitchMinimum = BAD_SWITCH_VALUE;
                                     }
 
@@ -416,7 +416,7 @@ namespace ConformU
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogError("MaxSwitchValue ", "Mandatory parameter threw an exception: " + ex.Message);
+                                        LogIssue("MaxSwitchValue ", "Mandatory parameter threw an exception: " + ex.Message);
                                         l_SwitchMaximum = BAD_SWITCH_VALUE;
                                         l_SwitchRange = BAD_SWITCH_VALUE;
                                     }
@@ -493,7 +493,7 @@ namespace ConformU
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogError("SwitchStep ", "Mandatory parameter threw an exception: " + ex.Message);
+                                        LogIssue("SwitchStep ", "Mandatory parameter threw an exception: " + ex.Message);
                                     }
 
                                     LogDebug("SwitchMinimum ", l_SwitchMinimum.ToString());
@@ -510,7 +510,7 @@ namespace ConformU
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogError("CanWrite ", "Mandatory parameter threw an exception: " + ex.Message);
+                                        LogIssue("CanWrite ", "Mandatory parameter threw an exception: " + ex.Message);
                                         LogInfo("CanWrite ", "Assuming that CanWrite is false");
                                         l_SwitchCanWrite = false;
                                     }// Initialise to a default state
@@ -681,14 +681,14 @@ namespace ConformU
                                         {
                                             if (l_SwitchCanWrite)
                                             {
-                                                LogError("SetSwitch ", "Exception: " + ex.Message);
+                                                LogIssue("SetSwitch ", "Exception: " + ex.Message);
                                                 LogDebug("SetSwitch ", "Exception: " + ex.ToString());
                                             }
                                             else if (IsMethodNotImplementedException(ex))
                                                 LogOK("SetSwitch ", "  CanWrite is False and MethodNotImplementedException was thrown");
                                             else
                                             {
-                                                LogError("SetSwitch ", "Exception: " + ex.Message);
+                                                LogIssue("SetSwitch ", "Exception: " + ex.Message);
                                                 LogDebug("SetSwitch ", "Exception: " + ex.ToString());
                                             }
                                         }
@@ -894,14 +894,14 @@ namespace ConformU
                                         {
                                             if (l_SwitchCanWrite)
                                             {
-                                                LogError("SetSwitchValue ", "Exception: " + ex.Message);
+                                                LogIssue("SetSwitchValue ", "Exception: " + ex.Message);
                                                 LogDebug("SetSwitchValue ", "Exception: " + ex.ToString());
                                             }
                                             else if (IsMethodNotImplementedException(ex))
                                                 LogOK("SetSwitchValue ", "  CanWrite is False and MethodNotImplementedException was thrown");
                                             else
                                             {
-                                                LogError("SetSwitchValue ", "Exception: " + ex.Message);
+                                                LogIssue("SetSwitchValue ", "Exception: " + ex.Message);
                                                 LogDebug("SetSwitchValue ", "Exception: " + ex.ToString());
                                             }
                                         }
@@ -914,7 +914,7 @@ namespace ConformU
                                 catch (Exception ex)
                                 {
                                     if ((i >= 0) & (i < m_MaxSwitch))
-                                        LogError("GetSwitchName ", "Mandatory method GetSwitchName threw an exception: " + ex.ToString());
+                                        LogIssue("GetSwitchName ", "Mandatory method GetSwitchName threw an exception: " + ex.ToString());
                                     else
                                         LogDebug("GetSwitchName ", "Exception: " + ex.ToString());
                                 }
@@ -975,7 +975,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(p_Name, "SwitchPropertyTestInteger: Unknown test type - " + p_Type.ToString());
+                            LogIssue(p_Name, "SwitchPropertyTestInteger: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -985,14 +985,14 @@ namespace ConformU
                     case object _ when returnValue < p_Min // Lower than minimum value
                    :
                         {
-                            LogError(p_Name, "Invalid value: " + returnValue.ToString());
+                            LogIssue(p_Name, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     case object _ when returnValue > p_Max // Higher than maximum value
              :
                         {
-                            LogError(p_Name, "Invalid value: " + returnValue.ToString());
+                            LogIssue(p_Name, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
@@ -1051,7 +1051,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError(p_Name, "SwitchPerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(p_Name, "SwitchPerformanceTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }
@@ -1355,7 +1355,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError("CheckInaccessibleOutOfRange",$"Unknown value of SwitchMethod Enum: {method}");
+                                LogIssue("CheckInaccessibleOutOfRange",$"Unknown value of SwitchMethod Enum: {method}");
                                 break;
                             }
                     }
@@ -1440,7 +1440,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError("CheckInaccessibleOutOfRange", $"Unknown value of SwitchMethod Enum: {method}");
+                                LogIssue("CheckInaccessibleOutOfRange", $"Unknown value of SwitchMethod Enum: {method}");
                                 break;
                             }
                     }

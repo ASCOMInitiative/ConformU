@@ -217,7 +217,7 @@ namespace ConformU
                 }
                 else // Report error message and don't do other tests
                 {
-                    LogError("Pre-run Check", "Rotator still moving after " + ROTATOR_WAIT_LIMIT + "seconds, IsMoving stuck on?");
+                    LogIssue("Pre-run Check", "Rotator still moving after " + ROTATOR_WAIT_LIMIT + "seconds, IsMoving stuck on?");
                 }
 
                 LogOK("Pre-run Check", "Rotator is stationary");
@@ -239,7 +239,7 @@ namespace ConformU
                 m_CanReadIsMoving = true; // Can read OK, doesn't generate an exception
                 if (m_IsMoving)
                 {
-                    LogError("IsMoving", "IsMoving is True before any movement has been commanded!");
+                    LogIssue("IsMoving", "IsMoving is True before any movement has been commanded!");
                     LogInfo("IsMoving", "Further tests have been skipped");
                 }
                 else
@@ -288,7 +288,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogError("Reverse Read", "CanReverse is false but no exception generated");
+                    LogIssue("Reverse Read", "CanReverse is false but no exception generated");
                 }
             }
             catch (Exception ex)
@@ -335,7 +335,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogError("Reverse Write", "CanReverse is false but no exception generated");
+                    LogIssue("Reverse Write", "CanReverse is false but no exception generated");
                 }
             }
             catch (Exception ex)
@@ -372,13 +372,13 @@ namespace ConformU
                     {
                         case var @case when @case < 0.0f: // Lower than minimum value
                             {
-                                LogError("MechanicalPosition", "Invalid value: " + mechanicalPosition.ToString());
+                                LogIssue("MechanicalPosition", "Invalid value: " + mechanicalPosition.ToString());
                                 break;
                             }
 
                         case var case1 when case1 >= 360.0f: // Higher than maximum value
                             {
-                                LogError("MechanicalPosition", "Invalid value: " + mechanicalPosition.ToString()); // OK value
+                                LogIssue("MechanicalPosition", "Invalid value: " + mechanicalPosition.ToString()); // OK value
                                 break;
                             }
 
@@ -449,7 +449,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(p_Name, "RotatorPropertyTestSingle: Unknown test type - " + p_Type.ToString());
+                            LogIssue(p_Name, "RotatorPropertyTestSingle: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -458,13 +458,13 @@ namespace ConformU
                 {
                     case var @case when @case < p_Min: // Lower than minimum value
                         {
-                            LogError(p_Name, "Invalid value: " + RotatorPropertyTestSingleRet.ToString());
+                            LogIssue(p_Name, "Invalid value: " + RotatorPropertyTestSingleRet.ToString());
                             break;
                         }
 
                     case var case1 when case1 >= p_Max: // Higher than maximum value
                         {
-                            LogError(p_Name, "Invalid value: " + RotatorPropertyTestSingleRet.ToString()); // OK value
+                            LogIssue(p_Name, "Invalid value: " + RotatorPropertyTestSingleRet.ToString()); // OK value
                             break;
                         }
 
@@ -679,7 +679,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(p_Name, "RotatorMoveTest: Unknown test type - " + p_type.ToString());
+                            LogIssue(p_Name, "RotatorMoveTest: Unknown test type - " + p_type.ToString());
                             break;
                         }
                 }
@@ -759,7 +759,7 @@ namespace ConformU
                             LogInfo(p_Name, "Rotator supports angles > 360.0");
                     }
                     else if (rotatorPosition < 0.0d | rotatorPosition >= 360.0d) // Interface V3 behaviour (Position must be 0..359.99999...)
-                        LogError(p_Name, $"Rotator position {rotatorPosition:0.000} is outside the valid range: 0.0 to 359.99999...");
+                        LogIssue(p_Name, $"Rotator position {rotatorPosition:0.000} is outside the valid range: 0.0 to 359.99999...");
 
                     // Get the relevant position value
                     if (p_type == RotatorPropertyMethod.MoveMechanical) // Use the MechanicalPosition property
@@ -1006,7 +1006,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError(p_Name, "RotatorPerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(p_Name, "RotatorPerformanceTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }

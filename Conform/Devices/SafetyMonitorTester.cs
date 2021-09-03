@@ -152,7 +152,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogError("IsSafe", "Cannot confirm that IsSafe is false before connection because it threw an exception: " + ex.Message);
+                LogIssue("IsSafe", "Cannot confirm that IsSafe is false before connection because it threw an exception: " + ex.Message);
             }
         }
         public override bool Connected
@@ -203,7 +203,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(p_Name, "RequiredPropertiesTest: Unknown test type " + p_Type.ToString());
+                            LogIssue(p_Name, "RequiredPropertiesTest: Unknown test type " + p_Type.ToString());
                             break;
                         }
                 }
@@ -236,7 +236,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError(p_Name, "PerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(p_Name, "PerformanceTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }

@@ -169,7 +169,7 @@ namespace ConformU
             catch (Exception ex)
             {
                 LogInfo("Pre-run Check", "Unable to determine that the Filter wheel is stationary");
-                LogError("Pre-run Check", "Exception: " + ex.ToString());
+                LogIssue("Pre-run Check", "Exception: " + ex.ToString());
             }
             ClearStatus();
         }
@@ -194,7 +194,7 @@ namespace ConformU
                 l_Offsets = m_FilterWheel.FocusOffsets;
                 l_NOffsets = l_Offsets.Length;
                 if (l_NOffsets == 0)
-                    LogError("FocusOffsets Get", "Found no offset values in the returned array");
+                    LogIssue("FocusOffsets Get", "Found no offset values in the returned array");
                 else
                     LogOK("FocusOffsets Get", "Found " + l_NOffsets.ToString() + " filter offset values");
 
@@ -219,7 +219,7 @@ namespace ConformU
                 l_Names = m_FilterWheel.Names;
                 l_NNames = l_Names.Length;
                 if (l_NNames == 0)
-                    LogError("Names Get", "Did not find any names in the returned array");
+                    LogIssue("Names Get", "Did not find any names in the returned array");
                 else
                     LogOK("Names Get", "Found " + l_NNames.ToString() + " filter names");
                 l_FilterNumber = 0;
@@ -243,7 +243,7 @@ namespace ConformU
             if (l_NNames == l_NOffsets)
                 LogOK("Names Get", "Number of filter offsets and number of names are the same: " + l_NNames.ToString());
             else
-                LogError("Names Get", "Number of filter offsets and number of names are different: " + l_NOffsets.ToString() + " " + l_NNames.ToString());
+                LogIssue("Names Get", "Number of filter offsets and number of names are different: " + l_NOffsets.ToString() + " " + l_NNames.ToString());
 
             // Position - Required - Read / Write
             switch (l_NOffsets)
@@ -261,7 +261,7 @@ namespace ConformU
                             LogCallToDriver("Position Get", "About to get Position property");
                             l_StartFilterNumber = m_FilterWheel.Position;
                             if ((l_StartFilterNumber < 0) | (l_StartFilterNumber >= l_NOffsets))
-                                LogError("Position Get", "Illegal filter position returned: " + l_StartFilterNumber.ToString());
+                                LogIssue("Position Get", "Illegal filter position returned: " + l_StartFilterNumber.ToString());
                             else
                             {
                                 LogOK("Position Get", "Currently at position: " + l_StartFilterNumber.ToString());
@@ -285,7 +285,7 @@ namespace ConformU
                                         if (m_FilterWheel.Position == i)
                                             LogOK("Position Set", "Reached position: " + i.ToString() + " in: " + l_EndTime.Subtract(l_StartTime).TotalSeconds.ToString("0.0") + " seconds");
                                         else
-                                            LogError("Position Set", "Filter wheel did not reach specified position: " + i.ToString() + " within timeout of: " + FILTER_WHEEL_TIME_OUT.ToString());
+                                            LogIssue("Position Set", "Filter wheel did not reach specified position: " + i.ToString() + " within timeout of: " + FILTER_WHEEL_TIME_OUT.ToString());
                                         WaitFor(1000); // Pause to allow filter wheel to stabilise
                                     }
                                     catch (Exception ex)
@@ -297,7 +297,7 @@ namespace ConformU
                                 {
                                     LogCallToDriver("Position Set", "About to set Position property");
                                     m_FilterWheel.Position = -1; // Negative position, positions should never be negative
-                                    LogError("Position Set", "Failed to generate exception when selecting filter with negative filter number");
+                                    LogIssue("Position Set", "Failed to generate exception when selecting filter with negative filter number");
                                 }
                                 catch (Exception ex)
                                 {
@@ -307,7 +307,7 @@ namespace ConformU
                                 {
                                     LogCallToDriver("Position Set", "About to set Position property");
                                     m_FilterWheel.Position = (short)l_NOffsets; // This should be 1 above the highest array element returned
-                                    LogError("Position Set", "Failed to generate exception when selecting filter outside expected range");
+                                    LogIssue("Position Set", "Failed to generate exception when selecting filter outside expected range");
                                 }
                                 catch (Exception ex)
                                 {
@@ -370,7 +370,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError(p_Name, "FilterWheelPerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(p_Name, "FilterWheelPerformanceTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }

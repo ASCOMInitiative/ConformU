@@ -451,7 +451,7 @@ namespace ConformU
                     }
                     else
                     {
-                        LogError("Mount Safety", "Scope reports that it is parked but CanUnPark is false - please manually unpark the scope");
+                        LogIssue("Mount Safety", "Scope reports that it is parked but CanUnPark is false - please manually unpark the scope");
                     }
                 }
                 else
@@ -478,7 +478,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    LogError("Mount Safety", "Driver threw an exception while unparking: " + ex.Message);
+                    LogIssue("Mount Safety", "Driver threw an exception while unparking: " + ex.Message);
                 }
             }
 
@@ -499,7 +499,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    LogError("TimeCheck", $"Exception reading PC Time: {ex}");
+                    LogIssue("TimeCheck", $"Exception reading PC Time: {ex}");
                 }
 
                 // v1.0.12.0 Added catch logic for any UTCDate issues
@@ -514,20 +514,20 @@ namespace ConformU
                 {
                     if (ex.ErrorCode == g_ExNotImplemented | ex.ErrorCode == ErrorCodes.NotImplemented)
                     {
-                        LogError("TimeCheck", "Mount UTCDate: COM exception - UTCDate not implemented in this driver");
+                        LogIssue("TimeCheck", "Mount UTCDate: COM exception - UTCDate not implemented in this driver");
                     }
                     else
                     {
-                        LogError("TimeCheck", "Mount UTCDate: COM Exception - " + ex.ToString());
+                        LogIssue("TimeCheck", "Mount UTCDate: COM Exception - " + ex.ToString());
                     }
                 }
                 catch (PropertyNotImplementedException)
                 {
-                    LogError("TimeCheck", "Mount UTCDate: .NET exception - UTCDate not implemented in this driver");
+                    LogIssue("TimeCheck", "Mount UTCDate: .NET exception - UTCDate not implemented in this driver");
                 }
                 catch (Exception ex)
                 {
-                    LogError("TimeCheck", "Mount UTCDate: .NET Exception - " + ex.Message);
+                    LogIssue("TimeCheck", "Mount UTCDate: .NET Exception - " + ex.Message);
                 }
             }
         }
@@ -1814,7 +1814,7 @@ namespace ConformU
 
                                 default:
                                     {
-                                        LogError("SiderealTime", "Scope and ASCOM sidereal times are more than 1 hour apart, Scope: " + FormatRA(m_SiderealTimeScope) + ", ASCOM: " + FormatRA(m_SiderealTimeASCOM));
+                                        LogIssue("SiderealTime", "Scope and ASCOM sidereal times are more than 1 hour apart, Scope: " + FormatRA(m_SiderealTimeScope) + ", ASCOM: " + FormatRA(m_SiderealTimeASCOM));
                                         return;
                                     }
                             }
@@ -2115,7 +2115,7 @@ namespace ConformU
                     else if (l_Count > 0) // We did get some members on the first call, but now they have disappeared!
                     {
                         // This can be due to the driver returning the same TrackingRates object on every TrackingRates call but not resetting the iterator pointer
-                        LogError("TrackingRates", "Multiple calls to TrackingRates returned different answers!");
+                        LogIssue("TrackingRates", "Multiple calls to TrackingRates returned different answers!");
                         LogInfo("TrackingRates", "");
                         LogInfo("TrackingRates", "The first call to TrackingRates returned " + l_Count + " drive rates; the next call appeared to return no rates.");
                         LogInfo("TrackingRates", "This can arise when the SAME TrackingRates object is returned on every TrackingRates call.");
@@ -2238,7 +2238,7 @@ namespace ConformU
                         }
                         catch (NullReferenceException) // Catch issues in iterating over a new TrackingRates object after a previous TrackingRates object was disposed.
                         {
-                            LogError("TrackingRate Write 1", "A NullReferenceException was thrown while iterating a new TrackingRates instance after a previous TrackingRates instance was disposed. TrackingRate.Write testing skipped");
+                            LogIssue("TrackingRate Write 1", "A NullReferenceException was thrown while iterating a new TrackingRates instance after a previous TrackingRates instance was disposed. TrackingRate.Write testing skipped");
                             LogInfo("TrackingRate Write 1", "This may indicate that the TrackingRates.Dispose method cleared a global variable shared by all TrackingRates instances.");
                         }
                         catch (Exception ex)
@@ -2286,7 +2286,7 @@ namespace ConformU
                     }
                     else // No TrackingRates object received after disposing of a previous instance
                     {
-                        LogError("TrackingRate Write", "TrackingRates did not return an object after calling Disposed() on a previous instance, TrackingRate.Write testing skipped");
+                        LogIssue("TrackingRate Write", "TrackingRates did not return an object after calling Disposed() on a previous instance, TrackingRate.Write testing skipped");
                     }
                 }
                 catch (Exception ex)
@@ -2548,11 +2548,11 @@ namespace ConformU
                                         }
                                         catch (COMException ex)
                                         {
-                                            LogError("UnPark", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                                            LogIssue("UnPark", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                                         }
                                         catch (Exception ex)
                                         {
-                                            LogError("UnPark", EX_NET + ex.Message);
+                                            LogIssue("UnPark", EX_NET + ex.Message);
                                         }
                                     }
                                     else // Can't UnPark
@@ -2590,16 +2590,16 @@ namespace ConformU
                                 }
                                 catch (COMException ex)
                                 {
-                                    LogError("Park", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                                    LogIssue("Park", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                                 }
                                 catch (Exception ex)
                                 {
-                                    LogError("Park", EX_NET + ex.Message);
+                                    LogIssue("Park", EX_NET + ex.Message);
                                 }
                             }
                             else // We are still in parked status despite a successful UnPark
                             {
-                                LogError("Park", "AtPark still true despite an earlier successful unpark");
+                                LogIssue("Park", "AtPark still true despite an earlier successful unpark");
                             }
                         }
                         catch (Exception ex)
@@ -2614,7 +2614,7 @@ namespace ConformU
                             if (settings.DisplayMethodCalls)
                                 LogTestAndMessage("UnPark", "About to call Park method");
                             telescopeDevice.Park();
-                            LogError("Park", "CanPark is false but no exception was generated on use");
+                            LogIssue("Park", "CanPark is false but no exception was generated on use");
                         }
                         catch (Exception ex)
                         {
@@ -2643,7 +2643,7 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage("UnPark", "About to call UnPark method");
                                 telescopeDevice.UnPark();
-                                LogError("UnPark", "CanPark and CanUnPark are false but no exception was generated on use");
+                                LogIssue("UnPark", "CanPark and CanUnPark are false but no exception was generated on use");
                             }
                             catch (Exception ex)
                             {
@@ -3326,7 +3326,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogError("Mount Safety", "Exception when disabling tracking to protect mount: " + ex.ToString());
+                LogIssue("Mount Safety", "Exception when disabling tracking to protect mount: " + ex.ToString());
             }
         }
 
@@ -3363,7 +3363,7 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(testName, "About to call SyncToCoordinates method, RA: " + FormatRA(syncRA) + ", Declination: " + FormatDec(syncDEC));
                                 telescopeDevice.SyncToCoordinates(syncRA, syncDEC);
-                                LogError(testName, "CanSyncToCoordinates is False but call to SyncToCoordinates did not throw an exception.");
+                                LogIssue(testName, "CanSyncToCoordinates is False but call to SyncToCoordinates did not throw an exception.");
                                 break;
                             }
 
@@ -3407,7 +3407,7 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(testName, "About to call SyncToTarget method");
                                 telescopeDevice.SyncToTarget(); // Sync to target coordinates
-                                LogError(testName, "CanSyncToTarget is False but call to SyncToTarget did not throw an exception.");
+                                LogIssue(testName, "CanSyncToTarget is False but call to SyncToTarget did not throw an exception.");
                                 break;
                             }
 
@@ -3439,13 +3439,13 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(testName, "About to call SyncToAltAz method, Altitude: " + FormatDec(syncAlt) + ", Azimuth: " + FormatDec(syncAz));
                                 telescopeDevice.SyncToAltAz(syncAz, syncAlt); // Sync to new Alt Az
-                                LogError(testName, "CanSyncToAltAz is False but call to SyncToAltAz did not throw an exception.");
+                                LogIssue(testName, "CanSyncToAltAz is False but call to SyncToAltAz did not throw an exception.");
                                 break;
                             }
 
                         default:
                             {
-                                LogError(testName, "Conform:SyncTest: Unknown test type " + testType.ToString());
+                                LogIssue(testName, "Conform:SyncTest: Unknown test type " + testType.ToString());
                                 break;
                             }
                     }
@@ -3521,22 +3521,22 @@ namespace ConformU
 
                                             default:
                                                 {
-                                                    LogError(testName, string.Format("The TargetRightAscension property {0} does not match the expected RA {1}", FormatRA(currentRA), FormatRA(syncRA)));
+                                                    LogIssue(testName, string.Format("The TargetRightAscension property {0} does not match the expected RA {1}", FormatRA(currentRA), FormatRA(syncRA)));
                                                     break;
                                                 }
                                         }
                                     }
                                     catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
                                     {
-                                        LogError(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.");
+                                        LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.");
                                     }
                                     catch (ASCOM.InvalidOperationException)
                                     {
-                                        LogError(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
+                                        LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
                                     }
                                     catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == g_ExNotSet1 | ex.Number == g_ExNotSet2)
                                     {
-                                        LogError(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
+                                        LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
                                     }
                                     catch (Exception ex)
                                     {
@@ -3559,22 +3559,22 @@ namespace ConformU
 
                                             default:
                                                 {
-                                                    LogError(testName, string.Format("The TargetDeclination property {0} does not match the expected Declination {1}", FormatDec(currentDec), FormatDec(syncDEC)));
+                                                    LogIssue(testName, string.Format("The TargetDeclination property {0} does not match the expected Declination {1}", FormatDec(currentDec), FormatDec(syncDEC)));
                                                     break;
                                                 }
                                         }
                                     }
                                     catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
                                     {
-                                        LogError(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.");
+                                        LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.");
                                     }
                                     catch (ASCOM.InvalidOperationException)
                                     {
-                                        LogError(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
+                                        LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
                                     }
                                     catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == g_ExNotSet1 | ex.Number == g_ExNotSet2)
                                     {
-                                        LogError(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
+                                        LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
                                     }
                                     catch (Exception ex)
                                     {
@@ -3963,7 +3963,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(p_Name, "Conform:SlewTest: Unknown test type " + p_Test.ToString());
+                            LogIssue(p_Name, "Conform:SlewTest: Unknown test type " + p_Test.ToString());
                             break;
                         }
                 }
@@ -4000,22 +4000,22 @@ namespace ConformU
 
                                         default:
                                             {
-                                                LogError(p_Name, string.Format("The TargetRightAscension property {0} does not match the expected RA {1}", FormatRA(actualRA), FormatRA(m_TargetRightAscension)));
+                                                LogIssue(p_Name, string.Format("The TargetRightAscension property {0} does not match the expected RA {1}", FormatRA(actualRA), FormatRA(m_TargetRightAscension)));
                                                 break;
                                             }
                                     }
                                 }
                                 catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
                                 {
-                                    LogError(p_Name, "The Driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.");
+                                    LogIssue(p_Name, "The Driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.");
                                 }
                                 catch (ASCOM.InvalidOperationException)
                                 {
-                                    LogError(p_Name, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
+                                    LogIssue(p_Name, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
                                 }
                                 catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == g_ExNotSet1 | ex.Number == g_ExNotSet2)
                                 {
-                                    LogError(p_Name, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
+                                    LogIssue(p_Name, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -4038,22 +4038,22 @@ namespace ConformU
 
                                         default:
                                             {
-                                                LogError(p_Name, string.Format("The TargetDeclination property {0} does not match the expected Declination {1}", FormatDec(actualDec), FormatDec(m_TargetDeclination)));
+                                                LogIssue(p_Name, string.Format("The TargetDeclination property {0} does not match the expected Declination {1}", FormatDec(actualDec), FormatDec(m_TargetDeclination)));
                                                 break;
                                             }
                                     }
                                 }
                                 catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
                                 {
-                                    LogError(p_Name, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.");
+                                    LogIssue(p_Name, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.");
                                 }
                                 catch (ASCOM.InvalidOperationException)
                                 {
-                                    LogError(p_Name, "The Driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
+                                    LogIssue(p_Name, "The Driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
                                 }
                                 catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == g_ExNotSet1 | ex.Number == g_ExNotSet2)
                                 {
-                                    LogError(p_Name, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
+                                    LogIssue(p_Name, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -4201,7 +4201,7 @@ namespace ConformU
                             {
                             } // Attempt to stop any motion that has actually started
 
-                            LogError(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(m_TargetRightAscension));
+                            LogIssue(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(m_TargetRightAscension));
                         }
                         catch (Exception ex)
                         {
@@ -4238,7 +4238,7 @@ namespace ConformU
                             {
                             } // Attempt to stop any motion that has actually started
 
-                            LogError(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(m_TargetDeclination));
+                            LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(m_TargetDeclination));
                         }
                         catch (Exception ex)
                         {
@@ -4268,7 +4268,7 @@ namespace ConformU
                             if (settings.DisplayMethodCalls)
                                 LogTestAndMessage(p_Name, "About to call SyncToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
                             telescopeDevice.SyncToCoordinates(m_TargetRightAscension, m_TargetDeclination);
-                            LogError(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(m_TargetRightAscension));
+                            LogIssue(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(m_TargetRightAscension));
                         }
                         catch (Exception ex)
                         {
@@ -4284,7 +4284,7 @@ namespace ConformU
                             if (settings.DisplayMethodCalls)
                                 LogTestAndMessage(p_Name, "About to call SyncToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
                             telescopeDevice.SyncToCoordinates(m_TargetRightAscension, m_TargetDeclination);
-                            LogError(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(m_TargetDeclination));
+                            LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(m_TargetDeclination));
                         }
                         catch (Exception ex)
                         {
@@ -4352,7 +4352,7 @@ namespace ConformU
                                 {
                                 } // Attempt to stop any motion that has actually started
 
-                                LogError(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(m_TargetRightAscension));
+                                LogIssue(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(m_TargetRightAscension));
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
@@ -4410,7 +4410,7 @@ namespace ConformU
                                 {
                                 } // Attempt to stop any motion that has actually started
 
-                                LogError(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(m_TargetDeclination));
+                                LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(m_TargetDeclination));
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
@@ -4461,7 +4461,7 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call SyncToTarget method");
                                 telescopeDevice.SyncToTarget();
-                                LogError(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(m_TargetRightAscension));
+                                LogIssue(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(m_TargetRightAscension));
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
@@ -4498,7 +4498,7 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call SyncToTarget method");
                                 telescopeDevice.SyncToTarget();
-                                LogError(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(m_TargetDeclination));
+                                LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(m_TargetDeclination));
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
@@ -4555,7 +4555,7 @@ namespace ConformU
                             {
                             } // Attempt to stop any motion that has actually started
 
-                            LogError(p_Name, $"Failed to reject bad Altitude coordinate: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
+                            LogIssue(p_Name, $"Failed to reject bad Altitude coordinate: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
                         }
                         catch (Exception ex)
                         {
@@ -4592,7 +4592,7 @@ namespace ConformU
                             {
                             } // Attempt to stop any motion that has actually started
 
-                            LogError(p_Name, "Failed to reject bad Azimuth coordinate: " + FormatAzimuth(m_TargetAzimuth));
+                            LogIssue(p_Name, "Failed to reject bad Azimuth coordinate: " + FormatAzimuth(m_TargetAzimuth));
                         }
                         catch (Exception ex)
                         {
@@ -4622,7 +4622,7 @@ namespace ConformU
                             if (settings.DisplayMethodCalls)
                                 LogTestAndMessage(p_Name, "About to call SyncToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
                             telescopeDevice.SyncToAltAz(m_TargetAzimuth, m_TargetAltitude);
-                            LogError(p_Name, $"Failed to reject bad Altitude coordinate: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
+                            LogIssue(p_Name, $"Failed to reject bad Altitude coordinate: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
                         }
                         catch (Exception ex)
                         {
@@ -4638,7 +4638,7 @@ namespace ConformU
                             if (settings.DisplayMethodCalls)
                                 LogTestAndMessage(p_Name, "About to call SyncToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
                             telescopeDevice.SyncToAltAz(m_TargetAzimuth, m_TargetAltitude);
-                            LogError(p_Name, "Failed to reject bad Azimuth coordinate: " + FormatAzimuth(m_TargetAzimuth));
+                            LogIssue(p_Name, "Failed to reject bad Azimuth coordinate: " + FormatAzimuth(m_TargetAzimuth));
                         }
                         catch (Exception ex)
                         {
@@ -4651,7 +4651,7 @@ namespace ConformU
 
                 default:
                     {
-                        LogError(p_Name, "Conform:SlewTest: Unknown test type " + p_Test.ToString());
+                        LogIssue(p_Name, "Conform:SlewTest: Unknown test type " + p_Test.ToString());
                         break;
                     }
             }
@@ -4743,7 +4743,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError(p_Name, "Conform:PerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(p_Name, "Conform:PerformanceTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }
@@ -4789,7 +4789,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogError("Performance: " + p_Name, EX_NET + ex.Message);
+                LogIssue("Performance: " + p_Name, EX_NET + ex.Message);
             }
         }
 
@@ -4926,7 +4926,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError("Parked:" + p_Name, "Conform:ParkedExceptionTest: Unknown test type " + p_Type.ToString());
+                                LogIssue("Parked:" + p_Name, "Conform:ParkedExceptionTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }
@@ -4992,7 +4992,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError("TelescopeAxisRateTest", "Unknown telescope axis: " + p_Axis.ToString());
+                            LogIssue("TelescopeAxisRateTest", "Unknown telescope axis: " + p_Axis.ToString());
                             break;
                         }
                 }
@@ -5022,11 +5022,11 @@ namespace ConformU
                 }
                 catch (COMException ex)
                 {
-                    LogError(p_Name + " Count", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                    LogIssue(p_Name + " Count", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                 }
                 catch (Exception ex)
                 {
-                    LogError(p_Name + " Count", EX_NET + ex.ToString());
+                    LogIssue(p_Name + " Count", EX_NET + ex.ToString());
                 }
 
                 try
@@ -5063,11 +5063,11 @@ namespace ConformU
                 }
                 catch (COMException ex)
                 {
-                    LogError(p_Name + " Enum", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                    LogIssue(p_Name + " Enum", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                 }
                 catch (Exception ex)
                 {
-                    LogError(p_Name + " Enum", EX_NET + ex.ToString());
+                    LogIssue(p_Name + " Enum", EX_NET + ex.ToString());
                 }
 
                 if (l_AxisRates.Count > 0)
@@ -5080,7 +5080,7 @@ namespace ConformU
                             l_Rate = currentL_Rate;
                             if ((l_Rate.Minimum < 0.0d) | (l_Rate.Maximum < 0.0d)) // Error because negative values are not allowed
                             {
-                                LogError(p_Name, "Minimum or maximum rate is negative: " + l_Rate.Minimum.ToString() + ", " + l_Rate.Maximum.ToString());
+                                LogIssue(p_Name, "Minimum or maximum rate is negative: " + l_Rate.Minimum.ToString() + ", " + l_Rate.Maximum.ToString());
                             }
                             else  // All positive values so continue tests
                             {
@@ -5090,7 +5090,7 @@ namespace ConformU
                                 }
                                 else // Minimum > Maximum so error!
                                 {
-                                    LogError(p_Name, "Maximum rate is less than minimum rate - minimum: " + l_Rate.Minimum.ToString() + " maximum: " + l_Rate.Maximum.ToString());
+                                    LogIssue(p_Name, "Maximum rate is less than minimum rate - minimum: " + l_Rate.Minimum.ToString() + " maximum: " + l_Rate.Maximum.ToString());
                                 }
                             }
                             // Save rates for overlap testing
@@ -5103,17 +5103,17 @@ namespace ConformU
 
                     catch (COMException ex)
                     {
-                        LogError(p_Name, "COM Unable to read AxisRates object - Exception: " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                        LogIssue(p_Name, "COM Unable to read AxisRates object - Exception: " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                         LogDebug(p_Name, "COM Unable to read AxisRates object - Exception: " + ex.ToString());
                     }
                     catch (DriverException ex)
                     {
-                        LogError(p_Name, ".NET Unable to read AxisRates object - Exception: " + ex.Message + " " + ex.Number.ToString("X8"));
+                        LogIssue(p_Name, ".NET Unable to read AxisRates object - Exception: " + ex.Message + " " + ex.Number.ToString("X8"));
                         LogDebug(p_Name, ".NET Unable to read AxisRates object - Exception: " + ex.ToString());
                     }
                     catch (Exception ex)
                     {
-                        LogError(p_Name, "Unable to read AxisRates object - Exception: " + ex.Message);
+                        LogIssue(p_Name, "Unable to read AxisRates object - Exception: " + ex.Message);
                         LogDebug(p_Name, "Unable to read AxisRates object - Exception: " + ex.ToString());
                     }
 
@@ -5181,20 +5181,20 @@ namespace ConformU
             }
             catch (COMException ex)
             {
-                LogError(p_Name, "COM Unable to get an AxisRates object - Exception: " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                LogIssue(p_Name, "COM Unable to get an AxisRates object - Exception: " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
             }
             catch (DriverException ex)
             {
-                LogError(p_Name, ".NET Unable to get an AxisRates object - Exception: " + ex.Message + " " + ex.Number.ToString("X8"));
+                LogIssue(p_Name, ".NET Unable to get an AxisRates object - Exception: " + ex.Message + " " + ex.Number.ToString("X8"));
             }
             catch (NullReferenceException ex) // Report null objects returned by the driver that are caught by DriverAccess.
             {
-                LogError(p_Name, ex.Message);
+                LogIssue(p_Name, ex.Message);
                 LogDebug(p_Name, ex.ToString());
             } // If debug then give full information
             catch (Exception ex)
             {
-                LogError(p_Name, "Unable to get or unable to use an AxisRates object - Exception: " + ex.ToString());
+                LogIssue(p_Name, "Unable to get or unable to use an AxisRates object - Exception: " + ex.ToString());
             }
 
             // Clean up AxisRate object if used
@@ -5270,7 +5270,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError(p_Name, "AxisRate.Dispose() - Unknown axis: " + p_Axis.ToString());
+                                LogIssue(p_Name, "AxisRate.Dispose() - Unknown axis: " + p_Axis.ToString());
                                 break;
                             }
                     }
@@ -5316,7 +5316,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    LogError(p_Name, "AxisRate.Dispose() - Unable to get or unable to use an AxisRates object - Exception: " + ex.ToString());
+                    LogIssue(p_Name, "AxisRate.Dispose() - Unable to get or unable to use an AxisRates object - Exception: " + ex.ToString());
                 }
             }
             else
@@ -5366,7 +5366,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(p_Name, "Conform:RequiredMethodsTest: Unknown test type " + p_Type.ToString());
+                            LogIssue(p_Name, "Conform:RequiredMethodsTest: Unknown test type " + p_Type.ToString());
                             break;
                         }
                 }
@@ -5435,7 +5435,7 @@ namespace ConformU
                                 // Make sure that we received two valid values i.e. that neither side returned PierSide.Unknown and that the two valid returned values are not the same i.e. we got one PointingState.Normal and one PointingState.ThroughThePole
                                 if (m_DestinationSideOfPierEast == PointingState.Unknown | m_DestinationSideOfPierWest == PointingState.Unknown)
                                 {
-                                    LogError(p_Name, "Invalid SideOfPier value received, Target in West: " + m_DestinationSideOfPierEast.ToString() + ", Target in East: " + m_DestinationSideOfPierWest.ToString());
+                                    LogIssue(p_Name, "Invalid SideOfPier value received, Target in West: " + m_DestinationSideOfPierEast.ToString() + ", Target in East: " + m_DestinationSideOfPierWest.ToString());
                                 }
                                 else if (m_DestinationSideOfPierEast == m_DestinationSideOfPierWest)
                                 {
@@ -5535,7 +5535,7 @@ namespace ConformU
                                     LogTestAndMessage(p_Name, "About to get IsPulseGuiding property");
                                 if (telescopeDevice.IsPulseGuiding) // IsPulseGuiding is true before we've started so this is an error and voids a real test
                                 {
-                                    LogError(p_Name, "IsPulseGuiding is True when not pulse guiding - PulseGuide test omitted");
+                                    LogIssue(p_Name, "IsPulseGuiding is True when not pulse guiding - PulseGuide test omitted");
                                 }
                                 else // OK to test pulse guiding
                                 {
@@ -5695,7 +5695,7 @@ namespace ConformU
 
                                         default:
                                             {
-                                                LogError(p_Name, "Unknown PierSide: " + m_SideOfPier.ToString());
+                                                LogIssue(p_Name, "Unknown PierSide: " + m_SideOfPier.ToString());
                                                 break;
                                             }
                                     }
@@ -5732,7 +5732,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError(p_Name, "Conform:OptionalMethodsTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(p_Name, "Conform:OptionalMethodsTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }
@@ -5749,7 +5749,7 @@ namespace ConformU
                         }
                         catch (Exception ex)
                         {
-                            LogError(p_Name, "AxisRates.Dispose threw an exception but must not: " + ex.Message);
+                            LogIssue(p_Name, "AxisRates.Dispose threw an exception but must not: " + ex.Message);
                             LogDebug(p_Name, "Exception: " + ex.ToString());
                         }
 
@@ -5771,7 +5771,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    LogError(p_Name, $"MoveAxis Exception\r\n{ex}");
+                    LogIssue(p_Name, $"MoveAxis Exception\r\n{ex}");
                     HandleException(p_Name, MemberType.Method, Required.Optional, ex, "");
                 }
             }
@@ -5848,7 +5848,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError(p_Name, "Conform:OptionalMethodsTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(p_Name, "Conform:OptionalMethodsTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }
@@ -6052,7 +6052,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(p_Name, "Conform:CanTest: Unknown test type " + p_Type.ToString());
+                            LogIssue(p_Name, "Conform:CanTest: Unknown test type " + p_Type.ToString());
                             break;
                         }
                 }
@@ -6105,15 +6105,15 @@ namespace ConformU
                     }
                     catch (COMException ex)
                     {
-                        LogError(p_Name, "Unable to set a movement rate of zero - " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                        LogIssue(p_Name, "Unable to set a movement rate of zero - " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                     }
                     catch (DriverException ex)
                     {
-                        LogError(p_Name, "Unable to set a movement rate of zero - " + ex.Message + " " + ex.Number.ToString("X8"));
+                        LogIssue(p_Name, "Unable to set a movement rate of zero - " + ex.Message + " " + ex.Number.ToString("X8"));
                     }
                     catch (Exception ex)
                     {
-                        LogError(p_Name, "Unable to set a movement rate of zero - " + ex.Message);
+                        LogIssue(p_Name, "Unable to set a movement rate of zero - " + ex.Message);
                     }
 
                     Status(StatusType.staAction, "Set lower rate");
@@ -6247,7 +6247,7 @@ namespace ConformU
                         }
                         else // No valid rate was found so print an error
                         {
-                            LogError(p_Name, "Minimum rate test - unable to find lowest axis rate");
+                            LogIssue(p_Name, "Minimum rate test - unable to find lowest axis rate");
                         }
 
                         if (cancellationToken.IsCancellationRequested)
@@ -6332,7 +6332,7 @@ namespace ConformU
                         }
                         else // No valid rate was found so print an error
                         {
-                            LogError(p_Name, "Maximum rate test - unable to find lowest axis rate");
+                            LogIssue(p_Name, "Maximum rate test - unable to find lowest axis rate");
                         }
 
                         if (cancellationToken.IsCancellationRequested)
@@ -6502,7 +6502,7 @@ namespace ConformU
                 else // Some problem in finding rates inside the AxisRates object
                 {
                     LogInfo(p_Name, "Found minimum rate: " + l_RateMinimum + " found maximum rate: " + l_RateMaximum);
-                    LogError(p_Name, $"Unable to determine lowest or highest rates, expected {p_AxisRates.Count} rates, found {l_RateCount}");
+                    LogIssue(p_Name, $"Unable to determine lowest or highest rates, expected {p_AxisRates.Count} rates, found {l_RateCount}");
                 }
             }
             else
@@ -6676,7 +6676,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError("SOPPierTest", "COM DestinationSideOfPier Exception: " + ex.ToString());
+                                LogIssue("SOPPierTest", "COM DestinationSideOfPier Exception: " + ex.ToString());
                                 break;
                             }
                     }
@@ -6688,7 +6688,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    LogError("SOPPierTest", ".NET DestinationSideOfPier Exception: " + ex.ToString());
+                    LogIssue("SOPPierTest", ".NET DestinationSideOfPier Exception: " + ex.ToString());
                 }
                 // Now do an actual slew and record side of pier we actually get
                 SlewScope(p_RA, p_DEC, "Testing " + p_Msg + ", co-ordinates: " + FormatRA(p_RA) + " " + FormatDec(p_DEC));
@@ -6701,7 +6701,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogError("SOPPierTest", "SideofPierException: " + ex.ToString());
+                LogIssue("SOPPierTest", "SideofPierException: " + ex.ToString());
             }
 
             return l_Results;
@@ -6866,7 +6866,7 @@ namespace ConformU
 
                 default:
                     {
-                        LogError(testName, "Conform:SyncTest: Unknown test type " + testType.ToString());
+                        LogIssue(testName, "Conform:SyncTest: Unknown test type " + testType.ToString());
                         break;
                     }
             }
@@ -7054,7 +7054,7 @@ namespace ConformU
 
                             default:
                                 {
-                                    LogError("TestEarlyBinding", "Unknown interface type: " + TestType.ToString());
+                                    LogIssue("TestEarlyBinding", "Unknown interface type: " + TestType.ToString());
                                     break;
                                 }
                         }
@@ -7120,7 +7120,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogError("Telescope:TestEarlyBinding.EX1", ex.ToString());
+                LogIssue("Telescope:TestEarlyBinding.EX1", ex.ToString());
             }
         }
 
@@ -7239,11 +7239,11 @@ namespace ConformU
                                     else
                                     {
                                         if (m_Slewing & m_RightAscensionRate == Rate)
-                                            LogError(TestName, $"RightAscensionRate was successfully set to {Rate} but Slewing is returning True, it should return False.");
+                                            LogIssue(TestName, $"RightAscensionRate was successfully set to {Rate} but Slewing is returning True, it should return False.");
                                         if (m_Slewing & m_RightAscensionRate != Rate)
-                                            LogError(TestName, $"RightAscensionRate Read does not return {Rate} as set, instead it returns {m_RightAscensionRate}. Slewing is also returning True, it should return False.");
+                                            LogIssue(TestName, $"RightAscensionRate Read does not return {Rate} as set, instead it returns {m_RightAscensionRate}. Slewing is also returning True, it should return False.");
                                         if (!m_Slewing & m_RightAscensionRate != Rate)
-                                            LogError(TestName, $"RightAscensionRate Read does not return {Rate} as set, instead it returns {m_RightAscensionRate}.");
+                                            LogIssue(TestName, $"RightAscensionRate Read does not return {Rate} as set, instead it returns {m_RightAscensionRate}.");
                                     }
 
                                     break;
@@ -7272,11 +7272,11 @@ namespace ConformU
                                     else
                                     {
                                         if (m_Slewing & m_DeclinationRate == Rate)
-                                            LogError(TestName, $"DeclinationRate was successfully set to {Rate} but Slewing is returning True, it should return False.");
+                                            LogIssue(TestName, $"DeclinationRate was successfully set to {Rate} but Slewing is returning True, it should return False.");
                                         if (m_Slewing & m_DeclinationRate != Rate)
-                                            LogError(TestName, string.Format("DeclinationRate Read does not return {0} as set, instead it returns {1}. Slewing is also returning True, it should return False.", Rate, m_DeclinationRate));
+                                            LogIssue(TestName, string.Format("DeclinationRate Read does not return {0} as set, instead it returns {1}. Slewing is also returning True, it should return False.", Rate, m_DeclinationRate));
                                         if (!m_Slewing & m_DeclinationRate != Rate)
-                                            LogError(TestName, string.Format("DeclinationRate Read does not return {0} as set, instead it returns {1}.", Rate, m_DeclinationRate));
+                                            LogIssue(TestName, string.Format("DeclinationRate Read does not return {0} as set, instead it returns {1}.", Rate, m_DeclinationRate));
                                     }
 
                                     break;
@@ -7284,7 +7284,7 @@ namespace ConformU
 
                             default:
                                 {
-                                    LogError("TestRADecRate",$"Conform internal error - Unknown Axis: {Axis}");
+                                    LogIssue("TestRADecRate",$"Conform internal error - Unknown Axis: {Axis}");
                                     break;
                                 }
                         }
@@ -7303,7 +7303,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogError(TestName, string.Format("{0} - Telescope.Slewing should be False at the start of this test but is returning True, test abandoned", Description));
+                    LogIssue(TestName, string.Format("{0} - Telescope.Slewing should be False at the start of this test but is returning True, test abandoned", Description));
                 }
             }
             catch (Exception ex)

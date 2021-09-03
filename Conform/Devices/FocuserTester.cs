@@ -159,7 +159,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    LogError("Connected", "Error changing focuser connected state: " + ex.ToString());
+                    LogIssue("Connected", "Error changing focuser connected state: " + ex.ToString());
                 }
             }
         }
@@ -195,7 +195,7 @@ namespace ConformU
                     m_CanReadIsMoving = true;
                 }
                 else
-                    LogError("IsMoving", "IsMoving is True at start of tests and it should be false");
+                    LogIssue("IsMoving", "IsMoving is True at start of tests and it should be false");
             }
             catch (Exception ex)
             {
@@ -450,7 +450,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError("Halt", $"{EX_COM}{ex.Message}{ex.ErrorCode: X8}");
+                            LogIssue("Halt", $"{EX_COM}{ex.Message}{ex.ErrorCode: X8}");
                             break;
                         }
                 }
@@ -496,7 +496,7 @@ namespace ConformU
                                 LogCallToDriver("Move - TempComp True", "About to set TempComp property");
                                 m_Focuser.TempComp = true;
                                 MoveFocuser("Move - TempComp True");
-                                LogError("Move - TempComp True", "TempComp is True but no exception is thrown by the Move Method - See Focuser.TempComp entry in Platform help file");
+                                LogIssue("Move - TempComp True", "TempComp is True but no exception is thrown by the Move Method - See Focuser.TempComp entry in Platform help file");
                             }
                             catch (COMException)
                             {
@@ -512,7 +512,7 @@ namespace ConformU
                             }
                             catch (Exception ex)
                             {
-                                LogError("Move - TempComp True", "Unexpected .NET Exception: " + ex.Message);
+                                LogIssue("Move - TempComp True", "Unexpected .NET Exception: " + ex.Message);
                             }
 
                             break;
@@ -537,7 +537,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError("Move - TempComp True", string.Format("Unknown interface version returned {0}, Move test with temperature compensation enabled skipped.", g_InterfaceVersion));
+                            LogIssue("Move - TempComp True", string.Format("Unknown interface version returned {0}, Move test with temperature compensation enabled skipped.", g_InterfaceVersion));
                             break;
                         }
                 }
@@ -597,7 +597,7 @@ namespace ConformU
                             default:
                                 {
                                     LogCallToDriver("Move - Below 0", "About to get Position property");
-                                    LogError("Move - Below 0", string.Format("Move was permitted below position 0: {0} ", m_Focuser.Position));
+                                    LogIssue("Move - Below 0", string.Format("Move was permitted below position 0: {0} ", m_Focuser.Position));
                                     break;
                                 }
                         }
@@ -653,7 +653,7 @@ namespace ConformU
                             default:
                                 {
                                     LogCallToDriver("Move - Above MaxStep", "About to get Position property");
-                                    LogError("Move - Above Maxstep", string.Format("Moved to {0}, {1} steps from MaxStep ", m_Focuser.Position, m_Focuser.Position - m_MaxStep));
+                                    LogIssue("Move - Above Maxstep", string.Format("Moved to {0}, {1} steps from MaxStep ", m_Focuser.Position, m_Focuser.Position - m_MaxStep));
                                     break;
                                 }
                         }
@@ -862,7 +862,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError(p_Name, "FocuserPerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(p_Name, "FocuserPerformanceTest: Unknown test type " + p_Type.ToString());
                                 break;
                             }
                     }

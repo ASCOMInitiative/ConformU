@@ -234,11 +234,11 @@ namespace ConformU
                 }
                 catch (COMException ex)
                 {
-                    LogError("Connected", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                    LogIssue("Connected", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                 }
                 catch (Exception ex)
                 {
-                    LogError("Connected", ex.Message);
+                    LogIssue("Connected", ex.Message);
                 }
 
                 if (cancellationToken.IsCancellationRequested)
@@ -265,7 +265,7 @@ namespace ConformU
                             {
                                 if (m_Description.Length > 68 & p_DeviceType == DeviceType.Camera)
                                 {
-                                    LogError("Description", "Maximum number of characters is 68 for compatibility with FITS headers, found: " + m_Description.Length + " characters: " + m_Description);
+                                    LogIssue("Description", "Maximum number of characters is 68 for compatibility with FITS headers, found: " + m_Description.Length + " characters: " + m_Description);
                                 }
                                 else
                                 {
@@ -342,11 +342,11 @@ namespace ConformU
                 }
                 catch (COMException ex)
                 {
-                    LogError("DriverVersion", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                    LogIssue("DriverVersion", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
                 }
                 catch (Exception ex)
                 {
-                    LogError("DriverVersion", ex.Message);
+                    LogIssue("DriverVersion", ex.Message);
                 }
 
                 if (cancellationToken.IsCancellationRequested)
@@ -446,7 +446,7 @@ namespace ConformU
                             {
                                 case var case5 when case5 == "":
                                     {
-                                        LogError("SupportedActions", "Supported action " + i + " Is an empty string"); // List the action that was found
+                                        LogIssue("SupportedActions", "Supported action " + i + " Is an empty string"); // List the action that was found
                                         break;
                                     }
 
@@ -468,7 +468,7 @@ namespace ConformU
                                                 }
                                                 catch (Exception ex1)
                                                 {
-                                                    LogError("SupportedActions", string.Format("Exception calling OCH simulator action {0}: {1}", ActionString, ex1.Message));
+                                                    LogIssue("SupportedActions", string.Format("Exception calling OCH simulator action {0}: {1}", ActionString, ex1.Message));
                                                 }
                                             }
                                             else if (ActionString.ToUpperInvariant().StartsWith("//ASCOM.SIMULATOR.OBSERVINGCONDITIONS:"))
@@ -482,7 +482,7 @@ namespace ConformU
                                                 }
                                                 catch (Exception ex1)
                                                 {
-                                                    LogError("SupportedActions", string.Format("Exception calling OCH simulator action {0}: {1}", ActionString, ex1.Message));
+                                                    LogIssue("SupportedActions", string.Format("Exception calling OCH simulator action {0}: {1}", ActionString, ex1.Message));
                                                 }
                                             }
                                             else if (ActionString.ToUpperInvariant().StartsWith("//SWITCHSIMULATOR:"))
@@ -496,7 +496,7 @@ namespace ConformU
                                                 }
                                                 catch (Exception ex1)
                                                 {
-                                                    LogError("SupportedActions", string.Format("Exception calling switch simulator action {0}: {1}", ActionString, ex1.Message));
+                                                    LogIssue("SupportedActions", string.Format("Exception calling switch simulator action {0}: {1}", ActionString, ex1.Message));
                                                 }
                                             }
                                             else if (ActionString.ToUpperInvariant().StartsWith("//ASCOM.SIMULATOR.SWITCH:"))
@@ -510,7 +510,7 @@ namespace ConformU
                                                 }
                                                 catch (Exception ex1)
                                                 {
-                                                    LogError("SupportedActions", string.Format("Exception calling switch simulator action {0}: {1}", ActionString, ex1.Message));
+                                                    LogIssue("SupportedActions", string.Format("Exception calling switch simulator action {0}: {1}", ActionString, ex1.Message));
                                                 }
                                             }
                                         }
@@ -521,7 +521,7 @@ namespace ConformU
                         }
                         else
                         {
-                            LogError("SupportedActions", "Actions must be strings. The type of action " + i + " " + Action.ToString() + " is: " + Action.GetType().Name);
+                            LogIssue("SupportedActions", "Actions must be strings. The type of action " + i + " " + Action.ToString() + " is: " + Action.GetType().Name);
                         }
                     }
                 }
@@ -535,7 +535,7 @@ namespace ConformU
                 else
                 {
                     HandleException("SupportedActions", MemberType.Property, Required.Optional, ex, "");
-                    LogError("SupportedActions", ex.Message);
+                    LogIssue("SupportedActions", ex.Message);
                 }
             }
 
@@ -546,7 +546,7 @@ namespace ConformU
 
         public virtual void CheckCommonMethods()
         {
-            LogError("CheckCommonMethods", "DeviceTester base Class warning message, you should not see this message!");
+            LogIssue("CheckCommonMethods", "DeviceTester base Class warning message, you should not see this message!");
         }
 
         public virtual bool HasCanProperties
@@ -694,12 +694,12 @@ namespace ConformU
 
         public virtual void CreateDevice()
         {
-            LogError("CreateDevice", "DeviceTester base Class warning message");
+            LogIssue("CreateDevice", "DeviceTester base Class warning message");
         }
 
         public virtual void PreConnectChecks()
         {
-            LogError("PreConnectChecks", "DeviceTester base Class warning message");
+            LogIssue("PreConnectChecks", "DeviceTester base Class warning message");
         }
 
         public virtual bool Connected
@@ -717,32 +717,32 @@ namespace ConformU
 
         public virtual void ReadCanProperties()
         {
-            LogError("ReadCanProperties", "DeviceTester base Class warning message, you should not see this message!");
+            LogIssue("ReadCanProperties", "DeviceTester base Class warning message, you should not see this message!");
         }
 
         public virtual void PreRunCheck()
         {
-            LogError("PreSafetyCheck", "DeviceTester base Class warning message, you should not see this message!");
+            LogIssue("PreSafetyCheck", "DeviceTester base Class warning message, you should not see this message!");
         }
 
         public virtual void CheckProperties()
         {
-            LogError("CheckProperties", "DeviceTester base Class warning message, you should not see this message!");
+            LogIssue("CheckProperties", "DeviceTester base Class warning message, you should not see this message!");
         }
 
         public virtual void CheckMethods()
         {
-            LogError("CheckMethods", "DeviceTester base Class warning message, you should not see this message!");
+            LogIssue("CheckMethods", "DeviceTester base Class warning message, you should not see this message!");
         }
 
         public virtual void CheckPerformance()
         {
-            LogError("CheckPerformance", "DeviceTester base Class warning message, you should not see this message!");
+            LogIssue("CheckPerformance", "DeviceTester base Class warning message, you should not see this message!");
         }
 
         public virtual void PostRunCheck()
         {
-            LogError("PostSafetyCheck", "DeviceTester base Class warning message, you should not see this message!");
+            LogIssue("PostSafetyCheck", "DeviceTester base Class warning message, you should not see this message!");
         }
 
         #endregion
@@ -1158,7 +1158,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(MemberName, "CONFORM ERROR! - Received unexpected member of 'Required' enum: " + IsRequired.ToString());
+                            LogIssue(MemberName, "CONFORM ERROR! - Received unexpected member of 'Required' enum: " + IsRequired.ToString());
                             break;
                         }
                 }
@@ -1185,7 +1185,7 @@ namespace ConformU
             // Handle all other types of error
             else
             {
-                LogError(MemberName, "Unexpected " + GetExceptionName(ex) + ", " + UserMessage + ": " + ex.Message);
+                LogIssue(MemberName, "Unexpected " + GetExceptionName(ex) + ", " + UserMessage + ": " + ex.Message);
             }
 
             LogDebug(MemberName, "Exception: " + ex.ToString());
@@ -1529,7 +1529,7 @@ namespace ConformU
 
                 default:
                     {
-                        LogError("DeviceTesterBaseClass:SpecialTests", $"Unknown test: {p_Test}");
+                        LogIssue("DeviceTesterBaseClass:SpecialTests", $"Unknown test: {p_Test}");
                         break;
                     }
             }
@@ -1537,22 +1537,22 @@ namespace ConformU
 
         protected virtual void SpecialTelescopeSideOfPier()
         {
-            LogError("SpecialTelescopeSideOfPier", "DeviceTester base Class warning message, you should not see this message!");
+            LogIssue("SpecialTelescopeSideOfPier", "DeviceTester base Class warning message, you should not see this message!");
         }
 
         protected virtual void SpecialTelescopeDestinationSideOfPier()
         {
-            LogError("SpecialTelescopeDestinationSideOfPier", "DeviceTester base Class warning message, you should not see this message!");
+            LogIssue("SpecialTelescopeDestinationSideOfPier", "DeviceTester base Class warning message, you should not see this message!");
         }
 
         protected virtual void SpecialTelescopeSideOfPierAnalysis()
         {
-            LogError("SpecialTelescopeFlipRange", "DeviceTester base Class warning message, you should not see this message!");
+            LogIssue("SpecialTelescopeFlipRange", "DeviceTester base Class warning message, you should not see this message!");
         }
 
         protected virtual void SpecialTelescopeCommands()
         {
-            LogError("SpecialTelescopeCommands", "DeviceTester base Class warning message, you should not see this message!");
+            LogIssue("SpecialTelescopeCommands", "DeviceTester base Class warning message, you should not see this message!");
         }
         #endregion
 

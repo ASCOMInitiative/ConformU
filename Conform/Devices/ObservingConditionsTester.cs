@@ -310,7 +310,7 @@ namespace ConformU
                 if ((windDirection == 0.0))
                     LogOK(PROPERTY_WINDSPEED, "Wind direction is reported as 0.0 when wind speed is 0.0");
                 else
-                    LogError(PROPERTY_WINDSPEED, string.Format("When wind speed is reported as 0.0, wind direction should also be reported as 0.0, it is actually reported as {0}", windDirection));
+                    LogIssue(PROPERTY_WINDSPEED, string.Format("When wind speed is reported as 0.0, wind direction should also be reported as 0.0, it is actually reported as {0}", windDirection));
             }
         }
 
@@ -622,7 +622,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogError(MethodName, "returnValue: Unknown test type - " + p_Type.ToString());
+                                LogIssue(MethodName, "returnValue: Unknown test type - " + p_Type.ToString());
                                 break;
                             }
                     }
@@ -634,13 +634,13 @@ namespace ConformU
                     {
                         case object _ when returnValue < p_Min:
                             {
-                                LogError(MethodName, "Invalid value (below minimum expected - " + p_Min.ToString() + "): " + returnValue.ToString());
+                                LogIssue(MethodName, "Invalid value (below minimum expected - " + p_Min.ToString() + "): " + returnValue.ToString());
                                 break;
                             }
 
                         case object _ when returnValue > p_Max:
                             {
-                                LogError(MethodName, "Invalid value (above maximum expected - " + p_Max.ToString() + "): " + returnValue.ToString());
+                                LogIssue(MethodName, "Invalid value (above maximum expected - " + p_Max.ToString() + "): " + returnValue.ToString());
                                 break;
                             }
 
@@ -783,7 +783,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogError(MethodName, "TestString: Unknown test type - " + p_Type.ToString());
+                            LogIssue(MethodName, "TestString: Unknown test type - " + p_Type.ToString());
                             break;
                         }
                 }
@@ -793,7 +793,7 @@ namespace ConformU
                 {
                     case object _ when returnValue == null:
                         {
-                            LogError(MethodName, "The driver did not return any string at all: Nothing (VB), null (C#)");
+                            LogIssue(MethodName, "The driver did not return any string at all: Nothing (VB), null (C#)");
                             break;
                         }
 
@@ -808,7 +808,7 @@ namespace ConformU
                             if (returnValue.Length <= p_MaxLength)
                                 LogOK(MethodName, returnValue);
                             else
-                                LogError(MethodName, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);
+                                LogIssue(MethodName, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);
                             break;
                         }
                 }
