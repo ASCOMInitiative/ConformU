@@ -11,7 +11,7 @@
 @inject NotificationService notificationService
 
 <div>
-    @if (IsSmall)
+    @if (isSmall)
     {
         <h2>Welcome to Conform Universal!</h2>
     }
@@ -31,10 +31,10 @@
 
 </div>
 
-<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="IsSmall" />
+<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="isSmall" />
 
 @code {
-    bool IsSmall = false;
+    bool isSmall = false;
 
     private bool disposedValue;
     int screenLogRows = 10;
@@ -56,7 +56,6 @@ string statusMessage = "Linux build";
     protected override void OnInitialized()
     {
         conformLogger.Debug = configuration.Settings.Debug;
-
     }
 
     async void StartTest(string buttonName)

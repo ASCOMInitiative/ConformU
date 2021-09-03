@@ -5,7 +5,14 @@
 
 @using System.Threading
 
-<h1>Device and Driver Setup</h1>
+@if (isSmall)
+{
+    <h2>Device and Driver Setup</h2>
+}
+else
+{
+    <h1>Device and Driver Setup</h1>
+}
 
 <div>
 
@@ -20,7 +27,7 @@
     {
         <div style="margin-top: 20px">
             <h3 style="margin-bottom: 20px">COM Driver Setup</h3>
-            <RadzenButton Click=@(args => SetupCom()) Text="Open Setup Dialogue" Style="width: 230px; margin-right:20px" Disabled=@configuration.Settings.OperationInProgress />
+            <RadzenButton Click=@(args => SetupCom()) Text="Open Setup Dialogue" Style="width: 230px; margin-bottom:20px; margin-right:20px" Disabled=@configuration.Settings.OperationInProgress />
             <RadzenButton Click=@(args => CancelSetup()) Text="Cancel Setup" Style="width: 230px;" Disabled=@(!configuration.Settings.OperationInProgress) />
         </div>
     }
@@ -29,13 +36,17 @@
     {
         <div style="margin-top: 20px">
             <h3 style="margin-bottom: 20px">Alpaca Device Setup</h3>
-            <RadzenButton Click=@(args => SetupAlpacaMain()) Text="Main Setup Page" Style="width: 210px; margin-right: 20px" />
+            <RadzenButton Click=@(args => SetupAlpacaMain()) Text="Main Setup Page" Style="width: 210px; margin-bottom:20px; margin-right: 20px" />
             <RadzenButton Click=@(args => SetupAlpacaDevice()) Text="Device Setup Page" Style="width: 210px" />
         </div>
     }
 </div>
 
-@code{
+<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="isSmall" />
+
+@code {
+    bool isSmall = false;
+
     bool alpacaControlsDisplay = false;
     bool comControlsDisplay = false;
     bool noDeviceMessageDisplay = false;
@@ -72,6 +83,10 @@
     async void SetupAlpacaMain()
     {
         string url = "";
+
+        configuration.RaiseConfigurationChangedEvent();
+        StateHasChanged();
+
         try
         {
             url = $"{configuration.Settings.AlpacaConfiguration.AccessServiceType}://{configuration.Settings.AlpacaDevice.IpAddress}:{configuration.Settings.AlpacaDevice.IpPort}/setup".ToLowerInvariant();
@@ -88,6 +103,10 @@
     async void SetupAlpacaDevice()
     {
         string url = "";
+
+        configuration.RaiseConfigurationChangedEvent();
+        StateHasChanged();
+
         try
         {
             url = $"{configuration.Settings.AlpacaConfiguration.AccessServiceType}://{configuration.Settings.AlpacaDevice.IpAddress}:{configuration.Settings.AlpacaDevice.IpPort}/setup/v1/{configuration.Settings.AlpacaDevice.AscomDeviceType}/{configuration.Settings.AlpacaDevice.AlpacaDeviceNumber}/setup".ToLowerInvariant();

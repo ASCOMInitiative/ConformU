@@ -14,10 +14,17 @@
 @* JavaScript runtime reference *@
 @inject IJSRuntime JS
 
-<h1>Device Selection</h1>
+@if (isSmall)
+{
+    <h2>Device Selection</h2>
+}
+else
+{
+    <h1>Device Selection</h1>
+}
 
 @*Select device type drop-down*@
-<div class="row">
+<div class="row" style="margin-left: 0px">
 
     <h3 style="padding-right: 1em">Select device type</h3>
 
@@ -40,7 +47,7 @@
 
         @* Alpaca device search tab *@
         <RadzenTabsItem Text="Alpaca Devices">
-            <RadzenCard Style="margin-bottom: 20px; min-height:120px; width:fit-content; height:fit-content; margin-right: 20px; overflow: auto;">
+            <RadzenCard Style="margin-bottom: 20px; min-height: 120px; width: fit-content; height: fit-content; margin-right: 20px; overflow: auto;">
 
                 <div class="row">
 
@@ -58,7 +65,7 @@
                     </RadzenCard>
 
                     @* Alpaca discovery progress information *@
-                    <RadzenCard Style="width: 600px; margin-bottom: 20px; height: stretch; margin-right: 20px">
+                    <RadzenCard Style="width: 600px; margin-bottom: 20px; height: stretch">
                         <h3 style="color: #479cc8; margin-bottom:10px">Discovery Status</h3>
                         <RadzenTextArea Style="line-height:1.5; height: stretch;"
                                         Cols="300"
@@ -141,7 +148,11 @@
 
 </RadzenTabs>
 
+<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="isSmall" />
+
 @code {
+    bool isSmall = false;
+
     string manualIpAddress = "127.0.0.1";
     int manualPortNumber = 11111;
     int manualAlpacaDeviceNumber = 0;

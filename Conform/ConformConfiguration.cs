@@ -51,7 +51,7 @@ namespace ConformU
                     TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Serialised settings: {serialisedSettings}");
 
                     settings = JsonSerializer.Deserialize<Settings>(serialisedSettings, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    Status = "Settings read successfully";
+                    Status = "Settings read OK";
                 }
                 else
                 {

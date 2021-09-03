@@ -12,14 +12,14 @@
         }
         else @* Operation in progress and normal screen *@
         {
-            <span class="navbar-brand" style="width: 100%; text-align: center">Conform Universal</span>
+            <span class="navbar-brand" style="width: 100%; margin-top:30px; text-align: center">Conform Universal</span>
         }
     }
     else @* No operation is in progress *@
     {
         if (IsSmall) @* No operation and screen is small *@
         {
-            <span class="navbar-brand" style="text-align: center">Conform Universal</span>
+            <span class="navbar-brand" >Conform Universal</span>
         }
         else @* No operation and screen is normal *@
         {
@@ -92,6 +92,9 @@ else
     /// <param name="args"></param>
     private void OnConfigurationChanged(object caller, EventArgs args)
     {
+        // Collapse the nav menu if an operation has been started
+        if (configuration.Settings.OperationInProgress) collapseNavMenu = true;
+        // Refresh the UI according to new state
         InvokeAsync(StateHasChanged);
     }
 

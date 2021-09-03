@@ -6,13 +6,21 @@
 
 @*Title and settings reset button*@
 <div class="row">
-    <h1>Settings</h1>
+    @if (isSmall)
+    {
+        <h2>Settings</h2>
+    }
+    else
+    {
+        <h1>Settings</h1>
+    }
+
     <RadzenButton Click=@(args => OnResetButtonClick()) Text="Reset to Defaults" Icon="account_circle" Style="margin-bottom: 20px; width: 220px; position: absolute; right: 30px;" />
 </div>
 
 @*Status message*@
 <div class="row">
-    <h3>Configuration status:   @status</h3>
+    <h3 style="margin-top: 20px">Configuration status:   @status</h3>
 </div>
 
 @*Configuration tabs*@
@@ -39,8 +47,8 @@
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Style="margin-top:6px;" Name="CHK1" @bind-Value=@chkUpdates TValue="bool" Change=@(args =>
                             OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
-                            <RadzenLabel Text="Check for updates" Component="CHK1" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
-                            <RadzenTextBox @bind-Value="lastUpdateDate" Disabled=true />
+                        <RadzenLabel Text="Check for updates" Component="CHK1" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
+                        <RadzenTextBox @bind-Value="lastUpdateDate" Disabled=true />
                     </div>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Name="CHK2" @bind-Value=@chkDisplayCalls TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.DisplayCalls)) /> <RadzenLabel Text="Display method calls" Component="CHK2" Style="margin-left: 5px;" />
@@ -54,23 +62,23 @@
                     <h3 style="color: #479cc8; margin-bottom: 0;">Additional Tracing</h3>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHK4"
-                                        @bind-Value=@chkTraceDiscovery 
-                                        TValue="bool" 
-                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TraceDiscovery)) /> 
+                                        @bind-Value=@chkTraceDiscovery
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TraceDiscovery)) />
                         <RadzenLabel Text="Trace discovery" Component="CHK4" Style="margin-left: 5px;" />
                     </div>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
-                        <RadzenCheckBox Name="CHK5" 
-                                        @bind-Value=@chkTraceSettings 
-                                        TValue="bool" 
-                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TraceSettings)) /> 
+                        <RadzenCheckBox Name="CHK5"
+                                        @bind-Value=@chkTraceSettings
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TraceSettings)) />
                         <RadzenLabel Text="Log settings values" Component="CHK5" Style="margin-left: 5px;" />
                     </div>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
-                        <RadzenCheckBox Name="CHK6" 
-                                        @bind-Value=@chkTraceAlpacaCalls 
-                                        TValue="bool" 
-                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TraceAlpacaCalls)) /> 
+                        <RadzenCheckBox Name="CHK6"
+                                        @bind-Value=@chkTraceAlpacaCalls
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TraceAlpacaCalls)) />
                         <RadzenLabel Text="Trace Alpaca calls" Component="CHK6" Style="margin-left: 5px;" />
                     </div>
                 </RadzenCard>
@@ -267,8 +275,10 @@
     </Tabs>
 </RadzenTabs>
 
-@*Page code*@
+<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="isSmall" />
+
 @code {
+    bool isSmall = false;
     string alpacaAndComText;
     bool strictCasing;
     bool chkTraceDiscovery;
@@ -506,7 +516,7 @@
         // Trace settings
         chkTraceDiscovery = configuration.Settings.TraceDiscovery;
         chkTraceSettings = configuration.Settings.TraceDiscovery;
-        chkTraceAlpacaCalls= configuration.Settings.TraceAlpacaCalls;
+        chkTraceAlpacaCalls = configuration.Settings.TraceAlpacaCalls;
 
         // COM Settings
         comAccessMechanic = configuration.Settings.ComConfiguration.ComACcessMechanic;
