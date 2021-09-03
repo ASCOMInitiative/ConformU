@@ -421,18 +421,18 @@
     private void UpdateComDevices()
     {
         comDeviceList.Clear();
-        if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Info, $"Getting registered {selectedDeviceTypeString} drivers...");
+        if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Debug, $"Getting registered {selectedDeviceTypeString} drivers...");
         Dictionary<string, string> registeredDevices = ComDevices.GetRegisteredDrivers(Enum.Parse<DeviceType>(selectedDeviceTypeString).ToString(), configuration.Settings.TraceDiscovery ? conformLogger : null);
         foreach (KeyValuePair<string, string> kvp in registeredDevices)
         {
-            if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Info, $"Found device: {kvp.Key} - {kvp.Value}");
+            if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Debug, $"Found device: {kvp.Key} - {kvp.Value}");
             ComDevice comDevice = new ComDevice($"{kvp.Value} ({kvp.Key})", kvp.Key);
             comDeviceList.Add(new ComDeviceListItem($"{kvp.Value} ({kvp.Key})", comDevice));
             if ((comDevice.ProgId == configuration.Settings.ComDevice.ProgId) &
                 (comDevice.DisplayName == configuration.Settings.ComDevice.DisplayName) &
                 (configuration.Settings.DeviceTechnology == DeviceTechnology.COM))
             {
-                if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Info, $"Selecting device : {kvp.Key} - {kvp.Value}");
+                if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Debug, $"Selecting device : {kvp.Key} - {kvp.Value}");
                 this.comDevice = comDevice;
             }
         }

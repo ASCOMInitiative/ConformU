@@ -7,30 +7,38 @@
 
 <h1>Device and Driver Setup</h1>
 
-<div style="margin-top: 20px;">
+<div>
 
+    @if (noDeviceMessageDisplay)
+    {
+        <div style="margin-top: 20px">
+            <h3>No device has been selected.</h3>
+        </div>
+    }
 
-    <div style="margin-top: 20px; display: @noDeviceMessageDisplay">
-        <h3>No device has been selected.</h3>
-    </div>
+    @if (comControlsDisplay)
+    {
+        <div style="margin-top: 20px">
+            <h3 style="margin-bottom: 20px">COM Driver Setup</h3>
+            <RadzenButton Click=@(args => SetupCom()) Text="Open Setup Dialogue" Style="width: 230px; margin-right:20px" Disabled=@configuration.Settings.OperationInProgress />
+            <RadzenButton Click=@(args => CancelSetup()) Text="Cancel Setup" Style="width: 230px;" Disabled=@(!configuration.Settings.OperationInProgress) />
+        </div>
+    }
 
-    <div style="margin-top: 20px; display: @comControlsDisplay">
-        <h3>COM Driver Setup</h3>
-        <RadzenButton Click=@(args => SetupCom()) Text="Open Setup Dialogue" Style="width: 250px;" Disabled=@configuration.Settings.OperationInProgress />
-        <RadzenButton Click=@(args => CancelSetup()) Text="Cancel Setup" Style="width: 200px;" Visible=@configuration.Settings.OperationInProgress />
-    </div>
-
-    <div style="margin-top: 20px; display: @alpacaControlsDisplay">
-        <h3>Alpaca Device Setup</h3>
-        <RadzenButton Click=@(args => SetupAlpacaMain()) Text="Main Setup Page" Style="margin-right: 20px; width: 200px;" />
-        <RadzenButton Click=@(args => SetupAlpacaDevice()) Text="Device Setup Page" Style="width: 200px;" />
-    </div>
+    @if (alpacaControlsDisplay)
+    {
+        <div style="margin-top: 20px">
+            <h3 style="margin-bottom: 20px">Alpaca Device Setup</h3>
+            <RadzenButton Click=@(args => SetupAlpacaMain()) Text="Main Setup Page" Style="width: 210px; margin-right: 20px" />
+            <RadzenButton Click=@(args => SetupAlpacaDevice()) Text="Device Setup Page" Style="width: 210px" />
+        </div>
+    }
 </div>
 
 @code{
-    string alpacaControlsDisplay = "none";
-    string comControlsDisplay = "none";
-    string noDeviceMessageDisplay = "none";
+    bool alpacaControlsDisplay = false;
+    bool comControlsDisplay = false;
+    bool noDeviceMessageDisplay = false;
 
     CancellationTokenSource setupCancellationTokenSource;
     CancellationToken setupCancelConformToken;
@@ -43,15 +51,15 @@
         switch (configuration.Settings.DeviceTechnology)
         {
             case DeviceTechnology.NotSelected:
-                noDeviceMessageDisplay = "inline";
+                noDeviceMessageDisplay = true;
                 break;
 
             case DeviceTechnology.Alpaca:
-                alpacaControlsDisplay = "inline";
+                alpacaControlsDisplay = true;
                 break;
 
             case DeviceTechnology.COM:
-                comControlsDisplay = "inline";
+                comControlsDisplay = true;
                 break;
 
             default:
@@ -96,9 +104,9 @@
 
     void CancelSetup()
     {
-        conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "About to cancel setup task");
+        conformLogger.LogMessage("CancelSetup", MessageLevel.Debug, "About to cancel setup task");
         setupCancellationTokenSource.Cancel();
-        conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, $"Setup task cancelled IsCancellationRequested: {setupCancelConformToken.IsCancellationRequested}");
+        conformLogger.LogMessage("CancelSetup", MessageLevel.Debug, $"Setup task cancelled IsCancellationRequested: {setupCancelConformToken.IsCancellationRequested}");
     }
 
     async void SetupCom()
@@ -133,15 +141,15 @@
 
                 }, taskCancellationToken);
 
-                conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Starting conformance test");
+                conformLogger.LogMessage("SetupCom", MessageLevel.Debug, "Starting conformance test");
                 // Start the conformnance test task
                 conformanceTest.Start();
-                conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Conformance test started OK");
+                conformLogger.LogMessage("SetupCom", MessageLevel.Debug, "Conformance test started OK");
 
                 // Wait for the task to complete.
-                conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Awaiting conformance task completion");
+                conformLogger.LogMessage("SetupCom", MessageLevel.Debug, "Awaiting conformance task completion");
                 await conformanceTest;
-                conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Conformance task completed");
+                conformLogger.LogMessage("SetupCom", MessageLevel.Debug, "Conformance task completed");
 
             }
         }

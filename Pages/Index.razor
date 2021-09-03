@@ -21,8 +21,8 @@
     }
 
     <div>
-        <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Icon="account_circle" Style="margin-bottom: 20px; width: 150px" Disabled=@configuration.Settings.OperationInProgress />
-        <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Icon="account_circle" Style="margin-bottom: 20px; margin-right: 40px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
+        <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" Disabled=@configuration.Settings.OperationInProgress />
+        <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Style="margin-bottom: 20px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
         <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:20px; margin-right:20px" @bind-Value=@statusMessage />
     </div>
 
@@ -115,23 +115,23 @@ string statusMessage = "Linux build";
                         }
 
                     }, cancelConformToken);
-                    conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Starting conformance test");
+                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
                     // Start the conformnance test task
                     conformanceTest.Start();
-                    conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Conformance test started OK");
+                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance test started OK");
 
                     // Wait for the task to complete.
-                    conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Awaiting conformance task completion");
+                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting conformance task completion");
                     await conformanceTest;
-                    conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Conformance task completed");
+                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance task completed");
 
                     conformLogger.MessageLogChanged -= OutputChanged;
                     conformLogger.StatusChanged -= StatusChanged;
                 }
             }
-            conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Awaiting Scroll to bottom");
+            conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting Scroll to bottom");
             await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
-            conformLogger.Log(ASCOM.Standard.Interfaces.LogLevel.Information, "Scroll to bottom completed");
+            conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Scroll to bottom completed");
 
             GC.Collect();
         }
@@ -145,6 +145,7 @@ string statusMessage = "Linux build";
             configuration.Settings.OperationInProgress = false;
             configuration.RaiseConfigurationChangedEvent();
             StateHasChanged();
+            await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
         }
     }
 

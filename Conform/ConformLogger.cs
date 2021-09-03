@@ -7,6 +7,7 @@ namespace ConformU
 {
     public class ConformLogger : TraceLogger, ILogger, IDisposable
     {
+        private bool debug;
         public ConformLogger(string logFileName, string logFilePath, string loggerName, bool enabled) : base(logFileName, logFilePath, loggerName, enabled)
         {
             Console.WriteLine($"ConformLogger - Creating log file - Name: {logFileName}, Path: {logFilePath}, Type: {loggerName}");
@@ -26,7 +27,25 @@ namespace ConformU
         /// <summary>
         /// Flag indicating whether debug messages should be included in the log.
         /// </summary>
-        public bool Debug { get; set; }
+        public bool Debug
+        {
+            get
+            {
+                return debug;
+            }
+            set
+            {
+                debug = value;
+                if (value)
+                {
+                    base.SetMinimumLoggingLevel(LogLevel.Debug);
+                }
+                else
+                {
+                    base.SetMinimumLoggingLevel(LogLevel.Information);
+                }
+            }
+        }
 
         /// <summary>
         /// Log a message on the screen, console and log file
@@ -89,13 +108,17 @@ namespace ConformU
             base.LogMessage(id, message);
 
             // Raise the MessaegLogChanged event to Write the message to the screen
+            OnMessageLogChanged(screenMessage);
+        }
+
+        private void OnMessageLogChanged(string message)
+        {
             MessageEventArgs eventArgs = new()
             {
-                Message = $"{DateTime.Now:HH:mm:ss.fff} {screenMessage}"
+                Message = $"{DateTime.Now:HH:mm:ss.fff} {message}"
             };
 
             MessageLogChanged?.Invoke(this, eventArgs);
-
         }
 
         /// <summary>
@@ -127,8 +150,18 @@ namespace ConformU
         /// <param name="message"></param>
         public new void Log(LogLevel logLevel, string message)
         {
-            LogMessage("ConformLogger.Log", MessageLevel.Error, $"For consistency, please use LogMessage(id, logLevel, message) instead of Log(logLevel, message).\r\n{logLevel} - {message}");
-        }
 
+            if (logLevel >= base.LoggingLevel)
+            {
+                // Write the message to the console
+                Console.WriteLine($"{logLevel,-TEST_NAME_WIDTH} {message}");
+
+                // Write the message to the log file
+                base.Log(logLevel, message);
+
+                // Raise the MessaegLogChanged event to Write the message to the screen
+                OnMessageLogChanged($"{logLevel,-TEST_NAME_WIDTH} {message}");
+            }
+        }
     }
 }

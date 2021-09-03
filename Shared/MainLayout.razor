@@ -5,23 +5,23 @@
 
 @* Top level page layout including page header at top and navigation bar at left *@
 <MediaQueryList>
-<div class="sidebar">
-    <NavMenu />
-</div>
-<div class="main">
-    <div class="top-row px-4">
-        <span>Current device - @deviceName (@deviceTechnology @deviceType)</span>
-        <a href="https://ascom-standards.org" target="_blank">ASCOM Initiative</a>
+    <div class="sidebar">
+        <NavMenu />
     </div>
+    <div class="main">
+        <div class="top-row px-4">
+            <span>Current device - @deviceName (@deviceTechnology @deviceType)</span>
+            <a href="https://ascom-standards.org" target="_blank">ASCOM Initiative</a>
+        </div>
 
-    <div class="content px-4">
-        @Body
+        <div class="content px-4">
+            @Body
+        </div>
     </div>
-</div>
-<div>
-    <RadzenNotification />
-</div>
-    </MediaQueryList>
+    <div>
+        <RadzenNotification />
+    </div>
+</MediaQueryList>
 @code
 {
     private string deviceName;
