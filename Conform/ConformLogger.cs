@@ -102,10 +102,10 @@ namespace ConformU
             }
 
             // Write the message to the console
-            Console.WriteLine($"{id,-TEST_NAME_WIDTH} {message}");
+            Console.WriteLine($"{id,-TEST_NAME_WIDTH} {messageLevel,MESSAGE_LEVEL_WIDTH} {message}");
 
             // Write the message to the log file
-            base.LogMessage(id, message);
+            base.LogMessage(id, $"{messageLevel,MESSAGE_LEVEL_WIDTH} {message}");
 
             // Raise the MessaegLogChanged event to Write the message to the screen
             OnMessageLogChanged(screenMessage);
@@ -157,10 +157,10 @@ namespace ConformU
                 Console.WriteLine($"{logLevel,-TEST_NAME_WIDTH} {message}");
 
                 // Write the message to the log file
-                base.Log(logLevel, message);
+                base.Log(logLevel, $"{string.Empty,-MESSAGE_LEVEL_WIDTH} {message}");
 
                 // Raise the MessaegLogChanged event to Write the message to the screen
-                OnMessageLogChanged($"{logLevel,-TEST_NAME_WIDTH} {message}");
+                OnMessageLogChanged($"{logLevel,-TEST_NAME_WIDTH - MESSAGE_LEVEL_WIDTH} {message}");
             }
         }
     }

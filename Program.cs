@@ -100,6 +100,13 @@ namespace ConformU
                 argList.Add("true");
             }
 
+            // Flag if start-up debug information should be included in the log file
+            if (o.DebugStartup)
+            {
+                argList.Add($"--{COMMAND_OPTION_DEBUG_STARTUP}");
+                argList.Add("true");
+            }
+
             // Run from command line if requested
             if (o.Run)
             {

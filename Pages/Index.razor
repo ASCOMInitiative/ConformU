@@ -214,7 +214,7 @@ string statusMessage = "Linux build";
 
             if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
 
-            conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $" Browser: {browser}, Browserheight: {window.Height}, LogAreaTop: {result.Top}, LogAreaHeight: {result.Height}, ScreenLogRows: {screenLogRows}");
+            conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Browser: {browser}, Browserheight: {window.Height}, LogAreaTop: {result.Top}, LogAreaHeight: {result.Height}, ScreenLogRows: {screenLogRows}");
             await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
 
         }

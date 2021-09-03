@@ -69,12 +69,18 @@ namespace ConformU
             }
 
             conformLogger = new(logFileName, logFilePath, loggerName, true);  // Create a logger component
-            services.AddSingleton(conformLogger); // Add the logger component to the list of injectable services
+
+            // Enable logging of application start-up if a command line option requires this
+            string debugStartup = Configuration.GetValue<string>(Globals.COMMAND_OPTION_DEBUG_STARTUP) ?? "";
+            if (!string.IsNullOrEmpty(debugStartup)) conformLogger.Debug = true;
+
+            // Add the logger component to the list of injectable services
+            services.AddSingleton(conformLogger);
 
             // Create a ConformConfiguration service
             conformConfiguration = new(conformLogger, Configuration.GetValue<string>(Globals.COMMAND_OPTION_SETTINGS)); // Create a configuration settings component
 
-            // Enable Alpaca discovery if a command line option requires this
+            // Enable logging of Alpaca discovery if a command line option requires this
             string debugDiscovery = Configuration.GetValue<string>(Globals.COMMAND_OPTION_DEBUG_DISCOVERY) ?? "";
             if (!string.IsNullOrEmpty(debugDiscovery)) conformConfiguration.Settings.TraceDiscovery = true;
 
@@ -88,7 +94,7 @@ namespace ConformU
                     options.EnableLogging = false; // Better performance
                     options.SuppressInitEvent = false; // Ensure the event fires when the application is first loaded
                 });
-            
+
             // Add BlazorPro MediaQuery support
             services.AddMediaQueryService();
 

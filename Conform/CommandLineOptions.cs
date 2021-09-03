@@ -25,5 +25,8 @@ namespace ConformU
         [Option('d', "debugdiscovery", Required = false, HelpText = "'--debugdiscovery' - Write discovery debug information to the log.")]
         public bool DebugDiscovery { get; set; }
 
+        [Option('s', "debugstartup", Required = false, HelpText = "'--debugstartup' - Write start-up debug information to the log.")]
+        public bool DebugStartup { get; set; }
+
     }
 }

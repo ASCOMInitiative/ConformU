@@ -286,7 +286,7 @@ namespace AlpacaDiscovery
             if (TL is object)
             {
                 string indentSpaces = new(' ', Thread.CurrentThread.ManagedThreadId * Constants.NUMBER_OF_THREAD_MESSAGE_INDENT_SPACES);
-                TL.LogMessage($"Finder - {method}", $"{indentSpaces}{Thread.CurrentThread.ManagedThreadId} - {message}");
+                TL.Log(ASCOM.Standard.Interfaces.LogLevel.Information,$"Finder - {method} {indentSpaces} {Thread.CurrentThread.ManagedThreadId} - {message}");
             }
         }
     }

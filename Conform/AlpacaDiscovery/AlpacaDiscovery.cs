@@ -580,15 +580,17 @@ namespace AlpacaDiscovery
             indentSpaces = new string(' ', Thread.CurrentThread.ManagedThreadId * Constants.NUMBER_OF_THREAD_MESSAGE_INDENT_SPACES);
 
             // Log the message so long as the trace logger is not null
-            TL?.LogMessage($"AlpacaDiscovery - {methodName}", $"{indentSpaces}{Thread.CurrentThread.ManagedThreadId} {message}");
+            // TL?.LogMessage($"AlpacaDiscovery - {methodName}", ,$"{indentSpaces}{Thread.CurrentThread.ManagedThreadId} {message}");
+            TL?.Log(ASCOM.Standard.Interfaces.LogLevel.Information, $"AlpacaDiscovery - {methodName} {indentSpaces}{Thread.CurrentThread.ManagedThreadId} {message}");
+
         }
 
         /// <summary>
-    /// Call a device URL and return the response as a string, timing out after a specified time
-    /// </summary>
-    /// <param name="deviceUrl">Device's URL to call</param>
-    /// <param name="timeOut">Length of time to wait for a response</param>
-    /// <returns>Device response as a string</returns>
+        /// Call a device URL and return the response as a string, timing out after a specified time
+        /// </summary>
+        /// <param name="deviceUrl">Device's URL to call</param>
+        /// <param name="timeOut">Length of time to wait for a response</param>
+        /// <returns>Device response as a string</returns>
         private string GetRequest(string deviceUrl, int timeOut)
         {
             WebClientWithTimeOut webClient;

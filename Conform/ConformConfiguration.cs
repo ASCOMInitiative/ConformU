@@ -62,12 +62,12 @@ namespace ConformU
             }
             catch (JsonException ex)
             {
-                TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Error parsing Conform settings file: {ex.Message}");
+                TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"Error parsing Conform settings file: {ex.Message}");
                 Status = "Settings file corrupted, please reset to default values";
             }
             catch (Exception ex)
             {
-                TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, ex.ToString());
+                TL?.LogMessage("ConformConfiguration", MessageLevel.Error, ex.ToString());
                 Status = "Exception reading settings, default values are in use.";
             }
         }

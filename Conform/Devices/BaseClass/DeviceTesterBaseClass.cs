@@ -155,10 +155,10 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    TL.LogMessage("DeviceTesterbaseClass","Dispose called");
-                    try { baseClassDevice.Dispose(); } catch (Exception ex){ TL.LogMessage("DeviceTesterbaseClass", $"Exception\r\n{ex}"); }
+                    TL.LogMessage("DeviceTesterbaseClass",MessageLevel.Debug,"Dispose called");
+                    try { baseClassDevice.Dispose(); } catch (Exception ex){ TL.LogMessage("DeviceTesterbaseClass",MessageLevel.Debug ,$"Exception\r\n{ex}"); }
                     baseClassDevice = null;
-                    TL.LogMessage("DeviceTesterbaseClass", "Dispose finished");
+                    TL.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, "Dispose finished");
                 }
             }
 

@@ -68,13 +68,6 @@
                         <RadzenLabel Text="Trace discovery" Component="CHK4" Style="margin-left: 5px;" />
                     </div>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
-                        <RadzenCheckBox Name="CHK5"
-                                        @bind-Value=@chkTraceSettings
-                                        TValue="bool"
-                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TraceSettings)) />
-                        <RadzenLabel Text="Log settings values" Component="CHK5" Style="margin-left: 5px;" />
-                    </div>
-                    <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHK6"
                                         @bind-Value=@chkTraceAlpacaCalls
                                         TValue="bool"
@@ -327,7 +320,6 @@
         AlpacaDiscoveryUseIpV6,
         StrictCasing,
         TraceDiscovery,
-        TraceSettings,
         TraceAlpacaCalls
     }
 
@@ -684,10 +676,6 @@
 
             case CheckBoxConfigurationItem.TraceDiscovery:
                 configuration.Settings.TraceDiscovery = chkTraceDiscovery;
-                break;
-
-            case CheckBoxConfigurationItem.TraceSettings:
-                configuration.Settings.TraceSettings = chkTraceSettings;
                 break;
 
             case CheckBoxConfigurationItem.TraceAlpacaCalls:
