@@ -19,6 +19,7 @@ namespace ConformU
         internal const string COMMAND_OPTION_LOGFILEPATH = "ConformLogFilePath";
         internal const string COMMAND_OPTION_DEBUG_DISCOVERY = "DebugDiscovery";
         internal const string COMMAND_OPTION_DEBUG_STARTUP = "DebugStartup";
+        internal const string COMMAND_OPTION_RESULTS_FILENAME = "ResultsFileName";
 
         internal const int MESSAGE_LEVEL_WIDTH = 8; // Width to which the message level will be padded
         internal const int TEST_NAME_WIDTH = 35; // Width allowed for test names in screen display and log files

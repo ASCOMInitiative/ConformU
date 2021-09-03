@@ -107,6 +107,13 @@ namespace ConformU
                 argList.Add("true");
             }
 
+            // Set the results filename if supplied 
+            if (!string.IsNullOrEmpty(o.ResultsFileName))
+            {
+                argList.Add($"--{COMMAND_OPTION_RESULTS_FILENAME}");
+                argList.Add(o.ResultsFileName);
+            }
+
             // Run from command line if requested
             if (o.Run)
             {
@@ -141,6 +148,9 @@ namespace ConformU
 
                 ConformLogger conformLogger = new(logFileName, logFilePath, loggerName, true);  // Create a logger component
                 ConformConfiguration settings = new(conformLogger, o.SettingsFileLocation);
+
+                // Set the report file location if required
+                if (!string.IsNullOrEmpty(o.ResultsFileName)) settings.Settings.ResultsFileName = o.ResultsFileName;
 
                 // Validate the supplied configuration and only start if there are no settings issues
                 string validationMessage = settings.Validate();

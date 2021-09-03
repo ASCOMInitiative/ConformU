@@ -29,8 +29,11 @@ namespace ConformU
 
         public IConfiguration Configuration { get; set; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        /// <summary>
+        /// This method gets called by the runtime before calling the Configure method. Use this method to add services to the container.
+        /// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        /// </summary>
+        /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
             // Blazor infrastructure
@@ -43,7 +46,10 @@ namespace ConformU
 
 
             // Conform components
+            #region Conform logger
+
             string loggerName;
+
             // Set log name with casing appropriate to OS
             if (OperatingSystem.IsWindows())
             {
@@ -76,6 +82,9 @@ namespace ConformU
 
             // Add the logger component to the list of injectable services
             services.AddSingleton(conformLogger);
+            #endregion
+
+            #region Conform configuration
 
             // Create a ConformConfiguration service
             conformConfiguration = new(conformLogger, Configuration.GetValue<string>(Globals.COMMAND_OPTION_SETTINGS)); // Create a configuration settings component
@@ -84,8 +93,14 @@ namespace ConformU
             string debugDiscovery = Configuration.GetValue<string>(Globals.COMMAND_OPTION_DEBUG_DISCOVERY) ?? "";
             if (!string.IsNullOrEmpty(debugDiscovery)) conformConfiguration.Settings.TraceDiscovery = true;
 
+            // Set the results filename if supplied on the command line
+            string resultsFileName = Configuration.GetValue<string>(Globals.COMMAND_OPTION_RESULTS_FILENAME) ?? "";
+            if (!string.IsNullOrEmpty(resultsFileName)) conformConfiguration.Settings.ResultsFileName = resultsFileName;
+
             // Add the configuration component to the list of injectable services
             services.AddSingleton(conformConfiguration);
+
+            #endregion
 
             // Add BlazorPro screen resize listener 
             services.AddResizeListener(options =>
@@ -105,8 +120,12 @@ namespace ConformU
             services.AddSingleton<CircuitHandler, CircuitHandlerService>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        //public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, IHostApplicationLifetime applicationLifetime, ConformConfiguration conformConfiguration, ConformLogger conformLogger)
+        /// <summary>
+        /// This method gets called by the runtime after services have been configured. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>
+        /// <param name="logger"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
             //applicationLifetime.ApplicationStopping.Register(DisposeObject, conformConfiguration);

@@ -20,7 +20,8 @@ ConformU is a cross-platform tool to validate that Alpaca Devices and ASCOM Driv
 * '--commandline' - Run as a command line application with no graphical interface using a pre-configured settings file.
 * '--settings fullyqualifiedfilename' - Fully qualified file name of the application configuration file. Leave blank to use the default location.
 * '--logfilepath fullyqualifiedlogfilepath' - Fully qualified path to the log file folder. Leave blank to use the default mechanic, which creates a new folder each day,
-* '--logfilename filename' - If filename has no directory/folder component it will be appended to the log file path to create the fully qualified log file name. If filename is fully qualified, any logfilepath parameter wil be ignored. Leave filename blank to use automatic file naming, where the file name will be based on the file creation time.
+* '--logfile filename' - If filename has no directory/folder component it will be appended to the log file path to create the fully qualified log file name. If filename is fully qualified, any logfilepath parameter will be ignored. Leave filename blank to use automatic file naming, where the file name will be based on the file creation time.
+* '--resultsfile fullyqualifiedfilename' - Fully qualified file name of the results file.
 * '--debugdiscovery' - Write discovery debug information to the log.
 * '--debugstartup' - Write start-up debug information to the log.
 * '--help' - Display this help screen.

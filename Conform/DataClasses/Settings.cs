@@ -160,7 +160,15 @@ namespace ConformU
 
         #region Internal state variables - not persisted
 
+        /// <summary>
+        /// Flag indicating that a long running process is underway
+        /// </summary>
         internal bool OperationInProgress { get; set; }
+
+        /// <summary>
+        /// Output filename for the results file as specified on the command line
+        /// </summary>
+        internal string ResultsFileName { get; set; } = "";
         
         #endregion
 

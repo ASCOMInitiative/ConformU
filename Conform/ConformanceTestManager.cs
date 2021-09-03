@@ -312,9 +312,19 @@ namespace ConformU
                     string json = JsonSerializer.Serialize<ConformResults>(conformResults, options);
                     TL.LogMessage("WriteResultsFile", MessageLevel.Debug, json);
 
-                    string reportFileName = Path.Combine(TL.LogFilePath, "conform.report.txt");
+                    // Set the results file filename
+                    string reportFileName;
+                    if (string.IsNullOrEmpty(settings.ResultsFileName)) // No command line argument has been supplied, so use the log file folder as default
+                    {
+                        reportFileName = Path.Combine(TL.LogFilePath, "conform.report.txt");
+                    }
+                    else // A results filename has been supplied on the command line so use it
+                    {
+                        reportFileName = settings.ResultsFileName;
+                    }
+
                     TL.LogMessage("WriteResultsFile", MessageLevel.Debug, $"Log file path: {TL.LogFilePath}, Report file name: {reportFileName}");
-                    File.WriteAllText(reportFileName, json);
+                    File.WriteAllText(reportFileName, json); // Write the file to disk
 
                 }
                 catch (Exception ex)
@@ -323,13 +333,10 @@ namespace ConformU
                     TL.LogMessage("WriteResultsFile", MessageLevel.Error, ex.ToString());
                 }
 
-
             }
             catch (Exception ex)
             {
-                //LogMsgError("Conform:ConformanceCheck Exception: ", ex.ToString());
-                TL.LogMessage("ConformanceTestManager", MessageLevel.Error, ex.ToString());
-                //OnLogMessageChanged("ConformanceTestManager", $"{DateTime.Now:HH:mm:ss.fff}  ERROR  ConformanceTestManager - {ex}");
+                TL.LogMessage("ConformanceTestManager", MessageLevel.Error, $"Exception running conformance test:\r\n{ex}");
             }
 
             // Dispose of the test device
