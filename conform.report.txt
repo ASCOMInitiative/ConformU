@@ -1,0 +1,6 @@
+{
+  "ErrorCount": 0,
+  "IssueCount": 0,
+  "Errors": [],
+  "Issues": []
+}

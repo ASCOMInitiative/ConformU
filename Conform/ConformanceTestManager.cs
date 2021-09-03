@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Permissions;
+using System.IO;
 
 namespace ConformU
 {
@@ -303,10 +304,25 @@ namespace ConformU
                     }
                 }
 
-                //JsonSerializerOptions options = new();
-                //options.WriteIndented = true;
-                //string json = JsonSerializer.Serialize<ConformResults>(conformResults, options);
-                //TL.LogMessage(json); LogNewLine();
+                try
+                {
+                    TL.LogMessage("WriteResultsFile", MessageLevel.Debug, $"TraceLogger Log file path: {TL.LogFilePath}, Log file name: {TL.LogFileName}");
+                    JsonSerializerOptions options = new();
+                    options.WriteIndented = true;
+                    string json = JsonSerializer.Serialize<ConformResults>(conformResults, options);
+                    TL.LogMessage("WriteResultsFile", MessageLevel.Debug, json);
+
+                    string reportFileName = Path.Combine(TL.LogFilePath, "conform.report.txt");
+                    TL.LogMessage("WriteResultsFile", MessageLevel.Debug, $"Log file path: {TL.LogFilePath}, Report file name: {reportFileName}");
+                    File.WriteAllText(reportFileName, json);
+
+                }
+                catch (Exception ex)
+                {
+
+                    TL.LogMessage("WriteResultsFile", MessageLevel.Error, ex.ToString());
+                }
+
 
             }
             catch (Exception ex)
