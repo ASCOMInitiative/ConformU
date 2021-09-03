@@ -1,5 +1,5 @@
 # ConformU
-ConformU is a cross-platform tool to validate that Alpaca Devices and ASCOM Drivers conform to the ASCOM interface specification. It supersedes the original WIndows based Conform application.
+ConformU is a cross-platform tool to validate that Alpaca Devices and ASCOM Drivers conform to the ASCOM interface specification. It supersedes the original Windows based Conform application.
 
 # Features
 * The application runs as a Blazor single page application in the user's default browser and can also be used directly from the command line without any UI.
