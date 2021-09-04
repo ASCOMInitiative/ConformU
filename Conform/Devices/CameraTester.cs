@@ -3215,6 +3215,15 @@ namespace ConformU
             }
             if (settings.DisplayMethodCalls)
                 LogTestAndMessage("ConformanceCheck", "About to set CoolerOn");
+
+            // Reset the camera image parameters to legal values
+            try { m_Camera.StartX = 0; } catch { }
+            try { m_Camera.StartY = 0; } catch { }
+            try { m_Camera.BinX = 1; } catch { }
+            try { m_Camera.BinY = 1; } catch { }
+            try { m_Camera.NumX = 1; } catch { }
+            try { m_Camera.NumY = 1; } catch { }
+
             try
             {
                 m_Camera.CoolerOn = m_CoolerOn;
