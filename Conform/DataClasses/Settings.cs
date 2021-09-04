@@ -136,8 +136,9 @@ namespace ConformU
         };
 
         // Camera test configuration
-        public int CameraMaxBinX { get; set; }
-        public int CameraMaxBinY { get; set; }
+        public int CameraMaxBinX { get; set; } = 0;
+        public int CameraMaxBinY { get; set; } = 0;
+        public bool CameraFirstUseTests { get; set; } = true;
 
         // Dome test configuration
         public int DomeShutterTimeout { get; set; } = 240;

@@ -429,38 +429,47 @@ namespace ConformU
             // Run camera tests
             if (!cancellationToken.IsCancellationRequested)
             {
-                LogNewLine();
-                // Check LastError throws an exception
-                LogTestOnly("Last Tests"); try
+                if (settings.CameraFirstUseTests) // Only run these tests if configured to do so
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get LastExposureDuration");
-                    m_LastExposureDuration = m_Camera.LastExposureDuration;
-                    LogIssue("LastExposureDuration", "LastExposureDuration did not generate an exception when called before an exposure was made");
-                }
-                catch (COMException)
-                {
-                    LogOK("LastExposureDuration", "LastExposureDuration correctly generated a COM exception before an exposure was made");
-                }
-                catch (Exception)
-                {
-                    LogOK("LastExposureDuration", "LastExposureDuration correctly generated a .NET exception before an exposure was made");
-                }
+                    LogNewLine();
+                    // Check LastError throws an exception
+                    LogTestOnly("Last Tests"); try
+                    {
+                        if (settings.DisplayMethodCalls)
+                            LogTestAndMessage("ConformanceCheck", "About to get LastExposureDuration");
+                        m_LastExposureDuration = m_Camera.LastExposureDuration;
+                        LogIssue("LastExposureDuration", "LastExposureDuration did not generate an exception when called before an exposure was made");
+                    }
+                    catch (COMException)
+                    {
+                        LogOK("LastExposureDuration", "LastExposureDuration correctly generated a COM exception before an exposure was made");
+                    }
+                    catch (Exception)
+                    {
+                        LogOK("LastExposureDuration", "LastExposureDuration correctly generated a .NET exception before an exposure was made");
+                    }
 
-                try
-                {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get LastExposureStartTime");
-                    m_LastExposureStartTime = m_Camera.LastExposureStartTime;
-                    LogIssue("LastExposureStartTime", "LastExposureStartTime did not generate an exception when called before an exposure was made");
+                    try
+                    {
+                        if (settings.DisplayMethodCalls)
+                            LogTestAndMessage("ConformanceCheck", "About to get LastExposureStartTime");
+                        m_LastExposureStartTime = m_Camera.LastExposureStartTime;
+                        LogIssue("LastExposureStartTime", "LastExposureStartTime did not generate an exception when called before an exposure was made");
+                    }
+                    catch (COMException)
+                    {
+                        LogOK("LastExposureStartTime", "LastExposureStartTime correctly generated a COM exception before an exposure was made");
+                    }
+                    catch (Exception)
+                    {
+                        LogOK("LastExposureStartTime", "LastExposureStartTime correctly generated a .NET exception before an exposure was made");
+                    }
+
                 }
-                catch (COMException)
+                else
                 {
-                    LogOK("LastExposureStartTime", "LastExposureStartTime correctly generated a COM exception before an exposure was made");
-                }
-                catch (Exception)
-                {
-                    LogOK("LastExposureStartTime", "LastExposureStartTime correctly generated a .NET exception before an exposure was made");
+                    LogInfo("LastExposureStartTime", "Conform is configured to omit these \"First use\" tests .");
+
                 }
             }
         }
@@ -715,34 +724,52 @@ namespace ConformU
             CameraPropertyTestDouble(CamPropertyType.HeatSinkTemperature, "HeatSinkTemperature", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested)
                 return;
 
-            m_ImageReady = CameraPropertyTestBoolean(CamPropertyType.ImageReady, "ImageReady", false); if (cancellationToken.IsCancellationRequested)
-                return;
-            if (m_ImageReady)
+            if (cancellationToken.IsCancellationRequested) return;
+
+            m_ImageReady = CameraPropertyTestBoolean(CamPropertyType.ImageReady, "ImageReady", false);
+            if (m_ImageReady & settings.CameraFirstUseTests) // Issue this warning if configured to do so
                 LogIssue("ImageReady", "Image is flagged as ready but no exposure has been started!");
-            if (m_ImageReady)
+
+            if (m_ImageReady) // ImageReady is true
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
+                    if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
+
                     m_ImageArray = (int[,])m_Camera.ImageArray;
-                    LogIssue("ImageArray", "No image has been taken but ImageArray has not generated an exception");
+                    if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
+                    {
+                        LogIssue("ImageArray", "No image has been taken but ImageArray has not generated an exception");
+                    }
+                    else  // Omit first use tests
+                    {
+                        LogOK("ImageArray", "ImageArray read OK");
+                    }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    LogOK("ImageArray", "Exception correctly generated before an image has been taken");
+                    LogDebug("ImageArray", $"Exception 1:\r\n{ex}");
+                    if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
+                    {
+                        LogOK("ImageArray", "Exception correctly generated before an image has been taken");
+                    }
+                    else // Omit first use tests
+                    {
+                        LogIssue("ImageArray", $"Conform is configured to omit \"First use\" tests and ImageReady is true, but ImageArray generated an exception: {ex.Message}");
+                    }
                 }
             }
-            else
+            else // ImageReady is false
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
+                    if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
+
                     m_ImageArray = (int[,])m_Camera.ImageArray;
                     LogIssue("ImageArray", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    LogDebug("ImageArray", $"Exception 2:\r\n{ex}");
                     LogOK("ImageArray", "Exception correctly generated when ImageReady is false");
                 }
 
@@ -754,23 +781,42 @@ namespace ConformU
             {
                 try
                 {
-                    object ImageArrayVariantObject;
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
-                    ImageArrayVariantObject = m_Camera.ImageArrayVariant;
-                    m_ImageArrayVariant = (int[,])ImageArrayVariantObject;
-                    LogIssue("ImageArrayVariant", "No image has been taken but ImageArray has not generated an exception");
+                    if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
+
+                    object ImageArrayVariantObject = m_Camera.ImageArrayVariant;
+
+
+                    object[,] ImageArrayVariantObjectArray = ImageArrayVariantObject as object[,];
+
+                    m_ImageArrayVariant = ImageArrayVariantObjectArray;
+                    if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
+                    {
+                        LogIssue("ImageArrayVariant", "No image has been taken but ImageArrayVariant has not generated an exception");
+                    }
+                    else
+                    {
+                        LogOK("ImageArrayVariant", "ImageArray read OK");
+                    }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    LogOK("ImageArrayVariant", "Exception correctly generated before an image has been taken");
+                    LogDebug("ImageArrayVariant", $"Exception:\r\n{ex}");
+                    if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
+                    {
+                        LogOK("ImageArrayVariant", "Exception correctly generated before an image has been taken");
+                    }
+                    else // Omit first use tests
+                    {
+                        LogIssue("ImageArrayVariant", $"Conform is configured to omit \"First use\" tests and ImageReady is true, but ImageArrayVariant generated an exception: {ex.Message}");
+                    }
+
                 }
             }
             else
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
+                    if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
+
                     m_ImageArrayVariant = (int[,])m_Camera.ImageArrayVariant;
                     LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                 }
@@ -779,26 +825,13 @@ namespace ConformU
                     LogOK("ImageArrayVariant", "Exception correctly generated when ImageReady is false");
                 }
 
-            try
+            if (OperatingSystem.IsWindows())
             {
-                if (OperatingSystem.IsWindows())
-                {
-                    if (m_ImageArray is not null) Marshal.ReleaseComObject(m_ImageArray);
-                }
+                try { if (m_ImageArray is not null) Marshal.ReleaseComObject(m_ImageArray); } catch { }
+
+                try { if (m_ImageArrayVariant is not null) Marshal.ReleaseComObject(m_ImageArrayVariant); } catch { }
             }
-            catch
-            {
-            }
-            try
-            {
-                if (OperatingSystem.IsWindows())
-                {
-                    if (m_ImageArray is not null) Marshal.ReleaseComObject(m_ImageArrayVariant);
-                }
-            }
-            catch
-            {
-            }
+
             m_ImageArray = null;
             m_ImageArrayVariant = null;
             GC.Collect();
