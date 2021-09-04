@@ -1,25 +1,27 @@
 ﻿@inject ILogger<App> logger
 @inject IJSRuntime JsRuntime
 @inject ConformConfiguration configuration
+@inject IResizeListener resizeListener
+@inject ConformLogger conformLogger
 
 <div class="top-row pl-4 navbar navbar-dark">
 
     @if (configuration.Settings.OperationInProgress)@* Operation is in progress *@
     {
-        if (IsSmall) @* Operation in progress and screen is small *@
+        @if (IsSmall)@* Operation in progress and screen is small *@
         {
             <span class="navbar-brand">Conform Universal</span> <span style="text-align:left; color: yellow"><b>Operation in progress</b></span>
         }
         else @* Operation in progress and normal screen *@
         {
-            <span class="navbar-brand" style="width: 100%; margin-top:30px; text-align: center">Conform Universal</span>
+            <span class="navbar-brand" style="width: 100%; text-align: center">Conform Universal</span>
         }
     }
     else @* No operation is in progress *@
     {
-        if (IsSmall) @* No operation and screen is small *@
+        @if (IsSmall)@* No operation and screen is small *@
         {
-            <span class="navbar-brand" >Conform Universal</span>
+            <span class="navbar-brand">Conform Universal</span>
         }
         else @* No operation and screen is normal *@
         {
@@ -76,6 +78,9 @@ else
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
+    private int lastWindowWidth = 0;
+    private int lastWindowHeight = 0;
+
     /// <summary>
     /// Event handler for page initialised event
     /// </summary>
@@ -84,6 +89,38 @@ else
     {
         configuration.ConfigurationChanged += OnConfigurationChanged;
     }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+            // Subscribe to the OnResized event. This will do work when the browser is resized.
+            resizeListener.OnResized += WindowResized;
+        }
+    }
+
+    // This method will be called when the window resizes.
+    async void WindowResized(object _, BrowserWindowSize window)
+    {
+        try
+        {
+            // Ensure that we aren't flooded with messages when window dimensions haven't changed.
+            if ((window.Height != lastWindowHeight) | (window.Width != lastWindowWidth))
+            {
+                conformLogger.LogMessage("Navmenu.WindowResized", MessageLevel.Debug, $"Window resized - Browser height: {window.Height}, Browser width: {window.Height}");
+                lastWindowHeight = window.Height;
+                lastWindowWidth = window.Width;
+            }
+            await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
+        }
+    }
+
+
 
     /// <summary>
     /// Event hander called when the configuration is changed
