@@ -79,10 +79,15 @@ else
                 @* Alpaca rediscover button *@
                 <div class="row">
 
-                    <RadzenButton Style="width: 150px; margin-left: 20px;"
+                    <RadzenButton Style="width: 150px; margin-left: 20px; margin-right:20px"
                                   Text="Rediscover"
-                                  Disabled="@discoveryInProgress"
+                                  Disabled=@(discoveryInProgress | !configuration.Settings.AlpacaConfiguration.DiscoveryEnabled)
                                   Click=@(args => OnAlpacaSearchClick()) />
+                    @if (!configuration.Settings.AlpacaConfiguration.DiscoveryEnabled)
+                    {
+                        <p style="margin-top:6px">Discovery is disabled in settings</p>
+                    }
+
 
                 </div>
 
@@ -194,8 +199,8 @@ else
         osIsWindows = OperatingSystem.IsWindows();
         osIsNotWindows = !osIsWindows;
 
-        // Start an Alpaca discovery to populate the Alpaca device list
-        StartDiscovery();
+        // Start an Alpaca discovery to populate the Alpaca device list if configured to do so
+        if (configuration.Settings.AlpacaConfiguration.DiscoveryEnabled) StartDiscovery();
     }
 
     #endregion

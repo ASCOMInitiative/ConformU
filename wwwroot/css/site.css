@@ -20,6 +20,16 @@ textarea {
     width: 100%;
 }
 
+/* Override the default radzen checkbox unchecked background colour when disabled > */
+.rz-chkbox.rz-state-disabled {
+    background-color: lightgray;
+}
+
+/* Override the default radzen checkbox checked background colour when disabled > */
+.rz-chkbox-box.rz-state-active.rz-state-disabled {
+    background-color: lightgray;
+}
+
 .topmost {
     position: relative;
     z-index: 100;
