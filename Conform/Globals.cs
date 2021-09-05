@@ -24,6 +24,8 @@ namespace ConformU
         internal const int MESSAGE_LEVEL_WIDTH = 8; // Width to which the message level will be padded
         internal const int TEST_NAME_WIDTH = 35; // Width allowed for test names in screen display and log files
 
+        internal const double UI_SMALL_TRANSITION_SIZE = 767.98;
+
         #endregion
 
         #region Global Variables

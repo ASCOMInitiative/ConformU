@@ -2,6 +2,7 @@
 
   <PropertyGroup Condition="'$(TargetFramework)'=='net5.0-windows'">
     <UseWindowsForms>true</UseWindowsForms>
+    <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
   </PropertyGroup>
 
   <PropertyGroup>

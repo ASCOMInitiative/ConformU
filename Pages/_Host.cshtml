@@ -55,24 +55,24 @@
     </script>
 
     @*<script>
-        document.onkeydown = function () {
-            switch (event.keyCode) {
-                case 116: //F5 button
-                    event.returnValue = false;
-                    event.keyCode = 0;
-                    return false;
-                case 82: //R button
-                    if (event.ctrlKey) {
+            document.onkeydown = function () {
+                switch (event.keyCode) {
+                    case 116: //F5 button
                         event.returnValue = false;
                         event.keyCode = 0;
                         return false;
-                    }
+                    case 82: //R button
+                        if (event.ctrlKey) {
+                            event.returnValue = false;
+                            event.keyCode = 0;
+                            return false;
+                        }
+                }
             }
-        }
-    </script>*@
+        </script>*@
 
     <script>
-    IdentifyBrowser = () => {
+        IdentifyBrowser = () => {
             var sBrowser, sUsrAg = navigator.userAgent;
 
             if (sUsrAg.indexOf("Firefox") > -1) {   // "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"
@@ -97,12 +97,23 @@
         };
     </script>
 
-    <!--Return position information for a control with the supplied ID-->
     <script>
-    GetBoundingClientRect = (elementId) => {
+        // Return position information for a control with the supplied element ID
+        GetBoundingClientRect = (elementId) => {
             return document.getElementById(elementId).getBoundingClientRect();
         };
+
+        // Return size information for the browser window
+        GetBoundingWindowRect = () => {
+            return new DOMRect(0,
+                0,
+                window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+                window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight)
+                ;
+        }
     </script>
+
+
     <script>ScrollToBottom = (elementId) => { document.getElementById(elementId).scrollTop = document.getElementById(elementId).scrollHeight; };</script>
 </body>
 </html>

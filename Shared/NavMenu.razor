@@ -3,6 +3,7 @@
 @inject ConformConfiguration configuration
 @inject IResizeListener resizeListener
 @inject ConformLogger conformLogger
+@inject IJSRuntime JS
 
 <div class="top-row pl-4 navbar navbar-dark">
 
@@ -10,18 +11,19 @@
     {
         @if (IsSmall)@* Operation in progress and screen is small *@
         {
-            <span class="navbar-brand">Conform Universal</span> <span style="text-align:left; color: yellow"><b>Operation in progress</b></span>
+            <span class="navbar-brand">Conform Universal</span><span style="text-align:left; color: yellow"><b>Operation in progress</b></span>
         }
         else @* Operation in progress and normal screen *@
         {
             <span class="navbar-brand" style="width: 100%; text-align: center">Conform Universal</span>
         }
+
     }
     else @* No operation is in progress *@
     {
         @if (IsSmall)@* No operation and screen is small *@
         {
-            <span class="navbar-brand">Conform Universal</span>
+            <span class="navbar-brand" style="text-align: left">Conform Universal</span>
         }
         else @* No operation and screen is normal *@
         {
@@ -40,7 +42,7 @@
     @if (!IsSmall)
     {
         <div style="margin-top: 80px;text-align:center">
-            <p style="color:yellow"><b> Operation in progress</b></p>
+            <p style="color:yellow"><b>Operation in progress</b></p>
         </div>
     }
 }
@@ -69,17 +71,13 @@ else
 
     </div>
 }
-<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="IsSmall" />
 
 @code {
-    bool IsSmall = false;
+    bool IsSmall;
 
     private bool collapseNavMenu = true;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private int lastWindowWidth = 0;
-    private int lastWindowHeight = 0;
 
     /// <summary>
     /// Event handler for page initialised event
@@ -101,18 +99,13 @@ else
     }
 
     // This method will be called when the window resizes.
-    async void WindowResized(object _, BrowserWindowSize window)
+    private async void WindowResized(object _, BrowserWindowSize window)
     {
         try
         {
-            // Ensure that we aren't flooded with messages when window dimensions haven't changed.
-            if ((window.Height != lastWindowHeight) | (window.Width != lastWindowWidth))
-            {
-                conformLogger.LogMessage("Navmenu.WindowResized", MessageLevel.Debug, $"Window resized - Browser height: {window.Height}, Browser width: {window.Height}");
-                lastWindowHeight = window.Height;
-                lastWindowWidth = window.Width;
-            }
-            await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
+            IsSmall = window.Width < Globals.UI_SMALL_TRANSITION_SIZE;
+            conformLogger.LogMessage("Navmenu.WindowResized", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {window.Width}, Window height: {window.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
@@ -127,12 +120,17 @@ else
     /// </summary>
     /// <param name="caller"></param>
     /// <param name="args"></param>
-    private void OnConfigurationChanged(object caller, EventArgs args)
+    private async void OnConfigurationChanged(object caller, EventArgs args)
     {
         // Collapse the nav menu if an operation has been started
         if (configuration.Settings.OperationInProgress) collapseNavMenu = true;
+
         // Refresh the UI according to new state
-        InvokeAsync(StateHasChanged);
+        BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
+        IsSmall = browserWindowSize.Width < Globals.UI_SMALL_TRANSITION_SIZE;
+
+        conformLogger.LogMessage("Navmenu.OnConfigurationChange", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {browserWindowSize.Width}, Window height: {browserWindowSize.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
+        await InvokeAsync(StateHasChanged);
     }
 
     private void ToggleNavMenu()

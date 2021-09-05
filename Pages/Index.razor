@@ -188,13 +188,25 @@ string statusMessage = "Linux build";
 
     #region Log textarea - resize support
 
+    async void ResizeLogWindow()
+    {
+        BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
+        BlazorPro.BlazorSize.BrowserWindowSize blazorProWindowSize = new();
+        blazorProWindowSize.Width = (int)browserWindowSize.Width;
+        blazorProWindowSize.Height = (int)browserWindowSize.Height;
+
+        conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
+        WindowResized(new object(), blazorProWindowSize);
+        conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
+    }
+
     protected override void OnAfterRender(bool firstRender)
     {
-
         if (firstRender)
         {
             // Subscribe to the OnResized event. This will do work when the browser is resized.
             listener.OnResized += WindowResized;
+            ResizeLogWindow();
         }
     }
 
@@ -214,7 +226,7 @@ string statusMessage = "Linux build";
 
             if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
 
-            conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Browser: {browser}, Browserheight: {window.Height}, LogAreaTop: {result.Top}, LogAreaHeight: {result.Height}, ScreenLogRows: {screenLogRows}");
+            conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"IsSmall: {isSmall}, Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
             await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
 
         }

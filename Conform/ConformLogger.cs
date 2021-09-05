@@ -102,7 +102,7 @@ namespace ConformU
             }
 
             // Write the message to the console
-            Console.WriteLine($"{id,-TEST_NAME_WIDTH} {messageLevel,MESSAGE_LEVEL_WIDTH} {message}");
+            Console.WriteLine($"{DateTime.Now:HH:mm:ss.fff} {id,-TEST_NAME_WIDTH} {messageLevel,MESSAGE_LEVEL_WIDTH} {message}");
 
             // Write the message to the log file
             base.LogMessage(id, $"{messageLevel,MESSAGE_LEVEL_WIDTH} {message}");
