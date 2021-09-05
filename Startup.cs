@@ -110,9 +110,6 @@ namespace ConformU
                     options.SuppressInitEvent = false; // Ensure the event fires when the application is first loaded
                 });
 
-            // Add BlazorPro MediaQuery support
-            services.AddMediaQueryService();
-
             // Radzen services
             services.AddScoped<NotificationService>();
 

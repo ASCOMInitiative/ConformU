@@ -231,6 +231,18 @@ namespace ConformU
                 .ConfigureWebHostDefaults(webBuilder =>
                     {
                         webBuilder.UseStartup<Startup>();
+
+                        //webBuilder.UseKestrel(opts =>
+                        //{
+                        //    // Bind directly to a socket handle or Unix socket
+                        //    // opts.ListenHandle(123554);
+                        //    // opts.ListenUnixSocket("/tmp/kestrel-test.sock");
+                        //    //opts.Listen(IPAddress.Loopback, port: 5002);
+                        //    opts.ListenAnyIP(5003);
+                        //    //opts.ListenLocalhost(5000);
+                        //    //opts.ListenLocalhost(5005, opts => opts.UseHttps());
+                        //});
+
                     });
 
         public static void OpenBrowser(string url)

@@ -11,14 +11,7 @@
 @inject NotificationService notificationService
 
 <div>
-    @if (isSmall)
-    {
-        <h2>Welcome to Conform Universal!</h2>
-    }
-    else
-    {
-        <h1>Welcome to Conform Universal!</h1>
-    }
+    <h1>Welcome to Conform Universal!</h1>
 
     <div>
         <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" Disabled=@configuration.Settings.OperationInProgress />
@@ -31,10 +24,7 @@
 
 </div>
 
-<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="isSmall" />
-
 @code {
-    bool isSmall = false;
 
     private bool disposedValue;
     int screenLogRows = 10;
@@ -238,7 +228,7 @@ string statusMessage = "Linux build";
 
             if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
 
-            conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"IsSmall: {isSmall}, Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
+            conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
             await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
 
         }

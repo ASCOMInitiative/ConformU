@@ -35,6 +35,14 @@ namespace ConformU
 
         #endregion
 
+        #region Static classes
+        internal static bool IsSmall(double width, double height)
+        {
+            return (width < UI_SMALL_TRANSITION_SIZE) | (height < UI_SMALL_TRANSITION_SIZE);
+        }
+
+        #endregion
+
     }
 
     #region Global Enums

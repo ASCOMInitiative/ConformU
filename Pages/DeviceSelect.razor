@@ -14,14 +14,7 @@
 @* JavaScript runtime reference *@
 @inject IJSRuntime JS
 
-@if (isSmall)
-{
-    <h2>Device Selection</h2>
-}
-else
-{
-    <h1>Device Selection</h1>
-}
+<h1>Device Selection</h1>
 
 @*Select device type drop-down*@
 <div class="row" style="margin-left: 0px">
@@ -153,10 +146,7 @@ else
 
 </RadzenTabs>
 
-<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="isSmall" />
-
 @code {
-    bool isSmall = false;
 
     string manualIpAddress = "127.0.0.1";
     int manualPortNumber = 11111;

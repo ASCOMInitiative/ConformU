@@ -1,15 +1,22 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
 /* Override the Radzen small screen size font increase to 1 rem */
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 768px) {
     .rz-colorpicker, .rz-lookup-search input, .rz-spinner, .rz-calendar .rz-inputtext, .rz-multiselect, .rz-dropdown, .mask, .rz-textarea, .rz-textbox, .rz-radiobutton-label, .label,
     input {
         font-size: 0.8rem;
     }
 }
 
+/* Override the h1 font size when small  */
+@media (max-width: 768px), (max-height: 768px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+}
+
 /* Set a smaller font for labels when on small devices */
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 768px) {
     label, p, h3 {
         font-size: 0.8rem;
     }
@@ -21,7 +28,7 @@ ul[role=tablist] {
 }
 
 /* Set a smaller padding for tab text on small screens so that more tabs fit in */
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 768px) {
     .rz-tabview-nav li a {
         padding-left: 10px;
         padding-right: 10px;
@@ -199,7 +206,7 @@ app {
         top: 0.5rem;
     }
 
-@media (max-width: 767.98px) {
+@media (max-width: 767.98px) and (orientation: portrait), (max-height: 768px) and (orientation: landscape) {
     .main .top-row:not(.auth) {
         display: none;
     }
@@ -213,7 +220,7 @@ app {
     }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 768px) and (orientation: portrait), (min-height: 768px) and (orientation: landscape) {
     app {
         flex-direction: row;
     }

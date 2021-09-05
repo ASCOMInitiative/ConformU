@@ -6,16 +6,9 @@
 
 @*Title and settings reset button*@
 <div class="row">
-    @if (isSmall)
-    {
-        <h2>Settings</h2>
-    }
-    else
-    {
-        <h1>Settings</h1>
-    }
+    <h1>Settings</h1>
 
-    <RadzenButton Click=@(args => OnResetButtonClick()) Text="Reset to Defaults" Icon="account_circle" Style="margin-bottom: 20px; width: 220px; position: absolute; right: 30px;" />
+    <RadzenButton Click=@(args => OnResetButtonClick()) Text="Reset to Defaults" Style="margin-bottom: 20px; position: absolute; right: 30px;" />
 </div>
 
 @*Status message*@
@@ -354,11 +347,8 @@
     </Tabs>
 </RadzenTabs>
 
-<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="isSmall" />
-
 @code {
     bool alpacaDiscoveryEnabled = true;
-    bool isSmall = false;
     string alpacaAndComText;
     bool strictCasing;
     bool chkTraceDiscovery;

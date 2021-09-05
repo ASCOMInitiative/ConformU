@@ -5,14 +5,8 @@
 
 @using System.Threading
 
-@if (isSmall)
-{
-    <h2>Device and Driver Setup</h2>
-}
-else
-{
-    <h1>Device and Driver Setup</h1>
-}
+<h1>Device and Driver Setup</h1>
+
 
 <div>
 
@@ -42,11 +36,7 @@ else
     }
 </div>
 
-<MediaQuery Media="@Breakpoints.SmallDown" @bind-Matches="isSmall" />
-
 @code {
-    bool isSmall = false;
-
     bool alpacaControlsDisplay = false;
     bool comControlsDisplay = false;
     bool noDeviceMessageDisplay = false;

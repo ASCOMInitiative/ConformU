@@ -103,7 +103,7 @@ else
     {
         try
         {
-            IsSmall = window.Width < Globals.UI_SMALL_TRANSITION_SIZE;
+            IsSmall = Globals.IsSmall(window.Width, window.Height);//window.Width < Globals.UI_SMALL_TRANSITION_SIZE;
             conformLogger.LogMessage("Navmenu.WindowResized", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {window.Width}, Window height: {window.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
             await InvokeAsync(StateHasChanged);
         }
@@ -112,8 +112,6 @@ else
             conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
         }
     }
-
-
 
     /// <summary>
     /// Event hander called when the configuration is changed
@@ -127,7 +125,7 @@ else
 
         // Refresh the UI according to new state
         BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
-        IsSmall = browserWindowSize.Width < Globals.UI_SMALL_TRANSITION_SIZE;
+        IsSmall = Globals.IsSmall(browserWindowSize.Width, browserWindowSize.Height); //browserWindowSize.Width < Globals.UI_SMALL_TRANSITION_SIZE;
 
         conformLogger.LogMessage("Navmenu.OnConfigurationChange", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {browserWindowSize.Width}, Window height: {browserWindowSize.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
         await InvokeAsync(StateHasChanged);
@@ -135,7 +133,7 @@ else
 
     private void ToggleNavMenu()
     {
-        collapseNavMenu = !collapseNavMenu;
+        if (IsSmall) collapseNavMenu = !collapseNavMenu;
         conformLogger.LogMessage("NavMenu-ToggleNavMenu", MessageLevel.Debug, $"Collapse menu: {collapseNavMenu}");
         configuration.RaiseUiHasChangedEvent();
         conformLogger.LogMessage("NavMenu-ToggleNavMenu", MessageLevel.Debug, $"UI changed event complete");
