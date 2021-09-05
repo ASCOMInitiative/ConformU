@@ -134,6 +134,7 @@ namespace ConformU
             { "SyncToTarget", true },
             { "SyncToAltAz", true }
         };
+        public bool TelescopeFirstUseTests { get; set; } = true;
 
         // Camera test configuration
         public int CameraMaxBinX { get; set; } = 0;

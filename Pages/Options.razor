@@ -209,24 +209,44 @@
 
         @*Telescope configuration*@
         <RadzenTabsItem Text="Telescope">
-            <div class="row" style="margin-top:5px;">
-                <h3 style="margin-top: 5px;">Select the tests which Conform should perform.</h3>
-                <RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(true)) Text="Check all tests" Style="margin-left: 20px; " />
-                <RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(false)) Text="Uncheck all tests" Style="margin-left: 20px; " />
-            </div>
+            <div class="row">
+                <RadzenCard Style="margin-left: 10px;padding-bottom:5px">
+                    <h3 style="margin-top: 5px; color: #479cc8">Select which tests Conform should perform.</h3>
 
-            <RadzenCheckBoxList @bind-Value=@telescopeTests
-                                Style="margin-top:20px"
-                                TValue="string"
-                                Orientation="Orientation.Vertical"
-                                Change=@(args => OnTelescopeTestsChange(args,""))>
-                <Items>
-                    @foreach (var item in configuration.Settings.TelescopeTests)
-                    {
-                        <RadzenCheckBoxListItem Text="@item.Key" Value="@item.Key" />
-                    }
-                </Items>
-            </RadzenCheckBoxList>
+                    <div class="row" style="margin-top:0px;">
+                        <RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(true)) Text="Check all" Style="margin-left: 20px; " />
+                        <RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(false)) Text="Uncheck all" Style="margin-left: 20px; " />
+                    </div>
+
+                    <RadzenCheckBoxList @bind-Value=@telescopeTests
+                                        Style="margin-top:10px;margin-bottom: 0px"
+                                        TValue="string"
+                                        Orientation="Orientation.Vertical"
+                                        Change=@(args => OnTelescopeTestsChange(args,""))>
+                        <Items>
+                            @foreach (var item in configuration.Settings.TelescopeTests)
+                            {
+                                <RadzenCheckBoxListItem Text="@item.Key" Value="@item.Key" />
+                            }
+                        </Items>
+                    </RadzenCheckBoxList>
+                </RadzenCard>
+
+                <RadzenCard Style="margin-left: 20px">
+                    <h3 style="margin-top: 5px; color: #479cc8">Further configuration.</h3>
+                    <div class="row">
+
+                        <RadzenCheckBox Name="TELEFIRSTUSETESTS"
+                                        Style="margin-top:20px;margin-left:20px"
+                                        @bind-Value=@telescopeFirstUseTests
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TelescopeFirstUseTests)) />
+                        <RadzenLabel Text="Enable first time use tests (Target RA/DEC throw exceptions if not set.)"
+                                     Component="TELEFIRSTUSETESTS"
+                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
+                    </div>
+                </RadzenCard>
+            </div>
         </RadzenTabsItem>
 
         @*Camera configuration*@
@@ -338,7 +358,6 @@
 
 @code {
     bool alpacaDiscoveryEnabled = true;
-    bool cameraFirstUseTests = false;
     bool isSmall = false;
     string alpacaAndComText;
     bool strictCasing;
@@ -390,12 +409,14 @@
         TraceDiscovery,
         TraceAlpacaCalls,
         CameraFirstUseTests,
-        DiscoveryEnabled
+        DiscoveryEnabled,
+        TelescopeFirstUseTests
     }
 
     // Camera test configuration
     private int cameraTestMaxBinX;
     private int cameraTestMaxBinY;
+    bool cameraFirstUseTests = false;
 
     // Dome test configuration
     private int domeShutterTimeout;
@@ -407,6 +428,7 @@
     // Telescope test configuration
     private IEnumerable<string> telescopeTests;
     private string status;
+    bool telescopeFirstUseTests = false;
 
     // ObservingConditions test configuration
     private int observingConditionsRetryTime;
@@ -589,6 +611,7 @@
         {
             if (item.Value) ((List<string>)telescopeTests).Add(item.Key);
         }
+        telescopeFirstUseTests = configuration.Settings.TelescopeFirstUseTests;
 
         // Camera tests
         cameraTestMaxBinX = configuration.Settings.CameraMaxBinX;
@@ -760,6 +783,10 @@
 
             case CheckBoxConfigurationItem.DiscoveryEnabled:
                 configuration.Settings.AlpacaConfiguration.DiscoveryEnabled = alpacaDiscoveryEnabled;
+                break;
+
+            case CheckBoxConfigurationItem.TelescopeFirstUseTests:
+                configuration.Settings.TelescopeFirstUseTests = telescopeFirstUseTests;
                 break;
 
             default:

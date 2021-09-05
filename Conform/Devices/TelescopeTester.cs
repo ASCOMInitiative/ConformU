@@ -1837,7 +1837,29 @@ namespace ConformU
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("TargetDeclination Read", "About to get TargetDeclination property");
                 m_TargetDeclination = telescopeDevice.TargetDeclination;
-                LogIssue("TargetDeclination Read", "Read before write should generate an error and didn't");
+                if (settings.TelescopeFirstUseTests)
+                {
+                    LogIssue("TargetDeclination Read", "Read before write should generate an error and didn't");
+                    LogInfo("TargetDeclination Read", "This issue can be suppressed by unchecking Conform's \"Enable first time use tests\" setting in the telescope test section.");
+                }
+                else
+                {
+                    switch (m_TargetDeclination)
+                    {
+                        case var case6 when case6 < -90.0d:
+                        case var case7 when case7 > 90.0d:
+                            {
+                                LogIssue("TargetDeclination Read", "TargetDeclination is <-90 or >90 degrees: " + FormatDec(m_TargetDeclination));
+                                break;
+                            }
+
+                        default:
+                            {
+                                LogOK("TargetDeclination Read", FormatDec(m_TargetDeclination));
+                                break;
+                            }
+                    }
+                }
             }
             catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
             {
@@ -1876,7 +1898,29 @@ namespace ConformU
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("TargetRightAscension Read", "About to get TargetRightAscension property");
                 m_TargetRightAscension = telescopeDevice.TargetRightAscension;
-                LogIssue("TargetRightAscension Read", "Read before write should generate an error and didn't");
+                if (settings.TelescopeFirstUseTests)
+                {
+                    LogIssue("TargetRightAscension Read", "Read before write should generate an error and didn't");
+                    LogInfo("TargetRightAscension Read", "This issue can be suppressed by unchecking Conform's \"Enable first time use tests\" setting in the telescope test section.");
+                }
+                else
+                {
+                    switch (m_TargetRightAscension)
+                    {
+                        case var case14 when case14 < 0.0d:
+                        case var case15 when case15 >= 24.0d:
+                            {
+                                LogIssue("TargetRightAscension Read", "TargetRightAscension is <0 or >=24 hours: " + m_TargetRightAscension + " " + FormatRA(m_TargetRightAscension));
+                                break;
+                            }
+
+                        default:
+                            {
+                                LogOK("TargetRightAscension Read", FormatRA(m_TargetRightAscension));
+                                break;
+                            }
+                    }
+                }
             }
             catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
             {
@@ -3146,7 +3190,7 @@ namespace ConformU
             if (settings.TestSideOfPierRead)
             {
                 LogNewLine();
-                LogTestOnly("SideOfPier Model Tests");                LogDebug("SideOfPier Model Tests", "Starting tests");
+                LogTestOnly("SideOfPier Model Tests"); LogDebug("SideOfPier Model Tests", "Starting tests");
                 if (g_InterfaceVersion > 1)
                 {
                     // 3.0.0.14 - Skip these tests if unable to read SideOfPier
@@ -6557,7 +6601,7 @@ namespace ConformU
             {
                 LogIssue("SideofPier", "SideofPier reports physical pier side rather than pointing state");
             }
-            else if ((l_PierSideMinus3.SideOfPier == l_PierSideMinus9.SideOfPier )& (l_PierSidePlus3.SideOfPier == l_PierSidePlus9.SideOfPier)) // Make other tests
+            else if ((l_PierSideMinus3.SideOfPier == l_PierSideMinus9.SideOfPier) & (l_PierSidePlus3.SideOfPier == l_PierSidePlus9.SideOfPier)) // Make other tests
             {
                 LogOK("SideofPier", "Reports the pointing state of the mount as expected");
             }
@@ -6735,9 +6779,9 @@ namespace ConformU
             LogInfo("DestinationSideofPier", TranslatePierSide(l_PierSideMinus3, false) + TranslatePierSide(l_PierSidePlus3, false));
         }
 
-#endregion
+        #endregion
 
-#region Support Code
+        #region Support Code
 
         private void CheckScopePosition(string testName, string functionName, double expectedRA, double expectedDec)
         {
@@ -7284,7 +7328,7 @@ namespace ConformU
 
                             default:
                                 {
-                                    LogIssue("TestRADecRate",$"Conform internal error - Unknown Axis: {Axis}");
+                                    LogIssue("TestRADecRate", $"Conform internal error - Unknown Axis: {Axis}");
                                     break;
                                 }
                         }
@@ -7315,7 +7359,7 @@ namespace ConformU
             return success;
         }
 
-#endregion
+        #endregion
 
     }
 }
