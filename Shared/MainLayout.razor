@@ -34,7 +34,7 @@
     /// <remarks>Hook up an event handler to redisplay the page header whenever the configuraiton is changed. </remarks>
     protected override void OnInitialized()
     {
-        configuration.ConfigurationChanged += OnConfigurationChanged;
+        configuration.UiHasChanged += OnUiChanged;
         SetDisplayVariables();
     }
 
@@ -43,7 +43,7 @@
     /// </summary>
     /// <param name="caller"></param>
     /// <param name="args"></param>
-    private void OnConfigurationChanged(object caller, EventArgs args)
+    private void OnUiChanged(object caller, EventArgs args)
     {
         SetDisplayVariables();
         InvokeAsync(StateHasChanged);

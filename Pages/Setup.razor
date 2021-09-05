@@ -84,7 +84,7 @@ else
     {
         string url = "";
 
-        configuration.RaiseConfigurationChangedEvent();
+        configuration.RaiseUiHasChangedEvent();
         StateHasChanged();
 
         try
@@ -104,7 +104,7 @@ else
     {
         string url = "";
 
-        configuration.RaiseConfigurationChangedEvent();
+        configuration.RaiseUiHasChangedEvent();
         StateHasChanged();
 
         try
@@ -133,7 +133,7 @@ else
         try
         {
             configuration.Settings.OperationInProgress = true;
-            configuration.RaiseConfigurationChangedEvent();
+            configuration.RaiseUiHasChangedEvent();
             StateHasChanged();
 
             conformLogger.Debug = configuration.Settings.Debug;
@@ -180,7 +180,7 @@ else
         {
             // Renable the button and remove operationin progress status
             configuration.Settings.OperationInProgress = false;
-            configuration.RaiseConfigurationChangedEvent();
+            configuration.RaiseUiHasChangedEvent();
             StateHasChanged();
         }
     }

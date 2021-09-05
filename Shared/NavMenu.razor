@@ -85,7 +85,7 @@ else
     /// <remarks>Hook up an event handler to redisplay the page header whenever the configuraiton is changed. </remarks>
     protected override void OnInitialized()
     {
-        configuration.ConfigurationChanged += OnConfigurationChanged;
+        configuration.UiHasChanged += OnUiChanged;
     }
 
     protected override void OnAfterRender(bool firstRender)
@@ -120,7 +120,7 @@ else
     /// </summary>
     /// <param name="caller"></param>
     /// <param name="args"></param>
-    private async void OnConfigurationChanged(object caller, EventArgs args)
+    private async void OnUiChanged(object caller, EventArgs args)
     {
         // Collapse the nav menu if an operation has been started
         if (configuration.Settings.OperationInProgress) collapseNavMenu = true;
@@ -136,6 +136,21 @@ else
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+        conformLogger.LogMessage("NavMenu-ToggleNavMenu", MessageLevel.Debug, $"Collapse menu: {collapseNavMenu}");
+        configuration.RaiseUiHasChangedEvent();
+        conformLogger.LogMessage("NavMenu-ToggleNavMenu", MessageLevel.Debug, $"UI changed event complete");
+
+        // Start a task that waits a short time and then fires a UI has changed event. Required to ensure that the log text area fully resizes at small widths after the nav bar has resized.
+        Task.Run(DelayedUiChangedTask);
+    }
+
+    async void DelayedUiChangedTask()
+    {
+        conformLogger.LogMessage("NavMenu-DelayedUiChangedTask", MessageLevel.Debug, $"Delay started");
+        await Task.Delay(100);
+        configuration.RaiseUiHasChangedEvent();
+        conformLogger.LogMessage("NavMenu-DelayedUiChangedTask", MessageLevel.Debug, $"Delayed UI changed event complete");
+
     }
 
 }

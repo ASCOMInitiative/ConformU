@@ -20,6 +20,14 @@ ul[role=tablist] {
     flex-wrap: wrap;
 }
 
+/* Set a smaller padding for tab text on small screens so that more tabs fit in */
+@media (max-width: 768px) {
+    .rz-tabview-nav li a {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
 @font-face {
     font-family: 'Icons';
     src: url('https://fonts.googleapis.com/icon?family=Material+Icons') format('woff');

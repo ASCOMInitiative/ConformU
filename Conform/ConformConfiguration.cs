@@ -112,17 +112,24 @@ namespace ConformU
             PersistSettings(settings);
             Status = $"Settings saved at {DateTime.Now:HH:mm:ss.f}.";
 
-            RaiseConfigurationChangedEvent();
-        }
-
-        internal void RaiseConfigurationChangedEvent()
-        {
+            // Raise configuration has changed event
             if (ConfigurationChanged is not null)
             {
                 EventArgs args = new();
-                TL?.LogMessage("RaiseConfigurationChnagedEvent", MessageLevel.Debug, "About to call configuration changed event handler");
+                TL?.LogMessage("Save", MessageLevel.Debug, "About to call configuration changed event handler");
                 ConfigurationChanged(this, args);
-                TL?.LogMessage("RaiseConfigurationChnagedEvent", MessageLevel.Debug, "Returned from configuration changed event handler");
+                TL?.LogMessage("Save", MessageLevel.Debug, "Returned from configuration changed event handler");
+            }
+        }
+
+        internal void RaiseUiHasChangedEvent()
+        {
+            if (UiHasChanged is not null)
+            {
+                EventArgs args = new();
+                TL?.LogMessage("RaiseUiHasChangedEvent", MessageLevel.Debug, "About to call UI has changed event handler");
+                UiHasChanged(this, args);
+                TL?.LogMessage("RaiseUiHasChangedEvent", MessageLevel.Debug, "Returned from UI has changed event handler");
             }
         }
 
@@ -132,13 +139,15 @@ namespace ConformU
             settings = new();
             PersistSettings(settings);
             Status = $"Settings reset at {DateTime.Now:HH:mm:ss.f}.";
-            RaiseConfigurationChangedEvent();
+            RaiseUiHasChangedEvent();
 
         }
 
         public delegate void MessageEventHandler(object sender, MessageEventArgs e);
 
         public event EventHandler ConfigurationChanged;
+
+        public event EventHandler UiHasChanged;
 
         public Settings Settings
         {

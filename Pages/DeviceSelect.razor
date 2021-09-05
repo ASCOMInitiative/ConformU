@@ -404,7 +404,7 @@ else
         }
         discoveryInProgress = false;
         configuration.Settings.OperationInProgress = false;
-        configuration.RaiseConfigurationChangedEvent();
+        configuration.RaiseUiHasChangedEvent();
 
         ascomDevices.Sort((a, b) => a.DisplayName.CompareTo(b.DisplayName));
 
@@ -472,7 +472,7 @@ else
     private void StartDiscovery()
     {
         configuration.Settings.OperationInProgress = true;
-        configuration.RaiseConfigurationChangedEvent();
+        configuration.RaiseUiHasChangedEvent();
         discoveredAlpacaDevices.Clear();
         discoveryInProgress = true;
         alpacaDiscoveryProgress = $"Discovery started (Duration {configuration.Settings.AlpacaConfiguration.DiscoveryDuration:0.0} seconds)...\r\n";

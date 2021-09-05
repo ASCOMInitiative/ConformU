@@ -56,7 +56,14 @@ string statusMessage = "Linux build";
     protected override void OnInitialized()
     {
         conformLogger.Debug = configuration.Settings.Debug;
+        configuration.UiHasChanged += OnUiHasChanged;
     }
+
+    public void OnUiHasChanged(object sender, EventArgs e)
+    {
+        ResizeLogWindow();
+    }
+
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -74,7 +81,7 @@ string statusMessage = "Linux build";
         {
             // Set the operation in progress flag and refresh state throughout the page and navigation menu.
             configuration.Settings.OperationInProgress = true;
-            configuration.RaiseConfigurationChangedEvent();
+            configuration.RaiseUiHasChangedEvent();
             StateHasChanged();
 
             // Validate the supplied configuraiton and only start if there are no settings issues
@@ -103,39 +110,44 @@ string statusMessage = "Linux build";
                 // Create a test manager instance to oversee the test
                 using (tester = new ConformanceTestManager(configuration, conformLogger, cancelConformToken))
                 {
-                    conformLogger.MessageLogChanged += OutputChanged;
-                    conformLogger.StatusChanged += StatusChanged;
-                    conformLogger.Debug = configuration.Settings.Debug;
-
-                    // Clear the screen log
-                    screenLog = "";
-
-                    // Create a task to run the conformance test
-                    conformanceTest = new Task(() =>
+                    try
                     {
-                        try
+                        conformLogger.MessageLogChanged += OutputChanged;
+                        conformLogger.StatusChanged += StatusChanged;
+                        conformLogger.Debug = configuration.Settings.Debug;
+
+                        // Clear the screen log
+                        screenLog = "";
+
+                        // Create a task to run the conformance test
+                        conformanceTest = new Task(() =>
                         {
-                            tester.TestDevice();
-                        }
-                        catch (Exception ex)
-                        {
-                            conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
+                            try
+                            {
+                                tester.TestDevice();
+                            }
+                            catch (Exception ex)
+                            {
+                                conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
 
-                        }
+                            }
 
-                    }, cancelConformToken);
-                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
-                    // Start the conformnance test task
-                    conformanceTest.Start();
-                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance test started OK");
+                        }, cancelConformToken);
+                        conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
+                        // Start the conformnance test task
+                        conformanceTest.Start();
+                        conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance test started OK");
 
-                    // Wait for the task to complete.
-                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting conformance task completion");
-                    await conformanceTest;
-                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance task completed");
-
-                    conformLogger.MessageLogChanged -= OutputChanged;
-                    conformLogger.StatusChanged -= StatusChanged;
+                        // Wait for the task to complete.
+                        conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting conformance task completion");
+                        await conformanceTest;
+                        conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance task completed");
+                    }
+                    finally
+                    {
+                        conformLogger.MessageLogChanged -= OutputChanged;
+                        conformLogger.StatusChanged -= StatusChanged;
+                    }
                 }
             }
             conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting Scroll to bottom");
@@ -152,7 +164,7 @@ string statusMessage = "Linux build";
         finally
         {
             configuration.Settings.OperationInProgress = false;
-            configuration.RaiseConfigurationChangedEvent();
+            configuration.RaiseUiHasChangedEvent();
             StateHasChanged();
             await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
         }
@@ -248,6 +260,8 @@ string statusMessage = "Linux build";
             {
                 Console.WriteLine("Index.Razor.Dispos() has been called...");
                 listener.OnResized -= WindowResized;
+                configuration.UiHasChanged -= OnUiHasChanged;
+
             }
 
             disposedValue = true;
