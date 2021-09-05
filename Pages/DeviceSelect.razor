@@ -47,12 +47,12 @@ else
 
         @* Alpaca device search tab *@
         <RadzenTabsItem Text="Alpaca Devices">
-            <RadzenCard Style="margin-bottom: 20px; min-height: 120px; width: fit-content; height: fit-content; margin-right: 20px; overflow: auto;">
+            <RadzenCard Style="margin-bottom: 20px; min-height: 120px; margin-right: 20px; overflow: auto;">
 
                 <div class="row">
 
                     @* Alpaca device selection radio buttons *@
-                    <RadzenCard Style="width:600px; margin-bottom: 20px; min-height:155px;  height:fit-content; margin-right: 20px; overflow: auto;">
+                    <RadzenCard Style="margin-bottom: 20px; min-height:155px;  height:fit-content; margin-right: 20px; overflow: auto;">
                         <h3 style="color: #479cc8; margin-bottom:-4px">Automatically Discovered Devices</h3>
                         <RadzenRadioButtonList @bind-Value=@ascomDevice
                                                Orientation="Orientation.Vertical"
@@ -65,7 +65,7 @@ else
                     </RadzenCard>
 
                     @* Alpaca discovery progress information *@
-                    <RadzenCard Style="width: 600px; margin-bottom: 20px; height: stretch">
+                    <RadzenCard Style="width: 500px; margin-bottom: 20px; height: stretch">
                         <h3 style="color: #479cc8; margin-bottom:10px">Discovery Status</h3>
                         <RadzenTextArea Style="line-height:1.5; height: stretch;"
                                         Cols="300"
@@ -134,7 +134,7 @@ else
             <div class="row">
 
                 @* COM device selection radio buttons *@
-                <RadzenCard Style="width:900px; margin-bottom: 20px; height:fit-content; margin-right: 20px; overflow: auto;">
+                <RadzenCard Style="margin-bottom: 20px; height:fit-content; margin-right: 20px; overflow: auto;">
 
                     <RadzenRadioButtonList @bind-Value=@comDevice
                                            Orientation="Orientation.Vertical"

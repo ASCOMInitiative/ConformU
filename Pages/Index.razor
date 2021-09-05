@@ -58,6 +58,16 @@ string statusMessage = "Linux build";
         conformLogger.Debug = configuration.Settings.Debug;
     }
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Subscribe to the OnResized event. This will do work when the browser is resized.
+            listener.OnResized += WindowResized;
+            ResizeLogWindow();
+        }
+    }
+
     async void StartTest(string buttonName)
     {
         try
@@ -198,16 +208,6 @@ string statusMessage = "Linux build";
         conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
         WindowResized(new object(), blazorProWindowSize);
         conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // Subscribe to the OnResized event. This will do work when the browser is resized.
-            listener.OnResized += WindowResized;
-            ResizeLogWindow();
-        }
     }
 
     // This method will be called when the window resizes.

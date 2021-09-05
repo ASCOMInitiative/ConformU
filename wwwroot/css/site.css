@@ -1,11 +1,23 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
-/* Override the Radzen small screen size font incr4ease to 1 rem */
+/* Override the Radzen small screen size font increase to 1 rem */
 @media (max-width: 768px) {
-    .rz-colorpicker, .rz-lookup-search input, .rz-spinner, .rz-calendar .rz-inputtext, .rz-multiselect, .rz-dropdown, .mask, .rz-textarea, .rz-textbox,
+    .rz-colorpicker, .rz-lookup-search input, .rz-spinner, .rz-calendar .rz-inputtext, .rz-multiselect, .rz-dropdown, .mask, .rz-textarea, .rz-textbox, .rz-radiobutton-label, .label,
     input {
-        font-size: 0.875rem;
+        font-size: 0.8rem;
     }
+}
+
+/* Set a smaller font for labels when on small devices */
+@media (max-width: 768px) {
+    label, p, h3 {
+        font-size: 0.8rem;
+    }
+}
+
+/* Make tabs flow round top multiple lines at small screen sizes */
+ul[role=tablist] {
+    flex-wrap: wrap;
 }
 
 @font-face {
@@ -222,10 +234,5 @@ app {
     .sidebar .collapse {
         /* Never collapse the sidebar for wide screens */
         display: block;
-    }
-
-    /* Radzen table ordering */
-    ul[role=tablist] {
-        flex-wrap: wrap;
     }
 }

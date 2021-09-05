@@ -30,7 +30,7 @@
         @*Conform configuration*@
         <RadzenTabsItem Text="Conform">
             <div class="row" style="margin-top:@topMargin;">
-                <RadzenCard Style="width:300px; margin-bottom: 20px; height:270px; margin-right: 20px">
+                <RadzenCard Style="margin-bottom: 20px; margin-right: 20px">
                     <h3 style="color: #479cc8; margin-bottom: 0;">Test Scope</h3>
                     <RadzenCheckBoxList @bind-Value=@conformanceTestScope TValue="int" Orientation="Orientation.Vertical" Change=@(args => OnConformTestScopeChange(args))>
                         <Items>
@@ -43,7 +43,7 @@
                     </RadzenCheckBoxList>
                 </RadzenCard>
 
-                <RadzenCard Style="width:410px; margin-bottom:20px;height:270px; margin-right: 20px">
+                <RadzenCard Style="margin-bottom:20px;margin-right: 20px">
                     <h3 style="color: #479cc8; margin-bottom: 0;">Operation</h3>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Style="margin-top:6px;" Name="CHKUPDATES" @bind-Value=@chkUpdates TValue="bool" Change=@(args =>
@@ -61,7 +61,7 @@
                     </div>
                 </RadzenCard>
 
-                <RadzenCard Style="width:300px; margin-bottom:20px;height:270px;">
+                <RadzenCard Style="margin-bottom:20px">
                     <h3 style="color: #479cc8; margin-bottom: 0;">Additional Tracing</h3>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKTRACEDISCOVERY"
@@ -210,7 +210,7 @@
         @*Telescope configuration*@
         <RadzenTabsItem Text="Telescope">
             <div class="row">
-                <RadzenCard Style="margin-left: 10px;padding-bottom:5px">
+                <RadzenCard Style="margin-left: 10px;padding-bottom:5px;margin-right: 10px;margin-bottom: 20px">
                     <h3 style="margin-top: 5px; color: #479cc8">Select which tests Conform should perform.</h3>
 
                     <div class="row" style="margin-top:0px;">
@@ -232,7 +232,7 @@
                     </RadzenCheckBoxList>
                 </RadzenCard>
 
-                <RadzenCard Style="margin-left: 20px">
+                <RadzenCard Style="margin-left: 10px">
                     <h3 style="margin-top: 5px; color: #479cc8">Further configuration.</h3>
                     <div class="row">
 
