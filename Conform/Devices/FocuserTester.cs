@@ -745,7 +745,7 @@ namespace ConformU
 
             // Wait for asynchronous move to finish
             LogCallToDriver(testName, "About to get IsMoving and Position properties repeatedly");
-            while (m_Focuser.IsMoving & (!cancellationToken.IsCancellationRequested))
+            while (m_Focuser.IsMoving & !cancellationToken.IsCancellationRequested)
             {
                 if (m_AbsolutePositionOK)
                     Status(StatusType.staStatus, "Waiting for asynchronous move to complete, Position: " + m_Focuser.Position + " / " + m_PositionOrg);
@@ -788,7 +788,7 @@ namespace ConformU
                 {
                     Status(StatusType.staStatus, "Waiting for asynchronous move to complete");
                     LogCallToDriver(testName, "About to get IsMoving and Position properties repeatedly");
-                    while ((m_Focuser.IsMoving & (!cancellationToken.IsCancellationRequested)))
+                    while (m_Focuser.IsMoving & !cancellationToken.IsCancellationRequested)
                     {
                         if (m_AbsolutePositionOK)
                             Status(StatusType.staStatus, "Waiting for asynchronous move to complete, Position: " + m_Focuser.Position + " / " + newPosition);

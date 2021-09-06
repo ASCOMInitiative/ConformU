@@ -57,8 +57,6 @@ namespace ConformU
 
         #endregion
 
-
-
         public new void CheckInitialise()
         {
             // Set the error type numbers according to the standards adopted by individual authors.

@@ -2553,11 +2553,10 @@ namespace ConformU
                                             do
                                             {
                                                 WaitFor(SLEEP_TIME);
-                                                //Application.DoEvents();
-                                                if (settings.DisplayMethodCalls)
-                                                    LogTestAndMessage("UnPark", "About to get AtPark property");
+                                                if (settings.DisplayMethodCalls) LogTestAndMessage("UnPark", "About to get AtPark property");
                                             }
                                             while (telescopeDevice.AtPark & !cancellationToken.IsCancellationRequested);
+
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
                                             try // Make sure tracking doesn't generate an error if it is not implemented
@@ -3811,8 +3810,7 @@ namespace ConformU
 
                     case SlewSyncType.SlewToCoordinatesAsync:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to get Tracking property");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
                                 if (settings.DisplayMethodCalls)
@@ -3823,10 +3821,12 @@ namespace ConformU
                             m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
                             m_TargetDeclination = 2.0d;
                             Status(StatusType.staAction, "Slewing");
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
+
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
                             telescopeDevice.SlewToCoordinatesAsync(m_TargetRightAscension, m_TargetDeclination);
+                            if (settings.DisplayMethodCalls) LogDebug(p_Name, $"Asynchronous slew initiated");
                             WaitForSlew(p_Name);
+                            if (settings.DisplayMethodCalls) LogDebug(p_Name, $"Slew completed");
                             break;
                         }
 
@@ -6786,12 +6786,11 @@ namespace ConformU
         private void CheckScopePosition(string testName, string functionName, double expectedRA, double expectedDec)
         {
             double actualRA, actualDec, difference;
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage(testName, "About to get RightAscension property");
+            if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to get RightAscension property");
             actualRA = telescopeDevice.RightAscension;
             LogDebug(testName, "Read RightAscension: " + FormatRA(actualRA));
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage(testName, "About to get Declination property");
+
+            if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to get Declination property");
             actualDec = telescopeDevice.Declination;
             LogDebug(testName, "Read Declination: " + FormatDec(actualDec));
 
@@ -6838,8 +6837,8 @@ namespace ConformU
         private static double RaDifferenceInSeconds(double FirstRA, double SecondRA)
         {
             double RaDifferenceInSecondsRet = Math.Abs(FirstRA - SecondRA); // Calculate the difference allowing for negative outcomes
-            if (RaDifferenceInSecondsRet > 12.0d)
-                RaDifferenceInSecondsRet = 24.0d - RaDifferenceInSecondsRet; // Deal with the cases where the two elements are more than 12 hours apart going in the initial direction
+            if (RaDifferenceInSecondsRet > 12.0d) RaDifferenceInSecondsRet = 24.0d - RaDifferenceInSecondsRet; // Deal with the cases where the two elements are more than 12 hours apart going in the initial direction
+
             RaDifferenceInSecondsRet = Math.Round(RaDifferenceInSecondsRet * 15.0d * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero); // RA difference is in arc seconds from hours of RA
             return RaDifferenceInSecondsRet;
         }
@@ -6966,14 +6965,12 @@ namespace ConformU
             do
             {
                 WaitFor(SLEEP_TIME);
-                //My.MyProject.Forms.FrmConformMain.staStatus.Text = "Slewing";
-                //Application.DoEvents();
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage(testName, "About to get Slewing property");
+                Status(StatusType.staStatus, $"- {DateTime.Now.Subtract(WaitStartTime).TotalSeconds:0.0} seconds");
+
+                if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to get Slewing property");
             }
-            //while (telescopeDevice.Slewing & (DateTime.Now.Subtract(WaitStartTime).TotalSeconds < WAIT_FOR_SLEW_MINIMUM_DURATION) & !TestStop());
-            while (telescopeDevice.Slewing & (DateTime.Now.Subtract(WaitStartTime).TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION) & !cancellationToken.IsCancellationRequested);
-            //My.MyProject.Forms.FrmConformMain.staStatus.Text = "Slew completed";
+            while ((telescopeDevice.Slewing | (DateTime.Now.Subtract(WaitStartTime).TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION)) & !cancellationToken.IsCancellationRequested);
+            Status(StatusType.staAction, "Slew completed");
         }
 
         private double TelescopeRAFromHourAngle(string testName, double p_Offset)

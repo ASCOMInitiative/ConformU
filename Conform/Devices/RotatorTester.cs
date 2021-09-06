@@ -210,7 +210,7 @@ namespace ConformU
                     WaitFor(500);
                     Status(StatusType.staStatus, DateTime.Now.Subtract(l_Now).TotalSeconds + "/" + ROTATOR_WAIT_LIMIT);
                 }
-                while (m_Rotator.IsMoving & DateTime.Now.Subtract(l_Now).TotalSeconds <= ROTATOR_WAIT_LIMIT);
+                while (m_Rotator.IsMoving & (DateTime.Now.Subtract(l_Now).TotalSeconds <= ROTATOR_WAIT_LIMIT));
                 if (!m_Rotator.IsMoving) // Rotator is stopped so OK
                 {
      // Clear stop flag to allow other tests to run

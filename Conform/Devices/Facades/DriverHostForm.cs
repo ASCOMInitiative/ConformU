@@ -85,7 +85,7 @@ namespace ConformU
                         logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
 
                     }
-                    while (remainingObjectCount > 0 & loopCount <= 20);
+                    while ((remainingObjectCount > 0) & (loopCount <= 20));
                 }
                 catch (Exception ex)
                 {

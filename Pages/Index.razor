@@ -10,22 +10,21 @@
 @* Radzen notification service to enable pop-up alerts *@
 @inject NotificationService notificationService
 
-<div>
-    <h1>Welcome to Conform Universal!</h1>
-
+    <h1 style="display: @statusVisible">Welcome to Conform Universal!</h1>
     <div>
+
         <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" Disabled=@configuration.Settings.OperationInProgress />
         <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Style="margin-bottom: 20px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
-        <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:20px; margin-right:20px" @bind-Value=@statusMessage />
     </div>
-
-    <h4>Conform Log</h4>
-    <RadzenTextArea Id="ConformLog" Style="line-height: 18px; padding-bottom: 0px" Name="ScreenLog" @bind-Value=@screenLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
-
+<div style="display :@statusVisible">
+    <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:20px; margin-right:20px" @bind-Value=@statusMessage />
 </div>
 
-@code {
+<h4>Conform Log</h4>
+<RadzenTextArea Id="ConformLog" Style="line-height: 18px; padding-bottom: 0px" Name="ScreenLog" @bind-Value=@screenLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
 
+@code {
+    private string statusVisible = "initial";
     private bool disposedValue;
     int screenLogRows = 10;
     string screenLog = "Conform log.";
@@ -180,6 +179,7 @@ string statusMessage = "Linux build";
         {
             screenLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
         }
+        await InvokeAsync(StateHasChanged);
         await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
     }
 
@@ -223,6 +223,11 @@ string statusMessage = "Linux build";
             BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ConformLog");
 
             screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 2;
+
+            // Hide the status field at small heights
+            if (window.Height < 600) statusVisible = "none";
+            else statusVisible = "initial";
+
             string browser = "";
             browser = await JS.InvokeAsync<string>(identifier: "IdentifyBrowser");
 

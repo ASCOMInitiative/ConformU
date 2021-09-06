@@ -206,7 +206,8 @@ app {
         top: 0.5rem;
     }
 
-@media (max-width: 767.98px) and (orientation: portrait), (max-height: 768px) and (orientation: landscape) {
+/* @media (max-width: 767.98px) and (orientation: portrait), (max-height: 768px) and (orientation: landscape) { */
+@media (max-width: 767.98px) {
     .main .top-row:not(.auth) {
         display: none;
     }
@@ -220,7 +221,8 @@ app {
     }
 }
 
-@media (min-width: 768px) and (orientation: portrait), (min-height: 768px) and (orientation: landscape) {
+/*@media (min-width: 768px) and (orientation: portrait), (min-height: 768px) and (orientation: landscape) { */
+@media (min-width: 768px) {
     app {
         flex-direction: row;
     }

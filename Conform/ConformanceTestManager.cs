@@ -333,6 +333,7 @@ namespace ConformU
                     TL.LogMessage("WriteResultsFile", MessageLevel.Error, ex.ToString());
                 }
 
+                TL.SetStatusMessage("Conformance test complete");
             }
             catch (Exception ex)
             {

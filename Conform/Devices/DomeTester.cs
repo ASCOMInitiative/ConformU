@@ -223,7 +223,7 @@ namespace ConformU
                             {
                                 l_V2 = int.Parse(l_VString[1..l_VStringPtr]); // Extract the number
                                 l_VString = l_VString[(l_VStringPtr + 1)..]; // Get the third version number part
-                                                                                   // Find the next non numeric character
+                                                                             // Find the next non numeric character
                                 l_VStringPtr = 0;
                                 do
                                     l_VStringPtr += 1;
@@ -232,7 +232,7 @@ namespace ConformU
                                 if (l_VStringPtr > 1)
                                 {
                                     l_V3 = System.Convert.ToInt32(l_VString[1..l_VStringPtr]); // Extract the number
-                                                                                                             // Turn the version parts into a whole number
+                                                                                               // Turn the version parts into a whole number
                                     l_V1 = l_V1 * 1000000 + l_V2 * 1000 + l_V3;
                                     if (l_V1 < 5000007)
                                     {
@@ -471,7 +471,9 @@ namespace ConformU
                 }
             }
             else
+            {
                 LogOK(p_Name + " " + p_Altitude, "Can't read Slewing so assume synchronous slew OK");
+            }
             DomeStabliisationWait();
         }
         private void DomeSlewToAzimuth(string p_Name, double p_Azimuth)
@@ -516,7 +518,7 @@ namespace ConformU
                 WaitFor(SLEEP_TIME);
                 Status(StatusType.staStatus, "Slewing Status: " + domeDevice.Slewing + ", Timeout: " + DateTime.Now.Subtract(l_StartTime).TotalSeconds.ToString("#0") + "/" + p_TimeOut + ", press stop to abandon wait");
             }
-            while (domeDevice.Slewing & !cancellationToken.IsCancellationRequested & (DateTime.Now.Subtract(l_StartTime).TotalSeconds <= p_TimeOut));
+            while ((domeDevice.Slewing | (DateTime.Now.Subtract(l_StartTime).TotalSeconds <= p_TimeOut)) & !cancellationToken.IsCancellationRequested);
 
             Status(StatusType.staStatus, "");
             if ((DateTime.Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut))
@@ -1406,7 +1408,7 @@ namespace ConformU
             // Wait for shutter to reach required stats or user presses stop or timeout occurs
             // Returns true if required state is reached
             ShutterState l_ShutterState;
-            bool domeShutterWait = false;
+            bool returnValue = false;
             l_StartTime = DateTime.Now;
             try
             {
@@ -1417,10 +1419,11 @@ namespace ConformU
                     l_ShutterState = domeDevice.ShutterStatus;
                     Status(StatusType.staStatus, "Shutter State: " + l_ShutterState.ToString() + " Timeout: " + DateTime.Now.Subtract(l_StartTime).Seconds + "/" + settings.DomeShutterTimeout);
                 }
-                while (!(l_ShutterState == p_RequiredStatus) & !cancellationToken.IsCancellationRequested & (DateTime.Now.Subtract(l_StartTime).TotalSeconds <= settings.DomeShutterTimeout));
+                while (((l_ShutterState != p_RequiredStatus) | (DateTime.Now.Subtract(l_StartTime).TotalSeconds < settings.DomeShutterTimeout)) & !cancellationToken.IsCancellationRequested);
+
                 LogCallToDriver("DomeShutterWait", "About to get ShutterStatus property");
-                if ((domeDevice.ShutterStatus == p_RequiredStatus))
-                    domeShutterWait = true; // All worked so return True
+                if ((domeDevice.ShutterStatus == p_RequiredStatus)) returnValue = true; // All worked so return True
+
                 if ((DateTime.Now.Subtract(l_StartTime).TotalSeconds > settings.DomeShutterTimeout))
                     LogIssue("DomeShutterWait", "Timed out waiting for shutter to reach state: " + p_RequiredStatus.ToString() + ", consider increasing the timeout setting in Options / Conformance Options");
             }
@@ -1429,7 +1432,7 @@ namespace ConformU
                 LogIssue("DomeShutterWait", "Unexpected exception: " + ex.ToString());
             }
 
-            return domeShutterWait;
+            return returnValue;
         }
         private void DomePerformanceTest(DomePropertyMethod p_Type, string p_Name)
         {
@@ -1537,7 +1540,7 @@ namespace ConformU
             Status(StatusType.staStatus, ""); // Clear status field
             for (double i = 1.0; i <= settings.DomeStabilisationWaitTime; i++)
             {
-                Status(StatusType.staAction, "Waiting for Dome to stabilise - " + System.Convert.ToString(i) + "/" + settings.DomeStabilisationWaitTime + " seconds");
+                Status(StatusType.staAction, $"Waiting for Dome to stabilise - {i} / {settings.DomeStabilisationWaitTime} seconds");
                 WaitFor(1000); // Wait for 1 second
             }
         }

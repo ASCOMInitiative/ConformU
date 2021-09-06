@@ -762,12 +762,15 @@ namespace ConformU
                 case StatusType.staTest:
                     {
                         test = message;
+                        action = "";
+                        status = "";
                         break;
                     }
 
                 case StatusType.staAction:
                     {
                         action = message;
+                        status = "";
                         break;
                     }
 

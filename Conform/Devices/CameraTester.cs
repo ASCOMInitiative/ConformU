@@ -2554,13 +2554,13 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
                                 do
                                 {
-                                    l_PercentCompletedMessage = "Not present in a V1 driver";
+                                    l_PercentCompletedMessage = "Not present in a V1 driver"; // Initialise PercentCompleted message
                                     if (m_Camera.InterfaceVersion > 1)
                                     {
                                         try
                                         {
                                             l_PercentCompleted = m_Camera.PercentCompleted;
-                                            l_PercentCompletedMessage = l_PercentCompleted.ToString();
+                                            l_PercentCompletedMessage = l_PercentCompleted.ToString(); // Operation completed OK
                                         }
                                         catch (COMException ex)
                                         {
@@ -2568,34 +2568,34 @@ namespace ConformU
                                             {
                                                 case int i when i == ErrorCodes.NotImplemented:
                                                     {
-                                                        l_PercentCompletedMessage = "COM - Not implemented";
+                                                        l_PercentCompletedMessage = "COM - Not implemented"; // Not implemented
                                                         break;
                                                     }
 
                                                 case int j when j == ErrorCodes.InvalidOperationException:
                                                     {
-                                                        l_PercentCompletedMessage = "COM - Invalid operation";
+                                                        l_PercentCompletedMessage = "COM - Invalid operation"; // Not valid at this time
                                                         break;
                                                     }
 
                                                 default:
                                                     {
-                                                        l_PercentCompletedMessage = "COM - Exception: " + ex.Message + " 0x" + ex.ErrorCode.ToString("X8");
+                                                        l_PercentCompletedMessage = "COM - Exception: " + ex.Message + " 0x" + ex.ErrorCode.ToString("X8"); // Something bad happened!
                                                         break;
                                                     }
                                             }
                                         }
                                         catch (ASCOM.InvalidOperationException)
                                         {
-                                            l_PercentCompletedMessage = ".NET - Invalid operation";
+                                            l_PercentCompletedMessage = ".NET - Invalid operation"; // Not valid at this time
                                         }
                                         catch (PropertyNotImplementedException)
                                         {
-                                            l_PercentCompletedMessage = "Not implemented";
+                                            l_PercentCompletedMessage = "Not implemented"; // Not implemented
                                         }
                                         catch (Exception ex)
                                         {
-                                            l_PercentCompletedMessage = "Exception: " + ex.Message;
+                                            l_PercentCompletedMessage = "Exception: " + ex.Message; // Something bad happened!
                                         }
                                     }
 
@@ -2603,8 +2603,7 @@ namespace ConformU
                                     WaitFor(CAMERA_SLEEP_TIME);
                                     if (cancellationToken.IsCancellationRequested) return;
                                 }
-                                while (m_Camera.CameraState == CameraState.Exposing)// Initialise PercentCompleted message// Operation completed OK// Not implemented// Not valid at this time// Something bad happened!// Not valid at this time// Not implemented// Something bad happened!
-    ;
+                                while (m_Camera.CameraState == CameraState.Exposing);
 
                                 // Wait for camera to become idle
                                 l_EndTime = DateTime.Now;
