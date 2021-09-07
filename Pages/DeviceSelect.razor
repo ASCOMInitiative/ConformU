@@ -74,7 +74,7 @@
 
                     <RadzenButton Style="width: 150px; margin-left: 20px; margin-right:20px"
                                   Text="Rediscover"
-                                  Disabled=@(discoveryInProgress | !configuration.Settings.AlpacaConfiguration.DiscoveryEnabled)
+                                  Disabled=@(discoveryInProgress | !configuration.Settings.AlpacaConfiguration.DiscoveryEnabled | (selectedDeviceTypeString == DeviceType.Video.ToString()))
                                   Click=@(args => OnAlpacaSearchClick()) />
                     @if (!configuration.Settings.AlpacaConfiguration.DiscoveryEnabled)
                     {
@@ -479,7 +479,7 @@
 
     private void StartDiscovery()
     {
-        if (configuration.Settings.AlpacaConfiguration.DiscoveryEnabled)
+        if (configuration.Settings.AlpacaConfiguration.DiscoveryEnabled & (selectedDeviceTypeString != DeviceType.Video.ToString()))
         {
 
             configuration.Settings.OperationInProgress = true;
