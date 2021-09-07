@@ -238,6 +238,20 @@
                                      Component="TELEFIRSTUSETESTS"
                                      Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
                     </div>
+
+                    <div class="row">
+                        <RadzenNumeric Name="TELESCOPESLEWTOLERANCE"
+                                       Style="margin-top: 20px; width: 6em"
+                                       Format="0.00"
+                                       @bind-Value="@telescopeSlewTolerance"
+                                       TValue="double"
+                                       Min="0.0m"
+                                       Step="0.1"
+                                       Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.TelescopeSlewTolerance)) />
+                        <RadzenLabel Text="Telescope slew tolerance (degrees))"
+                                     Component="TELESCOPESLEWTOLERANCE"
+                                     Style="margin-left: 20px;margin-top:26px; margin-right: 20px" />
+                    </div>
                 </RadzenCard>
             </div>
         </RadzenTabsItem>
@@ -299,6 +313,20 @@
                 <RadzenLabel Text="Weather safety - Allow dome to open during testing." Component="CHKOPENSHUTTER" Style="margin-left: 5px;" />
             </div>
 
+            <div class="row">
+                <RadzenNumeric Name="DOMESLEWTOLERANCE"
+                               Style="margin-top:20px; width: 6em"
+                               Format="0.00"
+                               @bind-Value="@domeSlewTolerance"
+                               TValue="double"
+                               Min="0.0m"
+                               Step="0.1"
+                               Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.DomeSlewtolerance)) />
+                <RadzenLabel Text="Dome slew tolerance (degrees))"
+                             Component="DOMESLEWTOLERANCE"
+                             Style="margin-left: 20px;margin-top:20px; margin-right: 26px" />
+            </div>
+
         </RadzenTabsItem>
 
         @*ObservingConditions  configuration*@
@@ -348,6 +376,8 @@
 </RadzenTabs>
 
 @code {
+    double telescopeSlewTolerance;
+    double domeSlewTolerance;
     bool alpacaDiscoveryEnabled = true;
     string alpacaAndComText;
     bool strictCasing;
@@ -366,6 +396,7 @@
 
     const string topMargin = "10px";
     private bool isWindowsOs;
+
     private enum NumericConfigurationItem
     {
         CameraMaxBinX,
@@ -382,7 +413,9 @@
         AlpacaNumberOfDiscoveryPolls,
         AlpacaDiscoveryPollInterval,
         AlpacaDiscoveryPort,
-        AlpacaDiscoveryDuration
+        AlpacaDiscoveryDuration,
+        TelescopeSlewTolerance,
+        DomeSlewtolerance
     }
 
     private enum CheckBoxConfigurationItem
@@ -486,6 +519,14 @@
 
             case NumericConfigurationItem.AlpacaDiscoveryPollInterval:
                 configuration.Settings.AlpacaConfiguration.DiscoveryPollInterval = newValue;
+                break;
+
+            case NumericConfigurationItem.TelescopeSlewTolerance:
+                configuration.Settings.TelescopeSlewTolerance = newValue;
+                break;
+
+            case NumericConfigurationItem.DomeSlewtolerance:
+                configuration.Settings.DomeSlewTolerance = newValue;
                 break;
 
             default:
@@ -602,6 +643,7 @@
             if (item.Value) ((List<string>)telescopeTests).Add(item.Key);
         }
         telescopeFirstUseTests = configuration.Settings.TelescopeFirstUseTests;
+        telescopeSlewTolerance = configuration.Settings.TelescopeSlewTolerance;
 
         // Camera tests
         cameraTestMaxBinX = configuration.Settings.CameraMaxBinX;
@@ -614,6 +656,7 @@
         domeAltitudeTimeout = configuration.Settings.DomeAltitudeTimeout;
         domeStabilisationWaitTime = configuration.Settings.DomeStabilisationWaitTime;
         domeOpenShutter = configuration.Settings.DomeOpenShutter;
+        domeSlewTolerance = configuration.Settings.DomeSlewTolerance;
 
         // ObservingConditions tests
         observingConditionsMaxRetries = configuration.Settings.ObservingConditionsMaxRetries;
@@ -824,7 +867,5 @@
     }
 
     #endregion
-
-
 
 }

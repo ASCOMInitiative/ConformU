@@ -14,6 +14,7 @@ namespace ConformU
         const double DOME_ILLEGAL_ALTITUDE_HIGH = 100.0; // Illegal value to test dome driver exception generation
         const double DOME_ILLEGAL_AZIMUTH_LOW = -10.0; // Illegal value to test dome driver exception generation
         const double DOME_ILLEGAL_AZIMUTH_HIGH = 370.0; // Illegal value to test dome driver exception generation
+        const double DOME_SLEW_TOLERANCE = 1.0; // position tolerance that is accepted as OK (degrees)
 
         // Dome variables
         private bool m_CanSetAltitude, m_CanSetAzimuth, m_CanSetShutter, m_CanSlave, m_CanSyncAzimuth, m_Slaved;
@@ -356,24 +357,15 @@ namespace ConformU
         }
         public override void CheckMethods()
         {
-            DomeMandatoryTest(DomePropertyMethod.AbortSlew, "AbortSlew"); if (cancellationToken.IsCancellationRequested)
-                return;
-            DomeOptionalTest(DomePropertyMethod.SlewToAltitude, MemberType.Method, "SlewToAltitude"); if (cancellationToken.IsCancellationRequested)
-                return;
-            DomeOptionalTest(DomePropertyMethod.SlewToAzimuth, MemberType.Method, "SlewToAzimuth"); if (cancellationToken.IsCancellationRequested)
-                return;
-            DomeOptionalTest(DomePropertyMethod.SyncToAzimuth, MemberType.Method, "SyncToAzimuth"); if (cancellationToken.IsCancellationRequested)
-                return;
-            DomeOptionalTest(DomePropertyMethod.CloseShutter, MemberType.Method, "CloseShutter"); if (cancellationToken.IsCancellationRequested)
-                return;
-            DomeOptionalTest(DomePropertyMethod.OpenShutter, MemberType.Method, "OpenShutter"); if (cancellationToken.IsCancellationRequested)
-                return;
-            DomeOptionalTest(DomePropertyMethod.FindHome, MemberType.Method, "FindHome"); if (cancellationToken.IsCancellationRequested)
-                return;
-            DomeOptionalTest(DomePropertyMethod.Park, MemberType.Method, "Park"); if (cancellationToken.IsCancellationRequested)
-                return;
-            DomeOptionalTest(DomePropertyMethod.SetPark, MemberType.Method, "SetPark"); if (cancellationToken.IsCancellationRequested)
-                return; // SetPark must follow Park
+            DomeMandatoryTest(DomePropertyMethod.AbortSlew, "AbortSlew"); if (cancellationToken.IsCancellationRequested) return;
+            DomeOptionalTest(DomePropertyMethod.SlewToAltitude, MemberType.Method, "SlewToAltitude"); if (cancellationToken.IsCancellationRequested) return;
+            DomeOptionalTest(DomePropertyMethod.SlewToAzimuth, MemberType.Method, "SlewToAzimuth"); if (cancellationToken.IsCancellationRequested) return;
+            DomeOptionalTest(DomePropertyMethod.SyncToAzimuth, MemberType.Method, "SyncToAzimuth"); if (cancellationToken.IsCancellationRequested) return;
+            DomeOptionalTest(DomePropertyMethod.CloseShutter, MemberType.Method, "CloseShutter"); if (cancellationToken.IsCancellationRequested) return;
+            DomeOptionalTest(DomePropertyMethod.OpenShutter, MemberType.Method, "OpenShutter"); if (cancellationToken.IsCancellationRequested) return;
+            DomeOptionalTest(DomePropertyMethod.FindHome, MemberType.Method, "FindHome"); if (cancellationToken.IsCancellationRequested) return;
+            DomeOptionalTest(DomePropertyMethod.Park, MemberType.Method, "Park"); if (cancellationToken.IsCancellationRequested) return;
+            DomeOptionalTest(DomePropertyMethod.SetPark, MemberType.Method, "SetPark"); if (cancellationToken.IsCancellationRequested) return; // SetPark must follow Park
         }
         public override void CheckPerformance()
         {
@@ -450,8 +442,7 @@ namespace ConformU
 
         private void DomeSlewToAltitude(string p_Name, double p_Altitude)
         {
-            if (!settings.DomeOpenShutter)
-                LogInfo("SlewToAltitude", "You have configured Conform not to open the shutter so the following slew may fail.");
+            if (!settings.DomeOpenShutter) LogInfo("SlewToAltitude", "You have configured Conform not to open the shutter so the following slew may fail.");
 
             Status(StatusType.staAction, "Slew to " + p_Altitude + " degrees");
             LogCallToDriver(p_Name, "About to call SlewToAltitude");
@@ -461,8 +452,7 @@ namespace ConformU
                 LogCallToDriver(p_Name, "About to get Slewing property");
                 if (domeDevice.Slewing)
                 {
-                    DomeWaitForSlew(settings.DomeAltitudeTimeout); if (cancellationToken.IsCancellationRequested)
-                        return;
+                    DomeWaitForSlew(settings.DomeAltitudeTimeout); if (cancellationToken.IsCancellationRequested) return;
                     LogOK(p_Name + " " + p_Altitude, "Asynchronous slew OK");
                 }
                 else
@@ -475,6 +465,22 @@ namespace ConformU
                 LogOK(p_Name + " " + p_Altitude, "Can't read Slewing so assume synchronous slew OK");
             }
             DomeStabliisationWait();
+
+            // Check whether the reported altitude matches the requested altitude
+            if (m_CanReadAltitude)
+            {
+                LogCallToDriver(p_Name, "About to get Altitude property");
+                double altitude = domeDevice.Altitude;
+
+                if (Math.Abs(altitude - p_Altitude) <= settings.DomeSlewTolerance)
+                {
+                    LogOK(p_Name + " " + p_Altitude, $"Reached the required altitude: {p_Altitude:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported altitude: {altitude:0.0} degrees");
+                }
+                else
+                {
+                    LogIssue(p_Name + " " + p_Altitude, $"Failed to reach the required altitude: {p_Altitude:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported altitude: {altitude:0.0} degrees");
+                }
+            }
         }
         private void DomeSlewToAzimuth(string p_Name, double p_Azimuth)
         {
@@ -496,8 +502,7 @@ namespace ConformU
                 LogCallToDriver(p_Name, "About to get Slewing property");
                 if (domeDevice.Slewing)
                 {
-                    DomeWaitForSlew(settings.DomeAzimuthTimeout); if (cancellationToken.IsCancellationRequested)
-                        return;
+                    DomeWaitForSlew(settings.DomeAzimuthTimeout); if (cancellationToken.IsCancellationRequested) return;
                     LogOK(p_Name + " " + p_Azimuth, "Asynchronous slew OK");
                 }
                 else
@@ -506,8 +511,27 @@ namespace ConformU
                 }
             }
             else
+            {
                 LogOK(p_Name + " " + p_Azimuth, "Can't read Slewing so assume synchronous slew OK");
+            }
             DomeStabliisationWait();
+
+            // Check whether the reported azimuth matches the requested azimuth
+            if (m_CanReadAzimuth)
+            {
+                LogCallToDriver(p_Name, "About to get Azimuth property");
+                double azimuth = domeDevice.Azimuth;
+
+                if (Math.Abs(azimuth - p_Azimuth) <= settings.DomeSlewTolerance)
+                {
+                    LogOK(p_Name + " " + p_Azimuth, $"Reached the required azimuth: {p_Azimuth:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported azimuth: {azimuth:0.0}");
+                }
+                else
+                {
+                    LogIssue(p_Name + " " + p_Azimuth, $"Failed to reach the required azimuth: {p_Azimuth:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported azimuth: {azimuth:0.0}");
+                }
+            }
+
         }
         private void DomeWaitForSlew(double p_TimeOut)
         {
@@ -518,7 +542,7 @@ namespace ConformU
                 WaitFor(SLEEP_TIME);
                 Status(StatusType.staStatus, "Slewing Status: " + domeDevice.Slewing + ", Timeout: " + DateTime.Now.Subtract(l_StartTime).TotalSeconds.ToString("#0") + "/" + p_TimeOut + ", press stop to abandon wait");
             }
-            while ((domeDevice.Slewing | (DateTime.Now.Subtract(l_StartTime).TotalSeconds <= p_TimeOut)) & !cancellationToken.IsCancellationRequested);
+            while ((domeDevice.Slewing & (DateTime.Now.Subtract(l_StartTime).TotalSeconds <= p_TimeOut)) & !cancellationToken.IsCancellationRequested);
 
             Status(StatusType.staStatus, "");
             if ((DateTime.Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut))
@@ -999,14 +1023,14 @@ namespace ConformU
                                     try
                                     {
                                         DomeSlewToAltitude(p_Name, l_SlewAngle);
-                                        if (cancellationToken.IsCancellationRequested)
-                                            return;
+                                        if (cancellationToken.IsCancellationRequested) return;
                                     }
                                     catch (Exception ex)
                                     {
                                         HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "CanSetAltitude is True");
                                     }
                                 }
+
                                 // Test out of range values -10 and 100 degrees
                                 if (m_CanSetAltitude)
                                 {
@@ -1419,7 +1443,7 @@ namespace ConformU
                     l_ShutterState = domeDevice.ShutterStatus;
                     Status(StatusType.staStatus, "Shutter State: " + l_ShutterState.ToString() + " Timeout: " + DateTime.Now.Subtract(l_StartTime).Seconds + "/" + settings.DomeShutterTimeout);
                 }
-                while (((l_ShutterState != p_RequiredStatus) | (DateTime.Now.Subtract(l_StartTime).TotalSeconds < settings.DomeShutterTimeout)) & !cancellationToken.IsCancellationRequested);
+                while (((l_ShutterState != p_RequiredStatus) & (DateTime.Now.Subtract(l_StartTime).TotalSeconds < settings.DomeShutterTimeout)) & !cancellationToken.IsCancellationRequested);
 
                 LogCallToDriver("DomeShutterWait", "About to get ShutterStatus property");
                 if ((domeDevice.ShutterStatus == p_RequiredStatus)) returnValue = true; // All worked so return True

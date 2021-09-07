@@ -140,6 +140,7 @@ namespace ConformU
         public int CameraMaxBinX { get; set; } = 0;
         public int CameraMaxBinY { get; set; } = 0;
         public bool CameraFirstUseTests { get; set; } = true;
+        public double TelescopeSlewTolerance { get; set; } = 1.0; // Degrees
 
         // Dome test configuration
         public int DomeShutterTimeout { get; set; } = 240;
@@ -147,6 +148,7 @@ namespace ConformU
         public int DomeAltitudeTimeout { get; set; } = 240;
         public int DomeStabilisationWaitTime { get; set; } = 10;
         public bool DomeOpenShutter { get; set; } = false;
+        public double DomeSlewTolerance { get; set; } = 1.0; // Degrees
 
         // ObservingConditions test configuration
         public int ObservingConditionsRetryTime { get; set; } = 1;
@@ -171,7 +173,7 @@ namespace ConformU
         /// Output filename for the results file as specified on the command line
         /// </summary>
         internal string ResultsFileName { get; set; } = "";
-        
+
         #endregion
 
     }

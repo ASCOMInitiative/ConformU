@@ -3553,7 +3553,7 @@ namespace ConformU
                                         currentRA = telescopeDevice.TargetRightAscension;
                                         LogDebug(testName, string.Format("Current TargetRightAscension: {0}, Set TargetRightAscension: {1}", currentRA, syncRA));
                                         double raDifference;
-                                        raDifference = RaDifferenceInSeconds(syncRA, currentRA);
+                                        raDifference = RaDifferenceInArcSeconds(syncRA, currentRA);
                                         switch (raDifference)
                                         {
                                             case var @case when @case <= SLEW_SYNC_OK_TOLERANCE:  // Within specified tolerance
@@ -3805,6 +3805,7 @@ namespace ConformU
                             if (settings.DisplayMethodCalls)
                                 LogTestAndMessage(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
                             telescopeDevice.SlewToCoordinates(m_TargetRightAscension, m_TargetDeclination);
+                            LogDebug(p_Name, "Returned from SlewToCoordinates method");
                             break;
                         }
 
@@ -4033,7 +4034,7 @@ namespace ConformU
                                     actualRA = telescopeDevice.TargetRightAscension;
                                     LogDebug(p_Name, string.Format("Current TargetRightAscension: {0}, Set TargetRightAscension: {1}", actualRA, m_TargetRightAscension));
                                     double raDifference;
-                                    raDifference = RaDifferenceInSeconds(actualRA, m_TargetRightAscension);
+                                    raDifference = RaDifferenceInArcSeconds(actualRA, m_TargetRightAscension);
                                     switch (raDifference)
                                     {
                                         case var @case when @case <= SLEW_SYNC_OK_TOLERANCE:  // Within specified tolerance
@@ -4129,15 +4130,15 @@ namespace ConformU
                                             break;
                                         }
 
-                                    case var case3 when case3 <= 2.0d / 3600.0d: // 2 seconds
+                                    case var case3 when case3 <= settings.TelescopeSlewTolerance:
                                         {
-                                            LogOK(p_Name, "Slewed to within 2 seconds of Azimuth target: " + FormatAzimuth(m_TargetAzimuth) + " Actual Azimuth " + FormatAzimuth(l_ActualAzimuth));
+                                            LogInfo(p_Name, $"Slewed {l_Difference:0.0} degree(s) away from Azimuth target: {TelescopeTester.FormatAzimuth(m_TargetAzimuth)} Reported Azimuth: {TelescopeTester.FormatAzimuth(l_ActualAzimuth)}. Tolerance ±{settings.TelescopeSlewTolerance} degrees.");
                                             break;
                                         }
 
                                     default:
                                         {
-                                            LogInfo(p_Name, "Slewed to within " + FormatAzimuth(l_Difference) + " DD:MM:SS of expected Azimuth: " + FormatAzimuth(m_TargetAzimuth));
+                                            LogIssue(p_Name, $"Slewed {l_Difference:0.0} degree(s) away from Azimuth target: {TelescopeTester.FormatAzimuth(m_TargetAzimuth)} Reported Azimuth: {TelescopeTester.FormatAzimuth(l_ActualAzimuth)}. Tolerance ±{settings.TelescopeSlewTolerance} degrees.");
                                             break;
                                         }
                                 }
@@ -4151,15 +4152,15 @@ namespace ConformU
                                             break;
                                         }
 
-                                    case var case5 when case5 <= 2.0d / 3600.0d: // 2 seconds
+                                    case var case5 when case5 <= settings.TelescopeSlewTolerance:
                                         {
-                                            LogOK(p_Name, $"Slewed to within 2 seconds of Altitude target: {TelescopeTester.FormatAltitude(m_TargetAltitude)} Actual Altitude {TelescopeTester.FormatAltitude(l_ActualAltitude)}");
+                                            LogInfo(p_Name, $"Slewed {l_Difference:0.0} degree(s) away from Altitude target: {TelescopeTester.FormatAltitude(m_TargetAltitude)} Reported Altitude: {TelescopeTester.FormatAltitude(l_ActualAltitude)}. Tolerance ±{settings.TelescopeSlewTolerance} degrees.");
                                             break;
                                         }
 
                                     default:
                                         {
-                                            LogInfo(p_Name, $"Slewed to within {TelescopeTester.FormatAltitude(l_Difference)} DD:MM:SS of expected Altitude: { TelescopeTester.FormatAltitude(m_TargetAltitude)}");
+                                            LogIssue(p_Name, $"Slewed {l_Difference:0.0} degree(s) away from Altitude target: {TelescopeTester.FormatAltitude(m_TargetAltitude)} Reported Altitude: {TelescopeTester.FormatAltitude(l_ActualAltitude)}. Tolerance ±{settings.TelescopeSlewTolerance} degrees.");
                                             break;
                                         }
                                 } // Do nothing
@@ -6795,18 +6796,24 @@ namespace ConformU
             LogDebug(testName, "Read Declination: " + FormatDec(actualDec));
 
             // Check that we have actually arrived where we are expected to be
-            difference = RaDifferenceInSeconds(actualRA, expectedRA);
+            difference = RaDifferenceInArcSeconds(actualRA, expectedRA); // Convert RA difference to arc seconds
             switch (difference)
             {
-                case var @case when @case <= SLEW_SYNC_OK_TOLERANCE:  // Convert arc seconds to hours of RA
+                case var @case when @case <= SLEW_SYNC_OK_TOLERANCE: // 10 seconds 
                     {
-                        LogOK(testName, string.Format("{0} OK. RA:   {1}", functionName, FormatRA(expectedRA)));
+                        LogOK(testName, $"{functionName} OK. RA:   {FormatRA(expectedRA)}");
+                        break;
+                    }
+
+                case var @case when @case <= settings.TelescopeSlewTolerance * 3600.0:
+                    {
+                        LogInfo(testName, $"{functionName} {difference:0.0} arc seconds from the expected RA: {FormatRA(expectedRA)}. Reported RA: {FormatRA(actualRA)}. Tolerance: ±{settings.TelescopeSlewTolerance} degrees.");
                         break;
                     }
 
                 default:
                     {
-                        LogInfo(testName, string.Format("{0} within {1} arc seconds of expected RA: {2}, actual RA: {3}", functionName, difference.ToString("0.0"), FormatRA(expectedRA), FormatRA(actualRA)));
+                        LogIssue(testName, $"{functionName} {difference:0.0} arc seconds from the expected RA: {FormatRA(expectedRA)}. Reported RA: {FormatRA(actualRA)}. Tolerance: ±{settings.TelescopeSlewTolerance} degrees.");
                         break;
                     }
             }
@@ -6820,9 +6827,15 @@ namespace ConformU
                         break;
                     }
 
+                case var @case when @case <= settings.TelescopeSlewTolerance * 3600.0:
+                    {
+                        LogInfo(testName, $"{functionName} {difference:0.0} arc seconds from the expected DEC: {FormatDec(expectedDec)}. Reported DEC: {FormatDec(expectedDec)}. Tolerance: ±{settings.TelescopeSlewTolerance} degrees.");
+                        break;
+                    }
+
                 default:
                     {
-                        LogInfo(testName, string.Format("{0} within {1} arc seconds of expected DEC: {2}, actual DEC: {3}", functionName, difference.ToString("0.0"), FormatDec(expectedDec), FormatDec(actualDec)));
+                        LogIssue(testName, $"{functionName} {difference:0.0} arc seconds from the expected DEC: {FormatDec(expectedDec)}. Reported DEC: {FormatDec(expectedDec)}. Tolerance: ±{settings.TelescopeSlewTolerance} degrees.");
                         break;
                     }
             }
@@ -6834,7 +6847,7 @@ namespace ConformU
         /// <param name="FirstRA">First RA (hours)</param>
         /// <param name="SecondRA">Second RA (hours)</param>
         /// <returns>Difference (seconds) between the supplied RAs</returns>
-        private static double RaDifferenceInSeconds(double FirstRA, double SecondRA)
+        private static double RaDifferenceInArcSeconds(double FirstRA, double SecondRA)
         {
             double RaDifferenceInSecondsRet = Math.Abs(FirstRA - SecondRA); // Calculate the difference allowing for negative outcomes
             if (RaDifferenceInSecondsRet > 12.0d) RaDifferenceInSecondsRet = 24.0d - RaDifferenceInSecondsRet; // Deal with the cases where the two elements are more than 12 hours apart going in the initial direction
@@ -6969,7 +6982,7 @@ namespace ConformU
 
                 if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to get Slewing property");
             }
-            while ((telescopeDevice.Slewing | (DateTime.Now.Subtract(WaitStartTime).TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION)) & !cancellationToken.IsCancellationRequested);
+            while (telescopeDevice.Slewing & (DateTime.Now.Subtract(WaitStartTime).TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION) & !cancellationToken.IsCancellationRequested);
             Status(StatusType.staAction, "Slew completed");
         }
 
