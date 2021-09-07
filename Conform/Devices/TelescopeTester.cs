@@ -3780,30 +3780,30 @@ namespace ConformU
         {
             double l_Difference, l_ActualAltitude, l_ActualAzimuth, actualRA, actualDec;
             Status(StatusType.staTest, p_Name);
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage(p_Name, "About to set Tracking property to true");
             if (canSetTracking)
+            {
+                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set Tracking property to true");
                 telescopeDevice.Tracking = true; // Enable tracking for these tests
+            }
+
             try
             {
                 switch (p_Test)
                 {
                     case SlewSyncType.SlewToCoordinates:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to get Tracking property");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set Tracking property to true");
+                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
                             m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -1.0d);
                             m_TargetDeclination = 1.0d;
                             Status(StatusType.staAction, "Slewing");
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
+
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
                             telescopeDevice.SlewToCoordinates(m_TargetRightAscension, m_TargetDeclination);
                             LogDebug(p_Name, "Returned from SlewToCoordinates method");
                             break;
@@ -6975,14 +6975,16 @@ namespace ConformU
         {
             DateTime WaitStartTime;
             WaitStartTime = DateTime.Now;
+
+            if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to get Slewing property multiple times");
             do
             {
                 WaitFor(SLEEP_TIME);
                 Status(StatusType.staStatus, $"- {DateTime.Now.Subtract(WaitStartTime).TotalSeconds:0.0} seconds");
 
-                if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to get Slewing property");
             }
-            while (telescopeDevice.Slewing & (DateTime.Now.Subtract(WaitStartTime).TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION) & !cancellationToken.IsCancellationRequested);
+            // This while loop contains an OR because Conform needs to wait a short minimum period to deal with mounts that don't set Slewing to true immediately
+            while ((telescopeDevice.Slewing | (DateTime.Now.Subtract(WaitStartTime).TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION)) & !cancellationToken.IsCancellationRequested);
             Status(StatusType.staAction, "Slew completed");
         }
 
