@@ -97,15 +97,15 @@
                     <RadzenCard Style="margin-bottom: 20px; height: fit-content; margin-right: 20px">
                         <h3 style="color: #479cc8">Manual Alpaca device configuration</h3>
                         <div class="row">
-                            <RadzenTextBox @bind-Value=@manualIpAddress Style="margin-left: 20px" />
+                            <RadzenTextBox @bind-Value=@manualIpAddress Style="margin-left: 20px" Disabled=@(selectedDeviceTypeString == DeviceType.Video.ToString()) />
                             <RadzenLabel Text="IP address" Style="margin-left: 20px" />
                         </div>
                         <div style="margin-top:20px" class="row">
-                            <RadzenNumeric Style="margin-left: 20px" @bind-Value="manualPortNumber" TValue="int" Min="1" />
+                            <RadzenNumeric Style="margin-left: 20px" @bind-Value="manualPortNumber" TValue="int" Min="1" Disabled=@(selectedDeviceTypeString == DeviceType.Video.ToString()) />
                             <p style="margin-left: 20px;margin-top: 5px;">IP port number</p>
                         </div>
                         <div style="margin-top:20px" class="row">
-                            <RadzenNumeric Style="margin-left: 20px" @bind-Value="manualAlpacaDeviceNumber" TValue="int" Min="0" />
+                            <RadzenNumeric Style="margin-left: 20px" @bind-Value="manualAlpacaDeviceNumber" TValue="int" Min="0" Disabled=@(selectedDeviceTypeString == DeviceType.Video.ToString()) />
                             <p style="margin-left: 20px;margin-top: 5px; margin-right: 20px">Alpaca device number</p>
                         </div>
                     </RadzenCard>
@@ -156,32 +156,32 @@
 </RadzenTabs>
 
 @code {
-        const string MANUAL_DEVICE_NAME = "Manually configured device";
-        string manualIpAddress = "127.0.0.1";
-        int manualPortNumber = 11111;
-        int manualAlpacaDeviceNumber = 0;
+    const string MANUAL_DEVICE_NAME = "Manually configured device";
+    string manualIpAddress = "127.0.0.1";
+    int manualPortNumber = 11111;
+    int manualAlpacaDeviceNumber = 0;
 
-        AscomDevice ascomDevice;
-        ComDevice comDevice;
-        bool discoveryInProgress = false;
-        int statusBoxHeight = 0; // Number of rows in the status box list ==> Determnines the height of the box
-        List<string> validAscomdDeviceTypes = new() { DeviceType.Telescope.ToString(), DeviceType.Camera.ToString(), DeviceType.CoverCalibrator.ToString(), DeviceType.Dome.ToString(), DeviceType.FilterWheel.ToString(), DeviceType.Focuser.ToString(), DeviceType.ObservingConditions.ToString(), DeviceType.Rotator.ToString(), DeviceType.SafetyMonitor.ToString(), DeviceType.Switch.ToString(), DeviceType.Video.ToString() };
-        DeviceType selectedDeviceType; // DeviceType of the selected device
-        string selectedDeviceTypeString; // String representation of the currently selected DeviceType
-        string alpacaDiscoveryProgress; // Text describing events happening while Alpaca discovery is underway
-        AlpacaDiscovery discovery; // Alpaca discovery component
-        bool osIsWindows; // OS environment type
-        bool osIsNotWindows;
-        int selectedTabNumber = 0; // Current tab number 0 = Alpaca, 1 = COM
-        DeviceTechnology technologyType = DeviceTechnology.Alpaca; // Is the user selecting an Alpaca or a COM device?
+    AscomDevice ascomDevice;
+    ComDevice comDevice;
+    bool discoveryInProgress = false;
+    int statusBoxHeight = 0; // Number of rows in the status box list ==> Determnines the height of the box
+    List<string> validAscomdDeviceTypes = new() { DeviceType.Telescope.ToString(), DeviceType.Camera.ToString(), DeviceType.CoverCalibrator.ToString(), DeviceType.Dome.ToString(), DeviceType.FilterWheel.ToString(), DeviceType.Focuser.ToString(), DeviceType.ObservingConditions.ToString(), DeviceType.Rotator.ToString(), DeviceType.SafetyMonitor.ToString(), DeviceType.Switch.ToString(), DeviceType.Video.ToString() };
+    DeviceType selectedDeviceType; // DeviceType of the selected device
+    string selectedDeviceTypeString; // String representation of the currently selected DeviceType
+    string alpacaDiscoveryProgress; // Text describing events happening while Alpaca discovery is underway
+    AlpacaDiscovery discovery; // Alpaca discovery component
+    bool osIsWindows; // OS environment type
+    bool osIsNotWindows;
+    int selectedTabNumber = 0; // Current tab number 0 = Alpaca, 1 = COM
+    DeviceTechnology technologyType = DeviceTechnology.Alpaca; // Is the user selecting an Alpaca or a COM device?
 
-        List<AlpacaDeviceListItem> ascomDevices = new(); // List of discovered Alpaca devices for use in the Alpaca devices Radzen radio button list
-        List<ComDeviceListItem> comDeviceList = new(); // List of COM devices for use in the Radzen COM devices radio button list
+    List<AlpacaDeviceListItem> ascomDevices = new(); // List of discovered Alpaca devices for use in the Alpaca devices Radzen radio button list
+    List<ComDeviceListItem> comDeviceList = new(); // List of COM devices for use in the Radzen COM devices radio button list
 
-        AscomDevice selectedAlpacaDevice; // Details of the currently selected Alpaca device
-        ComDevice selectedComDevice; // Details of the currently selected COM device
+    AscomDevice selectedAlpacaDevice; // Details of the currently selected Alpaca device
+    ComDevice selectedComDevice; // Details of the currently selected COM device
 
-        List<string> discoveredAlpacaDevices = new();
+    List<string> discoveredAlpacaDevices = new();
 
     #region Initialisation and Load
 
@@ -239,6 +239,7 @@
         switch (selectedTabNumber)
         {
             case 0:
+                ascomDevices.Clear();
                 StartDiscovery();
                 break;
 
@@ -479,6 +480,8 @@
 
     private void StartDiscovery()
     {
+        alpacaDiscoveryProgress = "";
+
         if (configuration.Settings.AlpacaConfiguration.DiscoveryEnabled & (selectedDeviceTypeString != DeviceType.Video.ToString()))
         {
 
