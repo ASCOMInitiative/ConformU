@@ -78,23 +78,27 @@
                                   Click=@(args => OnAlpacaSearchClick()) />
                     @if (!configuration.Settings.AlpacaConfiguration.DiscoveryEnabled)
                     {
-                        <p style="margin-top:6px">Discovery is disabled in settings</p>
+                        <p style="margin-top:6px; margin-right: 20px">Discovery is disabled in settings</p>
                     }
-
+                    @if (selectedDeviceTypeString == DeviceType.Video.ToString())
+                    {
+                        <p style="margin-top:6px">Alpaca Video devices are not supported</p>
+                    }
 
                 </div>
 
             </RadzenCard>
 
             @* Alpaca manual device configuration *@
-            <RadzenCard Style="width:600px; margin-bottom: 20px; min-height:120px;  height:fit-content; margin-right: 20px; overflow: auto;">
+            <RadzenCard Style="margin-bottom: 20px; min-height:120px;  height:fit-content; margin-right: 20px; overflow: auto;">
 
                 <div class="row">
-                    <RadzenCard Style="width: 600px; margin-bottom: 20px; height: fit-content; margin-right: 20px">
+
+                    <RadzenCard Style="margin-bottom: 20px; height: fit-content; margin-right: 20px">
                         <h3 style="color: #479cc8">Manual Alpaca device configuration</h3>
                         <div class="row">
                             <RadzenTextBox @bind-Value=@manualIpAddress Style="margin-left: 20px" />
-                            <RadzenLabel Text="IP address" Style="margin-left: 20px;" />
+                            <RadzenLabel Text="IP address" Style="margin-left: 20px" />
                         </div>
                         <div style="margin-top:20px" class="row">
                             <RadzenNumeric Style="margin-left: 20px" @bind-Value="manualPortNumber" TValue="int" Min="1" />
@@ -102,18 +106,23 @@
                         </div>
                         <div style="margin-top:20px" class="row">
                             <RadzenNumeric Style="margin-left: 20px" @bind-Value="manualAlpacaDeviceNumber" TValue="int" Min="0" />
-                            <p style="margin-left: 20px;margin-top: 5px;">Alpaca device number</p>
+                            <p style="margin-left: 20px;margin-top: 5px; margin-right: 20px">Alpaca device number</p>
                         </div>
-                        <div class="row">
-
-                            <RadzenButton Style="margin-top: 20px; width: 150px; margin-left: 20px;"
-                                          Text="Select"
-                                          Disabled="@discoveryInProgress"
-                                          Click=@(args => OnManualAlpacaDeviceSelect()) />
-                        </div>
-
-
                     </RadzenCard>
+
+                </div>
+
+                <div class="row">
+
+                    <RadzenButton Style="margin-top: 0px; width: 150px; margin-left: 20px; margin-right: 20px"
+                                  Text="Select"
+                                  Disabled="@(discoveryInProgress | selectedDeviceTypeString == DeviceType.Video.ToString())"
+                                  Click=@(args => OnManualAlpacaDeviceSelect()) />
+                    @if (selectedDeviceTypeString == DeviceType.Video.ToString())
+                    {
+                        <p style="margin-top:6px">Alpaca Video devices are not supported</p>
+                    }
+
                 </div>
 
             </RadzenCard>
@@ -147,32 +156,32 @@
 </RadzenTabs>
 
 @code {
+        const string MANUAL_DEVICE_NAME = "Manually configured device";
+        string manualIpAddress = "127.0.0.1";
+        int manualPortNumber = 11111;
+        int manualAlpacaDeviceNumber = 0;
 
-    string manualIpAddress = "127.0.0.1";
-    int manualPortNumber = 11111;
-    int manualAlpacaDeviceNumber = 0;
+        AscomDevice ascomDevice;
+        ComDevice comDevice;
+        bool discoveryInProgress = false;
+        int statusBoxHeight = 0; // Number of rows in the status box list ==> Determnines the height of the box
+        List<string> validAscomdDeviceTypes = new() { DeviceType.Telescope.ToString(), DeviceType.Camera.ToString(), DeviceType.CoverCalibrator.ToString(), DeviceType.Dome.ToString(), DeviceType.FilterWheel.ToString(), DeviceType.Focuser.ToString(), DeviceType.ObservingConditions.ToString(), DeviceType.Rotator.ToString(), DeviceType.SafetyMonitor.ToString(), DeviceType.Switch.ToString(), DeviceType.Video.ToString() };
+        DeviceType selectedDeviceType; // DeviceType of the selected device
+        string selectedDeviceTypeString; // String representation of the currently selected DeviceType
+        string alpacaDiscoveryProgress; // Text describing events happening while Alpaca discovery is underway
+        AlpacaDiscovery discovery; // Alpaca discovery component
+        bool osIsWindows; // OS environment type
+        bool osIsNotWindows;
+        int selectedTabNumber = 0; // Current tab number 0 = Alpaca, 1 = COM
+        DeviceTechnology technologyType = DeviceTechnology.Alpaca; // Is the user selecting an Alpaca or a COM device?
 
-    AscomDevice ascomDevice;
-    ComDevice comDevice;
-    bool discoveryInProgress = false;
-    int statusBoxHeight = 0; // Number of rows in the status box list ==> Determnines the height of the box
-    List<string> validAscomdDeviceTypes = new() { DeviceType.Telescope.ToString(), DeviceType.Camera.ToString(), DeviceType.CoverCalibrator.ToString(), DeviceType.Dome.ToString(), DeviceType.FilterWheel.ToString(), DeviceType.Focuser.ToString(), DeviceType.ObservingConditions.ToString(), DeviceType.Rotator.ToString(), DeviceType.SafetyMonitor.ToString(), DeviceType.Switch.ToString(), DeviceType.Video.ToString() };
-    DeviceType selectedDeviceType; // DeviceType of the selected device
-    string selectedDeviceTypeString; // String representation of the currently selected DeviceType
-    string alpacaDiscoveryProgress; // Text describing events happening while Alpaca discovery is underway
-    AlpacaDiscovery discovery; // Alpaca discovery component
-    bool osIsWindows; // OS environment type
-    bool osIsNotWindows;
-    int selectedTabNumber = 0; // Current tab number 0 = Alpaca, 1 = COM
-    DeviceTechnology technologyType = DeviceTechnology.Alpaca; // Is the user selecting an Alpaca or a COM device?
+        List<AlpacaDeviceListItem> ascomDevices = new(); // List of discovered Alpaca devices for use in the Alpaca devices Radzen radio button list
+        List<ComDeviceListItem> comDeviceList = new(); // List of COM devices for use in the Radzen COM devices radio button list
 
-    List<AlpacaDeviceListItem> ascomDevices = new(); // List of discovered Alpaca devices for use in the Alpaca devices Radzen radio button list
-    List<ComDeviceListItem> comDeviceList = new(); // List of COM devices for use in the Radzen COM devices radio button list
+        AscomDevice selectedAlpacaDevice; // Details of the currently selected Alpaca device
+        ComDevice selectedComDevice; // Details of the currently selected COM device
 
-    AscomDevice selectedAlpacaDevice; // Details of the currently selected Alpaca device
-    ComDevice selectedComDevice; // Details of the currently selected COM device
-
-    List<string> discoveredAlpacaDevices = new();
+        List<string> discoveredAlpacaDevices = new();
 
     #region Initialisation and Load
 
@@ -189,8 +198,16 @@
         osIsWindows = OperatingSystem.IsWindows();
         osIsNotWindows = !osIsWindows;
 
+        // Populate the manual settings fields if appropriate
+        if (configuration.Settings.AlpacaDevice.AscomDeviceName == MANUAL_DEVICE_NAME)
+        {
+            manualAlpacaDeviceNumber = configuration.Settings.AlpacaDevice.AlpacaDeviceNumber;
+            manualIpAddress = configuration.Settings.AlpacaDevice.IpAddress;
+            manualPortNumber = configuration.Settings.AlpacaDevice.IpPort;
+        }
+
         // Start an Alpaca discovery to populate the Alpaca device list if configured to do so
-        if (configuration.Settings.AlpacaConfiguration.DiscoveryEnabled) StartDiscovery();
+        StartDiscovery();
     }
 
     #endregion
@@ -247,9 +264,7 @@
             technologyType = DeviceTechnology.Alpaca;
             configuration.Settings.DeviceTechnology = technologyType;
 
-
-
-            selectedAlpacaDevice = new AscomDevice("Manually configured device",
+            selectedAlpacaDevice = new AscomDevice(MANUAL_DEVICE_NAME,
                 selectedDeviceType.ToString(),
                 manualAlpacaDeviceNumber,
                 "UniqueID",
@@ -259,7 +274,9 @@
                 "Alpaca device status message");
 
             configuration.Settings.AlpacaDevice = selectedAlpacaDevice;
+            ascomDevice = null;
             SaveConfiguration();
+            configuration.RaiseUiHasChangedEvent();
         }
         catch (Exception ex)
         {
@@ -285,6 +302,7 @@
             configuration.Settings.AlpacaDevice = selectedAlpacaDevice;
 
             SaveConfiguration();
+            configuration.RaiseUiHasChangedEvent();
         }
         catch (Exception ex)
         {
@@ -367,6 +385,7 @@
         configuration.Settings.DeviceTechnology = technologyType;
 
         SaveConfiguration();
+        configuration.RaiseUiHasChangedEvent();
 
     }
 
@@ -452,7 +471,6 @@
         StateHasChanged();
     }
 
-
     private async void ShowNotification(NotificationMessage message)
     {
         notificationService.Notify(message);
@@ -461,23 +479,26 @@
 
     private void StartDiscovery()
     {
-        configuration.Settings.OperationInProgress = true;
-        configuration.RaiseUiHasChangedEvent();
-        discoveredAlpacaDevices.Clear();
-        discoveryInProgress = true;
-        alpacaDiscoveryProgress = $"Discovery started (Duration {configuration.Settings.AlpacaConfiguration.DiscoveryDuration:0.0} seconds)...\r\n";
-        statusBoxHeight = 1; // Initual status area height
-        Task t = Task.Run(() =>
-            discovery.StartDiscovery(configuration.Settings.AlpacaConfiguration.NumberOfDiscoveryPolls,
-            (int)(configuration.Settings.AlpacaConfiguration.DiscoveryPollInterval * 1000),
-            configuration.Settings.AlpacaConfiguration.DiscoveryPort,
-            configuration.Settings.AlpacaConfiguration.DiscoveryDuration,
-            configuration.Settings.AlpacaConfiguration.DiscoveryResolveName,
-            configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4,
-            configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6)
-        );
-        StateHasChanged();
-        //t.Wait();
+        if (configuration.Settings.AlpacaConfiguration.DiscoveryEnabled)
+        {
+
+            configuration.Settings.OperationInProgress = true;
+            configuration.RaiseUiHasChangedEvent();
+            discoveredAlpacaDevices.Clear();
+            discoveryInProgress = true;
+            alpacaDiscoveryProgress = $"Discovery started (Duration {configuration.Settings.AlpacaConfiguration.DiscoveryDuration:0.0} seconds)...\r\n";
+            statusBoxHeight = 1; // Initual status area height
+            Task t = Task.Run(() =>
+                discovery.StartDiscovery(configuration.Settings.AlpacaConfiguration.NumberOfDiscoveryPolls,
+                (int)(configuration.Settings.AlpacaConfiguration.DiscoveryPollInterval * 1000),
+                configuration.Settings.AlpacaConfiguration.DiscoveryPort,
+                configuration.Settings.AlpacaConfiguration.DiscoveryDuration,
+                configuration.Settings.AlpacaConfiguration.DiscoveryResolveName,
+                configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4,
+                configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6)
+            );
+            StateHasChanged();
+        }
     }
 
     #endregion

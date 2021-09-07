@@ -4,27 +4,28 @@
 @using static ConformU.Globals
 
 @* Top level page layout including page header at top and navigation bar at left *@
-    <div class="sidebar">
-        <NavMenu />
+<div class="sidebar">
+    <NavMenu />
+</div>
+<div class="main">
+    <div class="top-row px-4">
+        <span>Current device - @deviceName (@deviceTechnology @deviceType @((deviceTechnology==DeviceTechnology.Alpaca)? alpacaDeviceNumber :""))</span>
+        <a href="https://ascom-standards.org" target="_blank">ASCOM Initiative</a>
     </div>
-    <div class="main">
-        <div class="top-row px-4">
-            <span>Current device - @deviceName (@deviceTechnology @deviceType)</span>
-            <a href="https://ascom-standards.org" target="_blank">ASCOM Initiative</a>
-        </div>
 
-        <div class="content px-4">
-            @Body
-        </div>
+    <div class="content px-4">
+        @Body
     </div>
-    <div>
-        <RadzenNotification />
-    </div>
+</div>
+<div>
+    <RadzenNotification />
+</div>
 @code
 {
     private string deviceName;
     private DeviceType deviceType;
     private DeviceTechnology deviceTechnology;
+    private int alpacaDeviceNumber;
 
     /// <summary>
     /// Event handler for page initialised event
@@ -41,10 +42,12 @@
     /// </summary>
     /// <param name="caller"></param>
     /// <param name="args"></param>
-    private void OnUiChanged(object caller, EventArgs args)
+    private async void OnUiChanged(object caller, EventArgs args)
     {
+        //conformLogger.LogMessage("MainLayout.OnUiChanged", MessageLevel.Debug,$"Method called");
         SetDisplayVariables();
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
+        //conformLogger.LogMessage("MainLayout.OnUiChanged", MessageLevel.Debug, $"Method completed");
     }
 
     private void SetDisplayVariables()
@@ -52,6 +55,7 @@
         if (configuration.Settings.DeviceTechnology == DeviceTechnology.Alpaca)
         {
             deviceName = $"{configuration.Settings.DeviceName} - {configuration.Settings.AlpacaDevice.IpAddress}:{configuration.Settings.AlpacaDevice.IpPort}";
+            alpacaDeviceNumber = configuration.Settings.AlpacaDevice.AlpacaDeviceNumber;
         }
         else
         {

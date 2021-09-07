@@ -182,6 +182,7 @@ namespace ConformU
             {
                 HandleException("Absolute", MemberType.Property, Required.Mandatory, ex, "");
             }
+            if (cancellationToken.IsCancellationRequested) return;
 
             // IsMoving - Required
             try
@@ -201,6 +202,7 @@ namespace ConformU
             {
                 HandleException("IsMoving", MemberType.Property, Required.Mandatory, ex, "");
             }
+            if (cancellationToken.IsCancellationRequested) return;
 
             // MaxStep - Required
             try
@@ -213,6 +215,7 @@ namespace ConformU
             {
                 HandleException("MaxStep", MemberType.Property, Required.Mandatory, ex, "");
             }
+            if (cancellationToken.IsCancellationRequested) return;
 
             // MaxIncrement - Required
             try
@@ -245,6 +248,7 @@ namespace ConformU
             {
                 HandleException("MaxIncrement", MemberType.Property, Required.Mandatory, ex, "");
             }
+            if (cancellationToken.IsCancellationRequested) return;
 
             // Position - Optional
             if (m_Absolute)
@@ -284,6 +288,7 @@ namespace ConformU
                 }
             }
             else
+            {
                 try
                 {
                     LogCallToDriver("Position", "About to get Position property");
@@ -294,6 +299,8 @@ namespace ConformU
                 {
                     HandleException("Position", MemberType.Property, Required.MustNotBeImplemented, ex, "Position must not be implemented for a relative focuser");
                 }
+            }
+            if (cancellationToken.IsCancellationRequested) return;
 
             // StepSize - Optional
             try
@@ -320,6 +327,7 @@ namespace ConformU
             {
                 HandleException("StepSize", MemberType.Property, Required.Optional, ex, "");
             }
+            if (cancellationToken.IsCancellationRequested) return;
 
             // TempCompAvailable - Required
             try
@@ -332,6 +340,7 @@ namespace ConformU
             {
                 HandleException("StepSize", MemberType.Property, Required.Mandatory, ex, "");
             }
+            if (cancellationToken.IsCancellationRequested) return;
 
             // TempComp Read - Required
             try
@@ -347,6 +356,7 @@ namespace ConformU
             {
                 HandleException("TempComp Read", MemberType.Property, Required.Mandatory, ex, "");
             }
+            if (cancellationToken.IsCancellationRequested) return;
 
             // TempComp Write - Optional
             if (m_TempCompAvailable)
@@ -372,6 +382,7 @@ namespace ConformU
                 }
             }
             else
+            {
                 try
                 {
                     LogCallToDriver("TempComp Write", "About to set TempComp property");
@@ -382,6 +393,8 @@ namespace ConformU
                 {
                     HandleException("TempComp Write", MemberType.Property, Required.MustNotBeImplemented, ex, "Temperature compensation is not available");
                 }
+            }
+            if (cancellationToken.IsCancellationRequested) return;
 
             // Restore original TempComp setting if possible
             LogCallToDriver("TempComp Write", "About to set TempComp property");
@@ -392,6 +405,7 @@ namespace ConformU
             catch
             {
             }
+            if (cancellationToken.IsCancellationRequested) return;
 
             // Temperature - Optional
             try
@@ -459,6 +473,7 @@ namespace ConformU
             {
                 HandleException("Halt", MemberType.Method, Required.Optional, ex, "");
             }
+            if (cancellationToken.IsCancellationRequested) return;
 
             // Move - Required
             Status(StatusType.staTest, "Focuser Move");
@@ -479,6 +494,7 @@ namespace ConformU
             Status(StatusType.staTest, "");
             Status(StatusType.staAction, "");
             Status(StatusType.staStatus, "");
+            if (cancellationToken.IsCancellationRequested) return;
 
             // Move with TempComp True (if supported) - Should throw an error
             Status(StatusType.staTest, "Focuser Move");
@@ -541,6 +557,7 @@ namespace ConformU
                             break;
                         }
                 }
+                if (cancellationToken.IsCancellationRequested) return;
 
                 // For absolute focusers, test movement to the 0 and MaxStep limits, also that the focuser will gracefully stop at the limits if commanded to move beyond them
                 if (m_Absolute)
@@ -578,6 +595,7 @@ namespace ConformU
                     {
                         HandleException("Move - To 0", MemberType.Method, Required.Mandatory, ex, "");
                     }
+                    if (cancellationToken.IsCancellationRequested) return;
 
                     // Test movement below the 0 limit
                     try
@@ -606,6 +624,7 @@ namespace ConformU
                     {
                         HandleException("Move - Below 0", MemberType.Method, Required.Mandatory, ex, "Move should fail gracefully by just moving to position 0; it should not throw an exception");
                     }
+                    if (cancellationToken.IsCancellationRequested) return;
 
                     // Test movement to the MaxSteps limit
                     try
@@ -634,6 +653,7 @@ namespace ConformU
                     {
                         HandleException("Move - To MaxStep", MemberType.Method, Required.Mandatory, ex, "");
                     }
+                    if (cancellationToken.IsCancellationRequested) return;
 
                     // Test movement above the MaxStep limit
                     try
@@ -662,6 +682,7 @@ namespace ConformU
                     {
                         HandleException("Move - Above Maxstep", MemberType.Method, Required.Mandatory, ex, "Move should fail gracefully by just moving to position MaxStep; it should not throw an exception");
                     }
+                    if (cancellationToken.IsCancellationRequested) return;
                 }
 
                 // Restore original TempComp value
@@ -687,19 +708,16 @@ namespace ConformU
                 LogCallToDriver(testName, "About to get Position property");
                 m_PositionOrg = m_Focuser.Position;
                 // Calculate an acceptable focus position
-                m_Position = m_PositionOrg + System.Convert.ToInt32(m_MaxStep / (double)10); // Move by 1/10 of the maximum focus distance out 
-                if (m_Position >= m_MaxStep)
-                    m_Position = m_PositionOrg - System.Convert.ToInt32(m_MaxStep / (double)10);// Move by 1/10 of the maximum focus distance in
-                                                                                                // Apply the MaxIncrement check
-                if (Math.Abs(m_Position - m_PositionOrg) > m_MaxIncrement)
-                    m_Position = m_PositionOrg + m_MaxIncrement;
+                m_Position = m_PositionOrg + Convert.ToInt32(m_MaxStep / 10); // Move by 1/10 of the maximum focus distance out 
+                if (m_Position >= m_MaxStep) m_Position = m_PositionOrg - Convert.ToInt32(m_MaxStep / 10.0);// Move by 1/10 of the maximum focus distance in
+
+                if (Math.Abs(m_Position - m_PositionOrg) > m_MaxIncrement) m_Position = m_PositionOrg + m_MaxIncrement; // Apply the MaxIncrement check
             }
             else
             {
-                m_Position = System.Convert.ToInt32(m_MaxIncrement / (double)10);
+                m_Position = Convert.ToInt32(m_MaxIncrement / 10.0);
                 // Apply the MaxIncrement check
-                if (m_Position > m_MaxIncrement)
-                    m_Position = m_MaxIncrement;
+                if (m_Position > m_MaxIncrement) m_Position = m_MaxIncrement;
             }
 
             MoveFocuserToPosition(testName, m_Position); // Move the focuser to the new test position within the focuser's movement range
@@ -757,17 +775,25 @@ namespace ConformU
         {
             DateTime l_StartTime, l_EndTime;
 
+            LogDebug(testName, $"New position: {newPosition}");
+
             // Confirm that the focuser is not moving
             LogCallToDriver(testName, "About to get IsMoving property");
-            if (m_Focuser.IsMoving)
+            if (m_Focuser.IsMoving) // This is an issue as we are expecting the focuser to be not moving
+            {
                 LogIssue(testName, "Focuser is already moving before start of Move test, rest of test skipped");
-            else
+            }
+            else // Focuser not moving so proceed with the test
             {
                 // Move the focuser
                 if (m_Absolute)
+                {
                     LogTestAndMessage(testName, "Moving to position: " + newPosition.ToString());
+                }
                 else
+                {
                     LogTestAndMessage(testName, "Moving by: " + newPosition.ToString());
+                }
 
                 Status(StatusType.staAction, "Moving to new position");
                 l_StartTime = DateTime.Now;
@@ -775,26 +801,32 @@ namespace ConformU
                 m_Focuser.Move(newPosition); // Move the focuser
                 l_EndTime = DateTime.Now;
 
-                if (l_EndTime.Subtract(l_StartTime).TotalMilliseconds > 1000)
+                if (l_EndTime.Subtract(l_StartTime).TotalMilliseconds > 1000) // Move took more than 1 second so assume a synchronous call
                 {
+                    LogDebug(testName, $"Synchronous call behaviour");
                     // Confirm that IsMoving is false
                     LogCallToDriver(testName, "About to get IsMoving property");
-                    if (m_Focuser.IsMoving)
-                        LogIssue(testName, "Synchronous move expected but focuser is moving after return from Focuser.Move");
-                    else
-                        LogTestAndMessage(testName, "Synchronous move found");
+                    if (m_Focuser.IsMoving) LogIssue(testName, "Synchronous move expected but focuser is moving after return from Focuser.Move");
+                    else LogTestAndMessage(testName, "Synchronous move found");
                 }
-                else
+                else // Move took less than 1 second so assume an asynchronous call
                 {
+                    LogDebug(testName, $"Asynchronous call behaviour");
                     Status(StatusType.staStatus, "Waiting for asynchronous move to complete");
                     LogCallToDriver(testName, "About to get IsMoving and Position properties repeatedly");
-                    while (m_Focuser.IsMoving & !cancellationToken.IsCancellationRequested)
+                    do
                     {
                         if (m_AbsolutePositionOK)
-                            Status(StatusType.staStatus, "Waiting for asynchronous move to complete, Position: " + m_Focuser.Position + " / " + newPosition);
-                        WaitFor(500);
+                        {
+                            Status(StatusType.staStatus, $"Waiting for asynchronous move to complete, Position: {m_Focuser.Position} / { newPosition}, IsMoving: {m_Focuser.IsMoving}");
+                            LogDebug(testName, $"Waiting for asynchronous move to complete, Position: {m_Focuser.Position} / { newPosition}, IsMoving: {m_Focuser.IsMoving}");
+                        }
+                        WaitFor(100);
                     }
-                    LogTestAndMessage(testName, "Asynchronous move found");
+                    while (m_Focuser.IsMoving & !cancellationToken.IsCancellationRequested);
+                    LogDebug(testName, $"Final position: {m_Focuser.Position}, IsMoving: {m_Focuser.IsMoving}");
+
+                    LogTestAndMessage(testName, "Asynchronous move completed");
                 }
             }
         }
@@ -872,8 +904,7 @@ namespace ConformU
                     {
                         Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
                         l_LastElapsedTime = l_ElapsedTime;
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
+                        if (cancellationToken.IsCancellationRequested) return;
                     }
                 }
                 while (l_ElapsedTime <= PERF_LOOP_TIME);
