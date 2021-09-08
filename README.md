@@ -11,7 +11,9 @@ ConformU is a cross-platform tool to validate that Alpaca Devices and ASCOM Driv
   * Alpaca devices that support the Alpaca discovery protocol will automatically be presented for selection.
   * An Alpaca device URL, port number and device number can be set manually to target devices that don't support discovery.
   * COM Drivers installed on the host WIndows PC will automatically be presented for selection
-* The graphical UI adjusts responsively to window size.
+* An issue summary is now appended at the end of the conformance report.
+* All conformance deviations are now reported as "issues" rather than as a mix of "errors" and "issues" as in the original Conform application.
+* The graphical UI adjusts responsively to browser window size.
 * Navigation is locked while Alpaca discovery and device testing is underway.
 * A conformance test run can be interrupted on demand.
 * Settings can be reset to default on demand.
@@ -38,4 +40,4 @@ ConformU is a cross-platform tool to validate that Alpaca Devices and ASCOM Driv
 The application is self-contained and does not require that any additional support components be installed on the target machine. To install ConformU:
 * Unzip the relevant OS archive to a folder of your choice on the target machine.
 * In Linux environments you will need to give the executable run permissions with the 'chmod 755 ./conformu' command.
-* The application can now be run by directly from a file browser or from the command line.
+* The application can now be run directly from a file browser or from the command line.
