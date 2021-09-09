@@ -19,6 +19,8 @@ namespace ConformU
         private const string NO_DEVICE_SELECTED = "No device selected";
         public Settings() { }
 
+        #region Conform configuration
+
         // Conform application configuration 
         public bool DisplayMethodCalls { get; set; } = false;
         public bool UpdateCheck { get; set; } = true;
@@ -108,6 +110,8 @@ namespace ConformU
         /// </summary>
         public DeviceType DeviceType { get; set; } = DeviceType.NoDeviceType;
 
+        #endregion
+
         #region Device test configuration
 
         // Telescope test configuration
@@ -135,12 +139,12 @@ namespace ConformU
             { "SyncToAltAz", true }
         };
         public bool TelescopeFirstUseTests { get; set; } = true;
+        public double TelescopeSlewTolerance { get; set; } = 10.0; // Arc-seconds
 
         // Camera test configuration
         public int CameraMaxBinX { get; set; } = 0;
         public int CameraMaxBinY { get; set; } = 0;
         public bool CameraFirstUseTests { get; set; } = true;
-        public double TelescopeSlewTolerance { get; set; } = 1.0; // Degrees
 
         // Dome test configuration
         public int DomeShutterTimeout { get; set; } = 240;
@@ -151,13 +155,13 @@ namespace ConformU
         public double DomeSlewTolerance { get; set; } = 1.0; // Degrees
 
         // ObservingConditions test configuration
-        public int ObservingConditionsRetryTime { get; set; } = 1;
+        public int ObservingConditionsRetryTime { get; set; } = 1; // Seconds
         public int ObservingConditionsMaxRetries { get; set; } = 5;
 
         // Switch test configuration
         public bool SwitchEnableSet { get; set; } = false;
-        public int SwitchReadDelay { get; set; } = 500;
-        public int SwitchWriteDelay { get; set; } = 3000;
+        public int SwitchReadDelay { get; set; } = 500; // Milliseconds
+        public int SwitchWriteDelay { get; set; } = 3000; // Milliseconds
         public int SwitchExtendedNumberTestRange { get; set; } = 100;
 
         #endregion

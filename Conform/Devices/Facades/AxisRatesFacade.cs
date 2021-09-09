@@ -15,10 +15,10 @@ namespace ConformU
         private RateFacade[] m_Rates;
 
         private int pos;
-        readonly ASCOM.Standard.Interfaces.ILogger logger;
+        readonly ConformLogger logger;
 
         // Default constructor - Internal prevents public creation instances.
-        internal AxisRatesFacade(TelescopeAxis Axis, dynamic driver, TelescopeFacade telescopeFacade, ASCOM.Standard.Interfaces.ILogger logger)
+        internal AxisRatesFacade(TelescopeAxis Axis, dynamic driver, TelescopeFacade telescopeFacade, ConformLogger logger)
         {
             m_Rates = Array.Empty<RateFacade>(); // Initialise to an empty array
 
@@ -37,7 +37,7 @@ namespace ConformU
                 nextArrayPosition++; // Increment the rate counter
             }
 
-            logger?.LogInformation($"AxisRateFacade.Init - Got {nextArrayPosition - 1} rates");
+            logger?.LogMessage($"AxisRateFacade.Init", MessageLevel.Debug, $"Got {nextArrayPosition - 1} rates");
             pos = -1;
         }
 
@@ -50,7 +50,7 @@ namespace ConformU
 
         public IEnumerator GetEnumerator()
         {
-            logger?.LogInformation($"AxisRateFacade.GetEnumerator - Returning enumerator");
+            logger?.LogMessage("AxisRateFacade.GetEnumerator", MessageLevel.Debug, $"Returning enumerator");
 
             pos = -1; //Reset pointer as this is assumed by .NET enumeration
             return this as IEnumerator;
@@ -61,7 +61,7 @@ namespace ConformU
             get
             {
                 if (index < 1 || index > this.Count) throw new InvalidValueException("AxisRates.index", index.ToString(CultureInfo.CurrentCulture), string.Format(CultureInfo.CurrentCulture, "1 to {0}", this.Count));
-                logger?.LogInformation($"AxisRateFacade.this[index] - Retuning index item: {index}");
+                logger?.LogMessage($"AxisRateFacade.this[index]", MessageLevel.Debug, $"Retuning index item: {index}");
                 return (IRate)m_Rates[index - 1]; 	// 1-based
             }
         }
@@ -81,7 +81,7 @@ namespace ConformU
         {
             if (disposing)
             {
-                logger?.LogInformation($"AxisRateFacade.Dispose(bool) - SETTING M_RATES TO NULL!!");
+                logger?.LogMessage($"AxisRateFacade.Dispose(bool)", MessageLevel.Debug, $"SETTING M_RATES TO NULL!!");
                 // free managed resources
                 m_Rates = null;
             }
@@ -93,20 +93,20 @@ namespace ConformU
 
         public bool MoveNext()
         {
-            logger?.LogInformation($"AxisRateFacade.MoveNext - SETTING Moving to next item");
+            logger?.LogMessage($"AxisRateFacade.MoveNext", MessageLevel.Debug, $"SETTING Moving to next item");
             if (++pos >= m_Rates.Length) return false;
             return true;
         }
 
         public void Reset()
         {
-            logger?.LogInformation($"AxisRateFacade.Reset - Resetting index");
+            logger?.LogMessage($"AxisRateFacade.Reset", MessageLevel.Debug, "Resetting index");
             pos = -1;
         }
 
         System.Collections.IEnumerator IAxisRates.GetEnumerator()
         {
-            logger?.LogInformation($"AxisRateFacade.IEnumerator - Returning enumerator");
+            logger?.LogMessage($"AxisRateFacade.IEnumerator", MessageLevel.Debug, $"Returning enumerator");
             pos = -1; //Reset pointer as this is assumed by .NET enumeration
             return this as IEnumerator;
         }
@@ -116,7 +116,7 @@ namespace ConformU
             get
             {
                 if (pos < 0 || pos >= m_Rates.Length) throw new ASCOM.InvalidOperationException();
-                logger?.LogInformation($"AxisRateFacade.Current - Returning Current value");
+                logger?.LogMessage($"AxisRateFacade.Current", MessageLevel.Debug, $"Returning Current value");
                 return m_Rates[pos];
             }
         }

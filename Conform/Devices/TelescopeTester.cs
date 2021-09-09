@@ -84,8 +84,8 @@ namespace ConformU
         private double m_SiteLongitude;
         private bool m_Slewing;
         private short m_SlewSettleTime;
-        private double m_TargetDeclination;
-        private double m_TargetRightAscension;
+        private double targetDeclination;
+        private double targetRightAscension;
         private bool m_Tracking;
         private DateTime m_UTCDate;
         private bool m_CanMoveAxisPrimary, m_CanMoveAxisSecondary, m_CanMoveAxisTertiary;
@@ -93,7 +93,7 @@ namespace ConformU
         private double m_SiderealTimeASCOM;
         private DateTime m_StartTime, m_EndTime;
         private bool m_CanReadSideOfPier;
-        private double m_TargetAltitude, m_TargetAzimuth;
+        private double targetAltitude, targetAzimuth;
         private bool canReadAltitide, canReadAzimuth, canReadSiderealTime;
 
         private readonly Dictionary<string, bool> telescopeTests;
@@ -599,19 +599,19 @@ namespace ConformU
                 {
                     case var @case when @case < 0.0d:
                         {
-                            LogIssue("Altitude", "Altitude is <0.0 degrees: " + m_Altitude.ToString("0.00000000"));
+                            LogIssue("Altitude", "Altitude is <0.0 degrees: " + FormatAltitude(m_Altitude).Trim());
                             break;
                         }
 
                     case var case1 when case1 > 90.0000001d:
                         {
-                            LogIssue("Altitude", "Altitude is >90.0 degrees: " + m_Altitude.ToString("0.00000000"));
+                            LogIssue("Altitude", "Altitude is >90.0 degrees: " + FormatAltitude(m_Altitude).Trim());
                             break;
                         }
 
                     default:
                         {
-                            LogOK("Altitude", m_Altitude.ToString("0.00"));
+                            LogOK("Altitude", FormatAltitude(m_Altitude).Trim());
                             break;
                         }
                 }
@@ -752,19 +752,19 @@ namespace ConformU
                 {
                     case var case4 when case4 < 0.0d:
                         {
-                            LogIssue("Azimuth", "Azimuth is <0.0 degrees: " + m_Azimuth.ToString("0.00"));
+                            LogIssue("Azimuth", "Azimuth is <0.0 degrees: " + FormatAzimuth(m_Azimuth).Trim());
                             break;
                         }
 
                     case var case5 when case5 > 360.0000000001d:
                         {
-                            LogIssue("Azimuth", "Azimuth is >360.0 degrees: " + m_Azimuth.ToString("0.00"));
+                            LogIssue("Azimuth", "Azimuth is >360.0 degrees: " + FormatAzimuth(m_Azimuth).Trim());
                             break;
                         }
 
                     default:
                         {
-                            LogOK("Azimuth", m_Azimuth.ToString("0.00"));
+                            LogOK("Azimuth", FormatAzimuth(m_Azimuth).Trim());
                             break;
                         }
                 }
@@ -788,13 +788,13 @@ namespace ConformU
                     case var case6 when case6 < -90.0d:
                     case var case7 when case7 > 90.0d:
                         {
-                            LogIssue("Declination", "Declination is <-90 or >90 degrees: " + FormatDec(m_Declination));
+                            LogIssue("Declination", "Declination is <-90 or >90 degrees: " + FormatDec(m_Declination).Trim());
                             break;
                         }
 
                     default:
                         {
-                            LogOK("Declination", FormatDec(m_Declination));
+                            LogOK("Declination", FormatDec(m_Declination).Trim());
                             break;
                         }
                 }
@@ -1256,13 +1256,13 @@ namespace ConformU
                     case var case14 when case14 < 0.0d:
                     case var case15 when case15 >= 24.0d:
                         {
-                            LogIssue("RightAscension", "RightAscension is <0 or >=24 hours: " + m_RightAscension + " " + FormatRA(m_RightAscension));
+                            LogIssue("RightAscension", "RightAscension is <0 or >=24 hours: " + m_RightAscension + " " + FormatRA(m_RightAscension).Trim());
                             break;
                         }
 
                     default:
                         {
-                            LogOK("RightAscension", FormatRA(m_RightAscension));
+                            LogOK("RightAscension", FormatRA(m_RightAscension).Trim());
                             break;
                         }
                 }
@@ -1836,7 +1836,7 @@ namespace ConformU
             {
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("TargetDeclination Read", "About to get TargetDeclination property");
-                m_TargetDeclination = telescopeDevice.TargetDeclination;
+                targetDeclination = telescopeDevice.TargetDeclination;
                 if (settings.TelescopeFirstUseTests)
                 {
                     LogIssue("TargetDeclination Read", "Read before write should generate an error and didn't");
@@ -1844,18 +1844,18 @@ namespace ConformU
                 }
                 else
                 {
-                    switch (m_TargetDeclination)
+                    switch (targetDeclination)
                     {
                         case var case6 when case6 < -90.0d:
                         case var case7 when case7 > 90.0d:
                             {
-                                LogIssue("TargetDeclination Read", "TargetDeclination is <-90 or >90 degrees: " + FormatDec(m_TargetDeclination));
+                                LogIssue("TargetDeclination Read", "TargetDeclination is <-90 or >90 degrees: " + FormatDec(targetDeclination));
                                 break;
                             }
 
                         default:
                             {
-                                LogOK("TargetDeclination Read", FormatDec(m_TargetDeclination));
+                                LogOK("TargetDeclination Read", FormatDec(targetDeclination));
                                 break;
                             }
                     }
@@ -1897,7 +1897,7 @@ namespace ConformU
             {
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("TargetRightAscension Read", "About to get TargetRightAscension property");
-                m_TargetRightAscension = telescopeDevice.TargetRightAscension;
+                targetRightAscension = telescopeDevice.TargetRightAscension;
                 if (settings.TelescopeFirstUseTests)
                 {
                     LogIssue("TargetRightAscension Read", "Read before write should generate an error and didn't");
@@ -1905,18 +1905,18 @@ namespace ConformU
                 }
                 else
                 {
-                    switch (m_TargetRightAscension)
+                    switch (targetRightAscension)
                     {
                         case var case14 when case14 < 0.0d:
                         case var case15 when case15 >= 24.0d:
                             {
-                                LogIssue("TargetRightAscension Read", "TargetRightAscension is <0 or >=24 hours: " + m_TargetRightAscension + " " + FormatRA(m_TargetRightAscension));
+                                LogIssue("TargetRightAscension Read", "TargetRightAscension is <0 or >=24 hours: " + targetRightAscension + " " + FormatRA(targetRightAscension));
                                 break;
                             }
 
                         default:
                             {
-                                LogOK("TargetRightAscension Read", FormatRA(m_TargetRightAscension));
+                                LogOK("TargetRightAscension Read", FormatRA(targetRightAscension));
                                 break;
                             }
                     }
@@ -2386,14 +2386,11 @@ namespace ConformU
                 if (telescopeTests[TELTEST_CAN_MOVE_AXIS] | telescopeTests[TELTEST_MOVE_AXIS] | telescopeTests[TELTEST_PARK_UNPARK])
                 {
                     TelescopeRequiredMethodsTest(RequiredMethodType.tstCanMoveAxisPrimary, "CanMoveAxis:Primary");
-                    if (cancellationToken.IsCancellationRequested)
-                        return;
+                    if (cancellationToken.IsCancellationRequested) return;
                     TelescopeRequiredMethodsTest(RequiredMethodType.tstCanMoveAxisSecondary, "CanMoveAxis:Secondary");
-                    if (cancellationToken.IsCancellationRequested)
-                        return;
+                    if (cancellationToken.IsCancellationRequested) return;
                     TelescopeRequiredMethodsTest(RequiredMethodType.tstCanMoveAxisTertiary, "CanMoveAxis:Tertiary");
-                    if (cancellationToken.IsCancellationRequested)
-                        return;
+                    if (cancellationToken.IsCancellationRequested) return;
                 }
                 else
                 {
@@ -2414,36 +2411,32 @@ namespace ConformU
                     {
                         try
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("Park", "About to get AtPark property");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get AtPark property");
                             if (!telescopeDevice.AtPark) // OK We are unparked so check that no error is generated
                             {
                                 Status(StatusType.staTest, "Park");
                                 try
                                 {
                                     Status(StatusType.staAction, "Park scope");
-                                    if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage("Park", "About to call Park method");
+                                    LogTestAndMessage("Park", "Parking scope...");
+                                    if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to call Park method");
                                     telescopeDevice.Park();
                                     Status(StatusType.staStatus, "Waiting for scope to park");
+                                    if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get AtPark property repeatedly...");
                                     do
                                     {
                                         WaitFor(SLEEP_TIME);
-                                        //Application.DoEvents();
-                                        if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage("Park", "About to get AtPark property");
                                     }
                                     while (!telescopeDevice.AtPark & !cancellationToken.IsCancellationRequested);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
+                                    if (cancellationToken.IsCancellationRequested) return;
+
                                     Status(StatusType.staStatus, "Scope parked");
                                     LogOK("Park", "Success");
 
                                     // Scope Parked OK
                                     try // Confirm second park is harmless
                                     {
-                                        if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage("Park", "About to Park call method");
+                                        if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to Park call method");
                                         telescopeDevice.Park();
                                         LogOK("Park", "Success if already parked");
                                     }
@@ -2878,37 +2871,37 @@ namespace ConformU
 
             try
             {
-                m_TargetRightAscension = TelescopeRAFromSiderealTime("TargetRightAscension Write", -4.0d);
+                targetRightAscension = TelescopeRAFromSiderealTime("TargetRightAscension Write", -4.0d);
                 if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("TargetRightAscension Write", "About to set TargetRightAscension property to " + m_TargetRightAscension);
-                telescopeDevice.TargetRightAscension = m_TargetRightAscension; // Set a valid value
+                    LogTestAndMessage("TargetRightAscension Write", "About to set TargetRightAscension property to " + targetRightAscension);
+                telescopeDevice.TargetRightAscension = targetRightAscension; // Set a valid value
                 try
                 {
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("TargetRightAscension Write", "About to get TargetRightAscension property");
-                    switch (Math.Abs(telescopeDevice.TargetRightAscension - m_TargetRightAscension))
+                    switch (Math.Abs(telescopeDevice.TargetRightAscension - targetRightAscension))
                     {
                         case 0.0d:
                             {
-                                LogOK("TargetRightAscension Write", "Legal value " + FormatRA(m_TargetRightAscension) + " HH:MM:SS written successfully");
+                                LogOK("TargetRightAscension Write", "Legal value " + FormatRA(targetRightAscension) + " HH:MM:SS written successfully");
                                 break;
                             }
 
                         case var @case when @case <= 1.0d / 3600.0d: // 1 seconds
                             {
-                                LogOK("TargetRightAscension Write", "Target RightAscension is within 1 second of the value set: " + FormatRA(m_TargetRightAscension));
+                                LogOK("TargetRightAscension Write", "Target RightAscension is within 1 second of the value set: " + FormatRA(targetRightAscension));
                                 break;
                             }
 
                         case var case1 when case1 <= 2.0d / 3600.0d: // 2 seconds
                             {
-                                LogOK("TargetRightAscension Write", "Target RightAscension is within 2 seconds of the value set: " + FormatRA(m_TargetRightAscension));
+                                LogOK("TargetRightAscension Write", "Target RightAscension is within 2 seconds of the value set: " + FormatRA(targetRightAscension));
                                 break;
                             }
 
                         case var case2 when case2 <= 5.0d / 3600.0d: // 5 seconds
                             {
-                                LogOK("TargetRightAscension Write", "Target RightAscension is within 5 seconds of the value set: " + FormatRA(m_TargetRightAscension));
+                                LogOK("TargetRightAscension Write", "Target RightAscension is within 5 seconds of the value set: " + FormatRA(targetRightAscension));
                                 break;
                             }
 
@@ -2959,43 +2952,43 @@ namespace ConformU
 
             try
             {
-                m_TargetDeclination = 1.0d;
+                targetDeclination = 1.0d;
                 if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("TargetDeclination Write", "About to set TargetDeclination property to " + m_TargetDeclination);
-                telescopeDevice.TargetDeclination = m_TargetDeclination; // Set a valid value
+                    LogTestAndMessage("TargetDeclination Write", "About to set TargetDeclination property to " + targetDeclination);
+                telescopeDevice.TargetDeclination = targetDeclination; // Set a valid value
                 try
                 {
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("TargetDeclination Write", "About to get TargetDeclination property");
-                    switch (Math.Abs(telescopeDevice.TargetDeclination - m_TargetDeclination))
+                    switch (Math.Abs(telescopeDevice.TargetDeclination - targetDeclination))
                     {
                         case 0.0d:
                             {
-                                LogOK("TargetDeclination Write", "Legal value " + FormatDec(m_TargetDeclination) + " DD:MM:SS written successfully");
+                                LogOK("TargetDeclination Write", "Legal value " + FormatDec(targetDeclination) + " DD:MM:SS written successfully");
                                 break;
                             }
 
                         case var case3 when case3 <= 1.0d / 3600.0d: // 1 seconds
                             {
-                                LogOK("TargetDeclination Write", "Target Declination is within 1 second of the value set: " + FormatDec(m_TargetDeclination));
+                                LogOK("TargetDeclination Write", "Target Declination is within 1 second of the value set: " + FormatDec(targetDeclination));
                                 break;
                             }
 
                         case var case4 when case4 <= 2.0d / 3600.0d: // 2 seconds
                             {
-                                LogOK("TargetDeclination Write", "Target Declination is within 2 seconds of the value set: " + FormatDec(m_TargetDeclination));
+                                LogOK("TargetDeclination Write", "Target Declination is within 2 seconds of the value set: " + FormatDec(targetDeclination));
                                 break;
                             }
 
                         case var case5 when case5 <= 5.0d / 3600.0d: // 5 seconds
                             {
-                                LogOK("TargetDeclination Write", "Target Declination is within 5 seconds of the value set: " + FormatDec(m_TargetDeclination));
+                                LogOK("TargetDeclination Write", "Target Declination is within 5 seconds of the value set: " + FormatDec(targetDeclination));
                                 break;
                             }
 
                         default:
                             {
-                                LogInfo("TargetDeclination Write", "Target Declination: " + FormatDec(m_TargetDeclination));
+                                LogInfo("TargetDeclination Write", "Target Declination: " + FormatDec(targetDeclination));
                                 break;
                             }
                     }
@@ -3778,7 +3771,6 @@ namespace ConformU
 
         private void TelescopeSlewTest(SlewSyncType p_Test, string p_Name, bool p_CanDoIt, string p_CanDoItName)
         {
-            double l_Difference, l_ActualAltitude, l_ActualAzimuth, actualRA, actualDec;
             Status(StatusType.staTest, p_Name);
             if (canSetTracking)
             {
@@ -3799,12 +3791,12 @@ namespace ConformU
                                 telescopeDevice.Tracking = true;
                             }
 
-                            m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -1.0d);
-                            m_TargetDeclination = 1.0d;
+                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -1.0d);
+                            targetDeclination = 1.0d;
                             Status(StatusType.staAction, "Slewing");
 
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
-                            telescopeDevice.SlewToCoordinates(m_TargetRightAscension, m_TargetDeclination);
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
+                            telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination);
                             LogDebug(p_Name, "Returned from SlewToCoordinates method");
                             break;
                         }
@@ -3814,18 +3806,18 @@ namespace ConformU
                             if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set Tracking property to true");
+                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
-                            m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
-                            m_TargetDeclination = 2.0d;
+                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
+                            targetDeclination = 2.0d;
                             Status(StatusType.staAction, "Slewing");
 
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
-                            telescopeDevice.SlewToCoordinatesAsync(m_TargetRightAscension, m_TargetDeclination);
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
+                            telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
                             if (settings.DisplayMethodCalls) LogDebug(p_Name, $"Asynchronous slew initiated");
+
                             WaitForSlew(p_Name);
                             if (settings.DisplayMethodCalls) LogDebug(p_Name, $"Slew completed");
                             break;
@@ -3833,22 +3825,19 @@ namespace ConformU
 
                     case SlewSyncType.SlewToTarget:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to get Tracking property");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set Tracking property to true");
+                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
-                            m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -3.0d);
-                            m_TargetDeclination = 3.0d;
+                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -3.0d);
+                            targetDeclination = 3.0d;
                             try
                             {
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
-                                telescopeDevice.TargetRightAscension = m_TargetRightAscension;
+                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(targetRightAscension));
+                                telescopeDevice.TargetRightAscension = targetRightAscension;
                             }
                             catch (Exception ex)
                             {
@@ -3864,9 +3853,8 @@ namespace ConformU
 
                             try
                             {
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
-                                telescopeDevice.TargetDeclination = m_TargetDeclination;
+                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(targetDeclination));
+                                telescopeDevice.TargetDeclination = targetDeclination;
                             }
                             catch (Exception ex)
                             {
@@ -3881,30 +3869,26 @@ namespace ConformU
                             }
 
                             Status(StatusType.staAction, "Slewing");
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to call SlewToTarget method");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToTarget method");
                             telescopeDevice.SlewToTarget();
                             break;
                         }
 
                     case SlewSyncType.SlewToTargetAsync: // SlewToTargetAsync
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to get Tracking property");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set Tracking property to true");
+                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
-                            m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -4.0d);
-                            m_TargetDeclination = 4.0d;
+                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -4.0d);
+                            targetDeclination = 4.0d;
                             try
                             {
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
-                                telescopeDevice.TargetRightAscension = m_TargetRightAscension;
+                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(targetRightAscension));
+                                telescopeDevice.TargetRightAscension = targetRightAscension;
                             }
                             catch (Exception ex)
                             {
@@ -3920,9 +3904,8 @@ namespace ConformU
 
                             try
                             {
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
-                                telescopeDevice.TargetDeclination = m_TargetDeclination;
+                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(targetDeclination));
+                                telescopeDevice.TargetDeclination = targetDeclination;
                             }
                             catch (Exception ex)
                             {
@@ -3937,9 +3920,9 @@ namespace ConformU
                             }
 
                             Status(StatusType.staAction, "Slewing");
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to call SlewToTargetAsync method");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToTargetAsync method");
                             telescopeDevice.SlewToTargetAsync();
+
                             WaitForSlew(p_Name);
                             break;
                         }
@@ -3947,76 +3930,70 @@ namespace ConformU
                     case SlewSyncType.SlewToAltAz:
                         {
                             LogDebug(p_Name, $"Tracking 1: {telescopeDevice.Tracking}");
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to get Tracking property");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             if (canSetTracking & telescopeDevice.Tracking)
                             {
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set property Tracking to false");
+                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set property Tracking to false");
                                 telescopeDevice.Tracking = false;
                                 LogDebug(p_Name, "Tracking turned off");
                             }
 
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to get Tracking property");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 2: {telescopeDevice.Tracking}");
-                            m_TargetAltitude = 50.0d;
-                            m_TargetAzimuth = 150.0d;
-                            Status(StatusType.staAction, "Slewing to Alt/Az: " + FormatDec(m_TargetAltitude) + " " + FormatDec(m_TargetAzimuth));
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
-                            telescopeDevice.SlewToAltAz(m_TargetAzimuth, m_TargetAltitude);
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to get Tracking property");
+                            targetAltitude = 50.0d;
+                            targetAzimuth = 150.0d;
+                            Status(StatusType.staAction, "Slewing to Alt/Az: " + FormatDec(targetAltitude) + " " + FormatDec(targetAzimuth));
+
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
+                            telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
+
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 3: {telescopeDevice.Tracking}");
                             break;
                         }
 
                     case SlewSyncType.SlewToAltAzAsync:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to get Tracking property");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 1: {telescopeDevice.Tracking}");
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to get Tracking property");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             if (canSetTracking & telescopeDevice.Tracking)
                             {
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set Tracking property false");
+                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set Tracking property false");
                                 telescopeDevice.Tracking = false;
                                 LogDebug(p_Name, "Tracking turned off");
                             }
 
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to get Tracking property");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 2: {telescopeDevice.Tracking}");
-                            m_TargetAltitude = 55.0d;
-                            m_TargetAzimuth = 155.0d;
-                            Status(StatusType.staAction, "Slewing to Alt/Az: " + FormatDec(m_TargetAltitude) + " " + FormatDec(m_TargetAzimuth));
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to call SlewToAltAzAsync method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
-                            telescopeDevice.SlewToAltAzAsync(m_TargetAzimuth, m_TargetAltitude);
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to get Tracking property");
+                            targetAltitude = 55.0d;
+                            targetAzimuth = 155.0d;
+                            Status(StatusType.staAction, "Slewing to Alt/Az: " + FormatDec(targetAltitude) + " " + FormatDec(targetAzimuth));
+
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToAltAzAsync method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
+                            telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
+
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 3: {telescopeDevice.Tracking}");
+
                             WaitForSlew(p_Name);
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to get Tracking property");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 4: {telescopeDevice.Tracking}");
                             break;
                         }
 
                     default:
                         {
-                            LogIssue(p_Name, "Conform:SlewTest: Unknown test type " + p_Test.ToString());
+                            LogError(p_Name, "Conform:SlewTest: Unknown test type " + p_Test.ToString());
                             break;
                         }
                 }
 
-                if (cancellationToken.IsCancellationRequested)
-                    return;
+                if (cancellationToken.IsCancellationRequested) return;
+
                 if (p_CanDoIt) // Should be able to do this so report what happened
                 {
+                    Status(StatusType.staAction, "Slew completed");
                     switch (p_Test)
                     {
                         case SlewSyncType.SlewToCoordinates:
@@ -4024,30 +4001,22 @@ namespace ConformU
                         case SlewSyncType.SlewToTarget:
                         case SlewSyncType.SlewToTargetAsync:
                             {
-                                Status(StatusType.staAction, "Slew completed");
                                 // Test how close the slew was to the required coordinates
-                                CheckScopePosition(p_Name, "Slewed", m_TargetRightAscension, m_TargetDeclination);
+                                CheckScopePosition(p_Name, "Slewed", targetRightAscension, targetDeclination);
 
-                                // Check that the slews and syncs set the target coordinates correctly per the ASCOM Telescope specification
+                                // Check that the slews and syncs set the target RA coordinate correctly per the ASCOM Telescope specification
                                 try
                                 {
-                                    actualRA = telescopeDevice.TargetRightAscension;
-                                    LogDebug(p_Name, string.Format("Current TargetRightAscension: {0}, Set TargetRightAscension: {1}", actualRA, m_TargetRightAscension));
-                                    double raDifference;
-                                    raDifference = RaDifferenceInArcSeconds(actualRA, m_TargetRightAscension);
-                                    switch (raDifference)
-                                    {
-                                        case var @case when @case <= SLEW_SYNC_OK_TOLERANCE:  // Within specified tolerance
-                                            {
-                                                LogOK(p_Name, string.Format("The TargetRightAscension property {0} matches the expected RA OK. ", FormatRA(m_TargetRightAscension))); // Outside specified tolerance
-                                                break;
-                                            }
+                                    double actualTargetRA = telescopeDevice.TargetRightAscension;
+                                    LogDebug(p_Name, $"Current TargetRightAscension: {actualTargetRA}, Set TargetRightAscension: {targetRightAscension}");
 
-                                        default:
-                                            {
-                                                LogIssue(p_Name, string.Format("The TargetRightAscension property {0} does not match the expected RA {1}", FormatRA(actualRA), FormatRA(m_TargetRightAscension)));
-                                                break;
-                                            }
+                                    if (RaDifferenceInArcSeconds(actualTargetRA, targetRightAscension) <= settings.TelescopeSlewTolerance) // Within specified tolerance
+                                    {
+                                        LogOK(p_Name, $"The TargetRightAscension property: {FormatRA(actualTargetRA)} matches the expected RA {FormatRA(targetRightAscension)} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds."); // Outside specified tolerance
+                                    }
+                                    else
+                                    {
+                                        LogIssue(p_Name, $"The TargetRightAscension property: {FormatRA(actualTargetRA)} does not match the expected RA {FormatRA(targetRightAscension)} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
                                     }
                                 }
                                 catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
@@ -4067,26 +4036,21 @@ namespace ConformU
                                     HandleException(p_Name, MemberType.Property, Required.Mandatory, ex, "");
                                 }
 
+                                // Check that the slews and syncs set the target declination coordinate correctly per the ASCOM Telescope specification
                                 try
                                 {
-                                    actualDec = telescopeDevice.TargetDeclination;
-                                    LogDebug(p_Name, string.Format("Current TargetDeclination: {0}, Set TargetDeclination: {1}", actualDec, m_TargetDeclination));
-                                    double decDifference;
-                                    decDifference = Math.Round(Math.Abs(actualDec - m_TargetDeclination) * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero); // Dec difference is in arc seconds from degrees of Declination
-                                    switch (decDifference)
-                                    {
-                                        case var case1 when case1 <= SLEW_SYNC_OK_TOLERANCE: // Within specified tolerance
-                                            {
-                                                LogOK(p_Name, string.Format("The TargetDeclination property {0} matches the expected Declination OK. ", FormatDec(m_TargetDeclination))); // Outside specified tolerance
-                                                break;
-                                            }
+                                    double actualTargetDec = telescopeDevice.TargetDeclination;
+                                    LogDebug(p_Name, $"Current TargetDeclination: {actualTargetDec}, Set TargetDeclination: {targetDeclination}");
 
-                                        default:
-                                            {
-                                                LogIssue(p_Name, string.Format("The TargetDeclination property {0} does not match the expected Declination {1}", FormatDec(actualDec), FormatDec(m_TargetDeclination)));
-                                                break;
-                                            }
+                                    if (Math.Round(Math.Abs(actualTargetDec - targetDeclination) * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero) <= settings.TelescopeSlewTolerance) // Within specified tolerance
+                                    {
+                                        LogOK(p_Name, $"The TargetDeclination property {FormatDec(actualTargetDec)} matches the expected Declination {FormatDec(targetDeclination)} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds."); // Outside specified tolerance
                                     }
+                                    else
+                                    {
+                                        LogIssue(p_Name, $"The TargetDeclination property { FormatDec(actualTargetDec)} does not match the expected Declination {FormatDec(targetDeclination)} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
+                                    }
+
                                 }
                                 catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
                                 {
@@ -4111,64 +4075,39 @@ namespace ConformU
                         case SlewSyncType.SlewToAltAz:
                         case SlewSyncType.SlewToAltAzAsync:
                             {
-                                Status(StatusType.staAction, "Slew completed");
                                 // Test how close the slew was to the required coordinates
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to get Azimuth property");
-                                l_ActualAzimuth = telescopeDevice.Azimuth;
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to get Altitude property");
-                                l_ActualAltitude = telescopeDevice.Altitude;
-                                l_Difference = Math.Abs(l_ActualAzimuth - m_TargetAzimuth);
-                                if (l_Difference > 350.0d)
-                                    l_Difference = 360.0d - l_Difference; // Deal with the case where the two elements are on different sides of 360 degrees
-                                switch (l_Difference)
+                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Azimuth property");
+                                double actualAzimuth = telescopeDevice.Azimuth;
+
+                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Altitude property");
+                                double actualAltitude = telescopeDevice.Altitude;
+
+                                double azimuthDifference = Math.Abs(actualAzimuth - targetAzimuth);
+                                if (azimuthDifference > 350.0d) azimuthDifference = 360.0d - azimuthDifference; // Deal with the case where the two elements are on different sides of 360 degrees
+
+                                if (azimuthDifference <= settings.TelescopeSlewTolerance)
                                 {
-                                    case var case2 when case2 <= 1.0d / 3600.0d: // seconds
-                                        {
-                                            LogOK(p_Name, "Slewed to target Azimuth OK: " + FormatAzimuth(m_TargetAzimuth));
-                                            break;
-                                        }
-
-                                    case var case3 when case3 <= settings.TelescopeSlewTolerance:
-                                        {
-                                            LogInfo(p_Name, $"Slewed {l_Difference:0.0} degree(s) away from Azimuth target: {TelescopeTester.FormatAzimuth(m_TargetAzimuth)} Reported Azimuth: {TelescopeTester.FormatAzimuth(l_ActualAzimuth)}. Tolerance ±{settings.TelescopeSlewTolerance} degrees.");
-                                            break;
-                                        }
-
-                                    default:
-                                        {
-                                            LogIssue(p_Name, $"Slewed {l_Difference:0.0} degree(s) away from Azimuth target: {TelescopeTester.FormatAzimuth(m_TargetAzimuth)} Reported Azimuth: {TelescopeTester.FormatAzimuth(l_ActualAzimuth)}. Tolerance ±{settings.TelescopeSlewTolerance} degrees.");
-                                            break;
-                                        }
+                                    LogOK(p_Name, $"Slewed to target Azimuth OK within tolerance: {settings.TelescopeSlewTolerance} arc seconds. Actual Azimuth: {FormatAzimuth(actualAzimuth)}, Target Azimuth: {FormatAzimuth(targetAzimuth)}");
+                                }
+                                else
+                                {
+                                    LogIssue(p_Name, $"Slewed {azimuthDifference:0.0} arc seconds away from Azimuth target: {FormatAzimuth(targetAzimuth)} Actual Azimuth: {FormatAzimuth(actualAzimuth)}. Tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
                                 }
 
-                                l_Difference = Math.Abs(l_ActualAltitude - m_TargetAltitude);
-                                switch (l_Difference)
+                                double altitudeDifference = Math.Abs(actualAltitude - targetAltitude);
+                                if (altitudeDifference <= settings.DomeSlewTolerance)
                                 {
-                                    case var case4 when case4 <= 1.0d / 3600.0d: // <1 seconds
-                                        {
-                                            LogOK(p_Name, $"Slewed to target Altitude OK: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
-                                            break;
-                                        }
-
-                                    case var case5 when case5 <= settings.TelescopeSlewTolerance:
-                                        {
-                                            LogInfo(p_Name, $"Slewed {l_Difference:0.0} degree(s) away from Altitude target: {TelescopeTester.FormatAltitude(m_TargetAltitude)} Reported Altitude: {TelescopeTester.FormatAltitude(l_ActualAltitude)}. Tolerance ±{settings.TelescopeSlewTolerance} degrees.");
-                                            break;
-                                        }
-
-                                    default:
-                                        {
-                                            LogIssue(p_Name, $"Slewed {l_Difference:0.0} degree(s) away from Altitude target: {TelescopeTester.FormatAltitude(m_TargetAltitude)} Reported Altitude: {TelescopeTester.FormatAltitude(l_ActualAltitude)}. Tolerance ±{settings.TelescopeSlewTolerance} degrees.");
-                                            break;
-                                        }
-                                } // Do nothing
+                                    LogOK(p_Name, $"Slewed to target Altitude OK within tolerance: {settings.TelescopeSlewTolerance} arc seconds. Actual Altitude: {FormatAltitude(actualAltitude)}, Target Altitude: {FormatAltitude(targetAltitude)}");
+                                }
+                                else
+                                {
+                                    LogIssue(p_Name, $"Slewed {altitudeDifference:0.0} degree(s) away from Altitude target: {FormatAltitude(targetAltitude)} Actual Altitude: {FormatAltitude(actualAltitude)}. Tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
+                                }
 
                                 break;
                             }
 
-                        default:
+                        default: // Do nothing
                             {
                                 break;
                             }
@@ -4220,19 +4159,19 @@ namespace ConformU
                         try
                         {
                             Status(StatusType.staAction, "Slew underway");
-                            m_TargetRightAscension = BadCoordinate1;
-                            m_TargetDeclination = 0.0d;
+                            targetRightAscension = BadCoordinate1;
+                            targetDeclination = 0.0d;
                             if (p_Test == SlewSyncType.SlewToCoordinates)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
-                                telescopeDevice.SlewToCoordinates(m_TargetRightAscension, m_TargetDeclination);
+                                    LogTestAndMessage(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
+                                telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination);
                             }
                             else
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
-                                telescopeDevice.SlewToCoordinatesAsync(m_TargetRightAscension, m_TargetDeclination);
+                                    LogTestAndMessage(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
+                                telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
                             }
 
                             Status(StatusType.staAction, "Attempting to abort slew");
@@ -4246,30 +4185,30 @@ namespace ConformU
                             {
                             } // Attempt to stop any motion that has actually started
 
-                            LogIssue(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(m_TargetRightAscension));
+                            LogIssue(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(targetRightAscension));
                         }
                         catch (Exception ex)
                         {
                             Status(StatusType.staAction, "Slew rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + FormatRA(m_TargetRightAscension));
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + FormatRA(targetRightAscension));
                         }
 
                         try
                         {
                             Status(StatusType.staAction, "Slew underway");
-                            m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
-                            m_TargetDeclination = BadCoordinate2;
+                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
+                            targetDeclination = BadCoordinate2;
                             if (p_Test == SlewSyncType.SlewToCoordinates)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
-                                telescopeDevice.SlewToCoordinates(m_TargetRightAscension, m_TargetDeclination);
+                                    LogTestAndMessage(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
+                                telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination);
                             }
                             else
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
-                                telescopeDevice.SlewToCoordinatesAsync(m_TargetRightAscension, m_TargetDeclination);
+                                    LogTestAndMessage(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
+                                telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
                             }
 
                             Status(StatusType.staAction, "Attempting to abort slew");
@@ -4283,12 +4222,12 @@ namespace ConformU
                             {
                             } // Attempt to stop any motion that has actually started
 
-                            LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(m_TargetDeclination));
+                            LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(targetDeclination));
                         }
                         catch (Exception ex)
                         {
                             Status(StatusType.staAction, "Slew rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + FormatDec(m_TargetDeclination));
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + FormatDec(targetDeclination));
                         }
 
                         break;
@@ -4308,33 +4247,33 @@ namespace ConformU
                         try
                         {
                             Status(StatusType.staAction, "Sync underway");
-                            m_TargetRightAscension = BadCoordinate1;
-                            m_TargetDeclination = 0.0d;
+                            targetRightAscension = BadCoordinate1;
+                            targetDeclination = 0.0d;
                             if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to call SyncToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
-                            telescopeDevice.SyncToCoordinates(m_TargetRightAscension, m_TargetDeclination);
-                            LogIssue(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(m_TargetRightAscension));
+                                LogTestAndMessage(p_Name, "About to call SyncToCoordinates method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
+                            telescopeDevice.SyncToCoordinates(targetRightAscension, targetDeclination);
+                            LogIssue(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(targetRightAscension));
                         }
                         catch (Exception ex)
                         {
                             Status(StatusType.staAction, "Sync rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + FormatRA(m_TargetRightAscension));
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + FormatRA(targetRightAscension));
                         }
 
                         try
                         {
                             Status(StatusType.staAction, "Sync underway");
-                            m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -3.0d);
-                            m_TargetDeclination = BadCoordinate2;
+                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -3.0d);
+                            targetDeclination = BadCoordinate2;
                             if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to call SyncToCoordinates method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(m_TargetDeclination));
-                            telescopeDevice.SyncToCoordinates(m_TargetRightAscension, m_TargetDeclination);
-                            LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(m_TargetDeclination));
+                                LogTestAndMessage(p_Name, "About to call SyncToCoordinates method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
+                            telescopeDevice.SyncToCoordinates(targetRightAscension, targetDeclination);
+                            LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(targetDeclination));
                         }
                         catch (Exception ex)
                         {
                             Status(StatusType.staAction, "Sync rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + FormatDec(m_TargetDeclination));
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + FormatDec(targetDeclination));
                         }
 
                         break;
@@ -4355,17 +4294,17 @@ namespace ConformU
                         try
                         {
                             Status(StatusType.staAction, "Slew underway");
-                            m_TargetRightAscension = BadCoordinate1;
-                            m_TargetDeclination = 0.0d;
+                            targetRightAscension = BadCoordinate1;
+                            targetDeclination = 0.0d;
                             if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
-                            telescopeDevice.TargetRightAscension = m_TargetRightAscension;
+                                LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(targetRightAscension));
+                            telescopeDevice.TargetRightAscension = targetRightAscension;
                             // Successfully set bad RA coordinate so now set the good Dec coordinate and see whether the move fails when the slew is attempted
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
-                                telescopeDevice.TargetDeclination = m_TargetDeclination;
+                                    LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(targetDeclination));
+                                telescopeDevice.TargetDeclination = targetDeclination;
                             }
                             catch
                             {
@@ -4397,33 +4336,33 @@ namespace ConformU
                                 {
                                 } // Attempt to stop any motion that has actually started
 
-                                LogIssue(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(m_TargetRightAscension));
+                                LogIssue(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(targetRightAscension));
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
                                 Status(StatusType.staAction, "Slew rejected");
-                                HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + FormatRA(m_TargetRightAscension));
+                                HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + FormatRA(targetRightAscension));
                             }
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad RA coordinate", "Telescope.TargetRA correctly rejected bad RA coordinate: " + FormatRA(m_TargetRightAscension));
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad RA coordinate", "Telescope.TargetRA correctly rejected bad RA coordinate: " + FormatRA(targetRightAscension));
                         }
 
                         try
                         {
                             Status(StatusType.staAction, "Slew underway");
-                            m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
-                            m_TargetDeclination = BadCoordinate2;
+                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
+                            targetDeclination = BadCoordinate2;
                             if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
-                            telescopeDevice.TargetDeclination = m_TargetDeclination;
+                                LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(targetDeclination));
+                            telescopeDevice.TargetDeclination = targetDeclination;
                             // Successfully set bad Dec coordinate so now set the good RA coordinate and see whether the move fails when the slew is attempted
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
-                                telescopeDevice.TargetRightAscension = m_TargetRightAscension;
+                                    LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(targetRightAscension));
+                                telescopeDevice.TargetRightAscension = targetRightAscension;
                             }
                             catch
                             {
@@ -4455,17 +4394,17 @@ namespace ConformU
                                 {
                                 } // Attempt to stop any motion that has actually started
 
-                                LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(m_TargetDeclination));
+                                LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(targetDeclination));
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
                                 Status(StatusType.staAction, "Slew rejected");
-                                HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + FormatDec(m_TargetDeclination));
+                                HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + FormatDec(targetDeclination));
                             }
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad Dec coordinate", "Telescope.TargetDeclination correctly rejected bad Dec coordinate: " + FormatDec(m_TargetDeclination));
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad Dec coordinate", "Telescope.TargetDeclination correctly rejected bad Dec coordinate: " + FormatDec(targetDeclination));
                         }
 
                         break;
@@ -4485,17 +4424,17 @@ namespace ConformU
                         try
                         {
                             Status(StatusType.staAction, "Sync underway");
-                            m_TargetRightAscension = BadCoordinate1;
-                            m_TargetDeclination = 0.0d;
+                            targetRightAscension = BadCoordinate1;
+                            targetDeclination = 0.0d;
                             if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
-                            telescopeDevice.TargetRightAscension = m_TargetRightAscension;
+                                LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(targetRightAscension));
+                            telescopeDevice.TargetRightAscension = targetRightAscension;
                             // Successfully set bad RA coordinate so now set the good Dec coordinate and see whether the move fails when the slew is attempted
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
-                                telescopeDevice.TargetDeclination = m_TargetDeclination;
+                                    LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(targetDeclination));
+                                telescopeDevice.TargetDeclination = targetDeclination;
                             }
                             catch
                             {
@@ -4506,33 +4445,33 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call SyncToTarget method");
                                 telescopeDevice.SyncToTarget();
-                                LogIssue(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(m_TargetRightAscension));
+                                LogIssue(p_Name, "Failed to reject bad RA coordinate: " + FormatRA(targetRightAscension));
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
                                 Status(StatusType.staAction, "Sync rejected");
-                                HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + FormatRA(m_TargetRightAscension));
+                                HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + FormatRA(targetRightAscension));
                             }
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad RA coordinate", "Telescope.TargetRA correctly rejected bad RA coordinate: " + FormatRA(m_TargetRightAscension));
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad RA coordinate", "Telescope.TargetRA correctly rejected bad RA coordinate: " + FormatRA(targetRightAscension));
                         }
 
                         try
                         {
                             Status(StatusType.staAction, "Sync underway");
-                            m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -3.0d);
-                            m_TargetDeclination = BadCoordinate2;
+                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -3.0d);
+                            targetDeclination = BadCoordinate2;
                             if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(m_TargetDeclination));
-                            telescopeDevice.TargetDeclination = m_TargetDeclination;
+                                LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(targetDeclination));
+                            telescopeDevice.TargetDeclination = targetDeclination;
                             // Successfully set bad Dec coordinate so now set the good RA coordinate and see whether the move fails when the slew is attempted
                             try
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(m_TargetRightAscension));
-                                telescopeDevice.TargetRightAscension = m_TargetRightAscension;
+                                    LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(targetRightAscension));
+                                telescopeDevice.TargetRightAscension = targetRightAscension;
                             }
                             catch
                             {
@@ -4543,17 +4482,17 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call SyncToTarget method");
                                 telescopeDevice.SyncToTarget();
-                                LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(m_TargetDeclination));
+                                LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + FormatDec(targetDeclination));
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
                                 Status(StatusType.staAction, "Sync rejected");
-                                HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + FormatDec(m_TargetDeclination));
+                                HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + FormatDec(targetDeclination));
                             }
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad Dec coordinate", "Telescope.TargetDeclination correctly rejected bad Dec coordinate: " + FormatDec(m_TargetDeclination));
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad Dec coordinate", "Telescope.TargetDeclination correctly rejected bad Dec coordinate: " + FormatDec(targetDeclination));
                         }
 
                         break;
@@ -4574,19 +4513,19 @@ namespace ConformU
                         try
                         {
                             Status(StatusType.staAction, "Slew underway");
-                            m_TargetAltitude = BadCoordinate1;
-                            m_TargetAzimuth = 45.0d;
+                            targetAltitude = BadCoordinate1;
+                            targetAzimuth = 45.0d;
                             if (p_Test == SlewSyncType.SlewToAltAz)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
-                                telescopeDevice.SlewToAltAz(m_TargetAzimuth, m_TargetAltitude);
+                                    LogTestAndMessage(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
+                                telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
                             }
                             else
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About To call SlewToAltAzAsync method, Altitude:  " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
-                                telescopeDevice.SlewToAltAzAsync(m_TargetAzimuth, m_TargetAltitude);
+                                    LogTestAndMessage(p_Name, "About To call SlewToAltAzAsync method, Altitude:  " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
+                                telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
                             }
 
                             Status(StatusType.staAction, "Attempting to abort slew");
@@ -4600,30 +4539,30 @@ namespace ConformU
                             {
                             } // Attempt to stop any motion that has actually started
 
-                            LogIssue(p_Name, $"Failed to reject bad Altitude coordinate: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
+                            LogIssue(p_Name, $"Failed to reject bad Altitude coordinate: {TelescopeTester.FormatAltitude(targetAltitude)}");
                         }
                         catch (Exception ex)
                         {
                             Status(StatusType.staAction, "Slew rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {TelescopeTester.FormatAltitude(targetAltitude)}");
                         }
 
                         try
                         {
                             Status(StatusType.staAction, "Slew underway");
-                            m_TargetAltitude = 45.0d;
-                            m_TargetAzimuth = BadCoordinate2;
+                            targetAltitude = 45.0d;
+                            targetAzimuth = BadCoordinate2;
                             if (p_Test == SlewSyncType.SlewToAltAz)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
-                                telescopeDevice.SlewToAltAz(m_TargetAzimuth, m_TargetAltitude);
+                                    LogTestAndMessage(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
+                                telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
                             }
                             else
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call SlewToAltAzAsync method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
-                                telescopeDevice.SlewToAltAzAsync(m_TargetAzimuth, m_TargetAltitude);
+                                    LogTestAndMessage(p_Name, "About to call SlewToAltAzAsync method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
+                                telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
                             }
 
                             Status(StatusType.staAction, "Attempting to abort slew");
@@ -4637,12 +4576,12 @@ namespace ConformU
                             {
                             } // Attempt to stop any motion that has actually started
 
-                            LogIssue(p_Name, "Failed to reject bad Azimuth coordinate: " + FormatAzimuth(m_TargetAzimuth));
+                            LogIssue(p_Name, "Failed to reject bad Azimuth coordinate: " + FormatAzimuth(targetAzimuth));
                         }
                         catch (Exception ex)
                         {
                             Status(StatusType.staAction, "Slew rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Azimuth coordinate", "Correctly rejected bad Azimuth coordinate: " + FormatAzimuth(m_TargetAzimuth));
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Azimuth coordinate", "Correctly rejected bad Azimuth coordinate: " + FormatAzimuth(targetAzimuth));
                         }
 
                         break;
@@ -4662,33 +4601,33 @@ namespace ConformU
                         try
                         {
                             Status(StatusType.staAction, "Sync underway");
-                            m_TargetAltitude = BadCoordinate1;
-                            m_TargetAzimuth = 45.0d;
+                            targetAltitude = BadCoordinate1;
+                            targetAzimuth = 45.0d;
                             if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to call SyncToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
-                            telescopeDevice.SyncToAltAz(m_TargetAzimuth, m_TargetAltitude);
-                            LogIssue(p_Name, $"Failed to reject bad Altitude coordinate: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
+                                LogTestAndMessage(p_Name, "About to call SyncToAltAz method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
+                            telescopeDevice.SyncToAltAz(targetAzimuth, targetAltitude);
+                            LogIssue(p_Name, $"Failed to reject bad Altitude coordinate: {TelescopeTester.FormatAltitude(targetAltitude)}");
                         }
                         catch (Exception ex)
                         {
                             Status(StatusType.staAction, "Sync rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {TelescopeTester.FormatAltitude(m_TargetAltitude)}");
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {TelescopeTester.FormatAltitude(targetAltitude)}");
                         }
 
                         try
                         {
                             Status(StatusType.staAction, "Sync underway");
-                            m_TargetAltitude = 45.0d;
-                            m_TargetAzimuth = BadCoordinate2;
+                            targetAltitude = 45.0d;
+                            targetAzimuth = BadCoordinate2;
                             if (settings.DisplayMethodCalls)
-                                LogTestAndMessage(p_Name, "About to call SyncToAltAz method, Altitude: " + FormatDec(m_TargetAltitude) + ", Azimuth: " + FormatDec(m_TargetAzimuth));
-                            telescopeDevice.SyncToAltAz(m_TargetAzimuth, m_TargetAltitude);
-                            LogIssue(p_Name, "Failed to reject bad Azimuth coordinate: " + FormatAzimuth(m_TargetAzimuth));
+                                LogTestAndMessage(p_Name, "About to call SyncToAltAz method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
+                            telescopeDevice.SyncToAltAz(targetAzimuth, targetAltitude);
+                            LogIssue(p_Name, "Failed to reject bad Azimuth coordinate: " + FormatAzimuth(targetAzimuth));
                         }
                         catch (Exception ex)
                         {
                             Status(StatusType.staAction, "Sync rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Azimuth coordinate", "Correctly rejected bad Azimuth coordinate: " + FormatAzimuth(m_TargetAzimuth));
+                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Azimuth coordinate", "Correctly rejected bad Azimuth coordinate: " + FormatAzimuth(targetAzimuth));
                         }
 
                         break;
@@ -5464,18 +5403,18 @@ namespace ConformU
                         case OptionalMethodType.DestinationSideOfPier:
                             {
                                 // Get the DestinationSideOfPier for a target in the West i.e. for a German mount when the tube is on the East side of the pier
-                                m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -l_TestRAOffset);
+                                targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -l_TestRAOffset);
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(l_TestDec));
-                                m_DestinationSideOfPierEast = (PointingState)telescopeDevice.DestinationSideOfPier(m_TargetRightAscension, l_TestDec);
-                                LogDebug(p_Name, "German mount - scope on the pier's East side, target in the West : " + FormatRA(m_TargetRightAscension) + " " + FormatDec(l_TestDec) + " " + m_DestinationSideOfPierEast.ToString());
+                                    LogTestAndMessage(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(l_TestDec));
+                                m_DestinationSideOfPierEast = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, l_TestDec);
+                                LogDebug(p_Name, "German mount - scope on the pier's East side, target in the West : " + FormatRA(targetRightAscension) + " " + FormatDec(l_TestDec) + " " + m_DestinationSideOfPierEast.ToString());
 
                                 // Get the DestinationSideOfPier for a target in the East i.e. for a German mount when the tube is on the West side of the pier
-                                m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, l_TestRAOffset);
+                                targetRightAscension = TelescopeRAFromSiderealTime(p_Name, l_TestRAOffset);
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(l_TestDec));
-                                m_DestinationSideOfPierWest = (PointingState)telescopeDevice.DestinationSideOfPier(m_TargetRightAscension, l_TestDec);
-                                LogDebug(p_Name, "German mount - scope on the pier's West side, target in the East: " + FormatRA(m_TargetRightAscension) + " " + FormatDec(l_TestDec) + " " + m_DestinationSideOfPierWest.ToString());
+                                    LogTestAndMessage(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(l_TestDec));
+                                m_DestinationSideOfPierWest = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, l_TestDec);
+                                LogDebug(p_Name, "German mount - scope on the pier's West side, target in the East: " + FormatRA(targetRightAscension) + " " + FormatDec(l_TestDec) + " " + m_DestinationSideOfPierWest.ToString());
 
                                 // Make sure that we received two valid values i.e. that neither side returned PierSide.Unknown and that the two valid returned values are not the same i.e. we got one PointingState.Normal and one PointingState.ThroughThePole
                                 if (m_DestinationSideOfPierEast == PointingState.Unknown | m_DestinationSideOfPierWest == PointingState.Unknown)
@@ -5836,10 +5775,10 @@ namespace ConformU
 
                         case OptionalMethodType.DestinationSideOfPier:
                             {
-                                m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -1.0d);
+                                targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -1.0d);
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(m_TargetRightAscension) + ", Declination: " + FormatDec(0.0d));
-                                m_DestinationSideOfPier = (PointingState)telescopeDevice.DestinationSideOfPier(m_TargetRightAscension, 0.0d);
+                                    LogTestAndMessage(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(0.0d));
+                                m_DestinationSideOfPier = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, 0.0d);
                                 break;
                             }
 
@@ -6787,6 +6726,7 @@ namespace ConformU
         private void CheckScopePosition(string testName, string functionName, double expectedRA, double expectedDec)
         {
             double actualRA, actualDec, difference;
+
             if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to get RightAscension property");
             actualRA = telescopeDevice.RightAscension;
             LogDebug(testName, "Read RightAscension: " + FormatRA(actualRA));
@@ -6797,47 +6737,25 @@ namespace ConformU
 
             // Check that we have actually arrived where we are expected to be
             difference = RaDifferenceInArcSeconds(actualRA, expectedRA); // Convert RA difference to arc seconds
-            switch (difference)
+
+            if (difference <= settings.TelescopeSlewTolerance)
             {
-                case var @case when @case <= SLEW_SYNC_OK_TOLERANCE: // 10 seconds 
-                    {
-                        LogOK(testName, $"{functionName} OK. RA:   {FormatRA(expectedRA)}");
-                        break;
-                    }
+                LogOK(testName, $"{functionName} OK within tolerance: ±{settings.TelescopeSlewTolerance} arc seconds. Actual RA: {FormatRA(actualRA)}, Target RA: {FormatRA(expectedRA)}");
 
-                case var @case when @case <= settings.TelescopeSlewTolerance * 3600.0:
-                    {
-                        LogInfo(testName, $"{functionName} {difference:0.0} arc seconds from the expected RA: {FormatRA(expectedRA)}. Reported RA: {FormatRA(actualRA)}. Tolerance: ±{settings.TelescopeSlewTolerance} degrees.");
-                        break;
-                    }
-
-                default:
-                    {
-                        LogIssue(testName, $"{functionName} {difference:0.0} arc seconds from the expected RA: {FormatRA(expectedRA)}. Reported RA: {FormatRA(actualRA)}. Tolerance: ±{settings.TelescopeSlewTolerance} degrees.");
-                        break;
-                    }
+            }
+            else
+            {
+                LogIssue(testName, $"{functionName} {difference:0.0} arc seconds away from RA target: {FormatRA(expectedRA)} Actual RA: {FormatRA(actualRA)}. Tolerance: ±{settings.TelescopeSlewTolerance} arc seconds");
             }
 
-            difference = Math.Round(Math.Abs(actualDec - expectedDec) * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero); // Dec difference is in arc seconds from degrees of Declination
-            switch (difference)
+            difference = Math.Round(Math.Abs(actualDec - expectedDec) * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero);
+            if (difference <= settings.TelescopeSlewTolerance) // Dec difference is in arc seconds from degrees of Declination
             {
-                case var case1 when case1 <= SLEW_SYNC_OK_TOLERANCE:
-                    {
-                        LogOK(testName, string.Format("{0} OK. DEC: {1}", functionName, FormatDec(expectedDec)));
-                        break;
-                    }
-
-                case var @case when @case <= settings.TelescopeSlewTolerance * 3600.0:
-                    {
-                        LogInfo(testName, $"{functionName} {difference:0.0} arc seconds from the expected DEC: {FormatDec(expectedDec)}. Reported DEC: {FormatDec(expectedDec)}. Tolerance: ±{settings.TelescopeSlewTolerance} degrees.");
-                        break;
-                    }
-
-                default:
-                    {
-                        LogIssue(testName, $"{functionName} {difference:0.0} arc seconds from the expected DEC: {FormatDec(expectedDec)}. Reported DEC: {FormatDec(expectedDec)}. Tolerance: ±{settings.TelescopeSlewTolerance} degrees.");
-                        break;
-                    }
+                LogOK(testName, $"{functionName} OK within tolerance: ±{settings.TelescopeSlewTolerance} arc seconds. Actual DEC: {FormatDec(actualDec)}, Target DEC: {FormatDec(expectedDec)}");
+            }
+            else
+            {
+                LogIssue(testName, $"{functionName} {difference:0.0} arc seconds from the expected DEC: {FormatDec(expectedDec)}. Actual DEC: {FormatDec(actualDec)}. Tolerance: ±{settings.TelescopeSlewTolerance} degrees.");
             }
         }
 
