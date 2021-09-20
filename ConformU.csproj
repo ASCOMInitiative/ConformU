@@ -32,6 +32,8 @@
   <!-- Always ignore MSB3042 warning - Flags that Namespace/Class is inside a compiler conditional expression -->
   <PropertyGroup>
     <NoWarn>1701;1702;MSB3042</NoWarn>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="publish\**" />

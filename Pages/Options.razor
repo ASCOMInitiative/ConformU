@@ -22,7 +22,7 @@
 
         @*Conform configuration*@
         <RadzenTabsItem Text="Conform">
-            <div class="row" style="margin-top:@topMargin;">
+            <div class="row" style="margin-top: 10px">
                 <RadzenCard Style="margin-bottom: 20px; margin-right: 20px">
                     <h3 style="color: #479cc8; margin-bottom: 0;">Test Scope</h3>
                     <RadzenCheckBoxList @bind-Value=@conformanceTestScope TValue="int" Orientation="Orientation.Vertical" Change=@(args => OnConformTestScopeChange(args))>
@@ -77,7 +77,7 @@
 
         @*Alpaca and COM configuration*@
         <RadzenTabsItem Text=@alpacaAndComText>
-            <div class="row" style="margin-top:@topMargin;">
+            <div class="row" style="margin-top: 10px">
                 <RadzenCard Style="width:510px; margin-left: 10px; margin-bottom: 20px;  margin-right: 20px">
                     <h3 style="color: #479cc8; margin-bottom: 0;">Alpaca Discovery and Access</h3>
 
@@ -258,7 +258,7 @@
 
         @*Camera configuration*@
         <RadzenTabsItem Text="Camera">
-            <h3 style="margin-top:@topMargin;">Conform will normally test camera imaging at all supported bin values that the camera reports through MaxBinX and MaxBinY.</h3>
+            <h3 style="margin-top: 10px">Conform will normally test camera imaging at all supported bin values that the camera reports through MaxBinX and MaxBinY.</h3>
 
             <div style="margin-top:40px" class="row">
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraTestMaxBinX" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraMaxBinX)) />
@@ -287,7 +287,7 @@
 
         @*Dome configuration*@
         <RadzenTabsItem Text="Dome">
-            <h3 style="margin-top:@topMargin;">These settings control how long Conform waits for actions to complete before reporting a timeout.</h3>
+            <h3 style="margin-top: 10px">These settings control how long Conform waits for actions to complete before reporting a timeout.</h3>
 
             <div style="margin-top:20px" class="row">
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeShutterTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.DomeShutterTimeout)) />
@@ -331,7 +331,7 @@
 
         @*ObservingConditions  configuration*@
         <RadzenTabsItem Text="ObservingConditions">
-            <h3 style="margin-top:@topMargin;">These settings control how long Conform waits for actions to complete before reporting a timeout.</h3>
+            <h3 style="margin-top: 10px">These settings control how long Conform waits for actions to complete before reporting a timeout.</h3>
 
             <div style="margin-top:20px" class="row">
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="observingConditionsMaxRetries" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.ObservingConditionsMaxRetries)) />
@@ -346,7 +346,7 @@
 
         @*Switch configuration*@
         <RadzenTabsItem Text="Switch">
-            <h3 style="margin-top:@topMargin;">These settings control how much delay is added after reading or writing to a switch to enable it to settle.</h3>
+            <h3 style="margin-top: 10px">These settings control how much delay is added after reading or writing to a switch to enable it to settle.</h3>
 
             <div style="margin-top:20px" class="row">
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchReadDelay" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.SwitchReadDelay)) />
@@ -394,7 +394,6 @@
 
     private ServiceType alpacaServiceType;
 
-    const string topMargin = "10px";
     private bool isWindowsOs;
 
     private enum NumericConfigurationItem

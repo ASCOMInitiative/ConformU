@@ -44,7 +44,6 @@ namespace ConformU
                 options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromSeconds(300);
             });
 
-
             // Conform components
             #region Conform logger
 
