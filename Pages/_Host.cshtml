@@ -100,8 +100,17 @@
     <script>
         // Return position information for a control with the supplied element ID
         GetBoundingClientRect = (elementId) => {
-            return document.getElementById(elementId).getBoundingClientRect();
+            let rect = null;
+            try {
+                rect = document.getElementById(elementId).getBoundingClientRect();
+            }
+            catch (err) {
+                rect = null;
+            }
+
+            return rect;
         };
+
 
         // Return size information for the browser window
         GetBoundingWindowRect = () => {

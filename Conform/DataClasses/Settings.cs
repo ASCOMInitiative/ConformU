@@ -1,5 +1,6 @@
-﻿using AlpacaDiscovery;
+﻿//using AlpacaDiscovery;
 using ASCOM;
+using ASCOM.Standard.Discovery;
 using System;
 using System.Collections.Generic;
 using System.Linq;

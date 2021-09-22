@@ -1,7 +1,7 @@
 ﻿@page "/DeviceSelection"
 @using ASCOM.Standard.Discovery
 @using System.Net
-@using AlpacaDiscovery
+@*@using AlpacaDiscovery*@
 @using System.Threading
 @using static ConformU.Globals
 
@@ -45,7 +45,7 @@
                 <div class="row">
 
                     @* Alpaca device selection radio buttons *@
-                    <RadzenCard Style="margin-bottom: 20px; min-height:155px;  height:fit-content; margin-right: 20px; overflow: auto;">
+                    <RadzenCard Id="Devices" Style="margin-bottom: 20px; min-height:155px;  height:fit-content; margin-right: 20px; overflow: auto;">
                         <h3 style="color: #479cc8; margin-bottom:-4px">Automatically Discovered Devices</h3>
                         <RadzenRadioButtonList @bind-Value=@ascomDevice
                                                Orientation="Orientation.Vertical"
@@ -58,11 +58,12 @@
                     </RadzenCard>
 
                     @* Alpaca discovery progress information *@
-                    <RadzenCard Style="width: 500px; margin-bottom: 20px; height: stretch">
+                    <RadzenCard Id="StatusContainer" Style="margin-bottom: 20px; height: fit-content; overflow: auto;">
                         <h3 style="color: #479cc8; margin-bottom:10px">Discovery Status</h3>
-                        <RadzenTextArea Style="line-height:1.5; height: stretch;"
-                                        Cols="300"
-                                        Rows="@statusBoxHeight"
+                        <RadzenTextArea Style="line-height: 1.5"
+                                        Id="DiscoveryStatus"
+                                        Rows="1"
+                                        Cols=@statusWidthCols
                                         ReadOnly="true"
                                         @bind-Value=@alpacaDiscoveryProgress />
 
@@ -160,11 +161,11 @@
     string manualIpAddress = "127.0.0.1";
     int manualPortNumber = 11111;
     int manualAlpacaDeviceNumber = 0;
+    int statusWidthCols = 20;
 
     AscomDevice ascomDevice;
     ComDevice comDevice;
     bool discoveryInProgress = false;
-    int statusBoxHeight = 0; // Number of rows in the status box list ==> Determnines the height of the box
     List<string> validAscomdDeviceTypes = new() { DeviceType.Telescope.ToString(), DeviceType.Camera.ToString(), DeviceType.CoverCalibrator.ToString(), DeviceType.Dome.ToString(), DeviceType.FilterWheel.ToString(), DeviceType.Focuser.ToString(), DeviceType.ObservingConditions.ToString(), DeviceType.Rotator.ToString(), DeviceType.SafetyMonitor.ToString(), DeviceType.Switch.ToString(), DeviceType.Video.ToString() };
     DeviceType selectedDeviceType; // DeviceType of the selected device
     string selectedDeviceTypeString; // String representation of the currently selected DeviceType
@@ -182,6 +183,34 @@
     ComDevice selectedComDevice; // Details of the currently selected COM device
 
     List<string> discoveredAlpacaDevices = new();
+
+
+    /// <summary>
+    /// Resize the status text area so that it does not display a scroll bar
+    /// </summary>
+    /// <returns></returns>
+    async Task ResizeStatusHeight()
+    {
+        var result = await JS.InvokeAsync<object>("eval", new object[] { @"(function() {
+        DiscoveryStatus.style.height='auto';
+        DiscoveryStatus.style.height=(DiscoveryStatus.scrollHeight + 2)+'px';
+        return DiscoveryStatus.scrollHeight;
+        })()"
+        });
+
+    }
+
+    private async void ResizeStatusArea()
+    {
+        // Set the width of the text area so that no lines are broken
+        string[] discoveryStatusLines = alpacaDiscoveryProgress.Split("\n");
+        statusWidthCols = discoveryStatusLines.OrderByDescending(s => s.Length).First().Length + 2;
+
+        // Set the height of the text area
+        await ResizeStatusHeight();
+    }
+
+
 
     #region Initialisation and Load
 
@@ -394,18 +423,10 @@
 
     #region Alpaca discovery event handlers
 
-    private void SetStatusAreaHeight()
-    {
-        if (statusBoxHeight < 20)
-        {
-            statusBoxHeight += 1;
-        }
-    }
-
-    private void AlpacaDiscoveryCompleted(object caller, EventArgs args)
+    private async void AlpacaDiscoveryCompleted(object caller, EventArgs args)
     {
         alpacaDiscoveryProgress += $"Discovery complete!";
-        SetStatusAreaHeight();
+        ResizeStatusArea();
         ascomDevices = new();
         foreach (AscomDevice device in discovery.GetAscomDevices(Enum.Parse<DeviceType>(selectedDeviceTypeString).ToString()))
         {
@@ -418,10 +439,10 @@
 
         ascomDevices.Sort((a, b) => a.DisplayName.CompareTo(b.DisplayName));
 
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
     }
 
-    private void AlpacaDeviceDiscovered(object caller, EventArgs args)
+    private async void AlpacaDeviceDiscovered(object caller, EventArgs args)
     {
         List<AscomDevice> newDevices = discovery.GetAscomDevices(Enum.Parse<DeviceType>(selectedDeviceTypeString).ToString());
 
@@ -432,12 +453,12 @@
             {
                 discoveredAlpacaDevices.Add(deviceKey);
                 alpacaDiscoveryProgress += $"{deviceKey}\r\n";
-                SetStatusAreaHeight();
+                ResizeStatusArea();
             }
         }
         //conformLogger.LogDebug("AlpacaDeviceDiscovered", $"Found {newDevices.Count} devices.");
 
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
     }
 
     #endregion
@@ -490,7 +511,6 @@
             discoveredAlpacaDevices.Clear();
             discoveryInProgress = true;
             alpacaDiscoveryProgress = $"Discovery started (Duration {configuration.Settings.AlpacaConfiguration.DiscoveryDuration:0.0} seconds)...\r\n";
-            statusBoxHeight = 1; // Initual status area height
             Task t = Task.Run(() =>
                 discovery.StartDiscovery(configuration.Settings.AlpacaConfiguration.NumberOfDiscoveryPolls,
                 (int)(configuration.Settings.AlpacaConfiguration.DiscoveryPollInterval * 1000),

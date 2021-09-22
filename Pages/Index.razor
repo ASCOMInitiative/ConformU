@@ -221,21 +221,27 @@ string statusMessage = "Linux build";
             // Get the browsers's width / height
             // Find the current position of the Conform log text area in the viewport
             BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ConformLog");
+            if (result is not null)
+            {
+                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 2;
 
-            screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 2;
+                // Hide the status field at small heights
+                if (window.Height < 600) statusVisible = "none";
+                else statusVisible = "initial";
 
-            // Hide the status field at small heights
-            if (window.Height < 600) statusVisible = "none";
-            else statusVisible = "initial";
+                string browser = "";
+                browser = await JS.InvokeAsync<string>(identifier: "IdentifyBrowser");
 
-            string browser = "";
-            browser = await JS.InvokeAsync<string>(identifier: "IdentifyBrowser");
+                if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
 
-            if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
+                conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
+                await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
+            }
 
-            conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
-            await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
-
+            else
+            {
+                conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"BoundingClientRectangle is NULL - No action taken.");
+            }
         }
         catch (Exception ex)
         {
