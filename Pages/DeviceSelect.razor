@@ -204,7 +204,7 @@
     {
         // Set the width of the text area so that no lines are broken
         string[] discoveryStatusLines = alpacaDiscoveryProgress.Split("\n");
-        statusWidthCols = discoveryStatusLines.OrderByDescending(s => s.Length).First().Length + 2;
+        statusWidthCols = discoveryStatusLines.OrderByDescending(s => s.Length).First().Length + 3;
 
         // Set the height of the text area
         await ResizeStatusHeight();
