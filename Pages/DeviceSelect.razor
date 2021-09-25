@@ -4,6 +4,7 @@
 @*@using AlpacaDiscovery*@
 @using System.Threading
 @using static ConformU.Globals
+@using ASCOM.Standard.COM.DriverAccess
 
 @* Activity logger object*@
 @inject ConformLogger conformLogger
@@ -469,17 +470,19 @@
     {
         comDeviceList.Clear();
         if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Debug, $"Getting registered {selectedDeviceTypeString} drivers...");
-        Dictionary<string, string> registeredDevices = ComDevices.GetRegisteredDrivers(Enum.Parse<DeviceType>(selectedDeviceTypeString).ToString(), configuration.Settings.TraceDiscovery ? conformLogger : null);
-        foreach (KeyValuePair<string, string> kvp in registeredDevices)
+
+        // Get the registered devices using the ASOCM.Standards ProfileAccess component.
+        List<ASCOMRegistration> registeredDevices = ProfileAccess.GetDrivers(selectedDeviceTypeString);
+        foreach (ASCOMRegistration ascomRegistration in registeredDevices)
         {
-            if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Debug, $"Found device: {kvp.Key} - {kvp.Value}");
-            ComDevice comDevice = new ComDevice($"{kvp.Value} ({kvp.Key})", kvp.Key);
-            comDeviceList.Add(new ComDeviceListItem($"{kvp.Value} ({kvp.Key})", comDevice));
+            if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Debug, $"Found device: {ascomRegistration.Name} - {ascomRegistration.ProgID}");
+            ComDevice comDevice = new ComDevice($"{ascomRegistration.Name} ({ascomRegistration.ProgID})", ascomRegistration.ProgID);
+            comDeviceList.Add(new ComDeviceListItem($"{ascomRegistration.Name} ({ascomRegistration.ProgID})", comDevice));
             if ((comDevice.ProgId == configuration.Settings.ComDevice.ProgId) &
                 (comDevice.DisplayName == configuration.Settings.ComDevice.DisplayName) &
                 (configuration.Settings.DeviceTechnology == DeviceTechnology.COM))
             {
-                if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Debug, $"Selecting device : {kvp.Key} - {kvp.Value}");
+                if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Debug, $"Selecting device : {ascomRegistration.ProgID} - {ascomRegistration.Name}");
                 this.comDevice = comDevice;
             }
         }

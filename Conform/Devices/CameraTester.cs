@@ -2580,7 +2580,7 @@ namespace ConformU
 
                                                 default:
                                                     {
-                                                        l_PercentCompletedMessage = "COM - Exception: " + ex.Message + " 0x" + ex.ErrorCode.ToString("X8"); // Something bad happened!
+                                                        l_PercentCompletedMessage = "COM - Exception: " + ex.Message + " 0x" + ((int)ex.ErrorCode).ToString("X8"); // Something bad happened!
                                                         break;
                                                     }
                                             }
@@ -2954,7 +2954,7 @@ namespace ConformU
                         }
                         catch (COMException ex)
                         {
-                            LogIssue("LastExposureStartTime", EX_COM + "parsing LastExposureStartTime - " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                            LogIssue("LastExposureStartTime", EX_COM + "parsing LastExposureStartTime - " + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                         }
                         catch (Exception ex)
                         {

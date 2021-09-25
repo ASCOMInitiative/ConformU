@@ -1527,7 +1527,7 @@ namespace ConformU
                 else
                 {
 
-                    LogIssue("SiteLatitude Write", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                    LogIssue("SiteLatitude Write", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                 }
             }
             catch (Exception ex)
@@ -2442,7 +2442,7 @@ namespace ConformU
                                     }
                                     catch (COMException ex)
                                     {
-                                        LogIssue("Park", "Exception when calling Park two times in succession: " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                                        LogIssue("Park", "Exception when calling Park two times in succession: " + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                                     }
                                     catch (Exception ex)
                                     {
@@ -2575,7 +2575,7 @@ namespace ConformU
                                             }
                                             catch (COMException ex)
                                             {
-                                                LogIssue("UnPark", "Exception when calling UnPark two times in succession: " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                                                LogIssue("UnPark", "Exception when calling UnPark two times in succession: " + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                                             }
                                             catch (Exception ex)
                                             {
@@ -2584,7 +2584,7 @@ namespace ConformU
                                         }
                                         catch (COMException ex)
                                         {
-                                            LogIssue("UnPark", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                                            LogIssue("UnPark", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                                         }
                                         catch (Exception ex)
                                         {
@@ -2609,7 +2609,7 @@ namespace ConformU
                                             }
                                             else
                                             {
-                                                LogIssue("UnPark", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                                                LogIssue("UnPark", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                                             }
                                         }
                                         catch (MethodNotImplementedException)
@@ -2626,7 +2626,7 @@ namespace ConformU
                                 }
                                 catch (COMException ex)
                                 {
-                                    LogIssue("Park", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                                    LogIssue("Park", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                                 }
                                 catch (Exception ex)
                                 {
@@ -5006,7 +5006,7 @@ namespace ConformU
                 }
                 catch (COMException ex)
                 {
-                    LogIssue(p_Name + " Count", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                    LogIssue(p_Name + " Count", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                 }
                 catch (Exception ex)
                 {
@@ -5047,7 +5047,7 @@ namespace ConformU
                 }
                 catch (COMException ex)
                 {
-                    LogIssue(p_Name + " Enum", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                    LogIssue(p_Name + " Enum", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                 }
                 catch (Exception ex)
                 {
@@ -5087,7 +5087,7 @@ namespace ConformU
 
                     catch (COMException ex)
                     {
-                        LogIssue(p_Name, "COM Unable to read AxisRates object - Exception: " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                        LogIssue(p_Name, "COM Unable to read AxisRates object - Exception: " + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                         LogDebug(p_Name, "COM Unable to read AxisRates object - Exception: " + ex.ToString());
                     }
                     catch (DriverException ex)
@@ -5165,7 +5165,7 @@ namespace ConformU
             }
             catch (COMException ex)
             {
-                LogIssue(p_Name, "COM Unable to get an AxisRates object - Exception: " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                LogIssue(p_Name, "COM Unable to get an AxisRates object - Exception: " + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
             }
             catch (DriverException ex)
             {
@@ -6089,7 +6089,7 @@ namespace ConformU
                     }
                     catch (COMException ex)
                     {
-                        LogIssue(p_Name, "Unable to set a movement rate of zero - " + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                        LogIssue(p_Name, "Unable to set a movement rate of zero - " + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                     }
                     catch (DriverException ex)
                     {

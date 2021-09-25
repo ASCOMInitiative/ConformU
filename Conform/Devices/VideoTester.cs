@@ -238,7 +238,7 @@ namespace ConformU
             }
             catch (COMException ex)
             {
-                LogIssue(p_Name, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                LogIssue(p_Name, EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
             }
             catch (Exception ex)
             {
@@ -741,7 +741,7 @@ namespace ConformU
                 if (ex.ErrorCode == g_ExNotImplemented | ex.ErrorCode == ErrorCodes.NotImplemented)
                     LogOK(p_Name, NOT_IMP_COM);
                 else
-                    LogIssue(p_Name, EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                    LogIssue(p_Name, EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
 
             }
             catch (PropertyNotImplementedException)

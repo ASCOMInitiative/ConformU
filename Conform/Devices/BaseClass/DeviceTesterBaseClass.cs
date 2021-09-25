@@ -234,7 +234,7 @@ namespace ConformU
                 }
                 catch (COMException ex)
                 {
-                    LogIssue("Connected", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                    LogIssue("Connected", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                 }
                 catch (Exception ex)
                 {
@@ -342,7 +342,7 @@ namespace ConformU
                 }
                 catch (COMException ex)
                 {
-                    LogIssue("DriverVersion", EX_COM + ex.Message + " " + ex.ErrorCode.ToString("X8"));
+                    LogIssue("DriverVersion", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                 }
                 catch (Exception ex)
                 {
@@ -1258,7 +1258,7 @@ namespace ConformU
             else if (ex is COMException exception) // Handle XOM exceptions with their error code
             {
                 ComEx = exception;
-                RetVal = "COMException(0x" + ComEx.ErrorCode.ToString("X8") + ")";
+                RetVal = "COMException(0x" + ((int)ComEx.ErrorCode).ToString("X8") + ")";
             }
             else // We got something else so report it
             {
