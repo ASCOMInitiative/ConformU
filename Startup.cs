@@ -14,6 +14,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Blazorise;
+using Blazorise.Bootstrap;
+using Blazorise.Icons.FontAwesome;
 
 namespace ConformU
 {
@@ -114,6 +117,14 @@ namespace ConformU
 
             // Add event handler to detect when the browser closes
             services.AddSingleton<CircuitHandler, CircuitHandlerService>();
+
+            // Add Blazorise services
+            services.AddBlazorise(options =>
+             {
+                 options.ChangeTextOnKeyPress = true; // optional
+             })
+                .AddBootstrapProviders()
+                .AddFontAwesomeIcons();
         }
 
         /// <summary>

@@ -19,11 +19,30 @@
     <!-- Add icon library -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
+    <!-- Blazorise supoport 
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+    <link href="_content/Blazorise/blazorise.css" rel="stylesheet" />
+    <link href="_content/Blazorise.Bootstrap/blazorise.bootstrap.css" rel="stylesheet" />
+    -->
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+
+    <link href="_content/Blazorise.TreeView/blazorise.treeview.css" rel="stylesheet" />
+
 </head>
 <body>
     <app>
         <component type="typeof(App)" render-mode="Server" />
     </app>
+
+    <!-- inside of body section and after the div/app tag  -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous"></script>
+
+    <script src="_content/Blazorise/blazorise.js"></script>
+    <script src="_content/Blazorise.Bootstrap/blazorise.bootstrap.js"></script>
 
     <div id="conform-error-ui">
         <environment include="Staging,Production">
@@ -55,20 +74,20 @@
     </script>
 
     @*<script>
-            document.onkeydown = function () {
-                switch (event.keyCode) {
-                    case 116: //F5 button
-                        event.returnValue = false;
-                        event.keyCode = 0;
-                        return false;
-                    case 82: //R button
-                        if (event.ctrlKey) {
-                            event.returnValue = false;
-                            event.keyCode = 0;
-                            return false;
-                        }
-                }
-            }
+        document.onkeydown = function () {
+        switch (event.keyCode) {
+        case 116: //F5 button
+        event.returnValue = false;
+        event.keyCode = 0;
+        return false;
+        case 82: //R button
+        if (event.ctrlKey) {
+        event.returnValue = false;
+        event.keyCode = 0;
+        return false;
+        }
+        }
+        }
         </script>*@
 
     <script>

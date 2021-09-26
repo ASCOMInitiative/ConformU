@@ -1,0 +1,362 @@
+﻿@page "/AlpacaMap"
+@implements IDisposable
+@using System.Threading
+@using ASCOM.Standard.Discovery
+@using Blazorise.TreeView
+@inject IResizeListener listener
+@inject ConformLogger conformLogger
+@inject ConformConfiguration configuration
+@inject IJSRuntime JS
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@* Radzen notification service to enable pop-up alerts *@
+@inject NotificationService notificationService
+
+<h1 style=@statusVisible>Alpaca Map</h1>
+<div>
+
+    <RadzenButton Id="StartButton" Click=@(args => StartDiscovery("Starting test")) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" Disabled=@configuration.Settings.OperationInProgress />
+    <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Style="margin-bottom: 20px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
+</div>
+
+<div style=@statusVisible>
+    <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:20px; margin-right:20px" @bind-Value=@statusMessage />
+</div>
+
+<div class="col" style="margin-bottom: 16px; width: 100%">
+
+    <TreeView Nodes="alpacaDevices"
+              GetChildNodes="@(item => item.Children)"
+              HasChildNodes="@(item => item.Children?.Any() == true)">
+        <NodeContent>@context.Text</NodeContent>
+    </TreeView>
+
+</div>
+
+<div class="col" style="margin-bottom: 16px; width: 100%">
+
+    <TreeView Nodes="ascomDevices"
+              GetChildNodes="@(item => item.Children)"
+              HasChildNodes="@(item => item.Children?.Any() == true)">
+        <NodeContent>@context.Text</NodeContent>
+    </TreeView>
+
+</div>
+
+<h4>Conform Log</h4>
+<RadzenTextArea Id="ConformLog" Style="line-height: 18px; padding-bottom: 0px" Name="ScreenLog" @bind-Value=@screenLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
+
+@code {
+
+    public class TreeViewItem
+    {
+        public string Text { get; set; }
+        public List<TreeViewItem> Children { get; set; }
+    }
+
+    // Custom comparer for the Product class
+    public class AscomDeviceComparer : IEqualityComparer<AscomDevice>
+    {
+        // Products are equal if their names and product numbers are equal.
+        public bool Equals(AscomDevice x, AscomDevice y)
+        {
+
+            //Check whether the compared objects reference the same data.
+            if (Object.ReferenceEquals(x, y)) return true;
+
+            //Check whether any of the compared objects is null.
+            if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null))
+                return false;
+
+            //Check whether the products' properties are equal.
+            return x.UniqueId == y.UniqueId;
+        }
+
+        // If Equals() returns true for a pair of objects
+        // then GetHashCode() must return the same value for these objects.
+
+        public int GetHashCode(AscomDevice ascomDevice)
+        {
+            //Check whether the object is null
+            if (Object.ReferenceEquals(ascomDevice, null)) return 0;
+
+            //Get hash code for the Name field if it is not null.
+            return ascomDevice.UniqueId == null ? 0 : ascomDevice.UniqueId.GetHashCode();
+
+        }
+    }
+
+
+    List<TreeViewItem> alpacaDevices = new();
+    List<TreeViewItem> ascomDevices = new();
+
+    private string statusVisible = "display: initial";
+    private bool disposedValue;
+    int screenLogRows = 10;
+    string screenLog = "Conform log.";
+    object screenLogLockObject = new object();
+    object statusLockObject = new object();
+    string statusMessage = "";
+
+    // Task and cancellation support
+    Task conformanceTest;
+    CancellationTokenSource cancellationTokenSource;
+    CancellationToken cancelConformToken;
+
+    protected override void OnInitialized()
+    {
+        configuration.UiHasChanged += OnUiHasChanged;
+    }
+
+    public void OnUiHasChanged(object sender, EventArgs e)
+    {
+        ResizeLogWindow();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Subscribe to the OnResized event. This will do work when the browser is resized.
+            listener.OnResized += WindowResized;
+            ResizeLogWindow();
+        }
+    }
+
+    async void StartDiscovery(string buttonName)
+    {
+        try
+        {
+            alpacaDevices = new();
+            ascomDevices = new();
+
+            // Set the operation in progress flag and refresh state throughout the page and navigation menu.
+            configuration.Settings.OperationInProgress = true;
+            configuration.RaiseUiHasChangedEvent();
+            StateHasChanged();
+
+            // Create a task cancellation token source and cancellation token
+
+            using (cancellationTokenSource = new CancellationTokenSource())
+            {
+                cancelConformToken = cancellationTokenSource.Token;
+
+                try
+                {
+                    // conformLogger.MessageLogChanged += OutputChanged;
+                    // conformLogger.StatusChanged += StatusChanged;
+
+                    // Clear the screen log
+                    screenLog = "";
+
+                    // Create a task to run the conformance test
+                    List<TreeViewItem> discoveredAlpacaDevices = new();
+                    List<TreeViewItem> discoveredAscomDevices = new();
+
+                    conformanceTest = new Task(() =>
+                    {
+
+                        using (AlpacaDiscovery alpacaDiscovery = new AlpacaDiscovery(true, conformLogger))
+                        {
+                            alpacaDiscovery.StartDiscovery(1, 1000, 32227, 1.0, false, true, false);
+                            do
+                            {
+                                Thread.Sleep(100);
+                            } while (!alpacaDiscovery.DiscoveryComplete & !cancellationTokenSource.IsCancellationRequested);
+
+                            foreach (AlpacaDevice alpacaDevice in alpacaDiscovery.GetAlpacaDevices())
+                            {
+                                string alpacaDeviceString = $"\"Found: " + $"{alpacaDevice.IpAddress}:{alpacaDevice.Port.ToString().PadRight(6)}".PadRight(40) + $" {alpacaDevice.ServerName,-15} {alpacaDevice.Manufacturer,-15} {alpacaDevice.ManufacturerVersion,-20} {alpacaDevice.Location}\"";
+                                LogMessage(alpacaDeviceString);
+
+                                TreeViewItem alpacaDeviceItem = new() { Text = $"Found device at: {alpacaDevice.IpAddress}:{alpacaDevice.Port}" };
+                                List<TreeViewItem> deviceDescription = new();
+                                deviceDescription.Add(new TreeViewItem() { Text = $"Server: {alpacaDevice.ServerName}" });
+                                deviceDescription.Add(new TreeViewItem() { Text = $"Manufacturer: {alpacaDevice.Manufacturer}" });
+                                deviceDescription.Add(new TreeViewItem() { Text = $"Version: {alpacaDevice.ManufacturerVersion}" });
+                                deviceDescription.Add(new TreeViewItem() { Text = $"Location: {alpacaDevice.Location}" });
+                                List<TreeViewItem> ascomDevices = new();
+
+                                foreach (AlpacaConfiguredDevice ascomDevice in alpacaDevice.ConfiguredDevices)
+                                {
+                                    LogMessage($"           ASCOM Device: {ascomDevice.DeviceName} {ascomDevice.DeviceType} {ascomDevice.DeviceNumber} {ascomDevice.UniqueID}");
+                                    ascomDevices.Add(new TreeViewItem() { Text = $"ASCOM {ascomDevice.DeviceType} Device: {ascomDevice.DeviceName} Alpaca device number: {ascomDevice.DeviceNumber} Alpaca Unique ID: {ascomDevice.UniqueID}" });
+                                }
+
+                                if (ascomDevices is not null) deviceDescription.Add(new TreeViewItem() { Text = "ASCOM Devices", Children = ascomDevices });
+                                alpacaDeviceItem.Children = deviceDescription;
+                                discoveredAlpacaDevices.Add(alpacaDeviceItem);
+                            }
+
+                            //List<AscomDevice> asd = (List<AscomDevice>)ascomDevices.Distinct(new AscomDeviceComparer());
+
+
+                            //foreach (var ascomDevice in asd)
+                            //{
+                            //    discoveredAscomDevices.Add(new TreeViewItem() { Text = $"{ascomDevice.UniqueId} {ascomDevice.AscomDeviceName}" });
+                            //}
+
+
+                        }
+
+                        LogMessage("Discovery complete");
+
+                    }, cancelConformToken);
+
+                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
+                    // Start the conformnance test task
+                    conformanceTest.Start();
+                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance test started OK");
+
+                    // Wait for the task to complete.
+                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting conformance task completion");
+                    await conformanceTest;
+                    alpacaDevices = discoveredAlpacaDevices;
+                    ascomDevices = discoveredAscomDevices;
+                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance task completed");
+
+                }
+                finally
+                {
+                    conformLogger.LogMessage("StartTest", "Finally code has run.");
+                    // conformLogger.StatusChanged -= StatusChanged;
+                }
+            }
+
+            GC.Collect();
+        }
+        catch (Exception ex)
+        {
+            try { conformLogger.LogMessage("INDEX.RAZOR-StartTest", MessageLevel.Error, $"{ex}"); } catch (Exception) { throw; }
+            try { Console.WriteLine($"INDEX.RAZOR-StartTest Exception: {ex}"); } catch (Exception) { throw; }
+        }
+        finally
+        {
+            configuration.Settings.OperationInProgress = false;
+            configuration.RaiseUiHasChangedEvent();
+            StateHasChanged();
+        }
+    }
+
+    void StopTest(string buttonName)
+    {
+        LogMessage("Stopping discovery...");
+        //conformLogger.LogMessage("StopClick", MessageLevel.Info, $"STOPPING TESTER");
+        cancellationTokenSource.Cancel(); // Cancel the Conform run
+    }
+
+    /// <summary>
+    /// Event handler for messages returned from the tester
+    /// </summary>
+    async public void LogMessage(string message)
+    {
+        lock (screenLogLockObject)
+        {
+            screenLog += $"{message}\r\n";  // Add the new log message to the screen display
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// Event handler for messages returned from the tester
+    /// </summary>
+    public void StatusChanged(object sender, MessageEventArgs e)
+    {
+        lock (statusLockObject)
+        {
+            statusMessage = $"{e.Message}";  // Add the new log message to the screen display
+
+            InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
+        }
+    }
+
+    #region Log textarea - resize support
+
+    async void ResizeLogWindow()
+    {
+        BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>
+    ("GetBoundingWindowRect");
+        BlazorPro.BlazorSize.BrowserWindowSize blazorProWindowSize = new();
+        blazorProWindowSize.Width = (int)browserWindowSize.Width;
+        blazorProWindowSize.Height = (int)browserWindowSize.Height;
+
+        conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
+        WindowResized(new object(), blazorProWindowSize);
+        conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
+    }
+
+    // This method will be called when the window resizes.
+    // It is ONLY called when the user stops dragging the window's edge. (It is already throttled to protect your app from perf. nightmares)
+    async void WindowResized(object _, BrowserWindowSize window)
+    {
+        try
+        {
+            // Get the browsers's width / height
+            // Find the current position of the Conform log text area in the viewport
+            BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>
+                ("GetBoundingClientRect", "ConformLog");
+            if (result is not null)
+            {
+                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 2;
+
+                // Hide the status field at small heights
+                if (window.Height < 600) statusVisible = "display: none";
+                else statusVisible = "display: initial";
+
+                string browser = "";
+                browser = await JS.InvokeAsync<string>
+                    (identifier: "IdentifyBrowser");
+
+                if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
+
+                conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
+                await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
+            }
+
+            else
+            {
+                conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"BoundingClientRectangle is NULL - No action taken.");
+            }
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
+        }
+    }
+
+    #endregion
+
+    #region Dispose support
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                Console.WriteLine("Index.Razor.Dispos() has been called...");
+                listener.OnResized -= WindowResized;
+                configuration.UiHasChanged -= OnUiHasChanged;
+
+            }
+
+            disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+    private async void ShowNotification(NotificationMessage message)
+    {
+        notificationService.Notify(message);
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+}
