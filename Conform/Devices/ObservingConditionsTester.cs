@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ASCOM.Standard.Interfaces;
-using ASCOM.Standard.AlpacaClients;
+using ASCOM.Alpaca.Clients;
 using ASCOM.Standard.COM.DriverAccess;
 using System.Threading;
 
@@ -13,7 +13,7 @@ namespace ConformU
         private double averageperiod, dewPoint, humidity, windDirection, windSpeed;
 
         // Variables to indicate whether each function is or is not implemented to that it is possible to check that for any given sensor, all three either are or are not implemented
-        private readonly Dictionary<string, bool> sensorisImplemented = new();
+        private readonly Dictionary<string, bool> sensorIsImplemented = new();
         private readonly Dictionary<string, bool> sensorHasDescription = new();
         private readonly Dictionary<string, bool> sensorHasTimeOfLastUpdate = new();
 
@@ -104,6 +104,14 @@ namespace ConformU
         {
             settings = conformConfiguration.Settings;
             this.logger = logger;
+            foreach (string sensorName in ValidSensors)
+            {
+                sensorIsImplemented[sensorName] = false;
+                sensorHasDescription[sensorName] = false;
+                sensorHasTimeOfLastUpdate[sensorName] = false;
+
+            }
+
         }
 
         // IDisposable
@@ -159,11 +167,11 @@ namespace ConformU
                 {
                     case DeviceTechnology.Alpaca:
                         LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
-                        m_ObservingConditions = new AlpacaObservingConditions(settings.AlpacaConfiguration.AccessServiceType.ToString(),
+                        m_ObservingConditions = new AlpacaObservingConditions(settings.AlpacaConfiguration.AccessServiceType,
                             settings.AlpacaDevice.IpAddress,
                             settings.AlpacaDevice.IpPort,
                             settings.AlpacaDevice.AlpacaDeviceNumber,
-                            settings.StrictCasing,
+                            settings.AlpacaConfiguration.StrictCasing,
                             settings.TraceAlpacaCalls ? logger : null);
                         LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;
@@ -384,13 +392,13 @@ namespace ConformU
             foreach (string sensorName in ValidSensors)
             {
                 LogDebug("Consistency", "Sensor name: " + sensorName);
-                if ((sensorisImplemented[sensorName] & sensorHasDescription[sensorName] & sensorHasTimeOfLastUpdate[sensorName]))
+                if ((sensorIsImplemented[sensorName] & sensorHasDescription[sensorName] & sensorHasTimeOfLastUpdate[sensorName]))
                     LogOK("Consistency - " + sensorName, "Sensor value, description and time since last update are all implemented as required by the specification");
-                else if (((!sensorisImplemented[sensorName]) & (!sensorHasDescription[sensorName]) & (!sensorHasTimeOfLastUpdate[sensorName])))
+                else if (((!sensorIsImplemented[sensorName]) & (!sensorHasDescription[sensorName]) & (!sensorHasTimeOfLastUpdate[sensorName])))
                     LogOK("Consistency - " + sensorName, "Sensor value, description and time since last update are all not implemented as required by the specification");
                 else
                 {
-                    LogIssue("Consistency - " + sensorName, "Sensor value is implemented: " + sensorisImplemented[sensorName] + ", Sensor description is implemented: " + sensorHasDescription[sensorName] + ", Sensor time since last update is implemented: " + sensorHasTimeOfLastUpdate[sensorName]);
+                    LogIssue("Consistency - " + sensorName, "Sensor value is implemented: " + sensorIsImplemented[sensorName] + ", Sensor description is implemented: " + sensorHasDescription[sensorName] + ", Sensor time since last update is implemented: " + sensorHasTimeOfLastUpdate[sensorName]);
                     LogInfo("Consistency - " + sensorName, "The ASCOM specification requires that sensor value, description and time since last update must either all be implemented or all not be implemented.");
                 }
             }
@@ -654,7 +662,7 @@ namespace ConformU
                     if (MethodName.StartsWith(PROPERTY_TIMESINCELASTUPDATE))
                         sensorHasTimeOfLastUpdate[SensorName] = true;
                     else
-                        sensorisImplemented[SensorName] = true;
+                        sensorIsImplemented[SensorName] = true;
                 }
                 catch (Exception ex)
                 {
