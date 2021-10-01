@@ -55,15 +55,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ASCOM.Standard.AlpacaClients" Version="1.0.0-alpha21c" />
-    <PackageReference Include="ASCOM.Standard.COM.DriverAccess" Version="1.0.0-alpha21c" />
-    <PackageReference Include="ASCOM.Standard.Utilities" Version="1.0.0-alpha21c" />
+    <PackageReference Include="ASCOM.Alpaca" Version="1.0.0-alpha21j" />
+    <PackageReference Include="ASCOM.Com" Version="1.0.0-alpha21j" />
+    <PackageReference Include="ASCOM.Tools" Version="1.0.0-alpha21j" />
     <PackageReference Include="Blazorise.Bootstrap" Version="0.9.4.4" />
     <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.4.4" />
     <PackageReference Include="Blazorise.TreeView" Version="0.9.4.4" />
     <PackageReference Include="BlazorPro.BlazorSize" Version="5.0.0" />
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
-    <PackageReference Include="Radzen.Blazor" Version="3.10.1" />
+    <PackageReference Include="Radzen.Blazor" Version="3.11.1" />
   </ItemGroup>
 
   <Target Name="CustomAfterPublishh" AfterTargets="AfterPublish">

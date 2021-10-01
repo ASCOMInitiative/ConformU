@@ -1,9 +1,13 @@
-﻿using ASCOM;
-using ASCOM.Standard.Interfaces;
+﻿using ASCOM.Common.DeviceInterfaces;
 using System;
-using System.Collections.Generic;
+/* Unmerged change from project 'ConformU (net5.0)'
+Before:
 using System.Runtime.InteropServices;
-using ASCOM.Standard.AlpacaClients;
+using ASCOM.Alpaca.Clients;
+After:
+using System.Runtime.InteropServices;
+*/
+
 
 namespace ConformU
 {
@@ -63,7 +67,7 @@ namespace ConformU
 
         public double Declination => (double)FunctionNoParameters(() => driver.Declination);
 
-        public double DeclinationRate { get => (double)FunctionNoParameters(() => driver.DeclinationRate); set => Method1Parameter((i) => driver.DeclinationRate = i,value); }
+        public double DeclinationRate { get => (double)FunctionNoParameters(() => driver.DeclinationRate); set => Method1Parameter((i) => driver.DeclinationRate = i, value); }
         public bool DoesRefraction { get => (bool)FunctionNoParameters(() => driver.DoesRefraction); set => Method1Parameter((i) => driver.DoesRefraction = i, value); }
 
         public EquatorialCoordinateType EquatorialSystem => (EquatorialCoordinateType)FunctionNoParameters(() => driver.EquatorialSystem);

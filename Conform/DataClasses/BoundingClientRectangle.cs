@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace ConformU
+﻿namespace ConformU
 {
     /// <summary>
     /// Data structure for a display element's bounding rectangle

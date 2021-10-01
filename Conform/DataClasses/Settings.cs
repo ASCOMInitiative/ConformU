@@ -1,13 +1,8 @@
 ﻿//using AlpacaDiscovery;
 using ASCOM;
-using ASCOM.Standard.Discovery;
+using ASCOM.Alpaca.Discovery;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using static ConformU.Globals;
 
 namespace ConformU
 {
@@ -39,9 +34,6 @@ namespace ConformU
         public bool TestPerformance { get; set; } = false;
         public bool TestSideOfPierRead { get; set; } = false;
         public bool TestSideOfPierWrite { get; set; } = false;
-
-        // Alpaca JSON parsing configuration
-        public bool StrictCasing { get; set; } = true;
 
         /// <summary>
         /// Details of the currently selected Alpaca device

@@ -1,8 +1,8 @@
-﻿using System;
-using ASCOM.Standard.Interfaces;
+﻿using ASCOM.Alpaca.Clients;
+using ASCOM.Com.DriverAccess;
+using ASCOM.Common.DeviceInterfaces;
+using System;
 using System.Threading;
-using ASCOM.Standard.AlpacaClients;
-using ASCOM.Standard.COM.DriverAccess;
 
 namespace ConformU
 {
@@ -87,11 +87,11 @@ namespace ConformU
                 {
                     case DeviceTechnology.Alpaca:
                         LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
-                        m_FilterWheel = new AlpacaFilterWheel(settings.AlpacaConfiguration.AccessServiceType.ToString(),
+                        m_FilterWheel = new AlpacaFilterWheel(settings.AlpacaConfiguration.AccessServiceType,
                             settings.AlpacaDevice.IpAddress,
                             settings.AlpacaDevice.IpPort,
                             settings.AlpacaDevice.AlpacaDeviceNumber,
-                            settings.StrictCasing,
+                            settings.AlpacaConfiguration.StrictCasing,
                             settings.TraceAlpacaCalls ? logger : null);
                         LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;
@@ -376,7 +376,7 @@ namespace ConformU
                     l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
                     if (l_ElapsedTime > l_LastElapsedTime + 1.0)
                     {
-                        Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString( "0") + " seconds");
+                        Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
                         l_LastElapsedTime = l_ElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;

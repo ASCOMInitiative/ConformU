@@ -1,8 +1,6 @@
-﻿using ASCOM.Standard.Interfaces;
+﻿using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Collections;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ConformU
 {

@@ -1,0 +1,230 @@
+﻿@page "/AlpacaDiscoveryPage"
+@implements IDisposable
+@inject ConformLogger conformLogger
+@inject ConformConfiguration configuration
+@using System.Threading
+@using ASCOM.Alpaca.Discovery
+@using Blazorise.TreeView
+
+<h1 style=@statusVisible>Alpaca Discovery Map</h1>
+<div>
+
+    <RadzenButton Id="StartButton" Click=@(args => StartDiscovery("Starting test")) Text="Discover" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" Disabled=@configuration.Settings.OperationInProgress />
+    <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Style="margin-bottom: 20px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
+</div>
+
+<div style=@statusVisible>
+    <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:20px; margin-right:20px" @bind-Value=@statusMessage />
+</div>
+
+<div class="col" style="margin-bottom: 16px; width: 100%">
+    <h3>Discovered Alpaca Devices</h3>
+    <TreeView Nodes="alpacaDevices"
+              GetChildNodes="@(item => item.Children)"
+              HasChildNodes="@(item => item.Children?.Any() == true)">
+        <NodeContent>@context.Text</NodeContent>
+    </TreeView>
+
+</div>
+
+<div class="col" style="margin-bottom: 16px; width: 100%">
+    <h3>Available ASCOM Devices</h3>
+    <TreeView Nodes="ascomDevices"
+              GetChildNodes="@(item => item.Children)"
+              HasChildNodes="@(item => item.Children?.Any() == true)">
+        <NodeContent>@context.Text</NodeContent>
+    </TreeView>
+
+</div>
+
+@code {
+
+    List<BlazoriseTreeItem> alpacaDevices = new() { new BlazoriseTreeItem() { Text = "None" } };
+    List<BlazoriseTreeItem> ascomDevices = new() { new BlazoriseTreeItem() { Text = "None" } };
+
+    private string statusVisible = "display: initial";
+    private bool disposedValue;
+    object statusLockObject = new object();
+    string statusMessage = "";
+
+    // Task and cancellation support
+    Task discoverytask;
+    CancellationTokenSource cancellationTokenSource;
+    CancellationToken cancelConformToken;
+
+    AlpacaConfiguration alpacaConfiguration;
+
+    protected override void OnInitialized()
+    {
+        alpacaConfiguration = configuration.Settings.AlpacaConfiguration;
+    }
+
+    async void StartDiscovery(string buttonName)
+    {
+        try
+        {
+            alpacaDevices = new();
+            ascomDevices = new();
+
+            // Set the operation in progress flag and refresh state throughout the page and navigation menu.
+            configuration.Settings.OperationInProgress = true;
+            configuration.RaiseUiHasChangedEvent();
+            StateHasChanged();
+
+            // Create a task cancellation token source and cancellation token
+
+            using (cancellationTokenSource = new CancellationTokenSource())
+            {
+                cancelConformToken = cancellationTokenSource.Token;
+
+                try
+                {
+                    // Create a task to run the conformance test
+                    List<BlazoriseTreeItem> discoveredAlpacaDevices = new();
+                    List<BlazoriseTreeItem> discoveredAscomDevices = new();
+                    SetStatusMessage("Discovery started");
+                    discoverytask = new Task(() =>
+                    {
+                        try
+                        {
+                            using (AlpacaDiscovery alpacaDiscovery = new AlpacaDiscovery(configuration.Settings.AlpacaConfiguration.StrictCasing, configuration.Settings.TraceDiscovery ? conformLogger : null)) // Create a discovery component with or without logging
+                            {
+                                alpacaDiscovery.StartDiscovery(alpacaConfiguration.NumberOfDiscoveryPolls,
+                                    (int)(alpacaConfiguration.DiscoveryPollInterval * 1000),
+                                    alpacaConfiguration.DiscoveryPort,
+                                    alpacaConfiguration.DiscoveryDuration,
+                                    alpacaConfiguration.DiscoveryResolveName,
+                                    alpacaConfiguration.DiscoveryUseIpV4,
+                                    alpacaConfiguration.DiscoveryUseIpV6,
+                                    alpacaConfiguration.AccessServiceType);
+                                do
+                                {
+                                    Thread.Sleep(100);
+                                } while (!alpacaDiscovery.DiscoveryComplete & !cancellationTokenSource.IsCancellationRequested);
+
+                                foreach (AlpacaDevice alpacaDevice in alpacaDiscovery.GetAlpacaDevices())
+                                {
+                                    string alpacaDeviceString = $"\"Found: " + $"{alpacaDevice.IpAddress}:{alpacaDevice.Port.ToString().PadRight(6)}".PadRight(40) + $" {alpacaDevice.ServerName,-15} {alpacaDevice.Manufacturer,-15} {alpacaDevice.ManufacturerVersion,-20} {alpacaDevice.Location}\"";
+
+                                    BlazoriseTreeItem alpacaDeviceItem = new() { Text = $"{alpacaDevice.ServerName} on host {alpacaDevice.HostName} ({alpacaDevice.IpAddress}:{alpacaDevice.Port})" };
+                                    List<BlazoriseTreeItem> deviceDescription = new();
+                                    deviceDescription.Add(new BlazoriseTreeItem() { Text = $"Manufacturer: {alpacaDevice.Manufacturer}" });
+                                    deviceDescription.Add(new BlazoriseTreeItem() { Text = $"Version: {alpacaDevice.ManufacturerVersion}" });
+                                    deviceDescription.Add(new BlazoriseTreeItem() { Text = $"Location: {alpacaDevice.Location}" });
+                                    List<BlazoriseTreeItem> ascomDevices = new();
+
+                                    foreach (AlpacaConfiguredDevice ascomDevice in alpacaDevice.ConfiguredDevices)
+                                    {
+                                        ascomDevices.Add(new BlazoriseTreeItem() { Text = $"ASCOM {ascomDevice.DeviceType} Device: {ascomDevice.DeviceName} - Alpaca device number: {ascomDevice.DeviceNumber} - Alpaca Unique ID: {ascomDevice.UniqueID}" });
+                                    }
+
+                                    if (ascomDevices is not null) deviceDescription.Add(new BlazoriseTreeItem() { Text = "Available ASCOM Devices", Children = ascomDevices });
+                                    alpacaDeviceItem.Children = deviceDescription;
+                                    discoveredAlpacaDevices.Add(alpacaDeviceItem);
+                                }
+
+                                IEnumerable<AscomDevice> uniqueAscomDevices = alpacaDiscovery.GetAscomDevices("").Distinct(new AscomDeviceComparer());
+
+                                foreach (AscomDevice uniqueAscomDevice in uniqueAscomDevices)
+                                {
+                                    IEnumerable<AscomDevice> sameDevices = alpacaDiscovery.GetAscomDevices("").Where<AscomDevice>(x => x.UniqueId == uniqueAscomDevice.UniqueId);
+                                    List<BlazoriseTreeItem> sameDevicesListItems = new();
+
+                                    foreach (AscomDevice ad in sameDevices)
+                                    {
+                                        sameDevicesListItems.Add(new BlazoriseTreeItem() { Text = $"Found at {ad.HostName} ({ad.IpAddress}:{ad.IpPort}) - {ad.AscomDeviceType} {ad.AlpacaDeviceNumber}" });
+                                    }
+
+                                    discoveredAscomDevices.Add(new BlazoriseTreeItem() { Text = $"{uniqueAscomDevice.AscomDeviceName} (UniqueID: {uniqueAscomDevice.UniqueId})", Children = sameDevicesListItems });
+                                }
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            try { conformLogger.LogMessage("DiscoveryTask", MessageLevel.Error, $"{ex}"); } catch (Exception) { throw; }
+
+                        }
+                    }, cancelConformToken);
+
+                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
+                    // Start the conformnance test task
+                    discoverytask.Start();
+                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance test started OK");
+
+                    // Wait for the task to complete.
+                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting conformance task completion");
+                    await discoverytask;
+
+                    if (discoveredAlpacaDevices.Count == 0) discoveredAlpacaDevices.Add(new BlazoriseTreeItem() { Text = "None" });
+                    if (discoveredAscomDevices.Count == 0) discoveredAscomDevices.Add(new BlazoriseTreeItem() { Text = "None" });
+
+                    alpacaDevices = discoveredAlpacaDevices;
+                    ascomDevices = discoveredAscomDevices;
+                    conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance task completed");
+                    SetStatusMessage("Discovery complete");
+                }
+                finally
+                {
+                    conformLogger.LogMessage("StartTest", "Finally code has run.");
+                }
+            }
+
+            GC.Collect();
+        }
+        catch (Exception ex)
+        {
+            SetStatusMessage($"Discovery error: {ex.Message} - See ConforumU log for details.");
+            try { conformLogger.LogMessage("ALPACAMAP.RAZOR-StartTest", MessageLevel.Error, $"{ex}"); } catch (Exception) { throw; }
+            try { Console.WriteLine($"ALPACAMAP.RAZOR-StartTest Exception: {ex}"); } catch (Exception) { throw; }
+        }
+        finally
+        {
+            configuration.Settings.OperationInProgress = false;
+            configuration.RaiseUiHasChangedEvent();
+            StateHasChanged();
+        }
+    }
+
+    void StopTest(string buttonName)
+    {
+        cancellationTokenSource.Cancel(); // Cancel the Conform run
+    }
+
+    /// <summary>
+    /// Event handler for messages returned from the tester
+    /// </summary>
+    public void SetStatusMessage(string message)
+    {
+        lock (statusLockObject)
+        {
+            statusMessage = $"{message}";  // Add the new log message to the screen display
+            InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
+        }
+    }
+
+    #region Dispose support
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                Console.WriteLine("AlpacaMap.Razor.Dispose() has been called...");
+            }
+
+            disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+}

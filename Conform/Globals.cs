@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ConformU
+﻿namespace ConformU
 {
     internal static class Globals
     {
@@ -85,13 +83,6 @@ namespace ConformU
         Error = 4,
         TestAndMessage = 5,
         TestOnly = 6
-    }
-
-    // Must be valid service types because they are used as values in Alpaca access code i.e. ServiceType.http.ToString()
-    public enum ServiceType
-    {
-        Http = 0,
-        Https = 1
     }
 
     #endregion

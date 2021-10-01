@@ -9,7 +9,7 @@
 </div>
 <div class="main">
     <div class="top-row px-4">
-        <span>Current device - @deviceName (@deviceTechnology @deviceType @((deviceTechnology==DeviceTechnology.Alpaca)? alpacaDeviceNumber :""))</span>
+        <span>Current device -&nbsp;</span><span><b style="color: #0366d6">@deviceName &nbsp;</b></span><span>(@deviceTechnology @deviceType @((deviceTechnology==DeviceTechnology.Alpaca)? alpacaDeviceNumber :""))</span>
         <a href="https://ascom-standards.org" target="_blank">ASCOM Initiative</a>
     </div>
 
@@ -54,7 +54,7 @@
     {
         if (configuration.Settings.DeviceTechnology == DeviceTechnology.Alpaca)
         {
-            deviceName = $"{configuration.Settings.DeviceName} - {configuration.Settings.AlpacaDevice.IpAddress}:{configuration.Settings.AlpacaDevice.IpPort}";
+            deviceName = $"{configuration.Settings.DeviceName} - {configuration.Settings.AlpacaDevice.HostName}:{configuration.Settings.AlpacaDevice.IpPort}";
             alpacaDeviceNumber = configuration.Settings.AlpacaDevice.AlpacaDeviceNumber;
         }
         else

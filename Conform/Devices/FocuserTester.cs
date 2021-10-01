@@ -1,10 +1,10 @@
-﻿using System;
-using ASCOM.Standard.Interfaces;
-using System.Threading;
-using ASCOM.Standard.COM.DriverAccess;
-using ASCOM.Standard.AlpacaClients;
+﻿using ASCOM;
+using ASCOM.Alpaca.Clients;
+using ASCOM.Com.DriverAccess;
+using ASCOM.Common.DeviceInterfaces;
+using System;
 using System.Runtime.InteropServices;
-using ASCOM;
+using System.Threading;
 
 namespace ConformU
 {
@@ -97,11 +97,11 @@ namespace ConformU
                 {
                     case DeviceTechnology.Alpaca:
                         LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
-                        m_Focuser = new AlpacaFocuser(settings.AlpacaConfiguration.AccessServiceType.ToString(),
+                        m_Focuser = new AlpacaFocuser(settings.AlpacaConfiguration.AccessServiceType,
                             settings.AlpacaDevice.IpAddress,
                             settings.AlpacaDevice.IpPort,
                             settings.AlpacaDevice.AlpacaDeviceNumber,
-                            settings.StrictCasing,
+                            settings.AlpacaConfiguration.StrictCasing,
                             settings.TraceAlpacaCalls ? logger : null);
                         LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;

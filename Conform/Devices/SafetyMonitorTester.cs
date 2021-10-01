@@ -1,9 +1,9 @@
-﻿using System;
-using ASCOM.Standard.Interfaces;
+﻿using ASCOM.Alpaca.Clients;
+using ASCOM.Com.DriverAccess;
+using ASCOM.Common.DeviceInterfaces;
+using ASCOM.Tools;
+using System;
 using System.Threading;
-using ASCOM.Standard.Utilities;
-using ASCOM.Standard.AlpacaClients;
-using ASCOM.Standard.COM.DriverAccess;
 
 namespace ConformU
 {
@@ -94,11 +94,11 @@ namespace ConformU
                 {
                     case DeviceTechnology.Alpaca:
                         LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
-                        m_SafetyMonitor = new AlpacaSafetyMonitor(settings.AlpacaConfiguration.AccessServiceType.ToString(),
+                        m_SafetyMonitor = new AlpacaSafetyMonitor(settings.AlpacaConfiguration.AccessServiceType,
                             settings.AlpacaDevice.IpAddress,
                             settings.AlpacaDevice.IpPort,
                             settings.AlpacaDevice.AlpacaDeviceNumber,
-                            settings.StrictCasing,
+                            settings.AlpacaConfiguration.StrictCasing,
                             settings.TraceAlpacaCalls ? logger : null);
                         LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;

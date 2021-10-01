@@ -1,8 +1,8 @@
-﻿using System;
+﻿using ASCOM.Alpaca.Clients;
+using ASCOM.Com.DriverAccess;
+using ASCOM.Common.DeviceInterfaces;
+using System;
 using System.Threading;
-using ASCOM.Standard.Interfaces;
-using ASCOM.Standard.AlpacaClients;
-using ASCOM.Standard.COM.DriverAccess;
 
 namespace ConformU
 {
@@ -106,11 +106,11 @@ namespace ConformU
                 {
                     case DeviceTechnology.Alpaca:
                         LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
-                        m_Rotator = new AlpacaRotator(settings.AlpacaConfiguration.AccessServiceType.ToString(),
+                        m_Rotator = new AlpacaRotator(settings.AlpacaConfiguration.AccessServiceType,
                             settings.AlpacaDevice.IpAddress,
                             settings.AlpacaDevice.IpPort,
                             settings.AlpacaDevice.AlpacaDeviceNumber,
-                            settings.StrictCasing,
+                            settings.AlpacaConfiguration.StrictCasing,
                             settings.TraceAlpacaCalls ? logger : null);
                         LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;
@@ -213,7 +213,7 @@ namespace ConformU
                 while (m_Rotator.IsMoving & (DateTime.Now.Subtract(l_Now).TotalSeconds <= ROTATOR_WAIT_LIMIT));
                 if (!m_Rotator.IsMoving) // Rotator is stopped so OK
                 {
-     // Clear stop flag to allow other tests to run
+                    // Clear stop flag to allow other tests to run
                 }
                 else // Report error message and don't do other tests
                 {
@@ -895,7 +895,7 @@ namespace ConformU
             if (canReadPosition)
             {
                 LogCallToDriver("Move", $"About to get Position property");
-                if (m_Rotator.Position< p_RelativeStepSize) // Set a value that should succeed OK
+                if (m_Rotator.Position < p_RelativeStepSize) // Set a value that should succeed OK
                 {
                     l_Target = p_RelativeStepSize;
                 }

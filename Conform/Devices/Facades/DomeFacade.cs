@@ -1,8 +1,4 @@
-﻿using ASCOM.Standard.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using ASCOM.Common.DeviceInterfaces;
 #if WINDOWS7_0_OR_GREATER
 using System.Windows.Forms;
 #endif

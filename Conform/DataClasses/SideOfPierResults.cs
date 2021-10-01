@@ -1,6 +1,6 @@
-﻿using ASCOM.Standard.Interfaces;
+﻿using ASCOM.Common.DeviceInterfaces;
 
-namespace ConformU 
+namespace ConformU
 {
     internal class SideOfPierResults
     {

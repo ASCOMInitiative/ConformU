@@ -1,9 +1,21 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿
+/* Unmerged change from project 'ConformU (net5.0)'
+Before:
+using System;
+After:
+using ASCOM.Common.DeviceInterfaces;
+using System;
+*/
+using ASCOM.Common.DeviceInterfaces;
+using System.
+/* Unmerged change from project 'ConformU (net5.0)'
+Before:
 using System.Threading.Tasks;
-using ASCOM.Standard.Interfaces;
+using ASCOM.Common.DeviceInterfaces;
+After:
+using System.Threading.Tasks;
+*/
+Collections;
 
 namespace ConformU
 {

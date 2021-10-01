@@ -1,8 +1,4 @@
-﻿using ASCOM.Standard.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using ASCOM.Common.DeviceInterfaces;
 
 namespace ConformU
 {
@@ -37,17 +33,17 @@ namespace ConformU
 
         public void MoveAbsolute(float Position)
         {
-            Method1Parameter((i) => driver.MoveAbsolute(i),Position);
+            Method1Parameter((i) => driver.MoveAbsolute(i), Position);
         }
 
         public void MoveMechanical(float Position)
         {
-            Method1Parameter((i) => driver.MoveMechanical(i),Position);
+            Method1Parameter((i) => driver.MoveMechanical(i), Position);
         }
 
         public void Sync(float Position)
         {
-            Method1Parameter((i) => driver.Sync(i),Position);
+            Method1Parameter((i) => driver.Sync(i), Position);
         }
     }
 }

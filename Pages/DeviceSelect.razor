@@ -1,10 +1,10 @@
 ﻿@page "/DeviceSelection"
-@using ASCOM.Standard.Discovery
+@using ASCOM.Alpaca.Discovery
 @using System.Net
 @*@using AlpacaDiscovery*@
 @using System.Threading
 @using static ConformU.Globals
-@using ASCOM.Standard.COM.DriverAccess
+@using ASCOM.Com.DriverAccess
 
 @* Activity logger object*@
 @inject ConformLogger conformLogger
@@ -220,7 +220,7 @@
         // Initialise variables
         selectedDeviceType = (configuration.Settings.DeviceType == DeviceType.NoDeviceType) ? DeviceType.Telescope : configuration.Settings.DeviceType;
         selectedDeviceTypeString = selectedDeviceType.ToString();
-        discovery = new AlpacaDiscovery(configuration.Settings.StrictCasing, configuration.Settings.TraceDiscovery ? conformLogger : null); // Create a discovery component with or without logging
+        discovery = new AlpacaDiscovery(configuration.Settings.AlpacaConfiguration.StrictCasing, configuration.Settings.TraceDiscovery ? conformLogger : null); // Create a discovery component with or without logging
         discovery.AlpacaDevicesUpdated += AlpacaDeviceDiscovered;
         discovery.DiscoveryCompleted += AlpacaDiscoveryCompleted;
 
@@ -354,7 +354,7 @@
             {
                 DeviceType deviceType = Enum.Parse<DeviceType>(ascomDevice.AscomDeviceType, true);
                 // If we get here the device type is correct but is incorrectly cased compared to the Enum type so we update the object to the correct format
-                if (configuration.Settings.StrictCasing)
+                if (configuration.Settings.AlpacaConfiguration.StrictCasing)
                 {
                     conformLogger.LogMessage("ValidateAscomDevice", MessageLevel.Issue, $" Returned device type value: '{ascomDevice.AscomDeviceType}' is not correctly cased. It should be: '{deviceType.ToString()}'.");
                 }
@@ -521,7 +521,8 @@
                 configuration.Settings.AlpacaConfiguration.DiscoveryDuration,
                 configuration.Settings.AlpacaConfiguration.DiscoveryResolveName,
                 configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4,
-                configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6)
+                configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6,
+                configuration.Settings.AlpacaConfiguration.AccessServiceType)
             );
             StateHasChanged();
         }

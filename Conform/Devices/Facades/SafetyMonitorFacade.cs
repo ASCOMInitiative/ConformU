@@ -1,9 +1,12 @@
-﻿using ASCOM;
-using ASCOM.Standard.Interfaces;
-using System;
-using System.Collections.Generic;
+﻿using ASCOM.Common.DeviceInterfaces;
+/* Unmerged change from project 'ConformU (net5.0)'
+Before:
 using System.Runtime.InteropServices;
-using ASCOM.Standard.AlpacaClients;
+using ASCOM.Alpaca.Clients;
+After:
+using System.Runtime.InteropServices;
+*/
+
 
 namespace ConformU
 {

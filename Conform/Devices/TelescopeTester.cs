@@ -1,13 +1,13 @@
-﻿using System;
+﻿using ASCOM;
+using ASCOM.Alpaca.Clients;
+using ASCOM.Com.DriverAccess;
+using ASCOM.Common.DeviceInterfaces;
+using ASCOM.Tools;
+using System;
 using System.Collections;
-using System.Runtime.InteropServices;
-using ASCOM;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
-using ASCOM.Standard.AlpacaClients;
-using ASCOM.Standard.Interfaces;
-using ASCOM.Standard.Utilities;
-using ASCOM.Standard.COM.DriverAccess;
 
 namespace ConformU
 {
@@ -104,7 +104,6 @@ namespace ConformU
 
         // Helper variables
         private ITelescopeV3 telescopeDevice;
-        internal static Utilities g_Util;
         private readonly CancellationToken cancellationToken;
         private readonly Settings settings;
         private readonly ConformLogger logger;
@@ -219,8 +218,6 @@ namespace ConformU
         #region New and Dispose
         public TelescopeTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(true, true, true, true, false, true, true, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
         {
-            g_Util = new();
-
             settings = conformConfiguration.Settings;
             telescopeTests = settings.TelescopeTests;
             cancellationToken = conformCancellationToken;
@@ -371,11 +368,11 @@ namespace ConformU
                 {
                     case DeviceTechnology.Alpaca:
                         LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
-                        telescopeDevice = new AlpacaTelescope(settings.AlpacaConfiguration.AccessServiceType.ToString(),
+                        telescopeDevice = new AlpacaTelescope(settings.AlpacaConfiguration.AccessServiceType,
                             settings.AlpacaDevice.IpAddress,
                             settings.AlpacaDevice.IpPort,
                             settings.AlpacaDevice.AlpacaDeviceNumber,
-                            settings.StrictCasing,
+                            settings.AlpacaConfiguration.StrictCasing,
                             settings.TraceAlpacaCalls ? logger : null);
                         LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;
@@ -3199,7 +3196,7 @@ namespace ConformU
                             {
                                 case var case6 when -SIDE_OF_PIER_INVALID_LATITUDE <= case6 && case6 <= SIDE_OF_PIER_INVALID_LATITUDE: // Refuse to handle this value because the Conform targeting logic or the mount's SideofPier flip logic may fail when the poles are this close to the horizon
                                     {
-                                        LogInfo("SideOfPier Model Tests", "Tests skipped because the site latitude is reported as " + g_Util.DegreesToDMS(m_SiteLatitude, ":", ":", "", 3));
+                                        LogInfo("SideOfPier Model Tests", "Tests skipped because the site latitude is reported as " + Utilities.DegreesToDMS(m_SiteLatitude, ":", ":", "", 3));
                                         LogInfo("SideOfPier Model Tests", "This places the celestial poles close to the horizon and the mount's flip logic may override Conform's expected behaviour.");
                                         LogInfo("SideOfPier Model Tests", "Please set the site latitude to a value within the ranges " + SIDE_OF_PIER_INVALID_LATITUDE.ToString("+0.0;-0.0") + " to +90.0 or " + (-SIDE_OF_PIER_INVALID_LATITUDE).ToString("+0.0;-0.0") + " to -90.0 to obtain a reliable result.");
                                         break;
@@ -7059,7 +7056,7 @@ namespace ConformU
                     if (l_DeviceObject is null)
                         WaitFor(200);
                 }
-                while (l_TryCount < 3 & !(l_ITelescope is object)); // Exit if created OK
+                while (l_TryCount < 3 & l_ITelescope is not object); // Exit if created OK
                 if (l_ITelescope is null)
                 {
                     LogInfo("AccessChecks", "Device does not expose interface " + TestType.ToString());
@@ -7100,22 +7097,22 @@ namespace ConformU
 
         private static string FormatRA(double ra)
         {
-            return g_Util.HoursToHMS(ra, ":", ":", "", DISPLAY_DECIMAL_DIGITS);
+            return Utilities.HoursToHMS(ra, ":", ":", "", DISPLAY_DECIMAL_DIGITS);
         }
 
         private static string FormatDec(double Dec)
         {
-            return g_Util.DegreesToDMS(Dec, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(9 + ((DISPLAY_DECIMAL_DIGITS > 0) ? DISPLAY_DECIMAL_DIGITS + 1 : 0));
+            return Utilities.DegreesToDMS(Dec, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(9 + ((DISPLAY_DECIMAL_DIGITS > 0) ? DISPLAY_DECIMAL_DIGITS + 1 : 0));
         }
 
         private static dynamic FormatAltitude(double Alt)
         {
-            return g_Util.DegreesToDMS(Alt, ":", ":", "", DISPLAY_DECIMAL_DIGITS);
+            return Utilities.DegreesToDMS(Alt, ":", ":", "", DISPLAY_DECIMAL_DIGITS);
         }
 
         private static string FormatAzimuth(double Az)
         {
-            return g_Util.DegreesToDMS(Az, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(9 + ((DISPLAY_DECIMAL_DIGITS > 0) ? DISPLAY_DECIMAL_DIGITS + 1 : 0));
+            return Utilities.DegreesToDMS(Az, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(9 + ((DISPLAY_DECIMAL_DIGITS > 0) ? DISPLAY_DECIMAL_DIGITS + 1 : 0));
         }
 
         public static string TranslatePierSide(PointingState p_PierSide, bool p_Long)

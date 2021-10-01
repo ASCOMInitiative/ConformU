@@ -1,5 +1,6 @@
 ﻿@page "/Settings"
 @using ASCOM
+@using ASCOM.Alpaca
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
 @using static ConformU.Globals
@@ -41,7 +42,7 @@
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Style="margin-top:6px;" Name="CHKUPDATES" @bind-Value=@chkUpdates TValue="bool" Change=@(args =>
                             OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
-                        <RadzenLabel Text="Check for updates" Component="CHKUPDATES" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
+                        <RadzenLabel Text="Check for updates (not implemented)" Component="CHKUPDATES" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
                         <RadzenTextBox @bind-Value="lastUpdateDate" Disabled=true />
                     </div>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
@@ -677,7 +678,7 @@
         alpacaDiscoveryUseIpV4 = configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4;
         alpacaDiscoveryUseIpV6 = configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6;
         alpacaServiceType = configuration.Settings.AlpacaConfiguration.AccessServiceType;
-        strictCasing = configuration.Settings.StrictCasing;
+        strictCasing = configuration.Settings.AlpacaConfiguration.StrictCasing;
     }
 
     void OnConformTestScopeChange(IEnumerable<int> scope)
@@ -798,7 +799,7 @@
                 break;
 
             case CheckBoxConfigurationItem.StrictCasing:
-                configuration.Settings.StrictCasing = strictCasing;
+                configuration.Settings.AlpacaConfiguration.StrictCasing = strictCasing;
                 break;
 
             case CheckBoxConfigurationItem.TraceDiscovery:

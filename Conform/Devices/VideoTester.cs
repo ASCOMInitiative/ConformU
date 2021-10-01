@@ -1,12 +1,27 @@
-﻿using System;
+﻿using ASCOM;
+
+/* Unmerged change from project 'ConformU (net5.0)'
+Before:
 using System.Collections.Generic;
 using System.Linq;
-using ASCOM.Standard.Interfaces;
-using ASCOM.Standard.COM.DriverAccess;
+using ASCOM.Common.DeviceInterfaces;
+using ASCOM.Com.DriverAccess;
 using System.Threading;
 using System.Collections;
+After:
+using ASCOM.Com.DriverAccess;
+using ASCOM.Common.DeviceInterfaces;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+*/
+using ASCOM.Common.DeviceInterfaces;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using ASCOM;
+using System.Threading;
 
 namespace ConformU
 {
@@ -17,8 +32,8 @@ namespace ConformU
         const int CAMERA_PULSE_TOLERANCE = 300; // Tolerance for acceptable;e performance (ms)
 
         // Camera variables
-        private bool CanConfigureDeviceProperties,  CanReadSensorType,  CanReadGainMax, CanReadGainMin  ;
-        private bool CanReadGammaMin, CanReadGammaMax,   CanReadIntegrationRate, CanReadSupportedIntegrationRates ;
+        private bool CanConfigureDeviceProperties, CanReadSensorType, CanReadGainMax, CanReadGainMin;
+        private bool CanReadGammaMin, CanReadGammaMax, CanReadIntegrationRate, CanReadSupportedIntegrationRates;
         private bool CanReadVideoFrame;
         private double PixelSizeX, PixelSizeY, ExposureMax, ExposureMin;
         private int BitDepth, Height, Width, IntegrationRate, VideoFramesBufferSize;
@@ -1276,7 +1291,7 @@ namespace ConformU
             }
             return returnValue;
         }
-        
+
         /// <summary>
         /// Not currently used in ConformU
         /// </summary>

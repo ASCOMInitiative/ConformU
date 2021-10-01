@@ -1,6 +1,6 @@
-﻿using System;
-using ASCOM.Standard.Interfaces;
-using ASCOM.Standard.Utilities;
+﻿using ASCOM.Common.Interfaces;
+using ASCOM.Tools;
+using System;
 using static ConformU.Globals;
 
 namespace ConformU

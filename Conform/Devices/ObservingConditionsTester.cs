@@ -1,8 +1,8 @@
-﻿using System;
+﻿using ASCOM.Alpaca.Clients;
+using ASCOM.Com.DriverAccess;
+using ASCOM.Common.DeviceInterfaces;
+using System;
 using System.Collections.Generic;
-using ASCOM.Standard.Interfaces;
-using ASCOM.Alpaca.Clients;
-using ASCOM.Standard.COM.DriverAccess;
 using System.Threading;
 
 namespace ConformU

@@ -1,8 +1,8 @@
-﻿using System;
-using ASCOM.Standard.Interfaces;
+﻿using ASCOM.Alpaca.Clients;
+using ASCOM.Com.DriverAccess;
+using ASCOM.Common.DeviceInterfaces;
+using System;
 using System.Threading;
-using ASCOM.Standard.COM.DriverAccess;
-using ASCOM.Standard.AlpacaClients;
 
 namespace ConformU
 {
@@ -101,11 +101,11 @@ namespace ConformU
                 {
                     case DeviceTechnology.Alpaca:
                         LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
-                        coverCalibratorDevice = new AlpacaCoverCalibrator(settings.AlpacaConfiguration.AccessServiceType.ToString(),
+                        coverCalibratorDevice = new AlpacaCoverCalibrator(settings.AlpacaConfiguration.AccessServiceType,
                             settings.AlpacaDevice.IpAddress,
                             settings.AlpacaDevice.IpPort,
                             settings.AlpacaDevice.AlpacaDeviceNumber,
-                            settings.StrictCasing,
+                            settings.AlpacaConfiguration.StrictCasing,
                             settings.TraceAlpacaCalls ? logger : null);
 
                         LogInfo("CreateDevice", $"Alpaca device created OK");
@@ -849,7 +849,7 @@ namespace ConformU
                     elapsedTime = DateTime.Now.Subtract(startTime).TotalSeconds;
                     if (elapsedTime > lastElapsedTime + 1.0)
                     {
-                        Status(StatusType.staStatus, loopCount + " transactions in " + elapsedTime.ToString( "0") + " seconds");
+                        Status(StatusType.staStatus, loopCount + " transactions in " + elapsedTime.ToString("0") + " seconds");
                         lastElapsedTime = elapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
@@ -862,25 +862,25 @@ namespace ConformU
                 {
                     case object _ when loopRate > 10.0:
                         {
-                            LogInfo(propertyName, "Transaction rate: " + loopRate.ToString( "0.0") + " per second");
+                            LogInfo(propertyName, "Transaction rate: " + loopRate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case object _ when 2.0 <= loopRate && loopRate <= 10.0:
                         {
-                            LogOK(propertyName, "Transaction rate: " + loopRate.ToString( "0.0") + " per second");
+                            LogOK(propertyName, "Transaction rate: " + loopRate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case object _ when 1.0 <= loopRate && loopRate <= 2.0:
                         {
-                            LogInfo(propertyName, "Transaction rate: " + loopRate.ToString( "0.0") + " per second");
+                            LogInfo(propertyName, "Transaction rate: " + loopRate.ToString("0.0") + " per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(propertyName, "Transaction rate: " + loopRate.ToString( "0.0") + " per second");
+                            LogInfo(propertyName, "Transaction rate: " + loopRate.ToString("0.0") + " per second");
                             break;
                         }
                 }

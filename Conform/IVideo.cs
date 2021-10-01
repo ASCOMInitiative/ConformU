@@ -1,11 +1,27 @@
-﻿using System;
+﻿/* Unmerged change from project 'ConformU (net5.0)'
+Before:
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ASCOM.Standard.Interfaces;
+using ASCOM.Common.DeviceInterfaces;
+After:
+using ASCOM.Common.DeviceInterfaces;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+*/
+
+/* Unmerged change from project 'ConformU (net5.0)'
+Before:
 using System.Runtime.InteropServices;
-namespace ASCOM.Standard.Interfaces
+After:
+using System.Threading.Tasks;
+*/
+using System.Collections;
+
+namespace ASCOM.Common.DeviceInterfaces
 
 {
     /// <summary>

@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Collections;
 #if WINDOWS7_0_OR_GREATER
 using System.Windows.Forms;
 #endif
@@ -30,13 +30,13 @@ namespace ConformU
             {
 #if WINDOWS
                 logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Using COM host form to create ProgID: {settings.ComDevice.ProgId}");
-                logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Creating driver {settings.ComDevice.ProgId} on separate thread. This is thread: {Thread.CurrentThread.ManagedThreadId}");
+                logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Creating driver {settings.ComDevice.ProgId} on separate thread. This is thread: {Environment.CurrentManagedThreadId}");
                 Thread driverThread = new(DriverOnSeparateThread);
                 driverThread.SetApartmentState(ApartmentState.STA);
                 //driverThread.DisableComObjectEagerCleanup();
                 driverThread.IsBackground = true;
                 driverThread.Start(this);
-                logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Thread started successfully for {settings.ComDevice.ProgId}. This is thread: {Thread.CurrentThread.ManagedThreadId}");
+                logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Thread started successfully for {settings.ComDevice.ProgId}. This is thread: {Environment.CurrentManagedThreadId}");
 
                 do
                 {
@@ -44,7 +44,7 @@ namespace ConformU
                     Application.DoEvents();
                 } while (driverHostForm == null);
 
-                logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Completed create driver delegate for {settings.ComDevice.ProgId} on thread {Thread.CurrentThread.ManagedThreadId}");
+                logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Completed create driver delegate for {settings.ComDevice.ProgId} on thread {Environment.CurrentManagedThreadId}");
 
 #else
                 logger?.LogMessage("CreateDevice", MessageLevel.Debug, $"Using direct variable to create ProgID: {settings.ComDevice.ProgId}");
@@ -85,20 +85,20 @@ namespace ConformU
                             break;
 
                         case DeviceTechnology.COM:
-                                try
-                                {
+                            try
+                            {
 #if WINDOWS7_0_OR_GREATER
-                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Ending COM facade application.");
-                                    Application.Exit();
-                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"COM facade application ended.");
+                                logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Ending COM facade application.");
+                                Application.Exit();
+                                logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"COM facade application ended.");
 #endif
-                                    driver = null;
-                                    GC.Collect();
-                                }
-                                catch (Exception ex)
-                                {
-                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception ending application: \r\n{ex}");
-                                }
+                                driver = null;
+                                GC.Collect();
+                            }
+                            catch (Exception ex)
+                            {
+                                logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception ending application: \r\n{ex}");
+                            }
 
                             int remainingObjectCount, loopCount;
                             if (driver is not null)
@@ -189,7 +189,7 @@ namespace ConformU
 #if WINDOWS7_0_OR_GREATER
             driverHostForm.Action2Parameters(action, parameter1, parameter2);
 #else
-            action(parameter1,parameter2);
+            action(parameter1, parameter2);
 #endif
             //logger?.LogMessage("Method2Parameters", MessageLevel.msgDebug, $"Returned from driverHostForm.SendVoid(action) on thread {Thread.CurrentThread.ManagedThreadId}");
         }
@@ -227,7 +227,7 @@ namespace ConformU
 #if WINDOWS7_0_OR_GREATER
             object returnValue = driverHostForm.Func2Parameters(action, parameter1, parameter2);
 #else
-            object returnValue = action(parameter1,parameter2);
+            object returnValue = action(parameter1, parameter2);
 #endif
             //logger?.LogMessage("Function2Parameters", MessageLevel.msgDebug, $"Returned from driverHostForm.SendVoid(action) on thread {Thread.CurrentThread.ManagedThreadId}");
             return returnValue;
@@ -251,10 +251,10 @@ namespace ConformU
             driverHostForm.Hide(); // Hide the form from view
             logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Hidden driver host form");
 
-            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Starting driver host environment for {settings.ComDevice.ProgId} on thread {Thread.CurrentThread.ManagedThreadId}");
+            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Starting driver host environment for {settings.ComDevice.ProgId} on thread {Environment.CurrentManagedThreadId}");
             Application.Run();  // Start the message loop on this thread to bring the form to life
 
-            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Environment for driver host {settings.ComDevice.ProgId} shut down on thread {Thread.CurrentThread.ManagedThreadId}");
+            logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Environment for driver host {settings.ComDevice.ProgId} shut down on thread {Environment.CurrentManagedThreadId}");
             driverHostForm.Dispose();
 
         }

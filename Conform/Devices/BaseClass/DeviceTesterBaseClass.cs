@@ -1,12 +1,12 @@
 ﻿// Base class from which particular device testers are derived
 // Put all common elements in here
+using ASCOM;
 using System;
 using System.Collections;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-using ASCOM;
 using static ConformU.Globals;
-using System.IO;
 
 namespace ConformU
 {
@@ -155,8 +155,8 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    TL.LogMessage("DeviceTesterbaseClass",MessageLevel.Debug,"Dispose called");
-                    try { baseClassDevice.Dispose(); } catch (Exception ex){ TL.LogMessage("DeviceTesterbaseClass",MessageLevel.Debug ,$"Exception\r\n{ex}"); }
+                    TL.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, "Dispose called");
+                    try { baseClassDevice.Dispose(); } catch (Exception ex) { TL.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, $"Exception\r\n{ex}"); }
                     baseClassDevice = null;
                     TL.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, "Dispose finished");
                 }
@@ -678,7 +678,7 @@ namespace ConformU
             {
                 case DeviceTechnology.Alpaca:
                     LogTestOnly($"Alpaca device: {settings.AlpacaDevice.AscomDeviceName} ({settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} {settings.AlpacaDevice.AscomDeviceType}/{settings.AlpacaDevice.AlpacaDeviceNumber})");
-                    if (!settings.StrictCasing) LogIssue("ConformanceCheck", "Alpaca strict casing has been disabled, this in only supported for testing devices.");
+                    if (!settings.AlpacaConfiguration.StrictCasing) LogIssue("ConformanceCheck", "Alpaca strict casing has been disabled, this in only supported for testing devices.");
 
                     break;
 

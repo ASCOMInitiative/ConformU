@@ -1,8 +1,15 @@
-﻿using System;
-using ASCOM.Standard.Interfaces;
-using ASCOM.Standard.AlpacaClients;
-using System.Collections;
+﻿using ASCOM.Alpaca.Clients;
+using ASCOM.Com.DriverAccess;
+using ASCOM.Common.DeviceInterfaces;
+using System;
 using System.Threading;
+/* Unmerged change from project 'ConformU (net5.0)'
+Before:
+using ASCOM.Com.DriverAccess;
+After:
+using System.Threading;
+*/
+
 
 namespace ConformU
 {
@@ -115,11 +122,11 @@ namespace ConformU
                 {
                     case DeviceTechnology.Alpaca:
                         LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
-                        m_Switch = new AlpacaSwitch(settings.AlpacaConfiguration.AccessServiceType.ToString(),
+                        m_Switch = new AlpacaSwitch(settings.AlpacaConfiguration.AccessServiceType,
                             settings.AlpacaDevice.IpAddress,
                             settings.AlpacaDevice.IpPort,
                             settings.AlpacaDevice.AlpacaDeviceNumber,
-                            settings.StrictCasing,
+                            settings.AlpacaConfiguration.StrictCasing,
                             settings.TraceAlpacaCalls ? logger : null);
                         LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;
@@ -134,7 +141,7 @@ namespace ConformU
 
                             case ComAccessMechanic.DriverAccess:
                                 LogInfo("CreateDevice", $"Creating DRIVERACCESS device: {settings.ComDevice.ProgId}");
-                                m_Switch = new ASCOM.Standard.COM.DriverAccess.Switch(settings.ComDevice.ProgId);
+                                m_Switch = new Switch(settings.ComDevice.ProgId);
                                 break;
 
                             default:
@@ -204,9 +211,9 @@ namespace ConformU
         public override void CheckMethods()
         {
             short i;
-            bool l_GetSwitch = false, l_GetSwitchOriginal = false, l_NewSwitchState, l_GetSwitchOK, l_SetSwitchOK, l_GetSwitchValueOK, l_SetSwitchValueMinOK, l_SetSwitchValueMaxOK,  l_SwitchCanWrite;
-            Exception l_GetSwitchException,  l_GetSwitchValueException;
-            double l_GetSwitchValue, l_GetSwitchValueOriginal=0.0, l_SwitchMinimum, l_SwitchMaximum, l_SwitchStep, l_SwitchRange;
+            bool l_GetSwitch = false, l_GetSwitchOriginal = false, l_NewSwitchState, l_GetSwitchOK, l_SetSwitchOK, l_GetSwitchValueOK, l_SetSwitchValueMinOK, l_SetSwitchValueMaxOK, l_SwitchCanWrite;
+            Exception l_GetSwitchException, l_GetSwitchValueException;
+            double l_GetSwitchValue, l_GetSwitchValueOriginal = 0.0, l_SwitchMinimum, l_SwitchMaximum, l_SwitchStep, l_SwitchRange;
             string l_SwitchName, l_SwitchDescription;
 
             switch (g_InterfaceVersion)
@@ -803,7 +810,7 @@ namespace ConformU
                                                     l_GetSwitchValue = m_Switch.GetSwitchValue(i);
                                                     switch (l_GetSwitchValue)
                                                     {
-                                                        case object _ when l_GetSwitchValue==l_SwitchMaximum:
+                                                        case object _ when l_GetSwitchValue == l_SwitchMaximum:
                                                             {
                                                                 LogOK("SetSwitchValue ", "  GetSwitchValue returned MAXIMUM_VALUE after SetSwitchValue(MAXIMUM_VALUE)");
                                                                 l_SetSwitchValueMaxOK = true;
@@ -1137,7 +1144,7 @@ namespace ConformU
                 else
                 {
                     l_MultiStateStepSize = SwitchStep; // Use the specified switch step size
-                    l_MultiStateNumberOfSteps =(int) Math.Floor(SwitchRange / SwitchStep);
+                    l_MultiStateNumberOfSteps = (int)Math.Floor(SwitchRange / SwitchStep);
                 }
                 LogDebug("MultiStateStepSize", l_MultiStateStepSize.ToString());
                 LogDebug("MultiStateNumberOfSteps", l_MultiStateNumberOfSteps.ToString());
@@ -1355,7 +1362,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogIssue("CheckInaccessibleOutOfRange",$"Unknown value of SwitchMethod Enum: {method}");
+                                LogIssue("CheckInaccessibleOutOfRange", $"Unknown value of SwitchMethod Enum: {method}");
                                 break;
                             }
                     }
