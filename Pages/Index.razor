@@ -203,7 +203,7 @@ string statusMessage = "Linux build";
     async void ResizeLogWindow()
     {
         BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
-        BlazorPro.BlazorSize.BrowserWindowSize blazorProWindowSize = new();
+        BrowserWindowSize blazorProWindowSize = new();
         blazorProWindowSize.Width = (int)browserWindowSize.Width;
         blazorProWindowSize.Height = (int)browserWindowSize.Height;
 

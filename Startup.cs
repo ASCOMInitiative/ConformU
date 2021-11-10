@@ -1,17 +1,6 @@
-
-/* Unmerged change from project 'ConformU (net5.0)'
-Before:
-using BlazorPro.BlazorSize;
-After:
 using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
-using BlazorPro.BlazorSize;
-*/
-using Blazorise;
-using Blazorise.Bootstrap;
-using Blazorise.Icons.FontAwesome;
-using BlazorPro.BlazorSize;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Hosting;
@@ -22,16 +11,6 @@ using Microsoft.Extensions.Logging;
 using Radzen;
 using System;
 using System.IO;
-/* Unmerged change from project 'ConformU (net5.0)'
-Before:
-using System.Threading.Tasks;
-using Blazorise;
-using Blazorise.Bootstrap;
-using Blazorise.Icons.FontAwesome;
-After:
-using System.Threading.Tasks;
-*/
-
 
 namespace ConformU
 {
