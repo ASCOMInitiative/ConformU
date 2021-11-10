@@ -1,9 +1,10 @@
 ﻿@inject ILogger<App> logger
 @inject IJSRuntime JsRuntime
 @inject ConformConfiguration configuration
-@inject IResizeListener resizeListener
+@inject BrowserResizeService resizeListener
 @inject ConformLogger conformLogger
 @inject IJSRuntime JS
+@implements IDisposable
 
 <div class="top-row pl-4 navbar navbar-dark">
 
@@ -11,7 +12,9 @@
     {
         @if (IsSmall)@* Operation in progress and screen is small *@
         {
-            <span class="navbar-brand">Conform Universal</span><span style="text-align:left; color: yellow"><b>Operation in progress</b></span>
+            <span class="navbar-brand">Conform Universal</span>
+
+            <span style="text-align:left; color: yellow"><b>Operation in progress</b></span>
         }
         else @* Operation in progress and normal screen *@
         {
@@ -77,6 +80,7 @@ else
 
 @code {
     bool IsSmall;
+    bool disposedValue;
 
     private bool collapseNavMenu = true;
 
@@ -97,7 +101,7 @@ else
         if (firstRender)
         {
             // Subscribe to the OnResized event. This will do work when the browser is resized.
-            resizeListener.OnResized += WindowResized;
+            resizeListener.OnResize += WindowResized;
         }
     }
 
@@ -153,5 +157,30 @@ else
         conformLogger.LogMessage("NavMenu-DelayedUiChangedTask", MessageLevel.Debug, $"Delayed UI changed event complete");
 
     }
+
+    #region Dispose support
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                resizeListener.OnResize -= WindowResized;
+            }
+
+            disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
 
 }

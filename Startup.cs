@@ -35,7 +35,6 @@ namespace ConformU
         {
             // Blazor infrastructure
             services.AddRazorPages();
-            //services.AddServerSideBlazor();
             services.AddServerSideBlazor(options =>
             {
                 options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromSeconds(300);
@@ -99,12 +98,15 @@ namespace ConformU
             #endregion
 
             // Add BlazorPro screen resize listener 
-            services.AddResizeListener(options =>
-                {
-                    options.ReportRate = 10; // Milliseconds between update notifications (I think - documentation not clear)
-                    options.EnableLogging = false; // Better performance
-                    options.SuppressInitEvent = false; // Ensure the event fires when the application is first loaded
-                });
+            //services.AddResizeListener(options =>
+            //    {
+            //        options.ReportRate = 10; // Milliseconds between update notifications (I think - documentation not clear)
+            //        options.EnableLogging = false; // Better performance
+            //        options.SuppressInitEvent = false; // Ensure the event fires when the application is first loaded
+            //    });
+
+            // Add window resize listener
+            services.AddSingleton<BrowserResizeService>();
 
             // Radzen services
             services.AddScoped<NotificationService>();

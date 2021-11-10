@@ -19,7 +19,7 @@
     <!-- Add icon library -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!-- Blazorise supoport 
+    <!-- Blazorise supoport
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
     <link href="_content/Blazorise/blazorise.css" rel="stylesheet" />
@@ -141,6 +141,21 @@
         }
     </script>
 
+    <script>
+        // Listen for page resize
+        function resizeListener(dotnethelper)
+        {
+            $(window).resize(() =>
+            {
+                let browserHeight = $(window).innerHeight();
+                let browserWidth = $(window).innerWidth();
+                dotnethelper.invokeMethodAsync('SetBrowserDimensions', browserWidth, browserHeight).then(() => 
+                {
+                    // success, do nothing
+                }).catch(error => { console.log("Error during browser resize: " + error); });
+            });
+        }
+    </script>
 
     <script>ScrollToBottom = (elementId) => { document.getElementById(elementId).scrollTop = document.getElementById(elementId).scrollHeight; };</script>
 </body>

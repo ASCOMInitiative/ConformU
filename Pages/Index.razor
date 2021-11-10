@@ -1,7 +1,7 @@
 ﻿@page "/"
 @implements IDisposable
 @using System.Threading
-@inject IResizeListener listener
+@inject BrowserResizeService listener
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
 @inject IJSRuntime JS
@@ -33,7 +33,7 @@
 #if WINDOWS7_0_OR_GREATER
     string statusMessage = "Windows Build";
 #else
-string statusMessage = "Linux build";
+    string statusMessage = "Linux build";
 #endif
     ConformanceTestManager tester;
 
@@ -59,7 +59,8 @@ string statusMessage = "Linux build";
         if (firstRender)
         {
             // Subscribe to the OnResized event. This will do work when the browser is resized.
-            listener.OnResized += WindowResized;
+            listener.Init(JS);
+            listener.OnResize += WindowResized;
             ResizeLogWindow();
         }
     }
@@ -259,10 +260,8 @@ string statusMessage = "Linux build";
         {
             if (disposing)
             {
-                Console.WriteLine("Index.Razor.Dispos() has been called...");
-                listener.OnResized -= WindowResized;
+                listener.OnResize -= WindowResized;
                 configuration.UiHasChanged -= OnUiHasChanged;
-
             }
 
             disposedValue = true;
