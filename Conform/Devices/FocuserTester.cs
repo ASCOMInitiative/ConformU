@@ -154,7 +154,7 @@ namespace ConformU
                 {
                     LogDebug("Connected", "Setting connected state to: " + value.ToString());
                     LogCallToDriver("Connected", "About to set Link property");
-                    m_Focuser.Link = value;
+                    m_Focuser.Connected = value;
                     LogDebug("AccessChecks", "Successfully changed connected state");
                 }
                 catch (Exception ex)

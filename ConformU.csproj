@@ -55,14 +55,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ASCOM.Alpaca" Version="1.0.0-alpha21j" />
-    <PackageReference Include="ASCOM.Com" Version="1.0.0-alpha21j" />
-    <PackageReference Include="ASCOM.Tools" Version="1.0.0-alpha21j" />
+    <PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.0-alpha23" />
+    <PackageReference Include="ASCOM.Com.Components" Version="1.0.0-alpha23" />
+    <PackageReference Include="ASCOM.Tools" Version="1.0.0-alpha23" />
     <PackageReference Include="Blazorise.Bootstrap" Version="0.9.4.4" />
     <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.4.4" />
     <PackageReference Include="Blazorise.TreeView" Version="0.9.4.4" />
     <PackageReference Include="BlazorPro.BlazorSize" Version="5.0.0" />
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    <PackageReference Include="NuGet.CommandLine" Version="5.11.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Radzen.Blazor" Version="3.11.1" />
   </ItemGroup>
 
