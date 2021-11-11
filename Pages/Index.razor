@@ -208,9 +208,9 @@
         blazorProWindowSize.Width = (int)browserWindowSize.Width;
         blazorProWindowSize.Height = (int)browserWindowSize.Height;
 
-        conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
+        //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
         WindowResized(new object(), blazorProWindowSize);
-        conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
+        //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
     }
 
     // This method will be called when the window resizes.
@@ -235,7 +235,7 @@
 
                 if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
 
-                conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
+                //conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
                 await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
             }
 

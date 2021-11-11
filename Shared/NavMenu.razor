@@ -111,7 +111,7 @@ else
         try
         {
             IsSmall = Globals.IsSmall(window.Width, window.Height);//window.Width < Globals.UI_SMALL_TRANSITION_SIZE;
-            conformLogger.LogMessage("Navmenu.WindowResized", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {window.Width}, Window height: {window.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
+            //conformLogger.LogMessage("Navmenu.WindowResized", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {window.Width}, Window height: {window.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
@@ -134,7 +134,7 @@ else
         BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
         IsSmall = Globals.IsSmall(browserWindowSize.Width, browserWindowSize.Height); //browserWindowSize.Width < Globals.UI_SMALL_TRANSITION_SIZE;
 
-        conformLogger.LogMessage("Navmenu.OnConfigurationChange", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {browserWindowSize.Width}, Window height: {browserWindowSize.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
+        //conformLogger.LogMessage("Navmenu.OnConfigurationChange", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {browserWindowSize.Width}, Window height: {browserWindowSize.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
         await InvokeAsync(StateHasChanged);
     }
 

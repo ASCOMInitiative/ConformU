@@ -1,6 +1,7 @@
 ﻿@page "/Settings"
 @using ASCOM
 @using ASCOM.Alpaca
+@using ASCOM.Common.Alpaca
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
 @using static ConformU.Globals
@@ -41,7 +42,7 @@
                     <h3 style="color: #479cc8; margin-bottom: 0;">Operation</h3>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Style="margin-top:6px;" Name="CHKUPDATES" @bind-Value=@chkUpdates TValue="bool" Change=@(args =>
-                            OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
+                                        OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
                         <RadzenLabel Text="Check for updates (not implemented)" Component="CHKUPDATES" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
                         <RadzenTextBox @bind-Value="lastUpdateDate" Disabled=true />
                     </div>
@@ -152,6 +153,7 @@
                                         Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV4)) />
                         <RadzenLabel Text="Use IPv4 (Default Yes)" Component="CHKUSEIPV4" Style="margin-left: 20px;" />
                     </div>
+
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKUSEIPV6"
                                         Disabled=@(!alpacaDiscoveryEnabled)
@@ -160,6 +162,7 @@
                                         Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV6)) />
                         <RadzenLabel Text="Use IPv6 (Default No)" Component="CHKUSEIPV6" Style="margin-left: 20px;" />
                     </div>
+
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKRESOLVEDNSNAMES"
                                         Disabled=@(!alpacaDiscoveryEnabled)
@@ -168,6 +171,7 @@
                                         Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.AlpacaDiscoveryResolveName)) />
                         <RadzenLabel Text="Resolve DNS names (Default No)" Component="CHKRESOLVEDNSNAMES" Style="margin-left: 20px;" />
                     </div>
+
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKSTRICTCASING"
                                         @bind-Value=@strictCasing
@@ -176,8 +180,22 @@
                         <RadzenLabel Text="Use strict JSON casing (Only unset this for testing)" Component="CHKSTRICTCASING" Style="margin-left: 20px;" />
                     </div>
 
-                </RadzenCard>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenDropDown @bind-Value=@alpacaImageArrayTransferType
+                                        Style="width:11em"
+                                        Data="imageArrayTypeOptions"
+                                        TextProperty="Key"
+                                        ValueProperty="Value"
+                                        TValue="ImageArrayTransferType"
+                                        AllowClear="false"
+                                        Multiple="false"
+                                        MaxSelectedLabels="1"
+                                        Name="DROP2"
+                                        Change=@(args => OnImageArrayTypeChange(args)) />
+                        <RadzenLabel Text="Image array transfer type (Default JSON)" Component="DROP2" Style="margin-left: 20px;margin-top:5px" />
+                    </div>
 
+                </RadzenCard>
 
                 @if (OperatingSystem.IsWindows())
                 {
@@ -185,15 +203,15 @@
                         <RadzenCard Visible="@isWindowsOs" Style="margin-left: 10px; width: 300px; margin-bottom: 20px;">
                             <h3 style="color: #479cc8">COM Access Mechanic</h3>
                             <RadzenDropDown @bind-Value=@comAccessMechanic
-                                            Style="width:245px"
-                                            Data="comAccessMechanicoptions"
-                                            TextProperty="Key"
-                                            ValueProperty="Value"
-                                            TValue="ComAccessMechanic"
-                                            AllowClear="false"
-                                            Multiple="false"
-                                            MaxSelectedLabels="1"
-                                            Change=@(args => OnComAccessModeChange(args)) />
+                                        Style="width:245px"
+                                        Data="comAccessMechanicoptions"
+                                        TextProperty="Key"
+                                        ValueProperty="Value"
+                                        TValue="ComAccessMechanic"
+                                        AllowClear="false"
+                                        Multiple="false"
+                                        MaxSelectedLabels="1"
+                                        Change=@(args => OnComAccessModeChange(args)) />
 
                         </RadzenCard>
                     </div>
@@ -282,6 +300,17 @@
                                 Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.CameraFirstUseTests)) />
                 <RadzenLabel Text="Enable first time use tests"
                              Component="CHKFIRSTUSETESTS"
+                             Style="margin-left: 20px;margin-top:20px;" />
+            </div>
+
+            <div class="row">
+                <RadzenCheckBox Name="CHKTESTIMAGEARRAYVARIANT"
+                                Style="margin-top:20px;margin-left:190px"
+                                @bind-Value=@cameraTestImageArrayVariant
+                                TValue="bool"
+                                Change=@(args => OnBoolItemChange(args, BoolConfigurationItem.TestImageArrayVariant)) />
+                <RadzenLabel Text="Test ImageArrayVariant property"
+                             Component="CHKTESTIMAGEARRAYVARIANT"
                              Style="margin-left: 20px;margin-top:20px;" />
             </div>
         </RadzenTabsItem>
@@ -385,6 +414,24 @@
     bool chkTraceDiscovery;
     bool chkTraceSettings;
     bool chkTraceAlpacaCalls;
+    bool cameraTestImageArrayVariant;
+
+    ImageArrayTransferType alpacaImageArrayTransferType;
+
+    private List<KeyValuePair<string, ImageArrayTransferType>> imageArrayTypeOptions = new()
+        {
+            new KeyValuePair<string, ImageArrayTransferType>("JSON", ImageArrayTransferType.JSON),
+            new KeyValuePair<string, ImageArrayTransferType>("Base64HandOff", ImageArrayTransferType.Base64HandOff),
+            new KeyValuePair<string, ImageArrayTransferType>("GetBase64Image", ImageArrayTransferType.GetBase64Image),
+            new KeyValuePair<string, ImageArrayTransferType>("GetImageBytes", ImageArrayTransferType.GetImageBytes)
+        };
+
+    void OnImageArrayTypeChange(object imageArrayTransferTypeObject)
+    {
+        ImageArrayTransferType imageArrayTransferType = (ImageArrayTransferType)imageArrayTransferTypeObject;
+        configuration.Settings.AlpacaConfiguration.ImageArrayTransferType = imageArrayTransferType;
+        SaveConfiguration();
+    }
 
     void OnServiceTypeChange(object serviceMode)
     {
@@ -396,6 +443,11 @@
     private ServiceType alpacaServiceType;
 
     private bool isWindowsOs;
+
+    private enum BoolConfigurationItem
+    {
+        TestImageArrayVariant
+    }
 
     private enum NumericConfigurationItem
     {
@@ -481,13 +533,13 @@
 
     private ComAccessMechanic comAccessMechanic = ComAccessMechanic.Native;
     private List<KeyValuePair<string, ComAccessMechanic>> comAccessMechanicoptions = new()
-    {
+        {
             new KeyValuePair<string, ComAccessMechanic>("Native", ComAccessMechanic.Native),
             new KeyValuePair<string, ComAccessMechanic>("Driver Access", ComAccessMechanic.DriverAccess)
         };
 
     private List<KeyValuePair<string, ServiceType>> serviceTypeOptions = new()
-    {
+        {
             new KeyValuePair<string, ServiceType>("HTTP", ServiceType.Http),
             new KeyValuePair<string, ServiceType>("HTTPS", ServiceType.Https)
         };
@@ -508,6 +560,21 @@
             alpacaAndComText = "Alpaca";
         }
     }
+
+    private void OnBoolItemChange(bool newValue, BoolConfigurationItem boolConfigurationItem)
+    {
+        switch (boolConfigurationItem)
+        {
+            case BoolConfigurationItem.TestImageArrayVariant:
+                configuration.Settings.TestImageArrayVariant = newValue;
+                break;
+
+            default:
+                throw new InvalidValueException($"OnDoubleItemChange - Unknown numeric configurtation item: {boolConfigurationItem}");
+        }
+        SaveConfiguration();
+    }
+
 
     private void OnDoubleItemChange(double newValue, NumericConfigurationItem numericConfigurationItem)
     {
@@ -649,6 +716,7 @@
         cameraTestMaxBinX = configuration.Settings.CameraMaxBinX;
         cameraTestMaxBinY = configuration.Settings.CameraMaxBinY;
         cameraFirstUseTests = configuration.Settings.CameraFirstUseTests;
+        cameraTestImageArrayVariant = configuration.Settings.TestImageArrayVariant;
 
         // Dome tests
         domeShutterTimeout = configuration.Settings.DomeShutterTimeout;
@@ -679,6 +747,7 @@
         alpacaDiscoveryUseIpV6 = configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6;
         alpacaServiceType = configuration.Settings.AlpacaConfiguration.AccessServiceType;
         strictCasing = configuration.Settings.AlpacaConfiguration.StrictCasing;
+        alpacaImageArrayTransferType = configuration.Settings.AlpacaConfiguration.ImageArrayTransferType;
     }
 
     void OnConformTestScopeChange(IEnumerable<int> scope)

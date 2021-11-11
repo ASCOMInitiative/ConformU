@@ -222,12 +222,29 @@ namespace ConformU
                 {
                     case DeviceTechnology.Alpaca:
                         LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
+                        //m_Camera = new AlpacaCamera(settings.AlpacaConfiguration.AccessServiceType,
+                        //    settings.AlpacaDevice.IpAddress,
+                        //    settings.AlpacaDevice.IpPort,
+                        //    settings.AlpacaDevice.AlpacaDeviceNumber,
+                        //    settings.AlpacaConfiguration.StrictCasing,
+                        //    settings.TraceAlpacaCalls ? logger : null);
+
+
                         m_Camera = new AlpacaCamera(settings.AlpacaConfiguration.AccessServiceType,
-                            settings.AlpacaDevice.IpAddress,
-                            settings.AlpacaDevice.IpPort,
-                            settings.AlpacaDevice.AlpacaDeviceNumber,
-                            settings.AlpacaConfiguration.StrictCasing,
-                            settings.TraceAlpacaCalls ? logger : null);
+                                                   settings.AlpacaDevice.IpAddress,
+                                                   settings.AlpacaDevice.IpPort,
+                                                   settings.AlpacaDevice.AlpacaDeviceNumber,
+                                                   10,
+                                                   10,
+                                                   100,
+                                                   999,
+                                                   settings.AlpacaConfiguration.ImageArrayTransferType,
+                                                   ASCOM.Common.Alpaca.ImageArrayCompression.None,
+                                                   "",
+                                                   "",
+                                                   settings.AlpacaConfiguration.StrictCasing,
+                                                   settings.TraceAlpacaCalls ? logger : null);
+
                         LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;
 
@@ -730,13 +747,14 @@ namespace ConformU
             if (m_ImageReady & settings.CameraFirstUseTests) // Issue this warning if configured to do so
                 LogIssue("ImageReady", "Image is flagged as ready but no exposure has been started!");
 
+            // ImageArray 
             if (m_ImageReady) // ImageReady is true
             {
                 try
                 {
                     if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
 
-                    m_ImageArray = (int[,])m_Camera.ImageArray;
+                    m_ImageArray = (Array)m_Camera.ImageArray;
                     if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
                     {
                         LogIssue("ImageArray", "No image has been taken but ImageArray has not generated an exception");
@@ -764,7 +782,7 @@ namespace ConformU
                 {
                     if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
 
-                    m_ImageArray = (int[,])m_Camera.ImageArray;
+                    m_ImageArray = (Array)m_Camera.ImageArray;
                     LogIssue("ImageArray", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                 }
                 catch (Exception ex)
@@ -777,53 +795,59 @@ namespace ConformU
             m_ImageArrayVariant = null;
             GC.Collect();
 
-            if (m_ImageReady)
+            // ImageArrayVariant
+            if (settings.TestImageArrayVariant) // Test if configured to do so
             {
-                try
+                if (m_ImageReady)
                 {
-                    if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
-
-                    object ImageArrayVariantObject = m_Camera.ImageArrayVariant;
-
-
-                    object[,] ImageArrayVariantObjectArray = ImageArrayVariantObject as object[,];
-
-                    m_ImageArrayVariant = ImageArrayVariantObjectArray;
-                    if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
+                    try
                     {
-                        LogIssue("ImageArrayVariant", "No image has been taken but ImageArrayVariant has not generated an exception");
+                        if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
+
+                        m_ImageArrayVariant = (Array)m_Camera.ImageArrayVariant;
+
+                        if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
+                        {
+                            LogIssue("ImageArrayVariant", "No image has been taken but ImageArrayVariant has not generated an exception");
+                        }
+                        else
+                        {
+                            LogOK("ImageArrayVariant", "ImageArray read OK");
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        LogOK("ImageArrayVariant", "ImageArray read OK");
+                        LogDebug("ImageArrayVariant", $"Exception:\r\n{ex}");
+                        if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
+                        {
+                            LogOK("ImageArrayVariant", "Exception correctly generated before an image has been taken");
+                        }
+                        else // Omit first use tests
+                        {
+                            LogIssue("ImageArrayVariant", $"Conform is configured to omit \"First use\" tests and ImageReady is true, but ImageArrayVariant generated an exception: {ex.Message}");
+                        }
+
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    LogDebug("ImageArrayVariant", $"Exception:\r\n{ex}");
-                    if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
+                    try
                     {
-                        LogOK("ImageArrayVariant", "Exception correctly generated before an image has been taken");
-                    }
-                    else // Omit first use tests
-                    {
-                        LogIssue("ImageArrayVariant", $"Conform is configured to omit \"First use\" tests and ImageReady is true, but ImageArrayVariant generated an exception: {ex.Message}");
-                    }
+                        if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
 
+                        m_ImageArrayVariant = (Array)m_Camera.ImageArrayVariant;
+                        LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
+                    }
+                    catch (Exception)
+                    {
+                        LogOK("ImageArrayVariant", "Exception correctly generated when ImageReady is false");
+                    }
                 }
             }
-            else
-                try
-                {
-                    if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
-
-                    m_ImageArrayVariant = (int[,])m_Camera.ImageArrayVariant;
-                    LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
-                }
-                catch (Exception)
-                {
-                    LogOK("ImageArrayVariant", "Exception correctly generated when ImageReady is false");
-                }
+            else // Log an issue because the ImageArrayVariant test was omitted
+            {
+                LogIssue("ImageArrayVariant", "Test omitted due to Conform configuration.");
+            }
 
             if (OperatingSystem.IsWindows())
             {
@@ -2673,7 +2697,7 @@ namespace ConformU
                                             if (m_ImageArray.GetUpperBound(2) > 0)
                                                 l_NumPlanes = System.Convert.ToString(m_ImageArray.GetUpperBound(2) + 1) + " planes";
                                         }
-                                        LogOK("ImageArray", "Successfully read 32 bit integer array (" + l_NumPlanes + ") " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1) + " pixels");
+                                        LogOK("ImageArray", $"Successfully read 32 bit integer array ({l_NumPlanes}) {m_ImageArray.GetLength(0)} x {m_ImageArray.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
                                     }
                                     else
                                         LogIssue("ImageArray", "Expected 32 bit integer array, actually got: " + m_ImageArray.GetType().ToString());
@@ -2698,57 +2722,57 @@ namespace ConformU
 
                             // Check image array variant dimensions
                             Array imageArrayObject;
-                            try
+
+                            if (settings.TestImageArrayVariant) // Test if configured to do so. No need to report an issue because it's already been reported when the ImageArrayVariant property was tested
                             {
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
-                                sw.Restart();
-                                imageArrayObject = (Array)m_Camera.ImageArrayVariant;
-                                sw.Stop();
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage("ConformanceCheck", "Get ImageArrayVariant completed in " + sw.ElapsedMilliseconds + "ms");
-                                sw.Restart();
-                                m_ImageArrayVariant = (Array)imageArrayObject;
-                                sw.Stop();
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage("ConformanceCheck", "Conversion to Array completed in " + sw.ElapsedMilliseconds + "ms");
-                                if ((m_ImageArrayVariant.GetLength(0) == p_NumX) & (m_ImageArrayVariant.GetLength(1) == p_NumY))
+                                try
                                 {
-                                    if (m_ImageArrayVariant.GetType().ToString() == "System.Object[,]" | m_ImageArrayVariant.GetType().ToString() == "System.Object[,,]")
+                                    if (settings.DisplayMethodCalls)
+                                        LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
+                                    sw.Restart();
+                                    imageArrayObject = (Array)m_Camera.ImageArrayVariant;
+                                    sw.Stop();
+                                    if (settings.DisplayMethodCalls)
+                                        LogTestAndMessage("ConformanceCheck", "Get ImageArrayVariant completed in " + sw.ElapsedMilliseconds + "ms");
+                                    m_ImageArrayVariant = (Array)imageArrayObject;
+                                    if ((m_ImageArrayVariant.GetLength(0) == p_NumX) & (m_ImageArrayVariant.GetLength(1) == p_NumY))
                                     {
-                                        if (m_ImageArrayVariant.Rank == 2)
+                                        if (m_ImageArrayVariant.GetType().ToString() == "System.Object[,]" | m_ImageArrayVariant.GetType().ToString() == "System.Object[,,]")
                                         {
-                                            l_NumPlanes = "1 plane";
-                                            l_VariantType = ((object[,])m_ImageArrayVariant)[0, 0].GetType().ToString();
-                                        }
-                                        else
-                                        {
-                                            l_NumPlanes = "1 plane";
-                                            if (m_ImageArrayVariant.GetUpperBound(2) > 0)
+                                            if (m_ImageArrayVariant.Rank == 2)
                                             {
-                                                l_NumPlanes = System.Convert.ToString(m_ImageArrayVariant.GetUpperBound(2) + 1) + " planes";
-                                                l_VariantType = ((object[,,])m_ImageArrayVariant)[0, 0, 0].GetType().ToString();
+                                                l_NumPlanes = "1 plane";
+                                                l_VariantType = ((object[,])m_ImageArrayVariant)[0, 0].GetType().ToString();
                                             }
                                             else
-                                                l_VariantType = ((object[,])m_ImageArrayVariant)[0, 0].GetType().ToString();
+                                            {
+                                                l_NumPlanes = "1 plane";
+                                                if (m_ImageArrayVariant.GetUpperBound(2) > 0)
+                                                {
+                                                    l_NumPlanes = System.Convert.ToString(m_ImageArrayVariant.GetUpperBound(2) + 1) + " planes";
+                                                    l_VariantType = ((object[,,])m_ImageArrayVariant)[0, 0, 0].GetType().ToString();
+                                                }
+                                                else
+                                                    l_VariantType = ((object[,])m_ImageArrayVariant)[0, 0].GetType().ToString();
+                                            }
+                                            LogOK("ImageArrayVariant", $"Successfully read variant array ({l_NumPlanes}) with {l_VariantType} elements {m_ImageArrayVariant.GetLength(0)} x {m_ImageArrayVariant.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
                                         }
-                                        LogOK("ImageArrayVariant", "Successfully read variant array (" + l_NumPlanes + ") with " + l_VariantType + " elements " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1) + " pixels");
+                                        else
+                                            LogIssue("ImageArrayVariant", "Expected variant array, actually got: " + m_ImageArrayVariant.GetType().ToString());
                                     }
+                                    else if ((m_ImageArrayVariant.GetLength(0) == p_NumY) & (m_ImageArrayVariant.GetLength(1) == p_NumX))
+                                        LogIssue("ImageArrayVariant", "Camera image dimensions swapped, expected values: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
                                     else
-                                        LogIssue("ImageArrayVariant", "Expected variant array, actually got: " + m_ImageArrayVariant.GetType().ToString());
+                                        LogIssue("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
                                 }
-                                else if ((m_ImageArrayVariant.GetLength(0) == p_NumY) & (m_ImageArrayVariant.GetLength(1) == p_NumX))
-                                    LogIssue("ImageArrayVariant", "Camera image dimensions swapped, expected values: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
-                                else
-                                    LogIssue("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
-                            }
-                            catch (COMException ex)
-                            {
-                                LogIssue("ImageArrayVariant", EX_COM + "exception when reading ImageArrayVariant" + ex.ToString());
-                            }
-                            catch (Exception ex)
-                            {
-                                LogIssue("ImageArrayVariant", EX_NET + "exception when reading ImageArrayVariant" + ex.ToString());
+                                catch (COMException ex)
+                                {
+                                    LogIssue("ImageArrayVariant", EX_COM + "exception when reading ImageArrayVariant" + ex.ToString());
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogIssue("ImageArrayVariant", EX_NET + "exception when reading ImageArrayVariant" + ex.ToString());
+                                }
                             }
 
                             // Release large image objects from memory
