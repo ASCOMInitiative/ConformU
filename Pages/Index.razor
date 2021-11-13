@@ -10,18 +10,19 @@
 @* Radzen notification service to enable pop-up alerts *@
 @inject NotificationService notificationService
 
-    <h1 style="display: @statusVisible">Welcome to Conform Universal!</h1>
-    <div>
+<h1 style="display: @statusVisible">Welcome to Conform Universal!</h1>
 
-        <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" Disabled=@configuration.Settings.OperationInProgress />
-        <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Style="margin-bottom: 20px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
-    </div>
-<div style="display :@statusVisible">
-    <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:20px; margin-right:20px" @bind-Value=@statusMessage />
+<div>
+    <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" Disabled=@configuration.Settings.OperationInProgress />
+    <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Style="margin-bottom: 20px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
 </div>
 
 <h4>Conform Log</h4>
 <RadzenTextArea Id="ConformLog" Style="line-height: 18px; padding-bottom: 0px" Name="ScreenLog" @bind-Value=@screenLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
+
+<div style="display :@statusVisible">
+    <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:20px; margin-right:20px; margin-top:8px" @bind-Value=@statusMessage />
+</div>
 
 @code {
     private string statusVisible = "initial";
@@ -30,11 +31,13 @@
     string screenLog = "Conform log.";
     object screenLogLockObject = new object();
     object statusLockObject = new object();
+
 #if WINDOWS7_0_OR_GREATER
-    string statusMessage = "Windows Build";
+    string statusMessage = $"Windows build - {Environment.OSVersion}";
 #else
-    string statusMessage = "Linux build";
+    string statusMessage = "Linux build - {Environment.OSVersion}";
 #endif
+
     ConformanceTestManager tester;
 
     // Task and cancellation support
@@ -224,7 +227,7 @@
             BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ConformLog");
             if (result is not null)
             {
-                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 2;
+                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 4;
 
                 // Hide the status field at small heights
                 if (window.Height < 600) statusVisible = "none";
