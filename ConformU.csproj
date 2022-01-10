@@ -54,19 +54,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.0-alpha25i" />
-    <PackageReference Include="ASCOM.Com.Components" Version="1.0.0-alpha25i" />
-    <PackageReference Include="ASCOM.Common.Components" Version="1.0.0-alpha25i" />
-    <PackageReference Include="ASCOM.Tools" Version="1.0.0-alpha25i" />
-    <PackageReference Include="Blazorise.Bootstrap" Version="0.9.4.8" />
-    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.4.8" />
-    <PackageReference Include="Blazorise.TreeView" Version="0.9.4.8" />
+    <PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.0-alpha26" />
+    <PackageReference Include="ASCOM.Com.Components" Version="1.0.0-alpha26" />
+    <PackageReference Include="ASCOM.Common.Components" Version="1.0.0-alpha26" />
+    <PackageReference Include="ASCOM.Tools" Version="1.0.0-alpha26" />
+    <PackageReference Include="Blazorise.Bootstrap" Version="0.9.5" />
+    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.5" />
+    <PackageReference Include="Blazorise.TreeView" Version="0.9.5" />
     <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
     <PackageReference Include="NuGet.CommandLine" Version="5.11.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Radzen.Blazor" Version="3.12.0" />
+    <PackageReference Include="Radzen.Blazor" Version="3.12.2" />
   </ItemGroup>
 
   <Target Name="CustomAfterPublishh" AfterTargets="AfterPublish">
