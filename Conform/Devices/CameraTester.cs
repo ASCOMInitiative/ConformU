@@ -753,7 +753,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
-
+                    Status(StatusType.staAction, "Retrieving image array...");
                     m_ImageArray = (Array)m_Camera.ImageArray;
                     if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
                     {
@@ -776,12 +776,13 @@ namespace ConformU
                         LogIssue("ImageArray", $"Conform is configured to omit \"First use\" tests and ImageReady is true, but ImageArray generated an exception: {ex.Message}");
                     }
                 }
+                ClearStatus();
             }
             else // ImageReady is false
                 try
                 {
                     if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
-
+                    Status(StatusType.staAction, "Retrieving image array...");
                     m_ImageArray = (Array)m_Camera.ImageArray;
                     LogIssue("ImageArray", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                 }
@@ -790,7 +791,7 @@ namespace ConformU
                     LogDebug("ImageArray", $"Exception 2:\r\n{ex}");
                     LogOK("ImageArray", "Exception correctly generated when ImageReady is false");
                 }
-
+            
             m_ImageArray = null;
             m_ImageArrayVariant = null;
             GC.Collect();
@@ -804,6 +805,7 @@ namespace ConformU
                     {
                         if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
 
+                        Status(StatusType.staAction, "Retrieving image array variant..");
                         m_ImageArrayVariant = (Array)m_Camera.ImageArrayVariant;
 
                         if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
@@ -828,6 +830,7 @@ namespace ConformU
                         }
 
                     }
+                    ClearStatus();
                 }
                 else
                 {
@@ -835,6 +838,7 @@ namespace ConformU
                     {
                         if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
 
+                        Status(StatusType.staAction, "Retrieving image array variant..");
                         m_ImageArrayVariant = (Array)m_Camera.ImageArrayVariant;
                         LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                     }
@@ -842,6 +846,7 @@ namespace ConformU
                     {
                         LogOK("ImageArrayVariant", "Exception correctly generated when ImageReady is false");
                     }
+                    ClearStatus();
                 }
             }
             else // Log an issue because the ImageArrayVariant test was omitted
