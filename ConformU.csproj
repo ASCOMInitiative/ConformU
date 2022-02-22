@@ -1,27 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup Condition="'$(TargetFramework)'=='net6.0-windows'">
-    <UseWindowsForms>true</UseWindowsForms>
-    <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(TargetFramework)'=='net6.0-windows'">
+		<UseWindowsForms>true</UseWindowsForms>
+		<DisableWinExeOutputInference>true</DisableWinExeOutputInference>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <TargetFrameworks>net6.0-windows;net6.0</TargetFrameworks>
-    <Configurations>Debug;Release</Configurations>
-    <OutputType>Exe</OutputType>
+	<PropertyGroup>
+		<TargetFrameworks>net6.0-windows;net6.0</TargetFrameworks>
+		<Configurations>Debug;Release</Configurations>
+		<OutputType>Exe</OutputType>
 
-    <UserSecretsId>c49fec0a-dd2c-4e60-9e85-407d8d9bdd9f</UserSecretsId>
-    <Platforms>AnyCPU</Platforms>
-    <ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
-    <AssemblyVersion>0.1.0.0</AssemblyVersion>
-    <FileVersion>0.1.0.0</FileVersion>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>conformu.snk</AssemblyOriginatorKeyFile>
-    <Version>0.1.0.0</Version>
-    <AssemblyName>conformu</AssemblyName>
-  </PropertyGroup>
+		<UserSecretsId>c49fec0a-dd2c-4e60-9e85-407d8d9bdd9f</UserSecretsId>
+		<Platforms>AnyCPU</Platforms>
+		<ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
+		<AssemblyVersion>0.1.0.0</AssemblyVersion>
+		<FileVersion>0.1.0.0</FileVersion>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>conformu.snk</AssemblyOriginatorKeyFile>
+		<Version>0.1.0.0</Version>
+		<AssemblyName>conformu</AssemblyName>
+	</PropertyGroup>
 
-  <!--
+	<!-- Added to support MacOS builds -->
+	<PropertyGroup>
+		<DefineConstants Condition=" '$(AppImage)' == 'true' ">$(DefineConstants);BUNDLED</DefineConstants>
+		<DefineConstants Condition=" '$(MACOS)' == 'true' ">$(DefineConstants);BUNDLED;MACOS</DefineConstants>
+	</PropertyGroup>
+
+	<!--
   Keep for reference
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
     <NoWarn>1701;1702;MSB3042</NoWarn>
@@ -29,50 +35,50 @@
       <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
  -->
 
-  <!-- Always ignore MSB3042 warning - Flags that Namespace/Class is inside a compiler conditional expression -->
-  <PropertyGroup>
-    <NoWarn>1701;1702;MSB3042</NoWarn>
-    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
-    <AnalysisLevel>latest</AnalysisLevel>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Remove="publish\**" />
-    <Content Remove="publish\**" />
-    <EmbeddedResource Remove="publish\**" />
-    <None Remove="publish\**" />
-  </ItemGroup>
+	<!-- Always ignore MSB3042 warning - Flags that Namespace/Class is inside a compiler conditional expression -->
+	<PropertyGroup>
+		<NoWarn>1701;1702;MSB3042</NoWarn>
+		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+		<AnalysisLevel>latest</AnalysisLevel>
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Remove="publish\**" />
+		<Content Remove="publish\**" />
+		<EmbeddedResource Remove="publish\**" />
+		<None Remove="publish\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Remove="Conform\Devices\Facades\DriverHostForm.resx" />
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Remove="Conform\Devices\Facades\DriverHostForm.resx" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="Conform\Devices\Facades\DriverHostForm.resx" />
-    <None Include="Properties\PublishProfiles\Linux-Arm.pubxml.user" />
-    <None Include="Properties\PublishProfiles\Linux-X64.pubxml.user" />
-    <None Include="Properties\PublishProfiles\Windows.pubxml.user" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="Conform\Devices\Facades\DriverHostForm.resx" />
+		<None Include="Properties\PublishProfiles\Linux-Arm.pubxml.user" />
+		<None Include="Properties\PublishProfiles\Linux-X64.pubxml.user" />
+		<None Include="Properties\PublishProfiles\Windows.pubxml.user" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.0-alpha28" />
-    <PackageReference Include="ASCOM.Com.Components" Version="1.0.0-alpha28" />
-    <PackageReference Include="ASCOM.Common.Components" Version="1.0.0-alpha28" />
-    <PackageReference Include="ASCOM.Tools" Version="1.0.0-alpha28" />
-    <PackageReference Include="Blazorise.Bootstrap" Version="0.9.5.4" />
-    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.5.4" />
-    <PackageReference Include="Blazorise.TreeView" Version="0.9.5.4" />
-    <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
-    <PackageReference Include="NuGet.CommandLine" Version="6.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Radzen.Blazor" Version="3.14.2" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.0-alpha28" />
+		<PackageReference Include="ASCOM.Com.Components" Version="1.0.0-alpha28" />
+		<PackageReference Include="ASCOM.Common.Components" Version="1.0.0-alpha28" />
+		<PackageReference Include="ASCOM.Tools" Version="1.0.0-alpha28" />
+		<PackageReference Include="Blazorise.Bootstrap" Version="0.9.5.4" />
+		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.5.4" />
+		<PackageReference Include="Blazorise.TreeView" Version="0.9.5.4" />
+		<PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
+		<PackageReference Include="NuGet.CommandLine" Version="6.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Radzen.Blazor" Version="3.14.2" />
+	</ItemGroup>
 
-  <Target Name="CustomAfterPublishh" AfterTargets="AfterPublish">
-    <!-- Insert tasks to run after publish here -->
-    <Message Text="After Publish Task $(CheckoutDirectory)" />
+	<Target Name="CustomAfterPublishh" AfterTargets="AfterPublish">
+		<!-- Insert tasks to run after publish here -->
+		<Message Text="After Publish Task $(CheckoutDirectory)" />
 
-  </Target>
+	</Target>
 
 </Project>

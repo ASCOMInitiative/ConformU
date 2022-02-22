@@ -226,8 +226,15 @@ namespace ConformU
 
                 .ConfigureWebHostDefaults(webBuilder =>
                     {
-                        webBuilder.UseStartup<Startup>();
+                        webBuilder.UseStartup<Startup>()
 
+#if RELEASE
+#if BUNDLED
+
+                       .UseContentRoot(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location))
+#endif
+#endif
+                        ;
                         //webBuilder.UseKestrel(opts =>
                         //{
                         //    // Bind directly to a socket handle or Unix socket
