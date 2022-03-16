@@ -28,7 +28,7 @@ namespace ConformU
             this.logger = logger;
             try
             {
-#if WINDOWS
+#if WINDOWS7_0_OR_GREATER
                 logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Using COM host form to create ProgID: {settings.ComDevice.ProgId}");
                 logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Creating driver {settings.ComDevice.ProgId} on separate thread. This is thread: {Environment.CurrentManagedThreadId}");
                 Thread driverThread = new(DriverOnSeparateThread);
@@ -46,7 +46,6 @@ namespace ConformU
 
                 logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Completed create driver delegate for {settings.ComDevice.ProgId} on thread {Environment.CurrentManagedThreadId}");
 
-#else
                 logger?.LogMessage("CreateDevice", MessageLevel.Debug, $"Using direct variable to create ProgID: {settings.ComDevice.ProgId}");
                 Type driverType = Type.GetTypeFromProgID(settings.ComDevice.ProgId);
                 logger?.LogMessage("CreateDevice", MessageLevel.Debug, $"Creating Type: {driverType}");

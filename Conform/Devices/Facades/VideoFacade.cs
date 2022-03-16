@@ -16,6 +16,7 @@ After:
 using System.Threading.Tasks;
 */
 Collections;
+using System.Collections.Generic;
 
 namespace ConformU
 {
@@ -32,13 +33,13 @@ namespace ConformU
 
         public VideoCameraFrameRate FrameRate => (VideoCameraFrameRate)FunctionNoParameters(() => driver.FrameRate);
 
-        public ArrayList SupportedIntegrationRates
+        public IList<double> SupportedIntegrationRates
         {
             get
             {
-                ArrayList returnValue = new ArrayList();
+                List<double> returnValue = new();
                 var gains = FunctionNoParameters(() => driver.SupportedIntegrationRates);
-                foreach (object o in (IList)gains)
+                foreach (double o in (IList)gains)
                 {
                     returnValue.Add(o);
                 }
@@ -49,7 +50,7 @@ namespace ConformU
 
         public int IntegrationRate { get => (int)FunctionNoParameters(() => driver.IntegrationRate); set => Method1Parameter((i) => driver.IntegrationRate = i, value); }
 
-        public object LastVideoFrame
+        public IVideoFrame LastVideoFrame
         {
             get
             {
@@ -86,13 +87,13 @@ namespace ConformU
 
         public short Gain { get => (short)FunctionNoParameters(() => driver.Gain); set => Method1Parameter((i) => driver.Gain = i, value); }
 
-        public ArrayList Gains
+        public IList<string> Gains
         {
             get
             {
-                ArrayList returnValue = new ArrayList();
+                List<string> returnValue = new();
                 var gains = FunctionNoParameters(() => driver.Gains);
-                foreach (object o in (IList)gains)
+                foreach (string o in (IList)gains)
                 {
                     returnValue.Add(o);
                 }
@@ -107,13 +108,13 @@ namespace ConformU
 
         public short Gamma { get => (short)FunctionNoParameters(() => driver.Gamma); set => Method1Parameter((i) => driver.Gamma = i, value); }
 
-        public ArrayList Gammas
+        public IList<string> Gammas
         {
             get
             {
-                ArrayList returnValue = new();
+                List<string> returnValue = new();
                 var gains = FunctionNoParameters(() => driver.Gammas);
-                foreach (object o in (IList)gains)
+                foreach (string o in (IList)gains)
                 {
                     returnValue.Add(o);
                 }
@@ -133,6 +134,11 @@ namespace ConformU
         public void StopRecordingVideoFile()
         {
             MethodNoParameters(() => driver.StopRecordingVideoFile());
+        }
+
+        public void ConfigureDeviceProperties()
+        {
+            throw new ASCOM.MethodNotImplementedException($"Conform does not support testing the ConfigureDeviceProperties method.");
         }
     }
 }

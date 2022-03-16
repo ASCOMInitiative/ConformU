@@ -47,6 +47,9 @@
 		<EmbeddedResource Remove="publish\**" />
 		<None Remove="publish\**" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Compile Remove="Conform\IVideo.cs" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<EmbeddedResource Remove="Conform\Devices\Facades\DriverHostForm.resx" />
@@ -60,19 +63,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.0-alpha28" />
-		<PackageReference Include="ASCOM.Com.Components" Version="1.0.0-alpha28" />
-		<PackageReference Include="ASCOM.Common.Components" Version="1.0.0-alpha28" />
-		<PackageReference Include="ASCOM.Tools" Version="1.0.0-alpha28" />
-		<PackageReference Include="Blazorise.Bootstrap" Version="0.9.5.4" />
-		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.5.4" />
-		<PackageReference Include="Blazorise.TreeView" Version="0.9.5.4" />
+		<PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.0-alpha29" />
+		<PackageReference Include="ASCOM.Com.Components" Version="1.0.0-alpha29" />
+		<PackageReference Include="ASCOM.Common.Components" Version="1.0.0-alpha29.swashbuckle2" />
+		<PackageReference Include="ASCOM.Tools" Version="1.0.0-alpha29" />
+		<PackageReference Include="Blazorise.Bootstrap" Version="1.0.1" />
+		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.0.1" />
+		<PackageReference Include="Blazorise.TreeView" Version="1.0.1" />
 		<PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
 		<PackageReference Include="NuGet.CommandLine" Version="6.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Radzen.Blazor" Version="3.14.2" />
+		<PackageReference Include="Radzen.Blazor" Version="3.16.3" />
 	</ItemGroup>
 
 	<Target Name="CustomAfterPublishh" AfterTargets="AfterPublish">

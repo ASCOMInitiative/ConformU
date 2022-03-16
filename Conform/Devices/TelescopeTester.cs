@@ -443,7 +443,7 @@ namespace ConformU
                     {
                         if (settings.DisplayMethodCalls)
                             LogTestAndMessage("Mount Safety", "About to call Unpark method");
-                        telescopeDevice.UnPark();
+                        telescopeDevice.Unpark();
                         LogInfo("Mount Safety", "Scope is parked, so it has been unparked for testing");
                     }
                     else
@@ -465,7 +465,7 @@ namespace ConformU
                     {
                         if (settings.DisplayMethodCalls)
                             LogTestAndMessage("Mount Safety", "About to call Unpark method");
-                        telescopeDevice.UnPark();
+                        telescopeDevice.Unpark();
                         LogOK("Mount Safety", "Scope has been unparked for testing");
                     }
                     else
@@ -2539,7 +2539,7 @@ namespace ConformU
                                             Status(StatusType.staAction, "UnPark scope after park");
                                             if (settings.DisplayMethodCalls)
                                                 LogTestAndMessage("UnPark", "About to call UnPark method");
-                                            telescopeDevice.UnPark();
+                                            telescopeDevice.Unpark();
                                             do
                                             {
                                                 WaitFor(SLEEP_TIME);
@@ -2567,7 +2567,7 @@ namespace ConformU
                                             {
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("UnPark", "About to call UnPark method");
-                                                telescopeDevice.UnPark();
+                                                telescopeDevice.Unpark();
                                                 LogOK("UnPark", "Success if already unparked");
                                             }
                                             catch (COMException ex)
@@ -2595,7 +2595,7 @@ namespace ConformU
                                         {
                                             if (settings.DisplayMethodCalls)
                                                 LogTestAndMessage("UnPark", "About to call UnPark method");
-                                            telescopeDevice.UnPark();
+                                            telescopeDevice.Unpark();
                                             LogIssue("UnPark", "No exception thrown by UnPark when CanUnPark is false");
                                         }
                                         catch (COMException ex)
@@ -2661,7 +2661,7 @@ namespace ConformU
                             {
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage("UnPark", "About to call UnPark method");
-                                telescopeDevice.UnPark();
+                                telescopeDevice.Unpark();
                                 LogOK("UnPark", "CanPark is false and CanUnPark is true; no exception generated as expected");
                             }
                             catch (Exception ex)
@@ -2675,7 +2675,7 @@ namespace ConformU
                             {
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage("UnPark", "About to call UnPark method");
-                                telescopeDevice.UnPark();
+                                telescopeDevice.Unpark();
                                 LogIssue("UnPark", "CanPark and CanUnPark are false but no exception was generated on use");
                             }
                             catch (Exception ex)
@@ -5466,7 +5466,7 @@ namespace ConformU
                                         LogIssue(p_Name, "FindHome has parked the scope as well as finding home");
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage(p_Name, "About to call UnPark method");
-                                        telescopeDevice.UnPark(); // Unpark it ready for further tests
+                                        telescopeDevice.Unpark(); // Unpark it ready for further tests
                                     }
                                 }
                                 else
@@ -5478,7 +5478,7 @@ namespace ConformU
                                     LogOK(p_Name, "Found home OK.");
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage(p_Name, "About to call Unpark method");
-                                    telescopeDevice.UnPark();
+                                    telescopeDevice.Unpark();
                                 } // Make sure we are still  unparked!
 
                                 break;
@@ -6987,7 +6987,7 @@ namespace ConformU
 
             return TelescopeRAFromSiderealTimeRet;
         }
-
+#if WINDOWS
         private void TestEarlyBinding(InterfaceType TestType)
         {
             dynamic l_ITelescope;
@@ -7094,7 +7094,7 @@ namespace ConformU
                 LogIssue("Telescope:TestEarlyBinding.EX1", ex.ToString());
             }
         }
-
+#endif
         private static string FormatRA(double ra)
         {
             return Utilities.HoursToHMS(ra, ":", ":", "", DISPLAY_DECIMAL_DIGITS);

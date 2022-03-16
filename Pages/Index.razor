@@ -77,9 +77,9 @@
             configuration.RaiseUiHasChangedEvent();
             StateHasChanged();
 
-            // Validate the supplied configuraiton and only start if there are no settings issues
+            // Validate the supplied configuration and only start if there are no settings issues
             string validationMessage = configuration.Validate();
-            if (!string.IsNullOrEmpty(validationMessage)) // There is a configuraiton issue so present an error message
+            if (!string.IsNullOrEmpty(validationMessage)) // There is a configuration issue so present an error message
             {
                 // Find the current position of the start button in the viewport
                 BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "StartButton");

@@ -272,7 +272,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("CameraState", "About to get VideoCameraRunning property");
-                CameraState = VideoCameraState.videoCameraRunning;
+                CameraState = VideoCameraState.Running;
                 CameraState = videoDevice.CameraState;
                 LogOK("CameraState Read", CameraState.ToString());
             }

@@ -198,9 +198,9 @@ namespace ConformU
             MethodNoParameters(() => driver.SyncToTarget());
         }
 
-        public void UnPark()
+        public void Unpark()
         {
-            MethodNoParameters(() => driver.UnPark());
+            MethodNoParameters(() => driver.Unpark());
         }
 
         #endregion

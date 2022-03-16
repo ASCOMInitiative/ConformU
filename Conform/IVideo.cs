@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 */
 using System.Collections;
 
-namespace ASCOM.Common.DeviceInterfaces
+namespace ASCOM.Common.DeviceInterfaces.NOLONGERNEEDED  
 
 {
     /// <summary>
