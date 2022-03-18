@@ -1,5 +1,8 @@
 call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
 
+MSBuild "j:\ConformU\ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Restore 
+MSBuild "j:\ConformU\ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Rebuild
+
 mkdir publish
 
 dotnet publish -c Debug /p:Platform="Any CPU" -r win-x64 --framework net6.0-windows --self-contained true /p:PublishTrimmed=false  -o ./publish/conformu.windows-x64
