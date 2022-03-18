@@ -32,11 +32,7 @@
     object screenLogLockObject = new object();
     object statusLockObject = new object();
 
-#if WINDOWS7_0_OR_GREATER
-    string statusMessage = $"Windows build - {Environment.OSVersion}";
-#else
-    string statusMessage = "Linux build - {Environment.OSVersion}";
-#endif
+    string statusMessage = $"{Environment.OSVersion} {(Environment.Is64BitOperatingSystem?"64bit":"32bit")}";
 
     ConformanceTestManager tester;
 
