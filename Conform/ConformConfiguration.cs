@@ -14,7 +14,6 @@ namespace ConformU
         private ConformLogger TL;
         Settings settings;
         private bool disposedValue;
-        readonly string fileSettingsFileName;
 
         /// <summary>
         /// Create a Configuration management instance and load the current settings
@@ -31,20 +30,20 @@ namespace ConformU
                 if (string.IsNullOrEmpty(configurationFile))
                 {
                     string folderName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), FOLDER_NAME);
-                    fileSettingsFileName = Path.Combine(folderName, SETTINGS_FILENAME);
-                    TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Settings folder: {folderName}, Settings file: {fileSettingsFileName}");
+                    SettingsFileName = Path.Combine(folderName, SETTINGS_FILENAME);
+                    TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Settings folder: {folderName}, Settings file: {SettingsFileName}");
                 }
                 else
                 {
-                    fileSettingsFileName = configurationFile;
-                    TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Settings file: {fileSettingsFileName}");
+                    SettingsFileName = configurationFile;
+                    TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Settings file: {SettingsFileName}");
                 }
 
 
-                if (File.Exists(fileSettingsFileName))
+                if (File.Exists(SettingsFileName))
                 {
                     TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, "File exists and read OK");
-                    string serialisedSettings = File.ReadAllText(fileSettingsFileName);
+                    string serialisedSettings = File.ReadAllText(SettingsFileName);
                     TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Serialised settings: {serialisedSettings}");
 
                     settings = JsonSerializer.Deserialize<Settings>(serialisedSettings, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -52,7 +51,7 @@ namespace ConformU
                 }
                 else
                 {
-                    TL.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Configuration file does not exist, initialising new file: {fileSettingsFileName}");
+                    TL.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Configuration file does not exist, initialising new file: {SettingsFileName}");
                     PersistSettings(settings);
                     Status = "Settings set to defaults on first time use.";
                 }
@@ -156,6 +155,8 @@ namespace ConformU
         /// </summary>
         public string Status { get; private set; }
 
+        public string SettingsFileName { get; private set; }
+
         /// <summary>
         /// Flag indicating whether de-serialisation of Alpaca JSON responses is sensitive to case of JSON element names
         /// </summary>
@@ -171,7 +172,7 @@ namespace ConformU
                     throw new ArgumentNullException(nameof(settingsToPersist));
                 }
 
-                TL?.LogMessage("PersistSettings", MessageLevel.Debug, $"Settings file: {fileSettingsFileName}");
+                TL?.LogMessage("PersistSettings", MessageLevel.Debug, $"Settings file: {SettingsFileName}");
 
                 JsonSerializerOptions options = new()
                 {
@@ -179,8 +180,8 @@ namespace ConformU
                 };
                 string serialisedSettings = JsonSerializer.Serialize<Settings>(settingsToPersist, options);
 
-                Directory.CreateDirectory(Path.GetDirectoryName(fileSettingsFileName));
-                File.WriteAllText(fileSettingsFileName, serialisedSettings);
+                Directory.CreateDirectory(Path.GetDirectoryName(SettingsFileName));
+                File.WriteAllText(SettingsFileName, serialisedSettings);
             }
             catch (Exception ex)
             {
