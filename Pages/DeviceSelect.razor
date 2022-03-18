@@ -192,13 +192,22 @@
     /// <returns></returns>
     async Task ResizeStatusHeight()
     {
-        var result = await JS.InvokeAsync<object>("eval", new object[] { @"(function() {
-        DiscoveryStatus.style.height='auto';
-        DiscoveryStatus.style.height=(DiscoveryStatus.scrollHeight + 2)+'px';
-        return DiscoveryStatus.scrollHeight;
-        })()"
-        });
-
+        try
+        {
+            var result = await JS.InvokeAsync<object>("eval", new object[]
+            {
+                // The text below defines a three line JavaScript anonymous function, which is run by the () parentheses at the end of the string.
+                @"(function() {
+                  DiscoveryStatus.style.height='auto';
+                  DiscoveryStatus.style.height=(DiscoveryStatus.scrollHeight + 2)+'px';
+                  return DiscoveryStatus.scrollHeight;
+                  })()"
+            });
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("DeviceSelect.ResizeStatusHeight", MessageLevel.Debug, $"Ignoring exception when resizing status height:\r\n{ex}");
+        }
     }
 
     private async void ResizeStatusArea()
@@ -210,7 +219,6 @@
         // Set the height of the text area
         await ResizeStatusHeight();
     }
-
 
 
     #region Initialisation and Load
