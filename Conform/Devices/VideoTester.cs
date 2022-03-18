@@ -1,4 +1,5 @@
 ﻿using ASCOM;
+using ASCOM.Com.DriverAccess;
 
 /* Unmerged change from project 'ConformU (net5.0)'
 Before:
@@ -185,8 +186,9 @@ namespace ConformU
                                 break;
 
                             case ComAccessMechanic.DriverAccess:
-                                LogIssue("CreateDevice", "The DriverAccess implementation does not support video devices.");
-                                throw new Exception("The DriverAccess implementation does not support video devices.");
+                                LogInfo("CreateDevice", $"Creating DRIVERACCESS device: {settings.ComDevice.ProgId}");
+                                videoDevice = new Video(settings.ComDevice.ProgId);
+                                break;
 
                             default:
                                 throw new ASCOM.InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComACcessMechanic}");
