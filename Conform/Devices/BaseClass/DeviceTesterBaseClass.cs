@@ -1178,7 +1178,15 @@ namespace ConformU
             }
             else if (ex is ASCOM.NotImplementedException)
             {
-                LogIssue(MemberName, "Received a NotImplementedException instead of a " + ((TypeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException"));
+                // ASCOM.NotImplementedException is expected if received from the cross platform library DriverAccess module, otherwise it is an issue, so test for this condition.
+                if ((settings.ComConfiguration.ComACcessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM)) // We are testing a COM device using the cross platform DriverAccess module so report OK.
+                {
+                    LogOK(MemberName, "Received a NotImplementedException from DriverAccess as expected");
+                }
+                else // We are NOT testing a COM device using the cross platform DriverAccess module so report an issue.
+                {
+                    LogIssue(MemberName, "Received a NotImplementedException instead of a " + ((TypeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException"));
+                }
             }
             else if (ex is System.NotImplementedException)
             {

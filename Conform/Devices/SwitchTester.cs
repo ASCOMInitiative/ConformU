@@ -686,6 +686,7 @@ namespace ConformU
                                         }
                                         catch (Exception ex)
                                         {
+                                            LogDebug("SetSwitch ", $"Exception generated - Switch can write: {l_SwitchCanWrite}, IsMethodNotImplementedException: {IsMethodNotImplementedException(ex)}, IsNotImplementedException: {IsNotImplementedException(ex)}, COM Access mechanic: {settings.ComConfiguration.ComACcessMechanic}, Device Technology: {settings.DeviceTechnology}");
                                             if (l_SwitchCanWrite)
                                             {
                                                 LogIssue("SetSwitch ", "Exception: " + ex.Message);
@@ -693,7 +694,20 @@ namespace ConformU
                                             }
                                             else if (IsMethodNotImplementedException(ex))
                                                 LogOK("SetSwitch ", "  CanWrite is False and MethodNotImplementedException was thrown");
-                                            else
+                                            // Determine whether we are testing a COM device using the cross platform DriverAccess module and, if so, test for the NotimplementedExceptionso that it returns.
+                                            else if ((settings.ComConfiguration.ComACcessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM))
+                                            {
+                                                if (IsNotImplementedException(ex)) // Got a NotImplementedException, which is OK
+                                                {
+                                                    LogOK("SetSwitch ", "  CanWrite is False and NotImplementedException was thrown by DriverAccess");
+                                                }
+                                                else // Got some other exception, which is an issue.
+                                                {
+                                                    LogIssue("SetSwitch ", "Exception: " + ex.Message);
+                                                    LogDebug("SetSwitch ", "Exception: " + ex.ToString());
+                                                }
+                                            }
+                                            else // Received an unexpected exception, which is an issue.
                                             {
                                                 LogIssue("SetSwitch ", "Exception: " + ex.Message);
                                                 LogDebug("SetSwitch ", "Exception: " + ex.ToString());
@@ -899,6 +913,7 @@ namespace ConformU
                                         }
                                         catch (Exception ex)
                                         {
+                                            LogDebug("SetSwitchValue ", $"EXCEPTION GENERATED - Switch can write: {l_SwitchCanWrite}, IsMethodNotImplementedException: {IsMethodNotImplementedException(ex)}, IsNotImplementedException: {IsNotImplementedException(ex)}, COM Access mechanic: {settings.ComConfiguration.ComACcessMechanic}, Device Technology: {settings.DeviceTechnology}");
                                             if (l_SwitchCanWrite)
                                             {
                                                 LogIssue("SetSwitchValue ", "Exception: " + ex.Message);
@@ -906,6 +921,19 @@ namespace ConformU
                                             }
                                             else if (IsMethodNotImplementedException(ex))
                                                 LogOK("SetSwitchValue ", "  CanWrite is False and MethodNotImplementedException was thrown");
+                                            // Determine whether we are testing a COM device using the cross platform DriverAccess module and, if so, test for the NotimplementedExceptionso that it returns.
+                                            else if ((settings.ComConfiguration.ComACcessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM))
+                                            {
+                                                if (IsNotImplementedException(ex)) // Got a NotImplementedException, which is OK
+                                                {
+                                                    LogOK("SetSwitchValue ", "  CanWrite is False and NotImplementedException was thrown by DriverAccess");
+                                                }
+                                                else // Got some other exception, which is an issue.
+                                                {
+                                                    LogIssue("SetSwitchValue ", "Exception: " + ex.Message);
+                                                    LogDebug("SetSwitchValue ", "Exception: " + ex.ToString());
+                                                }
+                                            }
                                             else
                                             {
                                                 LogIssue("SetSwitchValue ", "Exception: " + ex.Message);
