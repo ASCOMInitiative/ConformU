@@ -546,7 +546,7 @@
 
     protected override void OnInitialized()
     {
-        status = configuration.Status;
+        status = $"{configuration.Status} - Configuration file: {configuration.SettingsFileName}";
         SetConfiguration();
 
         isWindowsOs = OperatingSystem.IsWindows();
