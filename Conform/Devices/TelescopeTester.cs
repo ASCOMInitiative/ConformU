@@ -493,8 +493,15 @@ namespace ConformU
             if (!cancellationToken.IsCancellationRequested & canSetTracking)
             {
                 if (settings.DisplayMethodCalls) LogTestAndMessage("Mount Safety", "About to set Tracking property true");
-                telescopeDevice.Tracking = true;
-                LogInfo("Mount Safety", "Scope tracking has been enabled");
+                try
+                {
+                    telescopeDevice.Tracking = true;
+                    LogInfo("Mount Safety", "Scope tracking has been enabled");
+                }
+                catch (Exception ex)
+                {
+                    LogInfo("Mount Safety", $"Exception while trying to set Tracking to true: {ex.Message}");
+                }
             }
 
             if (!cancellationToken.IsCancellationRequested)
