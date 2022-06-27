@@ -435,25 +435,37 @@ namespace ConformU
             // Get into a consistent state
             if (g_InterfaceVersion > 1)
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("Mount Safety", "About to get AtPark property");
-                if (telescopeDevice.AtPark)
+                try
                 {
-                    if (canUnpark)
+                    if (settings.DisplayMethodCalls) LogTestAndMessage("Mount Safety", "About to get AtPark property");
+                    if (telescopeDevice.AtPark)
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("Mount Safety", "About to call Unpark method");
-                        telescopeDevice.Unpark();
-                        LogInfo("Mount Safety", "Scope is parked, so it has been unparked for testing");
+                        if (canUnpark)
+                        {
+                            try
+                            {
+                                if (settings.DisplayMethodCalls) LogTestAndMessage("Mount Safety", "About to call Unpark method");
+                                telescopeDevice.Unpark();
+                                LogInfo("Mount Safety", "Scope is parked, so it has been unparked for testing");
+                            }
+                            catch (Exception ex)
+                            {
+                                HandleException("Mount Safety - Unpark", MemberType.Method, Required.MustBeImplemented, ex, "CanUnpark is true");
+                            }
+                        }
+                        else
+                        {
+                            LogIssue("Mount Safety", "Scope reports that it is parked but CanUnPark is false - please manually unpark the scope");
+                        }
                     }
                     else
                     {
-                        LogIssue("Mount Safety", "Scope reports that it is parked but CanUnPark is false - please manually unpark the scope");
+                        LogInfo("Mount Safety", "Scope is not parked, continuing testing");
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    LogInfo("Mount Safety", "Scope is not parked, continuing testing");
+                    HandleException("Mount Safety - AtPark", MemberType.Property, Required.Mandatory, ex, "");
                 }
             }
             else
@@ -463,8 +475,7 @@ namespace ConformU
                 {
                     if (canUnpark)
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("Mount Safety", "About to call Unpark method");
+                        if (settings.DisplayMethodCalls) LogTestAndMessage("Mount Safety", "About to call Unpark method");
                         telescopeDevice.Unpark();
                         LogOK("Mount Safety", "Scope has been unparked for testing");
                     }
@@ -481,8 +492,7 @@ namespace ConformU
 
             if (!cancellationToken.IsCancellationRequested & canSetTracking)
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("Mount Safety", "About to set Tracking property true");
+                if (settings.DisplayMethodCalls) LogTestAndMessage("Mount Safety", "About to set Tracking property true");
                 telescopeDevice.Tracking = true;
                 LogInfo("Mount Safety", "Scope tracking has been enabled");
             }
@@ -491,7 +501,7 @@ namespace ConformU
             {
                 try
                 {
-                    LogInfo("TimeCheck", $"PC Time Zone:  { TimeZoneInfo.Local.DisplayName} offset: {TimeZoneInfo.Local.BaseUtcOffset.Hours} hours.");
+                    LogInfo("TimeCheck", $"PC Time Zone:  {TimeZoneInfo.Local.DisplayName} offset: {TimeZoneInfo.Local.BaseUtcOffset.Hours} hours.");
                     LogInfo("TimeCheck", $"PC UTCDate:    " + DateTime.UtcNow.ToString("dd-MMM-yyyy HH:mm:ss.fff"));
                 }
                 catch (Exception ex)
@@ -4045,7 +4055,7 @@ namespace ConformU
                                     }
                                     else
                                     {
-                                        LogIssue(p_Name, $"The TargetDeclination property { FormatDec(actualTargetDec)} does not match the expected Declination {FormatDec(targetDeclination)} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
+                                        LogIssue(p_Name, $"The TargetDeclination property {FormatDec(actualTargetDec)} does not match the expected Declination {FormatDec(targetDeclination)} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
                                     }
 
                                 }
