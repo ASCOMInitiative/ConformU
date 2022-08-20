@@ -40,6 +40,7 @@
 		<NoWarn>1701;1702;MSB3042</NoWarn>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<AnalysisLevel>latest</AnalysisLevel>
+		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Remove="publish\**" />
@@ -48,11 +49,15 @@
 		<None Remove="publish\**" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Compile Remove="Conform\IVideo.cs" />
+		<Compile Remove="Conform\IVideo.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<EmbeddedResource Remove="Conform\Devices\Facades\DriverHostForm.resx" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <_WebToolingArtifacts Remove="Properties\PublishProfiles\Arm64.pubxml" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -63,17 +68,31 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.0-alpha29" />
-		<PackageReference Include="ASCOM.Alpaca.Device" Version="1.0.0-alpha29" />
-		<PackageReference Include="ASCOM.Com.Components" Version="1.0.0-alpha29" />
-		<PackageReference Include="ASCOM.Tools" Version="1.0.0-alpha29" />
-		<PackageReference Include="Blazorise.Bootstrap" Version="1.0.1" />
-		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.0.1" />
-		<PackageReference Include="Blazorise.TreeView" Version="1.0.1" />
-		<PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
-		<PackageReference Include="Radzen.Blazor" Version="3.16.3" />
+		<PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.0-alpha33k" />
+		<PackageReference Include="ASCOM.Alpaca.Device" Version="1.0.0-alpha33k" />
+		<PackageReference Include="ASCOM.Com.Components" Version="1.0.0-alpha33k" />
+		<PackageReference Include="ASCOM.Tools" Version="1.0.0-alpha33k" />
+		<PackageReference Include="Blazorise.Bootstrap" Version="1.0.6" />
+		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.0.6" />
+		<PackageReference Include="Blazorise.TreeView" Version="1.0.6" />
+		<PackageReference Include="CommandLineParser" Version="2.9.1" />
+		<PackageReference Include="Radzen.Blazor" Version="3.19.11" />
 	</ItemGroup>
 
+	<!-- Include the correct SOFA library depending on the targeted runtime OS -->
+	<ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+		<None Update="SofaLibraries\Linux64\libsofa_c.so">
+			<Link>libsofa_c.so</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">
+		<None Update="SofaLibraries\Arm64\libsofa_c.so">
+			<Link>libsofa_c.so</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	
 	<Target Name="CustomAfterPublishh" AfterTargets="AfterPublish">
 		<!-- Insert tasks to run after publish here -->
 		<Message Text="After Publish Task $(CheckoutDirectory)" />

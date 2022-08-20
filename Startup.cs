@@ -133,6 +133,9 @@ namespace ConformU
         {
             //applicationLifetime.ApplicationStopping.Register(DisposeObject, conformConfiguration);
             //applicationLifetime.ApplicationStopping.Register(DisposeObject, conformLogger);
+            logger.LogInformation($"***** Environment.CurrentDirectory: {Environment.CurrentDirectory}");
+            logger.LogInformation($"***** Environment.ProcessPath: {Environment.ProcessPath}");
+            logger.LogInformation($"***** Environment.ProcessorCount: {Environment.ProcessorCount}");
 
             if (env.IsDevelopment())
             {
