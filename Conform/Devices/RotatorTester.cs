@@ -1,6 +1,7 @@
 ﻿using ASCOM.Alpaca.Clients;
 using ASCOM.Com.DriverAccess;
 using ASCOM.Common.DeviceInterfaces;
+using ASCOM.Tools;
 using System;
 using System.Threading;
 
@@ -14,6 +15,7 @@ namespace ConformU
         private const double ROTATOR_OK_TOLERANCE = 1.0d;
         private const double ROTATOR_INFO_TOLERANCE = 2.0d;
         private const float ROTATOR_POSITION_TOLERANCE = 0.001f; // Degrees
+        private const float ROTATOR_POSITION_UNKNOWN = float.NaN; // Define a constant to represent position unknown. Used when restoring rotator position after testing.
 
         // Rotator variables
         private bool m_CanReadIsMoving, canReadPosition, m_CanReadTargetPosition, m_CanReadStepSize;
@@ -22,6 +24,9 @@ namespace ConformU
         private bool m_Reverse;
         private bool m_LastMoveWasAsync;
         private bool canReadMechanicalPosition;
+        private float initialPosiiton = ROTATOR_POSITION_UNKNOWN;
+        private float initialMechanicalPosiiton = ROTATOR_POSITION_UNKNOWN;
+        private float initialSyncOffset = ROTATOR_POSITION_UNKNOWN;
 
         private readonly CancellationToken cancellationToken;
         private readonly Settings settings;
@@ -45,7 +50,7 @@ namespace ConformU
         #endregion
 
         #region New and Dispose
-        public RotatorTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(true, true, true, true, false, true, false, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
+        public RotatorTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(true, true, true, true, false, true, true, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
         {
             settings = conformConfiguration.Settings;
             cancellationToken = conformCancellationToken;
@@ -190,8 +195,12 @@ namespace ConformU
         public override void PreRunCheck()
         {
             DateTime l_Now;
+
+            // Initialise to the unknown position value
+            initialPosiiton = ROTATOR_POSITION_UNKNOWN;
+
             // Get the rotator into a standard state
-            LogCallToDriver("PreRunCheck", "About to call Halt method");
+            LogCallToDriver("PreRun Check", "About to call Halt method");
             try
             {
                 m_Rotator.Halt();
@@ -200,33 +209,125 @@ namespace ConformU
             {
             } // Stop any movement
 
+            // Confirm that rotator is not moving or wait for it to stop
             l_Now = DateTime.Now;
-            try // Confirm that rotator is not moving or wait for it to stop
+            try
             {
                 Status(StatusType.staAction, "Waiting up to " + ROTATOR_WAIT_LIMIT + " seconds for rotator to stop moving");
-                LogCallToDriver("CanReverse", "About to get IsMoving property repeatedly");
+                LogCallToDriver("PreRun Check", "About to get IsMoving property repeatedly");
                 do
                 {
                     WaitFor(500);
                     Status(StatusType.staStatus, DateTime.Now.Subtract(l_Now).TotalSeconds + "/" + ROTATOR_WAIT_LIMIT);
                 }
-                while (m_Rotator.IsMoving & (DateTime.Now.Subtract(l_Now).TotalSeconds <= ROTATOR_WAIT_LIMIT));
-                if (!m_Rotator.IsMoving) // Rotator is stopped so OK
-                {
-                    // Clear stop flag to allow other tests to run
-                }
-                else // Report error message and don't do other tests
-                {
-                    LogIssue("Pre-run Check", "Rotator still moving after " + ROTATOR_WAIT_LIMIT + "seconds, IsMoving stuck on?");
-                }
+                while (!(!m_Rotator.IsMoving) | (DateTime.Now.Subtract(l_Now).TotalSeconds > ROTATOR_WAIT_LIMIT));
 
-                LogOK("Pre-run Check", "Rotator is stationary");
+                if (!m_Rotator.IsMoving)
+                {
+                    LogOK("Pre-run Check", "Rotator is stationary");
+
+                    // Try to record the current position of the rotator so that it can be restored after testing. If this fails the initial position will be set to unknown value.
+                    try
+                    {
+                        LogCallToDriver("PreRun Check", "About to get Position property");
+                        initialPosiiton = m_Rotator.Position;
+                        LogOK("Pre-run Check", $"Rotator initial position: {initialPosiiton}");
+
+                        // Attempt to get the rotator's current mechanical position. If this fails the initial mechanical position will be set to unknown value.
+                        try
+                        {
+                            LogCallToDriver("PreRun Check", "About to get MechanicalPosition property");
+                            initialMechanicalPosiiton = m_Rotator.MechanicalPosition;
+                            initialSyncOffset = (float)Utilities.Range((double)(initialPosiiton - initialMechanicalPosiiton), -180.0, true, 180.0, true);
+                            LogOK("Pre-run Check", $"Rotator initial mechanical position: {initialMechanicalPosiiton}, Initial sync offset: {initialSyncOffset}");
+                        }
+                        catch (Exception ex)
+                        {
+                            // Don't report errors at this point
+                            LogInfo("Pre-run Check", $"Rotator initial mechanical position could not be read: {ex.Message}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Don't report errors at this point
+                        LogInfo("Pre-run Check", $"Rotator initial position could not be read: {ex.Message}");
+                    }
+                }
+                else
+                    LogIssue("Pre-run Check", "Rotator still moving after " + ROTATOR_WAIT_LIMIT + "seconds, could IsMoving be stuck on?");
             }
-            catch
+            catch (Exception)
             {
-                // Don't report errors at this point
             }
         }
+
+        public override void PostRunCheck()
+        {
+            float currentPosition, currentMechanicalPosition, relativeMovement, syncPosition;
+            DateTime l_Now;
+
+            // Restore the initial position of the rotator if possible
+            if (initialPosiiton == ROTATOR_POSITION_UNKNOWN)
+                // The initial position could not be determined so log a message to this effect.
+                LogMsg("Post-run Check", MessageLevel.TestAndMessage, "The rotator's initial position could not be determined so it is not possible to restore it's initial position.");
+            else
+                // We have a valid initial position so attempt to reset the rotator to this position.
+                try
+                {
+                    // Get the current position
+                    LogCallToDriver("Post-run Check", $"About to get Position property");
+                    currentPosition = m_Rotator.Position;
+                    LogOK("Post-run Check", $"Current position: {currentPosition}");
+
+                    // Restore the original sync offset, if possible 
+                    if (!(initialMechanicalPosiiton == ROTATOR_POSITION_UNKNOWN))
+                    {
+                        // Get the current mechanical position
+                        LogCallToDriver("Post-run Check", $"About to get MechanicalPosition property");
+                        currentMechanicalPosition = m_Rotator.MechanicalPosition;
+                        LogOK("Post-run Check", $"Current mechanical position: {currentMechanicalPosition}");
+
+                        syncPosition = (float)Utilities.Range((double)(currentMechanicalPosition + initialSyncOffset), 0.0, true, 360.0, false);
+                        LogOK("Post-run Check", $"New sync position: {syncPosition}");
+
+                        LogCallToDriver("Post-run Check", $"About to call Sync method. Position: {syncPosition}");
+                        m_Rotator.Sync(syncPosition);
+                        LogOK("Post-run Check", $"Completed Sync ({initialSyncOffset} degrees) from position: {currentPosition} to {syncPosition}");
+                    }
+
+                    // Re-get the current position because the sync will have changed it
+                    LogCallToDriver("Post-run Check", $"About to get Position property");
+                    currentPosition = m_Rotator.Position;
+                    LogOK("Post-run Check", $"New current position: {currentPosition}");
+
+                    // Calculate the smallest relative movement required to get to the initial position
+                    relativeMovement = (float)Utilities.Range((double)(initialPosiiton - currentPosition), -180.0, true, 180.0, true);
+
+                    // Move to the starting position
+                    LogCallToDriver("Post-run Check", $"About to move by {relativeMovement} to {initialPosiiton}");
+                    m_Rotator.Move(relativeMovement);
+
+                    // Wait for the move to complete
+                    LogCallToDriver("Post-run Check", "About to get IsMoving property repeatedly");
+                    l_Now = DateTime.Now;
+                    do
+                    {
+                        WaitFor(500);
+                        Status(StatusType.staStatus, DateTime.Now.Subtract(l_Now).TotalSeconds + "/" + ROTATOR_WAIT_LIMIT);
+                    }
+                    while (!(!m_Rotator.IsMoving) | (DateTime.Now.Subtract(l_Now).TotalSeconds > ROTATOR_WAIT_LIMIT));
+
+                    if (!m_Rotator.IsMoving)
+                        LogOK("Post-run Check", $"Rotator starting position successfully restored to {initialPosiiton}");
+                    else
+                        LogError("Post-run Check", "Unable to restore rotator starting position, the rotator is still moving after " + ROTATOR_WAIT_LIMIT + "seconds. Could IsMoving be stuck on?");
+                }
+                catch (Exception ex)
+                {
+                    LogError("Post-run Check", $"Exception: {ex}");
+                }
+        }
+
 
         public override void CheckProperties()
         {
