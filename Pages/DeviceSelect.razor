@@ -5,6 +5,7 @@
 @using System.Threading
 @using static ConformU.Globals
 @using ASCOM.Com.DriverAccess
+@using ASCOM.Com
 
 @* Activity logger object*@
 @inject ConformLogger conformLogger
@@ -480,7 +481,7 @@
         if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Debug, $"Getting registered {selectedDeviceTypeString} drivers...");
 
         // Get the registered devices using the ASOCM.Standards ProfileAccess component.
-        List<ASCOMRegistration> registeredDevices = ProfileAccess.GetDrivers(selectedDeviceTypeString);
+        List<ASCOMRegistration> registeredDevices = Profile.GetDrivers(selectedDeviceTypeString);
         foreach (ASCOMRegistration ascomRegistration in registeredDevices)
         {
             if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Debug, $"Found device: {ascomRegistration.Name} - {ascomRegistration.ProgID}");
