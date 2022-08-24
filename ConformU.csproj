@@ -68,10 +68,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.0-alpha33k" />
-		<PackageReference Include="ASCOM.Alpaca.Device" Version="1.0.0-alpha33k" />
-		<PackageReference Include="ASCOM.Com.Components" Version="1.0.0-alpha33k" />
-		<PackageReference Include="ASCOM.Tools" Version="1.0.0-alpha33k" />
+		<PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.0-beta2" />
+		<PackageReference Include="ASCOM.Alpaca.Device" Version="1.0.0-beta2" />
+		<PackageReference Include="ASCOM.Com.Components" Version="1.0.0-beta2" />
+		<PackageReference Include="ASCOM.Tools" Version="1.0.0-beta2" />
 		<PackageReference Include="Blazorise.Bootstrap" Version="1.0.6" />
 		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.0.6" />
 		<PackageReference Include="Blazorise.TreeView" Version="1.0.6" />
