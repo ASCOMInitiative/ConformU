@@ -1,6 +1,7 @@
 ﻿using ASCOM;
 using ASCOM.Alpaca.Clients;
 using ASCOM.Com.DriverAccess;
+using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using ASCOM.Tools;
 using System;
@@ -249,7 +250,7 @@ namespace ConformU
         #region Code
         public override void CheckCommonMethods()
         {
-            CheckCommonMethods(telescopeDevice, DeviceType.Telescope);
+            CheckCommonMethods(telescopeDevice, DeviceTypes.Telescope);
         }
 
         public new void CheckInitialise()

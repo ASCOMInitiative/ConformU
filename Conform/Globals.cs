@@ -58,22 +58,6 @@
         COM = 2
     }
 
-    public enum DeviceType
-    {
-        NoDeviceType = 0,
-        Telescope = 1,
-        Camera = 2,
-        Dome = 3,
-        FilterWheel = 4,
-        Focuser = 5,
-        ObservingConditions = 6,
-        Rotator = 7,
-        Switch = 8,
-        SafetyMonitor = 9,
-        Video = 10,
-        CoverCalibrator = 11
-    }
-
     public enum MessageLevel
     {
         Debug = 0,

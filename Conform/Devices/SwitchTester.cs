@@ -1,5 +1,6 @@
 ﻿using ASCOM.Alpaca.Clients;
 using ASCOM.Com.DriverAccess;
+using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Threading;
@@ -183,7 +184,7 @@ namespace ConformU
 
         public override void CheckCommonMethods()
         {
-            base.CheckCommonMethods(m_Switch, DeviceType.Switch);
+            base.CheckCommonMethods(m_Switch, DeviceTypes.Switch);
         }
 
         public override void CheckProperties()

@@ -1,6 +1,7 @@
 ﻿// Base class from which particular device testers are derived
 // Put all common elements in here
 using ASCOM;
+using ASCOM.Common;
 using System;
 using System.Collections;
 using System.IO;
@@ -182,7 +183,7 @@ namespace ConformU
             baseClassDevice.SetupDialog();
         }
 
-        public void CheckCommonMethods(object p_DeviceObject, DeviceType p_DeviceType)
+        public void CheckCommonMethods(object p_DeviceObject, DeviceTypes p_DeviceType)
         {
             string m_DriverVersion, m_DriverInfo, m_Description, m_Name; // , m_LastResult As String
             IList SA;
@@ -263,7 +264,7 @@ namespace ConformU
 
                         default:
                             {
-                                if (m_Description.Length > 68 & p_DeviceType == DeviceType.Camera)
+                                if (m_Description.Length > 68 & p_DeviceType == DeviceTypes.Camera)
                                 {
                                     LogIssue("Description", "Maximum number of characters is 68 for compatibility with FITS headers, found: " + m_Description.Length + " characters: " + m_Description);
                                 }
@@ -455,7 +456,7 @@ namespace ConformU
                                         LogOK("SupportedActions", "Found action: " + ActionString);
 
                                         // Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
-                                        if (p_DeviceType == DeviceType.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.ToUpper() == "ASCOM.OCH.OBSERVINGCONDITIONS")
+                                        if (p_DeviceType == DeviceTypes.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.ToUpper() == "ASCOM.OCH.OBSERVINGCONDITIONS")
                                         {
                                             if (ActionString.ToUpperInvariant().StartsWith("//OCSIMULATOR:"))
                                             {
@@ -528,7 +529,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                if (p_DeviceType == DeviceType.Switch & ReferenceEquals(ex.GetType(), typeof(MissingMemberException)))
+                if (p_DeviceType == DeviceTypes.Switch & ReferenceEquals(ex.GetType(), typeof(MissingMemberException)))
                 {
                     LogOK("SupportedActions", "Switch V1 Driver does not have SupportedActions");
                 }
@@ -1303,7 +1304,7 @@ namespace ConformU
 
         #region Base class support Code
 
-        private static bool IncludeMethod(MandatoryMethod p_Method, DeviceType p_DeviceType, int p_InterfaceVersion)
+        private static bool IncludeMethod(MandatoryMethod p_Method, DeviceTypes p_DeviceType, int p_InterfaceVersion)
         {
             // This mechanic allows individual tests for particular devices to be skipped. It is no longer required because this is handled by DriverAccess
             // The code is left in place in case it is ever needed in the future
@@ -1313,7 +1314,7 @@ namespace ConformU
             // Matrix controlling what tests
             switch (p_DeviceType)
             {
-                case DeviceType.Telescope:
+                case DeviceTypes.Telescope:
                     {
                         switch (p_InterfaceVersion)
                         {
@@ -1334,7 +1335,7 @@ namespace ConformU
                         break;
                     }
 
-                case DeviceType.Camera:
+                case DeviceTypes.Camera:
                     {
                         RetVal = true;
                         break;

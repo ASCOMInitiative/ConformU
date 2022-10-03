@@ -1,5 +1,6 @@
 ﻿using ASCOM.Alpaca.Clients;
 using ASCOM.Com.DriverAccess;
+using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Threading;
@@ -195,7 +196,7 @@ namespace ConformU
         }
         public override void CheckCommonMethods()
         {
-            base.CheckCommonMethods(domeDevice, DeviceType.Dome);
+            base.CheckCommonMethods(domeDevice, DeviceTypes.Dome);
         }
 
         public override void PreRunCheck()

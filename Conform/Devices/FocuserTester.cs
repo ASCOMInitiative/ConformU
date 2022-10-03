@@ -1,6 +1,7 @@
 ﻿using ASCOM;
 using ASCOM.Alpaca.Clients;
 using ASCOM.Com.DriverAccess;
+using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Runtime.InteropServices;
@@ -166,7 +167,7 @@ namespace ConformU
 
         public override void CheckCommonMethods()
         {
-            base.CheckCommonMethods(m_Focuser, DeviceType.Focuser);
+            base.CheckCommonMethods(m_Focuser, DeviceTypes.Focuser);
         }
 
         public override void CheckProperties()

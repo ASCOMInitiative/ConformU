@@ -1,5 +1,6 @@
 ﻿using ASCOM;
 using ASCOM.Com.DriverAccess;
+using ASCOM.Common;
 
 /* Unmerged change from project 'ConformU (net5.0)'
 Before:
@@ -142,7 +143,7 @@ namespace ConformU
 
         public override void CheckCommonMethods()
         {
-            base.CheckCommonMethods(videoDevice, DeviceType.Camera);
+            base.CheckCommonMethods(videoDevice, DeviceTypes.Camera);
         }
 
         public new void CheckInitialise()

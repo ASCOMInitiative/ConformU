@@ -1,5 +1,6 @@
 ﻿using ASCOM.Alpaca.Clients;
 using ASCOM.Com.DriverAccess;
+using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using ASCOM.Tools;
 using System;
@@ -175,7 +176,7 @@ namespace ConformU
 
         public override void CheckCommonMethods()
         {
-            base.CheckCommonMethods(m_Rotator, DeviceType.Rotator);
+            base.CheckCommonMethods(m_Rotator, DeviceTypes.Rotator);
         }
 
         public override void ReadCanProperties()

@@ -1,6 +1,7 @@
 ﻿//using AlpacaDiscovery;
 using ASCOM;
 using ASCOM.Alpaca.Discovery;
+using ASCOM.Common;
 using System;
 using System.Collections.Generic;
 
@@ -101,7 +102,7 @@ namespace ConformU
         /// <summary>
         /// ASCOM Device type of the current device
         /// </summary>
-        public DeviceType DeviceType { get; set; } = DeviceType.NoDeviceType;
+        public DeviceTypes ?DeviceType { get; set; } = null;
 
         #endregion
 

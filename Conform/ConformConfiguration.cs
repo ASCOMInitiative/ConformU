@@ -81,7 +81,7 @@ namespace ConformU
             switch (settings.DeviceTechnology)
             {
                 case DeviceTechnology.Alpaca:
-                    if (string.IsNullOrEmpty(settings.AlpacaDevice.AscomDeviceType)) issueList += $"\r\nAlpaca device type is not set";
+                    if (settings.AlpacaDevice.AscomDeviceType == null) issueList += $"\r\nAlpaca device type is not set";
 
                     if (string.IsNullOrEmpty(settings.AlpacaDevice.IpAddress)) issueList += $"\r\nAlpaca device IP address is not set";
 

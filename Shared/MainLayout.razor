@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using ASCOM.Common
+@inherits LayoutComponentBase
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
 @using static ConformU.Globals
@@ -23,7 +24,7 @@
 @code
 {
     private string deviceName;
-    private DeviceType deviceType;
+    private DeviceTypes deviceType;
     private DeviceTechnology deviceTechnology;
     private int alpacaDeviceNumber;
 
@@ -61,7 +62,7 @@
         {
             deviceName = configuration.Settings.DeviceName;
         }
-        deviceType = configuration.Settings.DeviceType;
+        deviceType = configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope);
         deviceTechnology = configuration.Settings.DeviceTechnology;
 
     }

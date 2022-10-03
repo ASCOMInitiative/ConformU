@@ -1,5 +1,6 @@
 ﻿using ASCOM.Alpaca.Clients;
 using ASCOM.Com.DriverAccess;
+using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Threading;
@@ -167,7 +168,7 @@ namespace ConformU
 
         public override void CheckCommonMethods()
         {
-            base.CheckCommonMethods(coverCalibratorDevice, DeviceType.CoverCalibrator);
+            base.CheckCommonMethods(coverCalibratorDevice, DeviceTypes.CoverCalibrator);
         }
 
         public override void CheckProperties()

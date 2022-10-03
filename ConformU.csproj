@@ -68,15 +68,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.0-beta2" />
-		<PackageReference Include="ASCOM.Alpaca.Device" Version="1.0.0-beta2" />
-		<PackageReference Include="ASCOM.Com.Components" Version="1.0.0-beta2" />
-		<PackageReference Include="ASCOM.Tools" Version="1.0.0-beta2" />
-		<PackageReference Include="Blazorise.Bootstrap" Version="1.0.6" />
-		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.0.6" />
-		<PackageReference Include="Blazorise.TreeView" Version="1.0.6" />
+		<PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.0-beta9a" />
+		<PackageReference Include="ASCOM.Alpaca.Device" Version="1.0.0-beta9a" />
+		<PackageReference Include="ASCOM.Com.Components" Version="1.0.0-beta9a" />
+		<PackageReference Include="ASCOM.Tools" Version="1.0.0-beta9a" />
+		<PackageReference Include="Blazorise.Bootstrap" Version="1.1.1" />
+		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.1.1" />
+		<PackageReference Include="Blazorise.TreeView" Version="1.1.1" />
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
-		<PackageReference Include="Radzen.Blazor" Version="3.19.11" />
+		<PackageReference Include="Radzen.Blazor" Version="4.1.5" />
 	</ItemGroup>
 
 	<!-- Include the correct SOFA library depending on the targeted runtime OS -->

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ASCOM.Common;
+using System;
 using System.Collections.Generic;
 
 /* Unmerged change from project 'ConformU (net5.0)'
@@ -52,67 +53,67 @@ namespace ConformU
 
             switch (settings.DeviceType) // Set current progID and device test class
             {
-                case DeviceType.Telescope:
+                case DeviceTypes.Telescope:
                     {
                         testDevice = new TelescopeTester(configuration, TL, cancellationToken);
                         break;
                     }
 
-                case DeviceType.Dome:
+                case DeviceTypes.Dome:
                     {
                         testDevice = new DomeTester(configuration, TL, cancellationToken);
                         break;
                     }
 
-                case DeviceType.Camera:
+                case DeviceTypes.Camera:
                     {
                         testDevice = new CameraTester(configuration, TL, cancellationToken);
                         break;
                     }
 
-                case DeviceType.Video:
+                case DeviceTypes.Video:
                     {
                         testDevice = new VideoTester(configuration, TL, cancellationToken);
                         break;
                     }
 
-                case DeviceType.Rotator:
+                case DeviceTypes.Rotator:
                     {
                         testDevice = new RotatorTester(configuration, TL, cancellationToken);
                         break;
                     }
 
-                case DeviceType.Focuser:
+                case DeviceTypes.Focuser:
                     {
                         testDevice = new FocuserTester(configuration, TL, cancellationToken);
                         break;
                     }
 
-                case DeviceType.ObservingConditions:
+                case DeviceTypes.ObservingConditions:
                     {
                         testDevice = new ObservingConditionsTester(configuration, TL, cancellationToken);
                         break;
                     }
 
-                case DeviceType.FilterWheel:
+                case DeviceTypes.FilterWheel:
                     {
                         testDevice = new FilterWheelTester(configuration, TL, cancellationToken);
                         break;
                     }
 
-                case DeviceType.Switch:
+                case DeviceTypes.Switch:
                     {
                         testDevice = new SwitchTester(configuration, TL, cancellationToken);
                         break;
                     }
 
-                case DeviceType.SafetyMonitor:
+                case DeviceTypes.SafetyMonitor:
                     {
                         testDevice = new SafetyMonitorTester(configuration, TL, cancellationToken);
                         break;
                     }
 
-                case DeviceType.CoverCalibrator:
+                case DeviceTypes.CoverCalibrator:
                     {
                         testDevice = new CoverCalibratorTester(configuration, TL, cancellationToken);
                         break;

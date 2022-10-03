@@ -6,6 +6,7 @@
 @using static ConformU.Globals
 @using ASCOM.Com.DriverAccess
 @using ASCOM.Com
+@using ASCOM.Common
 
 @* Activity logger object*@
 @inject ConformLogger conformLogger
@@ -77,13 +78,13 @@
 
                     <RadzenButton Style="width: 150px; margin-left: 20px; margin-right:20px"
                                   Text="Rediscover"
-                                  Disabled=@(discoveryInProgress | !configuration.Settings.AlpacaConfiguration.DiscoveryEnabled | (selectedDeviceTypeString == DeviceType.Video.ToString()))
+                                  Disabled=@(discoveryInProgress | !configuration.Settings.AlpacaConfiguration.DiscoveryEnabled | (selectedDeviceTypeString == DeviceTypes.Video.ToString()))
                                   Click=@(args => OnAlpacaSearchClick()) />
                     @if (!configuration.Settings.AlpacaConfiguration.DiscoveryEnabled)
                     {
                         <p style="margin-top:6px; margin-right: 20px">Discovery is disabled in settings</p>
                     }
-                    @if (selectedDeviceTypeString == DeviceType.Video.ToString())
+                    @if (selectedDeviceTypeString == DeviceTypes.Video.ToString())
                     {
                         <p style="margin-top:6px">Alpaca Video devices are not supported</p>
                     }
@@ -100,15 +101,15 @@
                     <RadzenCard Style="margin-bottom: 20px; height: fit-content; margin-right: 20px">
                         <h3 style="color: #479cc8">Manual Alpaca device configuration</h3>
                         <div class="row">
-                            <RadzenTextBox @bind-Value=@manualIpAddress Style="margin-left: 20px" Disabled=@(selectedDeviceTypeString == DeviceType.Video.ToString()) />
+                            <RadzenTextBox @bind-Value=@manualIpAddress Style="margin-left: 20px" Disabled=@(selectedDeviceTypeString == DeviceTypes.Video.ToString()) />
                             <RadzenLabel Text="IP address" Style="margin-left: 20px" />
                         </div>
                         <div style="margin-top:20px" class="row">
-                            <RadzenNumeric Style="margin-left: 20px" @bind-Value="manualPortNumber" TValue="int" Min="1" Disabled=@(selectedDeviceTypeString == DeviceType.Video.ToString()) />
+                            <RadzenNumeric Style="margin-left: 20px" @bind-Value="manualPortNumber" TValue="int" Min="1" Disabled=@(selectedDeviceTypeString == DeviceTypes.Video.ToString()) />
                             <p style="margin-left: 20px;margin-top: 5px;">IP port number</p>
                         </div>
                         <div style="margin-top:20px" class="row">
-                            <RadzenNumeric Style="margin-left: 20px" @bind-Value="manualAlpacaDeviceNumber" TValue="int" Min="0" Disabled=@(selectedDeviceTypeString == DeviceType.Video.ToString()) />
+                            <RadzenNumeric Style="margin-left: 20px" @bind-Value="manualAlpacaDeviceNumber" TValue="int" Min="0" Disabled=@(selectedDeviceTypeString == DeviceTypes.Video.ToString()) />
                             <p style="margin-left: 20px;margin-top: 5px; margin-right: 20px">Alpaca device number</p>
                         </div>
                     </RadzenCard>
@@ -119,9 +120,9 @@
 
                     <RadzenButton Style="margin-top: 0px; width: 150px; margin-left: 20px; margin-right: 20px"
                                   Text="Select"
-                                  Disabled="@(discoveryInProgress | selectedDeviceTypeString == DeviceType.Video.ToString())"
+                                  Disabled="@(discoveryInProgress | selectedDeviceTypeString == DeviceTypes.Video.ToString())"
                                   Click=@(args => OnManualAlpacaDeviceSelect()) />
-                    @if (selectedDeviceTypeString == DeviceType.Video.ToString())
+                    @if (selectedDeviceTypeString == DeviceTypes.Video.ToString())
                     {
                         <p style="margin-top:6px">Alpaca Video devices are not supported</p>
                     }
@@ -168,8 +169,8 @@
     AscomDevice ascomDevice;
     ComDevice comDevice;
     bool discoveryInProgress = false;
-    List<string> validAscomdDeviceTypes = new() { DeviceType.Telescope.ToString(), DeviceType.Camera.ToString(), DeviceType.CoverCalibrator.ToString(), DeviceType.Dome.ToString(), DeviceType.FilterWheel.ToString(), DeviceType.Focuser.ToString(), DeviceType.ObservingConditions.ToString(), DeviceType.Rotator.ToString(), DeviceType.SafetyMonitor.ToString(), DeviceType.Switch.ToString(), DeviceType.Video.ToString() };
-    DeviceType selectedDeviceType; // DeviceType of the selected device
+    List<string> validAscomdDeviceTypes = new() { DeviceTypes.Telescope.ToString(), DeviceTypes.Camera.ToString(), DeviceTypes.CoverCalibrator.ToString(), DeviceTypes.Dome.ToString(), DeviceTypes.FilterWheel.ToString(), DeviceTypes.Focuser.ToString(), DeviceTypes.ObservingConditions.ToString(), DeviceTypes.Rotator.ToString(), DeviceTypes.SafetyMonitor.ToString(), DeviceTypes.Switch.ToString(), DeviceTypes.Video.ToString() };
+    DeviceTypes selectedDeviceType; // DeviceType of the selected device
     string selectedDeviceTypeString; // String representation of the currently selected DeviceType
     string alpacaDiscoveryProgress; // Text describing events happening while Alpaca discovery is underway
     AlpacaDiscovery discovery; // Alpaca discovery component
@@ -227,7 +228,8 @@
     protected override void OnInitialized()
     {
         // Initialise variables
-        selectedDeviceType = (configuration.Settings.DeviceType == DeviceType.NoDeviceType) ? DeviceType.Telescope : configuration.Settings.DeviceType;
+        selectedDeviceType = configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope);
+
         selectedDeviceTypeString = selectedDeviceType.ToString();
         discovery = new AlpacaDiscovery(configuration.Settings.AlpacaConfiguration.StrictCasing, configuration.Settings.TraceDiscovery ? conformLogger : null); // Create a discovery component with or without logging
         discovery.AlpacaDevicesUpdated += AlpacaDeviceDiscovered;
@@ -298,16 +300,17 @@
         {
             // Update the selected device variable or initialise if there is no device
 
-            selectedDeviceType = Enum.Parse<DeviceType>(selectedDeviceTypeString);
+            selectedDeviceType = Devices.StringToDeviceType(selectedDeviceTypeString);
             configuration.Settings.DeviceType = selectedDeviceType;
 
             technologyType = DeviceTechnology.Alpaca;
             configuration.Settings.DeviceTechnology = technologyType;
 
             selectedAlpacaDevice = new AscomDevice(MANUAL_DEVICE_NAME,
-                selectedDeviceType.ToString(),
+                selectedDeviceType,
                 manualAlpacaDeviceNumber,
                 "UniqueID",
+                ASCOM.Common.Alpaca.ServiceType.Http,
                 new IPEndPoint(IPAddress.Parse(manualIpAddress), manualPortNumber),
                 manualIpAddress,
                 1,
@@ -333,7 +336,7 @@
             selectedAlpacaDevice = (value is not null) ? value : new AscomDevice();
             ValidateAscomDevice(ref value);
 
-            selectedDeviceType = Enum.Parse<DeviceType>(selectedDeviceTypeString);
+            selectedDeviceType = Devices.StringToDeviceType(selectedDeviceTypeString);
             configuration.Settings.DeviceType = selectedDeviceType;
 
             technologyType = DeviceTechnology.Alpaca;
@@ -354,14 +357,14 @@
     {
         try
         {
-            DeviceType deviceType = Enum.Parse<DeviceType>(ascomDevice.AscomDeviceType);
+            DeviceTypes? deviceType = ascomDevice.AscomDeviceType;
             // If we get here the device type is correctly formatted to the Enum type
         }
         catch
         {
             try
             {
-                DeviceType deviceType = Enum.Parse<DeviceType>(ascomDevice.AscomDeviceType, true);
+                DeviceTypes? deviceType = ascomDevice.AscomDeviceType;
                 // If we get here the device type is correct but is incorrectly cased compared to the Enum type so we update the object to the correct format
                 if (configuration.Settings.AlpacaConfiguration.StrictCasing)
                 {
@@ -371,7 +374,7 @@
                 {
                     // Tolerant mode - no warnings to be given
                 }
-                ascomDevice.AscomDeviceType = deviceType.ToString(); // Quietly update the stored device type
+                ascomDevice.AscomDeviceType = deviceType; // Quietly update the stored device type
             }
             catch (Exception ex)
             {
@@ -399,7 +402,7 @@
         else
         {
             configuration.Settings.AlpacaDevice = selectedAlpacaDevice;
-            configuration.Settings.DeviceType = Enum.Parse<DeviceType>(selectedAlpacaDevice.AscomDeviceType);
+            configuration.Settings.DeviceType = selectedAlpacaDevice.AscomDeviceType;
         }
 
         technologyType = DeviceTechnology.Alpaca;
@@ -417,7 +420,7 @@
         selectedComDevice = value;
         if (value is null) value = new ComDevice("Unknown", "Unknown");
 
-        selectedDeviceType = Enum.Parse<DeviceType>(selectedDeviceTypeString);
+        selectedDeviceType = Enum.Parse<DeviceTypes>(selectedDeviceTypeString);
         configuration.Settings.DeviceType = selectedDeviceType;
         configuration.Settings.ComDevice = selectedComDevice;
 
@@ -438,7 +441,7 @@
         alpacaDiscoveryProgress += $"Discovery complete!";
         ResizeStatusArea();
         ascomDevices = new();
-        foreach (AscomDevice device in discovery.GetAscomDevices(Enum.Parse<DeviceType>(selectedDeviceTypeString).ToString()))
+        foreach (AscomDevice device in discovery.GetAscomDevices(Enum.Parse<DeviceTypes>(selectedDeviceTypeString)))
         {
             ascomDevices.Add(new AlpacaDeviceListItem($"{device.AscomDeviceName} ({device.IpAddress})", device));
             if ((device.AscomDeviceName == configuration.Settings.AlpacaDevice.AscomDeviceName) & (device.IpAddress == configuration.Settings.AlpacaDevice.IpAddress) & (configuration.Settings.DeviceTechnology == DeviceTechnology.Alpaca)) ascomDevice = device;
@@ -454,7 +457,7 @@
 
     private async void AlpacaDeviceDiscovered(object caller, EventArgs args)
     {
-        List<AscomDevice> newDevices = discovery.GetAscomDevices(Enum.Parse<DeviceType>(selectedDeviceTypeString).ToString());
+        List<AscomDevice> newDevices = discovery.GetAscomDevices(Enum.Parse<DeviceTypes>(selectedDeviceTypeString));
 
         foreach (AscomDevice device in newDevices)
         {
@@ -481,7 +484,7 @@
         if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Debug, $"Getting registered {selectedDeviceTypeString} drivers...");
 
         // Get the registered devices using the ASOCM.Standards ProfileAccess component.
-        List<ASCOMRegistration> registeredDevices = Profile.GetDrivers(selectedDeviceTypeString);
+        List<ASCOMRegistration> registeredDevices = Profile.GetDrivers(Devices.StringToDeviceType(selectedDeviceTypeString));
         foreach (ASCOMRegistration ascomRegistration in registeredDevices)
         {
             if (configuration.Settings.TraceDiscovery) conformLogger.LogMessage("UpdateComDevices", MessageLevel.Debug, $"Found device: {ascomRegistration.Name} - {ascomRegistration.ProgID}");
@@ -515,7 +518,7 @@
     {
         alpacaDiscoveryProgress = "";
 
-        if (configuration.Settings.AlpacaConfiguration.DiscoveryEnabled & (selectedDeviceTypeString != DeviceType.Video.ToString()))
+        if (configuration.Settings.AlpacaConfiguration.DiscoveryEnabled & (selectedDeviceTypeString != DeviceTypes.Video.ToString()))
         {
 
             configuration.Settings.OperationInProgress = true;

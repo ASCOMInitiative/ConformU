@@ -1,6 +1,7 @@
 ﻿using ASCOM;
 using ASCOM.Alpaca.Clients;
 using ASCOM.Com.DriverAccess;
+using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Collections.Generic;
@@ -190,7 +191,7 @@ namespace ConformU
 
         public override void CheckCommonMethods()
         {
-            base.CheckCommonMethods(m_Camera, DeviceType.Camera);
+            base.CheckCommonMethods(m_Camera, DeviceTypes.Camera);
         }
 
         public new void CheckInitialise()

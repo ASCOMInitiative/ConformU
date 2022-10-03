@@ -123,11 +123,11 @@
                                     discoveredAlpacaDevices.Add(alpacaDeviceItem);
                                 }
 
-                                IEnumerable<AscomDevice> uniqueAscomDevices = alpacaDiscovery.GetAscomDevices("").Distinct(new AscomDeviceComparer());
+                                IEnumerable<AscomDevice> uniqueAscomDevices = alpacaDiscovery.GetAscomDevices(null).Distinct(new AscomDeviceComparer());
 
                                 foreach (AscomDevice uniqueAscomDevice in uniqueAscomDevices)
                                 {
-                                    IEnumerable<AscomDevice> sameDevices = alpacaDiscovery.GetAscomDevices("").Where<AscomDevice>(x => x.UniqueId == uniqueAscomDevice.UniqueId);
+                                    IEnumerable<AscomDevice> sameDevices = alpacaDiscovery.GetAscomDevices(null).Where<AscomDevice>(x => x.UniqueId == uniqueAscomDevice.UniqueId);
                                     List<BlazoriseTreeItem> sameDevicesListItems = new();
 
                                     foreach (AscomDevice ad in sameDevices)

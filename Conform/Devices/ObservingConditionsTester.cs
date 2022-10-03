@@ -1,5 +1,6 @@
 ﻿using ASCOM.Alpaca.Clients;
 using ASCOM.Com.DriverAccess;
+using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Collections.Generic;
@@ -228,7 +229,7 @@ namespace ConformU
 
         public override void CheckCommonMethods()
         {
-            base.CheckCommonMethods(m_ObservingConditions, DeviceType.ObservingConditions);
+            base.CheckCommonMethods(m_ObservingConditions, DeviceTypes.ObservingConditions);
         }
 
         public override void CheckProperties()
