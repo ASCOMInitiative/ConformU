@@ -1,11 +1,12 @@
 ﻿using ASCOM.Common.Interfaces;
 using ASCOM.Tools;
+using Microsoft.Extensions.Logging;
 using System;
 using static ConformU.Globals;
 
 namespace ConformU
 {
-    public class ConformLogger : TraceLogger, ILogger, IDisposable
+    public class ConformLogger : TraceLogger, ITraceLogger, IDisposable
     {
         private bool debug;
         public ConformLogger(string logFileName, string logFilePath, string loggerName, bool enabled) : base(logFileName, logFilePath, loggerName, enabled)
@@ -38,11 +39,11 @@ namespace ConformU
                 debug = value;
                 if (value)
                 {
-                    base.SetMinimumLoggingLevel(LogLevel.Debug);
+                    base.SetMinimumLoggingLevel(ASCOM.Common.Interfaces.LogLevel.Debug);
                 }
                 else
                 {
-                    base.SetMinimumLoggingLevel(LogLevel.Information);
+                    base.SetMinimumLoggingLevel(ASCOM.Common.Interfaces.LogLevel.Information);
                 }
             }
         }
@@ -148,7 +149,7 @@ namespace ConformU
         /// </summary>
         /// <param name="logLevel"></param>
         /// <param name="message"></param>
-        public new void Log(LogLevel logLevel, string message)
+        public new void Log(ASCOM.Common.Interfaces.LogLevel logLevel, string message)
         {
 
             if (logLevel >= base.LoggingLevel)
@@ -163,5 +164,20 @@ namespace ConformU
                 OnMessageLogChanged($"{logLevel,-TEST_NAME_WIDTH - MESSAGE_LEVEL_WIDTH} {message}");
             }
         }
+
+        public new void LogMessage(string method, string message)
+        {
+            // Write the message to the console
+            Console.WriteLine($"{method} {message}");
+
+            // Write the message to the log file
+            base.LogMessage(method,message);
+
+            // Raise the MessaegLogChanged event to Write the message to the screen
+            OnMessageLogChanged($"{method} {message}");
+
+        }
+
+
     }
 }

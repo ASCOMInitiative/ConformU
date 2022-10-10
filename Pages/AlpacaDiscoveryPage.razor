@@ -113,9 +113,9 @@
                                     deviceDescription.Add(new BlazoriseTreeItem() { Text = $"Location: {alpacaDevice.Location}" });
                                     List<BlazoriseTreeItem> ascomDevices = new();
 
-                                    foreach (AlpacaConfiguredDevice ascomDevice in alpacaDevice.ConfiguredDevices)
+                                    foreach (AscomDevice ascomDevice in alpacaDevice.AscomDevices(null))
                                     {
-                                        ascomDevices.Add(new BlazoriseTreeItem() { Text = $"ASCOM {ascomDevice.DeviceType} Device: {ascomDevice.DeviceName} - Alpaca device number: {ascomDevice.DeviceNumber} - Alpaca Unique ID: {ascomDevice.UniqueID}" });
+                                        ascomDevices.Add(new BlazoriseTreeItem() { Text = $"ASCOM {ascomDevice.AscomDeviceType} Device: {ascomDevice.AscomDeviceName} - Alpaca device number: {ascomDevice.AlpacaDeviceNumber} - Alpaca Unique ID: {ascomDevice.UniqueId}" });
                                     }
 
                                     if (ascomDevices is not null) deviceDescription.Add(new BlazoriseTreeItem() { Text = "Available ASCOM Devices", Children = ascomDevices });
