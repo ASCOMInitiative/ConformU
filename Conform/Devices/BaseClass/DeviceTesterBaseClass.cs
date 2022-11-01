@@ -1138,25 +1138,25 @@ namespace ConformU
                 {
                     case Required.Mandatory:
                         {
-                            LogIssue(MemberName, "This member is mandatory but threw a " + GetExceptionName(ex) + " exception, it must function per the ASCOM specification.");
+                            LogIssue(MemberName, "This member is mandatory but threw a " + GetExceptionName(ex,TypeOfMember) + " exception, it must function per the ASCOM specification.");
                             break;
                         }
 
                     case Required.MustNotBeImplemented:
                         {
-                            LogOK(MemberName, UserMessage + " and a " + GetExceptionName(ex) + " exception was generated as expected");
+                            LogOK(MemberName, UserMessage + " and a " + GetExceptionName(ex, TypeOfMember) + " exception was generated as expected");
                             break;
                         }
 
                     case Required.MustBeImplemented:
                         {
-                            LogIssue(MemberName, UserMessage + " and a " + GetExceptionName(ex) + " exception was thrown, this method must function per the ASCOM specification.");
+                            LogIssue(MemberName, UserMessage + " and a " + GetExceptionName(ex, TypeOfMember) + " exception was thrown, this method must function per the ASCOM specification.");
                             break;
                         }
 
                     case Required.Optional:
                         {
-                            LogOK(MemberName, "Optional member threw a " + GetExceptionName(ex) + " exception.");
+                            LogOK(MemberName, "Optional member threw a " + GetExceptionName(ex, TypeOfMember) + " exception.");
                             break;
                         }
 
@@ -1197,7 +1197,7 @@ namespace ConformU
             // Handle all other types of error
             else
             {
-                LogIssue(MemberName, "Unexpected " + GetExceptionName(ex) + ", " + UserMessage + ": " + ex.Message);
+                LogIssue(MemberName, "Unexpected " + GetExceptionName(ex, TypeOfMember) + ", " + UserMessage + ": " + ex.Message);
             }
 
             LogDebug(MemberName, "Exception: " + ex.ToString());
@@ -1242,36 +1242,47 @@ namespace ConformU
         /// <summary>
         /// Get an exception name (and number if a COM or Driver exception)
         /// </summary>
-        /// <param name="ex">Exception whose name is required</param>
+        /// <param name="clientException">Exception whose name is required</param>
         /// <returns>String exception name</returns>
         /// <remarks></remarks>
-        protected static string GetExceptionName(Exception ex)
+        protected static string GetExceptionName(Exception clientException, MemberType memberType)
         {
-            COMException ComEx;
             DriverException DriverEx;
             string RetVal;
 
             // Treat ASCOM exceptions specially
-            if (ex.GetType().FullName.ToUpper().Contains("ASCOM"))
+            if (clientException.GetType().FullName.ToUpper().Contains("ASCOM"))
             {
-                if (ex.GetType().FullName.ToUpper().Contains("DRIVEREXCEPTION")) // We have a driver exception so add its number
+                if (clientException.GetType().FullName.ToUpper().Contains("DRIVEREXCEPTION")) // We have a driver exception so add its number
                 {
-                    DriverEx = (DriverException)ex;
+                    DriverEx = (DriverException)clientException;
                     RetVal = "DriverException(0x" + DriverEx.Number.ToString("X8") + ")";
                 }
                 else // Otherwise just use the ASCOM exception's name
                 {
-                    RetVal = ex.GetType().Name;
+                    RetVal = clientException.GetType().Name;
                 }
             }
-            else if (ex is COMException exception) // Handle XOM exceptions with their error code
+            else if (clientException is COMException ComEx) // Handle XOM exceptions with their error code
             {
-                ComEx = exception;
-                RetVal = "COMException(0x" + ((int)ComEx.ErrorCode).ToString("X8") + ")";
+                try
+                {
+                    string exceptionName = ErrorCodes.GetExceptionName(ComEx);
+
+                    RetVal = $"{(String.IsNullOrEmpty(exceptionName) ? ComEx.GetType().Name : exceptionName)} (COM Error: 0x{ComEx.ErrorCode:X8})";
+                    if (ComEx.ErrorCode== ErrorCodes.NotImplemented)
+                    {
+                        RetVal = $"{memberType}{RetVal}";
+                    }
+                }
+                catch (Exception)
+                {
+                    RetVal = $"COMException(0x{ComEx.ErrorCode:X8})";
+                }
             }
             else // We got something else so report it
             {
-                RetVal = ex.GetType().FullName + " exception";
+                RetVal = clientException.GetType().FullName + " exception";
             }
 
             return RetVal;
