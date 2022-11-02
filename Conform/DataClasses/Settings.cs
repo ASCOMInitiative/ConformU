@@ -16,7 +16,13 @@ namespace ConformU
         private const string NO_DEVICE_SELECTED = "No device selected";
         public Settings() { }
 
-        #region Conform configuration
+        #region Application behaviour
+
+        public bool GoHomeOnDeviceSelected{ get; set; } = true;
+
+        #endregion
+
+        #region Conform test configuration
 
         // Conform application configuration 
         public bool DisplayMethodCalls { get; set; } = false;

@@ -7,6 +7,8 @@
 @using ASCOM.Com.DriverAccess
 @using ASCOM.Com
 @using ASCOM.Common
+@inject NavigationManager UriHelper
+
 
 @* Activity logger object*@
 @inject ConformLogger conformLogger
@@ -349,6 +351,8 @@
 
             SaveConfiguration();
             configuration.RaiseUiHasChangedEvent();
+
+            if (configuration.Settings.GoHomeOnDeviceSelected) UriHelper.NavigateTo("/");
         }
         catch (Exception ex)
         {
@@ -432,6 +436,8 @@
 
         SaveConfiguration();
         configuration.RaiseUiHasChangedEvent();
+
+        if (configuration.Settings.GoHomeOnDeviceSelected) UriHelper.NavigateTo("/");
 
     }
 

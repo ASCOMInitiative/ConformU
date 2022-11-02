@@ -5,16 +5,23 @@
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
 @inject IJSRuntime JS
+@using ASCOM.Common
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @* Radzen notification service to enable pop-up alerts *@
 @inject NotificationService notificationService
+@inject NavigationManager UriHelper
 
 <h1 style="display: @statusVisible">Welcome to Conform Universal!</h1>
 
 <div>
-    <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" Disabled=@configuration.Settings.OperationInProgress />
-    <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Style="margin-bottom: 20px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
+    <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 130px" IsBusy=@configuration.Settings.OperationInProgress />
+    <RadzenButton Id="StopButton" Click=@(args => StopTest("Stopping test")) Text="Stop" Style="margin-bottom: 20px; margin-right: 20px; width: 130px" Disabled=@(!configuration.Settings.OperationInProgress) />
+    <RadzenButton Id="ConfigureButton" ButtonStyle="ButtonStyle.Info" Shade="Shade.Dark" Click=@(args => GoToSelectionPage("ConfigureButton")) Text="Select Device" Style="margin-bottom: 10px; margin-right: 10px; width: 130px;" Disabled=@configuration.Settings.OperationInProgress />
+    <div style="display :@descriptionVisible;">
+        @deviceDescription;
+    </div>
+
 </div>
 
 <h4>Conform Log</h4>
@@ -25,14 +32,15 @@
 </div>
 
 @code {
+    private string descriptionVisible = "initial";
     private string statusVisible = "initial";
     private bool disposedValue;
     int screenLogRows = 10;
     string screenLog = "Conform log.";
     object screenLogLockObject = new object();
     object statusLockObject = new object();
-
-    string statusMessage = $"{Environment.OSVersion} {(Environment.Is64BitOperatingSystem?"64bit":"32bit")}";
+    private string deviceDescription = "";
+    string statusMessage = $"{Environment.OSVersion} {(Environment.Is64BitOperatingSystem ? "64bit" : "32bit")}";
 
     ConformanceTestManager tester;
 
@@ -45,9 +53,23 @@
     {
         conformLogger.Debug = configuration.Settings.Debug;
         configuration.UiHasChanged += OnUiHasChanged;
+
+        if (configuration.Settings.DeviceTechnology == DeviceTechnology.Alpaca)
+        {
+            deviceDescription = $"Alpaca {configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope)}: {configuration.Settings.DeviceName} ({configuration.Settings.AlpacaDevice.HostName}:{configuration.Settings.AlpacaDevice.IpPort} - Device {configuration.Settings.AlpacaDevice.AlpacaDeviceNumber})";
+        }
+        else
+        {
+            deviceDescription = $"COM {configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope)}: {configuration.Settings.DeviceName}";
+        }
     }
 
-    public void OnUiHasChanged(object sender, EventArgs e)
+    void GoToSelectionPage(string buttonName)
+    {
+        UriHelper.NavigateTo("/DeviceSelection");
+    }
+
+    public async void OnUiHasChanged(object sender, EventArgs e)
     {
         ResizeLogWindow();
     }
@@ -223,11 +245,27 @@
             BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ConformLog");
             if (result is not null)
             {
-                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 4;
+                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 17.9)) - 5;
 
                 // Hide the status field at small heights
-                if (window.Height < 600) statusVisible = "none";
-                else statusVisible = "initial";
+                if (window.Height < 600)
+                {
+                    statusVisible = "none";
+                    screenLogRows += 3;
+                }
+                else
+                {
+                    statusVisible = "initial";
+                }
+
+                if (window.Width < 1000)
+                {
+                    descriptionVisible = "none";
+                }
+                else
+                {
+                    descriptionVisible = "initial";
+                }
 
                 string browser = "";
                 browser = await JS.InvokeAsync<string>(identifier: "IdentifyBrowser");

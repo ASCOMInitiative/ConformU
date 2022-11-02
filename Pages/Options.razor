@@ -54,6 +54,10 @@
                         <RadzenCheckBox Name="CHKDEBUG" @bind-Value=@chkDebug TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.Debug)) />
                         <RadzenLabel Text="Debug enabled" Component="CHKDEBUG" Style="margin-left: 5px;" />
                     </div>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHKGOHOME" @bind-Value=@chkGoHomeOnDeviceSelection TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.GoHomeOnDeviceSelection)) />
+                        <RadzenLabel Text="Return to home page when device is selected" Component="CHKDEBUG" Style="margin-left: 5px;" />
+                    </div>
                 </RadzenCard>
 
                 <RadzenCard Style="margin-bottom:20px">
@@ -415,6 +419,7 @@
     bool chkTraceSettings;
     bool chkTraceAlpacaCalls;
     bool cameraTestImageArrayVariant;
+    bool chkGoHomeOnDeviceSelection;
 
     ImageArrayTransferType alpacaImageArrayTransferType;
 
@@ -485,7 +490,8 @@
         TraceAlpacaCalls,
         CameraFirstUseTests,
         DiscoveryEnabled,
-        TelescopeFirstUseTests
+        TelescopeFirstUseTests,
+        GoHomeOnDeviceSelection
     }
 
     // Camera test configuration
@@ -570,7 +576,7 @@
                 break;
 
             default:
-                throw new InvalidValueException($"OnDoubleItemChange - Unknown numeric configurtation item: {boolConfigurationItem}");
+                throw new InvalidValueException($"OnDoubleItemChange - Unknown numeric configuration item: {boolConfigurationItem}");
         }
         SaveConfiguration();
     }
@@ -597,7 +603,7 @@
                 break;
 
             default:
-                throw new InvalidValueException($"OnDoubleItemChange - Unknown numeric configurtation item: {numericConfigurationItem}");
+                throw new InvalidValueException($"OnDoubleItemChange - Unknown numeric configuration item: {numericConfigurationItem}");
         }
         SaveConfiguration();
     }
@@ -659,7 +665,7 @@
                 break;
 
             default:
-                throw new InvalidValueException($"OnIntegerItemChange - Unknown numeric configurtation item: {numericConfigurationItem}");
+                throw new InvalidValueException($"OnIntegerItemChange - Unknown numeric configuration item: {numericConfigurationItem}");
         }
         SaveConfiguration();
     }
@@ -694,6 +700,7 @@
         chkUpdates = configuration.Settings.UpdateCheck;
         chkDisplayCalls = configuration.Settings.DisplayMethodCalls;
         chkDebug = configuration.Settings.Debug;
+        chkGoHomeOnDeviceSelection = configuration.Settings.GoHomeOnDeviceSelected;
 
         // Trace settings
         chkTraceDiscovery = configuration.Settings.TraceDiscovery;
@@ -889,6 +896,10 @@
 
             case CheckBoxConfigurationItem.TelescopeFirstUseTests:
                 configuration.Settings.TelescopeFirstUseTests = telescopeFirstUseTests;
+                break;
+
+            case CheckBoxConfigurationItem.GoHomeOnDeviceSelection:
+                configuration.Settings.GoHomeOnDeviceSelected = chkGoHomeOnDeviceSelection;
                 break;
 
             default:
