@@ -12,16 +12,12 @@
 @inject NotificationService notificationService
 @inject NavigationManager UriHelper
 
-<h1 style="display: @statusVisible">Welcome to Conform Universal!</h1>
+<h2 style="display: @statusVisible">Welcome to Conform Universal!</h2>
 
 <div>
     <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 130px" IsBusy=@configuration.Settings.OperationInProgress />
     <RadzenButton Id="StopButton" Click=@(args => StopTest("Stopping test")) Text="Stop" Style="margin-bottom: 20px; margin-right: 20px; width: 130px" Disabled=@(!configuration.Settings.OperationInProgress) />
     <RadzenButton Id="ConfigureButton" ButtonStyle="ButtonStyle.Info" Shade="Shade.Dark" Click=@(args => GoToSelectionPage("ConfigureButton")) Text="Select Device" Style="margin-bottom: 10px; margin-right: 10px; width: 130px;" Disabled=@configuration.Settings.OperationInProgress />
-    <div style="display :@descriptionVisible;">
-        @deviceDescription;
-    </div>
-
 </div>
 
 <h4>Conform Log</h4>
@@ -71,18 +67,18 @@
 
     public async void OnUiHasChanged(object sender, EventArgs e)
     {
-        ResizeLogWindow();
+        await ResizeLogWindow();
     }
 
 
-    protected override void OnAfterRender(bool firstRender)
+    protected async override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
             // Subscribe to the OnResized event. This will do work when the browser is resized.
             listener.Init(JS);
             listener.OnResize += WindowResized;
-            ResizeLogWindow();
+            await ResizeLogWindow();
         }
     }
 
@@ -222,7 +218,7 @@
 
     #region Log textarea - resize support
 
-    async void ResizeLogWindow()
+    async Task ResizeLogWindow()
     {
         BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
         BrowserWindowSize blazorProWindowSize = new();
@@ -245,7 +241,7 @@
             BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ConformLog");
             if (result is not null)
             {
-                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 17.9)) - 5;
+                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 5;
 
                 // Hide the status field at small heights
                 if (window.Height < 600)
