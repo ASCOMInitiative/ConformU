@@ -150,7 +150,7 @@ namespace ConformU
             DateTime StartTime;
 
             // Get into a consistent state
-            SetStatus("FilterWheel Pre-run Check", "Wait one second for initialisation", "");
+            SetFullStatus("FilterWheel Pre-run Check", "Wait one second for initialisation", "");
             WaitFor(1000); // Wait for 1 second to allow any movement to start
             StartTime = DateTime.Now;
             try
@@ -158,7 +158,7 @@ namespace ConformU
                 LogCallToDriver("Pre-run Check", "About to get Position property repeatedly");
                 do
                 {
-                    SetStatus("FilterWheel Pre-run Check", "Waiting for movement to stop", DateTime.Now.Subtract(StartTime).Seconds + " second(s)");
+                    SetFullStatus("FilterWheel Pre-run Check", "Waiting for movement to stop", DateTime.Now.Subtract(StartTime).Seconds + " second(s)");
                     WaitFor(SLEEP_TIME);
                 }
                 while ((m_FilterWheel.Position == FWTEST_IS_MOVING) & (DateTime.Now.Subtract(StartTime).TotalSeconds <= FWTEST_TIMEOUT)); // Wait until movement has stopped or 30 seconds have passed
@@ -337,8 +337,8 @@ namespace ConformU
             DateTime l_StartTime;
             double l_Count, l_LastElapsedTime, l_ElapsedTime;
             double l_Rate;
-            Status(StatusType.staTest, "Performance Test");
-            Status(StatusType.staAction, p_Name);
+            SetTest("Performance Test");
+            SetAction(p_Name);
             try
             {
                 l_StartTime = DateTime.Now;
@@ -377,7 +377,7 @@ namespace ConformU
                     l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
                     if (l_ElapsedTime > l_LastElapsedTime + 1.0)
                     {
-                        Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
+                        SetStatus(l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
                         l_LastElapsedTime = l_ElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;

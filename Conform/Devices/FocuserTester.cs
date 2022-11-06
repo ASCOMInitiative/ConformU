@@ -477,7 +477,7 @@ namespace ConformU
             if (cancellationToken.IsCancellationRequested) return;
 
             // Move - Required
-            Status(StatusType.staTest, "Focuser Move");
+            SetTest("Focuser Move");
             try
             {
                 // Ensure that TempComp is false so that a move should be possible
@@ -492,13 +492,13 @@ namespace ConformU
             {
                 HandleException("Move", MemberType.Method, Required.Mandatory, ex, "");
             }
-            Status(StatusType.staTest, "");
-            Status(StatusType.staAction, "");
-            Status(StatusType.staStatus, "");
+            SetTest("");
+            SetAction("");
+            SetStatus("");
             if (cancellationToken.IsCancellationRequested) return;
 
             // Move with TempComp True (if supported) - Should throw an error
-            Status(StatusType.staTest, "Focuser Move");
+            SetTest("Focuser Move");
             if (m_TempCompTrueOK)
             {
                 switch (g_InterfaceVersion)
@@ -695,9 +695,9 @@ namespace ConformU
                 {
                 }
 
-                Status(StatusType.staTest, "");
-                Status(StatusType.staAction, "");
-                Status(StatusType.staStatus, "");
+                SetTest("");
+                SetAction("");
+                SetStatus("");
             }
         }
 
@@ -747,8 +747,8 @@ namespace ConformU
             else
                 LogOK(testName, "Relative move OK");
 
-            Status(StatusType.staStatus, "");
-            Status(StatusType.staAction, "Returning to original position: " + m_PositionOrg);
+            SetStatus("");
+            SetAction("Returning to original position: " + m_PositionOrg);
             LogInfo(testName, "Returning to original position: " + m_PositionOrg);
             if (m_Absolute)
             {
@@ -760,14 +760,14 @@ namespace ConformU
                 LogCallToDriver(testName, "About to call Move method");
                 m_Focuser.Move(-m_Position); // Return to original position
             }
-            Status(StatusType.staStatus, "Waiting for asynchronous move to complete");
+            SetStatus("Waiting for asynchronous move to complete");
 
             // Wait for asynchronous move to finish
             LogCallToDriver(testName, "About to get IsMoving and Position properties repeatedly");
             while (m_Focuser.IsMoving & !cancellationToken.IsCancellationRequested)
             {
                 if (m_AbsolutePositionOK)
-                    Status(StatusType.staStatus, "Waiting for asynchronous move to complete, Position: " + m_Focuser.Position + " / " + m_PositionOrg);
+                    SetStatus("Waiting for asynchronous move to complete, Position: " + m_Focuser.Position + " / " + m_PositionOrg);
                 WaitFor(500);
             }
         }
@@ -796,7 +796,7 @@ namespace ConformU
                     LogTestAndMessage(testName, "Moving by: " + newPosition.ToString());
                 }
 
-                Status(StatusType.staAction, "Moving to new position");
+                SetAction("Moving to new position");
                 l_StartTime = DateTime.Now;
                 LogCallToDriver(testName, "About to call Move method");
                 m_Focuser.Move(newPosition); // Move the focuser
@@ -813,13 +813,13 @@ namespace ConformU
                 else // Move took less than 1 second so assume an asynchronous call
                 {
                     LogDebug(testName, $"Asynchronous call behaviour");
-                    Status(StatusType.staStatus, "Waiting for asynchronous move to complete");
+                    SetStatus("Waiting for asynchronous move to complete");
                     LogCallToDriver(testName, "About to get IsMoving and Position properties repeatedly");
                     do
                     {
                         if (m_AbsolutePositionOK)
                         {
-                            Status(StatusType.staStatus, $"Waiting for asynchronous move to complete, Position: {m_Focuser.Position} / { newPosition}, IsMoving: {m_Focuser.IsMoving}");
+                            SetStatus($"Waiting for asynchronous move to complete, Position: {m_Focuser.Position} / { newPosition}, IsMoving: {m_Focuser.IsMoving}");
                             LogDebug(testName, $"Waiting for asynchronous move to complete, Position: {m_Focuser.Position} / { newPosition}, IsMoving: {m_Focuser.IsMoving}");
                         }
                         WaitFor(100);
@@ -851,9 +851,9 @@ namespace ConformU
                 FocuserPerformanceTest(FocuserPropertyMethod.Temperature, "Temperature");
             else
                 LogInfo("Temperature", "Skipping test as property is not supported");
-            Status(StatusType.staAction, "");
-            Status(StatusType.staStatus, "");
-            Status(StatusType.staTest, "");
+            SetAction("");
+            SetStatus("");
+            SetTest("");
         }
 
         private void FocuserPerformanceTest(FocuserPropertyMethod p_Type, string p_Name)
@@ -863,8 +863,8 @@ namespace ConformU
             float l_Single;
             bool l_Boolean;
             double l_Rate;
-            Status(StatusType.staTest, "Performance Test");
-            Status(StatusType.staAction, p_Name);
+            SetTest("Performance Test");
+            SetAction(p_Name);
             try
             {
                 l_StartTime = DateTime.Now;
@@ -903,7 +903,7 @@ namespace ConformU
                     l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
                     if (l_ElapsedTime > l_LastElapsedTime + 1.0)
                     {
-                        Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
+                        SetStatus(l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
                         l_LastElapsedTime = l_ElapsedTime;
                         if (cancellationToken.IsCancellationRequested) return;
                     }

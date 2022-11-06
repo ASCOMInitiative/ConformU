@@ -4,6 +4,7 @@ using ASCOM;
 using ASCOM.Common;
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -28,7 +29,7 @@ namespace ConformU
         internal const string EX_NET = ".NET - Exception: ";
         internal const string EX_COM = "COM - Exception: ";
         internal const double PERF_LOOP_TIME = 5.0; // Performance loop run time in seconds
-        internal const int SLEEP_TIME = 200; // Loop time for testing whether slewing has completed
+        internal const int SLEEP_TIME = 500; // Loop time for testing whether slewing has completed
         internal const int CAMERA_SLEEP_TIME = 10; // Loop time for testing whether camera events have completed
         internal const int DEVICE_DESTROY_WAIT = 500; // Time to wait after destroying a device before continuing
 
@@ -40,7 +41,7 @@ namespace ConformU
         private bool l_HasPreConnectCheck;
         internal dynamic baseClassDevice; // IAscomDriverV1
 
-        private string test, action, status;
+        private string testName, testAction, testStatus;
 
         private readonly ConformLogger TL;
         private readonly CancellationToken cancellationToken;
@@ -647,9 +648,9 @@ namespace ConformU
         /// <param name="p_ProgID">The ProgID.</param>
         internal void CheckInitialise()
         {
-            Status(StatusType.staTest, ""); // Clear status messages
-            Status(StatusType.staAction, "");
-            Status(StatusType.staStatus, "");
+            SetTest(""); // Clear status messages
+            SetAction("");
+            SetStatus("");
 
             DateTime lastModifiedTime = DateTime.MinValue;
             try
@@ -751,54 +752,44 @@ namespace ConformU
         #region Common methods for all device tester classes
 
         /// <summary>
-        /// Update the status display
-        /// </summary>
-        /// <param name="Status">Type of message to set, Test, Action or Status</param>
-        /// <param name="Message">Message text</param>
-        /// <remarks></remarks>
-        internal void Status(StatusType Status, string message)
-        {
-            switch (Status)
-            {
-                case StatusType.staTest:
-                    {
-                        test = message;
-                        action = "";
-                        status = "";
-                        break;
-                    }
-
-                case StatusType.staAction:
-                    {
-                        action = message;
-                        status = "";
-                        break;
-                    }
-
-                case StatusType.staStatus:
-                    {
-                        status = message;
-                        break;
-                    }
-            }
-
-            TL?.SetStatusMessage($"{test} {action} {status}");
-        }
-
-        /// <summary>
         ///Set the test, action and status in one call
         ///</summary>
-        ///<param name="newTest">Name of the test being conducted</param>
-        ///<param name="newAction">Specific action within the test</param>
-        ///<param name="newStatus">Status of the action</param>
+        ///<param name="newTestName">Name of the test being conducted</param>
+        ///<param name="newTestAction">Specific action within the test</param>
+        ///<param name="newTestStatus">Status of the action</param>
         ///<remarks></remarks>
-        public void SetStatus(string newTest, string newAction, string newStatus)
+        public void SetFullStatus(string newTestName, string newTestAction, string newTestStatus)
         {
-            test = newTest;
-            action = newAction;
-            status = newStatus;
+            testName = newTestName;
+            testAction = newTestAction;
+            testStatus = newTestStatus;
 
-            TL?.SetStatusMessage($"{test} {action} {status}");
+            string displayText = testName;
+            if (!string.IsNullOrEmpty(newTestAction)) displayText += $" - {newTestAction}";
+            if (!string.IsNullOrEmpty(newTestStatus)) displayText += $" - {newTestStatus}";
+
+            TL?.SetStatusMessage(displayText);
+        }
+
+        public void SetTest(string test)
+        {
+            testName = test;
+            testAction = "";
+            testStatus = "";
+            SetFullStatus(test, testAction, testStatus);
+        }
+
+        public void SetAction(string action)
+        {
+            this.testAction = action;
+            this.testStatus = "";
+            SetFullStatus(testName, action, testStatus);
+        }
+
+        public void SetStatus(string status)
+        {
+            this.testStatus = status;
+            SetFullStatus(testName, testAction, status);
         }
 
         /// <summary>
@@ -807,11 +798,7 @@ namespace ConformU
         ///<remarks></remarks>
         public void ClearStatus()
         {
-            test = "";
-            action = "";
-            status = "";
-
-            TL?.SetStatusMessage($"{test} {action} {status}");
+            TL?.SetStatusMessage($"");
         }
 
         /// <summary>
@@ -821,9 +808,14 @@ namespace ConformU
         /// <remarks></remarks>
         internal void WaitFor(int p_Duration)
         {
+            const int INTERVAL_BETWEEN_UPDATES = 500; // Milliseconds
+            Stopwatch sw = new Stopwatch();
+            long lastMessageCount = long.MinValue;
+            sw.Start();
+
             DateTime l_StartTime;
             int WaitDuration;
-            WaitDuration = (int)Math.Round(p_Duration / 100d);
+            WaitDuration = p_Duration % INTERVAL_BETWEEN_UPDATES;
             if (WaitDuration > SLEEP_TIME)
                 WaitDuration = SLEEP_TIME;
             if (WaitDuration < 1)
@@ -833,9 +825,62 @@ namespace ConformU
             do
             {
                 Thread.Sleep(WaitDuration);
-                //Application.DoEvents();
+                long currentMessageCount = sw.ElapsedMilliseconds / INTERVAL_BETWEEN_UPDATES;
+                if (currentMessageCount > lastMessageCount)
+                {
+                    lastMessageCount = currentMessageCount;
+                    SetStatus($"{Math.Round(Convert.ToDouble(currentMessageCount) * INTERVAL_BETWEEN_UPDATES / 1000.0, 1):0.0} {(currentMessageCount == 1 ? "second" : "seconds")}");
+                }
             }
             while ((DateTime.Now.Subtract(l_StartTime).TotalMilliseconds <= p_Duration) & !cancellationToken.IsCancellationRequested);
+        }
+
+        /// <summary>
+        /// Call the wait function every poll interval milliseconds and delay until the wait function becomes false
+        /// </summary>
+        /// <param name="actionName">Text to set in the status Action field</param>
+        /// <param name="waitFunction">Completion Func that returns false when the process is complete</param>
+        /// <param name="pollInterval">Interval between calls of the completion function in milliseconds</param>
+        /// <exception cref="InvalidValueException"></exception>
+        internal void WaitUntil(string actionName, Func<bool> waitFunction, int pollInterval)
+        {
+            // Validate the supplied poll interval
+            if (pollInterval < 100) throw new InvalidValueException($"The poll interval must be >=100ms: {pollInterval}");
+
+            // Set the status message action field to the supplied action name
+            SetAction(actionName);
+
+            // Start the loop timing stopwatch
+            Stopwatch sw = Stopwatch.StartNew();
+
+            // Wait for the completion function to return false
+            do
+            {
+                // Calculate the current loop number (starts at 1 given that the timer's elapsed time will be zero or very low on the first loop)
+                int currentLoopNumber = (int)sw.ElapsedMilliseconds / pollInterval;
+
+                // Calculate the sleep time required to start the next loop at a multiple of the poll interval
+                int sleeptime = pollInterval * (currentLoopNumber + 1) - (int)sw.ElapsedMilliseconds;
+
+                // Sleep until it is time for the next completion function poll
+                Thread.Sleep(sleeptime);
+
+                // Set the status message status field to the elapsed time
+                SetStatus($"{Math.Round(Convert.ToDouble(currentLoopNumber) * pollInterval / 1000.0, 1):0.0} {(currentLoopNumber == 10 ? "second" : "seconds")}");
+
+            } while (waitFunction());
+        }
+
+        internal void WaitForAbsolute(int p_Duration, string p_Message)
+        {
+            LogDebug("WaitForAbsolute", p_Duration + " " + p_Message);
+            for (int i = 0, loopTo = (int)Math.Round(p_Duration / 100d); i <= loopTo; i++)
+            {
+                Thread.Sleep(100);
+                SetFullStatus(p_Message, ((p_Duration / 100d - i) / 10d).ToString(), "");
+            }
+
+            ClearStatus();
         }
 
         internal void LogNewLine()
@@ -1138,7 +1183,7 @@ namespace ConformU
                 {
                     case Required.Mandatory:
                         {
-                            LogIssue(MemberName, "This member is mandatory but threw a " + GetExceptionName(ex,TypeOfMember) + " exception, it must function per the ASCOM specification.");
+                            LogIssue(MemberName, "This member is mandatory but threw a " + GetExceptionName(ex, TypeOfMember) + " exception, it must function per the ASCOM specification.");
                             break;
                         }
 
@@ -1270,7 +1315,7 @@ namespace ConformU
                     string exceptionName = ErrorCodes.GetExceptionName(ComEx);
 
                     RetVal = $"{(String.IsNullOrEmpty(exceptionName) ? ComEx.GetType().Name : exceptionName)} (COM Error: 0x{ComEx.ErrorCode:X8})";
-                    if (ComEx.ErrorCode== ErrorCodes.NotImplemented)
+                    if (ComEx.ErrorCode == ErrorCodes.NotImplemented)
                     {
                         RetVal = $"{memberType}{RetVal}";
                     }
@@ -1297,18 +1342,6 @@ namespace ConformU
         {
             if (settings.DisplayMethodCalls)
                 LogTestAndMessage(test, memberName);
-        }
-
-        internal void WaitForAbsolute(int p_Duration, string p_Message)
-        {
-            LogDebug("WaitForAbsolute", p_Duration + " " + p_Message);
-            for (int i = 0, loopTo = (int)Math.Round(p_Duration / 100d); i <= loopTo; i++)
-            {
-                Thread.Sleep(100);
-                SetStatus(p_Message, ((p_Duration / 100d - i) / 10d).ToString(), "");
-            }
-
-            ClearStatus();
         }
 
         #endregion

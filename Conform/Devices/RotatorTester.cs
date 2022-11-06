@@ -214,12 +214,12 @@ namespace ConformU
             l_Now = DateTime.Now;
             try
             {
-                Status(StatusType.staAction, "Waiting up to " + ROTATOR_WAIT_LIMIT + " seconds for rotator to stop moving");
+                SetAction("Waiting up to " + ROTATOR_WAIT_LIMIT + " seconds for rotator to stop moving");
                 LogCallToDriver("PreRun Check", "About to get IsMoving property repeatedly");
                 do
                 {
                     WaitFor(500);
-                    Status(StatusType.staStatus, DateTime.Now.Subtract(l_Now).TotalSeconds + "/" + ROTATOR_WAIT_LIMIT);
+                    SetStatus(DateTime.Now.Subtract(l_Now).TotalSeconds + "/" + ROTATOR_WAIT_LIMIT);
                 }
                 while (!(!m_Rotator.IsMoving) | (DateTime.Now.Subtract(l_Now).TotalSeconds > ROTATOR_WAIT_LIMIT));
 
@@ -314,7 +314,7 @@ namespace ConformU
                     do
                     {
                         WaitFor(500);
-                        Status(StatusType.staStatus, DateTime.Now.Subtract(l_Now).TotalSeconds + "/" + ROTATOR_WAIT_LIMIT);
+                        SetStatus(DateTime.Now.Subtract(l_Now).TotalSeconds + "/" + ROTATOR_WAIT_LIMIT);
                     }
                     while (!(!m_Rotator.IsMoving) | (DateTime.Now.Subtract(l_Now).TotalSeconds > ROTATOR_WAIT_LIMIT));
 
@@ -934,9 +934,9 @@ namespace ConformU
                 }
             }
 
-            Status(StatusType.staAction, "");
-            Status(StatusType.staStatus, "");
-            Status(StatusType.staTest, "");
+            SetAction("");
+            SetStatus("");
+            SetTest("");
         }
 
         private void RotatorWait(RotatorPropertyMethod p_type, string p_Name, float p_value, float p_RotatorStartPosition)
@@ -949,8 +949,8 @@ namespace ConformU
                 if (m_Rotator.IsMoving)
                 {
                     LogDebug("RotatorWait", "Rotator is moving, waiting for move to complete");
-                    Status(StatusType.staTest, p_Name + " test");
-                    Status(StatusType.staAction, "Waiting for move to complete");
+                    SetTest(p_Name + " test");
+                    SetAction("Waiting for move to complete");
                     LogCallToDriver(p_Name, $"About to get Position and Ismoving properties repeatedly");
                     do
                     {
@@ -961,13 +961,13 @@ namespace ConformU
                             {
                                 case RotatorPropertyMethod.Move:
                                     {
-                                        Status(StatusType.staStatus, $"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition)} / {p_value} relative");
+                                        SetStatus($"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition)} / {p_value} relative");
                                         break;
                                     }
 
                                 case RotatorPropertyMethod.MoveAbsolute:
                                     {
-                                        Status(StatusType.staStatus, $"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition)} / {Math.Abs(p_value - p_RotatorStartPosition)} absolute");
+                                        SetStatus($"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition)} / {Math.Abs(p_value - p_RotatorStartPosition)} absolute");
                                         break;
                                     }
                             }
@@ -976,7 +976,7 @@ namespace ConformU
                     }
                     while (m_Rotator.IsMoving);
                     LogDebug("RotatorWait", "Rotator has stopped moving");
-                    Status(StatusType.staAction, "");
+                    SetAction("");
                     m_LastMoveWasAsync = true;
                 }
                 else
@@ -1071,7 +1071,7 @@ namespace ConformU
             float l_Single;
             bool l_Boolean;
             double l_Rate;
-            Status(StatusType.staAction, p_Name);
+            SetAction(p_Name);
             try
             {
                 l_StartTime = DateTime.Now;
@@ -1116,7 +1116,7 @@ namespace ConformU
                     l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
                     if (l_ElapsedTime > l_LastElapsedTime + 1.0d)
                     {
-                        Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
+                        SetStatus(l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
                         l_LastElapsedTime = l_ElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;

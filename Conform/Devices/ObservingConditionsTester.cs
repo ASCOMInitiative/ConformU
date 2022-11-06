@@ -407,9 +407,9 @@ namespace ConformU
 
         public override void CheckPerformance()
         {
-            Status(StatusType.staTest, "");
-            Status(StatusType.staAction, "");
-            Status(StatusType.staStatus, "");
+            SetTest("");
+            SetAction("");
+            SetStatus("");
         }
 
         /// <summary>

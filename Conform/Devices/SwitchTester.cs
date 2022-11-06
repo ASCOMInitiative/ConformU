@@ -224,12 +224,12 @@ namespace ConformU
                     {
                         if (m_CanReadMaxSwitch)
                         {
-                            Status(StatusType.staTest, "Read/Write Switches");
-                            Status(StatusType.staAction, "Testing switch");
+                            SetTest("Read/Write Switches");
+                            SetAction("Testing switch");
                             // Find valid GetSwitch values
                             for (i = 0; i <= System.Convert.ToInt16(m_MaxSwitch - 1); i++)
                             {
-                                Status(StatusType.staStatus, i.ToString());
+                                SetStatus(i.ToString());
                                 l_GetSwitchOK = false;
                                 l_SetSwitchOK = false;
                                 try // Read switch state
@@ -313,9 +313,9 @@ namespace ConformU
                                     LogDebug("GetSwitchName " + i, "Exception: " + ex.ToString());
                                 }
                             }
-                            Status(StatusType.staTest, "");
-                            Status(StatusType.staAction, "");
-                            Status(StatusType.staStatus, "");
+                            SetTest("");
+                            SetAction("");
+                            SetStatus("");
                         }
                         else
                             LogIssue("SwitchCheckMethods", "Skipping further tests as there is no valid value for MaxSwitch");
@@ -327,7 +327,7 @@ namespace ConformU
                     {
                         if (m_CanReadMaxSwitch)
                         {
-                            Status(StatusType.staTest, "Read/Write Switches");
+                            SetTest("Read/Write Switches");
 
                             CheckInaccessibleOutOfRange(SwitchMethod.CanWrite);
                             CheckInaccessibleOutOfRange(SwitchMethod.GetSwitch);
@@ -341,11 +341,11 @@ namespace ConformU
                             CheckInaccessibleOutOfRange(SwitchMethod.SwitchStep);
 
                             // Find valid GetSwitch values
-                            Status(StatusType.staAction, "Testing switch");
+                            SetAction("Testing switch");
                             LogDebug("GetSwitchName ", string.Format("Extended switch number test range: {0} - {1}", -ExtendedSwitchNumberTestRange, m_MaxSwitch + ExtendedSwitchNumberTestRange - 1));
                             for (i = (short)-ExtendedSwitchNumberTestRange; i <= Convert.ToInt16(m_MaxSwitch + ExtendedSwitchNumberTestRange - 1); i++)
                             {
-                                Status(StatusType.staStatus, i.ToString());
+                                SetStatus(i.ToString());
 
                                 // Initialise status variables
                                 l_SetSwitchValueMinOK = false;
@@ -563,7 +563,7 @@ namespace ConformU
                                         {
 
                                             // Try SetSwitch(False)
-                                            Status(StatusType.staStatus, "Setting SetSwitch - False");
+                                            SetStatus("Setting SetSwitch - False");
                                             if (settings.DisplayMethodCalls)
                                                 LogTestAndMessage("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, false));
                                             m_Switch.SetSwitch(i, false); // Set switch false
@@ -614,7 +614,7 @@ namespace ConformU
                                             WaitFor(SWITCH_WRITE_DELAY);
 
                                             // Try SetSwitch(True)
-                                            Status(StatusType.staStatus, "Setting SetSwitch - True");
+                                            SetStatus("Setting SetSwitch - True");
                                             if (settings.DisplayMethodCalls)
                                                 LogTestAndMessage("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, true));
                                             m_Switch.SetSwitch(i, true); // Set switch true
@@ -667,7 +667,7 @@ namespace ConformU
                                             // Return to original state if possible,otherwise set to false
                                             if (l_GetSwitchOK)
                                             {
-                                                Status(StatusType.staStatus, "Returning boolean switch to its original value");
+                                                SetStatus("Returning boolean switch to its original value");
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, l_GetSwitch));
                                                 m_Switch.SetSwitch(i, l_GetSwitch); // Return to the original state
@@ -675,7 +675,7 @@ namespace ConformU
                                             }
                                             else
                                             {
-                                                Status(StatusType.staStatus, "Setting boolean switch to False");
+                                                SetStatus("Setting boolean switch to False");
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, false));
                                                 m_Switch.SetSwitch(i, false); // Set to false
@@ -720,7 +720,7 @@ namespace ConformU
                                         {
                                             if (IsGoodValue(l_SwitchMinimum))
                                             {
-                                                Status(StatusType.staStatus, "Setting SetSwitchValue - MINIMUM_VALUE");
+                                                SetStatus("Setting SetSwitchValue - MINIMUM_VALUE");
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set the minimum permissible value", i, l_SwitchMinimum));
                                                 m_Switch.SetSwitchValue(i, l_SwitchMinimum); // Set switch to minimum
@@ -798,7 +798,7 @@ namespace ConformU
                                             // Try SetSwitchValue(MAXIMUM_VALUE)
                                             if (IsGoodValue(l_SwitchMaximum))
                                             {
-                                                Status(StatusType.staStatus, "Setting SetSwitchValue - MAXIMUM_VALUE");
+                                                SetStatus("Setting SetSwitchValue - MAXIMUM_VALUE");
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set the maximum permissible value", i, l_SwitchMaximum));
                                                 m_Switch.SetSwitchValue(i, l_SwitchMaximum); // Set switch to minimum
@@ -893,7 +893,7 @@ namespace ConformU
                                             // Return to original state if possible,otherwise set to false
                                             if (l_GetSwitchValueOK)
                                             {
-                                                Status(StatusType.staStatus, "Returning switch to its original value");
+                                                SetStatus("Returning switch to its original value");
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to restore pre-test value", i, l_GetSwitchValueOriginal));
                                                 m_Switch.SetSwitchValue(i, l_GetSwitchValueOriginal); // Return to the original state
@@ -902,7 +902,7 @@ namespace ConformU
                                             }
                                             else if (IsGoodValue(l_SwitchMinimum) & IsGoodValue(l_SwitchMaximum))
                                             {
-                                                Status(StatusType.staStatus, "Setting switch to half its minimum to maximum range");
+                                                SetStatus("Setting switch to half its minimum to maximum range");
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set the value to its mid-point", i, (l_SwitchMaximum - l_SwitchMinimum) / 2.0));
                                                 m_Switch.SetSwitchValue(i, (l_SwitchMaximum - l_SwitchMinimum) / 2.0); // Return to the half way state
@@ -958,9 +958,9 @@ namespace ConformU
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                             }
-                            Status(StatusType.staTest, "");
-                            Status(StatusType.staAction, "");
-                            Status(StatusType.staStatus, "");
+                            SetTest("");
+                            SetAction("");
+                            SetStatus("");
                         }
                         else
                             LogInfo("SwitchCheckMethods", "Skipping further tests as there is no valid value for MaxSwitch");
@@ -986,9 +986,9 @@ namespace ConformU
                 SwitchPerformanceTest(SwitchPropertyMethod.GetSwitchName, "GetSwitchName");
             else
                 LogInfo("GetSwitchName", "Test skipped as unable to read value");
-            Status(StatusType.staTest, "");
-            Status(StatusType.staAction, "");
-            Status(StatusType.staStatus, "");
+            SetTest("");
+            SetAction("");
+            SetStatus("");
         }
 
         private short SwitchPropertyTestShort(SwitchPropertyMethod p_Type, string p_Name, short p_Min, short p_Max)
@@ -1055,8 +1055,8 @@ namespace ConformU
             bool l_Boolean;
             double l_Rate;
             short l_Short;
-            Status(StatusType.staTest, "Performance Testing");
-            Status(StatusType.staAction, p_Name);
+            SetTest("Performance Testing");
+            SetAction(p_Name);
             try
             {
                 l_StartTime = DateTime.Now;
@@ -1095,7 +1095,7 @@ namespace ConformU
                     l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
                     if (l_ElapsedTime > l_LastElapsedTime + 1.0)
                     {
-                        Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
+                        SetStatus(l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
                         l_LastElapsedTime = l_ElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
@@ -1204,7 +1204,7 @@ namespace ConformU
 
                     if (TestValue2 <= SwitchMaximum)
                     {
-                        Status(StatusType.staStatus, "Setting multi-state switch - " + TestValue2);
+                        SetStatus("Setting multi-state switch - " + TestValue2);
                         if (settings.DisplayMethodCalls)
                             LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set an intermediate value", i, TestValue2));
                         m_Switch.SetSwitchValue((short)i, TestValue2); // Set the required switch value

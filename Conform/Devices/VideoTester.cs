@@ -1336,7 +1336,7 @@ namespace ConformU
         {
             DateTime l_StartTime;
             double l_Count, l_LastElapsedTime, l_ElapsedTime, l_Rate;
-            Status(StatusType.staAction, p_Name);
+            SetAction(p_Name);
             try
             {
                 l_StartTime = DateTime.Now;
@@ -1363,7 +1363,7 @@ namespace ConformU
                     l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
                     if (l_ElapsedTime > l_LastElapsedTime + 1.0)
                     {
-                        Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
+                        SetStatus(l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
                         l_LastElapsedTime = l_ElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;

@@ -754,7 +754,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
-                    Status(StatusType.staAction, "Retrieving image array...");
+                    SetAction("Retrieving image array...");
                     m_ImageArray = (Array)m_Camera.ImageArray;
                     if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
                     {
@@ -783,7 +783,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
-                    Status(StatusType.staAction, "Retrieving image array...");
+                    SetAction("Retrieving image array...");
                     m_ImageArray = (Array)m_Camera.ImageArray;
                     LogIssue("ImageArray", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                 }
@@ -806,7 +806,7 @@ namespace ConformU
                     {
                         if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
 
-                        Status(StatusType.staAction, "Retrieving image array variant..");
+                        SetAction("Retrieving image array variant..");
                         m_ImageArrayVariant = (Array)m_Camera.ImageArrayVariant;
 
                         if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
@@ -839,7 +839,7 @@ namespace ConformU
                     {
                         if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
 
-                        Status(StatusType.staAction, "Retrieving image array variant..");
+                        SetAction("Retrieving image array variant..");
                         m_ImageArrayVariant = (Array)m_Camera.ImageArrayVariant;
                         LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                     }
@@ -2530,7 +2530,7 @@ namespace ConformU
                     m_Camera.NumY = p_NumY;
                     try
                     {
-                        Status(StatusType.staAction, "Start " + p_Duration.ToString() + " second synchronous exposure");
+                        SetAction("Start " + p_Duration.ToString() + " second synchronous exposure");
 
                         // Initiate exposure
                         l_StartTime = DateTime.Now;
@@ -2558,7 +2558,7 @@ namespace ConformU
                             }
                             else
                             {
-                                Status(StatusType.staAction, "Waiting for exposure to start");
+                                SetAction("Waiting for exposure to start");
 
                                 // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
                                 if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
@@ -2629,7 +2629,7 @@ namespace ConformU
                                         }
                                     }
 
-                                    Status(StatusType.staAction, "Waiting for " + p_Duration.ToString() + " second exposure to complete: " + DateTime.Now.Subtract(l_StartTime).TotalSeconds.ToString() + ",   PercentComplete: " + l_PercentCompletedMessage);
+                                    SetAction("Waiting for " + p_Duration.ToString() + " second exposure to complete: " + DateTime.Now.Subtract(l_StartTime).TotalSeconds.ToString() + ",   PercentComplete: " + l_PercentCompletedMessage);
                                     WaitFor(CAMERA_SLEEP_TIME);
                                     if (cancellationToken.IsCancellationRequested) return;
                                 }
@@ -2637,7 +2637,7 @@ namespace ConformU
 
                                 // Wait for camera to become idle
                                 l_EndTime = DateTime.Now;
-                                Status(StatusType.staAction, "Waiting for camera idle state, reading/downloading image");
+                                SetAction("Waiting for camera idle state, reading/downloading image");
                                 if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
                                 do
                                 {
@@ -2647,7 +2647,7 @@ namespace ConformU
                                 while ((m_Camera.CameraState != CameraState.Idle) & (m_Camera.CameraState != CameraState.Error));
 
                                 // Wait for image to become ready
-                                Status(StatusType.staAction, "Waiting for image ready");
+                                SetAction("Waiting for image ready");
                                 if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
                                 do
                                 {
@@ -2874,7 +2874,7 @@ namespace ConformU
                 LogIssue("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
             }
 
-            Status(StatusType.staAction, "");
+            SetAction("");
         }
         private void CameraTestLast(double p_Duration, DateTime p_Start)
         {
@@ -3010,7 +3010,7 @@ namespace ConformU
             // Dim pulseGuideStatus As PulseGuideState
 
             l_StartTime = DateTime.Now;
-            Status(StatusType.staAction, "Start " + CAMERA_PULSE_DURATION / (double)1000 + " second pulse guide " + p_Direction.ToString());
+            SetAction("Start " + CAMERA_PULSE_DURATION / (double)1000 + " second pulse guide " + p_Direction.ToString());
             if (settings.DisplayMethodCalls)
                 LogTestAndMessage("ConformanceCheck", $"About to call PulseGuide - {p_Direction}");
             m_Camera.PulseGuide(p_Direction, CAMERA_PULSE_DURATION); // Start a 2 second pulse
@@ -3089,8 +3089,8 @@ namespace ConformU
             CameraPerformanceTest(CameraPerformance.ImageReady, "ImageReady");
             if (m_CanPulseGuide)
                 CameraPerformanceTest(CameraPerformance.IsPulseGuiding, "IsPulseGuiding");
-            Status(StatusType.staAction, "Exposure for ImageArray Test");
-            Status(StatusType.staStatus, "Start");
+            SetAction("Exposure for ImageArray Test");
+            SetStatus("Start");
             if (settings.DisplayMethodCalls)
                 LogTestAndMessage("ConformanceCheck", "About to set BinX");
             m_Camera.BinX = 1;
@@ -3116,9 +3116,9 @@ namespace ConformU
             if (settings.DisplayMethodCalls)
                 LogTestAndMessage("ConformanceCheck", "About to call ImageReady multiple times");
             do
-                Status(StatusType.staStatus, "Waiting for ImageReady");
+                SetStatus("Waiting for ImageReady");
             while (!m_Camera.ImageReady);
-            Status(StatusType.staStatus, "Finished");
+            SetStatus("Finished");
             CameraPerformanceTest(CameraPerformance.ImageArray, "ImageArray");
             CameraPerformanceTest(CameraPerformance.ImageArrayVariant, "ImageArrayVariant");
         }
@@ -3126,7 +3126,7 @@ namespace ConformU
         {
             DateTime l_StartTime;
             double l_Count, l_LastElapsedTime, l_ElapsedTime, l_Rate;
-            Status(StatusType.staAction, p_Name);
+            SetAction(p_Name);
             try
             {
                 l_StartTime = DateTime.Now;
@@ -3195,7 +3195,7 @@ namespace ConformU
                     l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
                     if (l_ElapsedTime > l_LastElapsedTime + 1.0)
                     {
-                        Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
+                        SetStatus(l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
                         l_LastElapsedTime = l_ElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;

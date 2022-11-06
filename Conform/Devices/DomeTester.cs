@@ -308,7 +308,7 @@ namespace ConformU
                     {
                         LogTestAndMessage("DomeSafety", "Unable to open shutter, some tests may fail: " + ex.Message);
                     }
-                    Status(StatusType.staTest, "");
+                    SetTest("");
                 }
                 else
                     LogTestAndMessage("DomeSafety", "Open shutter check box is unchecked so shutter not opened");
@@ -445,7 +445,7 @@ namespace ConformU
         {
             if (!settings.DomeOpenShutter) LogInfo("SlewToAltitude", "You have configured Conform not to open the shutter so the following slew may fail.");
 
-            Status(StatusType.staAction, "Slew to " + p_Altitude + " degrees");
+            SetAction("Slew to " + p_Altitude + " degrees");
             LogCallToDriver(p_Name, "About to call SlewToAltitude");
             domeDevice.SlewToAltitude(p_Altitude);
             if (m_CanReadSlewing)
@@ -485,7 +485,7 @@ namespace ConformU
         }
         private void DomeSlewToAzimuth(string p_Name, double p_Azimuth)
         {
-            Status(StatusType.staAction, "Slew to " + p_Azimuth + " degrees");
+            SetAction("Slew to " + p_Azimuth + " degrees");
             if (p_Azimuth >= 0.0 & p_Azimuth <= 359.9999999)
             {
                 m_CanSlewToAzimuth = false;
@@ -541,11 +541,11 @@ namespace ConformU
             do
             {
                 WaitFor(SLEEP_TIME);
-                Status(StatusType.staStatus, "Slewing Status: " + domeDevice.Slewing + ", Timeout: " + DateTime.Now.Subtract(l_StartTime).TotalSeconds.ToString("#0") + "/" + p_TimeOut + ", press stop to abandon wait");
+                SetStatus("Slewing Status: " + domeDevice.Slewing + ", Timeout: " + DateTime.Now.Subtract(l_StartTime).TotalSeconds.ToString("#0") + "/" + p_TimeOut + ", press stop to abandon wait");
             }
             while ((domeDevice.Slewing & (DateTime.Now.Subtract(l_StartTime).TotalSeconds <= p_TimeOut)) & !cancellationToken.IsCancellationRequested);
 
-            Status(StatusType.staStatus, "");
+            SetStatus("");
             if ((DateTime.Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut))
             {
                 LogIssue("DomeWaitForSlew", "Timed out waiting for Dome slew, consider increasing time-outs in Options/Conform Options.");
@@ -855,8 +855,8 @@ namespace ConformU
                         {
                             if (m_CanFindHome)
                             {
-                                Status(StatusType.staTest, p_Name);
-                                Status(StatusType.staAction, "Waiting for movement to stop");
+                                SetTest(p_Name);
+                                SetAction("Waiting for movement to stop");
                                 try
                                 {
                                     LogCallToDriver(p_Name, "About to call FindHome method");
@@ -873,7 +873,7 @@ namespace ConformU
                                         do
                                         {
                                             WaitFor(SLEEP_TIME);
-                                            Status(StatusType.staStatus, "Slewing Status: " + domeDevice.Slewing);
+                                            SetStatus("Slewing Status: " + domeDevice.Slewing);
                                         }
                                         while (domeDevice.Slewing & !cancellationToken.IsCancellationRequested);
                                     }
@@ -936,8 +936,8 @@ namespace ConformU
                         {
                             if (m_CanPark)
                             {
-                                Status(StatusType.staTest, p_Name);
-                                Status(StatusType.staAction, "Waiting for movement to stop");
+                                SetTest(p_Name);
+                                SetAction("Waiting for movement to stop");
                                 try
                                 {
                                     LogCallToDriver(p_Name, "About to call Park method");
@@ -954,7 +954,7 @@ namespace ConformU
                                         do
                                         {
                                             WaitFor(SLEEP_TIME);
-                                            Status(StatusType.staStatus, "Slewing Status: " + domeDevice.Slewing);
+                                            SetStatus("Slewing Status: " + domeDevice.Slewing);
                                         }
                                         while (domeDevice.Slewing & !cancellationToken.IsCancellationRequested);
                                     }
@@ -1018,7 +1018,7 @@ namespace ConformU
                         {
                             if (m_CanSetAltitude)
                             {
-                                Status(StatusType.staTest, p_Name);
+                                SetTest(p_Name);
                                 for (l_SlewAngle = 0; l_SlewAngle <= 90; l_SlewAngle += 15)
                                 {
                                     try
@@ -1069,7 +1069,7 @@ namespace ConformU
                         {
                             if (m_CanSetAzimuth)
                             {
-                                Status(StatusType.staTest, p_Name);
+                                SetTest(p_Name);
                                 for (l_SlewAngle = 0; l_SlewAngle <= 315; l_SlewAngle += 45)
                                 {
                                     try
@@ -1234,9 +1234,9 @@ namespace ConformU
             {
                 HandleException(p_Name, p_MemberType, Required.Optional, ex, "");
             }
-            Status(StatusType.staTest, "");
-            Status(StatusType.staAction, "");
-            Status(StatusType.staStatus, "");
+            SetTest("");
+            SetAction("");
+            SetStatus("");
         }
         private void DomeShutterTest(ShutterState p_RequiredShutterState, string p_Name)
         {
@@ -1244,7 +1244,7 @@ namespace ConformU
 
             if (settings.DomeOpenShutter)
             {
-                Status(StatusType.staTest, p_Name);
+                SetTest(p_Name);
                 if (m_CanReadShutterStatus)
                 {
                     LogCallToDriver(p_Name, "About to get ShutterStatus property");
@@ -1258,7 +1258,7 @@ namespace ConformU
                                 if (p_RequiredShutterState == ShutterState.Closed)
                                 {
                                     // Wrong state, get to the required state
-                                    Status(StatusType.staAction, "Opening shutter ready for close test");
+                                    SetAction("Opening shutter ready for close test");
                                     LogDebug(p_Name, "Opening shutter ready for close test");
                                     LogCallToDriver(p_Name, "About to call OpenShutter method");
                                     domeDevice.OpenShutter();
@@ -1277,12 +1277,12 @@ namespace ConformU
                             {
                                 if (p_RequiredShutterState == ShutterState.Closed)
                                 {
-                                    Status(StatusType.staAction, "Waiting for shutter to close before opening ready for close test");
+                                    SetAction("Waiting for shutter to close before opening ready for close test");
                                     LogDebug(p_Name, "Waiting for shutter to close before opening ready for close test");
                                     if (!DomeShutterWait(ShutterState.Closed))
                                         return; // Wait for shutter to close
                                     LogDebug(p_Name, "Opening shutter ready for close test");
-                                    Status(StatusType.staAction, "Opening shutter ready for close test");
+                                    SetAction("Opening shutter ready for close test");
                                     LogCallToDriver(p_Name, "About to call OpenShutter method");
                                     domeDevice.OpenShutter(); // Then open it
                                     if (!DomeShutterWait(ShutterState.Open))
@@ -1291,7 +1291,7 @@ namespace ConformU
                                 }
                                 else
                                 {
-                                    Status(StatusType.staAction, "Waiting for shutter to close ready for open test");
+                                    SetAction("Waiting for shutter to close ready for open test");
                                     LogDebug(p_Name, "Waiting for shutter to close ready for open test");
                                     if (!DomeShutterWait(ShutterState.Closed))
                                         return; // Wait for shutter to close
@@ -1305,7 +1305,7 @@ namespace ConformU
                             {
                                 if (p_RequiredShutterState == ShutterState.Closed)
                                 {
-                                    Status(StatusType.staAction, "Waiting for shutter to open ready for close test");
+                                    SetAction("Waiting for shutter to open ready for close test");
                                     LogDebug(p_Name, "Waiting for shutter to open ready for close test");
                                     if (!DomeShutterWait(ShutterState.Open))
                                         return; // Wait for shutter to open
@@ -1313,12 +1313,12 @@ namespace ConformU
                                 }
                                 else
                                 {
-                                    Status(StatusType.staAction, "Waiting for shutter to open before closing ready for open test");
+                                    SetAction("Waiting for shutter to open before closing ready for open test");
                                     LogDebug(p_Name, "Waiting for shutter to open before closing ready for open test");
                                     if (!DomeShutterWait(ShutterState.Open))
                                         return; // Wait for shutter to open
                                     LogDebug(p_Name, "Closing shutter ready for open test");
-                                    Status(StatusType.staAction, "Closing shutter ready for open test");
+                                    SetAction("Closing shutter ready for open test");
                                     LogCallToDriver(p_Name, "About to call CloseShutter method");
                                     domeDevice.CloseShutter(); // Then close it
                                     if (!DomeShutterWait(ShutterState.Closed))
@@ -1343,7 +1343,7 @@ namespace ConformU
                                 else
                                 {
                                     // Wrong state, get to the required state
-                                    Status(StatusType.staAction, "Closing shutter ready for open  test");
+                                    SetAction("Closing shutter ready for open  test");
                                     LogDebug(p_Name, "Closing shutter ready for open test");
                                     LogCallToDriver(p_Name, "About to call CloseShutter method");
                                     domeDevice.CloseShutter();
@@ -1366,10 +1366,10 @@ namespace ConformU
                     if (p_RequiredShutterState == ShutterState.Closed)
                     {
                         // Shutter is now open so close it
-                        Status(StatusType.staAction, "Closing shutter");
+                        SetAction("Closing shutter");
                         LogCallToDriver(p_Name, "About to call CloseShutter method");
                         domeDevice.CloseShutter();
-                        Status(StatusType.staAction, "Waiting for shutter to close");
+                        SetAction("Waiting for shutter to close");
                         LogDebug(p_Name, "Waiting for shutter to close");
                         if (!DomeShutterWait(ShutterState.Closed))
                         {
@@ -1384,9 +1384,9 @@ namespace ConformU
                     }
                     else
                     {
-                        Status(StatusType.staAction, "Opening shutter");
+                        SetAction("Opening shutter");
                         domeDevice.OpenShutter();
-                        Status(StatusType.staAction, "Waiting for shutter to open");
+                        SetAction("Waiting for shutter to open");
                         LogDebug(p_Name, "Waiting for shutter to open");
                         if (!DomeShutterWait(ShutterState.Open))
                         {
@@ -1419,9 +1419,9 @@ namespace ConformU
                     }
                     LogOK(p_Name, "Command issued successfully but can't read ShutterStatus to confirm shutter is closed");
                 }
-                Status(StatusType.staTest, "");
-                Status(StatusType.staAction, "");
-                Status(StatusType.staStatus, "");
+                SetTest("");
+                SetAction("");
+                SetStatus("");
             }
             else
                 LogTestAndMessage("DomeSafety", "Open shutter check box is unchecked so shutter test bypassed");
@@ -1442,7 +1442,7 @@ namespace ConformU
                 {
                     WaitFor(SLEEP_TIME);
                     l_ShutterState = domeDevice.ShutterStatus;
-                    Status(StatusType.staStatus, "Shutter State: " + l_ShutterState.ToString() + " Timeout: " + DateTime.Now.Subtract(l_StartTime).Seconds + "/" + settings.DomeShutterTimeout);
+                    SetStatus("Shutter State: " + l_ShutterState.ToString() + " Timeout: " + DateTime.Now.Subtract(l_StartTime).Seconds + "/" + settings.DomeShutterTimeout);
                 }
                 while (((l_ShutterState != p_RequiredStatus) & (DateTime.Now.Subtract(l_StartTime).TotalSeconds < settings.DomeShutterTimeout)) & !cancellationToken.IsCancellationRequested);
 
@@ -1467,8 +1467,8 @@ namespace ConformU
             bool l_Boolean;
             double l_Double;
             ShutterState l_ShutterState;
-            Status(StatusType.staTest, "Performance Testing");
-            Status(StatusType.staAction, p_Name);
+            SetTest("Performance Testing");
+            SetAction(p_Name);
             try
             {
                 l_StartTime = DateTime.Now;
@@ -1519,7 +1519,7 @@ namespace ConformU
                     l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
                     if (l_ElapsedTime > l_LastElapsedTime + 1.0)
                     {
-                        Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
+                        SetStatus(l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
                         l_LastElapsedTime = l_ElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
@@ -1562,10 +1562,10 @@ namespace ConformU
 
         public void DomeStabliisationWait()
         {
-            Status(StatusType.staStatus, ""); // Clear status field
+            SetStatus(""); // Clear status field
             for (double i = 1.0; i <= settings.DomeStabilisationWaitTime; i++)
             {
-                Status(StatusType.staAction, $"Waiting for Dome to stabilise - {i} / {settings.DomeStabilisationWaitTime} seconds");
+                SetAction($"Waiting for Dome to stabilise - {i} / {settings.DomeStabilisationWaitTime} seconds");
                 WaitFor(1000); // Wait for 1 second
             }
         }

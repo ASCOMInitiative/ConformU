@@ -7,6 +7,7 @@ using ASCOM.Tools;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -879,6 +880,7 @@ namespace ConformU
             {
                 if (canSetDeclinationRate) // Any value is acceptable
                 {
+                    SetTest("DeclinationRate Write");
                     if (TestRADecRate("DeclinationRate Write", "Set rate to 0.0", Axis.Dec, 0.0d, false))
                     {
                         TestRADecRate("DeclinationRate Write", "Set rate to 0.1", Axis.Dec, 0.1d, false);
@@ -1988,6 +1990,7 @@ namespace ConformU
             l_OriginalTrackingState = m_Tracking;
             if (canSetTracking) // Set should work OK
             {
+                SetTest("Tracking Write");
                 try
                 {
                     if (m_Tracking) // OK try turning tracking off
@@ -2003,6 +2006,7 @@ namespace ConformU
                         telescopeDevice.Tracking = true;
                     }
 
+                    SetAction("Waiting for mount to stabilise");
                     WaitFor(TRACKING_COMMAND_DELAY); // Wait for a short time to allow mounts to implement the tracking state change
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("Tracking Write", "About to get Tracking property");
@@ -2019,12 +2023,14 @@ namespace ConformU
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("Tracking Write", "About to set Tracking property " + l_OriginalTrackingState);
                     telescopeDevice.Tracking = l_OriginalTrackingState; // Restore original state
+                    SetAction("Waiting for mount to stabilise");
                     WaitFor(TRACKING_COMMAND_DELAY); // Wait for a short time to allow mounts to implement the tracking state change
                 }
                 catch (Exception ex)
                 {
                     HandleException("Tracking Write", MemberType.Property, Required.MustBeImplemented, ex, "CanSetTracking is True");
                 }
+                ClearStatus();
             }
             else // Can read OK but Set tracking should fail
             {
@@ -2429,23 +2435,20 @@ namespace ConformU
                             if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get AtPark property");
                             if (!telescopeDevice.AtPark) // OK We are unparked so check that no error is generated
                             {
-                                Status(StatusType.staTest, "Park");
+                                SetTest("Park");
                                 try
                                 {
-                                    Status(StatusType.staAction, "Park scope");
+                                    SetAction("Parking scope...");
                                     LogTestAndMessage("Park", "Parking scope...");
                                     if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to call Park method");
                                     telescopeDevice.Park();
-                                    Status(StatusType.staStatus, "Waiting for scope to park");
                                     if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get AtPark property repeatedly...");
-                                    do
-                                    {
-                                        WaitFor(SLEEP_TIME);
-                                    }
-                                    while (!telescopeDevice.AtPark & !cancellationToken.IsCancellationRequested);
+
+                                    // Wait for the park to complete
+                                    WaitUntil("Waiting for scope to park", () => { return !telescopeDevice.AtPark & !cancellationToken.IsCancellationRequested; }, SLEEP_TIME);
                                     if (cancellationToken.IsCancellationRequested) return;
 
-                                    Status(StatusType.staStatus, "Scope parked");
+                                    SetStatus("Scope parked");
                                     LogOK("Park", "Success");
 
                                     // Scope Parked OK
@@ -2554,19 +2557,16 @@ namespace ConformU
                                     {
                                         try
                                         {
-                                            Status(StatusType.staAction, "UnPark scope after park");
                                             if (settings.DisplayMethodCalls)
                                                 LogTestAndMessage("UnPark", "About to call UnPark method");
                                             telescopeDevice.Unpark();
-                                            do
-                                            {
-                                                WaitFor(SLEEP_TIME);
-                                                if (settings.DisplayMethodCalls) LogTestAndMessage("UnPark", "About to get AtPark property");
-                                            }
-                                            while (telescopeDevice.AtPark & !cancellationToken.IsCancellationRequested);
+                                            if (settings.DisplayMethodCalls) LogTestAndMessage("UnPark", "About to get AtPark property repeatedly");
+
+                                            WaitUntil("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark & !cancellationToken.IsCancellationRequested; }, SLEEP_TIME);
 
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
+
                                             try // Make sure tracking doesn't generate an error if it is not implemented
                                             {
                                                 if (settings.DisplayMethodCalls)
@@ -2577,7 +2577,7 @@ namespace ConformU
                                             {
                                             }
 
-                                            Status(StatusType.staStatus, "Scope UnParked");
+                                            SetStatus("Scope UnParked OK");
                                             LogOK("UnPark", "Success");
 
                                             // Scope unparked
@@ -2586,7 +2586,7 @@ namespace ConformU
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("UnPark", "About to call UnPark method");
                                                 telescopeDevice.Unpark();
-                                                LogOK("UnPark", "Success if already unparked");
+                                                LogOK("UnPark", "Success when already unparked");
                                             }
                                             catch (COMException ex)
                                             {
@@ -3262,7 +3262,7 @@ namespace ConformU
 
         public override void CheckPerformance()
         {
-            Status(StatusType.staTest, "Performance"); // Clear status messages
+            SetTest("Performance"); // Clear status messages
             TelescopePerformanceTest(PerformanceType.tstPerfAltitude, "Altitude");
             if (cancellationToken.IsCancellationRequested)
                 return;
@@ -3385,6 +3385,9 @@ namespace ConformU
         {
             bool showOutcome = false;
             double difference, syncRA, syncDEC, syncAlt = default, syncAz = default, newAlt, newAz, currentAz = default, currentAlt = default, startRA, startDec, currentRA, currentDec;
+
+            SetTest(testName);
+            SetAction("Running test...");
 
             // Basic test to make sure the method is either implemented OK or fails as expected if it is not supported in this driver.
             if (settings.DisplayMethodCalls)
@@ -3531,10 +3534,10 @@ namespace ConformU
                                 } // Calculate for southern hemisphere
 
                                 LogDebug(testName, string.Format("Declination for sync tests: {0}", FormatDec(startDec)));
-                                SlewScope(startRA, startDec, string.Format("Start position - RA: {0}, Dec: {1}", FormatRA(startRA), FormatDec(startDec)));
+                                SlewScope(startRA, startDec, "start position");
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
-
+                                SetAction("Checking that scope slewed OK");
                                 // Now test that we have actually arrived
                                 CheckScopePosition(testName, "Slewed to start position", startRA, startDec);
 
@@ -3546,6 +3549,7 @@ namespace ConformU
                                 // Calculate the sync test DEC coordinate as a variation from the current DEC coordinate
                                 syncDEC = startDec - SYNC_SIMULATED_ERROR / 60.0d; // Convert sync error in arc minutes to degrees
 
+                                SetAction("Syncing the scope");
                                 // Sync the scope to the offset RA and DEC coordinates
                                 SyncScope(testName, canDoItName, testType, syncRA, syncDEC);
 
@@ -3553,6 +3557,7 @@ namespace ConformU
                                 CheckScopePosition(testName, "Synced to sync position", syncRA, syncDEC);
 
                                 // Check that the TargetRA and TargetDec were 
+                                SetAction("Checking that the scope synced OK");
                                 if (testType == SlewSyncType.SyncToCoordinates)
                                 {
                                     // Check that target coordinates are present and set correctly per the ASCOM Telescope specification
@@ -3634,7 +3639,7 @@ namespace ConformU
                                 }
 
                                 // Now slew to the scope's original position
-                                SlewScope(startRA, startDec, string.Format("Slewing back to start position - RA: {0}, Dec: {1}", FormatRA(startRA), FormatDec(startDec)));
+                                SlewScope(startRA, startDec, "original position in post-sync coordinates");
 
                                 // Check that the scope's position is the original position
                                 CheckScopePosition(testName, "Slewed back to start position", startRA, startDec);
@@ -3650,13 +3655,14 @@ namespace ConformU
                                 syncDEC = startDec + SYNC_SIMULATED_ERROR / 60.0d; // Convert sync error in arc minutes to degrees
 
                                 // Sync back to the original coordinates
+                                SetAction("Restoring original sync values");
                                 SyncScope(testName, canDoItName, testType, syncRA, syncDEC);
 
                                 // Check that the scope's synchronised position is as expected
                                 CheckScopePosition(testName, "Synced to reversed sync position", syncRA, syncDEC);
 
                                 // Now slew to the scope's original position
-                                SlewScope(startRA, startDec, string.Format("Slewing back to start position - RA: {0}, Dec: {1}", FormatRA(startRA), FormatDec(startDec)));
+                                SlewScope(startRA, startDec, "original position in pre-sync coordinates");
 
                                 // Check that the scope's position is the original position
                                 CheckScopePosition(testName, "Slewed back to start position", startRA, startDec);
@@ -3786,7 +3792,7 @@ namespace ConformU
 
         private void TelescopeSlewTest(SlewSyncType p_Test, string p_Name, bool p_CanDoIt, string p_CanDoItName)
         {
-            Status(StatusType.staTest, p_Name);
+            SetTest(p_Name);
             if (canSetTracking)
             {
                 if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set Tracking property to true");
@@ -3808,7 +3814,7 @@ namespace ConformU
 
                             targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -1.0d);
                             targetDeclination = 1.0d;
-                            Status(StatusType.staAction, "Slewing");
+                            SetAction("Slewing synchronously...");
 
                             if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
                             telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination);
@@ -3827,7 +3833,7 @@ namespace ConformU
 
                             targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
                             targetDeclination = 2.0d;
-                            Status(StatusType.staAction, "Slewing");
+                            SetAction("Slewing asynchronously...");
 
                             if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
                             telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
@@ -3883,7 +3889,7 @@ namespace ConformU
                                 }
                             }
 
-                            Status(StatusType.staAction, "Slewing");
+                            SetAction("Slewing synchronously...");
                             if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToTarget method");
                             telescopeDevice.SlewToTarget();
                             break;
@@ -3934,7 +3940,7 @@ namespace ConformU
                                 }
                             }
 
-                            Status(StatusType.staAction, "Slewing");
+                            SetAction("Slewing asynchronously...");
                             if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToTargetAsync method");
                             telescopeDevice.SlewToTargetAsync();
 
@@ -3957,7 +3963,7 @@ namespace ConformU
                             LogDebug(p_Name, $"Tracking 2: {telescopeDevice.Tracking}");
                             targetAltitude = 50.0d;
                             targetAzimuth = 150.0d;
-                            Status(StatusType.staAction, "Slewing to Alt/Az: " + FormatDec(targetAltitude) + " " + FormatDec(targetAzimuth));
+                            SetAction("Slewing to Alt/Az synchronously: " + FormatDec(targetAltitude) + " " + FormatDec(targetAzimuth));
 
                             if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
                             telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
@@ -3983,7 +3989,7 @@ namespace ConformU
                             LogDebug(p_Name, $"Tracking 2: {telescopeDevice.Tracking}");
                             targetAltitude = 55.0d;
                             targetAzimuth = 155.0d;
-                            Status(StatusType.staAction, "Slewing to Alt/Az: " + FormatDec(targetAltitude) + " " + FormatDec(targetAzimuth));
+                            SetAction("Slewing to Alt/Az asynchronously: " + FormatDec(targetAltitude) + " " + FormatDec(targetAzimuth));
 
                             if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToAltAzAsync method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
                             telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
@@ -4008,7 +4014,7 @@ namespace ConformU
 
                 if (p_CanDoIt) // Should be able to do this so report what happened
                 {
-                    Status(StatusType.staAction, "Slew completed");
+                    SetAction("Slew completed");
                     switch (p_Test)
                     {
                         case SlewSyncType.SlewToCoordinates:
@@ -4173,7 +4179,7 @@ namespace ConformU
 
                         try
                         {
-                            Status(StatusType.staAction, "Slew underway");
+                            SetAction("Slew underway");
                             targetRightAscension = BadCoordinate1;
                             targetDeclination = 0.0d;
                             if (p_Test == SlewSyncType.SlewToCoordinates)
@@ -4189,7 +4195,7 @@ namespace ConformU
                                 telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
                             }
 
-                            Status(StatusType.staAction, "Attempting to abort slew");
+                            SetAction("Attempting to abort slew");
                             try
                             {
                                 if (settings.DisplayMethodCalls)
@@ -4204,13 +4210,13 @@ namespace ConformU
                         }
                         catch (Exception ex)
                         {
-                            Status(StatusType.staAction, "Slew rejected");
+                            SetAction("Slew rejected");
                             HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + FormatRA(targetRightAscension));
                         }
 
                         try
                         {
-                            Status(StatusType.staAction, "Slew underway");
+                            SetAction("Slew underway");
                             targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
                             targetDeclination = BadCoordinate2;
                             if (p_Test == SlewSyncType.SlewToCoordinates)
@@ -4226,7 +4232,7 @@ namespace ConformU
                                 telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
                             }
 
-                            Status(StatusType.staAction, "Attempting to abort slew");
+                            SetAction("Attempting to abort slew");
                             try
                             {
                                 if (settings.DisplayMethodCalls)
@@ -4241,7 +4247,7 @@ namespace ConformU
                         }
                         catch (Exception ex)
                         {
-                            Status(StatusType.staAction, "Slew rejected");
+                            SetAction("Slew rejected");
                             HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + FormatDec(targetDeclination));
                         }
 
@@ -4261,7 +4267,7 @@ namespace ConformU
 
                         try
                         {
-                            Status(StatusType.staAction, "Sync underway");
+                            SetAction("Sync underway");
                             targetRightAscension = BadCoordinate1;
                             targetDeclination = 0.0d;
                             if (settings.DisplayMethodCalls)
@@ -4271,13 +4277,13 @@ namespace ConformU
                         }
                         catch (Exception ex)
                         {
-                            Status(StatusType.staAction, "Sync rejected");
+                            SetAction("Sync rejected");
                             HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + FormatRA(targetRightAscension));
                         }
 
                         try
                         {
-                            Status(StatusType.staAction, "Sync underway");
+                            SetAction("Sync underway");
                             targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -3.0d);
                             targetDeclination = BadCoordinate2;
                             if (settings.DisplayMethodCalls)
@@ -4287,7 +4293,7 @@ namespace ConformU
                         }
                         catch (Exception ex)
                         {
-                            Status(StatusType.staAction, "Sync rejected");
+                            SetAction("Sync rejected");
                             HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + FormatDec(targetDeclination));
                         }
 
@@ -4308,7 +4314,7 @@ namespace ConformU
 
                         try
                         {
-                            Status(StatusType.staAction, "Slew underway");
+                            SetAction("Slew underway");
                             targetRightAscension = BadCoordinate1;
                             targetDeclination = 0.0d;
                             if (settings.DisplayMethodCalls)
@@ -4340,7 +4346,7 @@ namespace ConformU
                                     telescopeDevice.SlewToTargetAsync();
                                 }
 
-                                Status(StatusType.staAction, "Attempting to abort slew");
+                                SetAction("Attempting to abort slew");
                                 try
                                 {
                                     if (settings.DisplayMethodCalls)
@@ -4355,7 +4361,7 @@ namespace ConformU
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
-                                Status(StatusType.staAction, "Slew rejected");
+                                SetAction("Slew rejected");
                                 HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + FormatRA(targetRightAscension));
                             }
                         }
@@ -4366,7 +4372,7 @@ namespace ConformU
 
                         try
                         {
-                            Status(StatusType.staAction, "Slew underway");
+                            SetAction("Slew underway");
                             targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
                             targetDeclination = BadCoordinate2;
                             if (settings.DisplayMethodCalls)
@@ -4398,7 +4404,7 @@ namespace ConformU
                                     telescopeDevice.SlewToTargetAsync();
                                 }
 
-                                Status(StatusType.staAction, "Attempting to abort slew");
+                                SetAction("Attempting to abort slew");
                                 try
                                 {
                                     if (settings.DisplayMethodCalls)
@@ -4413,7 +4419,7 @@ namespace ConformU
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
-                                Status(StatusType.staAction, "Slew rejected");
+                                SetAction("Slew rejected");
                                 HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + FormatDec(targetDeclination));
                             }
                         }
@@ -4438,7 +4444,7 @@ namespace ConformU
 
                         try
                         {
-                            Status(StatusType.staAction, "Sync underway");
+                            SetAction("Sync underway");
                             targetRightAscension = BadCoordinate1;
                             targetDeclination = 0.0d;
                             if (settings.DisplayMethodCalls)
@@ -4464,7 +4470,7 @@ namespace ConformU
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
-                                Status(StatusType.staAction, "Sync rejected");
+                                SetAction("Sync rejected");
                                 HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + FormatRA(targetRightAscension));
                             }
                         }
@@ -4475,7 +4481,7 @@ namespace ConformU
 
                         try
                         {
-                            Status(StatusType.staAction, "Sync underway");
+                            SetAction("Sync underway");
                             targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -3.0d);
                             targetDeclination = BadCoordinate2;
                             if (settings.DisplayMethodCalls)
@@ -4501,7 +4507,7 @@ namespace ConformU
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
-                                Status(StatusType.staAction, "Sync rejected");
+                                SetAction("Sync rejected");
                                 HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + FormatDec(targetDeclination));
                             }
                         }
@@ -4527,7 +4533,7 @@ namespace ConformU
 
                         try
                         {
-                            Status(StatusType.staAction, "Slew underway");
+                            SetAction("Slew underway");
                             targetAltitude = BadCoordinate1;
                             targetAzimuth = 45.0d;
                             if (p_Test == SlewSyncType.SlewToAltAz)
@@ -4543,7 +4549,7 @@ namespace ConformU
                                 telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
                             }
 
-                            Status(StatusType.staAction, "Attempting to abort slew");
+                            SetAction("Attempting to abort slew");
                             try
                             {
                                 if (settings.DisplayMethodCalls)
@@ -4558,13 +4564,13 @@ namespace ConformU
                         }
                         catch (Exception ex)
                         {
-                            Status(StatusType.staAction, "Slew rejected");
+                            SetAction("Slew rejected");
                             HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {TelescopeTester.FormatAltitude(targetAltitude)}");
                         }
 
                         try
                         {
-                            Status(StatusType.staAction, "Slew underway");
+                            SetAction("Slew underway");
                             targetAltitude = 45.0d;
                             targetAzimuth = BadCoordinate2;
                             if (p_Test == SlewSyncType.SlewToAltAz)
@@ -4580,7 +4586,7 @@ namespace ConformU
                                 telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
                             }
 
-                            Status(StatusType.staAction, "Attempting to abort slew");
+                            SetAction("Attempting to abort slew");
                             try
                             {
                                 if (settings.DisplayMethodCalls)
@@ -4595,7 +4601,7 @@ namespace ConformU
                         }
                         catch (Exception ex)
                         {
-                            Status(StatusType.staAction, "Slew rejected");
+                            SetAction("Slew rejected");
                             HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Azimuth coordinate", "Correctly rejected bad Azimuth coordinate: " + FormatAzimuth(targetAzimuth));
                         }
 
@@ -4615,7 +4621,7 @@ namespace ConformU
 
                         try
                         {
-                            Status(StatusType.staAction, "Sync underway");
+                            SetAction("Sync underway");
                             targetAltitude = BadCoordinate1;
                             targetAzimuth = 45.0d;
                             if (settings.DisplayMethodCalls)
@@ -4625,13 +4631,13 @@ namespace ConformU
                         }
                         catch (Exception ex)
                         {
-                            Status(StatusType.staAction, "Sync rejected");
+                            SetAction("Sync rejected");
                             HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {TelescopeTester.FormatAltitude(targetAltitude)}");
                         }
 
                         try
                         {
-                            Status(StatusType.staAction, "Sync underway");
+                            SetAction("Sync underway");
                             targetAltitude = 45.0d;
                             targetAzimuth = BadCoordinate2;
                             if (settings.DisplayMethodCalls)
@@ -4641,7 +4647,7 @@ namespace ConformU
                         }
                         catch (Exception ex)
                         {
-                            Status(StatusType.staAction, "Sync rejected");
+                            SetAction("Sync rejected");
                             HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Azimuth coordinate", "Correctly rejected bad Azimuth coordinate: " + FormatAzimuth(targetAzimuth));
                         }
 
@@ -4663,7 +4669,7 @@ namespace ConformU
         {
             DateTime l_StartTime;
             double l_Count, l_LastElapsedTime, l_ElapsedTime, l_Rate;
-            Status(StatusType.staAction, p_Name);
+            SetAction(p_Name);
             try
             {
                 l_StartTime = DateTime.Now;
@@ -4750,7 +4756,7 @@ namespace ConformU
                     l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
                     if (l_ElapsedTime > l_LastElapsedTime + 1.0d)
                     {
-                        Status(StatusType.staStatus, l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
+                        SetStatus(l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
                         l_LastElapsedTime = l_ElapsedTime;
                         //Application.DoEvents();
                         if (cancellationToken.IsCancellationRequested)
@@ -5382,11 +5388,10 @@ namespace ConformU
 
         private void TelescopeOptionalMethodsTest(OptionalMethodType p_Type, string p_Name, bool p_CanTest)
         {
-            int l_ct;
             double l_TestDec, l_TestRAOffset;
             IAxisRates l_AxisRates = null;
 
-            Status(StatusType.staTest, p_Name);
+            SetTest(p_Name);
             LogDebug("TelescopeOptionalMethodsTest", p_Type.ToString() + " " + p_Name + " " + p_CanTest.ToString());
             if (p_CanTest) // Confirm that an error is raised if the optional command is not implemented
             {
@@ -5452,20 +5457,14 @@ namespace ConformU
                             {
                                 if (g_InterfaceVersion > 1)
                                 {
+                                    SetAction("Homing mount...");
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage(p_Name, "About to call FindHome method");
                                     telescopeDevice.FindHome();
-                                    m_StartTime = DateTime.Now;
-                                    Status(StatusType.staAction, "Waiting for mount to home");
-                                    l_ct = 0;
-                                    do
-                                    {
-                                        WaitFor(SLEEP_TIME);
-                                        l_ct += 1;
-                                        if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage(p_Name, "About to get AtHome property");
-                                    }
-                                    while (!telescopeDevice.AtHome & !cancellationToken.IsCancellationRequested & (DateTime.Now.Subtract(m_StartTime).TotalMilliseconds < 60000)); // Wait up to a minute to find home
+
+                                    // Wait for mount to find home
+                                    WaitUntil("Waiting for mount to home...", () => { return !telescopeDevice.AtHome & !cancellationToken.IsCancellationRequested & (DateTime.Now.Subtract(m_StartTime).TotalMilliseconds < 60000); }, 200);
+
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage(p_Name, "About to get AtHome property");
                                     if (telescopeDevice.AtHome)
@@ -5489,7 +5488,7 @@ namespace ConformU
                                 }
                                 else
                                 {
-                                    Status(StatusType.staAction, "Waiting for mount to home");
+                                    SetAction("Waiting for mount to home");
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage(p_Name, "About to call FindHome method");
                                     telescopeDevice.FindHome();
@@ -5538,7 +5537,7 @@ namespace ConformU
                                 }
                                 else // OK to test pulse guiding
                                 {
-                                    Status(StatusType.staAction, "Start PulseGuide");
+                                    SetAction("Calling PulseGuide east");
                                     m_StartTime = DateTime.Now;
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage(p_Name, "About to call PulseGuide method, Direction: " + ((int)GuideDirection.East).ToString() + ", Duration: " + PULSEGUIDE_MOVEMENT_TIME * 1000 + "ms");
@@ -5547,21 +5546,14 @@ namespace ConformU
                                     LogDebug(p_Name, "PulseGuide command time: " + PULSEGUIDE_MOVEMENT_TIME * 1000 + " milliseconds, PulseGuide call duration: " + m_EndTime.Subtract(m_StartTime).TotalMilliseconds + " milliseconds");
                                     if (m_EndTime.Subtract(m_StartTime).TotalMilliseconds < PULSEGUIDE_MOVEMENT_TIME * 0.75d * 1000d) // If less than three quarters of the expected duration then assume we have returned early
                                     {
-                                        l_ct = 0;
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage(p_Name, "About to get IsPulseGuiding property");
                                         if (telescopeDevice.IsPulseGuiding)
                                         {
-                                            do
-                                            {
-                                                WaitFor(SLEEP_TIME);
-                                                l_ct += 1;
-                                                if (cancellationToken.IsCancellationRequested)
-                                                    return;
-                                                if (settings.DisplayMethodCalls)
-                                                    LogTestAndMessage(p_Name, "About to get IsPulseGuiding property");
-                                            }
-                                            while (telescopeDevice.IsPulseGuiding & DateTime.Now.Subtract(m_StartTime).TotalMilliseconds < PULSEGUIDE_TIMEOUT_TIME * 1000); // Wait for success or timeout
+                                            if (settings.DisplayMethodCalls)
+                                                LogTestAndMessage(p_Name, "About to get IsPulseGuiding property multiple times");
+                                            WaitUntil("Pulse guiding Eastwards", () => { return telescopeDevice.IsPulseGuiding & DateTime.Now.Subtract(m_StartTime).TotalMilliseconds < PULSEGUIDE_TIMEOUT_TIME * 1000; }, SLEEP_TIME);
+
                                             if (settings.DisplayMethodCalls)
                                                 LogTestAndMessage(p_Name, "About to get IsPulseGuiding property");
                                             if (!telescopeDevice.IsPulseGuiding)
@@ -5602,10 +5594,11 @@ namespace ConformU
                                 // SideOfPier Write
                                 if (canSetPierside) // Can set pier side so test if we can
                                 {
-                                    SlewScope(TelescopeRAFromHourAngle(p_Name, -3.0d), 0.0d, "Slewing to far start point");
+                                    SlewScope(TelescopeRAFromHourAngle(p_Name, -3.0d), 0.0d, "far start point");
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
-                                    SlewScope(TelescopeRAFromHourAngle(p_Name, -0.03d), 0.0d, "Slewing to near start point"); // 2 minutes from zenith
+
+                                    SlewScope(TelescopeRAFromHourAngle(p_Name, -0.03d), 0.0d, "near start point"); // 2 minutes from zenith
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
 
@@ -5617,15 +5610,14 @@ namespace ConformU
                                     m_StartTime = DateTime.Now;
                                     do
                                     {
-                                        System.Threading.Thread.Sleep(SLEEP_TIME);
-                                        //Application.DoEvents();
-                                        SetStatus(p_Name, "Waiting for transit through Meridian", Convert.ToInt32(DateTime.Now.Subtract(m_StartTime).TotalSeconds) + "/" + SIDEOFPIER_MERIDIAN_TRACKING_PERIOD / 1000d + " seconds");
+                                        Thread.Sleep(1000);
+                                        SetFullStatus(p_Name, "Waiting for transit through Meridian", $"{Convert.ToInt32(DateTime.Now.Subtract(m_StartTime).TotalSeconds)}/{SIDEOFPIER_MERIDIAN_TRACKING_PERIOD / 1000d} seconds");
                                     }
                                     while ((DateTime.Now.Subtract(m_StartTime).TotalMilliseconds <= SIDEOFPIER_MERIDIAN_TRACKING_PERIOD) & !cancellationToken.IsCancellationRequested);
 
-                                    // SlewScope(TelescopeRAFromHourAngle(+0.0833333), 0.0, "Slewing to flip point") '5 minutes past zenith
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
+
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage(p_Name, "About to get SideOfPier property");
                                     switch (telescopeDevice.SideOfPier)
@@ -5635,12 +5627,15 @@ namespace ConformU
                                                 try
                                                 {
                                                     LogDebug(p_Name, "Scope is pierEast so flipping West");
+                                                    SetAction("Flipping mount to pointing state pierWest");
                                                     if (settings.DisplayMethodCalls)
                                                         LogTestAndMessage(p_Name, "About to set SideOfPier property to " + ((int)PointingState.ThroughThePole).ToString());
                                                     telescopeDevice.SideOfPier = PointingState.ThroughThePole;
                                                     WaitForSlew(p_Name);
+
                                                     if (cancellationToken.IsCancellationRequested)
                                                         return;
+
                                                     if (settings.DisplayMethodCalls)
                                                         LogTestAndMessage(p_Name, "About to get SideOfPier property");
                                                     m_SideOfPier = (PointingState)telescopeDevice.SideOfPier;
@@ -5666,12 +5661,14 @@ namespace ConformU
                                                 try
                                                 {
                                                     LogDebug(p_Name, "Scope is pierWest so flipping East");
+                                                    SetAction("Flipping mount to pointing state pierEast");
                                                     if (settings.DisplayMethodCalls)
                                                         LogTestAndMessage(p_Name, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
                                                     telescopeDevice.SideOfPier = PointingState.Normal;
                                                     WaitForSlew(p_Name);
                                                     if (cancellationToken.IsCancellationRequested)
                                                         return;
+
                                                     if (settings.DisplayMethodCalls)
                                                         LogTestAndMessage(p_Name, "About to get SideOfPier property");
                                                     m_SideOfPier = (PointingState)telescopeDevice.SideOfPier;
@@ -5687,7 +5684,7 @@ namespace ConformU
                                                 catch (Exception ex)
                                                 {
                                                     HandleException("SideOfPier Write pierEast", MemberType.Method, Required.MustBeImplemented, ex, "CanSetPierSide is True");
-                                                } // Unknown pier side
+                                                }
 
                                                 break;
                                             }
@@ -5764,7 +5761,6 @@ namespace ConformU
 
                         l_AxisRates = null;
                     }
-
                     if (cancellationToken.IsCancellationRequested)
                         return;
                 }
@@ -5870,6 +5866,7 @@ namespace ConformU
                     }
                 }
             }
+            ClearStatus();
 
         }
 
@@ -6070,6 +6067,8 @@ namespace ConformU
             bool l_TrackingStart, l_TrackingEnd, l_CanSetZero;
             int l_RateCount;
 
+            SetTest(p_Name);
+
             // Determine lowest and highest tracking rates
             l_RateMinimum = double.PositiveInfinity; // Set to invalid values
             l_RateMaximum = double.NegativeInfinity;
@@ -6092,7 +6091,7 @@ namespace ConformU
                     LogDebug(p_Name, "Found minimum rate: " + l_RateMinimum + " found maximum rate: " + l_RateMaximum);
 
                     // Confirm setting a zero rate works
-                    Status(StatusType.staAction, "Set zero rate");
+                    SetAction("Set zero rate");
                     l_CanSetZero = false;
                     try
                     {
@@ -6115,7 +6114,8 @@ namespace ConformU
                         LogIssue(p_Name, "Unable to set a movement rate of zero - " + ex.Message);
                     }
 
-                    Status(StatusType.staAction, "Set lower rate");
+                    SetAction("Set lower rate");
+
                     // Test that error is generated on attempt to set rate lower than minimum
                     try
                     {
@@ -6150,6 +6150,7 @@ namespace ConformU
                     {
                         HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "when move axis is set below lowest rate (" + l_MoveRate + ")", "Exception correctly generated when move axis is set below lowest rate (" + l_MoveRate + ")");
                     }
+
                     // Clean up and release each object after use
                     try
                     {
@@ -6166,7 +6167,7 @@ namespace ConformU
                         return;
 
                     // test that error is generated when rate is above maximum set
-                    Status(StatusType.staAction, "Set upper rate");
+                    SetAction("Set upper rate");
                     try
                     {
                         l_MoveRate = l_RateMaximum + 1.0d;
@@ -6209,29 +6210,32 @@ namespace ConformU
                     if (l_CanSetZero) // Can set a rate of zero so undertake these tests
                     {
                         // Confirm that lowest tracking rate can be set
-                        Status(StatusType.staAction, "Move at minimum rate");
                         if (l_RateMinimum != double.PositiveInfinity) // Valid value found so try and set it
                         {
                             try
                             {
-                                Status(StatusType.staStatus, "Moving forward");
+                                SetAction("Moving forward at minimum rate");
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMinimum);
                                 telescopeDevice.MoveAxis(p_Axis, l_RateMinimum); // Set the minimum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
+
+                                SetAction("Stopping movement");
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
-                                Status(StatusType.staStatus, "Moving back");
+
+                                SetAction("Moving back at minimum rate");
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMinimum);
                                 telescopeDevice.MoveAxis(p_Axis, -l_RateMinimum); // Set the minimum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
-                                // v1.0.12 Next line added because movement wasn't stopped
+
+                                SetAction("Stopping movement");
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
@@ -6242,7 +6246,7 @@ namespace ConformU
                                 HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "when setting rate: " + l_RateMinimum);
                             }
 
-                            Status(StatusType.staStatus, ""); // Clear status flag
+                            SetStatus(""); // Clear status flag
                         }
                         else // No valid rate was found so print an error
                         {
@@ -6253,7 +6257,6 @@ namespace ConformU
                             return;
 
                         // Confirm that highest tracking rate can be set
-                        Status(StatusType.staAction, "Move at maximum rate");
                         if (l_RateMaximum != double.NegativeInfinity) // Valid value found so try and set it
                         {
                             try
@@ -6267,11 +6270,12 @@ namespace ConformU
                                     return;
                                 }
 
-                                Status(StatusType.staStatus, "Moving forward");
+                                SetStatus("Moving forward at highest rate");
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMaximum);
-                                telescopeDevice.MoveAxis(p_Axis, l_RateMaximum); // Set the minimum rate
-                                                                                 // Confirm that slewing is active when the move is underway
+                                telescopeDevice.MoveAxis(p_Axis, l_RateMaximum); // Set the maximum rate
+
+                                // Confirm that slewing is active when the move is underway
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to get Slewing property");
                                 if (!telescopeDevice.Slewing)
@@ -6283,6 +6287,8 @@ namespace ConformU
                                     LogTestAndMessage(p_Name, "About to get Slewing property");
                                 if (!telescopeDevice.Slewing)
                                     LogIssue(p_Name, "Slewing is not true after " + MOVE_AXIS_TIME / 1000d + " seconds moving in positive direction");
+
+                                SetStatus("Stopping movement");
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
@@ -6295,7 +6301,7 @@ namespace ConformU
                                     return;
                                 }
 
-                                Status(StatusType.staStatus, "Moving back");
+                                SetStatus("Moving backward at highest rate");
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
                                 telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the minimum rate
@@ -6327,7 +6333,7 @@ namespace ConformU
                                 HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "when setting rate: " + l_RateMaximum);
                             }
 
-                            Status(StatusType.staStatus, ""); // Clear status flag
+                            SetStatus(""); // Clear status flag
                         }
                         else // No valid rate was found so print an error
                         {
@@ -6340,20 +6346,20 @@ namespace ConformU
                         // Confirm that tracking state is correctly restored after a move axis command
                         try
                         {
-                            Status(StatusType.staAction, "Tracking state restore");
+                            SetAction("Tracking state restore");
                             if (canSetTracking)
                             {
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to get Tracking property");
                                 l_TrackingStart = telescopeDevice.Tracking; // Save the start tracking state
-                                Status(StatusType.staStatus, "Moving forward");
+                                SetStatus("Moving forward");
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMaximum);
                                 telescopeDevice.MoveAxis(p_Axis, l_RateMaximum); // Set the maximum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
-                                Status(StatusType.staStatus, "Stop movement");
+                                SetStatus("Stop movement");
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
@@ -6364,11 +6370,11 @@ namespace ConformU
                                 {
                                     if (l_TrackingStart) // Tracking is true so switch to false for return movement
                                     {
-                                        Status(StatusType.staStatus, "Set tracking off");
+                                        SetStatus("Set tracking off");
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage(p_Name, "About to set Tracking property false");
                                         telescopeDevice.Tracking = false;
-                                        Status(StatusType.staStatus, "Move back");
+                                        SetStatus("Move back");
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
                                         telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the maximum rate
@@ -6378,7 +6384,7 @@ namespace ConformU
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                         telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
-                                        Status(StatusType.staStatus, "");
+                                        SetStatus("");
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage(p_Name, "About to get Tracking property");
                                         if (telescopeDevice.Tracking == false) // tracking correctly retained in both states
@@ -6392,11 +6398,11 @@ namespace ConformU
                                     }
                                     else // Tracking false so switch to true for return movement
                                     {
-                                        Status(StatusType.staStatus, "Set tracking on");
+                                        SetStatus("Set tracking on");
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage(p_Name, "About to set Tracking property true");
                                         telescopeDevice.Tracking = true;
-                                        Status(StatusType.staStatus, "Move back");
+                                        SetStatus("Move back");
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
                                         telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the maximum rate
@@ -6406,7 +6412,7 @@ namespace ConformU
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                         telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
-                                        Status(StatusType.staStatus, "");
+                                        SetStatus("");
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage(p_Name, "About to get Tracking property");
                                         if (telescopeDevice.Tracking == true) // tracking correctly retained in both states
@@ -6419,18 +6425,18 @@ namespace ConformU
                                         }
                                     }
 
-                                    Status(StatusType.staStatus, ""); // Clear status flag
+                                    SetStatus(""); // Clear status flag
                                 }
                                 else // Tracking state not correctly restored
                                 {
-                                    Status(StatusType.staStatus, "Move back");
+                                    SetStatus("Move back");
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
                                     telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the maximum rate
                                     WaitFor(MOVE_AXIS_TIME);
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
-                                    Status(StatusType.staStatus, "");
+                                    SetStatus("");
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                     telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
@@ -6445,21 +6451,21 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to get Tracking property");
                                 l_TrackingStart = telescopeDevice.Tracking;
-                                Status(StatusType.staStatus, "Moving forward");
+                                SetStatus("Moving forward");
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMaximum);
                                 telescopeDevice.MoveAxis(p_Axis, l_RateMaximum); // Set the maximum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
-                                Status(StatusType.staStatus, "Stop movement");
+                                SetStatus("Stop movement");
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to get Tracking property");
                                 l_TrackingEnd = telescopeDevice.Tracking; // Save tracking state
-                                Status(StatusType.staStatus, "Move back");
+                                SetStatus("Move back");
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(p_Name, "About to call method MoveAxis for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
                                 telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the maximum rate
@@ -6482,7 +6488,7 @@ namespace ConformU
                                     LogIssue(p_Name, "Tracking state not correctly restored after MoveAxis when CanSetTracking is false");
                                 }
 
-                                Status(StatusType.staStatus, "");
+                                SetStatus("");
                             } // Clear status flag
                         }
                         catch (Exception ex)
@@ -6495,8 +6501,7 @@ namespace ConformU
                         LogInfo(p_Name, "Remaining MoveAxis tests skipped because unable to set a movement rate of zero");
                     }
 
-                    Status(StatusType.staStatus, ""); // Clear status flag
-                    Status(StatusType.staAction, ""); // Clear action flag
+                    ClearStatus(); // Clear status
                 }
                 else // Some problem in finding rates inside the AxisRates object
                 {
@@ -6517,7 +6522,7 @@ namespace ConformU
 
             // Slew to starting position
             LogDebug("SideofPier", "Starting Side of Pier tests");
-            Status(StatusType.staTest, "Side of pier tests");
+            SetTest("Side of pier tests");
             l_StartRA = TelescopeRAFromHourAngle("SideofPier", -3.0d);
             if (m_SiteLatitude > 0.0d) // We are in the northern hemisphere
             {
@@ -6531,27 +6536,31 @@ namespace ConformU
             }
 
             LogDebug("SideofPier", "Declination for hour angle = +-3.0 tests: " + FormatDec(l_Declination3) + ", Declination for hour angle = +-9.0 tests: " + FormatDec(l_Declination9));
-            SlewScope(l_StartRA, 0.0d, "Move to starting position " + FormatRA(l_StartRA) + " " + FormatDec(0.0d));
+            SlewScope(l_StartRA, 0.0d, "starting position");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // Run tests
-            Status(StatusType.staAction, "Test hour angle -3.0 at declination: " + FormatDec(l_Declination3));
+            SetAction("Test hour angle -3.0 at declination: " + FormatDec(l_Declination3));
             l_PierSideMinus3 = SOPPierTest(l_StartRA, l_Declination3, "hour angle -3.0");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            Status(StatusType.staAction, "Test hour angle +3.0 at declination: " + FormatDec(l_Declination3));
+
+            SetAction("Test hour angle +3.0 at declination: " + FormatDec(l_Declination3));
             l_PierSidePlus3 = SOPPierTest(TelescopeRAFromHourAngle("SideofPier", +3.0d), l_Declination3, "hour angle +3.0");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            Status(StatusType.staAction, "Test hour angle -9.0 at declination: " + FormatDec(l_Declination9));
+
+            SetAction("Test hour angle -9.0 at declination: " + FormatDec(l_Declination9));
             l_PierSideMinus9 = SOPPierTest(TelescopeRAFromHourAngle("SideofPier", -9.0d), l_Declination9, "hour angle -9.0");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            Status(StatusType.staAction, "Test hour angle +9.0 at declination: " + FormatDec(l_Declination9));
+
+            SetAction("Test hour angle +9.0 at declination: " + FormatDec(l_Declination9));
             l_PierSidePlus9 = SOPPierTest(TelescopeRAFromHourAngle("SideofPier", +9.0d), l_Declination9, "hour angle +9.0");
             if (cancellationToken.IsCancellationRequested)
                 return;
+
             if ((l_PierSideMinus3.SideOfPier == l_PierSidePlus9.SideOfPier) & (l_PierSidePlus3.SideOfPier == l_PierSideMinus9.SideOfPier))// Reporting physical pier side
             {
                 LogIssue("SideofPier", "SideofPier reports physical pier side rather than pointing state");
@@ -6590,7 +6599,7 @@ namespace ConformU
             }
 
             // Test whether DestinationSideOfPier is implemented
-            if ((int)l_PierSideMinus3.DestinationSideOfPier == (int)PointingState.Unknown & (int)l_PierSideMinus9.DestinationSideOfPier == (int)PointingState.Unknown & (int)l_PierSidePlus3.DestinationSideOfPier == (int)PointingState.Unknown & (int)l_PierSidePlus9.DestinationSideOfPier == (int)PointingState.Unknown)
+            if (l_PierSideMinus3.DestinationSideOfPier == PointingState.Unknown & l_PierSideMinus9.DestinationSideOfPier == PointingState.Unknown & l_PierSidePlus3.DestinationSideOfPier == PointingState.Unknown & l_PierSidePlus9.DestinationSideOfPier == PointingState.Unknown)
             {
                 LogInfo("DestinationSideofPier", "Analysis skipped as this method is not implemented"); // Not implemented
             }
@@ -6638,9 +6647,7 @@ namespace ConformU
             // 3.0.0.12 added conditional test to next line
             if (canSetTracking)
                 telescopeDevice.Tracking = false;
-            Status(StatusType.staStatus, "");
-            Status(StatusType.staAction, "");
-            Status(StatusType.staTest, "");
+            ClearStatus();
         }
 
         public SideOfPierResults SOPPierTest(double p_RA, double p_DEC, string p_Msg)
@@ -6659,7 +6666,7 @@ namespace ConformU
                 LogDebug("SOPPierTest", "Testing RA DEC: " + FormatRA(p_RA) + " " + FormatDec(p_DEC) + " Current pierSide: " + TranslatePierSide((PointingState)telescopeDevice.SideOfPier, true));
                 try
                 {
-                    l_Results.DestinationSideOfPier = (PointingState)telescopeDevice.DestinationSideOfPier(p_RA, p_DEC);
+                    l_Results.DestinationSideOfPier = telescopeDevice.DestinationSideOfPier(p_RA, p_DEC);
                     LogDebug("SOPPierTest", "Target DestinationSideOfPier: " + l_Results.DestinationSideOfPier.ToString());
                 }
                 catch (COMException ex)
@@ -6689,13 +6696,14 @@ namespace ConformU
                 {
                     LogIssue("SOPPierTest", ".NET DestinationSideOfPier Exception: " + ex.ToString());
                 }
+
                 // Now do an actual slew and record side of pier we actually get
-                SlewScope(p_RA, p_DEC, "Testing " + p_Msg + ", co-ordinates: " + FormatRA(p_RA) + " " + FormatDec(p_DEC));
+                SlewScope(p_RA, p_DEC, "test position");
                 l_Results.SideOfPier = (PointingState)telescopeDevice.SideOfPier;
                 LogDebug("SOPPierTest", "Actual SideOfPier: " + l_Results.SideOfPier.ToString());
 
                 // Return to original RA
-                SlewScope(l_StartRA, l_StartDEC, "Returning to start point");
+                SlewScope(l_StartRA, l_StartDEC, "initial start point");
                 LogDebug("SOPPierTest", "Returned to: " + FormatRA(l_StartRA) + " " + FormatDec(l_StartDEC));
             }
             catch (Exception ex)
@@ -6711,11 +6719,11 @@ namespace ConformU
             PointingState l_PierSideMinus3, l_PierSideMinus9, l_PierSidePlus3, l_PierSidePlus9;
 
             // Slew to one position, then call destination side of pier 4 times and report the pattern
-            SlewScope(TelescopeRAFromHourAngle("DestinationSideofPier", -3.0d), 0.0d, "Slew to start position");
-            l_PierSideMinus3 = (PointingState)telescopeDevice.DestinationSideOfPier(-3.0d, 0.0d);
-            l_PierSidePlus3 = (PointingState)telescopeDevice.DestinationSideOfPier(3.0d, 0.0d);
-            l_PierSideMinus9 = (PointingState)telescopeDevice.DestinationSideOfPier(-9.0d, 90.0d - m_SiteLatitude);
-            l_PierSidePlus9 = (PointingState)telescopeDevice.DestinationSideOfPier(9.0d, 90.0d - m_SiteLatitude);
+            SlewScope(TelescopeRAFromHourAngle("DestinationSideofPier", -3.0d), 0.0d, "start position");
+            l_PierSideMinus3 = telescopeDevice.DestinationSideOfPier(-3.0d, 0.0d);
+            l_PierSidePlus3 = telescopeDevice.DestinationSideOfPier(3.0d, 0.0d);
+            l_PierSideMinus9 = telescopeDevice.DestinationSideOfPier(-9.0d, 90.0d - m_SiteLatitude);
+            l_PierSidePlus9 = telescopeDevice.DestinationSideOfPier(9.0d, 90.0d - m_SiteLatitude);
             if (l_PierSideMinus3 == l_PierSidePlus9 & l_PierSidePlus3 == l_PierSideMinus9) // Reporting physical pier side
             {
                 LogIssue("DestinationSideofPier", "The driver appears to be reporting physical pier side rather than pointing state");
@@ -6855,7 +6863,7 @@ namespace ConformU
 
                 default:
                     {
-                        LogIssue(testName, "Conform:SyncTest: Unknown test type " + testType.ToString());
+                        LogError(testName, "Conform:SyncTest: Unknown test type " + testType.ToString());
                         break;
                     }
             }
@@ -6870,22 +6878,22 @@ namespace ConformU
                 telescopeDevice.Tracking = true;
             }
 
-            Status(StatusType.staAction, p_Msg);
             if (canSlew)
             {
                 if (canSlewAsync)
                 {
-                    LogDebug("SlewScope", "Slewing asynchronously to " + p_Msg + " " + FormatRA(p_RA) + " " + FormatDec(p_DEC));
+                    LogDebug("SlewScope", $"Slewing asynchronously to {p_Msg} {FormatRA(p_RA)} {FormatDec(p_DEC)}");
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("SlewScope", "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(p_RA) + ", Declination: " + FormatDec(p_DEC));
                     telescopeDevice.SlewToCoordinatesAsync(p_RA, p_DEC);
-                    WaitForSlew("SlewScope");
+                    WaitForSlew(p_Msg);
                 }
                 else
                 {
                     LogDebug("SlewScope", "Slewing synchronously to " + p_Msg + " " + FormatRA(p_RA) + " " + FormatDec(p_DEC));
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("SlewScope", "About to call SlewToCoordinates method, RA: " + FormatRA(p_RA) + ", Declination: " + FormatDec(p_DEC));
+                    SetStatus($"Slewing synchronously to {FormatRA(p_RA)} {FormatDec(p_DEC)}");
                     telescopeDevice.SlewToCoordinates(p_RA, p_DEC);
                 }
 
@@ -6901,24 +6909,15 @@ namespace ConformU
                 LogInfo("SlewScope", "Unable to slew this scope as CanSlew is false, slew omitted");
             }
 
-            Status(StatusType.staAction, "");
+            SetAction("");
         }
 
         private void WaitForSlew(string testName)
         {
-            DateTime WaitStartTime;
-            WaitStartTime = DateTime.Now;
+            Stopwatch sw = Stopwatch.StartNew();
 
             if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to get Slewing property multiple times");
-            do
-            {
-                WaitFor(SLEEP_TIME);
-                Status(StatusType.staStatus, $"- {DateTime.Now.Subtract(WaitStartTime).TotalSeconds:0.0} seconds");
-
-            }
-            // This while loop contains an OR because Conform needs to wait a short minimum period to deal with mounts that don't set Slewing to true immediately
-            while ((telescopeDevice.Slewing | (DateTime.Now.Subtract(WaitStartTime).TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION)) & !cancellationToken.IsCancellationRequested);
-            Status(StatusType.staAction, "Slew completed");
+            WaitUntil("Waiting for slew", () => { return (telescopeDevice.Slewing | (sw.Elapsed.TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION)) & !cancellationToken.IsCancellationRequested; }, SLEEP_TIME);
         }
 
         private double TelescopeRAFromHourAngle(string testName, double p_Offset)
@@ -7200,6 +7199,7 @@ namespace ConformU
                 m_Slewing = telescopeDevice.Slewing;
                 if (!m_Slewing | SkipSlewiingTest) // Slewing should be false at this point or we are ignoring the test!
                 {
+                    SetAction(TestName);
                     // Check that we can set the rate to a non-zero value
                     try
                     {
@@ -7210,7 +7210,7 @@ namespace ConformU
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage(TestName, string.Format("{0} - About to set RightAscensionRate property to {1}", Description, Rate));
                                     telescopeDevice.RightAscensionRate = Rate;
-                                    SetStatus(string.Format("Watling for mount to settle after setting RightAcensionRate to {0}", Rate), "", "");
+                                    SetAction("Waiting for mount to settle");
                                     WaitFor(2000); // Give a short wait to allow the mount to settle
 
                                     // Value set OK, now check that the new rate is returned by RightAscensionRate Get and that Slewing is false
@@ -7243,7 +7243,7 @@ namespace ConformU
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage(TestName, string.Format("{0} - About to set DeclinationRate property to {1}", Description, Rate));
                                     telescopeDevice.DeclinationRate = Rate;
-                                    SetStatus(string.Format("Watling for mount to settle after setting DeclinationRate to {0}", Rate), "", "");
+                                    SetAction("Waiting for mount to settle");
                                     WaitFor(2000); // Give a short wait to allow the mount to settle
 
                                     // Value set OK, now check that the new rate is returned by DeclinationRate Get and that Slewing is false

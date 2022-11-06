@@ -756,14 +756,14 @@ namespace ConformU
 
         public override void CheckPerformance()
         {
-            Status(StatusType.staTest, "Performance");
+            SetTest("Performance");
 
             PerformanceTest(PerformanceProperty.CalibratorState, "CalibratorState");
             PerformanceTest(PerformanceProperty.CoverState, "CoverState");
 
-            Status(StatusType.staTest, "");
-            Status(StatusType.staAction, "");
-            Status(StatusType.staStatus, "");
+            SetTest("");
+            SetAction("");
+            SetStatus("");
         }
 
         private bool RequiredPropertiesTest(RequiredProperty propertyToTest, string propertyName)
@@ -817,7 +817,7 @@ namespace ConformU
             CalibratorStatus testCalibratorState;
             CoverStatus testCoverState;
 
-            Status(StatusType.staAction, propertyName);
+            SetAction(propertyName);
             try
             {
                 startTime = DateTime.Now;
@@ -850,7 +850,7 @@ namespace ConformU
                     elapsedTime = DateTime.Now.Subtract(startTime).TotalSeconds;
                     if (elapsedTime > lastElapsedTime + 1.0)
                     {
-                        Status(StatusType.staStatus, loopCount + " transactions in " + elapsedTime.ToString("0") + " seconds");
+                        SetStatus(loopCount + " transactions in " + elapsedTime.ToString("0") + " seconds");
                         lastElapsedTime = elapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;

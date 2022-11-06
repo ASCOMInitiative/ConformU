@@ -286,6 +286,9 @@ namespace ConformU
                             else
                             {
                                 TL.LogMessage("Conformance test interrupted by STOP button or to protect the device.", MessageLevel.TestOnly, "");
+
+                                // Add an issue if the test was interrupted and is therefore incomplete
+                                conformResults.Issues.Add(new KeyValuePair<string, string>("StopKey", "The conformance test is incomplete because it was interrupted by the stop key"));
                             }
 
                         }
