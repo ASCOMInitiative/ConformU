@@ -28,7 +28,6 @@
 </div>
 
 @code {
-    private string descriptionVisible = "initial";
     private string statusVisible = "initial";
     private bool disposedValue;
     int screenLogRows = 10;
@@ -141,7 +140,7 @@
 
                         }, cancelConformToken);
                         conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
-                        // Start the conformnance test task
+                        // Start the conformance test task
                         conformanceTest.Start();
                         conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance test started OK");
 
@@ -231,7 +230,7 @@
     }
 
     // This method will be called when the window resizes.
-    // It is ONLY called when the user stops dragging the window's edge. (It is already throttled to protect your app from perf. nightmares)
+    // It is ONLY called when the user stops dragging the window's edge. (It is already throttled to protect your app from performance nightmares)
     async void WindowResized(object _, BrowserWindowSize window)
     {
         try
@@ -252,15 +251,6 @@
                 else
                 {
                     statusVisible = "initial";
-                }
-
-                if (window.Width < 1000)
-                {
-                    descriptionVisible = "none";
-                }
-                else
-                {
-                    descriptionVisible = "initial";
                 }
 
                 string browser = "";
@@ -303,7 +293,7 @@
 
     public void Dispose()
     {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        // Do not change this code. Put clean-up code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
