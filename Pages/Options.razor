@@ -264,7 +264,7 @@
 
                     <div class="row">
                         <RadzenNumeric Name="TELESCOPESLEWTOLERANCE"
-                                       Style="margin-top: 20px; width: 6em"
+                                       Style="margin-top: 20px; margin-left:20px; width: 6em"
                                        Format="0.00"
                                        @bind-Value="@telescopeSlewTolerance"
                                        TValue="double"
@@ -278,14 +278,14 @@
 
                     <div class="row">
                         <RadzenNumeric Name="TELESCOPEMAXSLEWTIME"
-                                       Style="margin-top: 20px; width: 6em"
+                                       Style="margin-top: 20px;  margin-left:20px; width: 6em"
                                        Format="0"
                                        @bind-Value="@telescopeMaximumSlewTime"
                                        TValue="int"
                                        Min="0"
                                        Step="1"
                                        Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.TelescopeMaximumSlewTime)) />
-                        <RadzenLabel Text="Maximum time before telescope slews time out (seconds))"
+                        <RadzenLabel Text="Maximum time before telescope slews time out (seconds)"
                                      Component="TELESCOPEMAXSLEWTIME"
                                      Style="margin-left: 20px;margin-top:26px; margin-right: 20px" />
                     </div>
@@ -295,9 +295,10 @@
 
         @*Camera configuration*@
         <RadzenTabsItem Text="Camera">
-            <h3 style="margin-top: 10px">Conform will normally test camera imaging at all supported bin values that the camera reports through MaxBinX and MaxBinY.</h3>
+            <h4 style="margin-top: 10px">Maximum Bin</h4>
+            <p>By default Conform will test camera imaging at all bin values reported by the camera through MaxBinX and MaxBinY. If required, the test range can be limited using the settings below.</p>
 
-            <div style="margin-top:40px" class="row">
+            <div style="margin-top:10px" class="row">
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraTestMaxBinX" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraMaxBinX)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Max BinX for testing. (Zero tests all available bin values.)</p>
             </div>
@@ -306,36 +307,39 @@
                 <p style="margin-left: 20px;margin-top: 5px;">Max BinY for testing. (Zero tests all available bin values.)</p>
             </div>
 
-            <h3 style="margin-top: 20px;">
+            <h4 style="margin-top: 20px">First Use Tests</h4>
+            <p>
                 By default, Conform will test the camera assuming that it has just been started and has not taken any images.
                 Uncheck the checkbox below to suppress issues flagged by these first use checks.
-            </h3>
+            </p>
             <div class="row">
                 <RadzenCheckBox Name="CHKFIRSTUSETESTS"
-                                Style="margin-top:20px;margin-left:190px"
+                                Style="margin-left:20px"
                                 @bind-Value=@cameraFirstUseTests
                                 TValue="bool"
                                 Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.CameraFirstUseTests)) />
                 <RadzenLabel Text="Enable first time use tests"
                              Component="CHKFIRSTUSETESTS"
-                             Style="margin-left: 20px;margin-top:20px;" />
+                             Style="margin-left: 20px;" />
             </div>
 
+            <h4 style="margin-top: 40px">Miscellaneous Configuration</h4>
             <div class="row">
                 <RadzenCheckBox Name="CHKTESTIMAGEARRAYVARIANT"
-                                Style="margin-top:20px;margin-left:190px"
+                                Style="margin-left:20px"
                                 @bind-Value=@cameraTestImageArrayVariant
                                 TValue="bool"
                                 Change=@(args => OnBoolItemChange(args, BoolConfigurationItem.TestImageArrayVariant)) />
                 <RadzenLabel Text="Test ImageArrayVariant property"
                              Component="CHKTESTIMAGEARRAYVARIANT"
-                             Style="margin-left: 20px;margin-top:20px;" />
+                             Style="margin-left: 20px;" />
             </div>
         </RadzenTabsItem>
 
         @*Dome configuration*@
         <RadzenTabsItem Text="Dome">
-            <h3 style="margin-top: 10px">These settings control how long Conform waits for actions to complete before reporting a timeout.</h3>
+            <h4 style="margin-top: 10px">Timeouts</h4>
+            <p>These settings control how long Conform waits for actions to complete before reporting a timeout.</p>
 
             <div style="margin-top:20px" class="row">
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeShutterTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.DomeShutterTimeout)) />
@@ -345,7 +349,7 @@
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeAzimuthTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.DomeAzimuthTimeout)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Azimuth movement completion timeout</p>
             </div>
-            <div style="margin-top:40px" class="row">
+            <div class="row">
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeAltitudeTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.DomeAltitudeTimeout)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Altitude movement completion timeout</p>
             </div>
@@ -354,16 +358,17 @@
                 <p style="margin-left: 20px;margin-top: 5px;">Movement stabilisation wait time</p>
             </div>
 
-            <h3 style="margin-top: 2em">By default commands to open the dome shutter will be suppressed to protect observing equipment.</h3>
-            <h3 style="margin-top: 0em">For a full conformance check, the dome must be permitted to open its shutter.</h3>
+            <h4 style="margin-top: 20px">Dome Safety</h4>
+            <p>By default commands to open the dome shutter will be suppressed to protect observing equipment. For a full conformance check, the dome must be permitted to open its shutter.</p>
             <div class="row" style="margin-top:14px; margin-left:4px;">
                 <RadzenCheckBox Name="CHKOPENSHUTTER" @bind-Value=@domeOpenShutter TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.DomeOpenShutter)) />
-                <RadzenLabel Text="Weather safety - Allow dome to open during testing." Component="CHKOPENSHUTTER" Style="margin-left: 5px;" />
+                <RadzenLabel Text="Allow dome to open during testing." Component="CHKOPENSHUTTER" Style="margin-left: 5px;" />
             </div>
 
+            <h4 style="margin-top: 40px">Miscellaneous Configuration</h4>
             <div class="row">
                 <RadzenNumeric Name="DOMESLEWTOLERANCE"
-                               Style="margin-top:20px; width: 6em"
+                               Style="margin-left: 20px; width: 6em"
                                Format="0.00"
                                @bind-Value="@domeSlewTolerance"
                                TValue="double"
@@ -372,14 +377,15 @@
                                Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.DomeSlewtolerance)) />
                 <RadzenLabel Text="Dome slew accuracy tolerance (degrees))"
                              Component="DOMESLEWTOLERANCE"
-                             Style="margin-left: 20px;margin-top:20px; margin-right: 26px" />
+                             Style="margin-left: 20px; margin-top: 6px; margin-right: 26px" />
             </div>
 
         </RadzenTabsItem>
 
         @*ObservingConditions  configuration*@
         <RadzenTabsItem Text="ObservingConditions">
-            <h3 style="margin-top: 10px">These settings control how long Conform waits for actions to complete before reporting a timeout.</h3>
+            <h4 style="margin-top: 10px">Timeouts</h4>
+            <p>These settings control how long Conform waits for actions to complete before reporting a timeout.</p>
 
             <div style="margin-top:20px" class="row">
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="observingConditionsMaxRetries" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.ObservingConditionsMaxRetries)) />
@@ -394,7 +400,8 @@
 
         @*Switch configuration*@
         <RadzenTabsItem Text="Switch">
-            <h3 style="margin-top: 10px">These settings control how much delay is added after reading or writing to a switch to enable it to settle.</h3>
+            <h4 style="margin-top: 10px">Timeouts</h4>
+            <p>These settings control how much delay is added after reading or writing to a switch to enable it to settle.</p>
 
             <div style="margin-top:20px" class="row">
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchReadDelay" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.SwitchReadDelay)) />
@@ -405,17 +412,19 @@
                 <p style="margin-left: 20px;margin-top: 5px;">Switch write delay (ms).</p>
             </div>
 
-            <h3 style="margin-top:40px;">This setting controls how far Conform tests for working switches outside the configured range 1 ==> MaxSwitch. Tests will be conducted in the ranges (-XXX ==> 0) and (MaxSwitch + 1 ==> +XXX).</h3>
+            <h4 style="margin-top: 20px">Switch Safety</h4>
+            <p>By default, switch Set tests are disabled, check this box to enable switches to be set.</p>
+            <div class="row" style="margin-top:14px; margin-left:4px;">
+                <RadzenCheckBox Name="CHKSWITCHEXTENDEDTESTRANGE" @bind-Value=@switchEnableSet TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.SwitchEnableSet)) />
+                <RadzenLabel Text="Allow switches to be set and changed." Component="CHKSWITCHEXTENDEDTESTRANGE" Style="margin-left: 5px;" />
+            </div>
+
+            <h4 style="margin-top: 20px">Miscellaneous Configuration</h4>
+            <p>This setting controls how far Conform tests for working switches outside the configured range 1 ==> MaxSwitch. Tests will be conducted in the ranges (-XXX ==> 0) and (MaxSwitch + 1 ==> +XXX).</p>
 
             <div style="margin-top:0px" class="row">
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchExtendedNumberTestRange" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.SwitchExtendedNumberTestRange)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Extended switch number test range.</p>
-            </div>
-
-            <h3 style="margin-top: 2em">Device Safety - By default, switch Set tests are disabled, check this box to enable switches to be set.</h3>
-            <div class="row" style="margin-top:14px; margin-left:4px;">
-                <RadzenCheckBox Name="CHKSWITCHEXTENDEDTESTRANGE" @bind-Value=@switchEnableSet TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.SwitchEnableSet)) />
-                <RadzenLabel Text="Allow switches to be set and changed." Component="CHKSWITCHEXTENDEDTESTRANGE" Style="margin-left: 5px;" />
             </div>
 
         </RadzenTabsItem>
