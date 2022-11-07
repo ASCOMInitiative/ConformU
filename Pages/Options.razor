@@ -275,6 +275,20 @@
                                      Component="TELESCOPESLEWTOLERANCE"
                                      Style="margin-left: 20px;margin-top:26px; margin-right: 20px" />
                     </div>
+
+                    <div class="row">
+                        <RadzenNumeric Name="TELESCOPEMAXSLEWTIME"
+                                       Style="margin-top: 20px; width: 6em"
+                                       Format="0"
+                                       @bind-Value="@telescopeMaximumSlewTime"
+                                       TValue="int"
+                                       Min="0"
+                                       Step="1"
+                                       Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.TelescopeMaximumSlewTime)) />
+                        <RadzenLabel Text="Maximum time before telescope slews time out (seconds))"
+                                     Component="TELESCOPEMAXSLEWTIME"
+                                     Style="margin-left: 20px;margin-top:26px; margin-right: 20px" />
+                    </div>
                 </RadzenCard>
             </div>
         </RadzenTabsItem>
@@ -411,6 +425,7 @@
 
 @code {
     double telescopeSlewTolerance;
+    int telescopeMaximumSlewTime;
     double domeSlewTolerance;
     bool alpacaDiscoveryEnabled = true;
     string alpacaAndComText;
@@ -472,7 +487,8 @@
         AlpacaDiscoveryPort,
         AlpacaDiscoveryDuration,
         TelescopeSlewTolerance,
-        DomeSlewtolerance
+        DomeSlewtolerance,
+        TelescopeMaximumSlewTime
     }
 
     private enum CheckBoxConfigurationItem
@@ -663,6 +679,9 @@
             case NumericConfigurationItem.AlpacaNumberOfDiscoveryPolls:
                 configuration.Settings.AlpacaConfiguration.NumberOfDiscoveryPolls = newValue;
                 break;
+            case NumericConfigurationItem.TelescopeMaximumSlewTime:
+                configuration.Settings.TelescopeMaximumSlewTime = newValue;
+                break;
 
             default:
                 throw new InvalidValueException($"OnIntegerItemChange - Unknown numeric configuration item: {numericConfigurationItem}");
@@ -718,6 +737,7 @@
         }
         telescopeFirstUseTests = configuration.Settings.TelescopeFirstUseTests;
         telescopeSlewTolerance = configuration.Settings.TelescopeSlewTolerance;
+        telescopeMaximumSlewTime = configuration.Settings.TelescopeMaximumSlewTime;
 
         // Camera tests
         cameraTestMaxBinX = configuration.Settings.CameraMaxBinX;

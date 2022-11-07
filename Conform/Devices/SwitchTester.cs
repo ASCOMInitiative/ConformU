@@ -157,7 +157,8 @@ namespace ConformU
                 LogInfo("CreateDevice", "Successfully created driver");
                 baseClassDevice = m_Switch; // Assign the driver to the base class
 
-                WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
+                SetFullStatus("Create device", "Waiting for driver to stabilise", "");
+                WaitFor(1000, 100);
 
             }
             catch (Exception ex)

@@ -271,7 +271,9 @@ namespace ConformU
                         throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
 
-                WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
+                SetFullStatus("Create device", "Waiting for driver to stabilise", "");
+                WaitFor(1000, 100);
+
                 baseClassDevice = m_Camera; // Assign the driver to the base class
 
                 LogInfo("CreateDevice", "Successfully created driver");

@@ -403,7 +403,8 @@ namespace ConformU
 
                 LogInfo("CreateDevice", "Successfully created driver");
                 baseClassDevice = telescopeDevice; // Assign the driver to the base class
-                WaitForAbsolute(DEVICE_DESTROY_WAIT, "Waiting for driver to initialise");
+                SetFullStatus("Create device", "Waiting for driver to stabilise","");
+                WaitFor(1000, 100);
 
             }
             catch (Exception ex)
@@ -2445,7 +2446,7 @@ namespace ConformU
                                     if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get AtPark property repeatedly...");
 
                                     // Wait for the park to complete
-                                    WaitUntil("Waiting for scope to park", () => { return !telescopeDevice.AtPark & !cancellationToken.IsCancellationRequested; }, SLEEP_TIME);
+                                    WaitUntil("Waiting for scope to park", () => { return !telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
                                     if (cancellationToken.IsCancellationRequested) return;
 
                                     SetStatus("Scope parked");
@@ -2562,7 +2563,7 @@ namespace ConformU
                                             telescopeDevice.Unpark();
                                             if (settings.DisplayMethodCalls) LogTestAndMessage("UnPark", "About to get AtPark property repeatedly");
 
-                                            WaitUntil("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark & !cancellationToken.IsCancellationRequested; }, SLEEP_TIME);
+                                            WaitUntil("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
@@ -5457,13 +5458,13 @@ namespace ConformU
                             {
                                 if (g_InterfaceVersion > 1)
                                 {
-                                    SetAction("Homing mount...");
+                                    SetAction("Homing mount synchronously...");
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage(p_Name, "About to call FindHome method");
                                     telescopeDevice.FindHome();
 
                                     // Wait for mount to find home
-                                    WaitUntil("Waiting for mount to home...", () => { return !telescopeDevice.AtHome & !cancellationToken.IsCancellationRequested & (DateTime.Now.Subtract(m_StartTime).TotalMilliseconds < 60000); }, 200);
+                                    WaitUntil("Waiting for mount to home...", () => { return !telescopeDevice.AtHome & (DateTime.Now.Subtract(m_StartTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
 
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage(p_Name, "About to get AtHome property");
@@ -5552,7 +5553,7 @@ namespace ConformU
                                         {
                                             if (settings.DisplayMethodCalls)
                                                 LogTestAndMessage(p_Name, "About to get IsPulseGuiding property multiple times");
-                                            WaitUntil("Pulse guiding Eastwards", () => { return telescopeDevice.IsPulseGuiding & DateTime.Now.Subtract(m_StartTime).TotalMilliseconds < PULSEGUIDE_TIMEOUT_TIME * 1000; }, SLEEP_TIME);
+                                            WaitUntil("Pulse guiding Eastwards", () => { return telescopeDevice.IsPulseGuiding & DateTime.Now.Subtract(m_StartTime).TotalMilliseconds < PULSEGUIDE_TIMEOUT_TIME * 1000; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                             if (settings.DisplayMethodCalls)
                                                 LogTestAndMessage(p_Name, "About to get IsPulseGuiding property");
@@ -6917,7 +6918,7 @@ namespace ConformU
             Stopwatch sw = Stopwatch.StartNew();
 
             if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to get Slewing property multiple times");
-            WaitUntil("Waiting for slew", () => { return (telescopeDevice.Slewing | (sw.Elapsed.TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION)) & !cancellationToken.IsCancellationRequested; }, SLEEP_TIME);
+            WaitUntil("Waiting for slew", () => { return (telescopeDevice.Slewing | (sw.Elapsed.TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION)) & !cancellationToken.IsCancellationRequested; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
         }
 
         private double TelescopeRAFromHourAngle(string testName, double p_Offset)
@@ -7104,7 +7105,9 @@ namespace ConformU
                 l_ITelescope = null;
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
-                WaitForAbsolute(DEVICE_DESTROY_WAIT, "TestEarlyBinding waiting for Telescope Object to Dispose");
+
+                SetFullStatus("Early Binding", "Waiting for driver to be destroyed", "");
+                WaitFor(1000, 100);
             }
             catch (Exception ex)
             {

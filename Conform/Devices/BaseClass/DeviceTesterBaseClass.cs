@@ -2,6 +2,7 @@
 // Put all common elements in here
 using ASCOM;
 using ASCOM.Common;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections;
 using System.Diagnostics;
@@ -32,6 +33,7 @@ namespace ConformU
         internal const int SLEEP_TIME = 500; // Loop time for testing whether slewing has completed
         internal const int CAMERA_SLEEP_TIME = 10; // Loop time for testing whether camera events have completed
         internal const int DEVICE_DESTROY_WAIT = 500; // Time to wait after destroying a device before continuing
+        internal const int WAITFOR_UPDATE_INTERVAL = 500; // Time in milliseconds between updates in the WaitFor method
 
         #endregion
 
@@ -44,7 +46,7 @@ namespace ConformU
         private string testName, testAction, testStatus;
 
         private readonly ConformLogger TL;
-        private readonly CancellationToken cancellationToken;
+        private readonly CancellationToken applicationCancellationToken;
 
         private readonly Settings settings;
 
@@ -146,7 +148,7 @@ namespace ConformU
             l_HasPostRunCheck = HasPostRunCheck;
             l_HasPerformanceCheck = HasPerformanceCheck;
             TL = logger;
-            this.cancellationToken = cancellationToken;
+            this.applicationCancellationToken = cancellationToken;
             settings = conformConfiguration.Settings;
         }
 
@@ -221,7 +223,7 @@ namespace ConformU
                 HandleException("InterfaceVersion", MemberType.Property, Required.Mandatory, ex, "");
             }
 
-            if (cancellationToken.IsCancellationRequested)
+            if (applicationCancellationToken.IsCancellationRequested)
                 return;
 
             // Connected - Required
@@ -243,7 +245,7 @@ namespace ConformU
                     LogIssue("Connected", ex.Message);
                 }
 
-                if (cancellationToken.IsCancellationRequested)
+                if (applicationCancellationToken.IsCancellationRequested)
                     return;
             }
 
@@ -283,7 +285,7 @@ namespace ConformU
                     HandleException("Description", MemberType.Property, Required.Mandatory, ex, "");
                 }
 
-                if (cancellationToken.IsCancellationRequested)
+                if (applicationCancellationToken.IsCancellationRequested)
                     return;
             }
 
@@ -315,7 +317,7 @@ namespace ConformU
                     HandleException("DriverInfo", MemberType.Property, Required.Mandatory, ex, "");
                 }
 
-                if (cancellationToken.IsCancellationRequested)
+                if (applicationCancellationToken.IsCancellationRequested)
                     return;
             }
 
@@ -351,7 +353,7 @@ namespace ConformU
                     LogIssue("DriverVersion", ex.Message);
                 }
 
-                if (cancellationToken.IsCancellationRequested)
+                if (applicationCancellationToken.IsCancellationRequested)
                     return;
             }
             else
@@ -387,7 +389,7 @@ namespace ConformU
                     HandleException("Name", MemberType.Property, Required.Mandatory, ex, "");
                 }
 
-                if (cancellationToken.IsCancellationRequested)
+                if (applicationCancellationToken.IsCancellationRequested)
                     return;
             }
 
@@ -541,7 +543,7 @@ namespace ConformU
                 }
             }
 
-            if (cancellationToken.IsCancellationRequested)
+            if (applicationCancellationToken.IsCancellationRequested)
                 return;
             LogNewLine();
         }
@@ -802,37 +804,32 @@ namespace ConformU
         }
 
         /// <summary>
-        /// Delays execution for the given time period in milliseconds
+        /// Delay execution for the given time period in milliseconds
         /// </summary>
-        /// <param name="p_Duration">Delay duration in milliseconds</param>
+        /// <param name="waitDuration">Period to wait in milliseconds</param>
+        /// <param name="updateInterval">Optional interval between status updates(Default 500ms)</param>
         /// <remarks></remarks>
-        internal void WaitFor(int p_Duration)
+        internal void WaitFor(int waitDuration, int updateInterval = WAITFOR_UPDATE_INTERVAL)
         {
-            const int INTERVAL_BETWEEN_UPDATES = 500; // Milliseconds
-            Stopwatch sw = new Stopwatch();
-            long lastMessageCount = long.MinValue;
-            sw.Start();
+            // Start the loop timing stopwatch
+            Stopwatch sw = Stopwatch.StartNew();
 
-            DateTime l_StartTime;
-            int WaitDuration;
-            WaitDuration = p_Duration % INTERVAL_BETWEEN_UPDATES;
-            if (WaitDuration > SLEEP_TIME)
-                WaitDuration = SLEEP_TIME;
-            if (WaitDuration < 1)
-                WaitDuration = 1;
             // Wait for p_Duration milliseconds
-            l_StartTime = DateTime.Now; // Save start time
             do
             {
-                Thread.Sleep(WaitDuration);
-                long currentMessageCount = sw.ElapsedMilliseconds / INTERVAL_BETWEEN_UPDATES;
-                if (currentMessageCount > lastMessageCount)
-                {
-                    lastMessageCount = currentMessageCount;
-                    SetStatus($"{Math.Round(Convert.ToDouble(currentMessageCount) * INTERVAL_BETWEEN_UPDATES / 1000.0, 1):0.0} {(currentMessageCount == 1 ? "second" : "seconds")}");
-                }
+                // Calculate the current loop number (starts at 1 given that the timer's elapsed time will be zero or very low on the first loop)
+                int currentLoopNumber = (int)sw.ElapsedMilliseconds / updateInterval;
+
+                // Calculate the sleep time required to start the next loop at a multiple of the poll interval
+                int sleeptime = updateInterval * (currentLoopNumber + 1) - (int)sw.ElapsedMilliseconds;
+
+                // Sleep until it is time for the next completion function poll
+                Thread.Sleep(sleeptime);
+
+                // Set the status message status field to the elapsed time
+                SetStatus($"{Math.Round(Convert.ToDouble(currentLoopNumber + 1) * updateInterval / 1000.0, 1):0.0} / {Convert.ToDouble(waitDuration) / 1000.0:0.0} seconds");
             }
-            while ((DateTime.Now.Subtract(l_StartTime).TotalMilliseconds <= p_Duration) & !cancellationToken.IsCancellationRequested);
+            while ((sw.ElapsedMilliseconds <= waitDuration) & !applicationCancellationToken.IsCancellationRequested);
         }
 
         /// <summary>
@@ -841,8 +838,10 @@ namespace ConformU
         /// <param name="actionName">Text to set in the status Action field</param>
         /// <param name="waitFunction">Completion Func that returns false when the process is complete</param>
         /// <param name="pollInterval">Interval between calls of the completion function in milliseconds</param>
+        /// <param name="timeoutSeconds">Number of seconds before the operation times out</param>
         /// <exception cref="InvalidValueException"></exception>
-        internal void WaitUntil(string actionName, Func<bool> waitFunction, int pollInterval)
+        /// <exception cref="TimeoutException">If the operation takes longer than the timeout value</exception>
+        internal void WaitUntil(string actionName, Func<bool> waitFunction, int pollInterval, int timeoutSeconds)
         {
             // Validate the supplied poll interval
             if (pollInterval < 100) throw new InvalidValueException($"The poll interval must be >=100ms: {pollInterval}");
@@ -852,6 +851,13 @@ namespace ConformU
 
             // Start the loop timing stopwatch
             Stopwatch sw = Stopwatch.StartNew();
+
+            // Create a timeout cancellation token source that times out after the required timeout period
+            CancellationTokenSource timeoutCts = new CancellationTokenSource();
+            timeoutCts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
+
+            // Combine the provided cancellation token parameter with the new timeout cancellation token
+            CancellationTokenSource combinedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, applicationCancellationToken);
 
             // Wait for the completion function to return false
             do
@@ -866,21 +872,17 @@ namespace ConformU
                 Thread.Sleep(sleeptime);
 
                 // Set the status message status field to the elapsed time
-                SetStatus($"{Math.Round(Convert.ToDouble(currentLoopNumber) * pollInterval / 1000.0, 1):0.0} {(currentLoopNumber == 10 ? "second" : "seconds")}");
+                SetStatus($"{Math.Round(Convert.ToDouble(currentLoopNumber) * pollInterval / 1000.0, 1):0.0} / {timeoutSeconds:0.0} seconds");
 
-            } while (waitFunction());
-        }
+            } while (waitFunction() & !combinedCts.Token.IsCancellationRequested);
 
-        internal void WaitForAbsolute(int p_Duration, string p_Message)
-        {
-            LogDebug("WaitForAbsolute", p_Duration + " " + p_Message);
-            for (int i = 0, loopTo = (int)Math.Round(p_Duration / 100d); i <= loopTo; i++)
+            // Test whether the operation timed out
+            if (timeoutCts.IsCancellationRequested) // The operation did time out
             {
-                Thread.Sleep(100);
-                SetFullStatus(p_Message, ((p_Duration / 100d - i) / 10d).ToString(), "");
+                //  Log the timeout and throw an exception to cancel the operation
+                LogDebug("WaitUntil",$"The {actionName} operation timed out after {timeoutSeconds} seconds.");
+                throw new TimeoutException($"The \"{actionName}\" operation exceeded the timeout of {timeoutSeconds} seconds that is configured in Conform.");
             }
-
-            ClearStatus();
         }
 
         internal void LogNewLine()
