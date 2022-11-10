@@ -6,14 +6,14 @@
 
 @inject ConformLogger conformLogger
 
-<h1>Conform Universal</h1>
+<h2>Conform Universal</h2>
 <p>
     Version - @Assembly.GetExecutingAssembly().GetName().Version.ToString()
     <br />
     Copyright 2021-22 Peter Simpson
 </p>
 
-<h3 style="margin-top:40px;">Updates</h3>
+<h4 style="margin-top:40px;">Updates</h4>
 @if (@Update.UpdateAvailable(conformLogger))
 {
     @if (@Update.HasNewerRelease)
@@ -48,10 +48,10 @@ else
     }
 }
 
-<h3 style="margin-top:40px;">Check for updates</h3>
+<h4 style="margin-top:40px;">Check for updates</h4>
 <RadzenButton Id="CheckForUpdatesButton" Click=@(args => CheckForUpdates()) Text="Check Now" Style="margin-bottom: 10px; margin-right: 10px; width: 130px;" />
 
-<h4 style="margin-top:20px;">Progress</h4>
+<h5 style="margin-top:20px;">Progress</h5>
 <RadzenTextArea Id="UpdateLog" Style="line-height: 18px; padding-bottom: 0px" Name="UpdateLog" @bind-Value=@updateLogMessages Rows="20" Cols="150" ReadOnly=true />
 
 @code {

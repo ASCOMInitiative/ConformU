@@ -6,7 +6,7 @@
 @using ASCOM.Alpaca.Discovery
 @using Blazorise.TreeView
 
-<h1 style=@statusVisible>Alpaca Discovery Map</h1>
+<h2 style=@statusVisible>Alpaca Discovery Map</h2>
 <div>
 
     <RadzenButton Id="StartButton" Click=@(args => StartDiscovery("Starting test")) Text="Discover" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" Disabled=@configuration.Settings.OperationInProgress />
@@ -18,7 +18,7 @@
 </div>
 
 <div class="col" style="margin-bottom: 16px; width: 100%">
-    <h3>Discovered Alpaca Devices</h3>
+    <h4>Discovered Alpaca Devices</h4>
     <TreeView Nodes="alpacaDevices"
               GetChildNodes="@(item => item.Children)"
               HasChildNodes="@(item => item.Children?.Any() == true)">
@@ -28,7 +28,7 @@
 </div>
 
 <div class="col" style="margin-bottom: 16px; width: 100%">
-    <h3>Available ASCOM Devices</h3>
+    <h4>Available ASCOM Devices</h4>
     <TreeView Nodes="ascomDevices"
               GetChildNodes="@(item => item.Children)"
               HasChildNodes="@(item => item.Children?.Any() == true)">

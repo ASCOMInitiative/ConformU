@@ -8,8 +8,7 @@
 
 @*Title and settings reset button*@
 <div class="row">
-    <h1>Settings</h1>
-
+    <h2>Settings</h2>
     <RadzenButton Click=@(args => OnResetButtonClick()) Text="Reset to Defaults" Style="margin-bottom: 20px; position: absolute; right: 30px;" />
 </div>
 
@@ -26,7 +25,7 @@
         <RadzenTabsItem Text="Conform">
             <div class="row" style="margin-top: 10px">
                 <RadzenCard Style="margin-bottom: 20px; margin-right: 20px">
-                    <h3 style="color: #479cc8; margin-bottom: 0;">Test Scope</h3>
+                    <h4 style="color: #479cc8; margin-bottom: 0;">Test Scope</h4>
                     <RadzenCheckBoxList @bind-Value=@conformanceTestScope TValue="int" Orientation="Orientation.Vertical" Change=@(args => OnConformTestScopeChange(args))>
                         <Items>
                             <RadzenCheckBoxListItem Text="Test Properties" Value="0" />
@@ -39,7 +38,7 @@
                 </RadzenCard>
 
                 <RadzenCard Style="margin-bottom:20px;margin-right: 20px">
-                    <h3 style="color: #479cc8; margin-bottom: 0;">Operation</h3>
+                    <h4 style="color: #479cc8; margin-bottom: 0;">Operation</h4>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Style="margin-top:6px;" Name="CHKUPDATES" @bind-Value=@chkUpdates TValue="bool" Change=@(args =>
                                         OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
@@ -61,7 +60,7 @@
                 </RadzenCard>
 
                 <RadzenCard Style="margin-bottom:20px">
-                    <h3 style="color: #479cc8; margin-bottom: 0;">Additional Tracing</h3>
+                    <h4 style="color: #479cc8; margin-bottom: 0;">Additional Tracing</h4>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKTRACEDISCOVERY"
                                         @bind-Value=@chkTraceDiscovery
@@ -85,7 +84,7 @@
         <RadzenTabsItem Text=@alpacaAndComText>
             <div class="row" style="margin-top: 10px">
                 <RadzenCard Style="width:510px; margin-left: 10px; margin-bottom: 20px;  margin-right: 20px">
-                    <h3 style="color: #479cc8; margin-bottom: 0;">Alpaca Discovery and Access</h3>
+                    <h4 style="color: #479cc8; margin-bottom: 0;">Alpaca Discovery and Access</h4>
 
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKDISCOVERYENABLED" @bind-Value=@alpacaDiscoveryEnabled TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.DiscoveryEnabled)) />
@@ -205,7 +204,7 @@
                 {
                     <div class="row" style="margin-left: 0px">
                         <RadzenCard Visible="@isWindowsOs" Style="margin-left: 10px; width: 300px; margin-bottom: 20px;">
-                            <h3 style="color: #479cc8">COM Access Mechanic</h3>
+                            <h4 style="color: #479cc8">COM Access Mechanic</h4>
                             <RadzenDropDown @bind-Value=@comAccessMechanic
                                         Style="width:245px"
                                         Data="comAccessMechanicoptions"
@@ -227,7 +226,7 @@
         <RadzenTabsItem Text="Telescope">
             <div class="row">
                 <RadzenCard Style="margin-left: 10px;padding-bottom:5px;margin-right: 10px;margin-bottom: 20px">
-                    <h3 style="margin-top: 5px; color: #479cc8">Select which tests Conform should perform.</h3>
+                    <h4 style="margin-top: 5px; color: #479cc8">Select which tests Conform should perform.</h4>
 
                     <div class="row" style="margin-top:0px;">
                         <RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(true)) Text="Check all" Style="margin-left: 20px; " />
@@ -249,7 +248,7 @@
                 </RadzenCard>
 
                 <RadzenCard Style="margin-left: 10px">
-                    <h3 style="margin-top: 5px; color: #479cc8">Further configuration.</h3>
+                    <h4 style="margin-top: 5px; color: #479cc8">Further configuration.</h4>
                     <div class="row">
 
                         <RadzenCheckBox Name="TELEFIRSTUSETESTS"
