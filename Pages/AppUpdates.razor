@@ -1,0 +1,101 @@
+﻿@page "/AppUpdates"
+
+@using Semver
+@using Octokit
+@using System.Reflection
+
+@inject ConformLogger conformLogger
+
+<h1>Conform Universal</h1>
+<p>
+    Version - @Assembly.GetExecutingAssembly().GetName().Version.ToString()
+    <br />
+    Copyright 2021-22 Peter Simpson
+</p>
+
+<h3 style="margin-top:40px;">Updates</h3>
+@if (@Update.UpdateAvailable(conformLogger))
+{
+    @if (@Update.HasNewerRelease)
+    {
+        <span style="color:blue"><b>New release available</b></span>
+        <span>: @Update.LatestReleaseName (@Update.LatestReleaseVersion) - URL: <a href="@Update.ReleaseUrl" target="_blank">@Update.ReleaseUrl</a></span>
+        <br />
+    }
+
+    @if (@Update.HasNewerPreview)
+    {
+        <span style="color:blue"><b>New pre-release available</b></span>
+        <span>: @Update.LatestPreviewName (@Update.LatestPreviewVersion) - URL:<a href="@Update.PreviewURL" target="_blank">@Update.PreviewURL</a></span>
+    }
+}
+else
+{
+    @if (@Update.UpToDate)
+    {
+        <p>Up to date</p>
+    }
+    else
+    {
+        @if (@Update.AheadOfPreview)
+        {
+            <p>Ahead of preview!</p>
+        }
+        else
+        {
+            <p>Found no updates or failed to read from the server. You should check manually for new releases.</p>
+        }
+    }
+}
+
+<h3 style="margin-top:40px;">Check for updates</h3>
+<RadzenButton Id="CheckForUpdatesButton" Click=@(args => CheckForUpdates()) Text="Check Now" Style="margin-bottom: 10px; margin-right: 10px; width: 130px;" />
+
+<h4 style="margin-top:20px;">Progress</h4>
+<RadzenTextArea Id="UpdateLog" Style="line-height: 18px; padding-bottom: 0px" Name="UpdateLog" @bind-Value=@updateLogMessages Rows="20" Cols="150" ReadOnly=true />
+
+@code {
+    string updateLogMessages = "";
+
+    private async void LogMessage(string method, string message)
+    {
+        updateLogMessages += $"{DateTime.Now:hh:mm:ss.fff} {message}\r\n";
+        conformLogger.LogMessage(method, MessageLevel.Debug, message);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void CheckForUpdates()
+    {
+        Task.Run(() =>
+        {
+
+            Task getReleasesTask = null;
+
+            try
+            {
+                updateLogMessages = "";
+                LogMessage("AppUpdates.CheckForUpdates", "Searching for updates...");
+                getReleasesTask = Task.Run(async () => { await Update.GetReleases(conformLogger); });
+                LogMessage("AppUpdates.CheckForUpdates", "Waiting for task to complete...");
+
+                Task.WaitAll(getReleasesTask);
+                if (getReleasesTask.IsCompletedSuccessfully)
+                {
+                    foreach (Release release in Update.Releases)
+                    {
+                        LogMessage("AppUpdates.CheckForUpdates", $"Found release: {release.Name} ({(release.Prerelease ? "Pre-release" : "Release")})");
+                    }
+                    LogMessage("AppUpdates.CheckForUpdates", $"Completed");
+                }
+                else
+                {
+
+                }
+            }
+            catch (Exception)
+            {
+                LogMessage("AppUpdates.CheckForUpdates", $"Exception retrieving update status from GitHub: {getReleasesTask.Exception.InnerException.Message}");
+            }
+        });
+    }
+}

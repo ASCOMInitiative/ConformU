@@ -48,6 +48,7 @@
     {
         conformLogger.Debug = configuration.Settings.Debug;
         configuration.UiHasChanged += OnUiHasChanged;
+        conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"Before Task.Run");
 
         if (configuration.Settings.DeviceTechnology == DeviceTechnology.Alpaca)
         {
@@ -57,6 +58,8 @@
         {
             deviceDescription = $"COM {configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope)}: {configuration.Settings.DeviceName}";
         }
+        conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"End");
+
     }
 
     void GoToSelectionPage(string buttonName)

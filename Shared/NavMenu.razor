@@ -66,6 +66,18 @@ else
                 <NavLink class="nav-link" href="/AlpacaDiscoveryPage" Match="NavLinkMatch.All">
                     <span class="oi oi-camera-slr" aria-hidden="true"></span> Alpaca Discovery Map
                 </NavLink>
+                @if (Update.UpdateAvailable())
+                {
+                    <NavLink class="nav-link" href="/AppUpdates" style="color:yellow;" Match="NavLinkMatch.All">
+                        <span class="oi oi-wrench" aria-hidden="true" style="color:yellow;"></span> Update available
+                    </NavLink>
+                }
+                else
+                {
+                    <NavLink class="nav-link" href="/AppUpdates" Match="NavLinkMatch.All">
+                        <span class="oi oi-wrench" aria-hidden="true"></span> Check for updates
+                    </NavLink>
+                }
                 <NavLink class="nav-link" href="/Settings" Match="NavLinkMatch.All">
                     <span class="oi oi-wrench" aria-hidden="true"></span> Settings
                 </NavLink>
@@ -111,7 +123,7 @@ else
         try
         {
             IsSmall = Globals.IsSmall(window.Width, window.Height);//window.Width < Globals.UI_SMALL_TRANSITION_SIZE;
-            //conformLogger.LogMessage("Navmenu.WindowResized", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {window.Width}, Window height: {window.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
+                                                                   //conformLogger.LogMessage("Navmenu.WindowResized", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {window.Width}, Window height: {window.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
@@ -131,8 +143,12 @@ else
         if (configuration.Settings.OperationInProgress) collapseNavMenu = true;
 
         // Refresh the UI according to new state
+        //try
+        //{
         BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
         IsSmall = Globals.IsSmall(browserWindowSize.Width, browserWindowSize.Height); //browserWindowSize.Width < Globals.UI_SMALL_TRANSITION_SIZE;
+                                                                                      //}
+                                                                                      //catch { }
 
         //conformLogger.LogMessage("Navmenu.OnConfigurationChange", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {browserWindowSize.Width}, Window height: {browserWindowSize.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
         await InvokeAsync(StateHasChanged);

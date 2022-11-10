@@ -9,15 +9,14 @@
 		<TargetFrameworks>net6.0-windows;net6.0</TargetFrameworks>
 		<Configurations>Debug;Release</Configurations>
 		<OutputType>Exe</OutputType>
-
 		<UserSecretsId>c49fec0a-dd2c-4e60-9e85-407d8d9bdd9f</UserSecretsId>
 		<Platforms>AnyCPU</Platforms>
 		<ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
-		<AssemblyVersion>0.9.0.0</AssemblyVersion>
-		<FileVersion>0.9.0.0</FileVersion>
+		<AssemblyVersion>0.9.0</AssemblyVersion>
+		<FileVersion>0.9.0</FileVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>conformu.snk</AssemblyOriginatorKeyFile>
-		<Version>0.9.0.0</Version>
+		<Version>0.9.0</Version>
 		<AssemblyName>conformu</AssemblyName>
 	</PropertyGroup>
 
@@ -76,7 +75,9 @@
 		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.1.2" />
 		<PackageReference Include="Blazorise.TreeView" Version="1.1.2" />
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
-		<PackageReference Include="Radzen.Blazor" Version="4.2.0" />
+		<PackageReference Include="Octokit" Version="4.0.1" />
+		<PackageReference Include="Radzen.Blazor" Version="4.2.3" />
+		<PackageReference Include="Semver" Version="2.2.0" />
 	</ItemGroup>
 
 	<!-- Include the correct SOFA library depending on the targeted runtime OS -->

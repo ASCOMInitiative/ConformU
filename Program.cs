@@ -1,5 +1,7 @@
+using ASCOM.Tools;
 using CommandLine;
 using CommandLine.Text;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -32,7 +34,7 @@ namespace ConformU
                 var parserResult = parser.ParseArguments<CommandLineOptions>(args);
 
                 parserResult.MapResult(
-                    (CommandLineOptions options) => Run(options),
+                    (CommandLineOptions commandLineOptions) => Run(commandLineOptions),
                     errs => DisplayHelp<CommandLineOptions>(parserResult));
 
                 return;
@@ -60,62 +62,61 @@ namespace ConformU
             return 1;
         }
 
-        static int Run(CommandLineOptions o)
+        static int Run(CommandLineOptions commandLineOptions)
         {
             List<string> argList = new();
             Console.WriteLine($"Starting parsed");
 
             // Extract the settings file location if provided
-            if (!string.IsNullOrEmpty(o.SettingsFileLocation))
+            if (!string.IsNullOrEmpty(commandLineOptions.SettingsFileLocation))
             {
-                Console.WriteLine($"Settings file location: {o.SettingsFileLocation}");
+                Console.WriteLine($"Settings file location: {commandLineOptions.SettingsFileLocation}");
                 argList.Add($"--{COMMAND_OPTION_SETTINGS}");
-                argList.Add(o.SettingsFileLocation);
+                argList.Add(commandLineOptions.SettingsFileLocation);
             }
 
             // Extract the log file location if provided
-            if (!string.IsNullOrEmpty(o.LogFileName))
+            if (!string.IsNullOrEmpty(commandLineOptions.LogFileName))
             {
-                Console.WriteLine($"Log file location: {o.LogFileName}");
+                Console.WriteLine($"Log file location: {commandLineOptions.LogFileName}");
                 argList.Add($"--{COMMAND_OPTION_LOGFILENAME}");
-                argList.Add(o.LogFileName);
+                argList.Add(commandLineOptions.LogFileName);
             }
 
             // Extract the log file path if provided
-            if (!string.IsNullOrEmpty(o.LogFilePath))
+            if (!string.IsNullOrEmpty(commandLineOptions.LogFilePath))
             {
-                Console.WriteLine($"Log file path: {o.LogFilePath}");
+                Console.WriteLine($"Log file path: {commandLineOptions.LogFilePath}");
                 argList.Add($"--{COMMAND_OPTION_LOGFILEPATH}");
-                argList.Add(o.LogFilePath);
+                argList.Add(commandLineOptions.LogFilePath);
             }
 
             // Flag if discovery debug information should be included in the log file
-            if (o.DebugDiscovery)
+            if (commandLineOptions.DebugDiscovery)
             {
                 argList.Add($"--{COMMAND_OPTION_DEBUG_DISCOVERY}");
                 argList.Add("true");
             }
 
             // Flag if start-up debug information should be included in the log file
-            if (o.DebugStartup)
+            if (commandLineOptions.DebugStartup)
             {
                 argList.Add($"--{COMMAND_OPTION_DEBUG_STARTUP}");
                 argList.Add("true");
             }
 
             // Set the results filename if supplied 
-            if (!string.IsNullOrEmpty(o.ResultsFileName))
+            if (!string.IsNullOrEmpty(commandLineOptions.ResultsFileName))
             {
                 argList.Add($"--{COMMAND_OPTION_RESULTS_FILENAME}");
-                argList.Add(o.ResultsFileName);
+                argList.Add(commandLineOptions.ResultsFileName);
             }
 
             // Run from command line if requested
-            if (o.Run)
+            if (commandLineOptions.Run)
             {
                 foreach (string s in argList)
                 { Console.WriteLine($"ARG = '{s}'"); }
-
 
                 string loggerName;
                 // Set log name with casing appropriate to OS
@@ -128,8 +129,8 @@ namespace ConformU
                     loggerName = "conformu";
                 }
 
-                string logFileName = o.LogFileName ?? "";
-                string logFilePath = o.LogFilePath ?? "";
+                string logFileName = commandLineOptions.LogFileName ?? "";
+                string logFilePath = commandLineOptions.LogFilePath ?? "";
 
                 // Use fully qualified file name if present, otherwise use log file path and relative file name
                 if (Path.IsPathFullyQualified(logFileName)) // Full file name and path provided so split into path and filename and ignore any supplied log file path
@@ -143,10 +144,10 @@ namespace ConformU
                 }
 
                 ConformLogger conformLogger = new(logFileName, logFilePath, loggerName, true);  // Create a logger component
-                ConformConfiguration settings = new(conformLogger, o.SettingsFileLocation);
+                ConformConfiguration settings = new(conformLogger, commandLineOptions.SettingsFileLocation);
 
                 // Set the report file location if required
-                if (!string.IsNullOrEmpty(o.ResultsFileName)) settings.Settings.ResultsFileName = o.ResultsFileName;
+                if (!string.IsNullOrEmpty(commandLineOptions.ResultsFileName)) settings.Settings.ResultsFileName = commandLineOptions.ResultsFileName;
 
                 // Validate the supplied configuration and only start if there are no settings issues
                 string validationMessage = settings.Validate();
@@ -176,6 +177,16 @@ namespace ConformU
             }
             else // Run as a web operation
             {
+                // Start a task to check whether any updates are available. Started here to give the maximum time to get a result before the UI is first displayed
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await Update.CheckForUpdates();
+                    }
+                    catch { } // Ignore exceptions here
+                });
+
                 if (!Debugger.IsAttached)
                 {
                     // Set the working directory to the application directory
@@ -185,7 +196,7 @@ namespace ConformU
                 CancellationToken applicationCancellationtoken = tokenSource.Token;
                 try
                 {
-                    Console.WriteLine($"Staring web server.");
+                    Console.WriteLine($"Starting web server.");
                     Task t = CreateHostBuilder(argList.ToArray()) // Use the revised argument list because the command line parser is fussy about prefixes and won't accept / 
                          .Build()
                          .RunAsync(applicationCancellationtoken);
