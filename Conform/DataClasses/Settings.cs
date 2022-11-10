@@ -157,6 +157,9 @@ namespace ConformU
         public bool DomeOpenShutter { get; set; } = false;
         public double DomeSlewTolerance { get; set; } = 1.0; // Degrees
 
+        // Focuser test configuration
+        public int FocuserTimeout { get; set; } = 60;
+
         // ObservingConditions test configuration
         public int ObservingConditionsRetryTime { get; set; } = 1; // Seconds
         public int ObservingConditionsMaxRetries { get; set; } = 5;

@@ -385,7 +385,19 @@
 
         </RadzenTabsItem>
 
-        @*ObservingConditions  configuration*@
+        @*Focuser configuration*@
+        <RadzenTabsItem Text="Focuser">
+            <h4 style="margin-top: 10px">Timeouts</h4>
+            <p>These settings control how long Conform waits for actions to complete before reporting a timeout.</p>
+
+            <div style="margin-top:20px" class="row">
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="focuserTimeout" TValue="int" Min="10" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.FocuserTimeout)) />
+                <p style="margin-left: 20px;margin-top: 5px;">Focuser move completion timeout (seconds).</p>
+            </div>
+
+        </RadzenTabsItem>
+
+        @*ObservingConditions configuration*@
         <RadzenTabsItem Text="ObservingConditions">
             <h4 style="margin-top: 10px">Timeouts</h4>
             <p>These settings control how long Conform waits for actions to complete before reporting a timeout.</p>
@@ -484,24 +496,25 @@
 
     private enum NumericConfigurationItem
     {
+        AlpacaNumberOfDiscoveryPolls,
+        AlpacaDiscoveryPollInterval,
+        AlpacaDiscoveryPort,
+        AlpacaDiscoveryDuration,
         CameraMaxBinX,
         CameraMaxBinY,
         CameraExposureDuration,
         DomeShutterTimeout,
         DomeAzimuthTimeout,
         DomeAltitudeTimeout,
+        DomeSlewtolerance,
         DomeStabilisationWaitTime,
+        FocuserTimeout,
         ObservingConditionsRetryTime,
         ObservingConditionsMaxRetries,
         SwitchReadDelay,
         SwitchWriteDelay,
         SwitchExtendedNumberTestRange,
-        AlpacaNumberOfDiscoveryPolls,
-        AlpacaDiscoveryPollInterval,
-        AlpacaDiscoveryPort,
-        AlpacaDiscoveryDuration,
         TelescopeSlewTolerance,
-        DomeSlewtolerance,
         TelescopeMaximumSlewTime
     }
 
@@ -540,6 +553,9 @@
     private IEnumerable<string> telescopeTests;
     private string status;
     bool telescopeFirstUseTests = false;
+
+    // Focuser test configuration
+    private int focuserTimeout;
 
     // ObservingConditions test configuration
     private int observingConditionsRetryTime;
@@ -697,8 +713,13 @@
             case NumericConfigurationItem.AlpacaNumberOfDiscoveryPolls:
                 configuration.Settings.AlpacaConfiguration.NumberOfDiscoveryPolls = newValue;
                 break;
+
             case NumericConfigurationItem.TelescopeMaximumSlewTime:
                 configuration.Settings.TelescopeMaximumSlewTime = newValue;
+                break;
+
+            case NumericConfigurationItem.FocuserTimeout:
+                configuration.Settings.FocuserTimeout= newValue;
                 break;
 
             default:
@@ -771,6 +792,9 @@
         domeStabilisationWaitTime = configuration.Settings.DomeStabilisationWaitTime;
         domeOpenShutter = configuration.Settings.DomeOpenShutter;
         domeSlewTolerance = configuration.Settings.DomeSlewTolerance;
+
+        // Focuser tests
+        focuserTimeout = configuration.Settings.FocuserTimeout;
 
         // ObservingConditions tests
         observingConditionsMaxRetries = configuration.Settings.ObservingConditionsMaxRetries;
