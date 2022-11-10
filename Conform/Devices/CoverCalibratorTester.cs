@@ -277,6 +277,7 @@ namespace ConformU
                 return;
 
             // Test OpenCover
+            SetTest("OpenCover");
             if (coverStateOk)
             {
                 try
@@ -288,7 +289,7 @@ namespace ConformU
                     coverCalibratorDevice.OpenCover();
                     if (!(coverState == CoverStatus.NotPresent))
                     {
-                        if (!(coverCalibratorDevice.CoverState == CoverStatus.Moving))
+                        if (!(coverCalibratorDevice.CoverState == CoverStatus.Moving)) // Synchronous open
                         {
                             canAsynchronousOpen = false;
                             if (coverCalibratorDevice.CoverState == CoverStatus.Open)
@@ -296,18 +297,16 @@ namespace ConformU
                             else
                                 LogIssue("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
-                        else
+                        else // Asynchronous open
                         {
                             canAsynchronousOpen = true;
                             asynchronousOpenTime = 0.0;
 
                             // Wait until the cover is no longer moving
-                            while (coverCalibratorDevice.CoverState == CoverStatus.Moving)
-                            {
-                                WaitFor(10);
-                                if (cancellationToken.IsCancellationRequested)
-                                    return;
-                            }
+                            WaitUntil("Opening", () => { return coverCalibratorDevice.CoverState == CoverStatus.Moving; }, 500, 60);
+                            if (cancellationToken.IsCancellationRequested)
+                                return;
+
                             if (coverCalibratorDevice.CoverState == CoverStatus.Open)
                             {
                                 asynchronousOpenTime = DateTime.Now.Subtract(startTime).TotalSeconds;
@@ -335,6 +334,7 @@ namespace ConformU
                 return;
 
             // Test CloseCover
+            SetTest("CloseCover");
             if (coverStateOk)
             {
                 try
@@ -345,7 +345,7 @@ namespace ConformU
                     asynchronousCloseTime = 0.0;
 
                     coverCalibratorDevice.CloseCover();
-                    if (!(coverState == CoverStatus.NotPresent))
+                    if (!(coverState == CoverStatus.NotPresent)) // Synchronous close
                     {
                         if (!(coverCalibratorDevice.CoverState == CoverStatus.Moving))
                         {
@@ -355,16 +355,14 @@ namespace ConformU
                             else
                                 LogIssue("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
-                        else
+                        else // Asynchronous close
                         {
                             canAsynchronousOpen = true;
                             // Wait until the cover is no longer moving
-                            while (coverCalibratorDevice.CoverState == CoverStatus.Moving)
-                            {
-                                WaitFor(10);
-                                if (cancellationToken.IsCancellationRequested)
-                                    return;
-                            }
+                            WaitUntil("Closing", () => { return coverCalibratorDevice.CoverState == CoverStatus.Moving; }, 500, 60);
+                            if (cancellationToken.IsCancellationRequested)
+                                return;
+
                             if (coverCalibratorDevice.CoverState == CoverStatus.Closed)
                             {
                                 asynchronousCloseTime = DateTime.Now.Subtract(startTime).TotalSeconds;
@@ -392,11 +390,12 @@ namespace ConformU
                 return;
 
             // Test HaltCover
+            SetTest("HaltCover");
             if (coverStateOk)
             {
-                if (!(coverState == CoverStatus.NotPresent))
+                if (!(coverState == CoverStatus.NotPresent)) // Cover present
                 {
-                    if (canAsynchronousOpen)
+                    if (canAsynchronousOpen) // Can open asynchronously
                     {
                         if ((asynchronousOpenTime > 0.0) & (asynchronousCloseTime > 0.0))
                         {
@@ -404,6 +403,7 @@ namespace ConformU
                             // Initiate a cover open first
                             if (settings.DisplayMethodCalls)
                                 LogTestAndMessage("HaltCover", "About to call OpenCover method");
+                            SetAction("Opening cover so that it can be halted");
                             coverCalibratorDevice.OpenCover();
 
                             // Wait for half of the expected cover open time
@@ -417,7 +417,10 @@ namespace ConformU
                                     // Issue a halt command
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage("HaltCover", "About to call HaltCover method");
+                                    SetAction("Halting cover");
+                                    SetStatus("Waiting for Halt to complete");
                                     coverCalibratorDevice.HaltCover();
+                                    SetStatus("Halt completed");
 
                                     // Confirm that the cover is no longer moving
                                     if (!(coverCalibratorDevice.CoverState == CoverStatus.Moving))
@@ -453,7 +456,7 @@ namespace ConformU
                                 HandleException("HaltCover", MemberType.Method, Required.Optional, ex, "");
                         }
                 }
-                else
+                else // Cover not present
                     try
                     {
                         if (settings.DisplayMethodCalls)
@@ -474,6 +477,7 @@ namespace ConformU
                 return;
 
             // Test CalibratorOn
+            SetTest("CalibratorOn");
             if (calibratorStateOk)
             {
                 if (!(calibratorState == CalibratorStatus.NotPresent))
@@ -594,6 +598,7 @@ namespace ConformU
                 LogIssue("CalibratorOn", $"Brightness tests skipped because the CoverState property returned an invalid value or threw an exception.");
 
             // Test CalibratorOff
+            SetTest("CalibratorOff");
             if (calibratorStateOk)
             {
                 if (!(calibratorState == CalibratorStatus.NotPresent))
@@ -606,7 +611,7 @@ namespace ConformU
                             LogTestAndMessage("CalibratorOff", "About to call CalibratorOff method");
                         coverCalibratorDevice.CalibratorOff();
 
-                        if (!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady))
+                        if (!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady)) // Synchronous call
                         {
                             if (coverCalibratorDevice.CalibratorState == CalibratorStatus.Off)
                             {
@@ -623,19 +628,16 @@ namespace ConformU
                             else
                                 LogIssue("CalibratorOff", $"CalibratorOff was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Off'. The synchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
-                        else
+                        else // Asynchronous call
                         {
+                            // Wait until the calibrator is off 
+                            WaitUntil("Cooling down", () => { return coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady; }, 500, 60);
+                            if (cancellationToken.IsCancellationRequested)
+                                return;
 
-                            // Wait until the cover is no longer moving
-                            while (coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady)
-                            {
-                                WaitFor(10);
-                                if (cancellationToken.IsCancellationRequested)
-                                    return;
-                            }
                             if (coverCalibratorDevice.CalibratorState == CalibratorStatus.Off)
                             {
-                                LogOK("CalibratorOff", $"CalibratorOff was successful. The asynchronous action took {asynchronousCloseTime:0.0} seconds");
+                                LogOK("CalibratorOff", $"CalibratorOff was successful. The asynchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
 
                                 // Confirm that Brightness returns to zero when calibrator is turned off
                                 if (settings.DisplayMethodCalls)
@@ -670,6 +672,8 @@ namespace ConformU
             }
             else
                 LogIssue("CalibratorOff", $"Test skipped because the CoverState property returned an invalid value or threw an exception.");
+
+            ClearStatus();
         }
 
         private void TestCalibratorOn(int requestedBrightness)
@@ -685,9 +689,10 @@ namespace ConformU
 
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("CalibratorOn", $"About to call CalibratorOn method with brightness: {requestedBrightness}");
+                    SetAction($"Setting calibrator to brightness {requestedBrightness}");
                     coverCalibratorDevice.CalibratorOn(requestedBrightness);
 
-                    if (!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady))
+                    if (!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady)) // Synchronous call
                     {
                         if ((requestedBrightness < 0) | (requestedBrightness > maxBrightness))
                             LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} should have thrown an InvalidValueException but did not.");
@@ -708,15 +713,12 @@ namespace ConformU
                         else
                             LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Ready'. The synchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                     }
-                    else
+                    else // Asynchronous call
                     {
                         // Wait until the cover is no longer moving
-                        while (coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady)
-                        {
-                            WaitFor(10);
-                            if (cancellationToken.IsCancellationRequested)
-                                return;
-                        }
+                        WaitUntil("Warming up", () => { return coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady; }, 500, 60);
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
 
                         if ((requestedBrightness < 0) | (requestedBrightness > maxBrightness))
                             LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} should have thrown an InvalidValueException but did not.");
