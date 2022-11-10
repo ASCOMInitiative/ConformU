@@ -3,13 +3,14 @@ using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using System;
+using System.Diagnostics;
 using System.Threading;
 
 namespace ConformU
 {
     internal class FilterWheelTester : DeviceTesterBaseClass
     {
-        const int FILTER_WHEEL_TIME_OUT = 10; // Filter wheel command timeout (seconds)
+        const int FILTER_WHEEL_TIME_OUT = 20; // Filter wheel command timeout (seconds)
         const int FWTEST_IS_MOVING = -1;
         const int FWTEST_TIMEOUT = 30;
 
@@ -256,6 +257,7 @@ namespace ConformU
 
                 default:
                     {
+                        SetTest("Position Set");
                         try
                         {
                             LogCallToDriver("Position Get", "About to get Position property");
@@ -265,19 +267,19 @@ namespace ConformU
                             else
                             {
                                 LogOK("Position Get", "Currently at position: " + l_StartFilterNumber.ToString());
+
+                                // Move to each position in turn
                                 for (short i = 0; i <= Convert.ToInt16(l_NOffsets - 1); i++)
                                 {
                                     try
                                     {
                                         LogCallToDriver("Position Set", "About to set Position property");
+                                        SetAction($"Setting position {i}");
                                         m_FilterWheel.Position = i;
                                         l_StartTime = DateTime.Now;
                                         LogCallToDriver("Position Set", "About to get Position property repeatedly");
-                                        do
-                                        {
-                                            Thread.Sleep(100);
-                                        }
-                                        while ((m_FilterWheel.Position != i) & (DateTime.Now.Subtract(l_StartTime).TotalSeconds <= FILTER_WHEEL_TIME_OUT) & !cancellationToken.IsCancellationRequested);
+                                        WaitUntil($"Moving to position {i}", () => { return m_FilterWheel.Position != i; }, 500, FILTER_WHEEL_TIME_OUT);
+
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
 
@@ -286,14 +288,19 @@ namespace ConformU
                                             LogOK("Position Set", "Reached position: " + i.ToString() + " in: " + l_EndTime.Subtract(l_StartTime).TotalSeconds.ToString("0.0") + " seconds");
                                         else
                                             LogIssue("Position Set", "Filter wheel did not reach specified position: " + i.ToString() + " within timeout of: " + FILTER_WHEEL_TIME_OUT.ToString());
-                                        WaitFor(1000); // Pause to allow filter wheel to stabilise
+                                        //WaitFor(1000); // Pause to allow filter wheel to stabilise
+                                        Stopwatch sw = Stopwatch.StartNew();
+                                        WaitUntil($"Waiting for wheel to stabilise at position {i}", () => { return sw.ElapsedMilliseconds < 1000; }, 500, 1);
+
                                     }
                                     catch (Exception ex)
                                     {
                                         HandleException("Position Set", MemberType.Property, Required.Mandatory, ex, "");
                                     }
                                 }
-                                try // Confirm that an error is correctly generated for outside range values
+
+                                // Confirm that an error is correctly generated for outside range values
+                                try
                                 {
                                     LogCallToDriver("Position Set", "About to set Position property");
                                     m_FilterWheel.Position = -1; // Negative position, positions should never be negative
@@ -303,7 +310,9 @@ namespace ConformU
                                 {
                                     HandleInvalidValueExceptionAsOK("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to - 1", "Correctly rejected bad position: -1");
                                 }
-                                try // Confirm that an error is correctly generated for outside range values
+
+                                // Confirm that an error is correctly generated for outside range values
+                                try
                                 {
                                     LogCallToDriver("Position Set", "About to set Position property");
                                     m_FilterWheel.Position = (short)l_NOffsets; // This should be 1 above the highest array element returned
@@ -323,6 +332,7 @@ namespace ConformU
                         break;
                     }
             }
+            ClearStatus();
         }
         public override void CheckPerformance()
         {

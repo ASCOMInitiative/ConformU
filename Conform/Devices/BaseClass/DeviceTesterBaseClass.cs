@@ -23,6 +23,7 @@ namespace ConformU
         // Implements IDisposable
 
         #region Variables and Constants
+
         #region Constants
         internal const double PERF_LOOP_TIME = 5.0; // Performance loop run time in seconds
         internal const int SLEEP_TIME = 500; // Loop time for testing whether slewing has completed
