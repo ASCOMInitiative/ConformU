@@ -655,11 +655,11 @@
                 break;
 
             case NumericConfigurationItem.DomeAltitudeTimeout:
-                configuration.Settings.DomeAltitudeTimeout = newValue;
+                configuration.Settings.DomeAltitudeMovementTimeout = newValue;
                 break;
 
             case NumericConfigurationItem.DomeAzimuthTimeout:
-                configuration.Settings.DomeAzimuthTimeout = newValue;
+                configuration.Settings.DomeAzimuthMovementTimeout = newValue;
                 break;
 
             case NumericConfigurationItem.DomeStabilisationWaitTime:
@@ -667,7 +667,7 @@
                 break;
 
             case NumericConfigurationItem.DomeShutterTimeout:
-                configuration.Settings.DomeShutterTimeout = newValue;
+                configuration.Settings.DomeShutterMovementTimeout = newValue;
                 break;
 
             case NumericConfigurationItem.ObservingConditionsMaxRetries:
@@ -765,9 +765,9 @@
         cameraExposureDuration = configuration.Settings.CameraExposureDuration;
 
         // Dome tests
-        domeShutterTimeout = configuration.Settings.DomeShutterTimeout;
-        domeAzimuthTimeout = configuration.Settings.DomeAzimuthTimeout;
-        domeAltitudeTimeout = configuration.Settings.DomeAltitudeTimeout;
+        domeShutterTimeout = configuration.Settings.DomeShutterMovementTimeout;
+        domeAzimuthTimeout = configuration.Settings.DomeAzimuthMovementTimeout;
+        domeAltitudeTimeout = configuration.Settings.DomeAltitudeMovementTimeout;
         domeStabilisationWaitTime = configuration.Settings.DomeStabilisationWaitTime;
         domeOpenShutter = configuration.Settings.DomeOpenShutter;
         domeSlewTolerance = configuration.Settings.DomeSlewTolerance;

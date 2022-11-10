@@ -847,23 +847,24 @@ namespace ConformU
             if (pollInterval < 100) throw new InvalidValueException($"The poll interval must be >=100ms: {pollInterval}");
 
             // Set the status message action field to the supplied action name
-            SetAction(actionName);
-
-            // Start the loop timing stopwatch
-            Stopwatch sw = Stopwatch.StartNew();
+            if (!string.IsNullOrEmpty(actionName))
+            {
+                SetAction(actionName);
+            }
 
             // Create a timeout cancellation token source that times out after the required timeout period
             CancellationTokenSource timeoutCts = new CancellationTokenSource();
-            timeoutCts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
+            timeoutCts.CancelAfter(TimeSpan.FromSeconds(Convert.ToDouble(timeoutSeconds) + 2.0 * (Convert.ToDouble(pollInterval) / 1000.0))); // Allow two poll intervals beyond the timeout time to prevent early termination
 
             // Combine the provided cancellation token parameter with the new timeout cancellation token
             CancellationTokenSource combinedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, applicationCancellationToken);
 
             // Wait for the completion function to return false
+            Stopwatch sw = Stopwatch.StartNew(); // Start the loop timing stopwatch
             do
             {
-                // Calculate the current loop number (starts at 1 given that the timer's elapsed time will be zero or very low on the first loop)
-                int currentLoopNumber = (int)sw.ElapsedMilliseconds / pollInterval;
+                // Calculate the current loop number (starts at 0 given that the timer's elapsed time will be zero or very low on the first loop)
+                int currentLoopNumber = ((int)(sw.ElapsedMilliseconds) + 50) / pollInterval; // Add a small positive offset (50) because integer division always rounds down
 
                 // Calculate the sleep time required to start the next loop at a multiple of the poll interval
                 int sleeptime = pollInterval * (currentLoopNumber + 1) - (int)sw.ElapsedMilliseconds;
@@ -872,7 +873,7 @@ namespace ConformU
                 Thread.Sleep(sleeptime);
 
                 // Set the status message status field to the elapsed time
-                SetStatus($"{Math.Round(Convert.ToDouble(currentLoopNumber) * pollInterval / 1000.0, 1):0.0} / {timeoutSeconds:0.0} seconds");
+                SetStatus($"{Math.Round(Convert.ToDouble(currentLoopNumber + 1) * pollInterval / 1000.0, 1):0.0} / {timeoutSeconds:0.0} seconds");
 
             } while (waitFunction() & !combinedCts.Token.IsCancellationRequested);
 
@@ -880,7 +881,7 @@ namespace ConformU
             if (timeoutCts.IsCancellationRequested) // The operation did time out
             {
                 //  Log the timeout and throw an exception to cancel the operation
-                LogDebug("WaitUntil",$"The {actionName} operation timed out after {timeoutSeconds} seconds.");
+                LogDebug("WaitUntil", $"The {actionName} operation timed out after {timeoutSeconds} seconds.");
                 throw new TimeoutException($"The \"{actionName}\" operation exceeded the timeout of {timeoutSeconds} seconds that is configured in Conform.");
             }
         }
@@ -1043,15 +1044,12 @@ namespace ConformU
         /// <remarks>Different tests are applied for COM and InvalidValueException exceptions</remarks>
         protected bool IsInvalidValueException(string MemberName, Exception deviceException)
         {
-            COMException COMException;
-            DriverException DriverException;
             bool IsInvalidValueExceptionRet = false; // Set false default value
             try
             {
                 if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is an invalid value exception
                 {
-                    COMException = exception;
-                    if (COMException.ErrorCode == ErrorCodes.InvalidValue | COMException.ErrorCode == g_ExInvalidValue1 | COMException.ErrorCode == g_ExInvalidValue2 | COMException.ErrorCode == g_ExInvalidValue3 | COMException.ErrorCode == g_ExInvalidValue4 | COMException.ErrorCode == g_ExInvalidValue5 | COMException.ErrorCode == g_ExInvalidValue6) // This is an invalid value exception
+                    if (exception.ErrorCode == ErrorCodes.InvalidValue | exception.ErrorCode == g_ExInvalidValue1 | exception.ErrorCode == g_ExInvalidValue2 | exception.ErrorCode == g_ExInvalidValue3 | exception.ErrorCode == g_ExInvalidValue4 | exception.ErrorCode == g_ExInvalidValue5 | exception.ErrorCode == g_ExInvalidValue6) // This is an invalid value exception
                     {
                         IsInvalidValueExceptionRet = true;
                     }
@@ -1063,8 +1061,7 @@ namespace ConformU
                 }
                 else if (deviceException is DriverException exception1)
                 {
-                    DriverException = exception1;
-                    if (DriverException.Number == ErrorCodes.InvalidValue) // This is an invalid value exception
+                    if (exception1.Number == ErrorCodes.InvalidValue) // This is an invalid value exception
                     {
                         LogIssue(MemberName, "Received ASCOM.DriverException(0x" + ErrorCodes.InvalidValue.ToString("X8") + "), please use ASCOM.InvalidValueException to report invalid values");
                     }

@@ -150,9 +150,9 @@ namespace ConformU
         public double CameraExposureDuration { get; set; } = 2.0;
 
         // Dome test configuration
-        public int DomeShutterTimeout { get; set; } = 240;
-        public int DomeAzimuthTimeout { get; set; } = 240;
-        public int DomeAltitudeTimeout { get; set; } = 240;
+        public int DomeShutterMovementTimeout { get; set; } = 240;
+        public int DomeAzimuthMovementTimeout { get; set; } = 240;
+        public int DomeAltitudeMovementTimeout { get; set; } = 240;
         public int DomeStabilisationWaitTime { get; set; } = 10;
         public bool DomeOpenShutter { get; set; } = false;
         public double DomeSlewTolerance { get; set; } = 1.0; // Degrees

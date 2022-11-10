@@ -3,6 +3,7 @@ using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using System;
+using System.Diagnostics;
 using System.Threading;
 
 namespace ConformU
@@ -264,7 +265,7 @@ namespace ConformU
                     m_Slewing = domeDevice.Slewing; // Try to read the Slewing property
                     if (m_Slewing)
                         LogInfo("DomeSafety", $"The Slewing property is true at device start-up. This could be by design or possibly Slewing logic is inverted?");// Display a message if slewing is True
-                    DomeWaitForSlew(settings.DomeAzimuthTimeout); // Wait for slewing to finish
+                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout); // Wait for slewing to finish
                 }
                 catch (Exception ex)
                 {
@@ -430,7 +431,7 @@ namespace ConformU
                 {
                     LogCallToDriver("DomeSafety", "About to call Park");
                     domeDevice.Park();
-                    DomeWaitForSlew(settings.DomeAzimuthTimeout);
+                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout);
                     LogOK("DomeSafety", "Dome successfully parked");
                 }
                 catch (Exception)
@@ -446,7 +447,8 @@ namespace ConformU
         {
             if (!settings.DomeOpenShutter) LogInfo("SlewToAltitude", "You have configured Conform not to open the shutter so the following slew may fail.");
 
-            SetAction("Slew to " + p_Altitude + " degrees");
+            SetTest("SlewToAltitude");
+            SetAction($"Slewing to {p_Altitude} degrees");
             LogCallToDriver(p_Name, "About to call SlewToAltitude");
             domeDevice.SlewToAltitude(p_Altitude);
             if (m_CanReadSlewing)
@@ -454,7 +456,7 @@ namespace ConformU
                 LogCallToDriver(p_Name, "About to get Slewing property");
                 if (domeDevice.Slewing)
                 {
-                    DomeWaitForSlew(settings.DomeAltitudeTimeout); if (cancellationToken.IsCancellationRequested) return;
+                    DomeWaitForSlew(settings.DomeAltitudeMovementTimeout); if (cancellationToken.IsCancellationRequested) return;
                     LogOK(p_Name + " " + p_Altitude, "Asynchronous slew OK");
                 }
                 else
@@ -486,7 +488,7 @@ namespace ConformU
         }
         private void DomeSlewToAzimuth(string p_Name, double p_Azimuth)
         {
-            SetAction("Slew to " + p_Azimuth + " degrees");
+            SetAction($"Slewing to {p_Azimuth} degrees");
             if (p_Azimuth >= 0.0 & p_Azimuth <= 359.9999999)
             {
                 m_CanSlewToAzimuth = false;
@@ -504,7 +506,7 @@ namespace ConformU
                 LogCallToDriver(p_Name, "About to get Slewing property");
                 if (domeDevice.Slewing)
                 {
-                    DomeWaitForSlew(settings.DomeAzimuthTimeout); if (cancellationToken.IsCancellationRequested) return;
+                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout); if (cancellationToken.IsCancellationRequested) return;
                     LogOK(p_Name + " " + p_Azimuth, "Asynchronous slew OK");
                 }
                 else
@@ -539,12 +541,8 @@ namespace ConformU
         {
             DateTime l_StartTime;
             l_StartTime = DateTime.Now;
-            do
-            {
-                WaitFor(SLEEP_TIME);
-                SetStatus("Slewing Status: " + domeDevice.Slewing + ", Timeout: " + DateTime.Now.Subtract(l_StartTime).TotalSeconds.ToString("#0") + "/" + p_TimeOut + ", press stop to abandon wait");
-            }
-            while ((domeDevice.Slewing & (DateTime.Now.Subtract(l_StartTime).TotalSeconds <= p_TimeOut)) & !cancellationToken.IsCancellationRequested);
+
+            WaitUntil("", () => { return domeDevice.Slewing; }, 500, Convert.ToInt32(p_TimeOut));
 
             SetStatus("");
             if ((DateTime.Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut))
@@ -828,36 +826,13 @@ namespace ConformU
                             break;
                         }
 
-                    case DomePropertyMethod.CommandBlind:
-                        {
-                            LogCallToDriver(p_Name, "About to call CommandBlind method");
-                            domeDevice.CommandBlind(""); // m_Dome.CommandBlind("", True)
-                            LogOK(p_Name, "Null string successfully sent");
-                            break;
-                        }
-
-                    case DomePropertyMethod.CommandBool:
-                        {
-                            LogCallToDriver(p_Name, "About to call CommandBool method");
-                            domeDevice.CommandBool(""); // m_Dome.CommandBool("", True)
-                            LogOK(p_Name, "Null string successfully sent");
-                            break;
-                        }
-
-                    case DomePropertyMethod.CommandString:
-                        {
-                            LogCallToDriver(p_Name, "About to call CommandString method");
-                            domeDevice.CommandString(""); // m_Dome.CommandString("", True)
-                            LogOK(p_Name, "Null string successfully sent");
-                            break;
-                        }
-
                     case DomePropertyMethod.FindHome:
                         {
                             if (m_CanFindHome)
                             {
                                 SetTest(p_Name);
-                                SetAction("Waiting for movement to stop");
+                                SetAction("Finding home");  
+                                SetStatus("Waiting for movement to stop");
                                 try
                                 {
                                     LogCallToDriver(p_Name, "About to call FindHome method");
@@ -871,12 +846,14 @@ namespace ConformU
                                     if (m_CanReadSlewing)
                                     {
                                         LogCallToDriver(p_Name, "About to get Slewing property repeatedly");
-                                        do
-                                        {
-                                            WaitFor(SLEEP_TIME);
-                                            SetStatus("Slewing Status: " + domeDevice.Slewing);
-                                        }
-                                        while (domeDevice.Slewing & !cancellationToken.IsCancellationRequested);
+                                        //do
+                                        //{
+                                        //    WaitFor(SLEEP_TIME);
+                                        //    SetStatus("Slewing Status: " + domeDevice.Slewing);
+                                        //}
+                                        //while (domeDevice.Slewing & !cancellationToken.IsCancellationRequested);
+                                        WaitUntil("Finding home", () => { return domeDevice.Slewing; }, 500, settings.DomeAzimuthMovementTimeout);
+
                                     }
                                     if (!cancellationToken.IsCancellationRequested)
                                     {
@@ -938,7 +915,8 @@ namespace ConformU
                             if (m_CanPark)
                             {
                                 SetTest(p_Name);
-                                SetAction("Waiting for movement to stop");
+                                SetAction("Parking");
+                                SetStatus("Waiting for movement to stop");
                                 try
                                 {
                                     LogCallToDriver(p_Name, "About to call Park method");
@@ -952,12 +930,14 @@ namespace ConformU
                                     if (m_CanReadSlewing)
                                     {
                                         LogCallToDriver(p_Name, "About to get Slewing property repeatedly");
-                                        do
-                                        {
-                                            WaitFor(SLEEP_TIME);
-                                            SetStatus("Slewing Status: " + domeDevice.Slewing);
-                                        }
-                                        while (domeDevice.Slewing & !cancellationToken.IsCancellationRequested);
+                                        //do
+                                        //{
+                                        //    WaitFor(SLEEP_TIME);
+                                        //    SetStatus("Slewing Status: " + domeDevice.Slewing);
+                                        //}
+                                        //while (domeDevice.Slewing & !cancellationToken.IsCancellationRequested);
+                                        WaitUntil("Parking", () => { return domeDevice.Slewing; }, 500, settings.DomeAzimuthMovementTimeout);
+
                                     }
                                     if (!cancellationToken.IsCancellationRequested)
                                     {
@@ -1043,7 +1023,7 @@ namespace ConformU
                                     }
                                     catch (Exception ex)
                                     {
-                                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "slew to " + DOME_ILLEGAL_ALTITUDE_LOW + " degrees", "COM invalid value exception correctly raised for slew to " + DOME_ILLEGAL_ALTITUDE_LOW + " degrees");
+                                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "slew to " + DOME_ILLEGAL_ALTITUDE_LOW + " degrees", "Invalid value exception correctly raised for slew to " + DOME_ILLEGAL_ALTITUDE_LOW + " degrees");
                                     }
                                     try
                                     {
@@ -1052,7 +1032,7 @@ namespace ConformU
                                     }
                                     catch (Exception ex)
                                     {
-                                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "slew to " + DOME_ILLEGAL_ALTITUDE_HIGH + " degrees", "COM invalid value exception correctly raised for slew to " + DOME_ILLEGAL_ALTITUDE_HIGH + " degrees");
+                                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "slew to " + DOME_ILLEGAL_ALTITUDE_HIGH + " degrees", "Invalid value exception correctly raised for slew to " + DOME_ILLEGAL_ALTITUDE_HIGH + " degrees");
                                     }
                                 }
                             }
@@ -1095,7 +1075,7 @@ namespace ConformU
                                     }
                                     catch (Exception ex)
                                     {
-                                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "slew to " + DOME_ILLEGAL_AZIMUTH_LOW + " degrees", "COM invalid value exception correctly raised for slew to " + DOME_ILLEGAL_AZIMUTH_LOW + " degrees");
+                                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "slew to " + DOME_ILLEGAL_AZIMUTH_LOW + " degrees", "Invalid value exception correctly raised for slew to " + DOME_ILLEGAL_AZIMUTH_LOW + " degrees");
                                     }
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
@@ -1106,7 +1086,7 @@ namespace ConformU
                                     }
                                     catch (Exception ex)
                                     {
-                                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "slew to " + DOME_ILLEGAL_AZIMUTH_HIGH + " degrees", "COM invalid value exception correctly raised for slew to " + DOME_ILLEGAL_AZIMUTH_HIGH + " degrees");
+                                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "slew to " + DOME_ILLEGAL_AZIMUTH_HIGH + " degrees", "Invalid value exception correctly raised for slew to " + DOME_ILLEGAL_AZIMUTH_HIGH + " degrees");
                                     }
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
@@ -1194,7 +1174,7 @@ namespace ConformU
                                     }
                                     catch (Exception ex)
                                     {
-                                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "sync to " + DOME_ILLEGAL_AZIMUTH_LOW + " degrees", "COM invalid value exception correctly raised for sync to " + DOME_ILLEGAL_AZIMUTH_LOW + " degrees");
+                                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "sync to " + DOME_ILLEGAL_AZIMUTH_LOW + " degrees", "Invalid value exception correctly raised for sync to " + DOME_ILLEGAL_AZIMUTH_LOW + " degrees");
                                     }
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
@@ -1206,7 +1186,7 @@ namespace ConformU
                                     }
                                     catch (Exception ex)
                                     {
-                                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "sync to " + DOME_ILLEGAL_AZIMUTH_HIGH + " degrees", "COM invalid value exception correctly raised for sync to " + DOME_ILLEGAL_AZIMUTH_HIGH + " degrees");
+                                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "sync to " + DOME_ILLEGAL_AZIMUTH_HIGH + " degrees", "Invalid value exception correctly raised for sync to " + DOME_ILLEGAL_AZIMUTH_HIGH + " degrees");
                                     }
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
@@ -1235,9 +1215,7 @@ namespace ConformU
             {
                 HandleException(p_Name, p_MemberType, Required.Optional, ex, "");
             }
-            SetTest("");
-            SetAction("");
-            SetStatus("");
+            ClearStatus();
         }
         private void DomeShutterTest(ShutterState p_RequiredShutterState, string p_Name)
         {
@@ -1420,9 +1398,8 @@ namespace ConformU
                     }
                     LogOK(p_Name, "Command issued successfully but can't read ShutterStatus to confirm shutter is closed");
                 }
-                SetTest("");
-                SetAction("");
-                SetStatus("");
+
+                ClearStatus();
             }
             else
                 LogTestAndMessage("DomeSafety", "Open shutter check box is unchecked so shutter test bypassed");
@@ -1433,24 +1410,16 @@ namespace ConformU
             DateTime l_StartTime;
             // Wait for shutter to reach required stats or user presses stop or timeout occurs
             // Returns true if required state is reached
-            ShutterState l_ShutterState;
             bool returnValue = false;
             l_StartTime = DateTime.Now;
             try
             {
-                LogCallToDriver("DomeShutterWait", "About to get ShutterStatus property repeatedly");
-                do
-                {
-                    WaitFor(SLEEP_TIME);
-                    l_ShutterState = domeDevice.ShutterStatus;
-                    SetStatus("Shutter State: " + l_ShutterState.ToString() + " Timeout: " + DateTime.Now.Subtract(l_StartTime).Seconds + "/" + settings.DomeShutterTimeout);
-                }
-                while (((l_ShutterState != p_RequiredStatus) & (DateTime.Now.Subtract(l_StartTime).TotalSeconds < settings.DomeShutterTimeout)) & !cancellationToken.IsCancellationRequested);
+                LogCallToDriver("DomeShutterWait", "About to get ShutterStatus property multiple times");
+                WaitUntil($"Waiting for shutter state {p_RequiredStatus}", () => { return (domeDevice.ShutterStatus != p_RequiredStatus); }, 500, settings.DomeShutterMovementTimeout);
 
-                LogCallToDriver("DomeShutterWait", "About to get ShutterStatus property");
                 if ((domeDevice.ShutterStatus == p_RequiredStatus)) returnValue = true; // All worked so return True
 
-                if ((DateTime.Now.Subtract(l_StartTime).TotalSeconds > settings.DomeShutterTimeout))
+                if ((DateTime.Now.Subtract(l_StartTime).TotalSeconds > settings.DomeShutterMovementTimeout))
                     LogIssue("DomeShutterWait", "Timed out waiting for shutter to reach state: " + p_RequiredStatus.ToString() + ", consider increasing the timeout setting in Options / Conformance Options");
             }
             catch (Exception ex)
@@ -1460,6 +1429,7 @@ namespace ConformU
 
             return returnValue;
         }
+
         private void DomePerformanceTest(DomePropertyMethod p_Type, string p_Name)
         {
             DateTime l_StartTime;
@@ -1563,11 +1533,11 @@ namespace ConformU
 
         public void DomeStabliisationWait()
         {
-            SetStatus(""); // Clear status field
-            for (double i = 1.0; i <= settings.DomeStabilisationWaitTime; i++)
+            // Only wait if a non-zero wait time has been configured
+            if (settings.DomeStabilisationWaitTime > 0)
             {
-                SetAction($"Waiting for Dome to stabilise - {i} / {settings.DomeStabilisationWaitTime} seconds");
-                WaitFor(1000); // Wait for 1 second
+                Stopwatch sw = Stopwatch.StartNew();
+                WaitUntil("Waiting for dome to stabilise", () => { return sw.Elapsed.TotalSeconds < settings.DomeStabilisationWaitTime; }, 500, settings.DomeStabilisationWaitTime);
             }
         }
     }
