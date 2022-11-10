@@ -24,11 +24,6 @@ namespace ConformU
 
         #region Variables and Constants
         #region Constants
-        internal const string NOT_IMP_NET = ".NET - Feature not implemented";
-        internal const string NOT_IMP_COM = "COM - Feature not implemented";
-        internal const string EX_DRV_NET = ".NET - Driver Exception: ";
-        internal const string EX_NET = ".NET - Exception: ";
-        internal const string EX_COM = "COM - Exception: ";
         internal const double PERF_LOOP_TIME = 5.0; // Performance loop run time in seconds
         internal const int SLEEP_TIME = 500; // Loop time for testing whether slewing has completed
         internal const int CAMERA_SLEEP_TIME = 10; // Loop time for testing whether camera events have completed
@@ -236,10 +231,6 @@ namespace ConformU
                     m_Connected = baseClassDevice.Connected;
                     LogOK("Connected", m_Connected.ToString());
                 }
-                catch (COMException ex)
-                {
-                    LogIssue("Connected", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
-                }
                 catch (Exception ex)
                 {
                     LogIssue("Connected", ex.Message);
@@ -343,10 +334,6 @@ namespace ConformU
                                 break;
                             }
                     }
-                }
-                catch (COMException ex)
-                {
-                    LogIssue("DriverVersion", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                 }
                 catch (Exception ex)
                 {
@@ -941,14 +928,12 @@ namespace ConformU
         /// <remarks>Different tests are applied for COM and MethodNotImplemmented exceptions</remarks>
         protected bool IsMethodNotImplementedException(Exception deviceException)
         {
-            COMException COMException;
             bool IsMethodNotImplementedExceptionRet = false; // Set false default value
             try
             {
                 if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
                 {
-                    COMException = exception;
-                    if (COMException.ErrorCode == g_ExNotImplemented | COMException.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
+                    if (exception.ErrorCode == g_ExNotImplemented | exception.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
                     {
                         IsMethodNotImplementedExceptionRet = true;
                     }
@@ -975,14 +960,12 @@ namespace ConformU
         /// <remarks>Different tests are applied for COM and .NET exceptions</remarks>
         protected bool IsNotImplementedException(Exception deviceException)
         {
-            COMException COMException;
             bool IsNotImplementedExceptionRet = false; // Set false default value
             try
             {
                 if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
                 {
-                    COMException = exception;
-                    if (COMException.ErrorCode == g_ExNotImplemented | COMException.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
+                    if (exception.ErrorCode == g_ExNotImplemented | exception.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
                     {
                         IsNotImplementedExceptionRet = true;
                     }
@@ -1009,14 +992,12 @@ namespace ConformU
         /// <remarks>Different tests are applied for COM and PropertyNotImplemmented exceptions</remarks>
         protected bool IsPropertyNotImplementedException(Exception deviceException)
         {
-            COMException COMException;
             bool IsPropertyNotImplementedExceptionRet = false; // Set false default value
             try
             {
                 if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
                 {
-                    COMException = exception;
-                    if (COMException.ErrorCode == g_ExNotImplemented | COMException.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
+                    if (exception.ErrorCode == g_ExNotImplemented | exception.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
                     {
                         IsPropertyNotImplementedExceptionRet = true;
                     }
@@ -1089,15 +1070,12 @@ namespace ConformU
         /// <remarks>Different tests are applied for COM and InvalidValueException exceptions</remarks>
         protected bool IsInvalidOperationException(string MemberName, Exception deviceException)
         {
-            COMException COMException;
-            DriverException DriverException;
             bool IsInvalidOperationExceptionRet = false; // Set false default value
             try
             {
                 if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is an invalid operation exception
                 {
-                    COMException = exception;
-                    if (COMException.ErrorCode == ErrorCodes.InvalidOperationException) // This is an invalid operation exception
+                    if (exception.ErrorCode == ErrorCodes.InvalidOperationException) // This is an invalid operation exception
                     {
                         IsInvalidOperationExceptionRet = true;
                     }
@@ -1109,8 +1087,7 @@ namespace ConformU
                 }
                 else if (deviceException is DriverException exception1)
                 {
-                    DriverException = exception1;
-                    if (DriverException.Number == ErrorCodes.InvalidOperationException) // This is an invalid operation exception
+                    if (exception1.Number == ErrorCodes.InvalidOperationException) // This is an invalid operation exception
                     {
                         LogIssue(MemberName, "Received ASCOM.DriverException(0x" + ErrorCodes.InvalidOperationException.ToString("X8") + "), please use ASCOM.InvalidOperationException to report invalid operations");
                     }
@@ -1137,14 +1114,12 @@ namespace ConformU
         /// <remarks>Different tests are applied for COM and ValueNotSetException exceptions</remarks>
         protected bool IsNotSetException(Exception deviceException)
         {
-            COMException COMException;
             bool IsNotSetExceptionRet = false; // Set false default value
             try
             {
                 if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is a not set exception
                 {
-                    COMException = exception;
-                    if (COMException.ErrorCode == g_ExNotSet1) // This is a not set exception
+                    if (exception.ErrorCode == g_ExNotSet1) // This is a not set exception
                     {
                         IsNotSetExceptionRet = true;
                     }

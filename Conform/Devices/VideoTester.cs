@@ -255,13 +255,9 @@ namespace ConformU
                         }
                 }
             }
-            catch (COMException ex)
-            {
-                LogIssue(p_Name, EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
-            }
             catch (Exception ex)
             {
-                LogIssue(p_Name, EX_NET + ex.Message);
+                LogIssue(p_Name, $"Exception: {ex.Message}");
             }
         }
 
@@ -550,13 +546,9 @@ namespace ConformU
                         else
                             LogInfo("ImageArray", "SensorType could not be determined so ImageArray quality tests have been skipped");
                     }
-                    catch (COMException ex)
-                    {
-                        LogIssue("ImageArray", "Unexpected COM exception when testing ImageArray: " + ex.ToString());
-                    }
                     catch (Exception ex)
                     {
-                        LogIssue("ImageArray", "Unexpected .NET exception when testing ImageArray: " + ex.ToString());
+                        LogIssue("ImageArray", "Unexpected exception when testing ImageArray: " + ex.ToString());
                     }
                 }
                 catch (Exception ex)
@@ -741,38 +733,6 @@ namespace ConformU
             return returnValue;
         }
 
-        private bool CameraPropertyMustNotImplemented(VideoProperty p_Type, string p_Name)
-        {
-            bool returnValue = true;
-            try
-            {
-                switch (p_Type)
-                {
-                    default:
-                        {
-                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
-                            break;
-                        }
-                }
-            }
-            catch (COMException ex)
-            {
-                if (ex.ErrorCode == g_ExNotImplemented | ex.ErrorCode == ErrorCodes.NotImplemented)
-                    LogOK(p_Name, NOT_IMP_COM);
-                else
-                    LogIssue(p_Name, EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
-
-            }
-            catch (PropertyNotImplementedException)
-            {
-                LogOK(p_Name, NOT_IMP_NET);
-            }
-            catch (Exception ex)
-            {
-                LogIssue(p_Name, EX_COM + ex.Message + " " + EX_NET + ex.Message);
-            }
-            return returnValue; // Return success indicator, True means property did thrown the exception, False means that it did not
-        }
         /// <summary>
         ///     ''' Test whether an integer is returned by a driver
         ///     ''' </summary>
@@ -1315,13 +1275,9 @@ namespace ConformU
                 }
                 LogOK(p_Property + " write", "Successfully wrote " + p_TestOK);
             }
-            catch (COMException ex)
-            {
-                LogIssue(p_Property + " write", EX_COM + "exception generated when setting legal value: " + p_TestOK.ToString() + " - " + ex.Message);
-            }
             catch (Exception ex)
             {
-                LogIssue(p_Property + " write", EX_NET + "exception generated when setting legal value: " + p_TestOK.ToString() + " - " + ex.Message);
+                LogIssue(p_Property + " write", "Exception generated when setting legal value: " + p_TestOK.ToString() + " - " + ex.Message);
             }
         }
 

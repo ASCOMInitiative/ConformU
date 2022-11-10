@@ -453,24 +453,6 @@ namespace ConformU
                 m_Focuser.Halt();
                 LogOK("Halt", "Focuser halted OK");
             }
-            catch (COMException ex)
-            {
-                switch (ex.ErrorCode)
-                {
-                    case object _ when ex.ErrorCode == g_ExNotImplemented:
-                    case object _ when ex.ErrorCode == ErrorCodes.NotImplemented:
-                        {
-                            LogOK("Halt", "COM Exception - Halt is not supported by this focuser");
-                            break;
-                        }
-
-                    default:
-                        {
-                            LogIssue("Halt", $"{EX_COM}{ex.Message}{ex.ErrorCode: X8}");
-                            break;
-                        }
-                }
-            }
             catch (Exception ex)
             {
                 HandleException("Halt", MemberType.Method, Required.Optional, ex, "");
@@ -516,21 +498,9 @@ namespace ConformU
                                 MoveFocuser("Move - TempComp True");
                                 LogIssue("Move - TempComp True", "TempComp is True but no exception is thrown by the Move Method - See Focuser.TempComp entry in Platform help file");
                             }
-                            catch (COMException)
-                            {
-                                LogOK("Move - TempComp True", "COM Exception correctly raised as expected");
-                            }
-                            catch (ASCOM.InvalidOperationException)
-                            {
-                                LogOK("Move - TempComp True", ".NET InvalidOperation Exception correctly raised as expected");
-                            }
-                            catch (System.InvalidOperationException)
-                            {
-                                LogIssue("Move - TempComp True", "Received System.InvalidOperationException instead of expected ASCOM.InvalidOperationException");
-                            }
                             catch (Exception ex)
                             {
-                                LogIssue("Move - TempComp True", "Unexpected .NET Exception: " + ex.Message);
+                                HandleInvalidOperationExceptionAsOK("",MemberType.Method,Required.MustBeImplemented,ex, "TempComp is True but incorrect exception was thrown by the Move Method", "InvalidOperation Exception correctly raised as expected");
                             }
 
                             break;

@@ -403,7 +403,7 @@ namespace ConformU
 
                 LogInfo("CreateDevice", "Successfully created driver");
                 baseClassDevice = telescopeDevice; // Assign the driver to the base class
-                SetFullStatus("Create device", "Waiting for driver to stabilise","");
+                SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);
 
             }
@@ -527,24 +527,9 @@ namespace ConformU
                     LogDebug("TimeCheck", $"Mount UTCDate Unformatted: {telescopeDevice.UTCDate}");
                     LogInfo("TimeCheck", $"Mount UTCDate: {telescopeDevice.UTCDate:dd-MMM-yyyy HH:mm:ss.fff}");
                 }
-                catch (COMException ex)
-                {
-                    if (ex.ErrorCode == g_ExNotImplemented | ex.ErrorCode == ErrorCodes.NotImplemented)
-                    {
-                        LogIssue("TimeCheck", "Mount UTCDate: COM exception - UTCDate not implemented in this driver");
-                    }
-                    else
-                    {
-                        LogIssue("TimeCheck", "Mount UTCDate: COM Exception - " + ex.ToString());
-                    }
-                }
-                catch (PropertyNotImplementedException)
-                {
-                    LogIssue("TimeCheck", "Mount UTCDate: .NET exception - UTCDate not implemented in this driver");
-                }
                 catch (Exception ex)
                 {
-                    LogIssue("TimeCheck", "Mount UTCDate: .NET Exception - " + ex.Message);
+                    HandleException("UTCDate",MemberType.Property,Required.Mandatory,ex,"");
                 }
             }
         }
@@ -1536,18 +1521,6 @@ namespace ConformU
                 telescopeDevice.SiteLatitude = m_SiteLatitude; // Restore original value
                 LogOK("SiteLatitude Write", "Legal value " + FormatDec(m_SiteLatitude) + " degrees written successfully");
             }
-            catch (COMException ex)
-            {
-                if (ex.ErrorCode == g_ExNotImplemented | ex.ErrorCode == ErrorCodes.NotImplemented)
-                {
-                    LogOK("SiteLatitude Write", NOT_IMP_COM);
-                }
-                else
-                {
-
-                    LogIssue("SiteLatitude Write", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
-                }
-            }
             catch (Exception ex)
             {
                 HandleException("SiteLatitude Write", MemberType.Property, Required.Optional, ex, "");
@@ -1881,27 +1854,15 @@ namespace ConformU
             }
             catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
             {
-                LogOK("TargetDeclination Read", "COM Not Set exception generated on read before write");
-            }
-            catch (COMException ex) when (ex.ErrorCode == ErrorCodes.InvalidOperationException)
-            {
-                LogOK("TargetDeclination Read", "COM InvalidOperationException generated on read before write");
-            }
-            catch (ASCOM.InvalidOperationException)
-            {
-                LogOK("TargetDeclination Read", ".NET InvalidOperationException generated on read before write");
+                LogOK("TargetDeclination Read", "Not Set exception generated on read before write");
             }
             catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == g_ExNotSet1 | ex.Number == g_ExNotSet2)
             {
                 LogOK("TargetDeclination Read", ".NET Not Set exception generated on read before write");
             }
-            catch (System.InvalidOperationException)
-            {
-                LogIssue("TargetDeclination Read", "Received System.InvalidOperationException instead of expected ASCOM.InvalidOperationException");
-            }
             catch (Exception ex)
             {
-                HandleException("TargetDeclination Read", MemberType.Property, Required.Optional, ex, "");
+                HandleInvalidOperationExceptionAsOK("TargetDeclination Read", MemberType.Property, Required.Optional, ex, "Incorrect exception received", "InvalidOperationException generated as expected on target read before read");
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -1942,27 +1903,15 @@ namespace ConformU
             }
             catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
             {
-                LogOK("TargetRightAscension Read", "COM Not Set exception generated on read before write");
-            }
-            catch (COMException ex) when (ex.ErrorCode == ErrorCodes.InvalidOperationException)
-            {
-                LogOK("TargetDeclination Read", "COM InvalidOperationException generated on read before write");
-            }
-            catch (ASCOM.InvalidOperationException)
-            {
-                LogOK("TargetRightAscension Read", ".NET InvalidOperationException generated on read before write");
+                LogOK("TargetRightAscension Read", "Not Set exception generated on read before write");
             }
             catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == g_ExNotSet1 | ex.Number == g_ExNotSet2)
             {
                 LogOK("TargetRightAscension Read", ".NET Not Set exception generated on read before write");
             }
-            catch (System.InvalidOperationException)
-            {
-                LogIssue("TargetRightAscension Read", "Received System.InvalidOperationException instead of expected ASCOM.InvalidOperationException");
-            }
             catch (Exception ex)
             {
-                HandleException("TargetRightAscension Read", MemberType.Property, Required.Optional, ex, "");
+                HandleInvalidOperationExceptionAsOK("TargetRightAscension Read", MemberType.Property, Required.Optional, ex, "Incorrect exception received", "InvalidOperationException generated as expected on target read before read");
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -2598,13 +2547,9 @@ namespace ConformU
                                                 LogIssue("UnPark", "Exception when calling UnPark two times in succession: " + ex.Message);
                                             }
                                         }
-                                        catch (COMException ex)
-                                        {
-                                            LogIssue("UnPark", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
-                                        }
                                         catch (Exception ex)
                                         {
-                                            LogIssue("UnPark", EX_NET + ex.Message);
+                                            HandleException("Unpark",MemberType.Method,Required.MustBeImplemented,ex,"CanUnpark is true");
                                         }
                                     }
                                     else // Can't UnPark
@@ -2617,36 +2562,17 @@ namespace ConformU
                                             telescopeDevice.Unpark();
                                             LogIssue("UnPark", "No exception thrown by UnPark when CanUnPark is false");
                                         }
-                                        catch (COMException ex)
-                                        {
-                                            if (ex.ErrorCode == g_ExNotImplemented | ex.ErrorCode == ErrorCodes.NotImplemented)
-                                            {
-                                                LogOK("UnPark", NOT_IMP_COM);
-                                            }
-                                            else
-                                            {
-                                                LogIssue("UnPark", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
-                                            }
-                                        }
-                                        catch (MethodNotImplementedException)
-                                        {
-                                            LogOK("UnPark", NOT_IMP_NET);
-                                        }
                                         catch (Exception ex)
                                         {
-                                            LogIssue("UnPark", EX_NET + ex.Message);
+                                            HandleException("Unpark", MemberType.Method, Required.MustNotBeImplemented, ex, "CanUnpark is false");
                                         }
                                         // Create user interface message asking for manual scope UnPark
                                         LogTestAndMessage("UnPark", "CanUnPark is false so you need to unpark manually");
                                     }
                                 }
-                                catch (COMException ex)
-                                {
-                                    LogIssue("Park", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
-                                }
                                 catch (Exception ex)
                                 {
-                                    LogIssue("Park", EX_NET + ex.Message);
+                                    HandleException("Park",MemberType.Method,Required.MustBeImplemented,ex,"CanPark is true");
                                 }
                             }
                             else // We are still in parked status despite a successful UnPark
@@ -3585,7 +3511,7 @@ namespace ConformU
                                     }
                                     catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
                                     {
-                                        LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.");
+                                        LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
                                     }
                                     catch (ASCOM.InvalidOperationException)
                                     {
@@ -3623,7 +3549,7 @@ namespace ConformU
                                     }
                                     catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
                                     {
-                                        LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.");
+                                        LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
                                     }
                                     catch (ASCOM.InvalidOperationException)
                                     {
@@ -4043,7 +3969,7 @@ namespace ConformU
                                 }
                                 catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
                                 {
-                                    LogIssue(p_Name, "The Driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.");
+                                    LogIssue(p_Name, "The Driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
                                 }
                                 catch (ASCOM.InvalidOperationException)
                                 {
@@ -4076,7 +4002,7 @@ namespace ConformU
                                 }
                                 catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
                                 {
-                                    LogIssue(p_Name, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.");
+                                    LogIssue(p_Name, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
                                 }
                                 catch (ASCOM.InvalidOperationException)
                                 {
@@ -4795,7 +4721,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogIssue("Performance: " + p_Name, EX_NET + ex.Message);
+                LogIssue("Performance: " + p_Name, $"Exception {ex.Message}");
             }
         }
 
@@ -5026,13 +4952,9 @@ namespace ConformU
                         LogDebug(p_Name + " Count", "Rate " + i + " - Minimum: " + AxisRateItem.Minimum.ToString() + ", Maximum: " + AxisRateItem.Maximum.ToString());
                     }
                 }
-                catch (COMException ex)
-                {
-                    LogIssue(p_Name + " Count", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
-                }
                 catch (Exception ex)
                 {
-                    LogIssue(p_Name + " Count", EX_NET + ex.ToString());
+                    LogIssue(p_Name + " Count", $"Unexpected exception: {ex.Message}");
                 }
 
                 try
@@ -5067,13 +4989,9 @@ namespace ConformU
                     l_Enum = null;
                     AxisRateItem = null;
                 }
-                catch (COMException ex)
-                {
-                    LogIssue(p_Name + " Enum", EX_COM + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
-                }
                 catch (Exception ex)
                 {
-                    LogIssue(p_Name + " Enum", EX_NET + ex.ToString());
+                    LogIssue(p_Name + " Enum", $"Exception: {ex}");
                 }
 
                 if (l_AxisRates.Count > 0)
@@ -5105,17 +5023,6 @@ namespace ConformU
                             m_AxisRatesArray[l_NAxisRates, AXIS_RATE_MAXIMUM] = l_Rate.Maximum;
                             l_HasRates = true;
                         }
-                    }
-
-                    catch (COMException ex)
-                    {
-                        LogIssue(p_Name, "COM Unable to read AxisRates object - Exception: " + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
-                        LogDebug(p_Name, "COM Unable to read AxisRates object - Exception: " + ex.ToString());
-                    }
-                    catch (DriverException ex)
-                    {
-                        LogIssue(p_Name, ".NET Unable to read AxisRates object - Exception: " + ex.Message + " " + ex.Number.ToString("X8"));
-                        LogDebug(p_Name, ".NET Unable to read AxisRates object - Exception: " + ex.ToString());
                     }
                     catch (Exception ex)
                     {
@@ -5185,19 +5092,6 @@ namespace ConformU
 
                 l_CanGetAxisRates = true; // Record that this driver can deliver a viable AxisRates object that can be tested for AxisRates.Dispose() later
             }
-            catch (COMException ex)
-            {
-                LogIssue(p_Name, "COM Unable to get an AxisRates object - Exception: " + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
-            }
-            catch (DriverException ex)
-            {
-                LogIssue(p_Name, ".NET Unable to get an AxisRates object - Exception: " + ex.Message + " " + ex.Number.ToString("X8"));
-            }
-            catch (NullReferenceException ex) // Report null objects returned by the driver that are caught by DriverAccess.
-            {
-                LogIssue(p_Name, ex.Message);
-                LogDebug(p_Name, ex.ToString());
-            } // If debug then give full information
             catch (Exception ex)
             {
                 LogIssue(p_Name, "Unable to get or unable to use an AxisRates object - Exception: " + ex.ToString());

@@ -460,13 +460,9 @@ namespace ConformU
                         m_LastExposureDuration = m_Camera.LastExposureDuration;
                         LogIssue("LastExposureDuration", "LastExposureDuration did not generate an exception when called before an exposure was made");
                     }
-                    catch (COMException)
-                    {
-                        LogOK("LastExposureDuration", "LastExposureDuration correctly generated a COM exception before an exposure was made");
-                    }
                     catch (Exception)
                     {
-                        LogOK("LastExposureDuration", "LastExposureDuration correctly generated a .NET exception before an exposure was made");
+                        LogOK("LastExposureDuration", "LastExposureDuration correctly generated an exception before an exposure was made");
                     }
 
                     try
@@ -476,13 +472,9 @@ namespace ConformU
                         m_LastExposureStartTime = m_Camera.LastExposureStartTime;
                         LogIssue("LastExposureStartTime", "LastExposureStartTime did not generate an exception when called before an exposure was made");
                     }
-                    catch (COMException)
-                    {
-                        LogOK("LastExposureStartTime", "LastExposureStartTime correctly generated a COM exception before an exposure was made");
-                    }
                     catch (Exception)
                     {
-                        LogOK("LastExposureStartTime", "LastExposureStartTime correctly generated a .NET exception before an exposure was made");
+                        LogOK("LastExposureStartTime", "LastExposureStartTime correctly generated an exception before an exposure was made");
                     }
 
                 }
@@ -538,7 +530,7 @@ namespace ConformU
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("ConformanceCheck", "About to set BinX");
                 m_Camera.BinX = (short)(m_MaxBinX + 1);
-                LogIssue("BinX Write", "Invalid value " + m_MaxBinX + 1 + " written but no exception generated");
+                LogIssue("BinX Write", "Exception incorrectly generated when camera is idle" + 1 + " written but no exception generated");
             }
             catch (Exception)
             {
@@ -560,7 +552,7 @@ namespace ConformU
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("ConformanceCheck", "About to set BinY");
                 m_Camera.BinY = (short)(m_MaxBinY + 1);
-                LogIssue("BinY Write", "Invalid value " + m_MaxBinY + 1 + " written but no exception generated");
+                LogIssue("BinY Write", "Exception incorrectly generated when camera is idle" + 1 + " written but no exception generated");
             }
             catch (Exception)
             {
@@ -2194,7 +2186,7 @@ namespace ConformU
                             if (returnValue.Length <= p_MaxLength)
                                 LogOK(p_Name, returnValue);
                             else
-                                LogIssue(p_Name, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);
+                                LogIssue(p_Name, "Exception incorrectly generated when camera is idle" + " characters maximum length - " + returnValue);
                             break;
                         }
                 }
@@ -2279,19 +2271,12 @@ namespace ConformU
                                 else
                                     LogIssue("AbortExposure", "CanAbortExposure is false but no exception is generated when AbortExposure is called");
                             }
-                            catch (COMException)
-                            {
-                                if (m_CanAbortExposure)
-                                    LogIssue("AbortExposure", EX_COM + "exception incorrectly generated when camera is idle");
-                                else
-                                    LogOK("AbortExposure", "CanAbortExposure is false and COM exception correctly generated");
-                            }
                             catch (Exception)
                             {
                                 if (m_CanAbortExposure)
-                                    LogIssue("AbortExposure", EX_NET + "exception incorrectly generated when camera is idle");
+                                    LogIssue("AbortExposure", "Exception incorrectly generated when camera is idle");
                                 else
-                                    LogOK("AbortExposure", "CanAbortExposure is false and .NET exception correctly generated");
+                                    LogOK("AbortExposure", "CanAbortExposure is false and an exception was correctly generated");
                             }
 
                             break;
@@ -2299,18 +2284,18 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue("AbortExposure", EX_COM + "camera is not idle, further AbortExposure tests skipped: " + m_CameraState.ToString());
+                            LogIssue("AbortExposure", "Exception incorrectly generated when camera is idle" + m_CameraState.ToString());
                             break;
                         }
                 }
             }
             catch (COMException)
             {
-                LogIssue("AbortExposure", EX_COM + "exception generated when reading camera state, further AbortExposure tests skipped");
+                LogIssue("AbortExposure", "Exception incorrectly generated when camera is idle");
             }
             catch (Exception)
             {
-                LogIssue("AbortExposure", EX_NET + "exception generated when reading camera state, further AbortExposure tests skipped");
+                LogIssue("AbortExposure", "Exception incorrectly generated when camera is idle");
             }
             // PulseGuide
             if (m_CanPulseGuide)
@@ -2328,11 +2313,11 @@ namespace ConformU
                 }
                 catch (COMException ex)
                 {
-                    LogIssue("PulseGuide", EX_COM + "CanPulseGuide is true but exception generated when calling method - " + ex.ToString());
+                    LogIssue("PulseGuide", "Exception incorrectly generated when camera is idle" + ex.ToString());
                 }
                 catch (Exception ex)
                 {
-                    LogIssue("PulseGuide", EX_NET + "CanPulseGuide is true but exception generated when calling method - " + ex.ToString());
+                    LogIssue("PulseGuide", "Exception incorrectly generated when camera is idle" + ex.ToString());
                 }
             }
             else
@@ -2379,19 +2364,12 @@ namespace ConformU
                                 else
                                     LogIssue("StopExposure", "CanStopExposure is false but no exception is generated when StopExposure is called");
                             }
-                            catch (COMException)
-                            {
-                                if (m_CanStopExposure)
-                                    LogIssue("StopExposure", EX_COM + "exception incorrectly generated when camera is idle");
-                                else
-                                    LogOK("StopExposure", "CanStopExposure is false and COM exception correctly generated");
-                            }
                             catch (Exception)
                             {
                                 if (m_CanStopExposure)
-                                    LogIssue("StopExposure", EX_NET + "exception incorrectly generated when camera is idle");
+                                    LogIssue("StopExposure", "Exception incorrectly generated when camera is idle");
                                 else
-                                    LogOK("StopExposure", "CanStopExposure is false and .NET exception correctly generated");
+                                    LogOK("StopExposure", "CanStopExposure is false and an exception was correctly generated");
                             }
 
                             break;
@@ -2399,18 +2377,18 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue("StopExposure", EX_COM + "camera is not idle, further StopExposure tests skipped: " + m_CameraState.ToString());
+                            LogIssue("StopExposure", "Exception incorrectly generated when camera is idle" + m_CameraState.ToString());
                             break;
                         }
                 }
             }
             catch (COMException)
             {
-                LogIssue("StopExposure", EX_COM + "exception generated when reading camera state, further StopExposure tests skipped");
+                LogIssue("StopExposure", "Exception incorrectly generated when camera is idle");
             }
             catch (Exception)
             {
-                LogIssue("StopExposure", EX_NET + "exception generated when reading camera state, further StopExposure tests skipped");
+                LogIssue("StopExposure", "Exception incorrectly generated when camera is idle");
             }
             ClearStatus();
 
@@ -2618,19 +2596,19 @@ namespace ConformU
                                             {
                                                 case int i when i == ErrorCodes.NotImplemented:
                                                     {
-                                                        l_PercentCompletedMessage = "COM - Not implemented"; // Not implemented
+                                                        l_PercentCompletedMessage = "Not implemented"; // Not implemented
                                                         break;
                                                     }
 
                                                 case int j when j == ErrorCodes.InvalidOperationException:
                                                     {
-                                                        l_PercentCompletedMessage = "COM - Invalid operation"; // Not valid at this time
+                                                        l_PercentCompletedMessage = "Invalid operation"; // Not valid at this time
                                                         break;
                                                     }
 
                                                 default:
                                                     {
-                                                        l_PercentCompletedMessage = "COM - Exception: " + ex.Message + " 0x" + ((int)ex.ErrorCode).ToString("X8"); // Something bad happened!
+                                                        l_PercentCompletedMessage = "Exception: " + ex.Message + " 0x" + ((int)ex.ErrorCode).ToString("X8"); // Something bad happened!
                                                         break;
                                                     }
                                             }
@@ -2728,17 +2706,17 @@ namespace ConformU
                                         LogIssue("ImageArray", "Expected 32 bit integer array, actually got: " + m_ImageArray.GetType().ToString());
                                 }
                                 else if ((m_ImageArray.GetLength(0) == p_NumY) & (m_ImageArray.GetLength(1) == p_NumX))
-                                    LogIssue("ImageArray", "Camera image dimensions swapped, expected values: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
+                                    LogIssue("ImageArray", "Exception incorrectly generated when camera is idle" + " x " + p_NumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
                                 else
-                                    LogIssue("ImageArray", "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
+                                    LogIssue("ImageArray", "Exception incorrectly generated when camera is idle" + " x " + p_NumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
                             }
                             catch (COMException ex)
                             {
-                                LogIssue("StartExposure", EX_COM + "exception when reading ImageArray" + ex.ToString());
+                                LogIssue("StartExposure", "Exception incorrectly generated when camera is idle" + ex.ToString());
                             }
                             catch (Exception ex)
                             {
-                                LogIssue("StartExposure", EX_NET + "exception when reading ImageArray" + ex.ToString());
+                                LogIssue("StartExposure", "Exception incorrectly generated when camera is idle" + ex.ToString());
                             }
 
                             m_ImageArray = null;
@@ -2786,17 +2764,17 @@ namespace ConformU
                                             LogIssue("ImageArrayVariant", "Expected variant array, actually got: " + m_ImageArrayVariant.GetType().ToString());
                                     }
                                     else if ((m_ImageArrayVariant.GetLength(0) == p_NumY) & (m_ImageArrayVariant.GetLength(1) == p_NumX))
-                                        LogIssue("ImageArrayVariant", "Camera image dimensions swapped, expected values: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
+                                        LogIssue("ImageArrayVariant", "Exception incorrectly generated when camera is idle" + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
                                     else
-                                        LogIssue("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
+                                        LogIssue("ImageArrayVariant", "Exception incorrectly generated when camera is idle" + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
                                 }
                                 catch (COMException ex)
                                 {
-                                    LogIssue("ImageArrayVariant", EX_COM + "exception when reading ImageArrayVariant" + ex.ToString());
+                                    LogIssue("ImageArrayVariant", "Exception incorrectly generated when camera is idle" + ex.ToString());
                                 }
                                 catch (Exception ex)
                                 {
-                                    LogIssue("ImageArrayVariant", EX_NET + "exception when reading ImageArrayVariant" + ex.ToString());
+                                    LogIssue("ImageArrayVariant", "Exception incorrectly generated when camera is idle" + ex.ToString());
                                 }
                             }
 
@@ -2808,7 +2786,7 @@ namespace ConformU
                         else
                         {
                             LogTestAndMessage("StartExposure", "Test: " + p_ExpectedErrorMessage);
-                            LogIssue("StartExposure", "Expected an exception and didn't get one - BinX:" + p_BinX + " BinY:" + p_BinY + " StartX:" + p_StartX + " StartY:" + p_StartY + " NumX:" + p_NumX + " NumY:" + p_NumY);
+                            LogIssue("StartExposure", "Exception incorrectly generated when camera is idle" + " BinY:" + p_BinY + " StartX:" + p_StartX + " StartY:" + p_StartY + " NumX:" + p_NumX + " NumY:" + p_NumY);
                             if (settings.DisplayMethodCalls)
                                 LogTestAndMessage("ConformanceCheck", "About to call StopExposure");
                             try
@@ -2836,7 +2814,7 @@ namespace ConformU
                         else
                         {
                             LogInfo("", p_ExpectedErrorMessage);
-                            LogIssue("StartExposure", EX_COM + "exception generated when exposing, further StartExposure tests skipped - " + ex.ToString());
+                            LogIssue("StartExposure", "Exception incorrectly generated when camera is idle" + ex.ToString());
                         }
                     }
                     catch (Exception ex)
@@ -2844,17 +2822,12 @@ namespace ConformU
                         if (p_ExpectedErrorMessage != "")
                             LogOK("StartExposure", "Exception correctly generated for " + p_ExpectedErrorMessage);
                         else
-                            LogIssue("StartExposure", EX_NET + "exception generated when exposing, further StartExposure tests skipped - " + ex.ToString());
+                            LogIssue("StartExposure", "Exception incorrectly generated when camera is idle" + ex.ToString());
                     }
-                }
-                catch (COMException ex)
-                {
-                    LogInfo("StartExposure", "COM Exception: " + ex.Message);
-                    LogIssue("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
                 }
                 catch (Exception ex)
                 {
-                    LogInfo("StartExposure", ".NET Exception: " + ex.Message);
+                    LogInfo("StartExposure", "Exception: " + ex.Message);
                     LogIssue("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
                 }
             }
@@ -2876,7 +2849,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogInfo("StartExposure", "COM Exception: " + ex.Message);
+                            LogInfo("StartExposure", "Exception: " + ex.Message);
                             LogIssue("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
                             break;
                         }
@@ -2889,7 +2862,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogInfo("StartExposure", ".NET Exception: " + ex.Message);
+                LogInfo("StartExposure", "Exception: " + ex.Message);
                 LogIssue("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
             }
 
@@ -2907,7 +2880,7 @@ namespace ConformU
                 if ((Math.Abs(m_LastExposureDuration - p_Duration) / p_Duration) < 0.02)
                     LogOK("LastExposureDuration", "LastExposureDuration is: " + m_LastExposureDuration + " seconds");
                 else
-                    LogIssue("LastExposureDuration", "LastExposureDuration is not the same as image duration: " + m_LastExposureDuration + " " + p_Duration);
+                    LogIssue("LastExposureDuration", "Exception incorrectly generated when camera is idle" + " " + p_Duration);
             }
             catch (Exception ex)
             {
@@ -2999,24 +2972,24 @@ namespace ConformU
                             if (p_Start.Subtract(l_StartTime).TotalSeconds < 2.0)
                                 LogOK("LastExposureStartTime", "LastExposureStartTime is correct to within 2 seconds: " + m_LastExposureStartTime + " UTC");
                             else
-                                LogIssue("LastExposureStartTime", "LastExposureStartTime is more than 2 seconds inaccurate : " + m_LastExposureStartTime + ", expected: " + p_Start.ToString("yyyy-MM-ddTHH:mm:ss") + " UTC");
+                                LogIssue("LastExposureStartTime", "Exception incorrectly generated when camera is idle" + ", expected: " + p_Start.ToString("yyyy-MM-ddTHH:mm:ss") + " UTC");
                         }
                         catch (COMException ex)
                         {
-                            LogIssue("LastExposureStartTime", EX_COM + "parsing LastExposureStartTime - " + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
+                            LogIssue("LastExposureStartTime", "Exception incorrectly generated when camera is idle" + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                         }
                         catch (Exception ex)
                         {
-                            LogIssue("LastExposureStartTime", EX_NET + "parsing LastExposureStartTime - " + ex.Message + " " + m_LastExposureStartTime);
+                            LogIssue("LastExposureStartTime", "Exception incorrectly generated when camera is idle" + ex.Message + " " + m_LastExposureStartTime);
                         }
                     }
                     else
-                        LogIssue("LastExposureStartTime", "LastExposureStartTime not in the expected format yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
+                        LogIssue("LastExposureStartTime", "Exception incorrectly generated when camera is idle");
                 }
                 else if (m_LastExposureStartTime == "")
                     LogIssue("LastExposureStartTime", "LastExposureStartTime has returned an empty string - expected yyyy-mm-ddThh:mm:ss");
                 else
-                    LogIssue("LastExposureStartTime", "LastExposureStartTime is less than 19 characters - expected yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
+                    LogIssue("LastExposureStartTime", "Exception incorrectly generated when camera is idle");
             }
             catch (Exception ex)
             {
