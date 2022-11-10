@@ -794,13 +794,13 @@ namespace ConformU
                     LogDebug("ImageArray", $"Exception 2:\r\n{ex}");
                     LogOK("ImageArray", "Exception correctly generated when ImageReady is false");
                 }
-            
+
             m_ImageArray = null;
             m_ImageArrayVariant = null;
             GC.Collect();
 
             // ImageArrayVariant
-            if (settings.TestImageArrayVariant) // Test if configured to do so
+            if (settings.CameraTestImageArrayVariant) // Test if configured to do so
             {
                 if (m_ImageReady)
                 {
@@ -2444,7 +2444,7 @@ namespace ConformU
                 {
                     for (l_BinX = 1; l_BinX <= l_MaxBinX; l_BinX++)
                     {
-                        CameraExposure("Take image full frame " + l_BinX + " x " + l_BinY + " bin", l_BinX, l_BinY, 0, 0, m_CameraXSize / l_BinX, m_CameraYSize / l_BinY, 2.0, "");
+                        CameraExposure("Take image full frame " + l_BinX + " x " + l_BinY + " bin", l_BinX, l_BinY, 0, 0, m_CameraXSize / l_BinX, m_CameraYSize / l_BinY,settings.CameraExposureDuration, "");
                         if (cancellationToken.IsCancellationRequested)
                             return;
                     }
@@ -2453,7 +2453,7 @@ namespace ConformU
             else
                 for (l_BinX = 1; l_BinX <= l_MaxBinX; l_BinX++)
                 {
-                    CameraExposure("Take image full frame " + l_BinX + " x " + l_BinX + " bin", l_BinX, l_BinX, 0, 0, m_CameraXSize / l_BinX, m_CameraYSize / l_BinX, 2.0, "");
+                    CameraExposure("Take image full frame " + l_BinX + " x " + l_BinX + " bin", l_BinX, l_BinX, 0, 0, m_CameraXSize / l_BinX, m_CameraYSize / l_BinX, settings.CameraExposureDuration, "");
                     if (cancellationToken.IsCancellationRequested)
                         return;
                 }
@@ -2564,7 +2564,7 @@ namespace ConformU
 
                                 // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
                                 if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
-                                imageReadyTooEarly = System.Convert.ToBoolean(m_Camera.ImageReady);
+                                imageReadyTooEarly = Convert.ToBoolean(m_Camera.ImageReady);
 
                                 // Wait for exposing state
                                 if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
@@ -2583,16 +2583,31 @@ namespace ConformU
                                 // Wait for the exposing state to finish
                                 l_StartTime = DateTime.Now;
                                 l_StartTimeUTC = DateTime.UtcNow;
+                                SetAction($"Waiting for exposure to complete");
                                 if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
+
+                                // Start the loop timing stopwatch
+                                Stopwatch sw = Stopwatch.StartNew();
+                                Stopwatch swOverall=Stopwatch.StartNew();
+                                const int POLL_INTERVAL = 500;
                                 do
                                 {
+                                    // Calculate the current loop number (starts at 1 given that the timer's elapsed time will be zero or very low on the first loop)
+                                    int currentLoopNumber = (int)sw.ElapsedMilliseconds / POLL_INTERVAL;
+
+                                    // Calculate the sleep time required to start the next loop at a multiple of the poll interval
+                                    int sleeptime = POLL_INTERVAL * (currentLoopNumber + 1) - (int)sw.ElapsedMilliseconds;
+
+                                    // Sleep until it is time for the next completion function poll
+                                    Thread.Sleep(sleeptime);
+
                                     l_PercentCompletedMessage = "Not present in a V1 driver"; // Initialise PercentCompleted message
                                     if (m_Camera.InterfaceVersion > 1)
                                     {
                                         try
                                         {
                                             l_PercentCompleted = m_Camera.PercentCompleted;
-                                            l_PercentCompletedMessage = l_PercentCompleted.ToString(); // Operation completed OK
+                                            l_PercentCompletedMessage = $"{l_PercentCompleted}%"; // Operation completed OK
                                         }
                                         catch (COMException ex)
                                         {
@@ -2631,8 +2646,7 @@ namespace ConformU
                                         }
                                     }
 
-                                    SetAction("Waiting for " + p_Duration.ToString() + " second exposure to complete: " + DateTime.Now.Subtract(l_StartTime).TotalSeconds.ToString() + ",   PercentComplete: " + l_PercentCompletedMessage);
-                                    WaitFor(CAMERA_SLEEP_TIME);
+                                    SetStatus($"{swOverall.Elapsed.TotalSeconds:0.0} / {p_Duration:0.0},   PercentComplete: {l_PercentCompletedMessage}");
                                     if (cancellationToken.IsCancellationRequested) return;
                                 }
                                 while (m_Camera.CameraState == CameraState.Exposing);
@@ -2731,7 +2745,7 @@ namespace ConformU
                             // Check image array variant dimensions
                             Array imageArrayObject;
 
-                            if (settings.TestImageArrayVariant) // Test if configured to do so. No need to report an issue because it's already been reported when the ImageArrayVariant property was tested
+                            if (settings.CameraTestImageArrayVariant) // Test if configured to do so. No need to report an issue because it's already been reported when the ImageArrayVariant property was tested
                             {
                                 try
                                 {

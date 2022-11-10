@@ -18,7 +18,7 @@ namespace ConformU
 
         #region Application behaviour
 
-        public bool GoHomeOnDeviceSelected{ get; set; } = true;
+        public bool GoHomeOnDeviceSelected { get; set; } = true;
 
         #endregion
 
@@ -108,7 +108,7 @@ namespace ConformU
         /// <summary>
         /// ASCOM Device type of the current device
         /// </summary>
-        public DeviceTypes ?DeviceType { get; set; } = null;
+        public DeviceTypes? DeviceType { get; set; } = null;
 
         #endregion
 
@@ -146,7 +146,8 @@ namespace ConformU
         public int CameraMaxBinX { get; set; } = 0;
         public int CameraMaxBinY { get; set; } = 0;
         public bool CameraFirstUseTests { get; set; } = true;
-        public bool TestImageArrayVariant { get; set; } = true;
+        public bool CameraTestImageArrayVariant { get; set; } = true;
+        public double CameraExposureDuration { get; set; } = 2.0;
 
         // Dome test configuration
         public int DomeShutterTimeout { get; set; } = 240;

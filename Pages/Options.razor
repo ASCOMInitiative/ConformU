@@ -294,7 +294,7 @@
 
         @*Camera configuration*@
         <RadzenTabsItem Text="Camera">
-            <h4 style="margin-top: 10px">Maximum Bin</h4>
+            <h4 style="margin-top: 10px">Exposure Settings</h4>
             <p>By default Conform will test camera imaging at all bin values reported by the camera through MaxBinX and MaxBinY. If required, the test range can be limited using the settings below.</p>
 
             <div style="margin-top:10px" class="row">
@@ -304,6 +304,10 @@
             <div class="row">
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraTestMaxBinY" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraMaxBinY)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Max BinY for testing. (Zero tests all available bin values.)</p>
+            </div>
+            <div class="row">
+                <RadzenNumeric Style="margin-left: 20px" Format="0.00" @bind-Value="cameraExposureDuration" TValue="double" Min="1.0m" Change=@(args => OnDoubleItemChange(args,NumericConfigurationItem.CameraExposureDuration)) />
+                <p style="margin-left: 20px;margin-top: 5px;">Test exposure duration (seconds)</p>
             </div>
 
             <h4 style="margin-top: 20px">First Use Tests</h4>
@@ -443,6 +447,7 @@
     bool chkTraceAlpacaCalls;
     bool cameraTestImageArrayVariant;
     bool chkGoHomeOnDeviceSelection;
+    double cameraExposureDuration;
 
     ImageArrayTransferType alpacaImageArrayTransferType;
 
@@ -481,6 +486,7 @@
     {
         CameraMaxBinX,
         CameraMaxBinY,
+        CameraExposureDuration,
         DomeShutterTimeout,
         DomeAzimuthTimeout,
         DomeAltitudeTimeout,
@@ -596,7 +602,7 @@
         switch (boolConfigurationItem)
         {
             case BoolConfigurationItem.TestImageArrayVariant:
-                configuration.Settings.TestImageArrayVariant = newValue;
+                configuration.Settings.CameraTestImageArrayVariant = newValue;
                 break;
 
             default:
@@ -624,6 +630,10 @@
 
             case NumericConfigurationItem.DomeSlewtolerance:
                 configuration.Settings.DomeSlewTolerance = newValue;
+                break;
+
+            case NumericConfigurationItem.CameraExposureDuration:
+                configuration.Settings.CameraExposureDuration = newValue;
                 break;
 
             default:
@@ -751,7 +761,8 @@
         cameraTestMaxBinX = configuration.Settings.CameraMaxBinX;
         cameraTestMaxBinY = configuration.Settings.CameraMaxBinY;
         cameraFirstUseTests = configuration.Settings.CameraFirstUseTests;
-        cameraTestImageArrayVariant = configuration.Settings.TestImageArrayVariant;
+        cameraTestImageArrayVariant = configuration.Settings.CameraTestImageArrayVariant;
+        cameraExposureDuration = configuration.Settings.CameraExposureDuration;
 
         // Dome tests
         domeShutterTimeout = configuration.Settings.DomeShutterTimeout;
