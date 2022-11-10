@@ -2357,6 +2357,7 @@ namespace ConformU
                 }
 
             // StopExposure
+            SetTest("StopExposure");
             try
             {
                 if (settings.DisplayMethodCalls)
@@ -2371,6 +2372,7 @@ namespace ConformU
                             {
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage("ConformanceCheck", "About to call StopExposure");
+                                SetAction("Calling StopExposure()");
                                 m_Camera.StopExposure();
                                 if (m_CanStopExposure)
                                     LogOK("StopExposure", "No exception generated when camera is already idle");
@@ -2410,6 +2412,7 @@ namespace ConformU
             {
                 LogIssue("StopExposure", EX_NET + "exception generated when reading camera state, further StopExposure tests skipped");
             }
+            ClearStatus();
 
             // Use either the maximum values supplied by the camera driver or the maximum values defined in Conform's setup, if these have been set
             if ((settings.CameraMaxBinX > 0) | (settings.CameraMaxBinY > 0))
@@ -2444,7 +2447,7 @@ namespace ConformU
                 {
                     for (l_BinX = 1; l_BinX <= l_MaxBinX; l_BinX++)
                     {
-                        CameraExposure("Take image full frame " + l_BinX + " x " + l_BinY + " bin", l_BinX, l_BinY, 0, 0, m_CameraXSize / l_BinX, m_CameraYSize / l_BinY,settings.CameraExposureDuration, "");
+                        CameraExposure("Take image full frame " + l_BinX + " x " + l_BinY + " bin", l_BinX, l_BinY, 0, 0, m_CameraXSize / l_BinX, m_CameraYSize / l_BinY, settings.CameraExposureDuration, "");
                         if (cancellationToken.IsCancellationRequested)
                             return;
                     }
@@ -2588,7 +2591,7 @@ namespace ConformU
 
                                 // Start the loop timing stopwatch
                                 Stopwatch sw = Stopwatch.StartNew();
-                                Stopwatch swOverall=Stopwatch.StartNew();
+                                Stopwatch swOverall = Stopwatch.StartNew();
                                 const int POLL_INTERVAL = 500;
                                 do
                                 {
