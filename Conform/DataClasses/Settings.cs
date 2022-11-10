@@ -164,6 +164,9 @@ namespace ConformU
         public int ObservingConditionsRetryTime { get; set; } = 1; // Seconds
         public int ObservingConditionsMaxRetries { get; set; } = 5;
 
+        // Rotator test configuration
+        public int RotatorTimeout { get; set; } = 60;
+
         // Switch test configuration
         public bool SwitchEnableSet { get; set; } = false;
         public int SwitchReadDelay { get; set; } = 500; // Milliseconds

@@ -12,7 +12,6 @@ namespace ConformU
     {
 
         #region Variables and Constants
-        private const double ROTATOR_WAIT_LIMIT = 30.0d;
         private const double ROTATOR_OK_TOLERANCE = 1.0d;
         private const double ROTATOR_INFO_TOLERANCE = 2.0d;
         private const float ROTATOR_POSITION_TOLERANCE = 0.001f; // Degrees
@@ -196,7 +195,6 @@ namespace ConformU
 
         public override void PreRunCheck()
         {
-            DateTime l_Now;
 
             // Initialise to the unknown position value
             initialPosiiton = ROTATOR_POSITION_UNKNOWN;
@@ -212,17 +210,12 @@ namespace ConformU
             } // Stop any movement
 
             // Confirm that rotator is not moving or wait for it to stop
-            l_Now = DateTime.Now;
             try
             {
-                SetAction("Waiting up to " + ROTATOR_WAIT_LIMIT + " seconds for rotator to stop moving");
+                SetTest("Pre-run check");
+                SetAction($"Waiting up to {settings.RotatorTimeout} seconds for rotator to stop moving");
                 LogCallToDriver("PreRun Check", "About to get IsMoving property repeatedly");
-                do
-                {
-                    WaitFor(500);
-                    SetStatus(DateTime.Now.Subtract(l_Now).TotalSeconds + "/" + ROTATOR_WAIT_LIMIT);
-                }
-                while (!(!m_Rotator.IsMoving) | (DateTime.Now.Subtract(l_Now).TotalSeconds > ROTATOR_WAIT_LIMIT));
+                RotatorWait(RotatorPropertyMethod.Move, "Ensuring that movement is stopped", 0, 0);
 
                 if (!m_Rotator.IsMoving)
                 {
@@ -256,7 +249,7 @@ namespace ConformU
                     }
                 }
                 else
-                    LogIssue("Pre-run Check", "Rotator still moving after " + ROTATOR_WAIT_LIMIT + "seconds, could IsMoving be stuck on?");
+                    LogIssue("Pre-run Check", $"Rotator still moving after {settings.RotatorTimeout} seconds, could IsMoving be stuck on?");
             }
             catch (Exception)
             {
@@ -266,7 +259,6 @@ namespace ConformU
         public override void PostRunCheck()
         {
             float currentPosition, currentMechanicalPosition, relativeMovement, syncPosition;
-            DateTime l_Now;
 
             // Restore the initial position of the rotator if possible
             if (initialPosiiton == ROTATOR_POSITION_UNKNOWN)
@@ -310,26 +302,18 @@ namespace ConformU
                     m_Rotator.Move(relativeMovement);
 
                     // Wait for the move to complete
-                    LogCallToDriver("Post-run Check", "About to get IsMoving property repeatedly");
-                    l_Now = DateTime.Now;
-                    do
-                    {
-                        WaitFor(500);
-                        SetStatus(DateTime.Now.Subtract(l_Now).TotalSeconds + "/" + ROTATOR_WAIT_LIMIT);
-                    }
-                    while (!(!m_Rotator.IsMoving) | (DateTime.Now.Subtract(l_Now).TotalSeconds > ROTATOR_WAIT_LIMIT));
+                    RotatorWait(RotatorPropertyMethod.Move, "Restoring original position", relativeMovement, currentPosition);
 
                     if (!m_Rotator.IsMoving)
                         LogOK("Post-run Check", $"Rotator starting position successfully restored to {initialPosiiton}");
                     else
-                        LogError("Post-run Check", "Unable to restore rotator starting position, the rotator is still moving after " + ROTATOR_WAIT_LIMIT + "seconds. Could IsMoving be stuck on?");
+                        LogError("Post-run Check", $"Unable to restore rotator starting position, the rotator is still moving after {settings.RotatorTimeout} seconds. Could IsMoving be stuck on?");
                 }
                 catch (Exception ex)
                 {
                     LogError("Post-run Check", $"Exception: {ex}");
                 }
         }
-
 
         public override void CheckProperties()
         {
@@ -739,6 +723,9 @@ namespace ConformU
             double l_OKLimit, l_PositionOffset;
             LogCallToDriver(p_Name, $"About to get Position property");
             LogDebug("RotatorMoveTest", "Start value, position: " + p_Value.ToString("0.000") + " " + m_Rotator.Position.ToString("0.000"));
+
+            SetTest(p_Name);
+            SetAction("Setting position");
             try
             {
                 // Move to requested position
@@ -946,36 +933,35 @@ namespace ConformU
             if (m_CanReadIsMoving) // Can read IsMoving so test for asynchronous and synchronous behaviour
             {
                 LogDebug("RotatorWait", "Can Read IsMoving OK");
-                LogCallToDriver(p_Name, $"About to get Ismoving property");
+                LogCallToDriver(p_Name, $"About to get IsMoving property");
                 if (m_Rotator.IsMoving)
                 {
                     LogDebug("RotatorWait", "Rotator is moving, waiting for move to complete");
-                    SetTest(p_Name + " test");
+                    SetTest(p_Name);
                     SetAction("Waiting for move to complete");
-                    LogCallToDriver(p_Name, $"About to get Position and Ismoving properties repeatedly");
-                    do
+                    LogCallToDriver(p_Name, $"About to get Position and IsMoving properties repeatedly");
+                    switch (p_type)
                     {
-                        WaitFor(500);
-                        if (canReadPosition) // Only do this if position doesn't generate an exception
-                        {
-                            switch (p_type)
+                        case RotatorPropertyMethod.Move:
                             {
-                                case RotatorPropertyMethod.Move:
-                                    {
-                                        SetStatus($"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition)} / {p_value} relative");
-                                        break;
-                                    }
-
-                                case RotatorPropertyMethod.MoveAbsolute:
-                                    {
-                                        SetStatus($"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition)} / {Math.Abs(p_value - p_RotatorStartPosition)} absolute");
-                                        break;
-                                    }
+                                WaitUntil("Waiting for move to complete", () => { return m_Rotator.IsMoving; }, 500, settings.RotatorTimeout, () => { return $"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition):000} / {Math.Abs(p_value):000} relative"; });
+                                break;
                             }
-                        }
 
+                        case RotatorPropertyMethod.MoveMechanical:
+                        case RotatorPropertyMethod.MoveAbsolute:
+                            {
+                                WaitUntil("Waiting for move to complete", () => { return m_Rotator.IsMoving; }, 500, settings.RotatorTimeout, () => { return $"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition):000} / {Math.Abs(p_value - p_RotatorStartPosition):000} absolute"; });
+                                break;
+                            }
+
+                        default:
+                            {
+                                WaitUntil("Waiting for move to complete", () => { return m_Rotator.IsMoving; }, 500, settings.RotatorTimeout, null);
+                                break;
+                            }
                     }
-                    while (m_Rotator.IsMoving);
+
                     LogDebug("RotatorWait", "Rotator has stopped moving");
                     SetAction("");
                     m_LastMoveWasAsync = true;

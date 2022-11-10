@@ -820,6 +820,8 @@ namespace ConformU
             while ((sw.ElapsedMilliseconds <= waitDuration) & !applicationCancellationToken.IsCancellationRequested);
         }
 
+#nullable enable
+
         /// <summary>
         /// Call the wait function every poll interval milliseconds and delay until the wait function becomes false
         /// </summary>
@@ -829,7 +831,7 @@ namespace ConformU
         /// <param name="timeoutSeconds">Number of seconds before the operation times out</param>
         /// <exception cref="InvalidValueException"></exception>
         /// <exception cref="TimeoutException">If the operation takes longer than the timeout value</exception>
-        internal void WaitUntil(string actionName, Func<bool> waitFunction, int pollInterval, int timeoutSeconds)
+        internal void WaitUntil(string actionName, Func<bool> waitFunction, int pollInterval, int timeoutSeconds, Func<string>? statusString = null)
         {
             // Validate the supplied poll interval
             if (pollInterval < 100) throw new InvalidValueException($"The poll interval must be >=100ms: {pollInterval}");
@@ -861,7 +863,10 @@ namespace ConformU
                 Thread.Sleep(sleeptime);
 
                 // Set the status message status field to the elapsed time
-                SetStatus($"{Math.Round(Convert.ToDouble(currentLoopNumber + 1) * pollInterval / 1000.0, 1):0.0} / {timeoutSeconds:0.0} seconds");
+                if (statusString is null)
+                    SetStatus($"{Math.Round(Convert.ToDouble(currentLoopNumber + 1) * pollInterval / 1000.0, 1):0.0} / {timeoutSeconds:0.0} seconds");
+                else
+                    SetStatus(statusString());
 
             } while (waitFunction() & !combinedCts.Token.IsCancellationRequested);
 
@@ -873,6 +878,8 @@ namespace ConformU
                 throw new TimeoutException($"The \"{actionName}\" operation exceeded the timeout of {timeoutSeconds} seconds that is configured in Conform.");
             }
         }
+
+#nullable disable
 
         internal void LogNewLine()
         {

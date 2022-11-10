@@ -382,7 +382,6 @@
                              Component="DOMESLEWTOLERANCE"
                              Style="margin-left: 20px; margin-top: 6px; margin-right: 26px" />
             </div>
-
         </RadzenTabsItem>
 
         @*Focuser configuration*@
@@ -394,7 +393,6 @@
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="focuserTimeout" TValue="int" Min="10" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.FocuserTimeout)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Focuser move completion timeout (seconds).</p>
             </div>
-
         </RadzenTabsItem>
 
         @*ObservingConditions configuration*@
@@ -410,7 +408,17 @@
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="observingConditionsRetryTime" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.ObservingConditionsRetryTime)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Wait time between invalid operation retries.</p>
             </div>
+        </RadzenTabsItem>
 
+        @*Rotator configuration*@
+        <RadzenTabsItem Text="Rotator">
+            <h4 style="margin-top: 10px">Timeouts</h4>
+            <p>These settings control how long Conform waits for actions to complete before reporting a timeout.</p>
+
+            <div style="margin-top:20px" class="row">
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="rotatorTimeout" TValue="int" Min="10" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.RotatorTimeout)) />
+                <p style="margin-left: 20px;margin-top: 5px;">Rotator move completion timeout (seconds).</p>
+            </div>
         </RadzenTabsItem>
 
         @*Switch configuration*@
@@ -441,7 +449,6 @@
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchExtendedNumberTestRange" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.SwitchExtendedNumberTestRange)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Extended switch number test range.</p>
             </div>
-
         </RadzenTabsItem>
 
     </Tabs>
@@ -511,6 +518,7 @@
         FocuserTimeout,
         ObservingConditionsRetryTime,
         ObservingConditionsMaxRetries,
+        RotatorTimeout,
         SwitchReadDelay,
         SwitchWriteDelay,
         SwitchExtendedNumberTestRange,
@@ -560,6 +568,9 @@
     // ObservingConditions test configuration
     private int observingConditionsRetryTime;
     private int observingConditionsMaxRetries;
+
+    // Rotator test configuration
+    private int rotatorTimeout;
 
     // Switch test configuration
     private bool switchEnableSet;
@@ -722,6 +733,10 @@
                 configuration.Settings.FocuserTimeout= newValue;
                 break;
 
+            case NumericConfigurationItem.RotatorTimeout:
+                configuration.Settings.RotatorTimeout = newValue;
+                break;
+
             default:
                 throw new InvalidValueException($"OnIntegerItemChange - Unknown numeric configuration item: {numericConfigurationItem}");
         }
@@ -799,6 +814,9 @@
         // ObservingConditions tests
         observingConditionsMaxRetries = configuration.Settings.ObservingConditionsMaxRetries;
         observingConditionsRetryTime = configuration.Settings.ObservingConditionsRetryTime;
+
+        // Rotator tests
+        rotatorTimeout = configuration.Settings.RotatorTimeout;
 
         // Switch tests
         switchEnableSet = configuration.Settings.SwitchEnableSet;
