@@ -4,19 +4,31 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<DisableWinExeOutputInference>true</DisableWinExeOutputInference>
 	</PropertyGroup>
-
+	<Target Name="Test" AfterTargets="AfterBuild">
+		<Message Importance="High" Text="Build number: $(BuildNumber), Revision number: $(RevisionNumber)"/>
+	</Target>
 	<PropertyGroup>
 		<TargetFrameworks>net6.0-windows;net6.0</TargetFrameworks>
 		<Configurations>Debug;Release</Configurations>
 		<OutputType>Exe</OutputType>
 		<UserSecretsId>c49fec0a-dd2c-4e60-9e85-407d8d9bdd9f</UserSecretsId>
-		<Platforms>AnyCPU</Platforms>
-		<ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
-		<AssemblyVersion>0.9.0</AssemblyVersion>
-		<FileVersion>0.9.0</FileVersion>
+		<Platforms>AnyCPU;x86</Platforms>
+		<ApplicationIcon>ASCOM.ico</ApplicationIcon>
+		<!-- Version numbers
+			Formulae for revision and build numbers:
+			int Revision = Convert.ToInt32(DateTime.Now.Subtract(DateTime.Today).TotalSeconds);
+			int Build = DateTime.Today.DayOfYear + ((DateTime.Today.Year - 2000) * 366);		
+		-->
+		<AssemblyMajor>0</AssemblyMajor>
+		<AssemblyMinor>9</AssemblyMinor>
+		<BuildNumber>$([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Subtract($([System.DateTime]::Today.Year),2000)),366)), $([System.DateTime]::Today.DayOfYear)))</BuildNumber>
+		<RevisionNumber>$([System.Convert]::ToUInt16($([MSBuild]::Divide($([System.DateTime]::Now.TimeOfDay.TotalSeconds),2))))</RevisionNumber>
+
+		<AssemblyVersion>$(AssemblyMajor).$(AssemblyMinor).$(BuildNumber).$(RevisionNumber)</AssemblyVersion>
+		<FileVersion>$(AssemblyMajor).$(AssemblyMinor).$(BuildNumber).$(RevisionNumber)</FileVersion>
+
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>conformu.snk</AssemblyOriginatorKeyFile>
-		<Version>0.9.0</Version>
 		<AssemblyName>conformu</AssemblyName>
 	</PropertyGroup>
 
@@ -41,6 +53,34 @@
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0-windows|AnyCPU'">
+		<Optimize>False</Optimize>
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0-windows|x86'">
+		<Optimize>False</Optimize>
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
+		<Optimize>False</Optimize>
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|x86'">
+		<Optimize>False</Optimize>
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0-windows|AnyCPU'">
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0-windows|x86'">
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|x86'">
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
 	<ItemGroup>
 		<Compile Remove="publish\**" />
 		<Content Remove="publish\**" />
@@ -56,7 +96,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <_WebToolingArtifacts Remove="Properties\PublishProfiles\Arm64.pubxml" />
+		<_WebToolingArtifacts Remove="Properties\PublishProfiles\Arm64.pubxml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="ASCOM.ico">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -93,7 +139,7 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
-	
+
 	<Target Name="CustomAfterPublishh" AfterTargets="AfterPublish">
 		<!-- Insert tasks to run after publish here -->
 		<Message Text="After Publish Task $(CheckoutDirectory)" />

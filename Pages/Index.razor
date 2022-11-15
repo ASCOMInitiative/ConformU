@@ -35,7 +35,7 @@
     object screenLogLockObject = new object();
     object statusLockObject = new object();
     private string deviceDescription = "";
-    string statusMessage = $"{Environment.OSVersion} {(Environment.Is64BitOperatingSystem ? "64bit" : "32bit")}";
+    string statusMessage = $"OS: {Environment.OSVersion} {(Environment.Is64BitOperatingSystem ? "64bit" : "32bit")} - Application is {(Environment.Is64BitProcess ? "64bit" : "32bit")}";
 
     ConformanceTestManager tester;
 
