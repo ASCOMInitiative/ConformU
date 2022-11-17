@@ -139,16 +139,16 @@ else
     /// <param name="args"></param>
     private async void OnUiChanged(object caller, EventArgs args)
     {
-        // Collapse the nav menu if an operation has been started
+        // Collapse the navigation menu if an operation has been started
         if (configuration.Settings.OperationInProgress) collapseNavMenu = true;
 
         // Refresh the UI according to new state
-        //try
-        //{
-        BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
-        IsSmall = Globals.IsSmall(browserWindowSize.Width, browserWindowSize.Height); //browserWindowSize.Width < Globals.UI_SMALL_TRANSITION_SIZE;
-                                                                                      //}
-                                                                                      //catch { }
+        try
+        {
+            BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
+            IsSmall = Globals.IsSmall(browserWindowSize.Width, browserWindowSize.Height); //browserWindowSize.Width < Globals.UI_SMALL_TRANSITION_SIZE;
+        }
+        catch { }
 
         //conformLogger.LogMessage("Navmenu.OnConfigurationChange", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {browserWindowSize.Width}, Window height: {browserWindowSize.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
         await InvokeAsync(StateHasChanged);

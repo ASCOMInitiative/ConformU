@@ -175,7 +175,12 @@
             configuration.Settings.OperationInProgress = false;
             configuration.RaiseUiHasChangedEvent();
             StateHasChanged();
-            await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
+            try
+            {
+                await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
+
+            }
+            catch { }
         }
     }
 
@@ -195,12 +200,16 @@
     /// <param name="e"></param>
     async public void OutputChanged(object sender, MessageEventArgs e)
     {
-        lock (screenLogLockObject)
+        try
         {
-            screenLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
+            lock (screenLogLockObject)
+            {
+                screenLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
+            }
+            await InvokeAsync(StateHasChanged);
+            await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
         }
-        await InvokeAsync(StateHasChanged);
-        await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
+        catch { }
     }
 
     /// <summary>
@@ -222,14 +231,18 @@
 
     async Task ResizeLogWindow()
     {
-        BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
-        BrowserWindowSize blazorProWindowSize = new();
-        blazorProWindowSize.Width = (int)browserWindowSize.Width;
-        blazorProWindowSize.Height = (int)browserWindowSize.Height;
+        try
+        {
+            BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
+            BrowserWindowSize blazorProWindowSize = new();
+            blazorProWindowSize.Width = (int)browserWindowSize.Width;
+            blazorProWindowSize.Height = (int)browserWindowSize.Height;
 
-        //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
-        WindowResized(new object(), blazorProWindowSize);
-        //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
+            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
+            WindowResized(new object(), blazorProWindowSize);
+            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
+        }
+        catch { }
     }
 
     // This method will be called when the window resizes.
@@ -270,9 +283,9 @@
                 conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"BoundingClientRectangle is NULL - No action taken.");
             }
         }
-        catch (Exception ex)
+        catch
         {
-            conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
+           // conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
         }
     }
 

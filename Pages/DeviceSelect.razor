@@ -208,9 +208,9 @@
                   })()"
             });
         }
-        catch (Exception ex)
+        catch 
         {
-            conformLogger.LogMessage("DeviceSelect.ResizeStatusHeight", MessageLevel.Debug, $"Ignoring exception when resizing status height:\r\n{ex}");
+            //conformLogger.LogMessage("DeviceSelect.ResizeStatusHeight", MessageLevel.Debug, $"Ignoring exception when resizing status height:\r\n{ex}");
         }
     }
 
@@ -393,29 +393,6 @@
     private void OnAlpacaSearchClick()
     {
         StartDiscovery();
-    }
-
-    private async void XXXXXXOnSelectAlpacaDeviceClick()
-    {
-        if (selectedAlpacaDevice is null)
-        {
-            var result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "SelectAlpacaButton");
-
-            var x = (int)(result.Right) + 30;
-            var y = (int)(result.Top) - 40;
-
-            ShowNotification(new NotificationMessage { Style = $"position: fixed; left: {x}px; top:{y}px;", Severity = NotificationSeverity.Error, Summary = "Select Device", Detail = $"No device has been selected!", Duration = 4000 });
-        }
-        else
-        {
-            configuration.Settings.AlpacaDevice = selectedAlpacaDevice;
-            configuration.Settings.DeviceType = selectedAlpacaDevice.AscomDeviceType;
-        }
-
-        technologyType = DeviceTechnology.Alpaca;
-        configuration.Settings.DeviceTechnology = technologyType;
-
-        SaveConfiguration();
     }
 
     #endregion

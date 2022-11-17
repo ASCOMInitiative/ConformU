@@ -14,22 +14,31 @@ namespace ConformU
 
         public async void Init(IJSRuntime js)
         {
-            // Enforce single invocation            
-            if (JS == null)
+            try
             {
-                this.JS = js;
-                await JS.InvokeAsync<string>("resizeListener", DotNetObjectReference.Create(this));
+                // Enforce single invocation            
+                if (JS == null)
+                {
+                    this.JS = js;
+                    await JS.InvokeAsync<string>("resizeListener", DotNetObjectReference.Create(this));
+                }
+
             }
+            catch { }
         }
 
         [JSInvokable]
         public void SetBrowserDimensions(int jsBrowserWidth, int jsBrowserHeight)
         {
-            BrowserWindowSize browserWindowSize = new();
-            browserWindowSize.Width = jsBrowserWidth;
-            browserWindowSize.Height = jsBrowserHeight;
-            // For simplicity, we're just using the new width
-            this.OnResize?.Invoke(this, browserWindowSize);
+            try
+            {
+                BrowserWindowSize browserWindowSize = new();
+                browserWindowSize.Width = jsBrowserWidth;
+                browserWindowSize.Height = jsBrowserHeight;
+                // For simplicity, we're just using the new width
+                this.OnResize?.Invoke(this, browserWindowSize);
+            }
+            catch { }
         }
     }
 }
