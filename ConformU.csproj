@@ -4,32 +4,46 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<DisableWinExeOutputInference>true</DisableWinExeOutputInference>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(TargetFramework)'=='net7.0-windows'">
+		<UseWindowsForms>true</UseWindowsForms>
+		<DisableWinExeOutputInference>true</DisableWinExeOutputInference>
+	</PropertyGroup>
 	<Target Name="Test" AfterTargets="AfterBuild">
-		<Message Importance="High" Text="Build number: $(BuildNumber), Revision number: $(RevisionNumber)"/>
+		<Message Importance="High" Text=" Version: $(AssemblyMajor).$(AssemblyMinor).$(AssemblyRevision).$(BuildNumber)" />
 	</Target>
 	<PropertyGroup>
-		<TargetFrameworks>net6.0-windows;net6.0</TargetFrameworks>
+		<TargetFrameworks>net6.0-windows;net6.0;net7.0-windows;net7.0</TargetFrameworks>
 		<Configurations>Debug;Release</Configurations>
 		<OutputType>Exe</OutputType>
 		<UserSecretsId>c49fec0a-dd2c-4e60-9e85-407d8d9bdd9f</UserSecretsId>
 		<Platforms>AnyCPU;x86</Platforms>
 		<ApplicationIcon>ASCOM.ico</ApplicationIcon>
-		<!-- Version numbers
+		<!-- Create a dynamic version number - The algorithms are based on the automatic version number algorithms used by MSBuild, but are slightly different
 			Formulae for revision and build numbers:
 			int Revision = Convert.ToInt32(DateTime.Now.Subtract(DateTime.Today).TotalSeconds);
 			int Build = DateTime.Today.DayOfYear + ((DateTime.Today.Year - 2000) * 366);		
 		-->
 		<AssemblyMajor>0</AssemblyMajor>
 		<AssemblyMinor>9</AssemblyMinor>
+		<AssemblyRevision>1</AssemblyRevision>
 		<BuildNumber>$([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Subtract($([System.DateTime]::Today.Year),2000)),366)), $([System.DateTime]::Today.DayOfYear)))</BuildNumber>
 		<RevisionNumber>$([System.Convert]::ToUInt16($([MSBuild]::Divide($([System.DateTime]::Now.TimeOfDay.TotalSeconds),2))))</RevisionNumber>
 
-		<AssemblyVersion>$(AssemblyMajor).$(AssemblyMinor).$(BuildNumber).$(RevisionNumber)</AssemblyVersion>
-		<FileVersion>$(AssemblyMajor).$(AssemblyMinor).$(BuildNumber).$(RevisionNumber)</FileVersion>
+		<AssemblyVersion>$(AssemblyMajor).$(AssemblyMinor).$(AssemblyRevision).$(BuildNumber)</AssemblyVersion>
+		<FileVersion>$(AssemblyMajor).$(AssemblyMinor).$(AssemblyRevision).$(BuildNumber)</FileVersion>
+		<Version>$(AssemblyMajor).$(AssemblyMinor).$(AssemblyRevision).$(BuildNumber)</Version>
 
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>conformu.snk</AssemblyOriginatorKeyFile>
 		<AssemblyName>conformu</AssemblyName>
+		<AssemblyCompany>ASCOM Initiative</AssemblyCompany>
+		<AssemblyProduct>Conform Universal</AssemblyProduct>
+		<AssemblyTitle>Conform Universal</AssemblyTitle>
+		<AssemblyConfiguration>$(Configuration)</AssemblyConfiguration>
+		<AssemblyDescription>Conform Universal</AssemblyDescription>
+		<Copyright>© Peter Simpson 2021-2023</Copyright>
+		<ProductName>Conform Universal</ProductName>
+
 	</PropertyGroup>
 
 	<!-- Added to support MacOS builds -->
@@ -53,32 +67,18 @@
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0-windows|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|$(TargetFramework)|AnyCPU'">
 		<Optimize>False</Optimize>
 		<DebugType>embedded</DebugType>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0-windows|x86'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|$(TargetFramework)|x86'">
 		<Optimize>False</Optimize>
 		<DebugType>embedded</DebugType>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
-		<Optimize>False</Optimize>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|$(TargetFramework)|AnyCPU'">
 		<DebugType>embedded</DebugType>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|x86'">
-		<Optimize>False</Optimize>
-		<DebugType>embedded</DebugType>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0-windows|AnyCPU'">
-		<DebugType>embedded</DebugType>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0-windows|x86'">
-		<DebugType>embedded</DebugType>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
-		<DebugType>embedded</DebugType>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|x86'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|$(TargetFramework)|x86'">
 		<DebugType>embedded</DebugType>
 	</PropertyGroup>
 	<ItemGroup>
@@ -139,11 +139,5 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
-
-	<Target Name="CustomAfterPublishh" AfterTargets="AfterPublish">
-		<!-- Insert tasks to run after publish here -->
-		<Message Text="After Publish Task $(CheckoutDirectory)" />
-
-	</Target>
 
 </Project>

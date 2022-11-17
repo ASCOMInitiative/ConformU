@@ -230,8 +230,8 @@ namespace ConformU
                          options.IncludeScopes = false;
                          options.TimestampFormat = "HH:mm:ss.fff - ";
                      });
-                     logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Information);
-                     logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Information);
+                     logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Debug);
+                     logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Debug);
                      logging.AddDebug();
                  })
 
