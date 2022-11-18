@@ -9,7 +9,7 @@
 		<DisableWinExeOutputInference>true</DisableWinExeOutputInference>
 	</PropertyGroup>
 	<Target Name="Test" AfterTargets="AfterBuild">
-		<Message Importance="High" Text=" Version: $(AssemblyMajor).$(AssemblyMinor).$(AssemblyRevision).$(BuildNumber)" />
+		<Message Importance="High" Text=" Version: $(AssemblyMajor).$(AssemblyMinor).$(AssemblyBuild).$(RevisionNumber)" />
 	</Target>
 	<PropertyGroup>
 		<TargetFrameworks>net6.0-windows;net6.0;net7.0-windows;net7.0</TargetFrameworks>
@@ -18,20 +18,23 @@
 		<UserSecretsId>c49fec0a-dd2c-4e60-9e85-407d8d9bdd9f</UserSecretsId>
 		<Platforms>AnyCPU;x86</Platforms>
 		<ApplicationIcon>ASCOM.ico</ApplicationIcon>
-		<!-- Create a dynamic version number - The algorithms are based on the automatic version number algorithms used by MSBuild, but are slightly different
-			Formulae for revision and build numbers:
-			int Revision = Convert.ToInt32(DateTime.Now.Subtract(DateTime.Today).TotalSeconds);
-			int Build = DateTime.Today.DayOfYear + ((DateTime.Today.Year - 2000) * 366);		
-		-->
+		
+		<!-- Set assembly version numbers -->
 		<AssemblyMajor>0</AssemblyMajor>
 		<AssemblyMinor>9</AssemblyMinor>
-		<AssemblyRevision>1</AssemblyRevision>
-		<BuildNumber>$([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Subtract($([System.DateTime]::Today.Year),2000)),366)), $([System.DateTime]::Today.DayOfYear)))</BuildNumber>
-		<RevisionNumber>$([System.Convert]::ToUInt16($([MSBuild]::Divide($([System.DateTime]::Now.TimeOfDay.TotalSeconds),2))))</RevisionNumber>
+		<AssemblyBuild>1</AssemblyBuild>
 
-		<AssemblyVersion>$(AssemblyMajor).$(AssemblyMinor).$(AssemblyRevision).$(BuildNumber)</AssemblyVersion>
-		<FileVersion>$(AssemblyMajor).$(AssemblyMinor).$(AssemblyRevision).$(BuildNumber)</FileVersion>
-		<Version>$(AssemblyMajor).$(AssemblyMinor).$(AssemblyRevision).$(BuildNumber)</Version>
+		<!--Create a dynamic revision number based on time of build
+		 
+		The revision number is calculated by using the lowest 3 bits to store the build hour and the upper 13 bits to store the build day since the 1st January 2022.
+		This approach gives a revision number that changes every hour and that only repeats after 4096 days (over 11 years). 
+		To simplify the formula years are assumed to be 366 days in length.-->
+		
+		<RevisionNumber>$([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Modulo($([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Subtract($([System.DateTime]::Today.Year),2022)),366)) ,219)),4096)),8 )),$([System.DateTime]::Now.TimeOfDay.Hours)))</RevisionNumber>
+
+		<AssemblyVersion>$(AssemblyMajor).$(AssemblyMinor).$(AssemblyBuild).$(RevisionNumber)</AssemblyVersion>
+		<FileVersion>$(AssemblyMajor).$(AssemblyMinor).$(AssemblyBuild).$(RevisionNumber)</FileVersion>
+		<Version>$(AssemblyMajor).$(AssemblyMinor).$(AssemblyBuild).$(RevisionNumber)</Version>
 
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>conformu.snk</AssemblyOriginatorKeyFile>

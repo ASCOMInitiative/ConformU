@@ -37,7 +37,9 @@ namespace ConformU
             services.AddRazorPages();
             services.AddServerSideBlazor(options =>
             {
-                options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromSeconds(300);
+                options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromSeconds(30);
+                options.JSInteropDefaultCallTimeout=TimeSpan.FromSeconds(2);
+                options.DetailedErrors = true;
             });
 
             // Conform components
