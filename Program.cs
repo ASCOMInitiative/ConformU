@@ -226,12 +226,12 @@ namespace ConformU
                      logging.ClearProviders();
                      logging.AddSimpleConsole(options =>
                      {
-                         options.SingleLine = false;
+                         options.SingleLine = true;
                          options.IncludeScopes = false;
                          options.TimestampFormat = "HH:mm:ss.fff - ";
                      });
-                     logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Debug);
-                     logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Debug);
+                     logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Information);
+                     logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Information);
                      logging.AddDebug();
                  })
 
