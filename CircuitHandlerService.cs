@@ -22,49 +22,27 @@ namespace ConformU
 
         public override Task OnConnectionUpAsync(Circuit circuit, CancellationToken cancellationToken)
         {
-            logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} ***** OnConnectionUpAsync *****");
-            return base.OnCircuitClosedAsync(circuit, cancellationToken);
+            Console.WriteLine($"{DateTime.Now:HH:mm:ss.fff} ***** OnConnectionUpAsync {circuit.Id} *****");
+            return base.OnConnectionUpAsync(circuit, cancellationToken);
         }
 
         public override Task OnConnectionDownAsync(Circuit circuit, CancellationToken cancellationToken)
         {
-            logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} ***** OnConnectionDownAsync *****");
-
-            return base.OnCircuitClosedAsync(circuit, cancellationToken);
+            Console.WriteLine($"{DateTime.Now:HH:mm:ss.fff} ***** OnConnectionDownAsync {circuit.Id} *****");
+            Environment.Exit(0);
+            Console.WriteLine($"{DateTime.Now:HH:mm:ss.fff} ***** OnConnectionDownAsync - AFter EXIT *****");
+            return Task.CompletedTask; //base.OnConnectionDownAsync(circuit, cancellationToken);
         }
 
         public override Task OnCircuitOpenedAsync(Circuit circuit, CancellationToken cancellationToken)
         {
-            logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} ***** OnCircuitOpenedAsync {circuit.Id} *****");
+            Console.WriteLine($"{DateTime.Now:HH:mm:ss.fff} ***** OnCircuitOpenedAsync {circuit.Id} *****");
             return base.OnCircuitOpenedAsync(circuit, cancellationToken);
         }
 
         public override Task OnCircuitClosedAsync(Circuit circuit, CancellationToken cancellationToken)
         {
-            //Console.WriteLine("OnCircuitClosedAsync has been called...");
-            //logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} ***** OnCircuitClosedAsync {circuit.Id} *****");
-            //if (!Debugger.IsAttached) // Only use this mechanic outside of a dev environment
-            //{
-            //    // At the time of writing any attempt to use Environment.Exit or lifetime.StopApplication() results in an undefined wait time before the 
-            //    // console hosting application closes. For this reason the more brutal Kill option is used to terminate the process immediately.
-            //    logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} About to kill process...");
-            //    Process.GetCurrentProcess().Kill();
-            //    try
-            //    {
-            //        lifetime.StopApplication();
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Console.WriteLine($"OnCircuitClosedAsync exception \r\n{ex}");
-            //    }
-            //    logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} Killed process.");
-            //}
-            //else
-            //{
-            //    logger.LogInformation($"***** OnCircuitClosedAsync {circuit.Id} *****");
-            //}
-            //logger.LogInformation($"{DateTime.Now:HH:mm:ss.fff} ***** END OF OnCircuitClosedAsync {circuit.Id} *****");
-            Console.WriteLine($"{DateTime.Now:HH:mm:ss.fff} ***** OnCircuitClosedAsync {circuit.Id} *****");
+            Console.WriteLine($"{DateTime.Now:HH:mm:ss.fff}  ***** OnCircuitClosedAsync {circuit.Id} *****");
             return base.OnCircuitClosedAsync(circuit, cancellationToken);
         }
     }
