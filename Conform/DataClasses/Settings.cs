@@ -19,7 +19,7 @@ namespace ConformU
         #region Application behaviour
 
         public bool GoHomeOnDeviceSelected { get; set; } = true;
-
+        public double ConnectionTimeout { get; set; } = 2.0;
         #endregion
 
         #region Conform test configuration
@@ -29,6 +29,7 @@ namespace ConformU
         public bool UpdateCheck { get; set; } = true;
         public DateTime UpdateDate { get; set; } = DateTime.MinValue;
         public bool WarningMessageDisplayed { get; set; } = false;
+        public int ApplicationPort { get; set; } = 0;
 
         // Debug output switches
         public bool Debug { get; set; } = false;

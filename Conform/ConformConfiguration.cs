@@ -6,7 +6,7 @@ using System.Text.Json;
 namespace ConformU
 {
     [DefaultMember("Settings")]
-    public class ConformConfiguration : IDisposable
+    public class ConformConfiguration : IDisposable, IConformConfiguration
     {
         private const string FOLDER_NAME = "conform"; // Folder name underneath the local application data folder
         private const string SETTINGS_FILENAME = "conform.settings"; // Settings file name

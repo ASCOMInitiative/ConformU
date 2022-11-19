@@ -57,6 +57,35 @@
                         <RadzenCheckBox Name="CHKGOHOME" @bind-Value=@chkGoHomeOnDeviceSelection TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.GoHomeOnDeviceSelection)) />
                         <RadzenLabel Text="Return to home page when device is selected" Component="CHKDEBUG" Style="margin-left: 5px;" />
                     </div>
+                    <div class="row">
+                        <RadzenNumeric Style="margin-left: 20px; margin-top:15px; width: 6em"
+                                       Format="0.0"
+                                       @bind-Value="connectionTimeout"
+                                       Step="0.1"
+                                       TValue="double"
+                                       Min="0.1M"
+                                       Change=@(args => OnDoubleItemChange(args,NumericConfigurationItem.ConnectionTimeout)) />
+                        <p style="margin-left: 5px;margin-top: 10px;">
+                            Time before application closes (Default: 2 Seconds)
+                            <br />
+                            (Changes require a restart)
+                        </p>
+                    </div>
+                    <div class="row">
+                        <RadzenNumeric Style="margin-left: 20px; margin-top:15px; width: 6em"
+                                       Format="0"
+                                       @bind-Value="applicationPort"
+                                       Step="1"
+                                       TValue="int"
+                                       Min="0.1M"
+                                       Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.ApplicationPort)) />
+                        <p style="margin-left: 5px;margin-top: 10px;">
+                            Application IP Port (Default 0 = dynamic allocation)
+                            <br />
+                            (Changes require a restart)
+                        </p>
+                    </div>
+
                 </RadzenCard>
 
                 <RadzenCard Style="margin-bottom:20px">
@@ -467,6 +496,8 @@
     bool cameraTestImageArrayVariant;
     bool chkGoHomeOnDeviceSelection;
     double cameraExposureDuration;
+    double connectionTimeout;
+    int applicationPort;
 
     ImageArrayTransferType alpacaImageArrayTransferType;
 
@@ -507,9 +538,11 @@
         AlpacaDiscoveryPollInterval,
         AlpacaDiscoveryPort,
         AlpacaDiscoveryDuration,
+        ApplicationPort,
         CameraMaxBinX,
         CameraMaxBinY,
         CameraExposureDuration,
+        ConnectionTimeout,
         DomeShutterTimeout,
         DomeAzimuthTimeout,
         DomeAltitudeTimeout,
@@ -663,6 +696,10 @@
                 configuration.Settings.CameraExposureDuration = newValue;
                 break;
 
+            case NumericConfigurationItem.ConnectionTimeout:
+                configuration.Settings.ConnectionTimeout = newValue;
+                break;
+
             default:
                 throw new InvalidValueException($"OnDoubleItemChange - Unknown numeric configuration item: {numericConfigurationItem}");
         }
@@ -673,6 +710,10 @@
     {
         switch (numericConfigurationItem)
         {
+            case NumericConfigurationItem.ApplicationPort:
+                configuration.Settings.ApplicationPort = newValue;
+                break;
+
             case NumericConfigurationItem.CameraMaxBinX:
                 configuration.Settings.CameraMaxBinX = newValue;
                 break;
@@ -730,7 +771,7 @@
                 break;
 
             case NumericConfigurationItem.FocuserTimeout:
-                configuration.Settings.FocuserTimeout= newValue;
+                configuration.Settings.FocuserTimeout = newValue;
                 break;
 
             case NumericConfigurationItem.RotatorTimeout:
@@ -774,6 +815,8 @@
         chkDisplayCalls = configuration.Settings.DisplayMethodCalls;
         chkDebug = configuration.Settings.Debug;
         chkGoHomeOnDeviceSelection = configuration.Settings.GoHomeOnDeviceSelected;
+        connectionTimeout = configuration.Settings.ConnectionTimeout;
+        applicationPort = configuration.Settings.ApplicationPort;
 
         // Trace settings
         chkTraceDiscovery = configuration.Settings.TraceDiscovery;
