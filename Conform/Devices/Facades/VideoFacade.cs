@@ -54,8 +54,90 @@ namespace ConformU
         {
             get
             {
-                dynamic returnValue = FunctionNoParameters(() => driver.LastVideoFrame);
-                return returnValue;
+                VideoFrame frame = null;
+                try
+                {
+                    // Get the last VideoFrame
+                    dynamic lastFrame = FunctionNoParameters(() => driver.LastVideoFrame);
+                    logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Got last frame from driver");
+                    // Create and populate the correct metadata return type
+                    List<KeyValuePair<string, string>> imageMetaData = new();
+                    foreach (var pair in lastFrame.ImageMetadata)
+                    {
+                        logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Found pair: {pair.Key()}, {pair.Value()}");
+                        imageMetaData.Add(new KeyValuePair<string, string>(pair.Key(), pair.Value()));
+                    }
+                    // Create a new frame with the correct parameter types
+                    logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Creating frame");
+
+                    object imageArray;
+                    byte[] previewBitmap;
+                    long frameNumber;
+                    double exposureDuration;
+                    string exposureStartTime;
+
+                    try
+                    {
+                        imageArray = lastFrame.ImageArray;
+                    }
+                    catch (System.Exception ex)
+                    {
+                        logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting ImageArray, supplying default value: null\r\n{ex}");
+                        imageArray = null;
+                    }
+
+                    try
+                    {
+                        previewBitmap = lastFrame.PreviewBitmap;
+                    }
+                    catch (System.Exception ex)
+                    {
+                        logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting PreviewBitmap, supplying default value: byte[10]\r\n{ex}");
+                        previewBitmap = new byte[10];
+                    }
+
+                    try
+                    {
+                        frameNumber = lastFrame.FrameNumber;
+                    }
+                    catch (System.Exception ex)
+                    {
+                        logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting FrameNumber, supplying default value: 0\r\n{ex}");
+                        frameNumber = 0;
+                    }
+
+                    try
+                    {
+                        exposureDuration = lastFrame.ExposureDuration;
+                    }
+                    catch (System.Exception ex)
+                    {
+                        logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting ExposureDuration, supplying default value: 0.0\r\n{ex}");
+                        exposureDuration = 0.0;
+                    }
+
+                    try
+                    {
+                        exposureStartTime = lastFrame.ExposureStartTime;
+                    }
+                    catch (System.Exception ex)
+                    {
+                        logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting ExposureStartTime, supplying default value: empty string\r\n{ex}");
+                        exposureStartTime = "";
+                    }
+
+                    frame = new(imageArray, previewBitmap, frameNumber, exposureDuration, exposureStartTime, imageMetaData);
+                    logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Created frame");
+
+                }
+                catch (System.Exception ex)
+                {
+                    logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception\r\n{ex}");
+                }
+                logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Returning frame");
+
+                // Return the new frame in place of the original
+                return frame;
             }
         }
 
