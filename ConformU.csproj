@@ -18,7 +18,7 @@
 		<UserSecretsId>c49fec0a-dd2c-4e60-9e85-407d8d9bdd9f</UserSecretsId>
 		<Platforms>AnyCPU;x86</Platforms>
 		<ApplicationIcon>ASCOM.ico</ApplicationIcon>
-		
+
 		<!-- Set assembly version numbers -->
 		<AssemblyMajor>0</AssemblyMajor>
 		<AssemblyMinor>9</AssemblyMinor>
@@ -29,8 +29,8 @@
 		The revision number is calculated by using the lowest 5 bits (0::31) to store the build hour (0::23) and the upper 11 bits to store the build day since the 1st January 2022.
 		This approach gives a revision number that changes every hour and that only repeats after 2048 days (over 5 years). 
 		To simplify the formula, years are assumed to be 366 days in length and UTC is used for the time of day so that daylight savings time changes can be ignored. -->
-		
-		<RevisionNumber>$([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Modulo($([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Subtract($([System.DateTime]::Today.Year),2022)),366)) ,219)),2048)),32 )),$([System.DateTime]::UtcNow.TimeOfDay.Hours)))</RevisionNumber>
+
+		<RevisionNumber>$([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Modulo($([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Subtract($([System.DateTime]::UtcNow.Year),2022)),366)),$([System.DateTime]::UtcNow.DayOfYear))),2048)),32)),$([System.DateTime]::UtcNow.TimeOfDay.Hours)))</RevisionNumber>
 
 		<AssemblyVersion>$(AssemblyMajor).$(AssemblyMinor).$(AssemblyBuild).$(RevisionNumber)</AssemblyVersion>
 		<FileVersion>$(AssemblyMajor).$(AssemblyMinor).$(AssemblyBuild).$(RevisionNumber)</FileVersion>

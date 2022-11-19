@@ -13,19 +13,6 @@ cd
 MSBuild "J:\ConformU\ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Rebuild
 echo *** Completed Build
 
-
-
-
-echo *** Publishing Linux X64
-dotnet publish -c Debug /p:Platform="Any CPU" -r linux-x64 --framework net7.0 --self-contained true -o ./publish/conformu.linux-x64
-bsdtar -cJf publish/conformu.linux-x64.tar.xz -C publish\conformu.linux-x64\ *
-echo *** Completed Linux X64
-
-
-
-
-
-
 echo *** Publishing MacOS Intel silicon
 dotnet publish -c Debug -p:Platform="Any CPU" -r osx-x64 --framework net7.0 --self-contained true -o ./publish/conformu.macos-x64 -p:PublishSingleFile=true -p:PublishReadyToRunShowWarnings=true
 bsdtar -cJf publish/conformu.macos-x64.tar.xz -C publish\conformu.macos-x64\ *
@@ -55,7 +42,7 @@ signtool sign /a /as /fd SHA256 /tr http://time.certum.pl /td SHA256 "publish\Co
 echo *** Completed 32bit signing
 
 echo *** Publishing Linux ARM32
-dotnet publish -c Debug /p:Platform="Any CPU" -r linux-arm --framework net7.0 --self-contained true -o ./publish/conformu.linux-arm32
+dotnet publish -c Debug /p:Platform="Any CPU" -r linux-arm --framework net7.0 --self-contained true -o ./publish/conformu.linux-arm32 
 bsdtar -cJf publish/conformu.linux-arm32.tar.xz -C publish\conformu.linux-arm32 *
 echo *** Completed Linux ARM32
 
