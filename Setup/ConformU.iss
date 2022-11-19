@@ -112,7 +112,6 @@ begin
       UninstallRegistry := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{#SetupSetting("AppId")}' + '_is1');
       if RegQueryStringValue(HKLM, UninstallRegistry, 'UninstallString', UninstallExe) then
         begin
-          MsgBox('Setup will now remove the previous version.', mbInformation, MB_OK);
           Exec(RemoveQuotes(UninstallExe), ' /SILENT', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ResultCode);
           sleep(1000);    //Give enough time for the install screen to be repainted before continuing
         end
