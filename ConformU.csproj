@@ -20,9 +20,9 @@
 		<ApplicationIcon>ASCOM.ico</ApplicationIcon>
 
 		<!-- Set assembly version numbers -->
-		<AssemblyMajor>0</AssemblyMajor>
-		<AssemblyMinor>9</AssemblyMinor>
-		<AssemblyBuild>1</AssemblyBuild>
+		<AssemblyMajor>1</AssemblyMajor>
+		<AssemblyMinor>0</AssemblyMinor>
+		<AssemblyBuild>0</AssemblyBuild>
 
 		<!--Create a dynamic revision number based on time of build
 		 

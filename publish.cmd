@@ -43,17 +43,17 @@ echo *** Completed 32bit signing
 
 echo *** Publishing Linux ARM32
 dotnet publish -c Debug /p:Platform="Any CPU" -r linux-arm --framework net7.0 --self-contained true -o ./publish/conformu.linux-arm32 
-bsdtar -cJf publish/conformu.linux-arm32.tar.xz -C publish\conformu.linux-arm32 *
+bsdtar -cJf publish/conformu.linux-arm32.needsexec.tar.xz -C publish\conformu.linux-arm32 *
 echo *** Completed Linux ARM32
 
 echo *** Publishing Linux ARM64
-dotnet publish -c Debug /p:Platform="Any CPU" -r linux-arm64 --framework net7.0 --self-contained true -o ./publish/conformu.linux-aarch64
-bsdtar -cJf publish/conformu.linux-aarch64.tar.xz -C publish\conformu.linux-aarch64 *
+dotnet publish -c Debug /p:Platform="Any CPU" -r linux-arm64 --framework net7.0 --self-contained true -o ./publish/conformu.linux-arm64
+bsdtar -cJf publish/conformu.linux-arm64.needsexec.tar.xz -C publish\conformu.linux-arm64 *
 echo *** Completed Linux ARM64
 
 echo *** Publishing Linux X64
 dotnet publish -c Debug /p:Platform="Any CPU" -r linux-x64 --framework net7.0 --self-contained true -o ./publish/conformu.linux-x64
-bsdtar -cJf publish/conformu.linux-x64.tar.xz -C publish\conformu.linux-x64\ *
+bsdtar -cJf publish/conformu.linux-x64.needsexec.tar.xz -C publish\conformu.linux-x64\ *
 echo *** Completed Linux X64
 
 echo *** Creating Windows installer
