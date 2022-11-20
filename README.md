@@ -1,5 +1,5 @@
-# ConformU - Beta 0.9.0.0
-Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca Devices and ASCOM Drivers conform to the ASCOM interface specification. ConformU runs natively on Linux, Arm, MacOS and Windows and, when out of beta, will supersede the original Windows Forms based Conform application.
+# Conform Universal
+Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca Devices and ASCOM Drivers conform to the ASCOM interface specification. ConformU runs natively on Linux, Arm, MacOS and Windows and will supersede the original Windows Forms based Conform application.
 
 # Features
 * Tests Alpaca devices on all Platforms and COM Drivers on the Windows platform
@@ -13,7 +13,8 @@ Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca De
   * in the browser UI and console
   * as a human readable log file
   * as a structured machine readable JSON report file
-* The new Alpaca Discovery Map provides an Alpaca Device view of discovered ASCOM devices and a unique ASCOM Device view of discovered Alpaca devices.
+* The Alpaca Discovery Map provides an Alpaca Device view of discovered ASCOM devices and a unique ASCOM Device view of discovered Alpaca devices.
+* The application will advise when a new update is available on GitHub.
 
 # Changes from current Conform behaviour
 * An issue summary is appended at the end of the conformance report.
@@ -33,19 +34,19 @@ Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca De
 * '--version' - Display version information.
 
 # Supported Operating Systems and Hardware
-* Linux (tested on Mint 64bit)
-* Arm (tested on Raspberry Pi)
-  * 32bit OS (Pi-3B 1Gb)
-  * 64bit OS (Pi-4 8Gb)
-* Windows (tested)
-  * x64 pre-compiled
-  * x86 pre-compiled
-  * x64 requires DotNet support to be installed
-  * x86 requires DotNet support to be installed
-* MacOS (not tested)
+* Linux 64bit
+* Arm (tested on Raspberry Pi 3B and 4)
+  * 32bit OS
+  * 64bit OS
+* Windows
+  * x64
+  * x86
+* MacOS
+  * Apple silicon
+  * Intel silicon
 
 # Installation and support requirements
-Except for the Windows specific builds that require .NET to be pre-installed, the applications are self-contained and do not require any additional support components to be installed on the target machine. To install ConformU:
+The applications are self-contained and do not require any additional support components to be installed on the target machine. To install ConformU:
 * Create a folder on your device to hold the ConformU application.
 * Expand the appropriate "zip" or "tar" archive that corresponds to your device's hardware / OS architecture into the newly created folder.
 * Linux environments only: Give the executable run permissions with the 'chmod 755 ./conformu' command.
