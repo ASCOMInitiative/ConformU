@@ -13,8 +13,10 @@
 </div>
 
 @*Status message*@
-<div class="row">
-    <p style="margin-top: 20px"><b>Status:</b>   @status</p>
+<div>
+    <p style="margin-top: 20px">
+        <b>Status:</b>   @status
+    </p>
 </div>
 
 @*Configuration tabs*@
@@ -482,6 +484,11 @@
 
     </Tabs>
 </RadzenTabs>
+<div>
+    <p style="margin-top: 20px">
+        <b>Settings file:</b>   @configuration.SettingsFileName
+    </p>
+</div>
 
 @code {
     double telescopeSlewTolerance;
@@ -642,7 +649,7 @@
 
     protected override void OnInitialized()
     {
-        status = $"{configuration.Status} - Configuration file: {configuration.SettingsFileName}";
+        status = $"{configuration.Status}";
         SetConfiguration();
 
         isWindowsOs = OperatingSystem.IsWindows();

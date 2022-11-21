@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Blazorise.Utilities;
+using System;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ConformU
 {
@@ -25,46 +27,57 @@ namespace ConformU
 
             try
             {
+                // Create a new settings file with default values in case the supplied file cannot be used
                 settings = new();
 
-                if (string.IsNullOrEmpty(configurationFile))
+                // Get the full settings file name including path
+                if (string.IsNullOrEmpty(configurationFile)) // No override settings fie has been specified so use the application default settings file
                 {
                     string folderName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), FOLDER_NAME);
                     SettingsFileName = Path.Combine(folderName, SETTINGS_FILENAME);
                     TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Settings folder: {folderName}, Settings file: {SettingsFileName}");
                 }
-                else
+                else // An override settings file has been supplied so use it instead of the default settings file
                 {
                     SettingsFileName = configurationFile;
                     TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Settings file: {SettingsFileName}");
                 }
 
-
-                if (File.Exists(SettingsFileName))
+                // Load the values in the settings file if it exists
+                if (File.Exists(SettingsFileName)) // Settings file exists
                 {
+                    // Read the file contents into a string
                     TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, "File exists and read OK");
                     string serialisedSettings = File.ReadAllText(SettingsFileName);
                     TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Serialised settings: {serialisedSettings}");
 
-                    settings = JsonSerializer.Deserialize<Settings>(serialisedSettings, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    Status = "Settings read OK";
+                    // Set de-serialisation options
+                    JsonSerializerOptions options = new()
+                    {
+                        PropertyNameCaseInsensitive = true // Ignore incorrect element name casing
+                    };
+                    options.Converters.Add(new JsonStringEnumConverter()); // Accept both string member names and integer member values as valid for enum elements.
+
+                    // De-serialise the settings string into a Settings object
+                    settings = JsonSerializer.Deserialize<Settings>(serialisedSettings, options);
+                    Status = $"Settings read OK.";
                 }
-                else
+                else // Settings file does not exist
                 {
                     TL.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Configuration file does not exist, initialising new file: {SettingsFileName}");
                     PersistSettings(settings);
-                    Status = "Settings set to defaults on first time use.";
+                    Status = $"Settings set to defaults on first time use.";
                 }
             }
             catch (JsonException ex)
             {
                 TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"Error parsing Conform settings file: {ex.Message}");
-                Status = "Settings file corrupted, please reset to default values";
+                Status = $"Settings file corrupted, please reset to default values.";
             }
             catch (Exception ex)
             {
                 TL?.LogMessage("ConformConfiguration", MessageLevel.Error, ex.ToString());
-                Status = "Exception reading settings, default values are in use.";
+                Status = $"Exception reading settings, default values are in use.";
             }
         }
 
@@ -136,7 +149,6 @@ namespace ConformU
             PersistSettings(settings);
             Status = $"Settings reset at {DateTime.Now:HH:mm:ss.f}.";
             RaiseUiHasChangedEvent();
-
         }
 
         public delegate void MessageEventHandler(object sender, MessageEventArgs e);
@@ -178,6 +190,8 @@ namespace ConformU
                 {
                     WriteIndented = true
                 };
+                options.Converters.Add(new JsonStringEnumConverter());
+
                 string serialisedSettings = JsonSerializer.Serialize<Settings>(settingsToPersist, options);
 
                 Directory.CreateDirectory(Path.GetDirectoryName(SettingsFileName));
