@@ -1,5 +1,5 @@
-# ConformU - Beta 0.9.0.0
-Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca Devices and ASCOM Drivers conform to the ASCOM interface specification. ConformU runs natively on Linux, Arm, MacOS and Windows and, when out of beta, will supersede the original Windows Forms based Conform application.
+# Conform Universal
+Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca Devices and ASCOM Drivers conform to the ASCOM interface specification. ConformU runs natively on Linux, Arm, MacOS and Windows and will supersede the original Windows Forms based Conform application.
 
 # Features
 * Tests Alpaca devices on all Platforms and COM Drivers on the Windows platform
@@ -13,7 +13,8 @@ Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca De
   * in the browser UI and console
   * as a human readable log file
   * as a structured machine readable JSON report file
-* The new Alpaca Discovery Map provides an Alpaca Device view of discovered ASCOM devices and a unique ASCOM Device view of discovered Alpaca devices.
+* The Alpaca Discovery Map provides an Alpaca Device view of discovered ASCOM devices and a unique ASCOM Device view of discovered Alpaca devices.
+* The application will advise when a new update is available on GitHub.
 
 # Changes from current Conform behaviour
 * An issue summary is appended at the end of the conformance report.
@@ -21,7 +22,7 @@ Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca De
 * Settings can be reset to default if required.
 * Navigation is locked while Alpaca discovery and device testing is underway, but the conformance test run can still be interrupted on demand.
 
-## Command line options
+# Command line options
 * '--commandline' - Run as a command line application with no graphical interface using a pre-configured settings file.
 * '--settings fullyqualifiedfilename' - Fully qualified file name of the application configuration file. Leave blank to use the default location.
 * '--logfilepath fullyqualifiedlogfilepath' - Fully qualified path to the log file folder. Leave blank to use the default mechanic, which creates a new folder each day,
@@ -29,30 +30,38 @@ Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca De
 * '--resultsfile fullyqualifiedfilename' - Fully qualified file name of the results file.
 * '--debugdiscovery' - Write discovery debug information to the log.
 * '--debugstartup' - Write start-up debug information to the log.
-* '--help' - Dislay a help screen.
+* '--help' - Display a help screen.
 * '--version' - Display version information.
 
 # Supported Operating Systems and Hardware
-* Linux (tested on Mint 64bit)
-* Arm (tested on Raspberry Pi)
-  * 32bit OS (Pi-3B 1Gb)
-  * 64bit OS (Pi-4 8Gb)
-* Windows (tested)
-  * x64 pre-compiled
-  * x86 pre-compiled
-  * x64 requires DotNet support to be installed
-  * x86 requires DotNet support to be installed
-* MacOS (not tested)
+* Linux 64bit
+* Arm (tested on Raspberry Pi 3B and 4)
+  * 32bit OS
+  * 64bit OS
+* Windows
+  * x64
+  * x86
+* MacOS
+  * Apple silicon
+  * Intel silicon
 
 # Installation and support requirements
-Except for the Windows specific builds that require .NET to be pre-installed, the applications are self-contained and do not require any additional support components to be installed on the target machine. To install ConformU:
-* Create a folder on your device to hold the ConformU application.
-* Expand the appropriate "zip" or "tar" archive that corresponds to your device's hardware / OS architecture into the newly created folder.
-* Linux environments only: Give the executable run permissions with the 'chmod 755 ./conformu' command.
-* The application executable (conformu (Linux) or conformu.exe (Windows))can now be run directly from a file browser or from the command line.
-* When run, the executable starts a command line server application and, if operating in the default GUI mode, automatically starts the default browser and creates a new tab to hold the application window.
+The applications are self-contained and do not require any additional support components to be installed on the target machine. To install ConformU:
+* **Windows**
+  * Download and run the Windows installer from the latest release.
+  * The Windows installer supports both 32bit and 64bit OS and will create the expected start menu entries.
+  * Optionally it will create a desktop icon.
+* **MacOS**
+  * Download the MacOS installer from the latest release.
+  * The installer is a DMG file that self-mounts when double clicked and displays a basic GUI.
+  * Use this GUI to drag and drop the Conform Universal application to the Applications folder.
+  * The application can then be started as normal from the Applications folder.
+* **Linux**
+  * Download the appropriate Linux x64, ARM 32bit or ARM 64bit compressed archive for your environment from the latest release to a convenient folder.
+  * Expand the archive using "tar -xf" or a similar utility.
+  * The application can then be run from the command line by the command: ./conformu
 
-# Known Issues
-* The server console application does not always close immediately the browser window is closed. Pressing CTRL/C in the console window will terminate the server application.
-* Raspberry Pi3B - If the Chromium browser is the default browser and is not already running, the ConformU UI will not be displayed, and Chromium error messages will appear in the console. If Chromium is already running, the ConformU UI is displayed as expected. The Firefox browser displays the ConformU UI correctly regardless of whether or not it is already running. The issue with Chromium does not appear on the 64bit Pi4.
-* When testing COM Video drivers, the Video.LastVideoFrame property incorrectly reports a PropertyNotImplemented error. This will be fixed in the next release.
+# Mode of Operation
+Conform Universal is a .NET single page Blazor application, which runs a web server on the localhost IP address (127.0.0.1). Each time the application starts it selects an unused IP port unless configured to always use the same port.
+
+When run, the executable starts the command line server application and, if operating in the default GUI mode, automatically starts the default browser and creates a tab to hold the application window. If operating in command line mode, the browser is not started.
