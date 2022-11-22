@@ -78,8 +78,26 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "J:\ConformU\publish\ConformU64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
-Source: "J:\ConformU\publish\ConformU86\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: not Is64BitInstallMode
+Source: "J:\ConformU\publish\ConformU64\*.exe"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
+Source: "J:\ConformU\publish\ConformU64\*.dll"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
+Source: "J:\ConformU\publish\ConformU64\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode
+Source: "J:\ConformU\publish\ConformU64\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
+
+
+
+
+Source: "J:\ConformU\publish\ConformU86\*.exe"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
+Source: "J:\ConformU\publish\ConformU86\*.dll"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
+Source: "J:\ConformU\publish\ConformU86\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode
+Source: "J:\ConformU\publish\ConformU86\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
+
+
+
+
+
+
+
+
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\ASCOM.ico"
