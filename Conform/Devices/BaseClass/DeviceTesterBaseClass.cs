@@ -831,7 +831,7 @@ namespace ConformU
         /// <param name="timeoutSeconds">Number of seconds before the operation times out</param>
         /// <exception cref="InvalidValueException"></exception>
         /// <exception cref="TimeoutException">If the operation takes longer than the timeout value</exception>
-        internal void WaitUntil(string actionName, Func<bool> waitFunction, int pollInterval, int timeoutSeconds, Func<string>? statusString = null)
+        internal void WaitWHile(string actionName, Func<bool> waitFunction, int pollInterval, int timeoutSeconds, Func<string>? statusString = null)
         {
             // Validate the supplied poll interval
             if (pollInterval < 100) throw new InvalidValueException($"The poll interval must be >=100ms: {pollInterval}");

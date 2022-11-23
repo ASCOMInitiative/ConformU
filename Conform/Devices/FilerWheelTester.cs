@@ -278,7 +278,7 @@ namespace ConformU
                                         m_FilterWheel.Position = i;
                                         l_StartTime = DateTime.Now;
                                         LogCallToDriver("Position Set", "About to get Position property repeatedly");
-                                        WaitUntil($"Moving to position {i}", () => { return m_FilterWheel.Position != i; }, 500, FILTER_WHEEL_TIME_OUT);
+                                        WaitWHile($"Moving to position {i}", () => { return m_FilterWheel.Position != i; }, 500, FILTER_WHEEL_TIME_OUT);
 
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
@@ -290,7 +290,7 @@ namespace ConformU
                                             LogIssue("Position Set", "Filter wheel did not reach specified position: " + i.ToString() + " within timeout of: " + FILTER_WHEEL_TIME_OUT.ToString());
                                         //WaitFor(1000); // Pause to allow filter wheel to stabilise
                                         Stopwatch sw = Stopwatch.StartNew();
-                                        WaitUntil($"Waiting for wheel to stabilise at position {i}", () => { return sw.ElapsedMilliseconds < 1000; }, 500, 1);
+                                        WaitWHile($"Waiting for wheel to stabilise at position {i}", () => { return sw.ElapsedMilliseconds < 1000; }, 500, 1);
 
                                     }
                                     catch (Exception ex)

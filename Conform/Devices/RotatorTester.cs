@@ -944,20 +944,20 @@ namespace ConformU
                     {
                         case RotatorPropertyMethod.Move:
                             {
-                                WaitUntil("Waiting for move to complete", () => { return m_Rotator.IsMoving; }, 500, settings.RotatorTimeout, () => { return $"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition):000} / {Math.Abs(p_value):000} relative"; });
+                                WaitWHile("Waiting for move to complete", () => { return m_Rotator.IsMoving; }, 500, settings.RotatorTimeout, () => { return $"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition):000} / {Math.Abs(p_value):000} relative"; });
                                 break;
                             }
 
                         case RotatorPropertyMethod.MoveMechanical:
                         case RotatorPropertyMethod.MoveAbsolute:
                             {
-                                WaitUntil("Waiting for move to complete", () => { return m_Rotator.IsMoving; }, 500, settings.RotatorTimeout, () => { return $"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition):000} / {Math.Abs(p_value - p_RotatorStartPosition):000} absolute"; });
+                                WaitWHile("Waiting for move to complete", () => { return m_Rotator.IsMoving; }, 500, settings.RotatorTimeout, () => { return $"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition):000} / {Math.Abs(p_value - p_RotatorStartPosition):000} absolute"; });
                                 break;
                             }
 
                         default:
                             {
-                                WaitUntil("Waiting for move to complete", () => { return m_Rotator.IsMoving; }, 500, settings.RotatorTimeout, null);
+                                WaitWHile("Waiting for move to complete", () => { return m_Rotator.IsMoving; }, 500, settings.RotatorTimeout, null);
                                 break;
                             }
                     }
