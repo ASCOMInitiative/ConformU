@@ -265,7 +265,7 @@ namespace ConformU
                     m_Slewing = domeDevice.Slewing; // Try to read the Slewing property
                     if (m_Slewing)
                         LogInfo("DomeSafety", $"The Slewing property is true at device start-up. This could be by design or possibly Slewing logic is inverted?");// Display a message if slewing is True
-                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout); // Wait for slewing to finish
+                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout, null); // Wait for slewing to finish
                 }
                 catch (Exception ex)
                 {
@@ -431,7 +431,7 @@ namespace ConformU
                 {
                     LogCallToDriver("DomeSafety", "About to call Park");
                     domeDevice.Park();
-                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout);
+                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout, null);
                     LogOK("DomeSafety", "Dome successfully parked");
                 }
                 catch (Exception)
@@ -448,7 +448,7 @@ namespace ConformU
             if (!settings.DomeOpenShutter) LogInfo("SlewToAltitude", "You have configured Conform not to open the shutter so the following slew may fail.");
 
             SetTest("SlewToAltitude");
-            SetAction($"Slewing to {p_Altitude} degrees");
+            SetAction($"Slewing to altitude {p_Altitude} degrees");
             LogCallToDriver(p_Name, "About to call SlewToAltitude");
             domeDevice.SlewToAltitude(p_Altitude);
             if (m_CanReadSlewing)
@@ -456,7 +456,7 @@ namespace ConformU
                 LogCallToDriver(p_Name, "About to get Slewing property");
                 if (domeDevice.Slewing)
                 {
-                    DomeWaitForSlew(settings.DomeAltitudeMovementTimeout); if (cancellationToken.IsCancellationRequested) return;
+                    DomeWaitForSlew(settings.DomeAltitudeMovementTimeout, () => { return $"{domeDevice.Altitude:00} / {p_Altitude:00}"; }); if (cancellationToken.IsCancellationRequested) return;
                     LogOK(p_Name + " " + p_Altitude, "Asynchronous slew OK");
                 }
                 else
@@ -488,7 +488,7 @@ namespace ConformU
         }
         private void DomeSlewToAzimuth(string p_Name, double p_Azimuth)
         {
-            SetAction($"Slewing to {p_Azimuth} degrees");
+            SetAction($"Slewing to azimuth {p_Azimuth} degrees");
             if (p_Azimuth >= 0.0 & p_Azimuth <= 359.9999999)
             {
                 m_CanSlewToAzimuth = false;
@@ -506,7 +506,7 @@ namespace ConformU
                 LogCallToDriver(p_Name, "About to get Slewing property");
                 if (domeDevice.Slewing)
                 {
-                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout); if (cancellationToken.IsCancellationRequested) return;
+                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout, () => { return $"{domeDevice.Azimuth:000} / {p_Azimuth:000}"; }); if (cancellationToken.IsCancellationRequested) return;
                     LogOK(p_Name + " " + p_Azimuth, "Asynchronous slew OK");
                 }
                 else
@@ -537,12 +537,12 @@ namespace ConformU
             }
 
         }
-        private void DomeWaitForSlew(double p_TimeOut)
+        private void DomeWaitForSlew(double p_TimeOut, Func<string> reportingFunction)
         {
             DateTime l_StartTime;
             l_StartTime = DateTime.Now;
 
-            WaitUntil("", () => { return domeDevice.Slewing; }, 500, Convert.ToInt32(p_TimeOut));
+            WaitUntil("", () => { return domeDevice.Slewing; }, 500, Convert.ToInt32(p_TimeOut), reportingFunction);
 
             SetStatus("");
             if ((DateTime.Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut))
@@ -831,7 +831,7 @@ namespace ConformU
                             if (m_CanFindHome)
                             {
                                 SetTest(p_Name);
-                                SetAction("Finding home");  
+                                SetAction("Finding home");
                                 SetStatus("Waiting for movement to stop");
                                 try
                                 {
