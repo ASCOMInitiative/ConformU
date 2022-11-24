@@ -54,9 +54,11 @@
 
     AlpacaConfiguration alpacaConfiguration;
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         alpacaConfiguration = configuration.Settings.AlpacaConfiguration;
+
+        StartDiscovery("Initialise");
     }
 
     async void StartDiscovery(string buttonName)
