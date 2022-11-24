@@ -1,5 +1,7 @@
 ﻿@page "/Help"
 @using System.Reflection
+@using ASCOM.Common
+@using ASCOM.Common.Alpaca
 
 <h2>Help</h2>
 
@@ -8,12 +10,12 @@
 
 <p style="margin-top: 20px">For support please post on the <a href="https://ascomtalk.groups.io/g/Developer" target="_blank">ASCOM Developer Support Forum</a></p>
 
-<h4 style="margin-top: 20px">Command line options</h4>
+<h4 style="margin-top: 40px">Command line parameters</h4>
 <p>
     <table id="commandline">
-        <col style="width:370px">
+        <col style="width:390px">
         <tr>
-            <th>Command</th>
+            <th>Parameter</th>
             <th>Description</th>
         </tr>
         <tr>
@@ -54,6 +56,35 @@
         </tr>
     </table>
 </p>
+
+<h4 style="margin-top: 40px">Settings file parameter values</h4>
+<p>The string parameters listed below are converted to enum values within the application and must have one of the values in the Possible Values list. Any casing is accepted but misspelling will result in the file being reported as corrupt.</p>
+<p>
+    <table id="commandline">
+        <col style="width:390px">
+        <tr>
+            <th>Parameter</th>
+            <th>Possible Values</th>
+        </tr>
+        <tr>
+            <td><tt>DeviceType, AlpacaDevice:AscomDeviceType</tt></td>
+            <td>@string.Join(", ",Enum.GetNames(typeof(DeviceTypes)))</td>
+        </tr>
+        <tr>
+            <td><tt>AlpacaConfiguration:AccessServiceType, AlpacaDevice:ServiceType</tt></td>
+            <td>@string.Join(", ",Enum.GetNames(typeof(ServiceType)))</td>
+        </tr>
+        <tr>
+            <td><tt>AlpacaConfiguration:ImageArrayTransferType</tt></td>
+            <td>@string.Join(", ",Enum.GetNames(typeof(ImageArrayTransferType)))</td>
+        </tr>
+        <tr>
+            <td><tt>ComConfiguration:ComAccessMechanic</tt></td>
+            <td>@string.Join(", ",Enum.GetNames(typeof(ComAccessMechanic)))</td>
+        </tr>
+    </table>
+</p>
+
 
 @code
 {

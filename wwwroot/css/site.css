@@ -255,5 +255,5 @@ app {
 }
 
 table#commandline tr:nth-child(even) {
-    background-color: #f2f2f2;
+    background-color: #e6f2ff
 }

@@ -78,8 +78,10 @@ namespace ConformU
                             File.Delete(badVersionSettingsFileName);
                             File.Move(SettingsFileName, $"{badVersionSettingsFileName}");
 
+                            // Persist the default settings values
                             settings = new();
                             PersistSettings(settings);
+
                             Status = $"The current settings version: {originalSettingsCompatibilityVersion} does not match the required version: {Settings.SETTINGS_COMPATIBILTY_VERSION}. Settings reset to default values and original settings file renamed to {badVersionSettingsFileName}.";
                         }
                         catch (Exception ex2)
@@ -102,9 +104,15 @@ namespace ConformU
                 TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"Error parsing Conform settings file: {ex1}");
                 try
                 {
+                    // Rename the current settings file to preserve it
                     string corruptSettingsFileName = $"{SettingsFileName}.corrupt";
                     File.Delete(corruptSettingsFileName);
                     File.Move(SettingsFileName, $"{corruptSettingsFileName}");
+
+                    // Persist the default settings values
+                    settings = new();
+                    PersistSettings(settings);
+
                     Status = $"The settings file is corrupt ({ex1.Message}), settings have been reset to default values. The corrupt file has been renamed to {SettingsFileName}.corrupt";
                 }
                 catch (Exception ex2)
