@@ -55,6 +55,8 @@ namespace ConformU
 
         public override Task OnCircuitClosedAsync(Circuit circuit, CancellationToken cancellationToken)
         {
+            // Include a short delay to allow any new circuits to establish themselves before checking whether the application should close down
+            Task.Delay(TimeSpan.FromSeconds(1)).Wait();
             try
             {
                 // Remove the circuit from the circuit list if present (it should be!)
