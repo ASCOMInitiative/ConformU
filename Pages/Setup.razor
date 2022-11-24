@@ -1,7 +1,7 @@
 ﻿@page "/Setup"
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime jsRuntime
 
 @using System.Threading
 
@@ -81,7 +81,7 @@
         {
             url = $"{configuration.Settings.AlpacaConfiguration.AccessServiceType}://{configuration.Settings.AlpacaDevice.IpAddress}:{configuration.Settings.AlpacaDevice.IpPort}/setup".ToLowerInvariant();
             conformLogger.LogMessage("SetupAlpacaMain", MessageLevel.Debug, $"URL: {url}");
-            await JSRuntime.InvokeAsync<object>("open", url, "_blank");
+            await jsRuntime.InvokeVoidAsync("open", url, "_blank");
             conformLogger.LogMessage("SetupAlpacaMain", MessageLevel.Debug, $"Returned from URL: {url}");
         }
         catch (Exception ex)
@@ -101,7 +101,7 @@
         {
             url = $"{configuration.Settings.AlpacaConfiguration.AccessServiceType}://{configuration.Settings.AlpacaDevice.IpAddress}:{configuration.Settings.AlpacaDevice.IpPort}/setup/v1/{configuration.Settings.AlpacaDevice.AscomDeviceType}/{configuration.Settings.AlpacaDevice.AlpacaDeviceNumber}/setup".ToLowerInvariant();
             conformLogger.LogMessage("SetupAlpacaDevice", MessageLevel.Debug, $"URL: {url}");
-            await JSRuntime.InvokeAsync<object>("open", url, "_blank");
+            await jsRuntime.InvokeVoidAsync("open", url, "_blank");
             conformLogger.LogMessage("SetupAlpacaDevice", MessageLevel.Debug, $"Returned from URL: {url}");
         }
         catch (Exception ex)
