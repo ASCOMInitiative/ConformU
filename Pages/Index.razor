@@ -31,7 +31,7 @@
     private string statusVisible = "initial";
     private bool disposedValue;
     int screenLogRows = 10;
-    string screenLog = "Conform log.";
+    string screenLog;
     object screenLogLockObject = new object();
     object statusLockObject = new object();
     private string deviceDescription = "";
@@ -58,8 +58,10 @@
         {
             deviceDescription = $"COM {configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope)}: {configuration.Settings.DeviceName}";
         }
-        conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"End");
 
+        screenLog = configuration.Status;
+
+        conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"End");
     }
 
     void GoToSelectionPage(string buttonName)
@@ -285,7 +287,7 @@
         }
         catch
         {
-           // conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
+            // conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
         }
     }
 
