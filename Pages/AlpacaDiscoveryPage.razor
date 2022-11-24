@@ -9,7 +9,7 @@
 <h2 style=@statusVisible>Alpaca Discovery Map</h2>
 <div>
 
-    <RadzenButton Id="StartButton" Click=@(args => StartDiscovery("Starting test")) Text="Discover" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" Disabled=@configuration.Settings.OperationInProgress />
+    <RadzenButton Id="StartButton" Click=@(async args => await StartDiscovery("Starting test")) Text="Discover" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" Disabled=@configuration.Settings.OperationInProgress />
     <RadzenButton Click=@(args => StopTest("Stopping test")) Text="Stop" Style="margin-bottom: 20px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
 </div>
 
@@ -58,10 +58,10 @@
     {
         alpacaConfiguration = configuration.Settings.AlpacaConfiguration;
 
-        StartDiscovery("Initialise");
+        await StartDiscovery("Initialise");
     }
 
-    async void StartDiscovery(string buttonName)
+    async Task StartDiscovery(string buttonName)
     {
         try
         {
@@ -71,7 +71,7 @@
             // Set the operation in progress flag and refresh state throughout the page and navigation menu.
             configuration.Settings.OperationInProgress = true;
             configuration.RaiseUiHasChangedEvent();
-            StateHasChanged();
+            await InvokeAsync(() => { StateHasChanged(); });
 
             // Create a task cancellation token source and cancellation token
 
@@ -184,7 +184,7 @@
         {
             configuration.Settings.OperationInProgress = false;
             configuration.RaiseUiHasChangedEvent();
-            StateHasChanged();
+            await InvokeAsync(() => { StateHasChanged(); });
         }
     }
 
