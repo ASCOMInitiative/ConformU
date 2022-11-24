@@ -4,11 +4,19 @@ using ASCOM.Alpaca.Discovery;
 using ASCOM.Common;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace ConformU
 {
     public class Settings
     {
+        // Current version number for this settings class. Only needs to be incremented when there are breaking changes!
+        // For example this can be left at its current level when adding new settings that have usable default values.
+
+        // This value is set when values are actually persisted in ConformConfiguration.PersistSettings in order not to overwrite the value that is retrieved from the current settings file when it is read.
+        internal const int SETTINGS_COMPATIBILTY_VERSION = 1;
+
         private AscomDevice ascomDevice = new();
         private ComDevice comDevice = new();
         private DeviceTechnology deviceTechnology = DeviceTechnology.NotSelected;
@@ -18,6 +26,7 @@ namespace ConformU
 
         #region Application behaviour
 
+        public int SettingsCompatibilityVersion { get; set; } = 0; // Default is zero so that versions prior to introduction of the settings compatibility version number can be detected.
         public bool GoHomeOnDeviceSelected { get; set; } = true;
         public double ConnectionTimeout { get; set; } = 2.0;
         #endregion
@@ -109,6 +118,7 @@ namespace ConformU
         /// <summary>
         /// ASCOM Device type of the current device
         /// </summary>
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public DeviceTypes? DeviceType { get; set; } = null;
 
         #endregion
