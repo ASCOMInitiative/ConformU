@@ -7,7 +7,55 @@
 <p>(c) Peter Simpson (ASCOM Initiative) 2021-2022</p>
 
 <p style="margin-top: 20px">For support please post on the <a href="https://ascomtalk.groups.io/g/Developer" target="_blank">ASCOM Developer Support Forum</a></p>
-@code 
+
+<h4 style="margin-top: 20px">Command line options</h4>
+<p>
+    <table id="commandline">
+        <col style="width:370px">
+        <tr>
+            <th>Command</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td><tt>--commandline</tt></td>
+            <td>Run as a command line application with no graphical interface using the same settings as the GUI application.</td>
+        </tr>
+        <tr>
+            <td><tt>--settings FullyQualifiedFilename</tt></td>
+            <td>Fully qualified file name of the application configuration file. Leave blank to use the default location.</td>
+        </tr>
+        <tr>
+            <td><tt>--logfilepath FullyQualifiedLogfilePath</tt></td>
+            <td>Fully qualified path to the log file folder. Leave blank to use the default mechanic, which creates a new folder each day.</td>
+        </tr>
+        <tr>
+            <td><tt>--logfile filename </tt></td>
+            <td>If filename has no directory/folder component it will be appended to the log file path to create the fully qualified log file name. If filename is fully qualified, any logfilepath parameter will be ignored. Leave filename blank to use automatic file naming, where the file name will be based on the file creation time.</td>
+        </tr>
+        <tr>
+            <td><tt>--resultsfile FullyQualifiedFilename</tt></td>
+            <td>Fully qualified file name of the results file.</td>
+        </tr>
+        <tr>
+            <td><tt>--debugdiscovery</tt></td>
+            <td>Write discovery debug information to the log.</td>
+        </tr>
+        <tr>
+            <td><tt>--debugstartup</tt></td>
+            <td>Write start-up debug information to the log.</td>
+        </tr>
+        <tr>
+            <td><tt>--help</tt></td>
+            <td>Display a help screen</td>
+        </tr>
+        <tr>
+            <td><tt>--version</tt></td>
+            <td>Display version information</td>
+        </tr>
+    </table>
+</p>
+
+@code
 {
     string assemblyVersion;
 
