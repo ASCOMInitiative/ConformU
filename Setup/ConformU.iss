@@ -83,21 +83,10 @@ Source: "J:\ConformU\publish\ConformU64\*.dll"; DestDir: "{app}"; Flags: ignorev
 Source: "J:\ConformU\publish\ConformU64\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode
 Source: "J:\ConformU\publish\ConformU64\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
 
-
-
-
 Source: "J:\ConformU\publish\ConformU86\*.exe"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
 Source: "J:\ConformU\publish\ConformU86\*.dll"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
 Source: "J:\ConformU\publish\ConformU86\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode
 Source: "J:\ConformU\publish\ConformU86\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
-
-
-
-
-
-
-
-
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\ASCOM.ico"
