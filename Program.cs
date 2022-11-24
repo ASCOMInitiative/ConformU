@@ -98,7 +98,7 @@ namespace ConformU
             }
 
             // Flag if discovery debug information should be included in the log file
-            if (commandLineOptions.DebugDiscovery)
+            if (commandLineOptions.DebugDiscovery.HasValue)
             {
                 argList.Add($"--{COMMAND_OPTION_DEBUG_DISCOVERY}");
                 argList.Add("true");
@@ -151,10 +151,10 @@ namespace ConformU
             conformConfiguration = new(conformLogger, commandLineOptions.SettingsFileLocation);
 
             // Enable logging of Alpaca discovery if a command line option requires this
-            conformConfiguration.Settings.TraceDiscovery = commandLineOptions.DebugDiscovery;
+            if (commandLineOptions.DebugDiscovery.HasValue) conformConfiguration.Settings.TraceDiscovery = commandLineOptions.DebugDiscovery.Value;
 
             // Set the results filename if supplied on the command line
-            conformConfiguration.Settings.ResultsFileName = commandLineOptions.ResultsFileName;
+            if (!string.IsNullOrEmpty(commandLineOptions.ResultsFileName)) conformConfiguration.Settings.ResultsFileName = commandLineOptions.ResultsFileName;
 
             // Pass in the blazor server connection timeout
             Console.WriteLine($"Server connection timeout: {conformConfiguration.Settings.ConnectionTimeout}");
@@ -201,15 +201,19 @@ namespace ConformU
             }
             else // Run as a web operation
             {
-                // Start a task to check whether any updates are available. Started here to give the maximum time to get a result before the UI is first displayed
-                Task.Run(async () =>
+                // Start a task to check whether any updates are available, if configured to do so.
+                // The update check is started here to give the maximum time to get a result before the UI is first displayed
+                if (conformConfiguration.Settings.UpdateCheck)
                 {
-                    try
+                    Task.Run(async () =>
                     {
-                        await Update.CheckForUpdates();
-                    }
-                    catch { } // Ignore exceptions here
-                });
+                        try
+                        {
+                            await Update.CheckForUpdates();
+                        }
+                        catch { } // Ignore exceptions here
+                    });
+                }
 
                 // In production set the working directory to the application directory
                 if (!Debugger.IsAttached)

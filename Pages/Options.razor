@@ -44,8 +44,7 @@
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Style="margin-top:6px;" Name="CHKUPDATES" @bind-Value=@chkUpdates TValue="bool" Change=@(args =>
                                         OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
-                        <RadzenLabel Text="Check for updates (not implemented)" Component="CHKUPDATES" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
-                        <RadzenTextBox @bind-Value="lastUpdateDate" Disabled=true />
+                        <RadzenLabel Text="Check for updates" Component="CHKUPDATES" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
                     </div>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKMETHODCALLS" @bind-Value=@chkDisplayCalls TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.DisplayCalls)) />
@@ -498,7 +497,6 @@
     string alpacaAndComText;
     bool strictCasing;
     bool chkTraceDiscovery;
-    bool chkTraceSettings;
     bool chkTraceAlpacaCalls;
     bool cameraTestImageArrayVariant;
     bool chkGoHomeOnDeviceSelection;
@@ -623,7 +621,6 @@
     private bool chkUpdates;
     private bool chkDisplayCalls;
     private bool chkDebug;
-    private string lastUpdateDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
 
     // Alpaca configuration
     private int alpacaNumberOfDiscoveryPolls;
@@ -827,7 +824,6 @@
 
         // Trace settings
         chkTraceDiscovery = configuration.Settings.TraceDiscovery;
-        chkTraceSettings = configuration.Settings.TraceDiscovery;
         chkTraceAlpacaCalls = configuration.Settings.TraceAlpacaCalls;
 
         // COM Settings

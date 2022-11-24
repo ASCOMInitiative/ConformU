@@ -22,7 +22,7 @@ namespace ConformU
         public string ResultsFileName { get; set; }
 
         [Option('d', "debugdiscovery", Required = false, HelpText = "'--debugdiscovery' - Write discovery debug information to the log.")]
-        public bool DebugDiscovery { get; set; }
+        public bool? DebugDiscovery { get; set; }
 
         [Option('t', "debugstartup", Required = false, HelpText = "'--debugstartup' - Write start-up debug information to the log.")]
         public bool DebugStartup { get; set; }
