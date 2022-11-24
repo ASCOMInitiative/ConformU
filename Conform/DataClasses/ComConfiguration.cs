@@ -2,6 +2,6 @@
 {
     public class ComConfiguration
     {
-        public ComAccessMechanic ComACcessMechanic { get; set; } = ComAccessMechanic.Native;
+        public ComAccessMechanic ComAccessMechanic { get; set; } = ComAccessMechanic.Native;
     }
 }

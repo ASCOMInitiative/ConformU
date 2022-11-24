@@ -1207,7 +1207,7 @@ namespace ConformU
             else if (ex is ASCOM.NotImplementedException)
             {
                 // ASCOM.NotImplementedException is expected if received from the cross platform library DriverAccess module, otherwise it is an issue, so test for this condition.
-                if ((settings.ComConfiguration.ComACcessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM)) // We are testing a COM device using the cross platform DriverAccess module so report OK.
+                if ((settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM)) // We are testing a COM device using the cross platform DriverAccess module so report OK.
                 {
                     LogOK(MemberName, "Received a NotImplementedException from DriverAccess as expected");
                 }

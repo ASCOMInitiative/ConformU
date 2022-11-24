@@ -113,7 +113,7 @@ namespace ConformU
                         break;
 
                     case DeviceTechnology.COM:
-                        switch (settings.ComConfiguration.ComACcessMechanic)
+                        switch (settings.ComConfiguration.ComAccessMechanic)
                         {
                             case ComAccessMechanic.Native:
                                 LogInfo("CreateDevice", $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
@@ -126,7 +126,7 @@ namespace ConformU
                                 break;
 
                             default:
-                                throw new ASCOM.InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComACcessMechanic}");
+                                throw new ASCOM.InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComAccessMechanic}");
                         }
                         break;
 

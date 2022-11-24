@@ -133,7 +133,7 @@ namespace ConformU
                         break;
 
                     case DeviceTechnology.COM:
-                        switch (settings.ComConfiguration.ComACcessMechanic)
+                        switch (settings.ComConfiguration.ComAccessMechanic)
                         {
                             case ComAccessMechanic.Native:
                                 LogInfo("CreateDevice", $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
@@ -146,7 +146,7 @@ namespace ConformU
                                 break;
 
                             default:
-                                throw new ASCOM.InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComACcessMechanic}");
+                                throw new ASCOM.InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComAccessMechanic}");
                         }
                         break;
 
@@ -688,7 +688,7 @@ namespace ConformU
                                         }
                                         catch (Exception ex)
                                         {
-                                            LogDebug("SetSwitch ", $"Exception generated - Switch can write: {l_SwitchCanWrite}, IsMethodNotImplementedException: {IsMethodNotImplementedException(ex)}, IsNotImplementedException: {IsNotImplementedException(ex)}, COM Access mechanic: {settings.ComConfiguration.ComACcessMechanic}, Device Technology: {settings.DeviceTechnology}");
+                                            LogDebug("SetSwitch ", $"Exception generated - Switch can write: {l_SwitchCanWrite}, IsMethodNotImplementedException: {IsMethodNotImplementedException(ex)}, IsNotImplementedException: {IsNotImplementedException(ex)}, COM Access mechanic: {settings.ComConfiguration.ComAccessMechanic}, Device Technology: {settings.DeviceTechnology}");
                                             if (l_SwitchCanWrite)
                                             {
                                                 LogIssue("SetSwitch ", "Exception: " + ex.Message);
@@ -697,7 +697,7 @@ namespace ConformU
                                             else if (IsMethodNotImplementedException(ex))
                                                 LogOK("SetSwitch ", "  CanWrite is False and MethodNotImplementedException was thrown");
                                             // Determine whether we are testing a COM device using the cross platform DriverAccess module and, if so, test for the NotimplementedExceptionso that it returns.
-                                            else if ((settings.ComConfiguration.ComACcessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM))
+                                            else if ((settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM))
                                             {
                                                 if (IsNotImplementedException(ex)) // Got a NotImplementedException, which is OK
                                                 {
@@ -915,7 +915,7 @@ namespace ConformU
                                         }
                                         catch (Exception ex)
                                         {
-                                            LogDebug("SetSwitchValue ", $"EXCEPTION GENERATED - Switch can write: {l_SwitchCanWrite}, IsMethodNotImplementedException: {IsMethodNotImplementedException(ex)}, IsNotImplementedException: {IsNotImplementedException(ex)}, COM Access mechanic: {settings.ComConfiguration.ComACcessMechanic}, Device Technology: {settings.DeviceTechnology}");
+                                            LogDebug("SetSwitchValue ", $"EXCEPTION GENERATED - Switch can write: {l_SwitchCanWrite}, IsMethodNotImplementedException: {IsMethodNotImplementedException(ex)}, IsNotImplementedException: {IsNotImplementedException(ex)}, COM Access mechanic: {settings.ComConfiguration.ComAccessMechanic}, Device Technology: {settings.DeviceTechnology}");
                                             if (l_SwitchCanWrite)
                                             {
                                                 LogIssue("SetSwitchValue ", "Exception: " + ex.Message);
@@ -924,7 +924,7 @@ namespace ConformU
                                             else if (IsMethodNotImplementedException(ex))
                                                 LogOK("SetSwitchValue ", "  CanWrite is False and MethodNotImplementedException was thrown");
                                             // Determine whether we are testing a COM device using the cross platform DriverAccess module and, if so, test for the NotimplementedExceptionso that it returns.
-                                            else if ((settings.ComConfiguration.ComACcessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM))
+                                            else if ((settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM))
                                             {
                                                 if (IsNotImplementedException(ex)) // Got a NotImplementedException, which is OK
                                                 {
