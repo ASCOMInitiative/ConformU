@@ -542,7 +542,7 @@ namespace ConformU
             DateTime l_StartTime;
             l_StartTime = DateTime.Now;
 
-            WaitWHile("", () => { return domeDevice.Slewing; }, 500, Convert.ToInt32(p_TimeOut), reportingFunction);
+            WaitWhile("", () => { return domeDevice.Slewing; }, 500, Convert.ToInt32(p_TimeOut), reportingFunction);
 
             SetStatus("");
             if ((DateTime.Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut))
@@ -852,7 +852,7 @@ namespace ConformU
                                         //    SetStatus("Slewing Status: " + domeDevice.Slewing);
                                         //}
                                         //while (domeDevice.Slewing & !cancellationToken.IsCancellationRequested);
-                                        WaitWHile("Finding home", () => { return domeDevice.Slewing; }, 500, settings.DomeAzimuthMovementTimeout);
+                                        WaitWhile("Finding home", () => { return domeDevice.Slewing; }, 500, settings.DomeAzimuthMovementTimeout);
 
                                     }
                                     if (!cancellationToken.IsCancellationRequested)
@@ -936,7 +936,7 @@ namespace ConformU
                                         //    SetStatus("Slewing Status: " + domeDevice.Slewing);
                                         //}
                                         //while (domeDevice.Slewing & !cancellationToken.IsCancellationRequested);
-                                        WaitWHile("Parking", () => { return domeDevice.Slewing; }, 500, settings.DomeAzimuthMovementTimeout);
+                                        WaitWhile("Parking", () => { return domeDevice.Slewing; }, 500, settings.DomeAzimuthMovementTimeout);
 
                                     }
                                     if (!cancellationToken.IsCancellationRequested)
@@ -1415,7 +1415,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("DomeShutterWait", "About to get ShutterStatus property multiple times");
-                WaitWHile($"Waiting for shutter state {p_RequiredStatus}", () => { return (domeDevice.ShutterStatus != p_RequiredStatus); }, 500, settings.DomeShutterMovementTimeout);
+                WaitWhile($"Waiting for shutter state {p_RequiredStatus}", () => { return (domeDevice.ShutterStatus != p_RequiredStatus); }, 500, settings.DomeShutterMovementTimeout);
 
                 if ((domeDevice.ShutterStatus == p_RequiredStatus)) returnValue = true; // All worked so return True
 
@@ -1537,7 +1537,7 @@ namespace ConformU
             if (settings.DomeStabilisationWaitTime > 0)
             {
                 Stopwatch sw = Stopwatch.StartNew();
-                WaitWHile("Waiting for dome to stabilise", () => { return sw.Elapsed.TotalSeconds < settings.DomeStabilisationWaitTime; }, 500, settings.DomeStabilisationWaitTime);
+                WaitWhile("Waiting for dome to stabilise", () => { return sw.Elapsed.TotalSeconds < settings.DomeStabilisationWaitTime; }, 500, settings.DomeStabilisationWaitTime);
             }
         }
     }

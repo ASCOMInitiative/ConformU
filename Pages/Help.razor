@@ -12,6 +12,10 @@
 
 <h4 style="margin-top: 40px">Command line parameters</h4>
 <p>
+    The following command line parameters are supported to override application default behaviour. If you wish to use Conform Universal as a command line tool, without a GUI,
+    use the <b>--commandline</b> parameter together with any other override parameters that you need
+</p>
+<p>
     <table id="commandline">
         <tr>
             <th style="width:390px">Parameter</th>
@@ -23,19 +27,20 @@
         </tr>
         <tr>
             <td><tt>--settings FullyQualifiedFilename</tt></td>
-            <td>Fully qualified file name of the application configuration file. Leave blank to use the default location.</td>
+            <td>Fully qualified file name of the application settings file to use. Omit or leave blank to use the settings configured through the GUI.</td>
         </tr>
         <tr>
             <td><tt>--logfilepath FullyQualifiedLogfilePath</tt></td>
-            <td>Fully qualified path to the log file folder. Leave blank to use the default mechanic, which creates a new folder each day.</td>
+            <td>Fully qualified path to the log file folder. Omit or leave blank to use the default logging settings, which create a new folder each day.</td>
         </tr>
         <tr>
             <td><tt>--logfile filename </tt></td>
-            <td>If filename has no directory/folder component it will be appended to the log file path to create the fully qualified log file name. If filename is fully qualified, any logfilepath parameter will be ignored. Leave filename blank to use automatic file naming, where the file name will be based on the file creation time.</td>
+            <td>If filename has no directory/folder component it will be appended to the log file path to create the fully qualified log file name. If filename is fully qualified, any logfilepath parameter will be ignored. 
+                Omit or leave blank to use automatic file naming, where the file name will be based on the file creation time.</td>
         </tr>
         <tr>
             <td><tt>--resultsfile FullyQualifiedFilename</tt></td>
-            <td>Fully qualified file name of the results file.</td>
+            <td>Fully qualified file name of the machine readable JSON results file. Omit or leave blank to use the default GUI behaviour.</td>
         </tr>
         <tr>
             <td><tt>--debugdiscovery</tt></td>
@@ -56,20 +61,31 @@
     </table>
 </p>
 
-<h4 style="margin-top: 40px">Settings file parameter values</h4>
-<p>The string parameters listed below are converted to enum values within the application and must have one of the values in the Possible Values list. Any casing is accepted but misspelling will result in the file being reported as corrupt.</p>
+<h4 style="margin-top: 40px">Settings file enum values</h4>
+<p>
+    When manually editing the settings file please be aware that the settings listed below are converted to enum values within the application and must have one of the values in the <b>Possible Values</b> list.
+    Any casing is accepted but misspelling will result in the file being reported as corrupt.
+</p>
 <p>
     <table id="commandline">
         <tr>
-            <th style="width:390px">Parameter</th>
+            <th style="width:390px">Setting</th>
             <th>Possible Values</th>
         </tr>
         <tr>
-            <td><tt>DeviceType, AlpacaDevice:AscomDeviceType</tt></td>
+            <td><tt>DeviceType</tt></td>
             <td>@string.Join(", ",Enum.GetNames(typeof(DeviceTypes)))</td>
         </tr>
         <tr>
-            <td><tt>AlpacaConfiguration:AccessServiceType, AlpacaDevice:ServiceType</tt></td>
+            <td><tt>AlpacaDevice:AscomDeviceType</tt></td>
+            <td>@string.Join(", ",Enum.GetNames(typeof(DeviceTypes)))</td>
+        </tr>
+        <tr>
+            <td><tt>AlpacaDevice:ServiceType</tt></td>
+            <td>@string.Join(", ",Enum.GetNames(typeof(ServiceType)))</td>
+        </tr>
+        <tr>
+            <td><tt>AlpacaConfiguration:AccessServiceType</tt></td>
             <td>@string.Join(", ",Enum.GetNames(typeof(ServiceType)))</td>
         </tr>
         <tr>

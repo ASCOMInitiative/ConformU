@@ -726,14 +726,14 @@ namespace ConformU
                 LogCallToDriver(testName, "About to call Move method");
                 m_Focuser.Move(m_PositionOrg); // Return to original position
                                                // Wait for asynchronous move to finish
-                WaitWHile($"Moving back to starting position", () => { return m_Focuser.IsMoving; }, 500, settings.FocuserTimeout, () => { return $"{m_Focuser.Position} / {m_PositionOrg}"; });
+                WaitWhile($"Moving back to starting position", () => { return m_Focuser.IsMoving; }, 500, settings.FocuserTimeout, () => { return $"{m_Focuser.Position} / {m_PositionOrg}"; });
             }
             else
             {
                 LogCallToDriver(testName, "About to call Move method");
                 m_Focuser.Move(-m_Position); // Return to original position
                                              // Wait for asynchronous move to finish
-                WaitWHile($"Moving back to starting position", () => { return m_Focuser.IsMoving; }, 500, settings.FocuserTimeout, () => { return $"{m_Focuser.Position} / {m_Position}"; });
+                WaitWhile($"Moving back to starting position", () => { return m_Focuser.IsMoving; }, 500, settings.FocuserTimeout, () => { return $"{m_Focuser.Position} / {m_Position}"; });
             }
         }
 
@@ -775,7 +775,7 @@ namespace ConformU
                     if (m_Focuser.IsMoving)
                     {
                         LogIssue(testName, "Synchronous move expected but focuser is moving after return from Focuser.Move");
-                        WaitWHile($"Moving focuser", () => { return m_Focuser.IsMoving; }, 500, settings.FocuserTimeout, () => { return $"{m_Focuser.Position} / {newPosition}"; }); // Wait for move to complete
+                        WaitWhile($"Moving focuser", () => { return m_Focuser.IsMoving; }, 500, settings.FocuserTimeout, () => { return $"{m_Focuser.Position} / {newPosition}"; }); // Wait for move to complete
                     }
                     else
                         LogTestAndMessage(testName, "Synchronous move found");
@@ -785,7 +785,7 @@ namespace ConformU
                     LogDebug(testName, $"Asynchronous call behaviour");
                     SetStatus("Waiting for asynchronous move to complete");
                     LogCallToDriver(testName, "About to get IsMoving and Position properties repeatedly");
-                    WaitWHile($"Moving focuser", () => { return m_Focuser.IsMoving; }, 500, settings.FocuserTimeout, () => { return $"{m_Focuser.Position} / {newPosition}"; });
+                    WaitWhile($"Moving focuser", () => { return m_Focuser.IsMoving; }, 500, settings.FocuserTimeout, () => { return $"{m_Focuser.Position} / {newPosition}"; });
 
                     LogDebug(testName, $"Final position: {m_Focuser.Position}, IsMoving: {m_Focuser.IsMoving}");
 

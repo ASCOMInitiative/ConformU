@@ -831,7 +831,7 @@ namespace ConformU
         /// <param name="timeoutSeconds">Number of seconds before the operation times out</param>
         /// <exception cref="InvalidValueException"></exception>
         /// <exception cref="TimeoutException">If the operation takes longer than the timeout value</exception>
-        internal void WaitWHile(string actionName, Func<bool> waitFunction, int pollInterval, int timeoutSeconds, Func<string>? statusString = null)
+        internal void WaitWhile(string actionName, Func<bool> waitFunction, int pollInterval, int timeoutSeconds, Func<string>? statusString = null)
         {
             // Validate the supplied poll interval
             if (pollInterval < 100) throw new InvalidValueException($"The poll interval must be >=100ms: {pollInterval}");
@@ -843,7 +843,7 @@ namespace ConformU
             }
 
             // Create a timeout cancellation token source that times out after the required timeout period
-            CancellationTokenSource timeoutCts = new CancellationTokenSource();
+            CancellationTokenSource timeoutCts = new ();
             timeoutCts.CancelAfter(TimeSpan.FromSeconds(Convert.ToDouble(timeoutSeconds) + 2.0 * (Convert.ToDouble(pollInterval) / 1000.0))); // Allow two poll intervals beyond the timeout time to prevent early termination
 
             // Combine the provided cancellation token parameter with the new timeout cancellation token

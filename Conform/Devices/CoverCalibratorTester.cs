@@ -303,7 +303,7 @@ namespace ConformU
                             asynchronousOpenTime = 0.0;
 
                             // Wait until the cover is no longer moving
-                            WaitWHile("Opening", () => { return coverCalibratorDevice.CoverState == CoverStatus.Moving; }, 500, 60);
+                            WaitWhile("Opening", () => { return coverCalibratorDevice.CoverState == CoverStatus.Moving; }, 500, 60);
                             if (cancellationToken.IsCancellationRequested)
                                 return;
 
@@ -359,7 +359,7 @@ namespace ConformU
                         {
                             canAsynchronousOpen = true;
                             // Wait until the cover is no longer moving
-                            WaitWHile("Closing", () => { return coverCalibratorDevice.CoverState == CoverStatus.Moving; }, 500, 60);
+                            WaitWhile("Closing", () => { return coverCalibratorDevice.CoverState == CoverStatus.Moving; }, 500, 60);
                             if (cancellationToken.IsCancellationRequested)
                                 return;
 
@@ -631,7 +631,7 @@ namespace ConformU
                         else // Asynchronous call
                         {
                             // Wait until the calibrator is off 
-                            WaitWHile("Cooling down", () => { return coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady; }, 500, 60);
+                            WaitWhile("Cooling down", () => { return coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady; }, 500, 60);
                             if (cancellationToken.IsCancellationRequested)
                                 return;
 
@@ -716,7 +716,7 @@ namespace ConformU
                     else // Asynchronous call
                     {
                         // Wait until the cover is no longer moving
-                        WaitWHile("Warming up", () => { return coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady; }, 500, 60);
+                        WaitWhile("Warming up", () => { return coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady; }, 500, 60);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 

@@ -6,6 +6,7 @@ using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -176,7 +177,11 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    if (m_Camera is not null) m_Camera.Dispose();
+                    if (m_Camera is not null)
+                    {
+                        m_Camera.Dispose();
+                    }
+
                     m_Camera = null;
                     m_ImageArray = null;
                     m_ImageArrayVariant = null;
@@ -492,10 +497,8 @@ namespace ConformU
 
 
             // Basic read tests
-            m_MaxBinX = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.MaxBinX, "MaxBinX", 1, MAX_BIN_X)); if (cancellationToken.IsCancellationRequested)
-                return;
-            m_MaxBinY = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.MaxBinY, "MaxBinY", 1, MAX_BIN_Y)); if (cancellationToken.IsCancellationRequested)
-                return;
+            m_MaxBinX = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.MaxBinX, "MaxBinX", 1, MAX_BIN_X)); if (cancellationToken.IsCancellationRequested) return;
+            m_MaxBinY = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.MaxBinY, "MaxBinY", 1, MAX_BIN_Y)); if (cancellationToken.IsCancellationRequested) return;
 
             if (!m_CanAsymmetricBin)
             {
@@ -503,10 +506,9 @@ namespace ConformU
                     LogIssue("CanAsymmetricBin", "CanAsymmetricBin is false but MaxBinX and MaxBinY are not equal!");
             }
 
-            m_BinX = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.BinX, "BinX Read", 1, 1)); if (cancellationToken.IsCancellationRequested)
-                return; // Must default to 1 on start-up
-            m_BinY = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.BinY, "BinY Read", 1, 1)); if (cancellationToken.IsCancellationRequested)
-                return; // Must default to 1 on start-up
+            m_BinX = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.BinX, "BinX Read", 1, 1)); if (cancellationToken.IsCancellationRequested) return; // Must default to 1 on start-up
+            m_BinY = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.BinY, "BinY Read", 1, 1)); if (cancellationToken.IsCancellationRequested) return; // Must default to 1 on start-up
+
             if (!m_CanAsymmetricBin)
             {
                 if (m_BinX != m_BinY)
@@ -525,6 +527,7 @@ namespace ConformU
             {
                 LogOK("BinX Write", "Exception correctly generated on setting BinX to 0");
             }
+
             try // Invalid high value
             {
                 if (settings.DisplayMethodCalls)
@@ -536,6 +539,7 @@ namespace ConformU
             {
                 LogOK("BinX Write", "Exception correctly generated on setting BinX to " + m_MaxBinX + 1);
             }
+
             try // Invalid low value
             {
                 if (settings.DisplayMethodCalls)
@@ -547,6 +551,7 @@ namespace ConformU
             {
                 LogOK("BinY Write", "Exception correctly generated on setting BinY to 0");
             }
+
             try // Invalid high value
             {
                 if (settings.DisplayMethodCalls)
@@ -562,6 +567,7 @@ namespace ConformU
             // Use either the maximum values supplied by the camera driver or the maximum values defined in Conform's setup, if these have been set
             if ((settings.CameraMaxBinX > 0) | (settings.CameraMaxBinY > 0))
                 LogNewLine(); // Insert a blank line if required
+
             if (settings.CameraMaxBinX > 0)
             {
                 l_MaxBinX = settings.CameraMaxBinX;
@@ -569,6 +575,7 @@ namespace ConformU
             }
             else
                 l_MaxBinX = m_MaxBinX;
+
             if (settings.CameraMaxBinY > 0)
             {
                 l_MaxBinY = settings.CameraMaxBinY;
@@ -579,8 +586,10 @@ namespace ConformU
 
             if ((settings.CameraMaxBinX > m_MaxBinX) | (settings.CameraMaxBinY > m_MaxBinY))
                 LogNewLine(); // Insert a blank line if required
+
             if (settings.CameraMaxBinX > m_MaxBinX)
                 LogTestAndMessage("BinXY Write", string.Format("WARNING - Conform's configured MaxBinX: {0} is greater than the camera's reported MaxBinX: {1}!", l_MaxBinX, m_MaxBinX));
+
             if (settings.CameraMaxBinY > m_MaxBinY)
                 LogTestAndMessage("BinXY Write", string.Format("WARNING - Conform's configured MaxBinY: {0} is greater than the camera's reported MaxBinY: {1}!", l_MaxBinY, m_MaxBinY));
 
@@ -644,16 +653,17 @@ namespace ConformU
                     }
                 }
 
-            // Reset binning to 1x1 state
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set BinX");
+            // Reset X and Y binning to 1x1 state
             try
             {
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("ConformanceCheck", "About to set BinX");
                 m_Camera.BinX = 1;
             }
             catch (Exception)
             {
             }
+
             if (settings.DisplayMethodCalls)
                 LogTestAndMessage("ConformanceCheck", "About to set BinY");
             try
@@ -664,17 +674,12 @@ namespace ConformU
             {
             }
 
-            m_CameraState = CameraPropertyTestCameraState(CamPropertyType.CameraState, "CameraState"); if (cancellationToken.IsCancellationRequested)
-                return;
-            m_CameraXSize = CameraPropertyTestInteger(CamPropertyType.CameraXSize, "CameraXSize", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested)
-                return;
-            m_CameraYSize = CameraPropertyTestInteger(CamPropertyType.CameraYSize, "CameraYSize", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested)
-                return;
+            m_CameraState = CameraPropertyTestCameraState(CamPropertyType.CameraState, "CameraState"); if (cancellationToken.IsCancellationRequested) return;
+            m_CameraXSize = CameraPropertyTestInteger(CamPropertyType.CameraXSize, "CameraXSize", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
+            m_CameraYSize = CameraPropertyTestInteger(CamPropertyType.CameraYSize, "CameraYSize", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
 
-            CameraPropertyTestDouble(CamPropertyType.CCDTemperature, "CCDTemperature", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested)
-                return;
-            m_CoolerOn = CameraPropertyTestBoolean(CamPropertyType.CoolerOn, "CoolerOn Read", false); if (cancellationToken.IsCancellationRequested)
-                return;
+            CameraPropertyTestDouble(CamPropertyType.CCDTemperature, "CCDTemperature", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
+            m_CoolerOn = CameraPropertyTestBoolean(CamPropertyType.CoolerOn, "CoolerOn Read", false); if (cancellationToken.IsCancellationRequested) return;
 
             // Write CoolerOn
             bool l_OriginalCoolerState;
@@ -708,11 +713,12 @@ namespace ConformU
                 {
                     HandleException("CoolerOn Write", MemberType.Property, Required.Optional, ex, "turning Cooler " + l_TargetCoolerState);
                 }
+
                 // Restore Cooler state
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set CoolerOn");
                 try
                 {
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("ConformanceCheck", "About to set CoolerOn");
                     m_Camera.CoolerOn = l_OriginalCoolerState;
                 }
                 catch
@@ -725,30 +731,23 @@ namespace ConformU
                 HandleException("CoolerOn Read", MemberType.Property, Required.Optional, ex, "");
             }
 
-            CameraPropertyTestDouble(CamPropertyType.CoolerPower, "CoolerPower", 0.0, 100.0, false); if (cancellationToken.IsCancellationRequested)
-                return;
-            CameraPropertyTestDouble(CamPropertyType.ElectronsPerADU, "ElectronsPerADU", 0.00001, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
-                return;
-            CameraPropertyTestDouble(CamPropertyType.FullWellCapacity, "FullWellCapacity", 0.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
-                return;
-            CameraPropertyTestBoolean(CamPropertyType.HasShutter, "HasShutter", false); if (cancellationToken.IsCancellationRequested)
-                return;
-            CameraPropertyTestDouble(CamPropertyType.HeatSinkTemperature, "HeatSinkTemperature", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested)
-                return;
+            CameraPropertyTestDouble(CamPropertyType.CoolerPower, "CoolerPower", 0.0, 100.0, false); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyTestDouble(CamPropertyType.ElectronsPerADU, "ElectronsPerADU", 0.00001, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyTestDouble(CamPropertyType.FullWellCapacity, "FullWellCapacity", 0.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyTestBoolean(CamPropertyType.HasShutter, "HasShutter", false); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyTestDouble(CamPropertyType.HeatSinkTemperature, "HeatSinkTemperature", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
 
-            if (cancellationToken.IsCancellationRequested) return;
-
-            m_ImageReady = CameraPropertyTestBoolean(CamPropertyType.ImageReady, "ImageReady", false);
+            m_ImageReady = CameraPropertyTestBoolean(CamPropertyType.ImageReady, "ImageReady", false); if (cancellationToken.IsCancellationRequested) return;
             if (m_ImageReady & settings.CameraFirstUseTests) // Issue this warning if configured to do so
                 LogIssue("ImageReady", "Image is flagged as ready but no exposure has been started!");
 
             // ImageArray 
+            SetFullStatus("ImageArray", "Getting image data from device...", "");
             if (m_ImageReady) // ImageReady is true
             {
                 try
                 {
                     if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
-                    SetAction("Retrieving image array...");
                     m_ImageArray = (Array)m_Camera.ImageArray;
                     if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
                     {
@@ -771,13 +770,12 @@ namespace ConformU
                         LogIssue("ImageArray", $"Conform is configured to omit \"First use\" tests and ImageReady is true, but ImageArray generated an exception: {ex.Message}");
                     }
                 }
-                ClearStatus();
             }
             else // ImageReady is false
+            {
                 try
                 {
                     if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
-                    SetAction("Retrieving image array...");
                     m_ImageArray = (Array)m_Camera.ImageArray;
                     LogIssue("ImageArray", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                 }
@@ -786,12 +784,15 @@ namespace ConformU
                     LogDebug("ImageArray", $"Exception 2:\r\n{ex}");
                     LogOK("ImageArray", "Exception correctly generated when ImageReady is false");
                 }
+            }
+            SetAction("Releasing memory");
 
             m_ImageArray = null;
             m_ImageArrayVariant = null;
             GC.Collect();
 
             // ImageArrayVariant
+            SetFullStatus("ImageArrayVariant", "Getting image data from device...", "");
             if (settings.CameraTestImageArrayVariant) // Test if configured to do so
             {
                 if (m_ImageReady)
@@ -799,8 +800,6 @@ namespace ConformU
                     try
                     {
                         if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
-
-                        SetAction("Retrieving image array variant..");
                         m_ImageArrayVariant = (Array)m_Camera.ImageArrayVariant;
 
                         if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
@@ -825,15 +824,12 @@ namespace ConformU
                         }
 
                     }
-                    ClearStatus();
                 }
                 else
                 {
                     try
                     {
                         if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
-
-                        SetAction("Retrieving image array variant..");
                         m_ImageArrayVariant = (Array)m_Camera.ImageArrayVariant;
                         LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                     }
@@ -841,7 +837,6 @@ namespace ConformU
                     {
                         LogOK("ImageArrayVariant", "Exception correctly generated when ImageReady is false");
                     }
-                    ClearStatus();
                 }
             }
             else // Log an issue because the ImageArrayVariant test was omitted
@@ -849,6 +844,7 @@ namespace ConformU
                 LogIssue("ImageArrayVariant", "Test omitted due to Conform configuration.");
             }
 
+            SetAction("Releasing memory");
             if (OperatingSystem.IsWindows())
             {
                 try { if (m_ImageArray is not null) Marshal.ReleaseComObject(m_ImageArray); } catch { }
@@ -859,30 +855,25 @@ namespace ConformU
             m_ImageArray = null;
             m_ImageArrayVariant = null;
             GC.Collect();
+            ClearStatus();
 
-            m_IsPulseGuiding = CameraPropertyTestBoolean(CamPropertyType.IsPulseGuiding, "IsPulseGuiding", false); if (cancellationToken.IsCancellationRequested)
-                return;
+            m_IsPulseGuiding = CameraPropertyTestBoolean(CamPropertyType.IsPulseGuiding, "IsPulseGuiding", false); if (cancellationToken.IsCancellationRequested) return;
             if (m_IsPulseGuiding)
                 LogIssue("IsPulseGuiding", "Camera is showing pulse guiding underway although no PulseGuide command has been issued!");
 
-            CameraPropertyTestInteger(CamPropertyType.MaxADU, "MaxADU", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested)
-                return;
+            CameraPropertyTestInteger(CamPropertyType.MaxADU, "MaxADU", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
 
-            CameraPropertyTestInteger(CamPropertyType.NumX, "NumX Read", 1, m_CameraXSize); if (cancellationToken.IsCancellationRequested)
-                return;
+            CameraPropertyTestInteger(CamPropertyType.NumX, "NumX Read", 1, m_CameraXSize); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyWriteTest(CamPropertyType.NumX, "NumX", System.Convert.ToInt32(m_CameraXSize / (double)2));
 
-            CameraPropertyTestInteger(CamPropertyType.NumY, "NumY Read", 1, m_CameraYSize); if (cancellationToken.IsCancellationRequested)
-                return;
+            CameraPropertyTestInteger(CamPropertyType.NumY, "NumY Read", 1, m_CameraYSize); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyWriteTest(CamPropertyType.NumY, "NumY", System.Convert.ToInt32(m_CameraYSize / (double)2));
 
-            CameraPropertyTestDouble(CamPropertyType.PixelSizeX, "PixelSizeX", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
-                return;
-            CameraPropertyTestDouble(CamPropertyType.PixelSizeY, "PixelSizeY", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
-                return;
+            CameraPropertyTestDouble(CamPropertyType.PixelSizeX, "PixelSizeX", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyTestDouble(CamPropertyType.PixelSizeY, "PixelSizeY", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
 
-            m_SetCCDTemperature = CameraPropertyTestDouble(CamPropertyType.SetCCDTemperature, "SetCCDTemperature Read", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_SETPOINT_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested)
-                return;
+            m_SetCCDTemperature = CameraPropertyTestDouble(CamPropertyType.SetCCDTemperature, "SetCCDTemperature Read", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_SETPOINT_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
+
             if (m_CanSetCCDTemperature)
             {
                 try
@@ -1009,14 +1000,10 @@ namespace ConformU
                     HandleException("SetCCDTemperature Write", MemberType.Property, Required.Optional, ex, "");
                 }
 
-            CameraPropertyTestInteger(CamPropertyType.StartX, "StartX Read", 0, m_CameraXSize - 1); if (cancellationToken.IsCancellationRequested)
-                return;
+            CameraPropertyTestInteger(CamPropertyType.StartX, "StartX Read", 0, m_CameraXSize - 1); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyWriteTest(CamPropertyType.StartX, "StartX", System.Convert.ToInt32(m_CameraXSize / (double)2));
-            CameraPropertyTestInteger(CamPropertyType.StartY, "StartY Read", 0, m_CameraYSize - 1); if (cancellationToken.IsCancellationRequested)
-                return;
+            CameraPropertyTestInteger(CamPropertyType.StartY, "StartY Read", 0, m_CameraYSize - 1); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyWriteTest(CamPropertyType.StartY, "StartY", System.Convert.ToInt32(m_CameraYSize / (double)2));
-
-
 
             if (settings.DisplayMethodCalls)
                 LogTestAndMessage("ConformanceCheck", "About to get InterfaceVersion");
@@ -1027,7 +1014,7 @@ namespace ConformU
                 try
                 {
                     if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get Sensortype");
+                        LogTestAndMessage("ConformanceCheck", "About to get SensorType");
                     m_SensorType = m_Camera.SensorType;
                     m_CanReadSensorType = true; // Set a flag to indicate that we have got a valid SensorType value
                                                 // Successfully retrieved a value
@@ -1245,6 +1232,7 @@ namespace ConformU
                     }
                 }
                 else
+                {
                     switch (m_GainMode)
                     {
                         case GainOffsetMode.Unknown:
@@ -1321,6 +1309,8 @@ namespace ConformU
                                 break;
                             }
                     }
+                }
+                if (cancellationToken.IsCancellationRequested) return;
 
                 // PercentCompleted Read - Optional - corrected to match the specification
                 try
@@ -1372,6 +1362,7 @@ namespace ConformU
                 {
                     HandleException("ReadoutModes Read", MemberType.Property, Required.Mandatory, ex, "");
                 }
+                if (cancellationToken.IsCancellationRequested) return;
 
                 // ReadoutMode Read - Mandatory
                 m_ReadoutMode = CameraPropertyTestShort(CamPropertyType.ReadoutMode, "ReadoutMode Read", 0, short.MaxValue, true);
@@ -1399,8 +1390,6 @@ namespace ConformU
                 // SensorName
                 CameraPropertyTestString(CamPropertyType.SensorName, "SensorName Read", 250, true);
             }
-
-
 
             if (settings.DisplayMethodCalls)
                 LogTestAndMessage("ConformanceCheck", "About to get InterfaceVersion");
@@ -1460,6 +1449,7 @@ namespace ConformU
                 else
                 {
                 }
+                if (cancellationToken.IsCancellationRequested) return;
 
                 // Offset Read - Optional 
                 try
@@ -2251,6 +2241,7 @@ namespace ConformU
         {
             int l_i, l_j, l_MaxBinX, l_MaxBinY;
             // AbortExposure - Mandatory
+            SetTest("AbortExposure");
             try
             {
                 if (settings.DisplayMethodCalls)
@@ -2297,7 +2288,9 @@ namespace ConformU
             {
                 LogIssue("AbortExposure", "Exception incorrectly generated when camera is idle");
             }
+
             // PulseGuide
+            SetTest("PulseGuide");
             if (m_CanPulseGuide)
             {
                 try
@@ -2390,7 +2383,9 @@ namespace ConformU
             {
                 LogIssue("StopExposure", "Exception incorrectly generated when camera is idle");
             }
-            ClearStatus();
+
+            // StartExposure
+            SetTest("StartExposure");
 
             // Use either the maximum values supplied by the camera driver or the maximum values defined in Conform's setup, if these have been set
             if ((settings.CameraMaxBinX > 0) | (settings.CameraMaxBinY > 0))
@@ -2513,7 +2508,7 @@ namespace ConformU
                     m_Camera.NumY = p_NumY;
                     try
                     {
-                        SetAction("Start " + p_Duration.ToString() + " second synchronous exposure");
+                        SetAction($"Exposing for {p_Duration} seconds");
 
                         // Initiate exposure
                         l_StartTime = DateTime.Now;
@@ -2529,7 +2524,7 @@ namespace ConformU
                             // Test whether we have a synchronous or asynchronous camera
                             if (settings.DisplayMethodCalls)
                                 LogTestAndMessage("ConformanceCheck", "About to get ImageReady and CameraState");
-                            if (m_Camera.ImageReady & (m_Camera.CameraState == CameraState.Idle))
+                            if (m_Camera.ImageReady & (m_Camera.CameraState == CameraState.Idle)) // Synchronous exposure
                             {
                                 if (l_EndTime.Subtract(l_StartTime).TotalSeconds >= p_Duration)
                                 {
@@ -2541,7 +2536,7 @@ namespace ConformU
                             }
                             else
                             {
-                                SetAction("Waiting for exposure to start");
+                                SetStatus("Waiting for exposure to start");
 
                                 // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
                                 if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
@@ -2549,13 +2544,15 @@ namespace ConformU
 
                                 // Wait for exposing state
                                 if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
-                                do
-                                {
-                                    WaitFor(CAMERA_SLEEP_TIME);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-                                }
-                                while ((m_Camera.CameraState != CameraState.Exposing) & (m_Camera.CameraState != CameraState.Error));
+                                //do
+                                //{
+                                //    WaitFor(CAMERA_SLEEP_TIME);
+                                //    if (cancellationToken.IsCancellationRequested)
+                                //        return;
+                                //}
+                                //while ((m_Camera.CameraState != CameraState.Exposing) & (m_Camera.CameraState != CameraState.Error));
+                                Stopwatch sw = Stopwatch.StartNew();
+                                WaitWhile("", () => { return (m_Camera.CameraState != CameraState.Exposing) & (m_Camera.CameraState != CameraState.Error); }, 500, Convert.ToInt32(p_Duration + 2), () => { return $"{sw.Elapsed.TotalSeconds:0.0} / {p_Duration:0.0}"; });
 
                                 // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
                                 if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
@@ -2568,7 +2565,7 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
 
                                 // Start the loop timing stopwatch
-                                Stopwatch sw = Stopwatch.StartNew();
+                                sw.Restart();
                                 Stopwatch swOverall = Stopwatch.StartNew();
                                 const int POLL_INTERVAL = 500;
                                 do
@@ -2679,6 +2676,7 @@ namespace ConformU
                             try
                             {
                                 // Retrieve the image array
+                                SetAction("Retrieving ImageArray");
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
                                 sw.Restart();
@@ -2719,6 +2717,7 @@ namespace ConformU
                                 LogIssue("StartExposure", "Exception incorrectly generated when camera is idle" + ex.ToString());
                             }
 
+                            SetAction("Releasing ImageArray memory");
                             m_ImageArray = null;
                             m_ImageArrayVariant = null;
                             GC.Collect();
@@ -2728,6 +2727,8 @@ namespace ConformU
 
                             if (settings.CameraTestImageArrayVariant) // Test if configured to do so. No need to report an issue because it's already been reported when the ImageArrayVariant property was tested
                             {
+                                SetAction("Retrieving ImageArrayVariant");
+
                                 try
                                 {
                                     if (settings.DisplayMethodCalls)
@@ -2778,6 +2779,7 @@ namespace ConformU
                                 }
                             }
 
+                            SetAction("Releasing ImageArrayVariant memory");
                             // Release large image objects from memory
                             m_ImageArrayVariant = null;
                             imageArrayObject = null;
@@ -3002,7 +3004,7 @@ namespace ConformU
             // Dim pulseGuideStatus As PulseGuideState
 
             l_StartTime = DateTime.Now;
-            SetAction("Start " + CAMERA_PULSE_DURATION / (double)1000 + " second pulse guide " + p_Direction.ToString());
+            //SetAction("Start " + CAMERA_PULSE_DURATION / (double)1000 + " second pulse guide " + p_Direction.ToString());
             if (settings.DisplayMethodCalls)
                 LogTestAndMessage("ConformanceCheck", $"About to call PulseGuide - {p_Direction}");
             m_Camera.PulseGuide(p_Direction, CAMERA_PULSE_DURATION); // Start a 2 second pulse
@@ -3018,13 +3020,8 @@ namespace ConformU
                     {
                         if (settings.DisplayMethodCalls)
                             LogTestAndMessage("ConformanceCheck", "About to get IsPulseGuiding multiple times");
-                        do
-                        {
-                            WaitFor(SLEEP_TIME);
-                            if (cancellationToken.IsCancellationRequested)
-                                return;
-                        }
-                        while (m_Camera.IsPulseGuiding & (DateTime.Now.Subtract(l_StartTime).TotalMilliseconds <= 3000)); // Wait for up to 3 seconds
+                        Stopwatch sw = Stopwatch.StartNew();
+                        WaitWhile($"Guiding {p_Direction}", () => { return m_Camera.IsPulseGuiding; }, 500, 3, () => { return $"{sw.Elapsed.TotalSeconds:0.0} / {CAMERA_PULSE_DURATION / 1000:0.0} seconds"; });
 
                         if (settings.DisplayMethodCalls)
                             LogTestAndMessage("ConformanceCheck", "About to get IsPulseGuiding");
