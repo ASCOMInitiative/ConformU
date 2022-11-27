@@ -15,9 +15,10 @@ namespace ConformU
         private const string SETTINGS_FILENAME = "conform.settings"; // Settings file name
 
         private ConformLogger TL;
-        Settings settings;
+        private Settings settings;
         private bool disposedValue;
         readonly int settingsFileVersion;
+        private readonly JsonDocument appSettingsDocument = null;
 
         #region Initialiser and Dispose
 
@@ -70,117 +71,126 @@ namespace ConformU
                             settings = new();
                             PersistSettings(settings);
 
-                            Status = $"A pre-release settings file was found. Settings have been reset to defaults and the original settings file has been renamed to {badVersionSettingsFileName}.";
+                            Status = $"A pre-release settings file was found.\r\n\r\nApplication settings have been reset to defaults and the original settings file has been renamed to {badVersionSettingsFileName}.";
                         }
                         catch (Exception ex2)
                         {
-                            TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"A pre-release settings file found but an error occurred when persisting new Conform settings: {ex2}");
-                            Status = $"$\"A pre-release settings file was found but an error occurred when persisting new Conform settings: {ex2.Message}.";
+                            TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"A pre-release settings file found but an error occurred when saving new Conform settings: {ex2}");
+                            Status = $"$\"A pre-release settings file was found but an error occurred when saving new Conform settings: {ex2.Message}.";
                         }
                     }
                     else // File does have a compatibility version so read in the settings from the file
                     {
+                        TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Found compatibility version element...");
                         // Try to read in the settings version number from the settings file
                         try
                         {
-                            var appSettings = JsonDocument.Parse(serialisedSettings, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip });
-                            settingsFileVersion = appSettings.RootElement.GetProperty("SettingsCompatibilityVersion").GetInt32();
-                        }
-                        catch (KeyNotFoundException)
-                        {
-                            // Ignore key not found exceptions because this indicates a corrupt file or a pre-release 1.0.0 version 
-                        }
+                            TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"About to parse settings string");
+                            appSettingsDocument = JsonDocument.Parse(serialisedSettings, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip });
+                            TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"About to get settings version");
+                            settingsFileVersion = appSettingsDocument.RootElement.GetProperty("SettingsCompatibilityVersion").GetInt32();
+                            TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Found settings version: {settingsFileVersion}");
 
-                        TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Found settings version: {settingsFileVersion}");
+                            // Handle different file versions
+                            switch (settingsFileVersion)
+                            {
+                                // File version 1 - first production release
+                                case 1:
 
-                        // Handle different file versions
-                        switch (settingsFileVersion)
-                        {
-                            // File version 1 - first production release
-                            case 1:
-
-                                try
-                                {
-                                    // Set de-serialisation options
-                                    JsonSerializerOptions options = new()
+                                    try
                                     {
-                                        PropertyNameCaseInsensitive = true // Ignore incorrect element name casing
-                                    };
-                                    options.Converters.Add(new JsonStringEnumConverter()); // For increased resilience, accept both string member names and integer member values as valid for enum elements.
-
-                                    // De-serialise the settings string into a Settings object
-                                    settings = JsonSerializer.Deserialize<Settings>(serialisedSettings, options);
-
-                                    // Test whether the retrieved settings match the requirements of this version of ConformU
-                                    if (settings.SettingsCompatibilityVersion == Settings.SETTINGS_COMPATIBILTY_VERSION) // Version numbers match so all is well
-                                    {
-                                        Status = $"Settings read OK.";
-                                    }
-                                    else // Version numbers don't match so reset to defaults
-                                    {
-                                        int originalSettingsCompatibilityVersion = 0;
-                                        try
+                                        // Set de-serialisation options
+                                        JsonSerializerOptions options = new()
                                         {
-                                            originalSettingsCompatibilityVersion = settings.SettingsCompatibilityVersion;
+                                            PropertyNameCaseInsensitive = true // Ignore incorrect element name casing
+                                        };
+                                        options.Converters.Add(new JsonStringEnumConverter()); // For increased resilience, accept both string member names and integer member values as valid for enum elements.
 
-                                            // Rename the current settings file to preserve it
-                                            string badVersionSettingsFileName = $"{SettingsFileName}.badversion";
-                                            File.Delete(badVersionSettingsFileName);
-                                            File.Move(SettingsFileName, $"{badVersionSettingsFileName}");
+                                        // De-serialise the settings string into a Settings object
+                                        settings = JsonSerializer.Deserialize<Settings>(serialisedSettings, options);
 
-                                            // Persist the default settings values
-                                            settings = new();
-                                            PersistSettings(settings);
-
-                                            Status = $"The current settings version: {originalSettingsCompatibilityVersion} does not match the required version: {Settings.SETTINGS_COMPATIBILTY_VERSION}. Settings reset to default values and original settings file renamed to {badVersionSettingsFileName}.";
+                                        // Test whether the retrieved settings match the requirements of this version of ConformU
+                                        if (settings.SettingsCompatibilityVersion == Settings.SETTINGS_COMPATIBILTY_VERSION) // Version numbers match so all is well
+                                        {
+                                            Status = $"Settings read OK.";
                                         }
-                                        catch (Exception ex2)
+                                        else // Version numbers don't match so reset to defaults
                                         {
-                                            TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"Error persisting new Conform settings file: {ex2}");
-                                            Status = $"The current settings version:{originalSettingsCompatibilityVersion} does not match the required version: {Settings.SETTINGS_COMPATIBILTY_VERSION} but the new settings could not be persisted: {ex2.Message}.";
+                                            int originalSettingsCompatibilityVersion = 0;
+                                            try
+                                            {
+                                                originalSettingsCompatibilityVersion = settings.SettingsCompatibilityVersion;
+
+                                                // Rename the current settings file to preserve it
+                                                string badVersionSettingsFileName = $"{SettingsFileName}.badversion";
+                                                File.Delete(badVersionSettingsFileName);
+                                                File.Move(SettingsFileName, $"{badVersionSettingsFileName}");
+
+                                                // Persist the default settings values
+                                                settings = new();
+                                                PersistSettings(settings);
+
+                                                Status = $"The current settings version: {originalSettingsCompatibilityVersion} does not match the required version: {Settings.SETTINGS_COMPATIBILTY_VERSION}. Application settings have been reset to default values and the original settings file renamed to {badVersionSettingsFileName}.";
+                                            }
+                                            catch (Exception ex2)
+                                            {
+                                                TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"Error persisting new Conform settings file: {ex2}");
+                                                Status = $"The current settings version:{originalSettingsCompatibilityVersion} does not match the required version: {Settings.SETTINGS_COMPATIBILTY_VERSION} but the new settings could not be saved: {ex2.Message}.";
+                                            }
                                         }
                                     }
-                                }
-                                catch (JsonException ex1)
-                                {
-                                    // There was an exception when parsing the settings file so report it and set default values
-                                    TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"Error parsing Conform settings file: {ex1}");
+                                    catch (JsonException ex1)
+                                    {
+                                        // There was an exception when parsing the settings file so report it and set default values
+                                        TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"Error de-serialising Conform settings file: {ex1}");
+                                        Status = $"There was an error de-serialising the settings file and application default settings are in effect.\r\n\r\nPlease correct the error in the file or use the \"Reset to Defaults\" button on the Settings page to save new values.\r\n\r\nJSON parser error message:\r\n{ex1.Message}";
+                                    }
+                                    catch (Exception ex1)
+                                    {
+                                        TL?.LogMessage("ConformConfiguration", MessageLevel.Error, ex1.ToString());
+                                        Status = $"Exception reading the settings file, default values are in effect.";
+                                    }
+                                    break;
 
-                                    // Set default values
-                                    settings = new();
+                                // Handle unknown settings version numbers
+                                default:
 
-                                    Status = $"The settings file is corrupt ({ex1.Message}) and application settings have been reset to default values. Please correct the error in the file or use the \"Reset to defaults\" button on the Settings page to persist new values.";
-                                }
-                                catch (Exception ex1)
-                                {
-                                    TL?.LogMessage("ConformConfiguration", MessageLevel.Error, ex1.ToString());
-                                    Status = $"Exception reading the settings file, default values are in use.";
-                                }
-                                break;
+                                    // Persist default settings values because the file version is unknown and the file may be corrupt
+                                    try
+                                    {
+                                        // Rename the current settings file to preserve it
+                                        string badVersionSettingsFileName = $"{SettingsFileName}.unknownversion";
+                                        File.Delete(badVersionSettingsFileName);
+                                        File.Move(SettingsFileName, $"{badVersionSettingsFileName}");
 
-                            // Handle unknown settings version numbers
-                            default:
+                                        // Persist the default settings values
+                                        settings = new();
+                                        PersistSettings(settings);
 
-                                // Persist default settings values because the file version is unknown and the file may be corrupt
-                                try
-                                {
-                                    // Rename the current settings file to preserve it
-                                    string badVersionSettingsFileName = $"{SettingsFileName}.unknownversion";
-                                    File.Delete(badVersionSettingsFileName);
-                                    File.Move(SettingsFileName, $"{badVersionSettingsFileName}");
-
-                                    // Persist the default settings values
-                                    settings = new();
-                                    PersistSettings(settings);
-
-                                    Status = $"An unsupported settings version was found: {settingsFileVersion}. Settings have been reset to defaults and the original settings file has been renamed to {badVersionSettingsFileName}.";
-                                }
-                                catch (Exception ex2)
-                                {
-                                    TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"An unsupported settings version was found: {settingsFileVersion} but an error occurred when persisting new Conform settings: {ex2}");
-                                    Status = $"$\"An unsupported settings version was found: {settingsFileVersion} but an error occurred when persisting new Conform settings: {ex2.Message}.";
-                                }
-                                break;
+                                        Status = $"An unsupported settings version was found: {settingsFileVersion}. Settings have been reset to defaults and the original settings file has been renamed to {badVersionSettingsFileName}.";
+                                    }
+                                    catch (Exception ex2)
+                                    {
+                                        TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"An unsupported settings version was found: {settingsFileVersion} but an error occurred when saving new Conform settings: {ex2}");
+                                        Status = $"$\"An unsupported settings version was found: {settingsFileVersion} but an error occurred when saving new Conform settings: {ex2.Message}.";
+                                    }
+                                    break;
+                            }
+                        }
+                        catch (JsonException ex)
+                        {
+                            // There was an exception when parsing the settings file so report it and use default values
+                            TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"Error getting settings file version from settings file: {ex}");
+                            Status = $"An error occurred when reading the settings file version and application default settings are in effect.\r\n\r\nPlease correct the error in the file or use the \"Reset to Defaults\" button on the Settings page to create a new settings file.\r\n\r\nJSON parser error message:\r\n{ex.Message}";
+                        }
+                        catch (Exception ex)
+                        {
+                            TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"Exception parsing the settings file: {ex}");
+                            Status = $"Exception parsing the settings file: {ex.Message}";
+                        }
+                        finally
+                        {
+                            appSettingsDocument?.Dispose();
                         }
                     }
                 }
@@ -188,7 +198,7 @@ namespace ConformU
                 {
                     TL.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Configuration file does not exist, initialising new file: {SettingsFileName}");
                     PersistSettings(settings);
-                    Status = $"First time use - settings set to default values.";
+                    Status = $"First time use - configuration set to default values.";
                 }
             }
             catch (Exception ex)
@@ -238,7 +248,7 @@ namespace ConformU
         /// </summary>
         public void Save()
         {
-            TL?.LogMessage("Save", MessageLevel.Debug, "Persisting settings to settings file");
+            TL?.LogMessage("Save", MessageLevel.Debug, "Saving settings to settings file");
             PersistSettings(settings);
             Status = $"Settings saved at {DateTime.Now:HH:mm:ss.f}.";
 
