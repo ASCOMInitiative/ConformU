@@ -416,12 +416,12 @@ namespace ConformU
                         l_VStringPtr = l_VString.IndexOf(".");
                         if (l_VStringPtr > 0)
                         {
-                            l_V1 = Convert.ToInt32(l_VString.Substring(0, l_VStringPtr - 1)); // Extract the number
+                            l_V1 = Convert.ToInt32(l_VString[..(l_VStringPtr - 1)]); // Extract the number
                             l_VString = l_VString[(l_VStringPtr + 1)..]; // Get the second version number part
                             l_VStringPtr = l_VString.IndexOf(".");
                             if (l_VStringPtr > 1)
                             {
-                                l_V2 = Convert.ToInt32(l_VString.Substring(0, l_VStringPtr - 1)); // Extract the number
+                                l_V2 = Convert.ToInt32(l_VString[..(l_VStringPtr - 1)]); // Extract the number
                                 l_VString = l_VString[(l_VStringPtr + 1)..]; // Get the third version number part
                                 l_V3 = Convert.ToInt32(l_VString); // Extract the number
                                                                    // Turn the version parts into a whole number

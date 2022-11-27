@@ -897,6 +897,8 @@ namespace ConformU
                 LogDebug("WaitUntil", $"The {actionName} operation timed out after {timeoutSeconds} seconds.");
                 throw new TimeoutException($"The \"{actionName}\" operation exceeded the timeout of {timeoutSeconds} seconds specified for this operation.");
             }
+
+            SetStatus("");
         }
 
 #nullable disable

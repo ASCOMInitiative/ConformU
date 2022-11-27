@@ -36,8 +36,6 @@ namespace ConformU
         // Conform application configuration 
         public bool DisplayMethodCalls { get; set; } = false;
         public bool UpdateCheck { get; set; } = true;
-        public DateTime UpdateDate { get; set; } = DateTime.MinValue;
-        public bool WarningMessageDisplayed { get; set; } = false;
         public int ApplicationPort { get; set; } = 0;
 
         // Debug output switches
@@ -164,6 +162,10 @@ namespace ConformU
         public int DomeShutterMovementTimeout { get; set; } = 240;
         public int DomeAzimuthMovementTimeout { get; set; } = 240;
         public int DomeAltitudeMovementTimeout { get; set; } = 240;
+        
+        /// <summary>
+        /// Dome stabilisation time (seconds)
+        /// </summary>
         public int DomeStabilisationWaitTime { get; set; } = 10;
         public bool DomeOpenShutter { get; set; } = false;
         public double DomeSlewTolerance { get; set; } = 1.0; // Degrees

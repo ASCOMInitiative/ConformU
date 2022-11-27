@@ -4,7 +4,6 @@ namespace ConformU
 {
     public interface IConformConfiguration
     {
-        bool JsonDeserialisationIsCaseSensitive { get; }
         Settings Settings { get; }
         string SettingsFileName { get; }
         string Status { get; }

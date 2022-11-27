@@ -17,7 +17,6 @@ namespace ConformU
         public ServiceType AccessServiceType { get; set; } = ServiceType.Http;
         public string AccessUserName { get; set; } = "";
         public string AccessPassword { get; set; } = "";
-        public bool LogCalls { get; set; } = false;
         public ImageArrayTransferType ImageArrayTransferType{ get; set; } = ImageArrayTransferType.JSON;
     }
 }

@@ -16,7 +16,6 @@ namespace ConformU
         const double DOME_ILLEGAL_ALTITUDE_HIGH = 100.0; // Illegal value to test dome driver exception generation
         const double DOME_ILLEGAL_AZIMUTH_LOW = -10.0; // Illegal value to test dome driver exception generation
         const double DOME_ILLEGAL_AZIMUTH_HIGH = 370.0; // Illegal value to test dome driver exception generation
-        const double DOME_SLEW_TOLERANCE = 1.0; // position tolerance that is accepted as OK (degrees)
 
         // Dome variables
         private bool m_CanSetAltitude, m_CanSetAzimuth, m_CanSetShutter, m_CanSlave, m_CanSyncAzimuth, m_Slaved;
@@ -93,7 +92,7 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    if (domeDevice is not null) domeDevice.Dispose();
+                    domeDevice?.Dispose();
                     domeDevice = null;
                 }
             }
@@ -231,7 +230,7 @@ namespace ConformU
                                 l_VStringPtr = 0;
                                 do
                                     l_VStringPtr += 1;
-                                while (int.TryParse(l_VString.Substring(l_VStringPtr, 1), out _));
+                                while (int.TryParse(l_VString.AsSpan(l_VStringPtr, 1), out _));
 
                                 if (l_VStringPtr > 1)
                                 {

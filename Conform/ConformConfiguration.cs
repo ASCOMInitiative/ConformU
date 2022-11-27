@@ -1,5 +1,6 @@
 ﻿using Blazorise.Utilities;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
@@ -16,6 +17,9 @@ namespace ConformU
         private ConformLogger TL;
         Settings settings;
         private bool disposedValue;
+        readonly int settingsFileVersion;
+
+        #region Initialiser and Dispose
 
         /// <summary>
         /// Create a Configuration management instance and load the current settings
@@ -47,34 +51,18 @@ namespace ConformU
                 if (File.Exists(SettingsFileName)) // Settings file exists
                 {
                     // Read the file contents into a string
-                    TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, "File exists and read OK");
+                    TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, "File exists, about to read it...");
                     string serialisedSettings = File.ReadAllText(SettingsFileName);
-                    TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Serialised settings: {serialisedSettings}");
+                    TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Serialised settings: \r\n{serialisedSettings}");
 
-                    // Set de-serialisation options
-                    JsonSerializerOptions options = new()
+                    // Make a basic check to see if this file is a beta / pre-release version that doesn't have a version number. If so replace with a new version
+                    if (!serialisedSettings.Contains("\"SettingsCompatibilityVersion\":")) // No compatibility version found so assume that this is a pre-release version
                     {
-                        PropertyNameCaseInsensitive = true // Ignore incorrect element name casing
-                    };
-                    options.Converters.Add(new JsonStringEnumConverter()); // Accept both string member names and integer member values as valid for enum elements.
-
-                    // De-serialise the settings string into a Settings object
-                    settings = JsonSerializer.Deserialize<Settings>(serialisedSettings, options);
-
-                    // Test whether the retrieved settings match the requirements of this version of ConformU
-                    if (settings.SettingsCompatibilityVersion == Settings.SETTINGS_COMPATIBILTY_VERSION) // Version numbers match so all is well
-                    {
-                        Status = $"Settings read OK.";
-                    }
-                    else // Version numbers don't match so reset to defaults
-                    {
-                        int originalSettingsCompatibilityVersion=0;
+                        // Persist the default settings values
                         try
                         {
-                            originalSettingsCompatibilityVersion = settings.SettingsCompatibilityVersion;
-
                             // Rename the current settings file to preserve it
-                            string badVersionSettingsFileName = $"{SettingsFileName}.badversion";
+                            string badVersionSettingsFileName = $"{SettingsFileName}.prereleaseversion";
                             File.Delete(badVersionSettingsFileName);
                             File.Move(SettingsFileName, $"{badVersionSettingsFileName}");
 
@@ -82,12 +70,117 @@ namespace ConformU
                             settings = new();
                             PersistSettings(settings);
 
-                            Status = $"The current settings version: {originalSettingsCompatibilityVersion} does not match the required version: {Settings.SETTINGS_COMPATIBILTY_VERSION}. Settings reset to default values and original settings file renamed to {badVersionSettingsFileName}.";
+                            Status = $"A pre-release settings file was found. Settings have been reset to defaults and the original settings file has been renamed to {badVersionSettingsFileName}.";
                         }
                         catch (Exception ex2)
                         {
-                            TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"Error persisting new Conform settings file: {ex2}");
-                            Status = $"The current settings version:{originalSettingsCompatibilityVersion} does not match the required version: {Settings.SETTINGS_COMPATIBILTY_VERSION} but the new settings could not be persisted: {ex2.Message}.";
+                            TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"A pre-release settings file found but an error occurred when persisting new Conform settings: {ex2}");
+                            Status = $"$\"A pre-release settings file was found but an error occurred when persisting new Conform settings: {ex2.Message}.";
+                        }
+                    }
+                    else // File does have a compatibility version so read in the settings from the file
+                    {
+                        // Try to read in the settings version number from the settings file
+                        try
+                        {
+                            var appSettings = JsonDocument.Parse(serialisedSettings, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip });
+                            settingsFileVersion = appSettings.RootElement.GetProperty("SettingsCompatibilityVersion").GetInt32();
+                        }
+                        catch (KeyNotFoundException)
+                        {
+                            // Ignore key not found exceptions because this indicates a corrupt file or a pre-release 1.0.0 version 
+                        }
+
+                        TL?.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Found settings version: {settingsFileVersion}");
+
+                        // Handle different file versions
+                        switch (settingsFileVersion)
+                        {
+                            // File version 1 - first production release
+                            case 1:
+
+                                try
+                                {
+                                    // Set de-serialisation options
+                                    JsonSerializerOptions options = new()
+                                    {
+                                        PropertyNameCaseInsensitive = true // Ignore incorrect element name casing
+                                    };
+                                    options.Converters.Add(new JsonStringEnumConverter()); // For increased resilience, accept both string member names and integer member values as valid for enum elements.
+
+                                    // De-serialise the settings string into a Settings object
+                                    settings = JsonSerializer.Deserialize<Settings>(serialisedSettings, options);
+
+                                    // Test whether the retrieved settings match the requirements of this version of ConformU
+                                    if (settings.SettingsCompatibilityVersion == Settings.SETTINGS_COMPATIBILTY_VERSION) // Version numbers match so all is well
+                                    {
+                                        Status = $"Settings read OK.";
+                                    }
+                                    else // Version numbers don't match so reset to defaults
+                                    {
+                                        int originalSettingsCompatibilityVersion = 0;
+                                        try
+                                        {
+                                            originalSettingsCompatibilityVersion = settings.SettingsCompatibilityVersion;
+
+                                            // Rename the current settings file to preserve it
+                                            string badVersionSettingsFileName = $"{SettingsFileName}.badversion";
+                                            File.Delete(badVersionSettingsFileName);
+                                            File.Move(SettingsFileName, $"{badVersionSettingsFileName}");
+
+                                            // Persist the default settings values
+                                            settings = new();
+                                            PersistSettings(settings);
+
+                                            Status = $"The current settings version: {originalSettingsCompatibilityVersion} does not match the required version: {Settings.SETTINGS_COMPATIBILTY_VERSION}. Settings reset to default values and original settings file renamed to {badVersionSettingsFileName}.";
+                                        }
+                                        catch (Exception ex2)
+                                        {
+                                            TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"Error persisting new Conform settings file: {ex2}");
+                                            Status = $"The current settings version:{originalSettingsCompatibilityVersion} does not match the required version: {Settings.SETTINGS_COMPATIBILTY_VERSION} but the new settings could not be persisted: {ex2.Message}.";
+                                        }
+                                    }
+                                }
+                                catch (JsonException ex1)
+                                {
+                                    // There was an exception when parsing the settings file so report it and set default values
+                                    TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"Error parsing Conform settings file: {ex1}");
+
+                                    // Set default values
+                                    settings = new();
+
+                                    Status = $"The settings file is corrupt ({ex1.Message}) and application settings have been reset to default values. Please correct the error in the file or use the \"Reset to defaults\" button on the Settings page to persist new values.";
+                                }
+                                catch (Exception ex1)
+                                {
+                                    TL?.LogMessage("ConformConfiguration", MessageLevel.Error, ex1.ToString());
+                                    Status = $"Exception reading the settings file, default values are in use.";
+                                }
+                                break;
+
+                            // Handle unknown settings version numbers
+                            default:
+
+                                // Persist default settings values because the file version is unknown and the file may be corrupt
+                                try
+                                {
+                                    // Rename the current settings file to preserve it
+                                    string badVersionSettingsFileName = $"{SettingsFileName}.unknownversion";
+                                    File.Delete(badVersionSettingsFileName);
+                                    File.Move(SettingsFileName, $"{badVersionSettingsFileName}");
+
+                                    // Persist the default settings values
+                                    settings = new();
+                                    PersistSettings(settings);
+
+                                    Status = $"An unsupported settings version was found: {settingsFileVersion}. Settings have been reset to defaults and the original settings file has been renamed to {badVersionSettingsFileName}.";
+                                }
+                                catch (Exception ex2)
+                                {
+                                    TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"An unsupported settings version was found: {settingsFileVersion} but an error occurred when persisting new Conform settings: {ex2}");
+                                    Status = $"$\"An unsupported settings version was found: {settingsFileVersion} but an error occurred when persisting new Conform settings: {ex2.Message}.";
+                                }
+                                break;
                         }
                     }
                 }
@@ -95,38 +188,81 @@ namespace ConformU
                 {
                     TL.LogMessage("ConformConfiguration", MessageLevel.Debug, $"Configuration file does not exist, initialising new file: {SettingsFileName}");
                     PersistSettings(settings);
-                    Status = $"Settings set to defaults on first time use.";
-                }
-            }
-            catch (JsonException ex1)
-            {
-                // There was an exception when parsing the settings file so report it and persist new default values
-                TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"Error parsing Conform settings file: {ex1}");
-                try
-                {
-                    // Rename the current settings file to preserve it
-                    string corruptSettingsFileName = $"{SettingsFileName}.corrupt";
-                    File.Delete(corruptSettingsFileName);
-                    File.Move(SettingsFileName, $"{corruptSettingsFileName}");
-
-                    // Persist the default settings values
-                    settings = new();
-                    PersistSettings(settings);
-
-                    Status = $"The settings file is corrupt ({ex1.Message}), settings have been reset to default values. The corrupt file has been renamed to {SettingsFileName}.corrupt";
-                }
-                catch (Exception ex2)
-                {
-                    TL?.LogMessage("ConformConfiguration", MessageLevel.Error, $"Error persisting Conform settings file: {ex2}");
-                    Status = $"The settings file is corrupt ({ex1.Message}), but default settings could not be saved to the file system: {ex2.Message}. Default values are in effect.";
+                    Status = $"First time use - settings set to default values.";
                 }
             }
             catch (Exception ex)
             {
                 TL?.LogMessage("ConformConfiguration", MessageLevel.Error, ex.ToString());
-                Status = $"Exception reading the settings file, default values are in use.";
+                Status = $"Unexpected exception reading the settings file, default values are in use.";
             }
         }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    Console.WriteLine("ConformConfiguration.Dispose()...");
+                    TL = null;
+                    settings = null;
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put clean-up code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
+        #region Public methods
+
+        public void Reset()
+        {
+            TL?.LogMessage("Reset", MessageLevel.Debug, "Resetting settings file to default values");
+            settings = new();
+            PersistSettings(settings);
+            Status = $"Settings reset at {DateTime.Now:HH:mm:ss.f}.";
+            RaiseUiHasChangedEvent();
+        }
+
+        /// <summary>
+        /// Persist current settings
+        /// </summary>
+        public void Save()
+        {
+            TL?.LogMessage("Save", MessageLevel.Debug, "Persisting settings to settings file");
+            PersistSettings(settings);
+            Status = $"Settings saved at {DateTime.Now:HH:mm:ss.f}.";
+
+            // Raise configuration has changed event
+            if (ConfigurationChanged is not null)
+            {
+                EventArgs args = new();
+                TL?.LogMessage("Save", MessageLevel.Debug, "About to call configuration changed event handler");
+                ConfigurationChanged(this, args);
+                TL?.LogMessage("Save", MessageLevel.Debug, "Returned from configuration changed event handler");
+            }
+        }
+
+        public Settings Settings
+        {
+            get { return settings; }
+        }
+
+        public string SettingsFileName { get; private set; }
+
+        /// <summary>
+        /// Text message describing any issues found when validating the settings
+        /// </summary>
+        public string Status { get; private set; }
 
         /// <summary>
         /// Validate the settings values
@@ -159,44 +295,9 @@ namespace ConformU
             return issueList;
         }
 
-        /// <summary>
-        /// Persist current settings
-        /// </summary>
-        public void Save()
-        {
-            TL?.LogMessage("Save", MessageLevel.Debug, "Persisting settings to settings file");
-            PersistSettings(settings);
-            Status = $"Settings saved at {DateTime.Now:HH:mm:ss.f}.";
+        #endregion
 
-            // Raise configuration has changed event
-            if (ConfigurationChanged is not null)
-            {
-                EventArgs args = new();
-                TL?.LogMessage("Save", MessageLevel.Debug, "About to call configuration changed event handler");
-                ConfigurationChanged(this, args);
-                TL?.LogMessage("Save", MessageLevel.Debug, "Returned from configuration changed event handler");
-            }
-        }
-
-        internal void RaiseUiHasChangedEvent()
-        {
-            if (UiHasChanged is not null)
-            {
-                EventArgs args = new();
-                TL?.LogMessage("RaiseUiHasChangedEvent", MessageLevel.Debug, "About to call UI has changed event handler");
-                UiHasChanged(this, args);
-                TL?.LogMessage("RaiseUiHasChangedEvent", MessageLevel.Debug, "Returned from UI has changed event handler");
-            }
-        }
-
-        public void Reset()
-        {
-            TL?.LogMessage("Reset", MessageLevel.Debug, "Resetting settings file to default values");
-            settings = new();
-            PersistSettings(settings);
-            Status = $"Settings reset at {DateTime.Now:HH:mm:ss.f}.";
-            RaiseUiHasChangedEvent();
-        }
+        #region Event handlers
 
         public delegate void MessageEventHandler(object sender, MessageEventArgs e);
 
@@ -204,23 +305,9 @@ namespace ConformU
 
         public event EventHandler UiHasChanged;
 
-        public Settings Settings
-        {
-            get { return settings; }
-        }
+        #endregion
 
-        /// <summary>
-        /// Text message describing any issues found when validating the settings
-        /// </summary>
-        public string Status { get; private set; }
-
-        public string SettingsFileName { get; private set; }
-
-        /// <summary>
-        /// Flag indicating whether de-serialisation of Alpaca JSON responses is sensitive to case of JSON element names
-        /// </summary>
-        /// <remarks>If Set TRUE JSON element names that are incorrectly cased will be ignored. If FALSE they will be accepted.</remarks>
-        public bool JsonDeserialisationIsCaseSensitive { get; private set; }
+        #region Support code
 
         private void PersistSettings(Settings settingsToPersist)
         {
@@ -254,35 +341,18 @@ namespace ConformU
 
         }
 
-        protected virtual void Dispose(bool disposing)
+        internal void RaiseUiHasChangedEvent()
         {
-            if (!disposedValue)
+            if (UiHasChanged is not null)
             {
-                if (disposing)
-                {
-                    Console.WriteLine("ConformConfiguration.Dispose()...");
-                    TL = null;
-                    settings = null;
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
-                disposedValue = true;
+                EventArgs args = new();
+                TL?.LogMessage("RaiseUiHasChangedEvent", MessageLevel.Debug, "About to call UI has changed event handler");
+                UiHasChanged(this, args);
+                TL?.LogMessage("RaiseUiHasChangedEvent", MessageLevel.Debug, "Returned from UI has changed event handler");
             }
         }
 
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~ConformConfiguration()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
+        #endregion
 
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
     }
 }
