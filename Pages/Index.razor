@@ -63,6 +63,13 @@
 
         switch (configuration.Settings.DeviceType)
         {
+            case DeviceTypes.Dome:
+                screenLog += $"\r\n\r\nTo protect your equipment and the dome that is controlled by this driver:";
+                screenLog += $"\r\n1. The shutter will not open until enabled on the Dome tab in the Settings page. (Currently {(configuration.Settings.DomeOpenShutter? "ENABLED" : "DISABLED")}.)";
+                screenLog += $"\r\n1. A stabilisation delay is added after each movement. (Currently {configuration.Settings.DomeStabilisationWaitTime} seconds.)";
+                screenLog += $"\r\n   The delay can also be changed on the Dome tab in the Settings page.";
+                break;
+
             case DeviceTypes.Switch:
                 screenLog += $"\r\n\r\nTo protect the equipment that is controlled by this Switch driver:";
                 screenLog += $"\r\n1. Write tests are disabled until enabled on the Switch tab in the Settings page. (Currently {(configuration.Settings.SwitchEnableSet?"ENABLED":"DISABLED")}.)";
