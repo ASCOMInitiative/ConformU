@@ -799,25 +799,39 @@ namespace ConformU
         /// <remarks></remarks>
         internal void WaitFor(int waitDuration, int updateInterval = WAITFOR_UPDATE_INTERVAL)
         {
-            // Start the loop timing stopwatch
-            Stopwatch sw = Stopwatch.StartNew();
-
-            // Wait for p_Duration milliseconds
-            do
+            if (waitDuration > 0)
             {
-                // Calculate the current loop number (starts at 1 given that the timer's elapsed time will be zero or very low on the first loop)
-                int currentLoopNumber = (int)sw.ElapsedMilliseconds / updateInterval;
+                // Ensure that we don't wait more than the expected duration
+                if (updateInterval > waitDuration) updateInterval = waitDuration;
 
-                // Calculate the sleep time required to start the next loop at a multiple of the poll interval
-                int sleeptime = updateInterval * (currentLoopNumber + 1) - (int)sw.ElapsedMilliseconds;
+                // Initialise the status message status field 
+                SetStatus($"0.0 / {Convert.ToDouble(waitDuration) / 1000.0:0.0} seconds");
 
-                // Sleep until it is time for the next completion function poll
-                Thread.Sleep(sleeptime);
+                // Start the loop timing stopwatch
+                Stopwatch sw = Stopwatch.StartNew();
 
-                // Set the status message status field to the elapsed time
-                SetStatus($"{Math.Round(Convert.ToDouble(currentLoopNumber + 1) * updateInterval / 1000.0, 1):0.0} / {Convert.ToDouble(waitDuration) / 1000.0:0.0} seconds");
+                // Wait for p_Duration milliseconds
+                do
+                {
+                    // Calculate the current loop number (starts at 1 given that the timer's elapsed time will be zero or very low on the first loop)
+                    int currentLoopNumber = ((int)sw.ElapsedMilliseconds + 50) / updateInterval;
+
+                    // Calculate the sleep time required to start the next loop at a multiple of the poll interval
+                    int sleeptime = updateInterval * (currentLoopNumber + 1) - (int)sw.ElapsedMilliseconds;
+
+                    // Ensure that we don't over-wait on the last cycle
+                    int remainingWaitTime = waitDuration - (int)sw.ElapsedMilliseconds;
+                    if (remainingWaitTime < 0) remainingWaitTime = 0;
+                    if (remainingWaitTime < updateInterval) sleeptime = remainingWaitTime;
+
+                    // Sleep until it is time for the next completion function poll
+                    Thread.Sleep(sleeptime);
+
+                    // Set the status message status field to the elapsed time
+                    SetStatus($"{Math.Round(Convert.ToDouble(currentLoopNumber + 1) * updateInterval / 1000.0, 1):0.0} / {Convert.ToDouble(waitDuration) / 1000.0:0.0} seconds");
+                }
+                while ((sw.ElapsedMilliseconds <= waitDuration) & !applicationCancellationToken.IsCancellationRequested);
             }
-            while ((sw.ElapsedMilliseconds <= waitDuration) & !applicationCancellationToken.IsCancellationRequested);
         }
 
 #nullable enable
@@ -842,8 +856,14 @@ namespace ConformU
                 SetAction(actionName);
             }
 
+            // Initialise the status message
+            if (statusString is null)
+                SetStatus($"0.0 / {timeoutSeconds:0.0} seconds");
+            else
+                SetStatus(statusString());
+
             // Create a timeout cancellation token source that times out after the required timeout period
-            CancellationTokenSource timeoutCts = new ();
+            CancellationTokenSource timeoutCts = new();
             timeoutCts.CancelAfter(TimeSpan.FromSeconds(Convert.ToDouble(timeoutSeconds) + 2.0 * (Convert.ToDouble(pollInterval) / 1000.0))); // Allow two poll intervals beyond the timeout time to prevent early termination
 
             // Combine the provided cancellation token parameter with the new timeout cancellation token
@@ -862,10 +882,10 @@ namespace ConformU
                 // Sleep until it is time for the next completion function poll
                 Thread.Sleep(sleeptime);
 
-                // Set the status message status field to the elapsed time
-                if (statusString is null)
+                // Set the status message status field
+                if (statusString is null) // No status string function was provided so display an elapsed time message
                     SetStatus($"{Math.Round(Convert.ToDouble(currentLoopNumber + 1) * pollInterval / 1000.0, 1):0.0} / {timeoutSeconds:0.0} seconds");
-                else
+                else // Display the supplied message instead of the elapsed time message
                     SetStatus(statusString());
 
             } while (waitFunction() & !combinedCts.Token.IsCancellationRequested);
@@ -875,7 +895,7 @@ namespace ConformU
             {
                 //  Log the timeout and throw an exception to cancel the operation
                 LogDebug("WaitUntil", $"The {actionName} operation timed out after {timeoutSeconds} seconds.");
-                throw new TimeoutException($"The \"{actionName}\" operation exceeded the timeout of {timeoutSeconds} seconds that is configured in Conform.");
+                throw new TimeoutException($"The \"{actionName}\" operation exceeded the timeout of {timeoutSeconds} seconds specified for this operation.");
             }
         }
 

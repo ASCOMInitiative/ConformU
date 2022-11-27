@@ -61,6 +61,25 @@
 
         screenLog = configuration.Status;
 
+        switch (configuration.Settings.DeviceType)
+        {
+            case DeviceTypes.Switch:
+                screenLog += $"\r\n\r\nTo protect the equipment that is controlled by this Switch driver:";
+                screenLog += $"\r\n1. Write tests are disabled until enabled on the Switch tab in the Settings page. (Currently {(configuration.Settings.SwitchEnableSet?"ENABLED":"DISABLED")}.)";
+                string readDelay = $"{Convert.ToDouble(configuration.Settings.SwitchReadDelay) / 1000.0:0.0}";
+                string writeDelay = $"{Convert.ToDouble(configuration.Settings.SwitchWriteDelay) / 1000.0:0.0}";
+                screenLog += $"\r\n2. Delays of {readDelay} second{(readDelay == "1.0" ? "" : "s")} (read) and {writeDelay} second{(writeDelay == "1.0" ? "" : "s")} (write) will be added after each operation.";
+                screenLog += $"\r\n   The delays can also be changed on the Switch tab in the Settings page.";
+                break;
+
+            default:
+                break;
+        }
+
+
+
+
+
         conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"End");
     }
 

@@ -456,7 +456,7 @@ namespace ConformU
                 LogCallToDriver(p_Name, "About to get Slewing property");
                 if (domeDevice.Slewing)
                 {
-                    DomeWaitForSlew(settings.DomeAltitudeMovementTimeout, () => { return $"{domeDevice.Altitude:00} / {p_Altitude:00}"; }); if (cancellationToken.IsCancellationRequested) return;
+                    DomeWaitForSlew(settings.DomeAltitudeMovementTimeout, () => { return $"{domeDevice.Altitude:00} / {p_Altitude:00} degrees"; }); if (cancellationToken.IsCancellationRequested) return;
                     LogOK(p_Name + " " + p_Altitude, "Asynchronous slew OK");
                 }
                 else
@@ -506,7 +506,7 @@ namespace ConformU
                 LogCallToDriver(p_Name, "About to get Slewing property");
                 if (domeDevice.Slewing)
                 {
-                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout, () => { return $"{domeDevice.Azimuth:000} / {p_Azimuth:000}"; }); if (cancellationToken.IsCancellationRequested) return;
+                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout, () => { return $"{domeDevice.Azimuth:000} / {p_Azimuth:000} degrees"; }); if (cancellationToken.IsCancellationRequested) return;
                     LogOK(p_Name + " " + p_Azimuth, "Asynchronous slew OK");
                 }
                 else

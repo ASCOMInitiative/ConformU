@@ -177,10 +177,7 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    if (m_Camera is not null)
-                    {
-                        m_Camera.Dispose();
-                    }
+                    m_Camera?.Dispose();
 
                     m_Camera = null;
                     m_ImageArray = null;

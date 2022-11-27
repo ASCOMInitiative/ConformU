@@ -236,7 +236,7 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    if (telescopeDevice is not null) telescopeDevice.Dispose();
+                    telescopeDevice?.Dispose();
                     telescopeDevice = null;
                 }
             }
@@ -3760,13 +3760,12 @@ namespace ConformU
 
                             targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
                             targetDeclination = 2.0d;
-                            SetAction("Slewing asynchronously...");
 
                             if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
                             telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
                             if (settings.DisplayMethodCalls) LogDebug(p_Name, $"Asynchronous slew initiated");
 
-                            WaitForSlew(p_Name);
+                            WaitForSlew(p_Name, $"Slewing to coordinates asynchronously");
                             if (settings.DisplayMethodCalls) LogDebug(p_Name, $"Slew completed");
                             break;
                         }
@@ -3867,11 +3866,10 @@ namespace ConformU
                                 }
                             }
 
-                            SetAction("Slewing asynchronously...");
                             if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToTargetAsync method");
                             telescopeDevice.SlewToTargetAsync();
 
-                            WaitForSlew(p_Name);
+                            WaitForSlew(p_Name, $"Slewing to target asynchronously");
                             break;
                         }
 
@@ -3890,7 +3888,7 @@ namespace ConformU
                             LogDebug(p_Name, $"Tracking 2: {telescopeDevice.Tracking}");
                             targetAltitude = 50.0d;
                             targetAzimuth = 150.0d;
-                            SetAction("Slewing to Alt/Az synchronously: " + FormatDec(targetAltitude) + " " + FormatDec(targetAzimuth));
+                            SetAction("Slewing to Alt/Az synchronously...");
 
                             if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
                             telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
@@ -3916,7 +3914,6 @@ namespace ConformU
                             LogDebug(p_Name, $"Tracking 2: {telescopeDevice.Tracking}");
                             targetAltitude = 55.0d;
                             targetAzimuth = 155.0d;
-                            SetAction("Slewing to Alt/Az asynchronously: " + FormatDec(targetAltitude) + " " + FormatDec(targetAzimuth));
 
                             if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToAltAzAsync method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
                             telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
@@ -3924,7 +3921,7 @@ namespace ConformU
                             if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 3: {telescopeDevice.Tracking}");
 
-                            WaitForSlew(p_Name);
+                            WaitForSlew(p_Name, $"Slewing to Alt/Az asynchronously");
                             if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 4: {telescopeDevice.Tracking}");
                             break;
@@ -4797,7 +4794,7 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage("Parked:" + p_Name, "About to call SlewToCoordinatesAsync method");
                                 telescopeDevice.SlewToCoordinatesAsync(TelescopeRAFromSiderealTime("Parked:" + p_Name, 1.0d), 0.0d);
-                                WaitForSlew("Parked:" + p_Name);
+                                WaitForSlew("Parked:" + p_Name,"Slewing to coordinates asynchronously");
                                 break;
                             }
 
@@ -4828,7 +4825,7 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage("Parked:" + p_Name, "About to call method");
                                 telescopeDevice.SlewToTargetAsync();
-                                WaitForSlew("Parked:" + p_Name);
+                                WaitForSlew("Parked:" + p_Name, "Slewing to target asynchronously");
                                 break;
                             }
 
@@ -5526,7 +5523,7 @@ namespace ConformU
                                                     if (settings.DisplayMethodCalls)
                                                         LogTestAndMessage(p_Name, "About to set SideOfPier property to " + ((int)PointingState.ThroughThePole).ToString());
                                                     telescopeDevice.SideOfPier = PointingState.ThroughThePole;
-                                                    WaitForSlew(p_Name);
+                                                    WaitForSlew(p_Name, $"Moving to the pierEast pointing state asynchronously");
 
                                                     if (cancellationToken.IsCancellationRequested)
                                                         return;
@@ -5560,7 +5557,7 @@ namespace ConformU
                                                     if (settings.DisplayMethodCalls)
                                                         LogTestAndMessage(p_Name, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
                                                     telescopeDevice.SideOfPier = PointingState.Normal;
-                                                    WaitForSlew(p_Name);
+                                                    WaitForSlew(p_Name, $"Moving to the pierWest pointing state asynchronously");
                                                     if (cancellationToken.IsCancellationRequested)
                                                         return;
 
@@ -5600,7 +5597,7 @@ namespace ConformU
                                             LogTestAndMessage(p_Name, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
                                         telescopeDevice.SideOfPier = PointingState.Normal;
                                         LogDebug(p_Name, "SideOfPier set OK to pierEast but should have thrown an error");
-                                        WaitForSlew(p_Name);
+                                        WaitForSlew(p_Name, $"Moving to the pierWest pointing state asynchronously");
                                         LogIssue(p_Name, "CanSetPierSide is false but no exception was generated when set was attempted");
                                     }
                                     catch (Exception ex)
@@ -5609,7 +5606,7 @@ namespace ConformU
                                     }
                                     finally
                                     {
-                                        WaitForSlew(p_Name);
+                                        WaitForSlew(p_Name, $"Moving to the pierWest pointing state asynchronously");
                                     } // Make sure slewing is stopped if an exception was thrown
                                 }
 
@@ -6593,7 +6590,7 @@ namespace ConformU
                 }
 
                 // Now do an actual slew and record side of pier we actually get
-                SlewScope(p_RA, p_DEC, "test position");
+                SlewScope(p_RA, p_DEC, $"test position {p_Msg}");
                 l_Results.SideOfPier = (PointingState)telescopeDevice.SideOfPier;
                 LogDebug("SOPPierTest", "Actual SideOfPier: " + l_Results.SideOfPier.ToString());
 
@@ -6781,14 +6778,14 @@ namespace ConformU
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("SlewScope", "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(p_RA) + ", Declination: " + FormatDec(p_DEC));
                     telescopeDevice.SlewToCoordinatesAsync(p_RA, p_DEC);
-                    WaitForSlew(p_Msg);
+                    WaitForSlew(p_Msg,$"Slewing asynchronously to {p_Msg}");
                 }
                 else
                 {
                     LogDebug("SlewScope", "Slewing synchronously to " + p_Msg + " " + FormatRA(p_RA) + " " + FormatDec(p_DEC));
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("SlewScope", "About to call SlewToCoordinates method, RA: " + FormatRA(p_RA) + ", Declination: " + FormatDec(p_DEC));
-                    SetStatus($"Slewing synchronously to {FormatRA(p_RA)} {FormatDec(p_DEC)}");
+                    SetStatus($"Slewing synchronously to {p_Msg}: {FormatRA(p_RA)} {FormatDec(p_DEC)}");
                     telescopeDevice.SlewToCoordinates(p_RA, p_DEC);
                 }
 
@@ -6807,12 +6804,12 @@ namespace ConformU
             SetAction("");
         }
 
-        private void WaitForSlew(string testName)
+        private void WaitForSlew(string testName, string actionMessage)
         {
             Stopwatch sw = Stopwatch.StartNew();
 
             if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to get Slewing property multiple times");
-            WaitWhile("Waiting for slew", () => { return telescopeDevice.Slewing | (sw.Elapsed.TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION); }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+            WaitWhile(actionMessage, () => { return telescopeDevice.Slewing | (sw.Elapsed.TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION); }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
         }
 
         private double TelescopeRAFromHourAngle(string testName, double p_Offset)

@@ -3,14 +3,8 @@ using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using System;
+using System.Configuration;
 using System.Threading;
-/* Unmerged change from project 'ConformU (net5.0)'
-Before:
-using ASCOM.Com.DriverAccess;
-After:
-using System.Threading;
-*/
-
 
 namespace ConformU
 {
@@ -20,8 +14,8 @@ namespace ConformU
         private short m_MaxSwitch;
         private bool m_CanReadMaxSwitch;
         private readonly int ExtendedSwitchNumberTestRange; // Checks for usable switches either side of the expected range
-        private readonly int SWITCH_WRITE_DELAY;
-        private readonly int SWITCH_READ_DELAY;
+        private readonly int switchWriteDelay;
+        private readonly int switchReadDelay;
 
         const int NUMBER_OF_SWITCH_TEST_STATES = 10;
         const double BAD_SWITCH_VALUE = double.NaN; // Do not change this value, the Double.IsNaN method is used in various tests in the code below
@@ -65,8 +59,8 @@ namespace ConformU
             m_PerformanceGetSwitchName = int.MinValue; // Initialise to silly values
             m_PerformanceGetSwitch = int.MinValue;
 
-            SWITCH_READ_DELAY = settings.SwitchReadDelay; // Get values for the two delay parameters as set by the user or the default values if not yet set
-            SWITCH_WRITE_DELAY = settings.SwitchWriteDelay;
+            switchReadDelay = settings.SwitchReadDelay; // Get values for the two delay parameters as set by the user or the default values if not yet set
+            switchWriteDelay = settings.SwitchWriteDelay;
             ExtendedSwitchNumberTestRange = settings.SwitchExtendedNumberTestRange;
         }
 
@@ -210,6 +204,26 @@ namespace ConformU
             }
         }
 
+        private void WaitForReadDelay(string message)
+        {
+            if (switchReadDelay > 0)
+            {
+                SetAction($"{message} post read delay");
+                WaitFor(switchReadDelay);
+            }
+            SetAction("");
+        }
+
+        private void WaitForWriteDelay(string message)
+        {
+            if (switchWriteDelay > 0)
+            {
+                SetAction($"{message} post write delay");
+                WaitFor(switchWriteDelay);
+            }
+            SetAction("");
+        }
+
         public override void CheckMethods()
         {
             short i;
@@ -225,18 +239,20 @@ namespace ConformU
                     {
                         if (m_CanReadMaxSwitch)
                         {
-                            SetTest("Read/Write Switches");
-                            SetAction("Testing switch");
+
                             // Find valid GetSwitch values
                             for (i = 0; i <= System.Convert.ToInt16(m_MaxSwitch - 1); i++)
                             {
-                                SetStatus(i.ToString());
+                                SetTest($"Read/Write Switch {i}");
                                 l_GetSwitchOK = false;
                                 l_SetSwitchOK = false;
                                 try // Read switch state
                                 {
                                     LogCallToDriver("GetSwitch " + i, $"About to call GetSwitch({i}) method");
+                                    SetAction($"GetSwitch");
                                     l_GetSwitchOriginal = m_Switch.GetSwitch(i);
+                                    WaitForReadDelay("GetSwitch");
+
                                     LogOK("GetSwitch " + i, "Found switch, state: " + l_GetSwitchOriginal.ToString());
                                     l_GetSwitchOK = true;
                                     if (i > m_MaxSwitch)
@@ -258,17 +274,25 @@ namespace ConformU
                                 try // Now try to write the value
                                 {
                                     LogCallToDriver("SetSwitch " + i, $"About to call SetSwitch({i})");
+                                    SetAction($"SetSwitch {!l_GetSwitchOriginal}");
                                     m_Switch.SetSwitch(i, !l_GetSwitchOriginal); // Swap the switch state
+                                    WaitForWriteDelay($"SetSwitch {!l_GetSwitchOriginal}");
+
                                     l_SetSwitchOK = true;
                                     if (l_GetSwitchOK)
                                     {
                                         LogCallToDriver("SetSwitch", $"About to call GetSwitch({i}) method");
+                                        SetAction($"GetSwitch");
                                         l_NewSwitchState = m_Switch.GetSwitch(i); // Read the new switch state to confirm that value did change
+                                        WaitForReadDelay("GetSwitch");
+
                                         if (l_NewSwitchState == !l_GetSwitchOriginal)
                                         {
                                             LogOK("SetSwitch " + i, "Switch correctly changed state");
                                             LogCallToDriver("SetSwitch", "About to call SetSwitch method");
+                                            SetAction($"SetSwitch {l_GetSwitchOriginal}");
                                             m_Switch.SetSwitch(i, l_GetSwitchOriginal); // Now put switch back to original state
+                                            WaitForWriteDelay($"SetSwitch {l_GetSwitchOriginal}");
                                         }
                                         else
                                             LogIssue("SetSwitch " + i, "Switch did not change state, currently it is " + l_NewSwitchState.ToString());
@@ -342,7 +366,6 @@ namespace ConformU
                             CheckInaccessibleOutOfRange(SwitchMethod.SwitchStep);
 
                             // Find valid GetSwitch values
-                            SetAction("Testing switch");
                             LogDebug("GetSwitchName ", string.Format("Extended switch number test range: {0} - {1}", -ExtendedSwitchNumberTestRange, m_MaxSwitch + ExtendedSwitchNumberTestRange - 1));
                             for (i = (short)-ExtendedSwitchNumberTestRange; i <= Convert.ToInt16(m_MaxSwitch + ExtendedSwitchNumberTestRange - 1); i++)
                             {
@@ -359,6 +382,7 @@ namespace ConformU
                                         LogTestAndMessage("GetSwitchName", string.Format("About to get switch {0} name", i));
                                     l_SwitchName = m_Switch.GetSwitchName(i);
                                     LogOK("GetSwitchName ", "Found switch " + i);
+                                    SetTest($"Testing switch {i}");
 
                                     // Test that the switch number is in the valid range of 0..MaxSwitch-1
                                     if (i > (m_MaxSwitch - 1))
@@ -372,6 +396,7 @@ namespace ConformU
 
                                     try // Read switch description
                                     {
+                                        SetAction("Getting switch description");
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage("GetSwitchDescription", string.Format("  About to get switch {0} description", i));
                                         l_SwitchDescription = m_Switch.GetSwitchDescription(i);
@@ -384,6 +409,8 @@ namespace ConformU
 
                                     try // Read switch minimum value
                                     {
+                                        SetAction("Getting switch minimum value");
+
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage("MinSwitchValue", string.Format("  About to get switch {0} minimum value", i));
                                         l_SwitchMinimum = m_Switch.MinSwitchValue(i);
@@ -397,6 +424,7 @@ namespace ConformU
 
                                     try // Read switch maximum value
                                     {
+                                        SetAction("Getting switch maximum value");
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage("MaxSwitchValue", string.Format("  About to get switch {0} maximum value", i));
                                         l_SwitchMaximum = m_Switch.MaxSwitchValue(i);
@@ -432,6 +460,7 @@ namespace ConformU
 
                                     try // Read switch step value
                                     {
+                                        SetAction("Getting switch step size");
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage("SwitchStep", string.Format("  About to get switch {0} step size", i));
                                         l_SwitchStep = m_Switch.SwitchStep(i);
@@ -527,9 +556,12 @@ namespace ConformU
                                     // Access the Get Methods and record the outcomes
                                     try
                                     {
+                                        SetAction($"GetSwitch");
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage("GetSwitch", string.Format("  About to call GetSwitch({0}) method", i));
                                         l_GetSwitchOriginal = m_Switch.GetSwitch(i);
+                                        WaitForReadDelay("GetSwitch");
+
                                         l_GetSwitchOK = true;
                                         LogOK("GetSwitch ", "  " + l_GetSwitchOriginal.ToString());
                                     }
@@ -542,9 +574,11 @@ namespace ConformU
 
                                     try
                                     {
+                                        SetAction($"GetSwitchValue");
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage("GetSwitchValue", string.Format("  About to call GetSwitchValue({0}) method", i));
                                         l_GetSwitchValueOriginal = m_Switch.GetSwitchValue(i);
+                                        WaitForReadDelay("GetSwitchValue");
                                         l_GetSwitchValueOK = true;
                                         LogOK("GetSwitchValue ", "  " + l_GetSwitchValueOriginal);
                                     }
@@ -562,23 +596,26 @@ namespace ConformU
                                         // Try to set the two boolean values through SetSwitch
                                         try
                                         {
-
                                             // Try SetSwitch(False)
-                                            SetStatus("Setting SetSwitch - False");
+                                            SetAction($"SetSwitch {i} False");
                                             if (settings.DisplayMethodCalls)
                                                 LogTestAndMessage("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, false));
+                                            SetAction("SetSwitch false");
                                             m_Switch.SetSwitch(i, false); // Set switch false
-                                            WaitFor(SWITCH_READ_DELAY);
+                                            WaitForWriteDelay($"SetSwitch False");
 
                                             // Check GetSwitch
                                             if (l_GetSwitchOK)
                                             {
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitch", string.Format("  About to call GetSwitch({0}) method", i));
+
+                                                SetAction($"GetSwitch");
                                                 if (m_Switch.GetSwitch(i) == false)
                                                     LogOK("SetSwitch ", "  GetSwitch returned False after SetSwitch(False)");
                                                 else
                                                     LogIssue("SetSwitch ", "  GetSwitch returned True after SetSwitch(False)");
+                                                WaitForReadDelay("GetSwitch");
                                             }
                                             else
                                                 LogInfo("SetSwitch ", "  Skipping GetSwitch confirmation because of an issue with the GetSwitch method");
@@ -588,7 +625,9 @@ namespace ConformU
                                             {
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitch", string.Format("  About to call GetSwitchValue({0}) method", i));
+                                                SetAction($"GetSwitchValue");
                                                 l_GetSwitchValue = m_Switch.GetSwitchValue(i);
+                                                WaitForReadDelay("GetSwitchValue");
                                                 switch (l_GetSwitchValue)
                                                 {
                                                     case object _ when l_GetSwitchValue == l_SwitchMinimum:
@@ -612,24 +651,27 @@ namespace ConformU
                                             }
                                             else
                                                 LogInfo("SetSwitch ", "  Skipping GetSwitchValue confirmation because of an issue with the GetSwitchValue or GetSwitchMinimum methods");
-                                            WaitFor(SWITCH_WRITE_DELAY);
+                                            if (cancellationToken.IsCancellationRequested) return;
 
                                             // Try SetSwitch(True)
-                                            SetStatus("Setting SetSwitch - True");
+                                            SetAction($"SetSwitch {i} True");
                                             if (settings.DisplayMethodCalls)
                                                 LogTestAndMessage("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, true));
+                                            SetAction($"SetSwitch true");
                                             m_Switch.SetSwitch(i, true); // Set switch true
-                                            WaitFor(SWITCH_READ_DELAY);
+                                            WaitForWriteDelay("SetSwitch true");
 
                                             // Check GetSwitch
                                             if (l_GetSwitchOK)
                                             {
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitch", string.Format("  About to call GetSwitch({0}) method", i));
+                                                SetAction($"GetSwitch");
                                                 if (m_Switch.GetSwitch(i) == true)
                                                     LogOK("SetSwitch ", "  GetSwitch read True after SetSwitch(True)");
                                                 else
                                                     LogIssue("SetSwitch ", "  GetSwitch read False after SetSwitch(True)");
+                                                WaitForReadDelay("GetSwitch");
                                             }
                                             else
                                                 LogInfo("SetSwitch ", "  Skipping GetSwitch confirmation because of an issue with the GetSwitch method");
@@ -639,7 +681,9 @@ namespace ConformU
                                             {
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitch", string.Format("  About to call GetSwitchValue({0}) method", i));
+                                                SetAction($"GetSwitchValue");
                                                 l_GetSwitchValue = m_Switch.GetSwitchValue(i);
+                                                WaitForReadDelay("GetSwitchValue");
                                                 switch (l_GetSwitchValue)
                                                 {
                                                     case object _ when l_GetSwitchValue == l_SwitchMaximum:
@@ -663,28 +707,30 @@ namespace ConformU
                                             }
                                             else
                                                 LogInfo("SetSwitch ", "  Skipping GetSwitchValue confirmation because of an issue with the GetSwitchValue or GetSwitchMaximum methods");
-                                            WaitFor(SWITCH_WRITE_DELAY);
+                                            if (cancellationToken.IsCancellationRequested) return;
 
                                             // Return to original state if possible,otherwise set to false
                                             if (l_GetSwitchOK)
                                             {
-                                                SetStatus("Returning boolean switch to its original value");
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, l_GetSwitch));
+                                                SetAction($"SetSwitch {l_GetSwitch} to its original value");
                                                 m_Switch.SetSwitch(i, l_GetSwitch); // Return to the original state
-                                                WaitFor(SWITCH_WRITE_DELAY);
+                                                WaitForWriteDelay($"SetSwitch {l_GetSwitch} to its original value");
                                             }
                                             else
                                             {
-                                                SetStatus("Setting boolean switch to False");
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, false));
+                                                SetAction("SeSwitch false");
                                                 m_Switch.SetSwitch(i, false); // Set to false
-                                                WaitFor(SWITCH_WRITE_DELAY);
+                                                WaitForWriteDelay("SetSwitch false");
                                             }
 
                                             l_SetSwitchOK = true;
                                             LogDebug("SetSwitch ", "Set value OK");
+                                            if (cancellationToken.IsCancellationRequested) return;
+
                                         }
                                         catch (Exception ex)
                                         {
@@ -721,21 +767,23 @@ namespace ConformU
                                         {
                                             if (IsGoodValue(l_SwitchMinimum))
                                             {
-                                                SetStatus("Setting SetSwitchValue - MINIMUM_VALUE");
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set the minimum permissible value", i, l_SwitchMinimum));
+                                                SetAction($"SetSwitchValue {l_SwitchMinimum}");
                                                 m_Switch.SetSwitchValue(i, l_SwitchMinimum); // Set switch to minimum
-                                                WaitFor(SWITCH_READ_DELAY);
+                                                WaitForWriteDelay($"SetSwitchValue {l_SwitchMinimum}");
 
                                                 // Check GetSwitch
                                                 if (l_GetSwitchOK)
                                                 {
                                                     if (settings.DisplayMethodCalls)
                                                         LogTestAndMessage("SetSwitchValue", string.Format("  About to call GetSwitch({0}) method", i));
+                                                    SetAction("GetSwitch");
                                                     if (m_Switch.GetSwitch(i) == false)
                                                         LogOK("SetSwitchValue", "  GetSwitch returned False after SetSwitchValue(MINIMUM_VALUE)");
                                                     else
                                                         LogIssue("SetSwitchValue", "  GetSwitch returned True after SetSwitchValue(MINIMUM_VALUE)");
+                                                    WaitForReadDelay("GetSwitch");
                                                 }
                                                 else
                                                     LogInfo("SetSwitchValue ", "  Skipping GetSwitch confirmation because of an issue with the GetSwitch method");
@@ -745,7 +793,10 @@ namespace ConformU
                                                 {
                                                     if (settings.DisplayMethodCalls)
                                                         LogTestAndMessage("SetSwitchValue", string.Format("  About to call GetSwitchValue({0}) method", i));
+                                                    SetAction("GetSwitchValue");
                                                     l_GetSwitchValue = m_Switch.GetSwitchValue(i);
+                                                    WaitForReadDelay("GetSwitchValue");
+
                                                     switch (l_GetSwitchValue)
                                                     {
                                                         case object _ when l_GetSwitchValue == l_SwitchMinimum:
@@ -777,21 +828,23 @@ namespace ConformU
                                                 }
                                                 else
                                                     LogInfo("SetSwitchValue ", "  Skipping GetSwitchValue confirmation because of an issue with the GetSwitchValue method");
-                                                WaitFor(SWITCH_WRITE_DELAY);
+                                                if (cancellationToken.IsCancellationRequested) return;
 
                                                 // Now try a value below minimum
                                                 try
                                                 {
                                                     if (settings.DisplayMethodCalls)
                                                         LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set an invalid low value", i, l_SwitchMinimum - 1.0));
+                                                    SetAction($"SetSwitchValue {l_SwitchMinimum - 1.0}");
                                                     m_Switch.SetSwitchValue(i, l_SwitchMinimum - 1.0);
+                                                    WaitForWriteDelay($"SetSwitchValue {l_SwitchMinimum - 1.0}");
+
                                                     LogIssue("SetSwitchValue", "Switch did not throw an exception when a value below SwitchMinimum was set: " + (l_SwitchMinimum - 1.0).ToString());
                                                 }
                                                 catch (Exception ex)
                                                 {
                                                     HandleInvalidValueExceptionAsOK("SetSwitchValue", MemberType.Method, Required.Mandatory, ex, "when setting a value below SwitchMinimum - " + (l_SwitchMinimum - 1.0).ToString(), "  Switch threw an InvalidOperationException when a value below SwitchMinimum was set: " + (l_SwitchMinimum - 1.0).ToString());
                                                 }
-                                                WaitFor(SWITCH_WRITE_DELAY);
                                             }
                                             else
                                                 LogInfo("SetSwitchValue ", "  Skipping test because of an issue with retrieving the switch minimum value through GetSwitchMinimim");
@@ -799,21 +852,24 @@ namespace ConformU
                                             // Try SetSwitchValue(MAXIMUM_VALUE)
                                             if (IsGoodValue(l_SwitchMaximum))
                                             {
-                                                SetStatus("Setting SetSwitchValue - MAXIMUM_VALUE");
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set the maximum permissible value", i, l_SwitchMaximum));
-                                                m_Switch.SetSwitchValue(i, l_SwitchMaximum); // Set switch to minimum
-                                                WaitFor(SWITCH_READ_DELAY);
+                                                SetAction($"SetSwitchValue maximum {l_SwitchMaximum}");
+                                                m_Switch.SetSwitchValue(i, l_SwitchMaximum); // Set switch to maximum
+                                                WaitForWriteDelay($"SetSwitchValue maximum {l_SwitchMaximum}");
 
                                                 // Check GetSwitch
                                                 if (l_GetSwitchOK)
                                                 {
                                                     if (settings.DisplayMethodCalls)
                                                         LogTestAndMessage("SetSwitchValue", string.Format("  About to call GetSwitch({0}) method", i));
+                                                    SetAction("GetSwitch");
                                                     if (m_Switch.GetSwitch(i) == true)
                                                         LogOK("SetSwitchValue ", "  GetSwitch returned True after SetSwitchValue(MAXIMUM_VALUE)");
                                                     else
                                                         LogIssue("SetSwitchValue ", "  GetSwitch returned False after SetSwitchValue(MAXIMUM_VALUE)");
+                                                    WaitForReadDelay("GetSwitch");
+
                                                 }
                                                 else
                                                     LogInfo("SetSwitchValue ", "  Skipping GetSwitch confirmation because of an issue with the GetSwitch method");
@@ -823,7 +879,10 @@ namespace ConformU
                                                 {
                                                     if (settings.DisplayMethodCalls)
                                                         LogTestAndMessage("SetSwitchValue", string.Format("  About to call GetSwitchValue({0}) method", i));
+                                                    SetAction("GetSwitchValue");
                                                     l_GetSwitchValue = m_Switch.GetSwitchValue(i);
+                                                    WaitForReadDelay("GetSwitchValue");
+
                                                     switch (l_GetSwitchValue)
                                                     {
                                                         case object _ when l_GetSwitchValue == l_SwitchMaximum:
@@ -854,21 +913,23 @@ namespace ConformU
                                                 }
                                                 else
                                                     LogInfo("SetSwitchValue ", "  Skipping GetSwitchValue confirmation because of an issue with the GetSwitchValue method");
-                                                WaitFor(SWITCH_WRITE_DELAY);
 
                                                 // Now try a value above maximum
                                                 try
                                                 {
                                                     if (settings.DisplayMethodCalls)
                                                         LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set an invalid high value", i, l_SwitchMaximum + 1.0));
+                                                    SetAction($"SetSwitchValue {l_SwitchMaximum + 1.0}");
                                                     m_Switch.SetSwitchValue(i, l_SwitchMaximum + 1.0);
+                                                    WaitForWriteDelay($"SetSwitchValue {l_SwitchMaximum + 1.0}");
+
                                                     LogIssue("SetSwitchValue", "Switch did not throw an exception when a value above SwitchMaximum was set: " + l_SwitchMaximum + 1.0);
                                                 }
                                                 catch (Exception ex)
                                                 {
                                                     HandleInvalidValueExceptionAsOK("SetSwitchValue", MemberType.Method, Required.Mandatory, ex, "when setting a value above SwitchMaximum was set: " + l_SwitchMaximum + 1.0, "  Switch threw an InvalidOperationException when a value above SwitchMaximum was set: " + l_SwitchMaximum + 1.0);
                                                 }
-                                                WaitFor(SWITCH_WRITE_DELAY);
+                                                if (cancellationToken.IsCancellationRequested) return;
                                             }
                                             else
                                                 LogInfo("SetSwitchValue ", "  Skipping test because of an issue with retrieving the switch minimum value through GetSwitchMinimim");
@@ -876,10 +937,10 @@ namespace ConformU
                                             // Test some positions of the multi-state switch between the minimum and maximum values
                                             if (l_GetSwitchValueOK & l_SetSwitchValueMinOK & l_SetSwitchValueMaxOK & IsGoodValue(l_SwitchRange) & IsGoodValue(l_SwitchStep))
                                             {
-                                                TestSetSwitchValue(i, 0.0, l_SwitchMinimum, l_SwitchMaximum, l_SwitchRange, l_SwitchStep);
-                                                TestSetSwitchValue(i, 0.25, l_SwitchMinimum, l_SwitchMaximum, l_SwitchRange, l_SwitchStep);
-                                                TestSetSwitchValue(i, 0.5, l_SwitchMinimum, l_SwitchMaximum, l_SwitchRange, l_SwitchStep);
-                                                TestSetSwitchValue(i, 0.75, l_SwitchMinimum, l_SwitchMaximum, l_SwitchRange, l_SwitchStep);
+                                                TestSetSwitchValue(i, 0.0, l_SwitchMinimum, l_SwitchMaximum, l_SwitchRange, l_SwitchStep); if (cancellationToken.IsCancellationRequested) return;
+                                                TestSetSwitchValue(i, 0.25, l_SwitchMinimum, l_SwitchMaximum, l_SwitchRange, l_SwitchStep); if (cancellationToken.IsCancellationRequested) return;
+                                                TestSetSwitchValue(i, 0.5, l_SwitchMinimum, l_SwitchMaximum, l_SwitchRange, l_SwitchStep); if (cancellationToken.IsCancellationRequested) return;
+                                                TestSetSwitchValue(i, 0.75, l_SwitchMinimum, l_SwitchMaximum, l_SwitchRange, l_SwitchStep); if (cancellationToken.IsCancellationRequested) return;
                                             }
                                             else
                                             {
@@ -894,24 +955,25 @@ namespace ConformU
                                             // Return to original state if possible,otherwise set to false
                                             if (l_GetSwitchValueOK)
                                             {
-                                                SetStatus("Returning switch to its original value");
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to restore pre-test value", i, l_GetSwitchValueOriginal));
+                                                SetAction($"SetSwitchValue to initial value {l_GetSwitchValueOriginal}");
                                                 m_Switch.SetSwitchValue(i, l_GetSwitchValueOriginal); // Return to the original state
                                                 LogOK("SetSwitchValue ", "  Switch has been reset to its original state");
-                                                WaitFor(SWITCH_WRITE_DELAY);
+                                                WaitForWriteDelay($"SetSwitchValue to initial value {l_GetSwitchValueOriginal}");
                                             }
                                             else if (IsGoodValue(l_SwitchMinimum) & IsGoodValue(l_SwitchMaximum))
                                             {
-                                                SetStatus("Setting switch to half its minimum to maximum range");
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set the value to its mid-point", i, (l_SwitchMaximum - l_SwitchMinimum) / 2.0));
+                                                SetAction($"SetSwitchValue to midpoint {(l_SwitchMaximum - l_SwitchMinimum) / 2.0}");
                                                 m_Switch.SetSwitchValue(i, (l_SwitchMaximum - l_SwitchMinimum) / 2.0); // Return to the half way state
                                                 LogOK("SetSwitchValue ", "  Switch has been reset to half its range");
-                                                WaitFor(SWITCH_WRITE_DELAY);
+                                                WaitForWriteDelay($"SetSwitchValue to midpoint {(l_SwitchMaximum - l_SwitchMinimum) / 2.0}");
                                             }
                                             else
                                                 LogInfo("SetSwitchValue ", "Switch can not be returned to its default state because of issues with GetSwitchValue, GetSwitchMinimum or GetSwitchMaximum");
+                                            if (cancellationToken.IsCancellationRequested) return;
                                         }
                                         catch (Exception ex)
                                         {
@@ -1205,14 +1267,17 @@ namespace ConformU
 
                     if (TestValue2 <= SwitchMaximum)
                     {
-                        SetStatus("Setting multi-state switch - " + TestValue2);
                         if (settings.DisplayMethodCalls)
                             LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set an intermediate value", i, TestValue2));
+                        SetAction($"SetSwitchValue {TestValue2}");
                         m_Switch.SetSwitchValue((short)i, TestValue2); // Set the required switch value
-                        WaitFor(SWITCH_READ_DELAY);
+                        WaitForWriteDelay($"SetSwitchValue {TestValue2}");
+
                         if (settings.DisplayMethodCalls)
                             LogTestAndMessage("SetSwitchValue", string.Format("  About to call GetSwitchValue({0})", i));
+                        SetAction("GetSwitchValue");
                         l_SwitchValue = m_Switch.GetSwitchValue((short)i); // Read back the switch value 
+                        WaitForReadDelay("GetSwitchValue");
 
                         switch (Math.Abs(l_SwitchValue - TestValue2))
                         {
@@ -1295,7 +1360,9 @@ namespace ConformU
                                 }
                         }
 
-                        WaitFor(SWITCH_WRITE_DELAY);
+                        // Exit if the test has been cancelled
+                        if (cancellationToken.IsCancellationRequested) return;
+
                     }
                     if (cancellationToken.IsCancellationRequested)
                         return;
