@@ -148,7 +148,12 @@ namespace ConformU
             }
 
             ConformLogger conformLogger = new(logFileName, logFilePath, loggerName, true);  // Create a logger component
+
+            // Debug reading the configuration file if a command line option requires this
+            if (commandLineOptions.DebugStartup) conformLogger.Debug = true;
+
             conformConfiguration = new(conformLogger, commandLineOptions.SettingsFileLocation);
+            conformLogger.Debug = conformConfiguration.Settings.Debug;
 
             // Enable logging of Alpaca discovery if a command line option requires this
             if (commandLineOptions.DebugDiscovery.HasValue) conformConfiguration.Settings.TraceDiscovery = commandLineOptions.DebugDiscovery.Value;

@@ -86,7 +86,7 @@ namespace ConformU
                 });
             }
 
-            // other config
+            // Other configuration
             if (env.IsDevelopment()) // Running in 
             {
                 app.UseDeveloperExceptionPage();
