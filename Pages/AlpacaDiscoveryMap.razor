@@ -5,6 +5,7 @@
 @using System.Threading
 @using ASCOM.Alpaca.Discovery
 @using Blazorise.TreeView
+@using System.Reflection;
 
 <h2 style=@statusVisible>Alpaca Discovery Map</h2>
 <div>
@@ -89,7 +90,7 @@
                     {
                         try
                         {
-                            using (AlpacaDiscovery alpacaDiscovery = new AlpacaDiscovery(configuration.Settings.AlpacaConfiguration.StrictCasing, configuration.Settings.TraceDiscovery ? conformLogger : null)) // Create a discovery component with or without logging
+                            using (AlpacaDiscovery alpacaDiscovery = new AlpacaDiscovery(configuration.Settings.AlpacaConfiguration.StrictCasing, configuration.Settings.TraceDiscovery ? conformLogger : null,Globals.USER_AGENT_PRODUCT_NAME,Assembly.GetExecutingAssembly().GetName().Version.ToString())) // Create a discovery component with or without logging
                             {
                                 alpacaDiscovery.StartDiscovery(alpacaConfiguration.NumberOfDiscoveryPolls,
                                     (int)(alpacaConfiguration.DiscoveryPollInterval * 1000),
