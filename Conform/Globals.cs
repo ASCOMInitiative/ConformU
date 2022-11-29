@@ -25,6 +25,10 @@
 
         internal const double UI_SMALL_TRANSITION_SIZE = 767.98;
 
+        internal const string USER_AGENT_PRODUCT_NAME = "ConformUniversal";
+
+        internal const int CLIENT_NUMBER_DEFAULT = 1;
+
         #endregion
 
         #region Global Variables

@@ -6,6 +6,7 @@ using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -233,20 +234,23 @@ namespace ConformU
                         //    settings.TraceAlpacaCalls ? logger : null);
 
 
-                        m_Camera = new AlpacaCamera(settings.AlpacaConfiguration.AccessServiceType,
-                                                   settings.AlpacaDevice.IpAddress,
-                                                   settings.AlpacaDevice.IpPort,
-                                                   settings.AlpacaDevice.AlpacaDeviceNumber,
-                                                   10,
-                                                   10,
-                                                   100,
-                                                   999,
-                                                   settings.AlpacaConfiguration.ImageArrayTransferType,
-                                                   ASCOM.Common.Alpaca.ImageArrayCompression.None,
-                                                   "",
-                                                   "",
-                                                   settings.AlpacaConfiguration.StrictCasing,
-                                                   settings.TraceAlpacaCalls ? logger : null);
+                        m_Camera = new AlpacaCamera(
+                                                    settings.AlpacaConfiguration.AccessServiceType,
+                                                    settings.AlpacaDevice.IpAddress,
+                                                    settings.AlpacaDevice.IpPort,
+                                                    settings.AlpacaDevice.AlpacaDeviceNumber,
+                                                    settings.AlpacaConfiguration.EstablishConnectionTimeout,
+                                                    settings.AlpacaConfiguration.StandardResponseTimeout,
+                                                    settings.AlpacaConfiguration.LongResponseTimeout,
+                                                    Globals.CLIENT_NUMBER_DEFAULT,
+                                                    settings.AlpacaConfiguration.ImageArrayTransferType,
+                                                    settings.AlpacaConfiguration.ImageArrayCompression,
+                                                    settings.AlpacaConfiguration.AccessUserName,
+                                                    settings.AlpacaConfiguration.AccessPassword,
+                                                    settings.AlpacaConfiguration.StrictCasing,
+                                                    settings.TraceAlpacaCalls ? logger : null,
+                                                    Globals.USER_AGENT_PRODUCT_NAME,
+                                                    Assembly.GetExecutingAssembly().GetName().Version.ToString(4));
 
                         LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;

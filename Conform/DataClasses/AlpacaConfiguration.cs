@@ -1,4 +1,5 @@
 ﻿using ASCOM.Alpaca;
+using ASCOM.Alpaca.Clients;
 using ASCOM.Common.Alpaca;
 
 namespace ConformU
@@ -18,5 +19,9 @@ namespace ConformU
         public string AccessUserName { get; set; } = "";
         public string AccessPassword { get; set; } = "";
         public ImageArrayTransferType ImageArrayTransferType{ get; set; } = ImageArrayTransferType.BestAvailable;
+        public ImageArrayCompression ImageArrayCompression { get; set; } = ImageArrayCompression.None;
+        public int EstablishConnectionTimeout { get; set; } = 5;
+        public int StandardResponseTimeout{ get; set; } = 10;
+        public int LongResponseTimeout{ get; set; } = 100;
     }
 }

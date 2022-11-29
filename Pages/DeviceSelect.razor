@@ -1,12 +1,12 @@
 ﻿@page "/DeviceSelection"
 @using ASCOM.Alpaca.Discovery
 @using System.Net
-@*@using AlpacaDiscovery*@
 @using System.Threading
 @using static ConformU.Globals
 @using ASCOM.Com.DriverAccess
 @using ASCOM.Com
 @using ASCOM.Common
+@using System.Reflection;
 @inject NavigationManager UriHelper
 
 
@@ -208,7 +208,7 @@
                   })()"
             });
         }
-        catch 
+        catch
         {
             //conformLogger.LogMessage("DeviceSelect.ResizeStatusHeight", MessageLevel.Debug, $"Ignoring exception when resizing status height:\r\n{ex}");
         }
@@ -233,7 +233,7 @@
         selectedDeviceType = configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope);
 
         selectedDeviceTypeString = selectedDeviceType.ToString();
-        discovery = new AlpacaDiscovery(configuration.Settings.AlpacaConfiguration.StrictCasing, configuration.Settings.TraceDiscovery ? conformLogger : null); // Create a discovery component with or without logging
+        discovery = new AlpacaDiscovery(configuration.Settings.AlpacaConfiguration.StrictCasing, configuration.Settings.TraceDiscovery ? conformLogger : null, Globals.USER_AGENT_PRODUCT_NAME, Assembly.GetExecutingAssembly().GetName().Version.ToString()); // Create a discovery component with or without logging
         discovery.AlpacaDevicesUpdated += AlpacaDeviceDiscovered;
         discovery.DiscoveryCompleted += AlpacaDiscoveryCompleted;
 

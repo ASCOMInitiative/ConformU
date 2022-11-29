@@ -4,6 +4,7 @@ using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using System;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -98,12 +99,22 @@ namespace ConformU
                 {
                     case DeviceTechnology.Alpaca:
                         LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
-                        m_Focuser = new AlpacaFocuser(settings.AlpacaConfiguration.AccessServiceType,
-                            settings.AlpacaDevice.IpAddress,
-                            settings.AlpacaDevice.IpPort,
-                            settings.AlpacaDevice.AlpacaDeviceNumber,
-                            settings.AlpacaConfiguration.StrictCasing,
-                            settings.TraceAlpacaCalls ? logger : null);
+                        m_Focuser = new AlpacaFocuser(
+                                                    settings.AlpacaConfiguration.AccessServiceType,
+                                                    settings.AlpacaDevice.IpAddress,
+                                                    settings.AlpacaDevice.IpPort,
+                                                    settings.AlpacaDevice.AlpacaDeviceNumber,
+                                                    settings.AlpacaConfiguration.EstablishConnectionTimeout,
+                                                    settings.AlpacaConfiguration.StandardResponseTimeout,
+                                                    settings.AlpacaConfiguration.LongResponseTimeout,
+                                                    Globals.CLIENT_NUMBER_DEFAULT,
+                                                    settings.AlpacaConfiguration.AccessUserName,
+                                                    settings.AlpacaConfiguration.AccessPassword,
+                                                    settings.AlpacaConfiguration.StrictCasing,
+                                                    settings.TraceAlpacaCalls ? logger : null,
+                                                    Globals.USER_AGENT_PRODUCT_NAME,
+                                                    Assembly.GetExecutingAssembly().GetName().Version.ToString(4));
+
                         LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;
 
