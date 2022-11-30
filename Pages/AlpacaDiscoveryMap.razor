@@ -90,7 +90,7 @@
                     {
                         try
                         {
-                            using (AlpacaDiscovery alpacaDiscovery = new AlpacaDiscovery(configuration.Settings.AlpacaConfiguration.StrictCasing, configuration.Settings.TraceDiscovery ? conformLogger : null,Globals.USER_AGENT_PRODUCT_NAME,Assembly.GetExecutingAssembly().GetName().Version.ToString())) // Create a discovery component with or without logging
+                            using (AlpacaDiscovery alpacaDiscovery = new AlpacaDiscovery(configuration.Settings.AlpacaConfiguration.StrictCasing, configuration.Settings.TraceDiscovery ? conformLogger : null, Globals.USER_AGENT_PRODUCT_NAME, Assembly.GetExecutingAssembly().GetName().Version.ToString())) // Create a discovery component with or without logging
                             {
                                 alpacaDiscovery.StartDiscovery(alpacaConfiguration.NumberOfDiscoveryPolls,
                                     (int)(alpacaConfiguration.DiscoveryPollInterval * 1000),
@@ -118,7 +118,15 @@
 
                                     foreach (AscomDevice ascomDevice in alpacaDevice.AscomDevices(null))
                                     {
-                                        ascomDevices.Add(new BlazoriseTreeItem() { Text = $"ASCOM {ascomDevice.AscomDeviceType} Device: {ascomDevice.AscomDeviceName} - Alpaca device number: {ascomDevice.AlpacaDeviceNumber} - Alpaca Unique ID: {ascomDevice.UniqueId}" });
+                                        // Provide appropriate descriptions for ASCOM and non-ASCOM device types
+                                        if (ascomDevice.AscomDeviceType is null) // This is not an ASCOM device type
+                                        {
+                                            ascomDevices.Add(new BlazoriseTreeItem() { Text = $"{ascomDevice.NonAscomDeviceType} Device: {ascomDevice.AscomDeviceName} - Alpaca device number: {ascomDevice.AlpacaDeviceNumber} - Alpaca Unique ID: {ascomDevice.UniqueId}" });
+                                        }
+                                        else // This is an ASCOM device type
+                                        {
+                                            ascomDevices.Add(new BlazoriseTreeItem() { Text = $"ASCOM {ascomDevice.AscomDeviceType} Device: {ascomDevice.AscomDeviceName} - Alpaca device number: {ascomDevice.AlpacaDeviceNumber} - Alpaca Unique ID: {ascomDevice.UniqueId}" });
+                                        }
                                     }
 
                                     if (ascomDevices is not null) deviceDescription.Add(new BlazoriseTreeItem() { Text = "Available ASCOM Devices", Children = ascomDevices });
