@@ -239,7 +239,7 @@ namespace ConformU
             TL?.LogMessage("Reset", MessageLevel.Debug, "Resetting settings file to default values");
             settings = new();
             PersistSettings(settings);
-            Status = $"Settings reset at {DateTime.Now:HH:mm:ss.f}.";
+            Status = $"Settings reset at {DateTime.Now:HH:mm:ss}.";
             RaiseUiHasChangedEvent();
         }
 
@@ -250,7 +250,7 @@ namespace ConformU
         {
             TL?.LogMessage("Save", MessageLevel.Debug, "Saving settings to settings file");
             PersistSettings(settings);
-            Status = $"Settings saved at {DateTime.Now:HH:mm:ss.f}.";
+            Status = $"Settings saved at {DateTime.Now:HH:mm:ss}.";
 
             // Raise configuration has changed event
             if (ConfigurationChanged is not null)

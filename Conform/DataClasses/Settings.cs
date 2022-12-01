@@ -172,6 +172,7 @@ namespace ConformU
 
         // Focuser test configuration
         public int FocuserTimeout { get; set; } = 60;
+        public int FocuserMoveTolerance { get; set; } = 2;
 
         // ObservingConditions test configuration
         public int ObservingConditionsRetryTime { get; set; } = 1; // Seconds

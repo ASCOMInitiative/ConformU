@@ -42,30 +42,30 @@
                 <RadzenCard Style="margin-bottom:20px;margin-right: 20px">
                     <h4 style="color: #479cc8; margin-bottom: 0;">Operation</h4>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
-                        <RadzenCheckBox Style="margin-top:6px;" Name="CHKUPDATES" @bind-Value=@chkUpdates TValue="bool" Change=@(args =>
+                        <RadzenCheckBox Style="margin-top:6px;" Name="CHECKFORUPDATES" @bind-Value=@checkForUpdates TValue="bool" Change=@(args =>
                                         OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
-                        <RadzenLabel Text="Check for updates" Component="CHKUPDATES" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
+                        <RadzenLabel Text="Check for updates" Component="checkForUpdates" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
                     </div>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
-                        <RadzenCheckBox Name="CHKMETHODCALLS" @bind-Value=@chkDisplayCalls TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.DisplayCalls)) />
+                        <RadzenCheckBox Name="DISPLAYMETHODCALLS" @bind-Value=@displayMethodCalls TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.DisplayCalls)) />
                         <RadzenLabel Text="Display method calls" Component="CHKMETHODCALLS" Style="margin-left: 5px;" />
                     </div>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
-                        <RadzenCheckBox Name="CHKDEBUG" @bind-Value=@chkDebug TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.Debug)) />
-                        <RadzenLabel Text="Debug enabled" Component="CHKDEBUG" Style="margin-left: 5px;" />
+                        <RadzenCheckBox Name="ENABLEDEBUGLOGGING" @bind-Value=@enableDebugLogging TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.Debug)) />
+                        <RadzenLabel Text="Debug enabled" Component="enableDebugLogging" Style="margin-left: 5px;" />
                     </div>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
-                        <RadzenCheckBox Name="CHKGOHOME" @bind-Value=@chkGoHomeOnDeviceSelection TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.GoHomeOnDeviceSelection)) />
-                        <RadzenLabel Text="Return to home page when device is selected" Component="CHKDEBUG" Style="margin-left: 5px;" />
+                        <RadzenCheckBox Name="GOHOME" @bind-Value=@goHomeOnDeviceSelection TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.GoHomeOnDeviceSelection)) />
+                        <RadzenLabel Text="Return to home page when device is selected" Component="enableDebugLogging" Style="margin-left: 5px;" />
                     </div>
                     <div class="row">
                         <RadzenNumeric Style="margin-left: 20px; margin-top:15px; width: 6em"
                                        Format="0.0"
-                                       @bind-Value="connectionTimeout"
+                                       @bind-Value="waitTimeBeforeConformApplicationExits"
                                        Step="0.1"
                                        TValue="double"
                                        Min="0.1M"
-                                       Change=@(args => OnDoubleItemChange(args,NumericConfigurationItem.ConnectionTimeout)) />
+                                       Change=@(args => OnDoubleItemChange(args,NumericConfigurationItem.waitTimeBeforeConformApplicationExits)) />
                         <p style="margin-left: 5px;margin-top: 10px;">
                             Time before application closes (Default: 2 Seconds)
                             <br />
@@ -267,7 +267,7 @@
                                         Style="margin-top:10px;margin-bottom: 0px"
                                         TValue="string"
                                         Orientation="Orientation.Vertical"
-                                        Change=@(args => OnTelescopeTestsChange(args,""))>
+                                        Change=@(args => OnTelescopeTestsChange(args))>
                         <Items>
                             @foreach (var item in configuration.Settings.TelescopeTests)
                             {
@@ -423,6 +423,12 @@
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="focuserTimeout" TValue="int" Min="10" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.FocuserTimeout)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Focuser move completion timeout (seconds).</p>
             </div>
+            <h4 style="margin-top: 20px">Miscellaneous Configuration</h4>
+
+            <div style="margin-top:20px" class="row">
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="focuserMoveTolerance" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.focuserMoveTolerance)) />
+                <p style="margin-left: 20px;margin-top: 5px;">± Tolerance within which a focuser move is reported as OK (Position count).</p>
+            </div>
         </RadzenTabsItem>
 
         @*ObservingConditions configuration*@
@@ -490,22 +496,49 @@
 </div>
 
 @code {
-    double telescopeSlewTolerance;
-    int telescopeMaximumSlewTime;
-    double domeSlewTolerance;
-    bool alpacaDiscoveryEnabled = true;
-    string alpacaAndComText;
-    bool strictCasing;
-    bool chkTraceDiscovery;
-    bool chkTraceAlpacaCalls;
-    bool cameraTestImageArrayVariant;
-    bool chkGoHomeOnDeviceSelection;
-    double cameraExposureDuration;
-    double connectionTimeout;
-    int applicationPort;
+    // Conform general configuration
+    private IEnumerable<int> conformanceTestScope = new List<int>() { 0, 1, 2, 3 };
+    private bool checkForUpdates;
+    private bool displayMethodCalls;
+    private bool enableDebugLogging;
+    private string alpacaAndComText;
+    private bool goHomeOnDeviceSelection;
+    private int applicationPort;
+    private double waitTimeBeforeConformApplicationExits;
+    private List<KeyValuePair<string, ComAccessMechanic>> comAccessMechanicoptions = new()
+        {
+            new KeyValuePair<string, ComAccessMechanic>("Native", ComAccessMechanic.Native),
+            new KeyValuePair<string, ComAccessMechanic>("Driver Access", ComAccessMechanic.DriverAccess)
+        };
+    private List<KeyValuePair<string, ServiceType>> serviceTypeOptions = new()
+        {
+            new KeyValuePair<string, ServiceType>("HTTP", ServiceType.Http),
+            new KeyValuePair<string, ServiceType>("HTTPS", ServiceType.Https)
+        };
+    private bool isWindowsOs;
 
-    ImageArrayTransferType alpacaImageArrayTransferType;
+    // Alpaca and COM configuration
+    private int alpacaNumberOfDiscoveryPolls;
+    private double alpacaDiscoveryPollInterval;
+    private int alpacaDiscoveryPort;
+    private double alpacaDiscoveryDuration;
+    public bool alpacaDiscoveryResolveName;
+    public bool alpacaDiscoveryUseIpV4;
+    public bool alpacaDiscoveryUseIpV6;
+    private ServiceType alpacaServiceType;
+    private bool alpacaDiscoveryEnabled = true;
+    private bool strictCasing;
+    private bool chkTraceDiscovery;
+    private bool chkTraceAlpacaCalls;
+    private ComAccessMechanic comAccessMechanic = ComAccessMechanic.Native;
 
+    // Camera test configuration
+    private int cameraTestMaxBinX;
+    private int cameraTestMaxBinY;
+    private bool cameraFirstUseTests = false;
+    private bool cameraTestImageArrayVariant;
+    private ImageArrayTransferType alpacaImageArrayTransferType;
+    private double cameraExposureDuration;
     private List<KeyValuePair<string, ImageArrayTransferType>> imageArrayTypeOptions = new()
         {
             new KeyValuePair<string, ImageArrayTransferType>("JSON", ImageArrayTransferType.JSON),
@@ -514,28 +547,39 @@
             new KeyValuePair<string, ImageArrayTransferType>("Best available", ImageArrayTransferType.BestAvailable)
         };
 
-    void OnImageArrayTypeChange(object imageArrayTransferTypeObject)
-    {
-        ImageArrayTransferType imageArrayTransferType = (ImageArrayTransferType)imageArrayTransferTypeObject;
-        configuration.Settings.AlpacaConfiguration.ImageArrayTransferType = imageArrayTransferType;
-        SaveConfiguration();
-    }
+    // Dome test configuration
+    private int domeShutterTimeout;
+    private int domeAzimuthTimeout;
+    private int domeAltitudeTimeout;
+    private int domeStabilisationWaitTime;
+    private bool domeOpenShutter;
+    private double domeSlewTolerance;
 
-    void OnServiceTypeChange(object serviceMode)
-    {
-        ServiceType serviceType = (ServiceType)serviceMode;
-        configuration.Settings.AlpacaConfiguration.AccessServiceType = serviceType;
-        SaveConfiguration();
-    }
+    // Focuser test configuration
+    private int focuserTimeout;
+    private int focuserMoveTolerance;
 
-    private ServiceType alpacaServiceType;
+    // ObservingConditions test configuration
+    private int observingConditionsRetryTime;
+    private int observingConditionsMaxRetries;
 
-    private bool isWindowsOs;
+    // Rotator test configuration
+    private int rotatorTimeout;
 
-    private enum BoolConfigurationItem
-    {
-        TestImageArrayVariant
-    }
+    // Switch test configuration
+    private bool switchEnableSet;
+    private int switchReadDelay;
+    private int switchWriteDelay;
+    private int switchExtendedNumberTestRange;
+
+    // Telescope test configuration
+    private IEnumerable<string> telescopeTests;
+    private string status;
+    private bool telescopeFirstUseTests = false;
+    private double telescopeSlewTolerance;
+    private int telescopeMaximumSlewTime;
+
+    # region Enums
 
     private enum NumericConfigurationItem
     {
@@ -547,13 +591,14 @@
         CameraMaxBinX,
         CameraMaxBinY,
         CameraExposureDuration,
-        ConnectionTimeout,
+        waitTimeBeforeConformApplicationExits,
         DomeShutterTimeout,
         DomeAzimuthTimeout,
         DomeAltitudeTimeout,
         DomeSlewtolerance,
         DomeStabilisationWaitTime,
         FocuserTimeout,
+        focuserMoveTolerance,
         ObservingConditionsRetryTime,
         ObservingConditionsMaxRetries,
         RotatorTimeout,
@@ -583,66 +628,12 @@
         GoHomeOnDeviceSelection
     }
 
-    // Camera test configuration
-    private int cameraTestMaxBinX;
-    private int cameraTestMaxBinY;
-    bool cameraFirstUseTests = false;
+    private enum BoolConfigurationItem
+    {
+        TestImageArrayVariant
+    }
 
-    // Dome test configuration
-    private int domeShutterTimeout;
-    private int domeAzimuthTimeout;
-    private int domeAltitudeTimeout;
-    private int domeStabilisationWaitTime;
-    private bool domeOpenShutter;
-
-    // Telescope test configuration
-    private IEnumerable<string> telescopeTests;
-    private string status;
-    bool telescopeFirstUseTests = false;
-
-    // Focuser test configuration
-    private int focuserTimeout;
-
-    // ObservingConditions test configuration
-    private int observingConditionsRetryTime;
-    private int observingConditionsMaxRetries;
-
-    // Rotator test configuration
-    private int rotatorTimeout;
-
-    // Switch test configuration
-    private bool switchEnableSet;
-    private int switchReadDelay;
-    private int switchWriteDelay;
-    private int switchExtendedNumberTestRange;
-
-    // Conform general configuration
-    private IEnumerable<int> conformanceTestScope = new List<int>() { 0, 1, 2, 3 };
-    private bool chkUpdates;
-    private bool chkDisplayCalls;
-    private bool chkDebug;
-
-    // Alpaca configuration
-    private int alpacaNumberOfDiscoveryPolls;
-    private double alpacaDiscoveryPollInterval;
-    private int alpacaDiscoveryPort;
-    private double alpacaDiscoveryDuration;
-    public bool alpacaDiscoveryResolveName;
-    public bool alpacaDiscoveryUseIpV4;
-    public bool alpacaDiscoveryUseIpV6;
-
-    private ComAccessMechanic comAccessMechanic = ComAccessMechanic.Native;
-    private List<KeyValuePair<string, ComAccessMechanic>> comAccessMechanicoptions = new()
-        {
-            new KeyValuePair<string, ComAccessMechanic>("Native", ComAccessMechanic.Native),
-            new KeyValuePair<string, ComAccessMechanic>("Driver Access", ComAccessMechanic.DriverAccess)
-        };
-
-    private List<KeyValuePair<string, ServiceType>> serviceTypeOptions = new()
-        {
-            new KeyValuePair<string, ServiceType>("HTTP", ServiceType.Http),
-            new KeyValuePair<string, ServiceType>("HTTPS", ServiceType.Https)
-        };
+    #endregion
 
     protected override void OnInitialized()
     {
@@ -675,7 +666,6 @@
         SaveConfiguration();
     }
 
-
     private void OnDoubleItemChange(double newValue, NumericConfigurationItem numericConfigurationItem)
     {
         switch (numericConfigurationItem)
@@ -700,7 +690,7 @@
                 configuration.Settings.CameraExposureDuration = newValue;
                 break;
 
-            case NumericConfigurationItem.ConnectionTimeout:
+            case NumericConfigurationItem.waitTimeBeforeConformApplicationExits:
                 configuration.Settings.ConnectionTimeout = newValue;
                 break;
 
@@ -782,109 +772,109 @@
                 configuration.Settings.RotatorTimeout = newValue;
                 break;
 
+            case NumericConfigurationItem.focuserMoveTolerance:
+                configuration.Settings.FocuserMoveTolerance = newValue;
+                break;
+
             default:
                 throw new InvalidValueException($"OnIntegerItemChange - Unknown numeric configuration item: {numericConfigurationItem}");
         }
         SaveConfiguration();
     }
 
-    private void SaveConfiguration()
+    private void OnCheckboxChange(bool args, CheckBoxConfigurationItem name)
     {
-        configuration.Save();
-        status = configuration.Status;
-        StateHasChanged();
+        switch (name)
+        {
+            case CheckBoxConfigurationItem.UpdateCheck:
+                configuration.Settings.UpdateCheck = checkForUpdates;
+                break;
+
+            case CheckBoxConfigurationItem.DisplayCalls:
+                configuration.Settings.DisplayMethodCalls = displayMethodCalls; ;
+                break;
+
+            case CheckBoxConfigurationItem.Debug:
+                configuration.Settings.Debug = enableDebugLogging;
+                break;
+
+            case CheckBoxConfigurationItem.DomeOpenShutter:
+                configuration.Settings.DomeOpenShutter = domeOpenShutter;
+                break;
+
+            case CheckBoxConfigurationItem.SwitchEnableSet:
+                configuration.Settings.SwitchEnableSet = switchEnableSet;
+                break;
+
+            case CheckBoxConfigurationItem.AlpacaDiscoveryResolveName:
+                configuration.Settings.AlpacaConfiguration.DiscoveryResolveName = alpacaDiscoveryResolveName;
+                break;
+
+            case CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV4:
+                configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4 = alpacaDiscoveryUseIpV4;
+                break;
+
+            case CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV6:
+                configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6 = alpacaDiscoveryUseIpV6;
+                break;
+
+            case CheckBoxConfigurationItem.StrictCasing:
+                configuration.Settings.AlpacaConfiguration.StrictCasing = strictCasing;
+                break;
+
+            case CheckBoxConfigurationItem.TraceDiscovery:
+                configuration.Settings.TraceDiscovery = chkTraceDiscovery;
+                break;
+
+            case CheckBoxConfigurationItem.TraceAlpacaCalls:
+                configuration.Settings.TraceAlpacaCalls = chkTraceAlpacaCalls;
+                break;
+
+            case CheckBoxConfigurationItem.CameraFirstUseTests:
+                configuration.Settings.CameraFirstUseTests = cameraFirstUseTests;
+                break;
+
+            case CheckBoxConfigurationItem.DiscoveryEnabled:
+                configuration.Settings.AlpacaConfiguration.DiscoveryEnabled = alpacaDiscoveryEnabled;
+                break;
+
+            case CheckBoxConfigurationItem.TelescopeFirstUseTests:
+                configuration.Settings.TelescopeFirstUseTests = telescopeFirstUseTests;
+                break;
+
+            case CheckBoxConfigurationItem.GoHomeOnDeviceSelection:
+                configuration.Settings.GoHomeOnDeviceSelected = goHomeOnDeviceSelection;
+                break;
+
+            default:
+                throw new InvalidValueException($"OnCheckboxChange - Unknown checkbox name: {name}");
+        }
+
+        SaveConfiguration();
     }
 
-    void OnComAccessModeChange(object accessMode)
+    private void OnImageArrayTypeChange(object imageArrayTransferTypeObject)
+    {
+        ImageArrayTransferType imageArrayTransferType = (ImageArrayTransferType)imageArrayTransferTypeObject;
+        configuration.Settings.AlpacaConfiguration.ImageArrayTransferType = imageArrayTransferType;
+        SaveConfiguration();
+    }
+
+    private void OnServiceTypeChange(object serviceMode)
+    {
+        ServiceType serviceType = (ServiceType)serviceMode;
+        configuration.Settings.AlpacaConfiguration.AccessServiceType = serviceType;
+        SaveConfiguration();
+    }
+
+    private void OnComAccessModeChange(object accessMode)
     {
         ComAccessMechanic comMechanic = (ComAccessMechanic)accessMode;
         configuration.Settings.ComConfiguration.ComAccessMechanic = comAccessMechanic;
         SaveConfiguration();
     }
 
-    private void SetConfiguration()
-    {
-        List<int> newScope = new();
-
-        // Set scope
-        if (configuration.Settings.TestProperties) newScope.Add(0);
-        if (configuration.Settings.TestMethods) newScope.Add(1);
-        if (configuration.Settings.TestSideOfPierRead) newScope.Add(2);
-        if (configuration.Settings.TestSideOfPierWrite) newScope.Add(3);
-        if (configuration.Settings.TestPerformance) newScope.Add(4);
-        conformanceTestScope = newScope;
-
-        // Operation settings
-        chkUpdates = configuration.Settings.UpdateCheck;
-        chkDisplayCalls = configuration.Settings.DisplayMethodCalls;
-        chkDebug = configuration.Settings.Debug;
-        chkGoHomeOnDeviceSelection = configuration.Settings.GoHomeOnDeviceSelected;
-        connectionTimeout = configuration.Settings.ConnectionTimeout;
-        applicationPort = configuration.Settings.ApplicationPort;
-
-        // Trace settings
-        chkTraceDiscovery = configuration.Settings.TraceDiscovery;
-        chkTraceAlpacaCalls = configuration.Settings.TraceAlpacaCalls;
-
-        // COM Settings
-        comAccessMechanic = configuration.Settings.ComConfiguration.ComAccessMechanic;
-
-        // Telescope tests
-        telescopeTests = new List<string>();
-        foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
-        {
-            if (item.Value) ((List<string>)telescopeTests).Add(item.Key);
-        }
-        telescopeFirstUseTests = configuration.Settings.TelescopeFirstUseTests;
-        telescopeSlewTolerance = configuration.Settings.TelescopeSlewTolerance;
-        telescopeMaximumSlewTime = configuration.Settings.TelescopeMaximumSlewTime;
-
-        // Camera tests
-        cameraTestMaxBinX = configuration.Settings.CameraMaxBinX;
-        cameraTestMaxBinY = configuration.Settings.CameraMaxBinY;
-        cameraFirstUseTests = configuration.Settings.CameraFirstUseTests;
-        cameraTestImageArrayVariant = configuration.Settings.CameraTestImageArrayVariant;
-        cameraExposureDuration = configuration.Settings.CameraExposureDuration;
-
-        // Dome tests
-        domeShutterTimeout = configuration.Settings.DomeShutterMovementTimeout;
-        domeAzimuthTimeout = configuration.Settings.DomeAzimuthMovementTimeout;
-        domeAltitudeTimeout = configuration.Settings.DomeAltitudeMovementTimeout;
-        domeStabilisationWaitTime = configuration.Settings.DomeStabilisationWaitTime;
-        domeOpenShutter = configuration.Settings.DomeOpenShutter;
-        domeSlewTolerance = configuration.Settings.DomeSlewTolerance;
-
-        // Focuser tests
-        focuserTimeout = configuration.Settings.FocuserTimeout;
-
-        // ObservingConditions tests
-        observingConditionsMaxRetries = configuration.Settings.ObservingConditionsMaxRetries;
-        observingConditionsRetryTime = configuration.Settings.ObservingConditionsRetryTime;
-
-        // Rotator tests
-        rotatorTimeout = configuration.Settings.RotatorTimeout;
-
-        // Switch tests
-        switchEnableSet = configuration.Settings.SwitchEnableSet;
-        switchExtendedNumberTestRange = configuration.Settings.SwitchExtendedNumberTestRange;
-        switchReadDelay = configuration.Settings.SwitchReadDelay;
-        switchWriteDelay = configuration.Settings.SwitchWriteDelay;
-
-        // Alpaca configuration
-        alpacaDiscoveryEnabled = configuration.Settings.AlpacaConfiguration.DiscoveryEnabled;
-        alpacaDiscoveryDuration = configuration.Settings.AlpacaConfiguration.DiscoveryDuration;
-        alpacaDiscoveryPollInterval = configuration.Settings.AlpacaConfiguration.DiscoveryPollInterval;
-        alpacaDiscoveryPort = configuration.Settings.AlpacaConfiguration.DiscoveryPort;
-        alpacaNumberOfDiscoveryPolls = configuration.Settings.AlpacaConfiguration.NumberOfDiscoveryPolls;
-        alpacaDiscoveryResolveName = configuration.Settings.AlpacaConfiguration.DiscoveryResolveName;
-        alpacaDiscoveryUseIpV4 = configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4;
-        alpacaDiscoveryUseIpV6 = configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6;
-        alpacaServiceType = configuration.Settings.AlpacaConfiguration.AccessServiceType;
-        strictCasing = configuration.Settings.AlpacaConfiguration.StrictCasing;
-        alpacaImageArrayTransferType = configuration.Settings.AlpacaConfiguration.ImageArrayTransferType;
-    }
-
-    void OnConformTestScopeChange(IEnumerable<int> scope)
+    private void OnConformTestScopeChange(IEnumerable<int> scope)
     {
         List<int> newScope = new();
         bool propertiesEnabled = scope.Contains(0);
@@ -957,107 +947,7 @@
         SaveConfiguration();
     }
 
-    void OnResetButtonClick()
-    {
-        configuration.Reset();
-        status = configuration.Status;
-        SetConfiguration();
-        StateHasChanged();
-    }
-
-    void OnCheckboxChange(bool args, CheckBoxConfigurationItem name)
-    {
-        switch (name)
-        {
-            case CheckBoxConfigurationItem.UpdateCheck:
-                configuration.Settings.UpdateCheck = chkUpdates;
-                break;
-
-            case CheckBoxConfigurationItem.DisplayCalls:
-                configuration.Settings.DisplayMethodCalls = chkDisplayCalls; ;
-                break;
-
-            case CheckBoxConfigurationItem.Debug:
-                configuration.Settings.Debug = chkDebug;
-                break;
-
-            case CheckBoxConfigurationItem.DomeOpenShutter:
-                configuration.Settings.DomeOpenShutter = domeOpenShutter;
-                break;
-
-            case CheckBoxConfigurationItem.SwitchEnableSet:
-                configuration.Settings.SwitchEnableSet = switchEnableSet;
-                break;
-
-            case CheckBoxConfigurationItem.AlpacaDiscoveryResolveName:
-                configuration.Settings.AlpacaConfiguration.DiscoveryResolveName = alpacaDiscoveryResolveName;
-                break;
-
-            case CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV4:
-                configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4 = alpacaDiscoveryUseIpV4;
-                break;
-
-            case CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV6:
-                configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6 = alpacaDiscoveryUseIpV6;
-                break;
-
-            case CheckBoxConfigurationItem.StrictCasing:
-                configuration.Settings.AlpacaConfiguration.StrictCasing = strictCasing;
-                break;
-
-            case CheckBoxConfigurationItem.TraceDiscovery:
-                configuration.Settings.TraceDiscovery = chkTraceDiscovery;
-                break;
-
-            case CheckBoxConfigurationItem.TraceAlpacaCalls:
-                configuration.Settings.TraceAlpacaCalls = chkTraceAlpacaCalls;
-                break;
-
-            case CheckBoxConfigurationItem.CameraFirstUseTests:
-                configuration.Settings.CameraFirstUseTests = cameraFirstUseTests;
-                break;
-
-            case CheckBoxConfigurationItem.DiscoveryEnabled:
-                configuration.Settings.AlpacaConfiguration.DiscoveryEnabled = alpacaDiscoveryEnabled;
-                break;
-
-            case CheckBoxConfigurationItem.TelescopeFirstUseTests:
-                configuration.Settings.TelescopeFirstUseTests = telescopeFirstUseTests;
-                break;
-
-            case CheckBoxConfigurationItem.GoHomeOnDeviceSelection:
-                configuration.Settings.GoHomeOnDeviceSelected = chkGoHomeOnDeviceSelection;
-                break;
-
-            default:
-                throw new InvalidValueException($"OnCheckboxChange - Unknown checkbox name: {name}");
-        }
-
-        SaveConfiguration();
-    }
-
-    void OnTabChange(int index)
-    {
-        //console.Log($"Tab with index {index} was selected.");
-    }
-
-    #region Telescope TAB
-
-    private void OnSetTelescopeTestsButtonClick(bool state)
-    {
-        Dictionary<string, bool> changedTests = new();
-        foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
-        {
-            changedTests.Add(item.Key, state);
-        }
-        configuration.Settings.TelescopeTests = changedTests;
-
-        SaveConfiguration();
-        SetConfiguration();
-        StateHasChanged();
-    }
-
-    void OnTelescopeTestsChange(IEnumerable<string> value, string asd)
+    private void OnTelescopeTestsChange(IEnumerable<string> value)
     {
         Dictionary<string, bool> newTelescopetestValues = new();
         foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
@@ -1073,6 +963,121 @@
         SaveConfiguration();
     }
 
-    #endregion
+    private void OnResetButtonClick()
+    {
+        configuration.Reset();
+        status = configuration.Status;
+        SetConfiguration();
+        StateHasChanged();
+    }
+
+    private void OnSetTelescopeTestsButtonClick(bool state)
+    {
+        Dictionary<string, bool> changedTests = new();
+        foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
+        {
+            changedTests.Add(item.Key, state);
+        }
+        configuration.Settings.TelescopeTests = changedTests;
+
+        SaveConfiguration();
+        SetConfiguration();
+        StateHasChanged();
+    }
+
+    private void OnTabChange(int index)
+    {
+        //console.Log($"Tab with index {index} was selected.");
+    }
+
+    private void SetConfiguration()
+    {
+        List<int> newScope = new();
+
+        // Set scope
+        if (configuration.Settings.TestProperties) newScope.Add(0);
+        if (configuration.Settings.TestMethods) newScope.Add(1);
+        if (configuration.Settings.TestSideOfPierRead) newScope.Add(2);
+        if (configuration.Settings.TestSideOfPierWrite) newScope.Add(3);
+        if (configuration.Settings.TestPerformance) newScope.Add(4);
+        conformanceTestScope = newScope;
+
+        // Operation settings
+        checkForUpdates = configuration.Settings.UpdateCheck;
+        displayMethodCalls = configuration.Settings.DisplayMethodCalls;
+        enableDebugLogging = configuration.Settings.Debug;
+        goHomeOnDeviceSelection = configuration.Settings.GoHomeOnDeviceSelected;
+        waitTimeBeforeConformApplicationExits = configuration.Settings.ConnectionTimeout;
+        applicationPort = configuration.Settings.ApplicationPort;
+
+        // Trace settings
+        chkTraceDiscovery = configuration.Settings.TraceDiscovery;
+        chkTraceAlpacaCalls = configuration.Settings.TraceAlpacaCalls;
+
+        // COM Settings
+        comAccessMechanic = configuration.Settings.ComConfiguration.ComAccessMechanic;
+
+        // Telescope tests
+        telescopeTests = new List<string>();
+        foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
+        {
+            if (item.Value) ((List<string>)telescopeTests).Add(item.Key);
+        }
+        telescopeFirstUseTests = configuration.Settings.TelescopeFirstUseTests;
+        telescopeSlewTolerance = configuration.Settings.TelescopeSlewTolerance;
+        telescopeMaximumSlewTime = configuration.Settings.TelescopeMaximumSlewTime;
+
+        // Camera tests
+        cameraTestMaxBinX = configuration.Settings.CameraMaxBinX;
+        cameraTestMaxBinY = configuration.Settings.CameraMaxBinY;
+        cameraFirstUseTests = configuration.Settings.CameraFirstUseTests;
+        cameraTestImageArrayVariant = configuration.Settings.CameraTestImageArrayVariant;
+        cameraExposureDuration = configuration.Settings.CameraExposureDuration;
+
+        // Dome tests
+        domeShutterTimeout = configuration.Settings.DomeShutterMovementTimeout;
+        domeAzimuthTimeout = configuration.Settings.DomeAzimuthMovementTimeout;
+        domeAltitudeTimeout = configuration.Settings.DomeAltitudeMovementTimeout;
+        domeStabilisationWaitTime = configuration.Settings.DomeStabilisationWaitTime;
+        domeOpenShutter = configuration.Settings.DomeOpenShutter;
+        domeSlewTolerance = configuration.Settings.DomeSlewTolerance;
+
+        // Focuser tests
+        focuserTimeout = configuration.Settings.FocuserTimeout;
+        focuserMoveTolerance = configuration.Settings.FocuserMoveTolerance;
+
+        // ObservingConditions tests
+        observingConditionsMaxRetries = configuration.Settings.ObservingConditionsMaxRetries;
+        observingConditionsRetryTime = configuration.Settings.ObservingConditionsRetryTime;
+
+        // Rotator tests
+        rotatorTimeout = configuration.Settings.RotatorTimeout;
+
+        // Switch tests
+        switchEnableSet = configuration.Settings.SwitchEnableSet;
+        switchExtendedNumberTestRange = configuration.Settings.SwitchExtendedNumberTestRange;
+        switchReadDelay = configuration.Settings.SwitchReadDelay;
+        switchWriteDelay = configuration.Settings.SwitchWriteDelay;
+
+        // Alpaca configuration
+        alpacaDiscoveryEnabled = configuration.Settings.AlpacaConfiguration.DiscoveryEnabled;
+        alpacaDiscoveryDuration = configuration.Settings.AlpacaConfiguration.DiscoveryDuration;
+        alpacaDiscoveryPollInterval = configuration.Settings.AlpacaConfiguration.DiscoveryPollInterval;
+        alpacaDiscoveryPort = configuration.Settings.AlpacaConfiguration.DiscoveryPort;
+        alpacaNumberOfDiscoveryPolls = configuration.Settings.AlpacaConfiguration.NumberOfDiscoveryPolls;
+        alpacaDiscoveryResolveName = configuration.Settings.AlpacaConfiguration.DiscoveryResolveName;
+        alpacaDiscoveryUseIpV4 = configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4;
+        alpacaDiscoveryUseIpV6 = configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6;
+        alpacaServiceType = configuration.Settings.AlpacaConfiguration.AccessServiceType;
+        strictCasing = configuration.Settings.AlpacaConfiguration.StrictCasing;
+        alpacaImageArrayTransferType = configuration.Settings.AlpacaConfiguration.ImageArrayTransferType;
+    }
+
+    private void SaveConfiguration()
+    {
+        configuration.Save();
+        status = configuration.Status;
+        StateHasChanged();
+    }
 
 }
