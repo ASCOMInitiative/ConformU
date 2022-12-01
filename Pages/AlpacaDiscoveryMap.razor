@@ -38,10 +38,24 @@
 
 </div>
 
+@if (nonStandardDevices.Count > 0)
+{
+    <div class="col" style="margin-bottom: 16px; width: 100%">
+        <h4>UNRECOGNISED ASCOM DEVICE TYPES - THESE ARE NOT VALID AND SHOULD BE REMOVED</h4>
+        <TreeView Nodes="nonStandardDevices"
+              GetChildNodes="@(item => item.Children)"
+              HasChildNodes="@(item => item.Children?.Any() == true)">
+            <NodeContent>@context.Text</NodeContent>
+        </TreeView>
+
+    </div>
+}
+
 @code {
 
     List<BlazoriseTreeItem> alpacaDevices = new() { new BlazoriseTreeItem() { Text = "None" } };
     List<BlazoriseTreeItem> ascomDevices = new() { new BlazoriseTreeItem() { Text = "None" } };
+    List<BlazoriseTreeItem> nonStandardDevices = new() { new BlazoriseTreeItem() { Text = "None" } };
 
     private string statusVisible = "display: initial";
     private bool disposedValue;
@@ -68,6 +82,7 @@
         {
             alpacaDevices = new();
             ascomDevices = new();
+            nonStandardDevices = new();
 
             // Set the operation in progress flag and refresh state throughout the page and navigation menu.
             configuration.Settings.OperationInProgress = true;
@@ -82,16 +97,20 @@
 
                 try
                 {
-                    // Create a task to run the conformance test
                     List<BlazoriseTreeItem> discoveredAlpacaDevices = new();
                     List<BlazoriseTreeItem> discoveredAscomDevices = new();
+                    List<BlazoriseTreeItem> discoveredNonStandardDevices = new();
+
                     SetStatusMessage("Discovery started");
+
+                    // Create a task to run the conformance test
                     discoverytask = new Task(() =>
                     {
                         try
                         {
                             using (AlpacaDiscovery alpacaDiscovery = new AlpacaDiscovery(configuration.Settings.AlpacaConfiguration.StrictCasing, configuration.Settings.TraceDiscovery ? conformLogger : null, Globals.USER_AGENT_PRODUCT_NAME, Assembly.GetExecutingAssembly().GetName().Version.ToString())) // Create a discovery component with or without logging
                             {
+                                // Start the discovery process
                                 alpacaDiscovery.StartDiscovery(alpacaConfiguration.NumberOfDiscoveryPolls,
                                     (int)(alpacaConfiguration.DiscoveryPollInterval * 1000),
                                     alpacaConfiguration.DiscoveryPort,
@@ -100,28 +119,37 @@
                                     alpacaConfiguration.DiscoveryUseIpV4,
                                     alpacaConfiguration.DiscoveryUseIpV6,
                                     alpacaConfiguration.AccessServiceType);
+
+                                // Wait for discovery to complete
                                 do
                                 {
                                     Thread.Sleep(100);
                                 } while (!alpacaDiscovery.DiscoveryComplete & !cancellationTokenSource.IsCancellationRequested);
 
+                                // Process each Alpaca device in turn
                                 foreach (AlpacaDevice alpacaDevice in alpacaDiscovery.GetAlpacaDevices())
                                 {
                                     string alpacaDeviceString = $"\"Found: " + $"{alpacaDevice.IpAddress}:{alpacaDevice.Port.ToString().PadRight(6)}".PadRight(40) + $" {alpacaDevice.ServerName,-15} {alpacaDevice.Manufacturer,-15} {alpacaDevice.ManufacturerVersion,-20} {alpacaDevice.Location}\"";
 
+                                    // Create a node for the ALpaca device and add sub-nodes for th device's details
                                     BlazoriseTreeItem alpacaDeviceItem = new() { Text = $"{alpacaDevice.ServerName} on host {alpacaDevice.HostName} ({alpacaDevice.IpAddress}:{alpacaDevice.Port})" };
                                     List<BlazoriseTreeItem> deviceDescription = new();
                                     deviceDescription.Add(new BlazoriseTreeItem() { Text = $"Manufacturer: {alpacaDevice.Manufacturer}" });
                                     deviceDescription.Add(new BlazoriseTreeItem() { Text = $"Version: {alpacaDevice.ManufacturerVersion}" });
                                     deviceDescription.Add(new BlazoriseTreeItem() { Text = $"Location: {alpacaDevice.Location}" });
+
+                                    // Add the discovered ASCOM devices to the main list of ASCOM devices
                                     List<BlazoriseTreeItem> ascomDevices = new();
+                                    List<BlazoriseTreeItem> nonStandardDevices = new();
 
                                     foreach (AscomDevice ascomDevice in alpacaDevice.AscomDevices(null))
                                     {
                                         // Provide appropriate descriptions for ASCOM and non-ASCOM device types
+
+                                        //Console.WriteLine($"ASCOMDevice - Devicetype isd null: {ascomDevice.AscomDeviceType is null}, non-standard device type: {ascomDevice.NonAscomDeviceType}");
                                         if (ascomDevice.AscomDeviceType is null) // This is not an ASCOM device type
                                         {
-                                            ascomDevices.Add(new BlazoriseTreeItem() { Text = $"{ascomDevice.NonAscomDeviceType} Device: {ascomDevice.AscomDeviceName} - Alpaca device number: {ascomDevice.AlpacaDeviceNumber} - Alpaca Unique ID: {ascomDevice.UniqueId}" });
+                                            nonStandardDevices.Add(new BlazoriseTreeItem() { Text = $"{ascomDevice.NonAscomDeviceType} Device: {ascomDevice.AscomDeviceName} - Alpaca device number: {ascomDevice.AlpacaDeviceNumber} - Alpaca Unique ID: {ascomDevice.UniqueId}" });
                                         }
                                         else // This is an ASCOM device type
                                         {
@@ -129,11 +157,20 @@
                                         }
                                     }
 
-                                    if (ascomDevices is not null) deviceDescription.Add(new BlazoriseTreeItem() { Text = "Available ASCOM Devices", Children = ascomDevices });
+                                    //Add a node to display this Alpaca device's ASCOM devices
+                                    deviceDescription.Add(new BlazoriseTreeItem() { Text = "Available ASCOM Devices", Children = ascomDevices });
+
+                                    //Add a node to display this Alpaca device's non-standard devices
+                                    if (nonStandardDevices.Count > 0) deviceDescription.Add(new BlazoriseTreeItem() { Text = "UNRECOGNISED ASCOM DEVICE TYPES - THESE ARE NOT VALID AND SHOULD BE REMOVED", Children = nonStandardDevices });
+
+                                    // Add the ASCOM device descriptions to the ALpaca device description
                                     alpacaDeviceItem.Children = deviceDescription;
+
+                                    // Add the Alpaca device to the overall list of Alpaca devices
                                     discoveredAlpacaDevices.Add(alpacaDeviceItem);
                                 }
 
+                                // Create a list of Unique devices
                                 IEnumerable<AscomDevice> uniqueAscomDevices = alpacaDiscovery.GetAscomDevices(null).Distinct(new AscomDeviceComparer());
 
                                 foreach (AscomDevice uniqueAscomDevice in uniqueAscomDevices)
@@ -146,10 +183,16 @@
                                         sameDevicesListItems.Add(new BlazoriseTreeItem() { Text = $"Found at {ad.HostName} ({ad.IpAddress}:{ad.IpPort}) - {ad.AscomDeviceType} {ad.AlpacaDeviceNumber}" });
                                     }
 
-                                    discoveredAscomDevices.Add(new BlazoriseTreeItem() { Text = $"{uniqueAscomDevice.AscomDeviceName} (UniqueID: {uniqueAscomDevice.UniqueId})", Children = sameDevicesListItems });
+                                    if (uniqueAscomDevice.AscomDeviceType is null) // This is a non-standard device so add it to the non-standard deviecs list
+                                    {
+                                        discoveredNonStandardDevices.Add(new BlazoriseTreeItem() { Text = $"{uniqueAscomDevice.AscomDeviceName} (UniqueID: {uniqueAscomDevice.UniqueId})", Children = sameDevicesListItems });
+                                    }
+                                    else // This is a standard device so add it to the ASCOM devices list
+                                    {
+                                        discoveredAscomDevices.Add(new BlazoriseTreeItem() { Text = $"{uniqueAscomDevice.AscomDeviceName} (UniqueID: {uniqueAscomDevice.UniqueId})", Children = sameDevicesListItems });
+                                    }
                                 }
                             }
-
                         }
                         catch (Exception ex)
                         {
@@ -159,7 +202,8 @@
                     }, cancelConformToken);
 
                     conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
-                    // Start the conformnance test task
+
+                    // Start the discovery task
                     discoverytask.Start();
                     conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance test started OK");
 
@@ -169,9 +213,12 @@
 
                     if (discoveredAlpacaDevices.Count == 0) discoveredAlpacaDevices.Add(new BlazoriseTreeItem() { Text = "None" });
                     if (discoveredAscomDevices.Count == 0) discoveredAscomDevices.Add(new BlazoriseTreeItem() { Text = "None" });
+                    if (discoveredNonStandardDevices.Count == 0) discoveredNonStandardDevices.Add(new BlazoriseTreeItem() { Text = "None" });
 
                     alpacaDevices = discoveredAlpacaDevices;
                     ascomDevices = discoveredAscomDevices;
+                    nonStandardDevices = discoveredNonStandardDevices;
+
                     conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance task completed");
                     SetStatusMessage("Discovery complete");
                 }
