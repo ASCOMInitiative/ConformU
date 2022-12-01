@@ -25,7 +25,6 @@
               HasChildNodes="@(item => item.Children?.Any() == true)">
         <NodeContent>@context.Text</NodeContent>
     </TreeView>
-
 </div>
 
 <div class="col" style="margin-bottom: 16px; width: 100%">
@@ -35,9 +34,9 @@
               HasChildNodes="@(item => item.Children?.Any() == true)">
         <NodeContent>@context.Text</NodeContent>
     </TreeView>
-
 </div>
 
+@* Only show the unrecognised device types message if there are such devices *@
 @if (nonStandardDevices.Count > 0)
 {
     <div class="col" style="margin-bottom: 16px; width: 100%">
@@ -47,7 +46,6 @@
               HasChildNodes="@(item => item.Children?.Any() == true)">
             <NodeContent>@context.Text</NodeContent>
         </TreeView>
-
     </div>
 }
 
