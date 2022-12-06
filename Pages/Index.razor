@@ -7,6 +7,7 @@
 @inject IJSRuntime JS
 @using ASCOM.Common
 @using Microsoft.Extensions.Configuration
+@using System.Reflection;
 @inject IConfiguration Configuration
 @* Radzen notification service to enable pop-up alerts *@
 @inject NotificationService notificationService
@@ -35,7 +36,7 @@
     object screenLogLockObject = new object();
     object statusLockObject = new object();
     private string deviceDescription = "";
-    string statusMessage = $"OS: {Environment.OSVersion} {(Environment.Is64BitOperatingSystem ? "64bit" : "32bit")} - Application is {(Environment.Is64BitProcess ? "64bit" : "32bit")}";
+    string statusMessage="";
 
     ConformanceTestManager tester;
 
@@ -83,6 +84,9 @@
                 break;
         }
 
+        statusMessage = $"Version {Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion} ({Assembly.GetExecutingAssembly().GetName().Version})";
+
+        statusMessage += $"        Running as a {(Environment.Is64BitProcess ? "64bit" : "32bit")} application on {Environment.OSVersion}";
 
 
 

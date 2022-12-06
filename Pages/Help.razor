@@ -5,7 +5,7 @@
 
 <h2>Help</h2>
 
-<h4 style="margin-top: 20px">ConformU version @assemblyVersion</h4>
+<h4 style="margin-top: 20px">ConformU Version @assemblyVersion</h4>
 <p>(c) Peter Simpson (ASCOM Initiative) 2021-2022</p>
 
 <p style="margin-top: 20px">For support please post on the <a href="https://ascomtalk.groups.io/g/Developer" target="_blank">ASCOM Developer Support Forum</a></p>
@@ -106,7 +106,7 @@
 
     protected override void OnInitialized()
     {
-        assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-    }
+        assemblyVersion = $"{Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion} ({Assembly.GetExecutingAssembly().GetName().Version})";
+}
 
 }
