@@ -9,7 +9,7 @@
 		<DisableWinExeOutputInference>true</DisableWinExeOutputInference>
 	</PropertyGroup>
 	<Target Name="Test" AfterTargets="AfterBuild">
-		<Message Importance="High" Text=" Version: $(AssemblyMajor).$(AssemblyMinor).$(AssemblyBuild).$(RevisionNumber)" />
+		<Message Importance="High" Text=" Version: $(ProductMajor).$(ProductMinor).$(ProductBuild).$(RevisionNumber)" />
 	</Target>
 	<PropertyGroup>
 		<TargetFrameworks>net6.0-windows;net6.0;net7.0-windows;net7.0</TargetFrameworks>
@@ -20,10 +20,10 @@
 		<ApplicationIcon>ASCOM.ico</ApplicationIcon>
 
 		<!-- Set assembly version numbers -->
-		<AssemblyMajor>1</AssemblyMajor>
-		<AssemblyMinor>0</AssemblyMinor>
-		<AssemblyBuild>0</AssemblyBuild>
-
+		<ProductMajor>1</ProductMajor>
+		<ProductMinor>1</ProductMinor>
+		<ProductBuild>0</ProductBuild>
+		<ProductBeta>-rc.1</ProductBeta>
 		<!--Create a dynamic revision number based on time of build
 		 
 		The revision number is calculated by using the lowest 5 bits (0::31) to store the build hour (0::23) and the upper 11 bits to store the build day since the 1st January 2022.
@@ -32,9 +32,9 @@
 
 		<RevisionNumber>$([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Modulo($([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Subtract($([System.DateTime]::UtcNow.Year),2022)),366)),$([System.DateTime]::UtcNow.DayOfYear))),2048)),32)),$([System.DateTime]::UtcNow.TimeOfDay.Hours)))</RevisionNumber>
 
-		<AssemblyVersion>$(AssemblyMajor).$(AssemblyMinor).$(AssemblyBuild).$(RevisionNumber)</AssemblyVersion>
-		<FileVersion>$(AssemblyMajor).$(AssemblyMinor).$(AssemblyBuild).$(RevisionNumber)</FileVersion>
-		<Version>$(AssemblyMajor).$(AssemblyMinor).$(AssemblyBuild).$(RevisionNumber)</Version>
+		<AssemblyVersion>$(ProductMajor).$(ProductMinor).$(ProductBuild).$(RevisionNumber)</AssemblyVersion>
+		<FileVersion>$(ProductMajor).$(ProductMinor).$(ProductBuild).$(RevisionNumber)</FileVersion>
+		<Version>$(ProductMajor).$(ProductMinor).$(ProductBuild).$(RevisionNumber)</Version>
 
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>conformu.snk</AssemblyOriginatorKeyFile>
@@ -44,6 +44,7 @@
 		<AssemblyTitle>Conform Universal</AssemblyTitle>
 		<AssemblyConfiguration>$(Configuration)</AssemblyConfiguration>
 		<AssemblyDescription>Conform Universal</AssemblyDescription>
+		<InformationalVersion>$(ProductMajor).$(ProductMinor).$(ProductBuild)$(ProductBeta)</InformationalVersion>
 		<Copyright>© Peter Simpson 2021-2023</Copyright>
 		<ProductName>Conform Universal</ProductName>
 
@@ -116,10 +117,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.64" />
-		<PackageReference Include="ASCOM.Com.Components" Version="1.0.64" />
+		<PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.66" />
+		<PackageReference Include="ASCOM.Com.Components" Version="1.0.66" />
 		<PackageReference Include="ASCOM.Exception.Library" Version="6.6.2-rc.1" />
-		<PackageReference Include="ASCOM.Tools" Version="1.0.64" />
+		<PackageReference Include="ASCOM.Tools" Version="1.0.66" />
 		<PackageReference Include="Blazorise.Bootstrap" Version="1.1.4.1" />
 		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.1.4.1" />
 		<PackageReference Include="Blazorise.TreeView" Version="1.1.4.1" />
