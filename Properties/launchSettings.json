@@ -9,7 +9,6 @@
     },
     "ConformU": {
       "commandName": "Project",
-      "commandLineArgs": "--debugstartup true",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

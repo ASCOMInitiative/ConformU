@@ -129,7 +129,7 @@
                                 {
                                     string alpacaDeviceString = $"\"Found: " + $"{alpacaDevice.IpAddress}:{alpacaDevice.Port.ToString().PadRight(6)}".PadRight(40) + $" {alpacaDevice.ServerName,-15} {alpacaDevice.Manufacturer,-15} {alpacaDevice.ManufacturerVersion,-20} {alpacaDevice.Location}\"";
 
-                                    // Create a node for the ALpaca device and add sub-nodes for th device's details
+                                    // Create a node for the Alpaca device and add sub-nodes for th device's details
                                     BlazoriseTreeItem alpacaDeviceItem = new() { Text = $"{alpacaDevice.ServerName} on host {alpacaDevice.HostName} ({alpacaDevice.IpAddress}:{alpacaDevice.Port})" };
                                     List<BlazoriseTreeItem> deviceDescription = new();
                                     deviceDescription.Add(new BlazoriseTreeItem() { Text = $"Manufacturer: {alpacaDevice.Manufacturer}" });
@@ -161,7 +161,7 @@
                                     //Add a node to display this Alpaca device's non-standard devices
                                     if (nonStandardDevices.Count > 0) deviceDescription.Add(new BlazoriseTreeItem() { Text = "UNRECOGNISED ASCOM DEVICE TYPES - THESE ARE NOT VALID AND SHOULD BE REMOVED", Children = nonStandardDevices });
 
-                                    // Add the ASCOM device descriptions to the ALpaca device description
+                                    // Add the ASCOM device descriptions to the Alpaca device description
                                     alpacaDeviceItem.Children = deviceDescription;
 
                                     // Add the Alpaca device to the overall list of Alpaca devices

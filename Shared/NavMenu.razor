@@ -51,6 +51,7 @@
 }
 else
 {
+    @* No operation running so display the main navigation menu *@
     <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
         <ul class="nav flex-column">
             <li class="nav-item px-3">
@@ -65,6 +66,9 @@ else
                 </NavLink>
                 <NavLink class="nav-link" href="/AlpacaDiscoveryPage" Match="NavLinkMatch.All">
                     <span class="oi oi-camera-slr" aria-hidden="true"></span> Alpaca Discovery Map
+                </NavLink>
+                <NavLink class="nav-link" href="/DiscoveryDiagnostics" Match="NavLinkMatch.All">
+                    <span class="oi oi-camera-slr" aria-hidden="true"></span> Discovery Diagnostics
                 </NavLink>
                 @if (Update.UpdateAvailable())
                 {

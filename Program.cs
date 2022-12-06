@@ -101,14 +101,14 @@ namespace ConformU
             if (commandLineOptions.DebugDiscovery.HasValue)
             {
                 argList.Add($"--{COMMAND_OPTION_DEBUG_DISCOVERY}");
-                argList.Add("true");
+                argList.Add(commandLineOptions.DebugDiscovery.ToString());
             }
 
             // Flag if start-up debug information should be included in the log file
             if (commandLineOptions.DebugStartup)
             {
                 argList.Add($"--{COMMAND_OPTION_DEBUG_STARTUP}");
-                argList.Add("true");
+                argList.Add(commandLineOptions.DebugStartup.ToString());
             }
 
             // Set the results filename if supplied 
