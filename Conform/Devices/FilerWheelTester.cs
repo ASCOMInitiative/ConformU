@@ -105,8 +105,6 @@ namespace ConformU
                                                     settings.TraceAlpacaCalls ? logger : null,
                                                     Globals.USER_AGENT_PRODUCT_NAME,
                                                     Assembly.GetExecutingAssembly().GetName().Version.ToString(4));
-
-                        LogInfo("CreateDevice", $"Alpaca device created OK - Version {Assembly.GetExecutingAssembly().GetName().Version.ToString(3)}");
                         break;
 
                     case DeviceTechnology.COM:
