@@ -9,8 +9,29 @@
 		<DisableWinExeOutputInference>true</DisableWinExeOutputInference>
 	</PropertyGroup>
 	<Target Name="Test" AfterTargets="AfterBuild">
-		<Message Importance="High" Text=" Version: $(ProductMajor).$(ProductMinor).$(ProductBuild).$(RevisionNumber)" />
+		<Message Importance="High" Text=" Version: $(ProductMajor).$(ProductMinor).$(ProductPatch).$(BuildNumber)" />
 	</Target>
+	<PropertyGroup>
+		<!-- Set version numbers -->
+		<ProductMajor>1</ProductMajor>
+		<ProductMinor>1</ProductMinor>
+		<ProductPatch>0</ProductPatch>
+
+		<!-- Set the pre-release string without a leading minus e.g. rc.1 -->
+		<ProductPreRelease></ProductPreRelease>
+
+		<!--Create a dynamic revision number based on time of build
+		 
+		The revision number is calculated by using the lowest 5 bits (0::31) to store the build hour (0::23) and the upper 11 bits to store the build day since the 1st January 2022.
+		This approach gives a revision number that changes every hour and that only repeats after 2048 days (over 5 years). 
+		To simplify the formula, years are assumed to be 366 days in length and UTC is used for the time of day so that daylight savings time changes can be ignored. -->
+
+		<BuildNumber>$([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Modulo($([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Subtract($([System.DateTime]::UtcNow.Year),2022)),366)),$([System.DateTime]::UtcNow.DayOfYear))),2048)),32)),$([System.DateTime]::UtcNow.TimeOfDay.Hours)))</BuildNumber>
+	</PropertyGroup>
+	<!-- Create the pre-release string minus character separator if this is a pre-release -->
+	<PropertyGroup Condition="'$(ProductPreRelease)'!=''">
+		<ProductPreReleaseSeparator>-</ProductPreReleaseSeparator>
+	</PropertyGroup>
 	<PropertyGroup>
 		<TargetFrameworks>net6.0-windows;net6.0;net7.0-windows;net7.0</TargetFrameworks>
 		<Configurations>Debug;Release</Configurations>
@@ -19,22 +40,13 @@
 		<Platforms>AnyCPU;x86</Platforms>
 		<ApplicationIcon>ASCOM.ico</ApplicationIcon>
 
-		<!-- Set assembly version numbers -->
-		<ProductMajor>1</ProductMajor>
-		<ProductMinor>1</ProductMinor>
-		<ProductBuild>0</ProductBuild>
-		<ProductBeta>-rc.1</ProductBeta>
-		<!--Create a dynamic revision number based on time of build
-		 
-		The revision number is calculated by using the lowest 5 bits (0::31) to store the build hour (0::23) and the upper 11 bits to store the build day since the 1st January 2022.
-		This approach gives a revision number that changes every hour and that only repeats after 2048 days (over 5 years). 
-		To simplify the formula, years are assumed to be 366 days in length and UTC is used for the time of day so that daylight savings time changes can be ignored. -->
+		<!--Set the assembly version numbers to major.minor.patch.build -->
+		<Version>$(ProductMajor).$(ProductMinor).$(ProductPatch).$(BuildNumber)</Version>
+		<AssemblyVersion>$(ProductMajor).$(ProductMinor).$(ProductPatch).$(BuildNumber)</AssemblyVersion>
+		<FileVersion>$(ProductMajor).$(ProductMinor).$(ProductPatch).$(BuildNumber)</FileVersion>
 
-		<RevisionNumber>$([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Modulo($([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Subtract($([System.DateTime]::UtcNow.Year),2022)),366)),$([System.DateTime]::UtcNow.DayOfYear))),2048)),32)),$([System.DateTime]::UtcNow.TimeOfDay.Hours)))</RevisionNumber>
-
-		<AssemblyVersion>$(ProductMajor).$(ProductMinor).$(ProductBuild).$(RevisionNumber)</AssemblyVersion>
-		<FileVersion>$(ProductMajor).$(ProductMinor).$(ProductBuild).$(RevisionNumber)</FileVersion>
-		<Version>$(ProductMajor).$(ProductMinor).$(ProductBuild).$(RevisionNumber)</Version>
+		<!--Set the product version to the SEMVER version string -->
+		<InformationalVersion>$(ProductMajor).$(ProductMinor).$(ProductPatch)$(ProductPreReleaseSeparator)$(ProductPreRelease)+$(BuildNumber)</InformationalVersion>
 
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>conformu.snk</AssemblyOriginatorKeyFile>
@@ -44,7 +56,6 @@
 		<AssemblyTitle>Conform Universal</AssemblyTitle>
 		<AssemblyConfiguration>$(Configuration)</AssemblyConfiguration>
 		<AssemblyDescription>Conform Universal</AssemblyDescription>
-		<InformationalVersion>$(ProductMajor).$(ProductMinor).$(ProductBuild)$(ProductBeta)</InformationalVersion>
 		<Copyright>© Peter Simpson 2021-2023</Copyright>
 		<ProductName>Conform Universal</ProductName>
 
