@@ -8,6 +8,7 @@
 @using ASCOM.Common
 @using Microsoft.Extensions.Configuration
 @using System.Reflection;
+@using Semver;
 @inject IConfiguration Configuration
 @* Radzen notification service to enable pop-up alerts *@
 @inject NotificationService notificationService
@@ -84,12 +85,18 @@
                 break;
         }
 
-        statusMessage = $"Version {Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion} ({Assembly.GetExecutingAssembly().GetName().Version})";
-
+        statusMessage = $"Version {Update.ConformuVersionDisplayString}";
         statusMessage += $"        Running as a {(Environment.Is64BitProcess ? "64bit" : "32bit")} application on {Environment.OSVersion}";
 
+        // Validate that the application SEMVER string is valid
+        if (SemVersion.TryParse(Update.ConformuVersion, SemVersionStyles.AllowV, out SemVersion currentversion))
+        {
 
-
+        }
+        else
+        {
+            screenLog += $"\r\n\r\nINVALID PRODUCT VERSION: {Update.ConformuVersion}";
+        }
 
         conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"End");
     }
