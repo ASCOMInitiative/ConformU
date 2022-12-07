@@ -658,7 +658,7 @@ namespace ConformU
                         RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 315.0f, "");
                         if (cancellationToken.IsCancellationRequested)
                             return;
-                        RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", (float)-405.0d, "Movement to large negative angle -405 degrees");
+                        RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", -405.0f, "Movement to large negative angle -405 degrees");
                         if (cancellationToken.IsCancellationRequested)
                             return;
                         RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 405.0f, "Movement to large positive angle 405 degrees");
@@ -674,6 +674,8 @@ namespace ConformU
                 {
                     HandleException("MoveMechanical", MemberType.Method, Required.Mandatory, ex, "");
                 }
+                if (cancellationToken.IsCancellationRequested)
+                    return;
 
                 // Test the Sync method
                 try
@@ -681,10 +683,20 @@ namespace ConformU
                     if (canReadMechanicalPosition & canReadPosition) // Test new IRotaotrV3 methods
                     {
                         RotatorSynctest(90.0f, 90.0f); // Make sure that the rotator can be synced to its mechanical position
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
                         RotatorSynctest(120.0f, 90.0f); // Test sync to a positive offset
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
                         RotatorSynctest(60.0f, 90.0f); // Test sync to a negative offset
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
                         RotatorSynctest(00.0f, 00.0f); // Test sync to zero
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
                         RotatorSynctest(30.0f, 00.0f); // Test sync to a positive offset
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
                         RotatorSynctest(330.0f, 00.0f); // Test sync to a negative offset that is through zero
                     }
                     else // Message saying we are skipping tests because we can't read required properties
@@ -955,14 +967,14 @@ namespace ConformU
                     {
                         case RotatorPropertyMethod.Move:
                             {
-                                WaitWhile("Waiting for move to complete", () => { return m_Rotator.IsMoving; }, 500, settings.RotatorTimeout, () => { return $"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition):000} / {Math.Abs(p_value):000} relative"; });
+                                WaitWhile($"Moving by {p_value:000} degrees", () => { return m_Rotator.IsMoving; }, 500, settings.RotatorTimeout, () => { return $"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition):000} / {Math.Abs(p_value % 360.0):000} relative"; });
                                 break;
                             }
 
                         case RotatorPropertyMethod.MoveMechanical:
                         case RotatorPropertyMethod.MoveAbsolute:
                             {
-                                WaitWhile("Waiting for move to complete", () => { return m_Rotator.IsMoving; }, 500, settings.RotatorTimeout, () => { return $"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition):000} / {Math.Abs(p_value - p_RotatorStartPosition):000} absolute"; });
+                                WaitWhile($"Moving to {p_value:000} degrees", () => { return m_Rotator.IsMoving; }, 500, settings.RotatorTimeout, () => { return $"{Math.Abs(m_Rotator.Position - p_RotatorStartPosition):000} / {Math.Abs((p_value - p_RotatorStartPosition) % 360.0):000} absolute"; });
                                 break;
                             }
 
