@@ -8,7 +8,7 @@
 
 <h2>Conform Universal</h2>
 <p>
-    Version - @Assembly.GetExecutingAssembly().GetName().Version.ToString()
+    Version - @Update.ConformuVersionDisplayString
     <br />
     Copyright 2021-22 Peter Simpson
 </p>
@@ -31,19 +31,26 @@
 }
 else
 {
-    @if (@Update.UpToDate)
+    @if (Update.AheadOfRelease)
     {
-        <p>Up to date</p>
+        <p>Ahead of release!</p>
     }
     else
     {
-        @if (@Update.AheadOfPreview)
+        @if (@Update.UpToDate)
         {
-            <p>Ahead of preview!</p>
+            <p>Up to date</p>
         }
         else
         {
-            <p>No updates available.</p>
+            @if (@Update.AheadOfPreview)
+            {
+                <p>Ahead of preview!</p>
+            }
+            else
+            {
+                <p>No updates available.</p>
+            }
         }
     }
 }
@@ -89,7 +96,7 @@ else
                 }
                 else
                 {
-
+                    throw getReleasesTask.Exception.Flatten();
                 }
             }
             catch (Exception)

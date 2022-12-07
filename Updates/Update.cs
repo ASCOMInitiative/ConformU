@@ -6,6 +6,8 @@ using System.Reflection;
 using ASCOM.Common.Interfaces;
 using ASCOM.Common;
 using System.Threading.Tasks;
+using ASCOM;
+using Octokit;
 //using Octokit;
 
 namespace ConformU
@@ -59,9 +61,14 @@ namespace ConformU
         internal static bool UpToDate { get; set; }
 
         /// <summary>
-        /// True if the client has a verison that is ahead of the latest preview release
+        /// True if the client has a version that is ahead of the latest preview release
         /// </summary>
         internal static bool AheadOfPreview { get; set; } = false;
+
+        /// <summary>
+        /// True if the client has a version that is ahead of the latest main release
+        /// </summary>
+        internal static bool AheadOfRelease { get; set; } = false;
 
         /// <summary>
         /// True if some releases have been retrieved from GitHub
@@ -73,6 +80,21 @@ namespace ConformU
         /// </summary>
         internal static IReadOnlyList<Octokit.Release> Releases { get; set; } = new List<Octokit.Release>(); //null;
 
+        internal static string ConformuVersion => $"{Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}";
+
+        internal static string ConformuVersionDisplayString
+        {
+            get
+            {
+                string informationalVersion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+
+                SemVersion.TryParse(informationalVersion, SemVersionStyles.AllowV, out SemVersion semver);
+                if (semver is not null)
+                    return $"{semver.Major}.{semver.Minor}.{semver.Patch}{(semver.Prerelease == "" ? "" : "-")}{semver.Prerelease} (Build {semver.Metadata})";
+                else
+                    return $"Unable to parse version string: {informationalVersion}!";
+            }
+        }
         #endregion
 
         #region Internal methods
@@ -82,18 +104,13 @@ namespace ConformU
             try
             {
                 logger?.LogMessage("CheckForUpdatesSync", MessageLevel.Debug, "Getting release details");
-                //Task<IReadOnlyList<Octokit.Release>> getReleasesTask = Task.Run(() => { return GitHubReleases.GetReleases("ASCOMInitiative", "ConformU"); });
-                //logger?.LogMessage("CheckForUpdatesSync", MessageLevel.Debug, "Waiting for task to complete");
-
-                //Task.WaitAll(getReleasesTask);
-                //Releases = getReleasesTask.Result;
                 Releases = await GitHubReleases.GetReleases("ASCOMInitiative", "ConformU");
                 SetProperties(logger);
                 logger?.LogMessage("CheckForUpdatesSync", MessageLevel.Debug, $"Found {Releases.Count} releases");
 
                 foreach (Octokit.Release release in Releases)
                 {
-                    logger?.LogMessage("CheckForUpdatesSync", MessageLevel.Debug, $"Found release: {release.Name}, ReleaseSemVersionFromTag: {release.ReleaseSemVersionFromTag().ToString()}, Published on: {release.PublishedAt.GetValueOrDefault()}, Major: {release.ReleaseSemVersionFromTag().Major}, Minor: {release.ReleaseSemVersionFromTag().Minor}, Build: {release.ReleaseSemVersionFromTag().Patch}, Pre-release: {release.Prerelease}");
+                    logger?.LogMessage("CheckForUpdatesSync", MessageLevel.Debug, $"Found release: {release.Name}, ReleaseSemVersionFromTag: {release.ReleaseSemVersionFromTag()}, Published on: {release.PublishedAt.GetValueOrDefault()}, Major: {release.ReleaseSemVersionFromTag().Major}, Minor: {release.ReleaseSemVersionFromTag().Minor}, Patch: {release.ReleaseSemVersionFromTag().Patch}, Pre-release: {release.Prerelease}");
                 }
 
                 return Releases;
@@ -116,7 +133,7 @@ namespace ConformU
 
                 foreach (Octokit.Release release in Releases)
                 {
-                    logger?.LogMessage("CheckForUpdates", MessageLevel.Debug, $"Found release: {release.Name}, ReleaseSemVersionFromTag: {release.ReleaseSemVersionFromTag().ToString()}, Published on: {release.PublishedAt.GetValueOrDefault()}, Major: {release.ReleaseSemVersionFromTag().Major}, Minor: {release.ReleaseSemVersionFromTag().Minor}, Build: {release.ReleaseSemVersionFromTag().Patch}, Pre-release: {release.Prerelease}");
+                    logger?.LogMessage("CheckForUpdates", MessageLevel.Debug, $"Found release: {release.Name}, ReleaseSemVersionFromTag: {release.ReleaseSemVersionFromTag()}, Published on: {release.PublishedAt.GetValueOrDefault()}, Major: {release.ReleaseSemVersionFromTag().Major}, Minor: {release.ReleaseSemVersionFromTag().Minor}, Patch: {release.ReleaseSemVersionFromTag().Patch}, Pre-release: {release.Prerelease}");
                 }
             }
             catch (Exception ex)
@@ -134,25 +151,30 @@ namespace ConformU
                 {
                     if (Releases.Count > 0)
                     {
-                        Version appVersion = Assembly.GetExecutingAssembly().GetName().Version;
-                        if (SemVersion.TryParse($"{appVersion.Major}.{appVersion.Minor}.{appVersion.Build}", SemVersionStyles.AllowV, out SemVersion currentversion))
+                        if (SemVersion.TryParse(Update.ConformuVersion, SemVersionStyles.AllowV, out SemVersion currentversion))
                         {
-                            var Release = Releases?.Latest();
+                            logger?.LogMessage("UpdateAvailable", MessageLevel.Debug, $"Application semver - Major: {currentversion.Major}, Minor: {currentversion.Minor}, Patch: {currentversion.Patch}, Pre-release: {currentversion.Prerelease}, Metadata: {currentversion.Metadata}");
+                            Octokit.Release Release = Releases?.Latest();
 
                             if (Release != null)
                             {
                                 if (SemVersion.TryParse(Release.TagName, SemVersionStyles.AllowV, out SemVersion latestrelease))
                                 {
-                                    return SemVersion.CompareSortOrder(currentversion, latestrelease) == -1;
+                                    logger?.LogMessage("UpdateAvailable", MessageLevel.Debug, $"Found release semver - Major: {latestrelease.Major}, Minor: {latestrelease.Minor}, Patch: {latestrelease.Patch}, Pre-release: {latestrelease.Prerelease}, Metadata: {latestrelease.Metadata}");
+                                    return SemVersion.ComparePrecedence(currentversion, latestrelease) == -1;
                                 }
                             }
+                        }
+                        else
+                        {
+                            throw new InvalidValueException($"The informational product version set in the project file is not a valid SEMVER string: {Update.ConformuVersion}");
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                logger?.LogMessage("CheckForUpdates", MessageLevel.Debug, $"Exception: {ex}");
+                logger?.LogMessage("UpdateAvailable", MessageLevel.Debug, $"Exception: {ex}");
             }
             return false;
         }
@@ -169,55 +191,68 @@ namespace ConformU
             try
             {
                 logger?.LogMessage("Update.SetProperties", MessageLevel.Debug, $"Running...");
-                Version appVersion = Assembly.GetExecutingAssembly().GetName().Version;
-                if (SemVersion.TryParse($"{appVersion.Major}.{appVersion.Minor}.{appVersion.Build}", SemVersionStyles.AllowV, out SemVersion installedRelease))
+                if (SemVersion.TryParse(Update.ConformuVersion, SemVersionStyles.AllowV, out SemVersion installedVersion))
                 {
-                    logger?.LogMessage("Update.SetProperties", MessageLevel.Debug, $"Installed version: {installedRelease}");
+                    logger?.LogMessage("Update.SetProperties", MessageLevel.Debug, $"Installed version: {installedVersion}");
 
-                    var LatestRelease = Update.Releases?.LatestRelease();
-                    var LatestPrerelease = Update.Releases?.LatestPrerelease();
-                    if ((LatestRelease is not null) & (LatestPrerelease is not null))
+                    Release latestRelease = Update.Releases?.LatestRelease();
+                    Release latestPreRelease = Update.Releases?.LatestPrerelease();
+                    if ((latestRelease is not null) & (latestPreRelease is not null))
                     {
 
-                        SemVersion.TryParse(LatestRelease.TagName, SemVersionStyles.AllowV, out SemVersion latestrelease);
+                        bool latesOk = SemVersion.TryParse(latestRelease.TagName, SemVersionStyles.AllowV, out SemVersion latestVersion);
 
-                        SemVersion.TryParse(LatestPrerelease.TagName, SemVersionStyles.AllowV, out SemVersion latestprerelease);
-                        logger?.LogMessage("Update.SetProperties", MessageLevel.Debug, $"latestrelease: {latestrelease}, latestprerelease: {latestprerelease}");
+                        bool latestPreOk = SemVersion.TryParse(latestPreRelease.TagName, SemVersionStyles.AllowV, out SemVersion latestPreReleaseVersion);
 
-                        if (installedRelease == latestrelease || installedRelease == latestprerelease)
+                        if (true)
+                        {
+
+                        }
+                        else
+                        {
+
+                        }
+                        logger?.LogMessage("Update.SetProperties", MessageLevel.Debug, $"latestrelease: {latestVersion}, latestprerelease: {latestPreReleaseVersion}");
+
+                        if ((SemVersion.ComparePrecedence(installedVersion, latestVersion) == 0) || (SemVersion.ComparePrecedence(installedVersion, latestPreReleaseVersion) == 0))
                         {
                             UpToDate = true;
                         }
 
-                        if (latestrelease != null)
+                        if (latestVersion != null)
                         {
-                            logger?.LogMessage("Update.SetProperties", MessageLevel.Debug, $"SemVersion.CompareSortOrder(currentversion, latestrelease) == -1: {SemVersion.CompareSortOrder(installedRelease, latestrelease) == -1}");
-                            if (SemVersion.CompareSortOrder(installedRelease, latestrelease) == -1)  //(installedRelease < latestrelease)
+                            if (SemVersion.ComparePrecedence(installedVersion, latestVersion) == -1)  //(installedRelease < latestrelease)
                             {
                                 HasNewerRelease = true;
-                                LatestReleaseVersion = LatestRelease.TagName;
-                                LatestReleaseName = LatestRelease.Name;
-                                ReleaseUrl = LatestRelease.HtmlUrl;
+                                LatestReleaseVersion = latestRelease.TagName;
+                                LatestReleaseName = latestRelease.Name;
+                                ReleaseUrl = latestRelease.HtmlUrl;
+                            }
+
+                            if (SemVersion.ComparePrecedence(installedVersion, latestVersion) == 1)  //(installedRelease > latestrelease)
+                            {
+                                logger?.LogMessage("Update.SetProperties", MessageLevel.Debug, $"Setting AheadOfRelease True");
+                                AheadOfRelease = true;
                             }
                         }
                         else
                         {
-                            latestrelease = new SemVersion(0);
+                            latestVersion = new SemVersion(0);
                         }
 
-                        if (latestprerelease != null)
+                        if (latestPreReleaseVersion != null)
                         {
-                            logger?.LogMessage("Update.SetProperties", MessageLevel.Debug, $"(SemVersion.CompareSortOrder(currentversion, latestprerelease) == -1) && (SemVersion.CompareSortOrder(latestrelease, latestprerelease) == -1): {(SemVersion.CompareSortOrder(installedRelease, latestprerelease) == -1) && (SemVersion.CompareSortOrder(latestrelease, latestprerelease) == -1)}");
-                            if ((SemVersion.CompareSortOrder(installedRelease, latestprerelease) == -1) && (SemVersion.CompareSortOrder(latestrelease, latestprerelease) == -1)) //installedRelease < latestprerelease && latestrelease < latestprerelease
+                            logger?.LogMessage("Update.SetProperties", MessageLevel.Debug, $"(SemVersion.ComparePrecedence(currentversion, latestprerelease) == -1) && (SemVersion.ComparePrecedence(latestrelease, latestprerelease) == -1): {(SemVersion.ComparePrecedence(installedVersion, latestPreReleaseVersion) == -1) && (SemVersion.ComparePrecedence(latestVersion, latestPreReleaseVersion) == -1)}");
+                            if ((SemVersion.ComparePrecedence(installedVersion, latestPreReleaseVersion) == -1) && (SemVersion.ComparePrecedence(latestVersion, latestPreReleaseVersion) == -1)) //installedRelease < latestprerelease && latestrelease < latestprerelease
                             {
                                 HasNewerPreview = true;
-                                LatestPreviewVersion = LatestPrerelease.TagName;
-                                LatestPreviewName = LatestPrerelease.Name;
-                                PreviewURL = LatestPrerelease.HtmlUrl;
+                                LatestPreviewVersion = latestPreRelease.TagName;
+                                LatestPreviewName = latestPreRelease.Name;
+                                PreviewURL = latestPreRelease.HtmlUrl;
                             }
 
-                            logger?.LogMessage("Update.SetProperties", MessageLevel.Debug, $"(SemVersion.CompareSortOrder(currentversion, latestprerelease) == -1) && (SemVersion.CompareSortOrder(latestrelease, latestprerelease) == 1): {(SemVersion.CompareSortOrder(installedRelease, latestprerelease) == 1) && (SemVersion.CompareSortOrder(latestrelease, latestprerelease) == -1)}");
-                            if ((SemVersion.CompareSortOrder(installedRelease, latestprerelease) == 1) && (SemVersion.CompareSortOrder(latestrelease, latestprerelease) == -1)) //(installedRelease > latestprerelease && latestrelease < latestprerelease)
+                            logger?.LogMessage("Update.SetProperties", MessageLevel.Debug, $"(SemVersion.ComparePrecedence(currentversion, latestprerelease) == -1) && (SemVersion.ComparePrecedence(latestrelease, latestprerelease) == 1): {(SemVersion.ComparePrecedence(installedVersion, latestPreReleaseVersion) == 1) && (SemVersion.ComparePrecedence(latestVersion, latestPreReleaseVersion) == -1)}");
+                            if ((SemVersion.ComparePrecedence(installedVersion, latestPreReleaseVersion) == 1) && (SemVersion.ComparePrecedence(latestVersion, latestPreReleaseVersion) == -1)) //(installedRelease > latestprerelease && latestrelease < latestprerelease)
                             {
                                 AheadOfPreview = true;
                             }
@@ -227,8 +262,7 @@ namespace ConformU
                 }
                 else
                 {
-                    logger?.LogMessage("Update.SetProperties", MessageLevel.Debug, $"Failed to parse {Assembly.GetExecutingAssembly().GetName().Version}");
-
+                    logger?.LogMessage("Update.SetProperties", MessageLevel.Debug, $"Failed to parse {Update.ConformuVersion}");
                 }
             }
             catch (Exception ex)
@@ -236,7 +270,6 @@ namespace ConformU
                 logger?.LogMessage("Update.SetProperties", MessageLevel.Debug, $"Exception: {ex}");
             }
         }
-
 
         #endregion
     }
