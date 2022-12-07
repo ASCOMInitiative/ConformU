@@ -27,5 +27,7 @@ namespace ConformU
         [Option('t', "debugstartup", Required = false, HelpText = "'--debugstartup' - Write start-up debug information to the log.")]
         public bool DebugStartup { get; set; }
 
+        [Option('v', "version", Required = false, HelpText = "'--version' - Display the application version.")]
+        public bool Version { get; set; }
     }
 }

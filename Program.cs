@@ -29,14 +29,18 @@ namespace ConformU
         {
             try
             {
-                for (int i = 0; i < args.Length; i++)
-                {
-                    Console.WriteLine($"CONSOLEARG[{i}] = {args[i]}");
-                }
+                //for (int i = 0; i < args.Length; i++)
+                //{
+                //    Console.WriteLine($"CONSOLEARG[{i}] = {args[i]}");
+                //}
                 Console.WriteLine();
 
                 // Parse the command line, options are specified in the CommandLine Options class
-                var parser = new CommandLine.Parser(with => with.HelpWriter = null);
+                var parser = new Parser(with =>
+                {
+                    with.HelpWriter = null;
+                    with.AutoVersion = false;
+                });
                 var parserResult = parser.ParseArguments<CommandLineOptions>(args);
 
                 parserResult.MapResult(
@@ -58,8 +62,8 @@ namespace ConformU
             {
                 //configure help
                 h.AdditionalNewLineAfterOption = true;
-                h.Heading = $"ASCOM ConforumU {Assembly.GetExecutingAssembly().GetName().Version}"; //change header
-                h.Copyright = "Copyright (c) 2021 Peter Simpson\r\n"; //change copyright text
+                h.Heading = $"Conform Universal {Update.ConformuVersionDisplayString}"; //change header
+                h.Copyright = $"Copyright (c) 2021-{DateTime.Now.Year} Peter Simpson\r\n"; //change copyright text
                 //h.MaximumDisplayWidth = 10000;
                 h.AddPreOptionsText("ASCOM Universal Conformance Checker - Tests an Alpaca or COM device to ensure that it conforms to the relevant ASCOM interface specification.");
                 return h;
@@ -71,7 +75,14 @@ namespace ConformU
         static int Run(CommandLineOptions commandLineOptions)
         {
             List<string> argList = new();
-            Console.WriteLine($"Starting parsed");
+
+            // Display the applicati0on version
+            if (commandLineOptions.Version)
+            {
+                Console.WriteLine($"Conform Universal {Update.ConformuVersionDisplayString}");
+                Console.WriteLine($"Copyright (c) 2021-{DateTime.Now.Year} Peter Simpson");
+                return 0;
+            }
 
             // Extract the settings file location if provided
             if (!string.IsNullOrEmpty(commandLineOptions.SettingsFileLocation))
@@ -174,7 +185,6 @@ namespace ConformU
                 foreach (string s in argList)
                 { Console.WriteLine($"ARG = '{s}'"); }
 
-
                 // Set the report file location if required
                 if (!string.IsNullOrEmpty(commandLineOptions.ResultsFileName)) conformConfiguration.Settings.ResultsFileName = commandLineOptions.ResultsFileName;
 
@@ -214,7 +224,7 @@ namespace ConformU
                     {
                         try
                         {
-                            await Update.CheckForUpdates();
+                            await Update.CheckForUpdates(conformLogger);
                         }
                         catch { } // Ignore exceptions here
                     });
