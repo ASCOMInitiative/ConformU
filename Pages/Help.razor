@@ -106,7 +106,7 @@
 
     protected override void OnInitialized()
     {
-        assemblyVersion = $"{Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion} ({Assembly.GetExecutingAssembly().GetName().Version})";
+        assemblyVersion = $"{Update.ConformuVersionDisplayString})";
 }
 
 }
