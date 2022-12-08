@@ -42,7 +42,7 @@
     ConformanceTestManager tester;
 
     // Task and cancellation support
-    Task conformanceTest;
+    Task conformanceTestTask;
     CancellationTokenSource cancellationTokenSource;
     CancellationToken cancelConformToken;
 
@@ -168,7 +168,7 @@
                         screenLog = "";
 
                         // Create a task to run the conformance test
-                        conformanceTest = new Task(() =>
+                        conformanceTestTask = new Task(() =>
                         {
                             try
                             {
@@ -177,19 +177,21 @@
                             catch (Exception ex)
                             {
                                 conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
-
                             }
 
                         }, cancelConformToken);
-                        conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
+
                         // Start the conformance test task
-                        conformanceTest.Start();
+                        conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
+                        conformanceTestTask.Start();
                         conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance test started OK");
 
                         // Wait for the task to complete.
                         conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting conformance task completion");
-                        await conformanceTest;
+                        await conformanceTestTask;
                         conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance task completed");
+
+                        tester.Dispose();
                     }
                     finally
                     {
@@ -198,7 +200,6 @@
                     }
                 }
             }
-            conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting Scroll to bottom");
             await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
             conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Scroll to bottom completed");
 
