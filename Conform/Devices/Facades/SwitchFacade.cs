@@ -9,61 +9,61 @@ namespace ConformU
 
         #region Interface implementation
 
-        public short MaxSwitch => driver.MaxSwitch;
+        public short MaxSwitch => (short)FunctionNoParameters(() => driver.MaxSwitch);
 
         public bool CanWrite(short id)
         {
-            return driver.CanWrite(id);
+            return (bool)Function1Parameter((i) => driver.CanWrite(i), id);
         }
 
         public bool GetSwitch(short id)
         {
-            return driver.GetSwitch(id);
+            return (bool)Function1Parameter((i) => driver.GetSwitch(i), id);
         }
 
         public string GetSwitchDescription(short id)
         {
-            return driver.GetSwitchDescription(id);
+            return (string)Function1Parameter((i) => driver.GetSwitchDescription(i), id);
         }
 
         public string GetSwitchName(short id)
         {
-            return driver.GetSwitchName(id);
+            return (string)Function1Parameter((i) => driver.GetSwitchName(i), id);
         }
 
         public double GetSwitchValue(short id)
         {
-            return driver.GetSwitchValue(id);
+            return (double)Function1Parameter((i) => driver.GetSwitchValue(i), id);
         }
 
         public double MaxSwitchValue(short id)
         {
-            return driver.MaxSwitchValue(id);
+            return (double)Function1Parameter((i) => driver.MaxSwitchValue(i), id);
         }
 
         public double MinSwitchValue(short id)
         {
-            return driver.MinSwitchValue(id);
+            return (double)Function1Parameter((i) => driver.MinSwitchValue(i), id);
         }
 
         public void SetSwitch(short id, bool state)
         {
-            driver.SetSwitch(id, state);
+            Method2Parameters((i, j) => driver.SetSwitch(i, j), id, state);
         }
 
         public void SetSwitchName(short id, string name)
         {
-            driver.SetSwitchName(id, name);
+            Method2Parameters((i, j) => driver.SetSwitchName(i, j), id, name);
         }
 
         public void SetSwitchValue(short id, double value)
         {
-            driver.SetSwitchValue(id, value);
+            Method2Parameters((i, j) => driver.SetSwitchValue(i, j), id, value);
         }
 
         public double SwitchStep(short id)
         {
-            return driver.SwitchStep(id);
+            return (double)Function1Parameter((i) => driver.SwitchStep(i), id);
         }
 
         #endregion

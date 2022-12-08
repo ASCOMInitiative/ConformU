@@ -121,7 +121,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="Conform\Devices\Facades\DriverHostForm.resx" />
+		<None Include="Conform\Devices\Facades\BaseClass\DriverHostForm.resx" />
 		<None Include="Properties\PublishProfiles\Linux-Arm.pubxml.user" />
 		<None Include="Properties\PublishProfiles\Linux-X64.pubxml.user" />
 		<None Include="Properties\PublishProfiles\Windows.pubxml.user" />

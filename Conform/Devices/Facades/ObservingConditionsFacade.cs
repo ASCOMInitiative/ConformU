@@ -9,47 +9,47 @@ namespace ConformU
 
         #region Interface implementation
 
-        public double AveragePeriod { get => driver.AveragePeriod; set => driver.AveragePeriod = value; }
+        public double AveragePeriod { get => (double)FunctionNoParameters(() => driver.AveragePeriod); set => Method1Parameter((i) => driver.AveragePeriod = i, value); }
 
-        public double CloudCover => driver.CloudCover;
+        public double CloudCover => (double)FunctionNoParameters(() => driver.CloudCover);
 
-        public double DewPoint => driver.DewPoint;
+        public double DewPoint => (double)FunctionNoParameters(() => driver.DewPoint);
 
-        public double Humidity => driver.Humidity;
+        public double Humidity => (double)FunctionNoParameters(() => driver.Humidity);
 
-        public double Pressure => driver.Pressure;
+        public double Pressure => (double)FunctionNoParameters(() => driver.Pressure);
 
-        public double RainRate => driver.RainRate;
+        public double RainRate => (double)FunctionNoParameters(() => driver.RainRate);
 
-        public double SkyBrightness => driver.SkyBrightness;
+        public double SkyBrightness => (double)FunctionNoParameters(() => driver.SkyBrightness);
 
-        public double SkyQuality => driver.SkyQuality;
+        public double SkyQuality => (double)FunctionNoParameters(() => driver.SkyQuality);
 
-        public double StarFWHM => driver.StarFWHM;
+        public double StarFWHM => (double)FunctionNoParameters(() => driver.StarFWHM);
 
-        public double SkyTemperature => driver.SkyTemperature;
+        public double SkyTemperature => (double)FunctionNoParameters(() => driver.SkyTemperature);
 
-        public double Temperature => driver.Temperature;
+        public double Temperature => (double)FunctionNoParameters(() => driver.Temperature);
 
-        public double WindDirection => driver.WindDirection;
+        public double WindDirection => (double)FunctionNoParameters(() => driver.WindDirection);
 
-        public double WindGust => driver.WindGust;
+        public double WindGust => (double)FunctionNoParameters(() => driver.WindGust);
 
-        public double WindSpeed => driver.WindSpeed;
+        public double WindSpeed => (double)FunctionNoParameters(() => driver.WindSpeed);
 
         public void Refresh()
         {
-            driver.Refresh();
+            MethodNoParameters(() => driver.Refresh());
         }
 
         public string SensorDescription(string PropertyName)
         {
-            return driver.SensorDescription(PropertyName);
+            return (string)Function1Parameter((i) => driver.SensorDescription(i), PropertyName);
         }
 
         public double TimeSinceLastUpdate(string PropertyName)
         {
-            return driver.TimeSinceLastUpdate(PropertyName);
+            return (double)Function1Parameter((i) => driver.TimeSinceLastUpdate(i), PropertyName);
         }
 
         #endregion
