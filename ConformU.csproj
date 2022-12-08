@@ -136,8 +136,8 @@
 		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.1.4.1" />
 		<PackageReference Include="Blazorise.TreeView" Version="1.1.4.1" />
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
-		<PackageReference Include="Octokit" Version="4.0.2" />
-		<PackageReference Include="Radzen.Blazor" Version="4.3.8" />
+		<PackageReference Include="Octokit" Version="4.0.3" />
+		<PackageReference Include="Radzen.Blazor" Version="4.4.4" />
 		<PackageReference Include="Semver" Version="2.3.0-alpha.0" />
 	</ItemGroup>
 
