@@ -68,7 +68,7 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    if (m_Rotator is not null) m_Rotator.Dispose();
+                    m_Rotator?.Dispose();
                     m_Rotator = null;
                 }
             }
@@ -272,7 +272,7 @@ namespace ConformU
             float currentPosition, currentMechanicalPosition, relativeMovement, syncPosition;
 
             // Restore the initial position of the rotator if possible
-            if (initialPosiiton == ROTATOR_POSITION_UNKNOWN)
+            if (Single.IsNaN(initialPosiiton))
                 // The initial position could not be determined so log a message to this effect.
                 LogMsg("Post-run Check", MessageLevel.TestAndMessage, "The rotator's initial position could not be determined so it is not possible to restore it's initial position.");
             else
@@ -285,7 +285,7 @@ namespace ConformU
                     LogOK("Post-run Check", $"Current position: {currentPosition}");
 
                     // Restore the original sync offset, if possible 
-                    if (!(initialMechanicalPosiiton == ROTATOR_POSITION_UNKNOWN))
+                    if (!Single.IsNaN(initialMechanicalPosiiton))
                     {
                         // Get the current mechanical position
                         LogCallToDriver("Post-run Check", $"About to get MechanicalPosition property");
