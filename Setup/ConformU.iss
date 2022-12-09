@@ -22,9 +22,10 @@ AppUpdatesURL={#MyAppUpdatesURL}
 AppVerName={#MyAppName}
 AppVersion={#MyAppVersion}
 ArchitecturesInstallIn64BitMode=x64
-Compression=lzma
+Compression=zip 
+;lzma
 DefaultDirName={autopf}\ASCOM\ConformU
-DefaultGroupName=ASCOM Platform 6\Tools
+DefaultGroupName=ASCOMConformUniversal
 MinVersion=6.1SP1
 DisableProgramGroupPage=yes
 OutputBaseFilename=ConformU({#MyAppVersion})Setup
@@ -98,12 +99,12 @@ Source: "J:\ConformU\publish\ConformU86\wwwroot\*"; DestDir: "{app}\wwwroot"; Fl
 
 [Icons]
 ; 64bit OS
-Name: "{group}\Conform Universal"; Filename: "{app}\64bit\{#MyAppExeName}"; IconFilename: "{app}\64bit\ASCOM.ico"; Check: Is64BitInstallMode
-Name: "{autodesktop}\Conform Universal"; Filename: "{app}\64bit\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\64bit\ASCOM.ico"; Check: Is64BitInstallMode
+Name: "{autoprograms}\ASCOM Conform Universal"; Filename: "{app}\64bit\{#MyAppExeName}"; IconFilename: "{app}\64bit\ASCOM.ico"; Check: Is64BitInstallMode; Flags: runminimized
+Name: "{autodesktop}\Conform Universal"; Filename: "{app}\64bit\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\64bit\ASCOM.ico"; Check: Is64BitInstallMode; Flags: runminimized
 
 ;32bit OS
-Name: "{group}\Conform Universal"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\ASCOM.ico"; Check: not Is64BitInstallMode
-Name: "{autodesktop}\Conform Universal"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\ASCOM.ico"; Check: not Is64BitInstallMode
+Name: "{autoprograms}\ASCOM Conform Universal"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\ASCOM.ico"; Check: not Is64BitInstallMode; Flags: runminimized
+Name: "{autodesktop}\Conform Universal"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\ASCOM.ico"; Check: not Is64BitInstallMode; Flags: runminimized
 
 [Run]
 ; 64bit OS  
