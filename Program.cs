@@ -195,6 +195,7 @@ namespace ConformU
                             {
                                 ProcessStartInfo processStartInfo = new ProcessStartInfo();
                                 processStartInfo.UseShellExecute = true;
+                                processStartInfo.WindowStyle = ProcessWindowStyle.Minimized;
                                 processStartInfo.FileName = "CMD.exe";
                                 processStartInfo.Arguments = $"/c \"{executable32}\" {string.Join(" ", commandLineArguments)}";
 
