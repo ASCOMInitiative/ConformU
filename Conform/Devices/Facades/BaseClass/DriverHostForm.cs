@@ -151,7 +151,7 @@ namespace ConformU
 
         internal void ActionNoParameters(Action action)
         {
-            Console.WriteLine($"***** HostForm.ActionNoParameters - ENTRY for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+            // Console.WriteLine($"***** HostForm.ActionNoParameters - ENTRY for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
             if (this.InvokeRequired)
             {
                 if (LOG_DISABLED) logger?.LogMessage("HostForm.ActionNoParameters", MessageLevel.Debug, $"Invoke required for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
@@ -161,7 +161,7 @@ namespace ConformU
             }
             else
             {
-                Console.WriteLine($"***** HostForm.ActionNoParameters - NOINVOKE for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+                // Console.WriteLine($"***** HostForm.ActionNoParameters - NOINVOKE for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
                 if (LOG_DISABLED) logger?.LogMessage("HostForm.ActionNoParameters", MessageLevel.Debug, $"About to run Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                 action();
                 if (LOG_DISABLED) logger?.LogMessage("HostForm.ActionNoParameters", MessageLevel.Debug, $"Returned from Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
@@ -170,7 +170,7 @@ namespace ConformU
 
         internal void Action1Parameter(Action<object> action, object parameter1)
         {
-            Console.WriteLine($"***** HostForm.Action1Parameter - ENTRY for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+            // Console.WriteLine($"***** HostForm.Action1Parameter - ENTRY for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
             if (this.InvokeRequired)
             {
                 if (LOG_DISABLED) logger?.LogMessage("HostForm.Action1Parameter", MessageLevel.Debug, $"Invoke required for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
@@ -180,7 +180,7 @@ namespace ConformU
             }
             else
             {
-                Console.WriteLine($"***** HostForm.Action1Parameter - NOINVOKE for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+                // Console.WriteLine($"***** HostForm.Action1Parameter - NOINVOKE for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
                 if (LOG_DISABLED) logger?.LogMessage("HostForm.Action1Parameter", MessageLevel.Debug, $"About to run Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                 action(parameter1);
                 if (LOG_DISABLED) logger?.LogMessage("HostForm.Action1Parameter", MessageLevel.Debug, $"Returned from Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
@@ -189,7 +189,7 @@ namespace ConformU
 
         internal void Action2Parameters(Action<object, object> action, object parameter1, object parameter2)
         {
-            Console.WriteLine($"HostForm.Action2Parameters - Invoke required for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+            // Console.WriteLine($"HostForm.Action2Parameters - Invoke required for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
             if (this.InvokeRequired)
             {
                 if (LOG_ENABLED) logger?.LogMessage("HostForm.Action2Parameters", MessageLevel.Debug, $"Invoke required for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
@@ -207,7 +207,7 @@ namespace ConformU
 
         internal object FuncNoParameters(Func<object> func)
         {
-            Console.WriteLine($"***** HostForm.FuncNoParameters - ENTRY for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+            // Console.WriteLine($"***** HostForm.FuncNoParameters - ENTRY for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
 
             if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Method called on thread {Environment.CurrentManagedThreadId}, Message loop running: {Application.MessageLoop}");
             if (this.InvokeRequired)
@@ -227,7 +227,7 @@ namespace ConformU
 
         internal object Func1Parameter(Func<object, object> func, object parameter1)
         {
-            Console.WriteLine($"***** HostForm.Func1Parameter - ENTRY for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+            // Console.WriteLine($"***** HostForm.Func1Parameter - ENTRY for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
 
             if (this.InvokeRequired)
             {
@@ -246,7 +246,7 @@ namespace ConformU
 
         internal object Func2Parameters(Func<object, object, object> func, object parameter1, object parameter2)
         {
-            Console.WriteLine($"***** HostForm.Func2Parameters - ENTRY for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+            // Console.WriteLine($"***** HostForm.Func2Parameters - ENTRY for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
 
             if (this.InvokeRequired)
             {

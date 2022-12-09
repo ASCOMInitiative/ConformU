@@ -29,6 +29,8 @@ namespace ConformU
         public int SettingsCompatibilityVersion { get; set; } = 0; // Default is zero so that versions prior to introduction of the settings compatibility version number can be detected.
         public bool GoHomeOnDeviceSelected { get; set; } = true;
         public double ConnectionTimeout { get; set; } = 2.0;
+        public bool RunAs32Bit { get; set; } = false;
+
         #endregion
 
         #region Conform test configuration

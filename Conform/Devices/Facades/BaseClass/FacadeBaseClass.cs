@@ -15,7 +15,7 @@ namespace ConformU
     {
         const int DRIVER_LOAD_TIMEOUT = 5; // Seconds to wait for the driver to load
         private readonly bool LOG_ENABLED = false; // Enable debug logging of this class
-        private readonly bool LOG_DISABLED = false; // Enable debug logging of this class
+        //private readonly bool LOG_DISABLED = false; // Enable debug logging of this class
 
         internal dynamic driver; // COM driver object
         internal readonly Settings settings; // Conform configuration settings

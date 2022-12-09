@@ -86,7 +86,7 @@
         }
 
         statusMessage = $"Version {Update.ConformuVersionDisplayString}";
-        statusMessage += $"        Running as a {(Environment.Is64BitProcess ? "64bit" : "32bit")} application on {Environment.OSVersion}";
+        statusMessage += $"        Running as a {(Environment.Is64BitProcess ? "64bit" : "32bit")} application on {(Environment.Is64BitOperatingSystem? "64bit" : "32bit")} {Environment.OSVersion}";
 
         // Validate that the application SEMVER string is valid
         if (SemVersion.TryParse(Update.ConformuVersion, SemVersionStyles.AllowV, out SemVersion currentversion))

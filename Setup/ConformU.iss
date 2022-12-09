@@ -78,22 +78,39 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "J:\ConformU\publish\ConformU64\*.exe"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
-Source: "J:\ConformU\publish\ConformU64\*.dll"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
-Source: "J:\ConformU\publish\ConformU64\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode
-Source: "J:\ConformU\publish\ConformU64\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
+; 64bit OS - Install the 64bit app
+Source: "J:\ConformU\publish\ConformU64\*.exe"; DestDir: "{app}\64bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
+Source: "J:\ConformU\publish\ConformU64\*.dll"; DestDir: "{app}\64bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
+Source: "J:\ConformU\publish\ConformU64\*"; DestDir: "{app}\64bit"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode
+Source: "J:\ConformU\publish\ConformU64\wwwroot\*"; DestDir: "{app}\64bit\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
 
+; 64bit OS - Install the 32bit app
+Source: "J:\ConformU\publish\ConformU86\*.exe"; DestDir: "{app}\32bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
+Source: "J:\ConformU\publish\ConformU86\*.dll"; DestDir: "{app}\32bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
+Source: "J:\ConformU\publish\ConformU86\*"; DestDir: "{app}\32bit"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode
+Source: "J:\ConformU\publish\ConformU86\wwwroot\*"; DestDir: "{app}\32bit\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
+
+; 32bit OS - Install the 32bit app
 Source: "J:\ConformU\publish\ConformU86\*.exe"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: not Is64BitInstallMode
 Source: "J:\ConformU\publish\ConformU86\*.dll"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: not Is64BitInstallMode
 Source: "J:\ConformU\publish\ConformU86\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: not Is64BitInstallMode
 Source: "J:\ConformU\publish\ConformU86\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: not Is64BitInstallMode
 
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\ASCOM.ico"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\ASCOM.ico"
+; 64bit OS
+Name: "{group}\Conform Universal"; Filename: "{app}\64bit\{#MyAppExeName}"; IconFilename: "{app}\64bit\ASCOM.ico"; Check: Is64BitInstallMode
+Name: "{autodesktop}\Conform Universal"; Filename: "{app}\64bit\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\64bit\ASCOM.ico"; Check: Is64BitInstallMode
+
+;32bit OS
+Name: "{group}\Conform Universal"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\ASCOM.ico"; Check: not Is64BitInstallMode
+Name: "{autodesktop}\Conform Universal"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\ASCOM.ico"; Check: not Is64BitInstallMode
 
 [Run]
-  Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent unchecked
+; 64bit OS  
+Filename: "{app}\64bit\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent unchecked; Check: Is64BitInstallMode
+  
+; 32bit OS  
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent unchecked; Check: not Is64BitInstallMode
 
 [UninstallDelete]
 Name: {app}; Type: dirifempty

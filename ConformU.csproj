@@ -14,8 +14,8 @@
 	<PropertyGroup>
 		<!-- Set version numbers -->
 		<ProductMajor>1</ProductMajor>
-		<ProductMinor>1</ProductMinor>
-		<ProductPatch>0</ProductPatch>
+		<ProductMinor>2</ProductMinor>
+		<ProductPatch>1</ProductPatch>
 
 		<!-- Set the pre-release string without a leading minus e.g. rc.1 -->
 		<ProductPreRelease></ProductPreRelease>
@@ -33,7 +33,7 @@
 		<ProductPreReleaseSeparator>-</ProductPreReleaseSeparator>
 	</PropertyGroup>
 	<PropertyGroup>
-		<TargetFrameworks>net6.0-windows;net6.0;net7.0-windows;net7.0</TargetFrameworks>
+		<TargetFrameworks>net7.0-windows;net7.0</TargetFrameworks>
 		<Configurations>Debug;Release</Configurations>
 		<OutputType>Exe</OutputType>
 		<UserSecretsId>c49fec0a-dd2c-4e60-9e85-407d8d9bdd9f</UserSecretsId>

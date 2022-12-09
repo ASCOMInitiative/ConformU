@@ -1,20 +1,14 @@
-using ASCOM.Common;
-using ASCOM.Tools;
 using CommandLine;
 using CommandLine.Text;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using static ConformU.Globals;
@@ -24,16 +18,14 @@ namespace ConformU
     public class Program
     {
         private static ConformConfiguration conformConfiguration;
+        private static string[] commandLineArguments;
 
         public static void Main(string[] args)
         {
             try
             {
-                //for (int i = 0; i < args.Length; i++)
-                //{
-                //    Console.WriteLine($"CONSOLEARG[{i}] = {args[i]}");
-                //}
-                Console.WriteLine();
+                // Save the command line arguments so they can be reused if a 32bit application is required
+                commandLineArguments = args;
 
                 // Parse the command line, options are specified in the CommandLine Options class
                 var parser = new Parser(with =>
@@ -176,6 +168,53 @@ namespace ConformU
             Console.WriteLine($"Server connection timeout: {conformConfiguration.Settings.ConnectionTimeout}");
             argList.Add($"--{COMMAND_OPTION_CONNECTION_TIMEOUT}");
             argList.Add(conformConfiguration.Settings.ConnectionTimeout.ToString());
+
+            #endregion
+
+            #region Run as 32bit on Windows if required
+
+            // Run as 32bit on a 64bit OS if configured to do so (Windows only!)
+            if (OperatingSystem.IsWindows()) // OS is Windows
+            {
+                // Check whether we are running on 64bit Windows
+                if (Environment.Is64BitOperatingSystem) // OS is 64bit
+                {
+                    // Test whether we are running in 64bit mode but the user has configured to start in 32bit mode
+                    if ((Environment.Is64BitProcess) & (conformConfiguration.Settings.RunAs32Bit)) // Application is running in 64bit mode but the user has specified 32bit
+                    {
+                        // Restart ConformU using the 32bit executable
+
+                        string baseFolder64 = AppContext.BaseDirectory;
+                        string executable32 = Path.Join(baseFolder64.Replace("64", "32"), "conformu.exe");
+                        Console.WriteLine($"Base directory: {AppContext.BaseDirectory}, EXE32: {executable32}");
+
+                        // Don't try to run the 32bit application in the development environment!
+                        if (!baseFolder64.Contains("\\bin\\"))
+                        {
+                            try
+                            {
+                                ProcessStartInfo processStartInfo = new ProcessStartInfo();
+                                processStartInfo.UseShellExecute = true;
+                                processStartInfo.FileName = "CMD.exe";
+                                processStartInfo.Arguments = $"/c \"{executable32}\" {string.Join(" ", commandLineArguments)}";
+
+                                Console.WriteLine($"Starting 32bit process");
+                                Process.Start(processStartInfo);
+                                Console.WriteLine($"32bit Process started");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Exception: {ex}");
+                            }
+
+                            return 0;
+                        }
+                    }
+                }
+            }
+
+            Console.WriteLine($"Running as a {(Environment.Is64BitProcess ? "64bit" : "32bit")} application");
+            Console.WriteLine($"Base directory: {AppContext.BaseDirectory}");
 
             #endregion
 

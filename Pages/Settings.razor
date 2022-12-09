@@ -5,6 +5,7 @@
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
 @using static ConformU.Globals
+@inject NotificationService notificationService
 
 @*Title and settings reset button*@
 <div class="row">
@@ -44,19 +45,23 @@
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Style="margin-top:6px;" Name="CHECKFORUPDATES" @bind-Value=@checkForUpdates TValue="bool" Change=@(args =>
                                         OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
-                        <RadzenLabel Text="Check for updates" Component="checkForUpdates" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
+                        <RadzenLabel Text="Check for updates" Component="CHECKFORUPDATES" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
                     </div>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Name="DISPLAYMETHODCALLS" @bind-Value=@displayMethodCalls TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.DisplayCalls)) />
-                        <RadzenLabel Text="Display method calls" Component="CHKMETHODCALLS" Style="margin-left: 5px;" />
+                        <RadzenLabel Text="Display method calls" Component="DISPLAYMETHODCALLS" Style="margin-left: 5px;" />
                     </div>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="ENABLEDEBUGLOGGING" @bind-Value=@enableDebugLogging TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.Debug)) />
-                        <RadzenLabel Text="Debug enabled" Component="enableDebugLogging" Style="margin-left: 5px;" />
+                        <RadzenLabel Text="Debug enabled" Component="ENABLEDEBUGLOGGING" Style="margin-left: 5px;" />
                     </div>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="GOHOME" @bind-Value=@goHomeOnDeviceSelection TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.GoHomeOnDeviceSelection)) />
-                        <RadzenLabel Text="Return to home page when device is selected" Component="enableDebugLogging" Style="margin-left: 5px;" />
+                        <RadzenLabel Text="Return to home page when device is selected" Component="GOHOME" Style="margin-left: 5px;" />
+                    </div>
+                    <div class="row" style="margin-top:14px; margin-left:4px; display:@(isWindowsOs?"Block":"None")">
+                        <RadzenCheckBox Name="APPBITNESS" @bind-Value=@runAs32Bit TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.RunAs32Bit)) />
+                        <RadzenLabel Text="Run as 32bit on a 64bit OS ====> Takes effect on restart" Component="APPBITNESS" Style="margin-left: 5px;" />
                     </div>
                     <div class="row">
                         <RadzenNumeric Style="margin-left: 20px; margin-top:15px; width: 6em"
@@ -505,6 +510,7 @@
     private bool goHomeOnDeviceSelection;
     private int applicationPort;
     private double waitTimeBeforeConformApplicationExits;
+    private bool runAs32Bit;
     private List<KeyValuePair<string, ComAccessMechanic>> comAccessMechanicoptions = new()
         {
             new KeyValuePair<string, ComAccessMechanic>("Native", ComAccessMechanic.Native),
@@ -625,7 +631,8 @@
         CameraFirstUseTests,
         DiscoveryEnabled,
         TelescopeFirstUseTests,
-        GoHomeOnDeviceSelection
+        GoHomeOnDeviceSelection,
+        RunAs32Bit
     }
 
     private enum BoolConfigurationItem
@@ -846,12 +853,23 @@
                 configuration.Settings.GoHomeOnDeviceSelected = goHomeOnDeviceSelection;
                 break;
 
+            case CheckBoxConfigurationItem.RunAs32Bit:
+                configuration.Settings.RunAs32Bit = runAs32Bit;
+                break;
+
             default:
                 throw new InvalidValueException($"OnCheckboxChange - Unknown checkbox name: {name}");
         }
 
         SaveConfiguration();
     }
+
+    private async void ShowNotification(NotificationMessage message)
+    {
+        notificationService.Notify(message);
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
 
     private void OnImageArrayTypeChange(object imageArrayTransferTypeObject)
     {
@@ -1009,6 +1027,7 @@
         goHomeOnDeviceSelection = configuration.Settings.GoHomeOnDeviceSelected;
         waitTimeBeforeConformApplicationExits = configuration.Settings.ConnectionTimeout;
         applicationPort = configuration.Settings.ApplicationPort;
+        runAs32Bit = configuration.Settings.RunAs32Bit;
 
         // Trace settings
         chkTraceDiscovery = configuration.Settings.TraceDiscovery;
