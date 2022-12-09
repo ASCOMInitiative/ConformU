@@ -142,17 +142,5 @@
 	</ItemGroup>
 
 	<!-- Include the correct SOFA library depending on the targeted runtime OS -->
-	<ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
-		<None Update="SofaLibraries\Linux64\libsofa_c.so">
-			<Link>libsofa_c.so</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-	<ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">
-		<None Update="SofaLibraries\Arm64\libsofa_c.so">
-			<Link>libsofa_c.so</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
 
 </Project>
