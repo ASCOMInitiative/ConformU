@@ -111,6 +111,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="C:\Users\peter\.nuget\packages\ascom.tools\1.0.66\contentFiles\any\netstandard2.0\README.md" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<_WebToolingArtifacts Remove="Properties\PublishProfiles\Arm64.pubxml" />
 	</ItemGroup>
 
