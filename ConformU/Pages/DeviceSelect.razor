@@ -39,6 +39,7 @@
 <RadzenTabs Style="height: auto; margin-top: 20px"
             RenderMode="TabRenderMode.Server"
             @bind-value=@selectedTabNumber
+            SelectedIndex=@selectedTabIndex
             Change=@(args => OnTabChange(args))>
 
     <Tabs>
@@ -167,6 +168,7 @@
     int manualPortNumber = 11111;
     int manualAlpacaDeviceNumber = 0;
     int statusWidthCols = 20;
+    int selectedTabIndex = 0;
 
     AscomDevice ascomDevice;
     ComDevice comDevice;
@@ -227,7 +229,7 @@
 
     #region Initialisation and Load
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         // Initialise variables
         selectedDeviceType = configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope);
@@ -249,8 +251,17 @@
             manualPortNumber = configuration.Settings.AlpacaDevice.IpPort;
         }
 
-        // Start an Alpaca discovery to populate the Alpaca device list if configured to do so
-        StartDiscovery();
+        if (configuration.Settings.DeviceTechnology == DeviceTechnology.COM)
+        {
+            selectedTabIndex = 1;
+            OnTabChange(1);
+        }
+        else
+        {
+            // Start an Alpaca discovery to populate the Alpaca device list if configured to do so
+            StartDiscovery();
+        }
+
     }
 
     #endregion
