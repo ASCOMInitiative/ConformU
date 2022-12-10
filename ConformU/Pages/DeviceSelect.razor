@@ -164,6 +164,9 @@
 
 @code {
     const string MANUAL_DEVICE_NAME = "Manually configured device";
+    const int ALPACA_TAB_NUMBER = 0;
+    const int COM_TAB_NUMBER = 1;
+
     string manualIpAddress = "127.0.0.1";
     int manualPortNumber = 11111;
     int manualAlpacaDeviceNumber = 0;
@@ -180,7 +183,7 @@
     AlpacaDiscovery discovery; // Alpaca discovery component
     bool osIsWindows; // OS environment type
     bool osIsNotWindows;
-    int selectedTabNumber = 0; // Current tab number 0 = Alpaca, 1 = COM
+    int selectedTabNumber = ALPACA_TAB_NUMBER; // Current tab number 0 = Alpaca, 1 = COM
     DeviceTechnology technologyType = DeviceTechnology.Alpaca; // Is the user selecting an Alpaca or a COM device?
 
     List<AlpacaDeviceListItem> ascomDevices = new(); // List of discovered Alpaca devices for use in the Alpaca devices Radzen radio button list
@@ -251,17 +254,30 @@
             manualPortNumber = configuration.Settings.AlpacaDevice.IpPort;
         }
 
-        if (configuration.Settings.DeviceTechnology == DeviceTechnology.COM)
+        // Select the Alpaca or COM tab depending on which device type is selected
+        switch (configuration.Settings.DeviceTechnology)
         {
-            selectedTabIndex = 1;
-            OnTabChange(1);
-        }
-        else
-        {
-            // Start an Alpaca discovery to populate the Alpaca device list if configured to do so
-            StartDiscovery();
-        }
+            case DeviceTechnology.Alpaca: // Alpaca device selected
+                // Start an Alpaca discovery to populate the Alpaca device list if configured to do so
+                StartDiscovery();
+                break;
 
+            case DeviceTechnology.COM: // COM device selected
+                // Switch to COM tab
+                selectedTabIndex = COM_TAB_NUMBER;
+
+                // Populate the COM tab with available drivers
+                OnTabChange(COM_TAB_NUMBER);
+                break;
+
+            case DeviceTechnology.NotSelected: // No device selected
+                // Start an Alpaca discovery to populate the Alpaca device list if configured to do so
+                StartDiscovery();
+                break;
+
+            default: // Unknown technology type so ignore
+                break;
+        }
     }
 
     #endregion
@@ -274,16 +290,16 @@
 
         switch (tabIndex)
         {
-            case 0:
+            case ALPACA_TAB_NUMBER:
                 StartDiscovery();
                 break;
 
-            case 1:
+            case COM_TAB_NUMBER:
                 UpdateComDevices();
                 break;
         }
-        StateHasChanged();
 
+        StateHasChanged();
     }
 
     void OnDeviceTypeChange(object value)
@@ -292,12 +308,12 @@
 
         switch (selectedTabNumber)
         {
-            case 0:
+            case ALPACA_TAB_NUMBER:
                 ascomDevices.Clear();
                 StartDiscovery();
                 break;
 
-            case 1:
+            case COM_TAB_NUMBER:
                 UpdateComDevices();
                 break;
         }
