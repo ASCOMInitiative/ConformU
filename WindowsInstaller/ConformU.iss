@@ -9,7 +9,7 @@
 #define MyAppExeName "ConformU.exe"
 #define MyAppAuthor "Peter Simpson"
 #define MyAppCopyright "Copyright © 2022 " + MyAppAuthor
-#define MyAppVersion GetFileVersion("..\bin\Debug\net7.0-windows\conformu.exe")  ; Create version number variable
+#define MyAppVersion GetVersionNumbersString("..\publish\ConformU64\conformu.exe")  ; Create version number variable
 
 [Setup]
 AppId={{454081A3-59A9-4EC6-984C-11CA605D3196}
@@ -31,7 +31,7 @@ DisableProgramGroupPage=yes
 OutputBaseFilename=ConformU({#MyAppVersion})Setup
 OutputDir=.\Builds
 PrivilegesRequired=admin
-SetupIconFile=..\ASCOM.ico
+SetupIconFile=ASCOM.ico
 SetupLogging=true
 ShowLanguageDialog=auto
 SolidCompression=yes
