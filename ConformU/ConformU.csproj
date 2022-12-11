@@ -81,6 +81,7 @@
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PlatformTarget>AnyCPU</PlatformTarget>
+		<StartupObject>ConformU.Program</StartupObject>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|$(TargetFramework)|AnyCPU'">
 		<Optimize>True</Optimize>
