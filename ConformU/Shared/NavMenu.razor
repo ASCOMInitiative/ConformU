@@ -68,18 +68,18 @@ else
                     <span class="oi oi-camera-slr" aria-hidden="true"></span> Alpaca Discovery Map
                 </NavLink>
                 <NavLink class="nav-link" href="/DiscoveryDiagnostics" Match="NavLinkMatch.All">
-                    <span class="oi oi-camera-slr" aria-hidden="true"></span> Discovery Diagnostics
+                    <span class="oi oi-loop" aria-hidden="true"></span> Discovery Diagnostics
                 </NavLink>
                 @if (Update.UpdateAvailable())
                 {
                     <NavLink class="nav-link" href="/AppUpdates" style="color:yellow;" Match="NavLinkMatch.All">
-                        <span class="oi oi-wrench" aria-hidden="true" style="color:yellow;"></span> Update available
+                        <span class="oi oi-cloud-download" aria-hidden="true" style="color:yellow;"></span> Update available
                     </NavLink>
                 }
                 else
                 {
                     <NavLink class="nav-link" href="/AppUpdates" Match="NavLinkMatch.All">
-                        <span class="oi oi-wrench" aria-hidden="true"></span> Check for updates
+                        <span class="oi oi-cloud-download" aria-hidden="true"></span> Check for updates
                     </NavLink>
                 }
                 <NavLink class="nav-link" href="/Settings" Match="NavLinkMatch.All">
