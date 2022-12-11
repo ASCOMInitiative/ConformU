@@ -29,9 +29,9 @@
     int screenLogRows;
     HttpClient httpClient;
     string hostIpAndPort;
-    int informationCount;
-    int issueCount;
     string statusText;
+    List<AlpacaDiscoveryDiagnostic> issueMessages;
+    List<AlpacaDiscoveryDiagnostic> informationMessages;
 
     // Constants and variables to create formatted on-screen messages
     const int COLUMN_WIDTH = 30;
@@ -127,8 +127,8 @@
         int alpacaPort = 0;
         try
         {
-            informationCount = 0;
-            issueCount = 0;
+            informationMessages = new();
+            issueMessages = new();
 
             // Clear the screen
             ClearLogScreen();
@@ -188,7 +188,7 @@
                                     }
                                     else
                                     {
-                                        LogIssue("DiscoveryDiagnostics", $"The Alpaca port JSON key name is incorrectly spelled or incorrectly cased.", COLUMN_OVERALL);
+                                        LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"The Alpaca port JSON key name is incorrectly spelled or incorrectly cased.", COLUMN_OVERALL);
                                     }
 
                                     // Extract the Alpaca port number from the response
@@ -200,17 +200,17 @@
                                         // Evaluate whether de-serialisation was successful
                                         if (alpacaPort == 0) //Failed to parse using case sensitive mode
                                         {
-                                            LogIssue("DiscoveryDiagnostics", $"Unable to extract the port number from the response using case SENSITIVE parsing.", COLUMN_OVERALL);
+                                            LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"Unable to extract the port number from the response using case SENSITIVE parsing.", COLUMN_OVERALL);
 
                                             // Case sensitive de-serialisation failed so now try case insensitive de-serialisation
                                             alpacaPort = JsonSerializer.Deserialize<AlpacaDiscoveryResponse>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }).AlpacaPort;
                                             if (alpacaPort == 0) //Failed to parse using case insensitive mode as well
                                             {
-                                                LogIssue("DiscoveryDiagnostics", $"Unable to extract the port number from the response using case INSENSITIVE parsing", COLUMN_OVERALL);
+                                                LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"Unable to extract the port number from the response using case INSENSITIVE parsing", COLUMN_OVERALL);
                                             }
                                             else // Successfully parsed using case insensitive mode contrary to the Alpaca specification
                                             {
-                                                LogIssue("DiscoveryDiagnostics", $"Can only extract the port number {alpacaPort} using case INSENSITIVE parsing. To be compliant with the Alpaca specification the port number key must be cased like this: {Constants.ResponseString}.", COLUMN_OVERALL);
+                                                LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"Can only extract the port number {alpacaPort} using case INSENSITIVE parsing. To be compliant with the Alpaca specification the port number key must be cased like this: {Constants.ResponseString}.", COLUMN_OVERALL);
                                             }
                                         }
                                         else // Successfully parsed the JSON response using case sensitive parsing
@@ -220,7 +220,7 @@
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogIssue("DiscoveryDiagnostics", $"Exception parsing response: {ex.Message}.", COLUMN_OVERALL);
+                                        LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"Exception parsing response: {ex.Message}.", COLUMN_OVERALL);
                                         logger?.LogMessage("DiscoveryDiagnostics", $"Exception parsing response: \r\n{ex}");
                                     }
 
@@ -261,23 +261,23 @@
                                             switch (apiVersionsResponse.Value.Length)
                                             {
                                                 case 0: // No values were returned so we can't process further
-                                                    LogIssue("DiscoveryDiagnostics", $"The call to /management/apiversions failed or the response contained no interface numbers. Omitting further tests.", COLUMN_OVERALL);
+                                                    LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"The call to /management/apiversions failed or the response contained no interface numbers. Omitting further tests.", COLUMN_OVERALL);
                                                     break;
 
                                                 case 1: // Exactly one value was returned
                                                     if (apiVersionsResponse.Value[0] == 1) // Interface version 1 is supported, as it should be, so test the remaining management API endpoints
                                                     {
                                                         LogOk("DiscoveryDiagnostics", $"Successfully read API version number: 1. Testing the Management API...", COLUMN_OVERALL);
-                                                        await TestManagementApi(httpClient);
+                                                        await TestManagementApi(httpClient, broadcastResponse);
                                                     }
                                                     else // Interface 1 is not supported, which is an issue
                                                     {
-                                                        LogIssue("DiscoveryDiagnostics", $"Alpaca interface version 1 is not supported by this device, it supports version {apiVersionsResponse.Value[0]}. Cannot test other management API endpoints.", COLUMN_OVERALL);
+                                                        LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"Alpaca interface version 1 is not supported by this device, it supports version {apiVersionsResponse.Value[0]}. Cannot test other management API endpoints.", COLUMN_OVERALL);
                                                     }
                                                     break;
 
                                                 default: // More than one value was returned
-                                                    LogIssue("DiscoveryDiagnostics", $"{apiVersionsResponse.Value.Length} interface values were returned but the Alpaca API specification only defines version 1.", COLUMN_OVERALL);
+                                                    LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"{apiVersionsResponse.Value.Length} interface values were returned but the Alpaca API specification only defines version 1.", COLUMN_OVERALL);
                                                     foreach (int interfaceVersion in apiVersionsResponse.Value)
                                                     {
                                                         if (interfaceVersion == 1)
@@ -286,30 +286,30 @@
                                                         }
                                                         else
                                                         {
-                                                            LogIssue("DiscoveryDiagnostics", $"Response included interface version: {interfaceVersion}", COLUMN_OVERALL + 11);
+                                                            LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"Response included interface version: {interfaceVersion}", COLUMN_OVERALL + 11);
                                                         }
                                                     }
 
                                                     if (apiVersionsResponse.Value.Contains(1)) // Interface version 1 is supported so test the remaining management API endpoints
                                                     {
                                                         LogOk("DiscoveryDiagnostics", $"Interface version 1 is supported. Testing the Management API...", COLUMN_OVERALL);
-                                                        await TestManagementApi(httpClient);
+                                                        await TestManagementApi(httpClient, broadcastResponse);
                                                     }
                                                     else // Interface 1 is not supported, which is an issue
                                                     {
-                                                        LogIssue("DiscoveryDiagnostics", $"Interface version 1 is not supported by this device, it supports version {apiVersionsResponse.Value[0]}. Cannot test other management API endpoints.", COLUMN_OVERALL);
+                                                        LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"Interface version 1 is not supported by this device, it supports version {apiVersionsResponse.Value[0]}. Cannot test other management API endpoints.", COLUMN_OVERALL);
                                                     }
                                                     break;
                                             }
                                         }
                                         catch (Exception ex) when (ex is TaskCanceledException || ex is TimeoutException)
                                         {
-                                            LogIssue("DiscoveryDiagnostics", $"Timed out while getting API versions from {hostIpAndPort}", COLUMN_OVERALL);
+                                            LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"Timed out while getting API versions from {hostIpAndPort}", COLUMN_OVERALL);
                                         }
                                         catch (Exception ex)
                                         {
                                             // Something went wrong so log the issue and send a message to the user
-                                            LogIssue("DiscoveryDiagnostics", $"Exception reading supported API versions: {ex.Message}", COLUMN_OVERALL);
+                                            LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"Exception reading supported API versions: {ex.Message}", COLUMN_OVERALL);
                                             logger?.LogMessage("DiscoveryDiagnostics", $"Exception reading supported API versions: {ex}");
                                         }
                                     }
@@ -320,16 +320,43 @@
                             {
                                 LogMessage("DiscoveryDiagnostics", "Discovery completed.", 0);
                                 LogMessage("DiscoveryDiagnostics", " ", 0);
-                                LogInformation("DiscoveryDiagnostics", "There were no responses to the discovery broadcast.", 0);
+                                LogInformation(null, "DiscoveryDiagnostics", "There were no responses to the discovery broadcast.", 0);
+                            }
+
+                            // Summarise the diagnostic outcome
+                            if ((informationMessages.Count == 0) & (issueMessages.Count == 0))
+                            {
+                                LogMessage("", $"No issues or information alerts found: Your Alpaca devices pass ASCOM Discovery Diagnostics validation!!", 0);
+                            }
+                            else
+                            {
+                                if (issueMessages.Count > 0)
+                                {
+                                    LogMessage("", $"Issue Summary", 0);
+                                    foreach (AlpacaDiscoveryDiagnostic diagnostic in issueMessages)
+                                    {
+                                        LogMessage("", $"{diagnostic.DeviceIp.PadRight(COLUMN_OVERALL)} {diagnostic.Message}", 0);
+                                    }
+                                }
+                                if (informationMessages.Count > 0)
+                                {
+                                    LogMessage("", $"Information Alert Summary", 0);
+                                    foreach (AlpacaDiscoveryDiagnostic diagnostic in informationMessages)
+                                    {
+                                        LogMessage("", $"{diagnostic.DeviceIp.PadRight(COLUMN_OVERALL)} {diagnostic.Message}", 0);
+                                    }
+                                }
                             }
                         }
-                        if ((informationCount == 0) & (issueCount == 0))
+
+                        // Set the status field depending on the outcome
+                        if ((informationMessages.Count == 0) & (issueMessages.Count == 0))
                         {
                             SetStatus($"Congratulations, there were no issues!");
                         }
                         else
                         {
-                            SetStatus($"Found {issueCount} issue{(issueCount == 1 ? "" : "s")} and {informationCount} information alert{(informationCount == 1 ? "" : "s")}.");
+                            SetStatus($"Found {issueMessages.Count} issue{(issueMessages.Count == 1 ? "" : "s")} and {informationMessages.Count} information alert{(informationMessages.Count == 1 ? "" : "s")}.");
                         }
                     }
                     catch (Exception ex)
@@ -342,6 +369,7 @@
                         configuration.Settings.OperationInProgress = false;
                         configuration.RaiseUiHasChangedEvent();
                         await InvokeAsync(() => { StateHasChanged(); });
+                        await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
                     }
                 });
         }
@@ -357,7 +385,7 @@
     /// <param name="httpClient"></param>
     /// <param name="padString"></param>
     /// <returns></returns>
-    private async Task TestManagementApi(HttpClient httpClient)
+    private async Task TestManagementApi(HttpClient httpClient, BroadcastResponse broadcastResponse)
     {
         // Test the device description management API
         try
@@ -377,7 +405,7 @@
             }
             else
             {
-                LogIssue("TestManagementApi", $"Manufacturer name is empty or white space", COLUMN_OVERALL + 10);
+                LogIssue(broadcastResponse, "TestManagementApi", $"Manufacturer name is empty or white space", COLUMN_OVERALL + 10);
             }
 
             // Validate the manufacturer version
@@ -387,7 +415,7 @@
             }
             else
             {
-                LogIssue("TestManagementApi", $"Manufacturer version is empty or white space", COLUMN_OVERALL + 10);
+                LogIssue(broadcastResponse, "TestManagementApi", $"Manufacturer version is empty or white space", COLUMN_OVERALL + 10);
             }
 
             // Validate the location
@@ -397,7 +425,7 @@
             }
             else
             {
-                LogInformation("TestManagementApi", $"  Location is empty or white space", COLUMN_OVERALL);
+                LogInformation(broadcastResponse, "TestManagementApi", $"  Location is empty or white space", COLUMN_OVERALL);
             }
 
             // Validate the server name
@@ -407,17 +435,17 @@
             }
             else
             {
-                LogInformation("TestManagementApi", $"Server name is empty or white space", COLUMN_OVERALL);
+                LogInformation(broadcastResponse, "TestManagementApi", $"Server name is empty or white space", COLUMN_OVERALL);
             }
         }
         catch (Exception ex) when (ex is TaskCanceledException || ex is TimeoutException)
         {
-            LogIssue("TestManagementApi", $"Timed out while getting device description from {hostIpAndPort}", COLUMN_OVERALL);
+            LogIssue(broadcastResponse, "TestManagementApi", $"Timed out while getting device description from {hostIpAndPort}", COLUMN_OVERALL);
         }
         catch (Exception ex)
         {
             // Something went wrong so log the issue and send a message to the user
-            LogIssue("TestManagementApi", $"Exception reading device description: {ex.Message}", COLUMN_OVERALL);
+            LogIssue(broadcastResponse, "TestManagementApi", $"Exception reading device description: {ex.Message}", COLUMN_OVERALL);
             logger?.LogMessage("TestManagementApi", $"Exception reading device description: {ex}");
         }
 
@@ -446,13 +474,13 @@
                     }
                     else
                     {
-                        LogIssue("TestManagementApi", $"Found non-standard device type: {alpacaDevice.DeviceType}", COLUMN_OVERALL + 10);
+                        LogIssue(broadcastResponse, "TestManagementApi", $"Found non-standard device type: {alpacaDevice.DeviceType}", COLUMN_OVERALL + 10);
                     }
 
                     // Validate the device number;
                     if (alpacaDevice.DeviceNumber < 0)
                     {
-                        LogIssue("TestManagementApi", $"Device number is negative: {alpacaDevice.DeviceNumber}", COLUMN_OVERALL + 12);
+                        LogIssue(broadcastResponse, "TestManagementApi", $"Device number is negative: {alpacaDevice.DeviceNumber}", COLUMN_OVERALL + 12);
                     }
                     else
                     {
@@ -462,7 +490,7 @@
                     // Validate the device name;
                     if (String.IsNullOrWhiteSpace(alpacaDevice.DeviceName))
                     {
-                        LogInformation("TestManagementApi", $"Device name is empty or white space.", COLUMN_OVERALL);
+                        LogInformation(broadcastResponse, "TestManagementApi", $"Device name is empty or white space.", COLUMN_OVERALL);
                     }
                     else
                     {
@@ -472,7 +500,7 @@
                     // Validate the unique ID;
                     if (String.IsNullOrWhiteSpace(alpacaDevice.UniqueID))
                     {
-                        LogIssue("TestManagementApi", $"Unique ID is empty or white space. This should have a value with at least 48bits of randomness e.g. a UUID / GUID", COLUMN_OVERALL + 12);
+                        LogIssue(broadcastResponse, "TestManagementApi", $"Unique ID is empty or white space. This should have a value with at least 48bits of randomness e.g. a UUID / GUID", COLUMN_OVERALL + 12);
                     }
                     else
                     {
@@ -482,21 +510,22 @@
             }
             else // There are no configured devices, which is an issue
             {
-                LogIssue("TestManagementApi", $"The list of configured devices is empty and no devices are available.", COLUMN_OVERALL);
+                LogIssue(broadcastResponse, "TestManagementApi", $"The list of configured devices is empty and no devices are available.", COLUMN_OVERALL);
             }
 
         }
         catch (Exception ex) when (ex is TaskCanceledException || ex is TimeoutException)
         {
-            LogIssue("TestManagementApi", $"Timed out while getting configured devices from {hostIpAndPort}", COLUMN_OVERALL);
+            LogIssue(broadcastResponse, "TestManagementApi", $"Timed out while getting configured devices from {hostIpAndPort}", COLUMN_OVERALL);
         }
         catch (Exception ex)
         {
             // Something went wrong so log the issue and send a message to the user
-            LogIssue("TestManagementApi", $"Exception reading configured devices: {ex.Message}", COLUMN_OVERALL);
+            LogIssue(broadcastResponse, "TestManagementApi", $"Exception reading configured devices: {ex.Message}", COLUMN_OVERALL);
             logger?.LogMessage("TestManagementApi", $"Exception reading configured devices: {ex}");
         }
     }
+
     private void ClearLogScreen()
     {
         screenLog = "";
@@ -516,16 +545,17 @@
         LogMessage(method, $"OK    - {message}", padding);
 
     }
-    private void LogIssue(string method, string message, int padding)
+
+    private void LogIssue(BroadcastResponse broadcastResponse, string method, string message, int padding)
     {
-        issueCount += 1;
         LogMessage(method, $"ISSUE - {message}", padding);
+        issueMessages.Add(new AlpacaDiscoveryDiagnostic(broadcastResponse.IPEndpoint.ToString(), message));
     }
 
-    private void LogInformation(string method, string message, int padding)
+    private void LogInformation(BroadcastResponse broadcastResponse, string method, string message, int padding)
     {
-        informationCount += 1;
         LogMessage(method, $"INFO  - {message}", padding);
+        informationMessages.Add(new AlpacaDiscoveryDiagnostic(broadcastResponse.IPEndpoint.ToString(), message));
     }
 
     private async void SetStatus(string message)
