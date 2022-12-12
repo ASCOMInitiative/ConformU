@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Reflection.Metadata;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using static ConformU.Globals;
@@ -20,10 +22,27 @@ namespace ConformU
         private static ConformConfiguration conformConfiguration;
         private static string[] commandLineArguments;
 
+#if WINDOWS7_0_OR_GREATER
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        const int SW_HIDE = 0;
+        const int SW_SHOWMINIMIZED = 2;
+        const int SW_SHOW = 5;
+#endif
+
         public static void Main(string[] args)
         {
             try
             {
+#if WINDOWS7_0_OR_GREATER
+                // Minimise the console window
+                ShowWindow(GetConsoleWindow(), SW_SHOWMINIMIZED);
+#endif
+
                 // Save the command line arguments so they can be reused if a 32bit application is required
                 commandLineArguments = args;
 
