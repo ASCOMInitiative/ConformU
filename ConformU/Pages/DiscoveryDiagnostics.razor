@@ -38,6 +38,7 @@
     const int COLUMN_PADDING = 24;
     const int COLUMN_OVERALL = COLUMN_WIDTH + COLUMN_PADDING;
 
+    # region Blazor lifetime event handlers
     protected async override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
@@ -55,68 +56,9 @@
         StartDiscoveryDiagnostics();
     }
 
-    #region Log textarea - resize support
-
-    async Task ResizeLogWindow()
-    {
-        try
-        {
-            BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
-            BrowserWindowSize blazorProWindowSize = new();
-            blazorProWindowSize.Width = (int)browserWindowSize.Width;
-            blazorProWindowSize.Height = (int)browserWindowSize.Height;
-
-            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
-            WindowResized(new object(), blazorProWindowSize);
-            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
-        }
-        catch { }
-    }
-
-    // This method will be called when the window resizes.
-    // It is ONLY called when the user stops dragging the window's edge. (It is already throttled to protect your app from performance nightmares)
-    async void WindowResized(object _, BrowserWindowSize window)
-    {
-        try
-        {
-            // Get the browsers's width / height
-            // Find the current position of the Conform log text area in the viewport
-            BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ConformLog");
-            if (result is not null)
-            {
-                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 2;
-
-                // Hide the status field at small heights
-                if (window.Height < 600)
-                {
-                    screenLogRows += 0;
-                }
-                else
-                {
-
-                }
-
-                string browser = "";
-                browser = await JS.InvokeAsync<string>(identifier: "IdentifyBrowser");
-
-                if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
-
-                //conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
-                await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
-            }
-
-            else
-            {
-                logger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"BoundingClientRectangle is NULL - No action taken.");
-            }
-        }
-        catch
-        {
-            // conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
-        }
-    }
-
     #endregion
+
+    # region Discovery diagnostics
 
     /// <summary>
     /// Diagnose the discovery process including initial discovery and the Alpaca Management API
@@ -526,11 +468,87 @@
         }
     }
 
+    #endregion
+
+    #region Logging and window resize
+
+    /// <summary>
+    /// Make the log window fit the browser size
+    /// </summary>
+    /// <returns></returns>
+    async Task ResizeLogWindow()
+    {
+        try
+        {
+            BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
+            BrowserWindowSize blazorProWindowSize = new();
+            blazorProWindowSize.Width = (int)browserWindowSize.Width;
+            blazorProWindowSize.Height = (int)browserWindowSize.Height;
+
+            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
+            WindowResized(new object(), blazorProWindowSize);
+            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
+        }
+        catch { }
+    }
+
+    // This method will be called when the window resizes.
+    // It is ONLY called when the user stops dragging the window's edge. (It is already throttled to protect your app from performance nightmares)
+    async void WindowResized(object _, BrowserWindowSize window)
+    {
+        try
+        {
+            // Get the browsers's width / height
+            // Find the current position of the Conform log text area in the viewport
+            BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ConformLog");
+            if (result is not null)
+            {
+                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 2;
+
+                // Hide the status field at small heights
+                if (window.Height < 600)
+                {
+                    screenLogRows += 0;
+                }
+                else
+                {
+
+                }
+
+                string browser = "";
+                browser = await JS.InvokeAsync<string>(identifier: "IdentifyBrowser");
+
+                if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
+
+                //conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
+                await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
+            }
+
+            else
+            {
+                logger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"BoundingClientRectangle is NULL - No action taken.");
+            }
+        }
+        catch
+        {
+            // conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
+        }
+    }
+
+    /// <summary>
+    /// Clear the log window
+    /// </summary>
     private void ClearLogScreen()
     {
         screenLog = "";
     }
 
+    /// <summary>
+    /// Log a message to the screen and log file
+    /// </summary>
+    /// <param name="method">Calling method name</param>
+    /// <param name="message">Message to log</param>
+    /// <param name="padding">Number of characters to which the message should be right padded</param>
     private async void LogMessage(string method, string message, int padding)
     {
         string padString = new string(' ', padding);
@@ -540,27 +558,54 @@
         await InvokeAsync(() => { StateHasChanged(); });
     }
 
+    /// <summary>
+    /// Log an OK message
+    /// </summary>
+    /// <param name="method">Calling method name</param>
+    /// <param name="message">Message to log</param>
+    /// <param name="padding">Number of characters to which the message should be right padded</param>
     private void LogOk(string method, string message, int padding)
     {
         LogMessage(method, $"OK    - {message}", padding);
 
     }
 
+    /// <summary>
+    /// Log an issue message
+    /// </summary>
+    /// <param name="broadcastResponse">Discovery broadcast response</param>
+    /// <param name="method">Calling method name</param>
+    /// <param name="message">Message to log</param>
+    /// <param name="padding">Number of characters to which the message should be right padded</param>
     private void LogIssue(BroadcastResponse broadcastResponse, string method, string message, int padding)
     {
         LogMessage(method, $"ISSUE - {message}", padding);
         issueMessages.Add(new AlpacaDiscoveryDiagnostic(broadcastResponse.IPEndpoint.ToString(), message));
     }
 
+    /// <summary>
+    /// Log an information message
+    /// </summary>
+    /// <param name="broadcastResponse">Discovery broadcast response</param>
+    /// <param name="method">Calling method name</param>
+    /// <param name="message">Message to log</param>
+    /// <param name="padding">Number of characters to which the message should be right padded</param>
     private void LogInformation(BroadcastResponse broadcastResponse, string method, string message, int padding)
     {
         LogMessage(method, $"INFO  - {message}", padding);
         informationMessages.Add(new AlpacaDiscoveryDiagnostic(broadcastResponse.IPEndpoint.ToString(), message));
     }
 
+    /// <summary>
+    /// Set the status message
+    /// </summary>
+    /// <param name="message"></param>
     private async void SetStatus(string message)
     {
         statusText = message;
         await InvokeAsync(() => { StateHasChanged(); });
     }
+
+    #endregion
+
 }
