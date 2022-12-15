@@ -1,4 +1,5 @@
 ﻿@page "/CheckAlpacaProtocol"
+@using ASCOM.Alpaca.Clients;
 @using ASCOM.Alpaca.Discovery;
 @using System.Threading;
 @using System.Text;
@@ -36,6 +37,7 @@
     string statusText;
     List<string> issueMessages;
     List<string> informationMessages;
+    List<string> errorMessages;
 
     // HTTP status codes used to assess the outcome of protocol tests
     List<HttpStatusCode> HttpStatusCode200 = new() { HttpStatusCode.OK };
@@ -99,6 +101,7 @@
         {
             informationMessages = new();
             issueMessages = new();
+            errorMessages = new();
 
             // Clear the screen
             ClearLogScreen();
@@ -317,7 +320,6 @@
                         throw new Exception($"Unknown device type: {settings.DeviceType}");
                 }
 
-
                 // Finally set Connected false
                 LogBlankLine();
                 await SendRequest("PUT Connected False", "Ids OK", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Put, ParamConnectedFalse, HttpStatusCode200);
@@ -329,12 +331,20 @@
 
             // Summarise the protocol test outcome
             LogBlankLine();
-            if ((informationMessages.Count == 0) & (issueMessages.Count == 0))
+            if ((informationMessages.Count == 0) & (issueMessages.Count == 0) & (errorMessages.Count == 0))
             {
-                LogLine($"No issues or information alerts found: Your devices pass ASCOM Alpaca protocol validation!!");
+                LogLine($"No errors, issues or information alerts found: Your devices pass ASCOM Alpaca protocol validation!!");
             }
             else
             {
+                if (errorMessages.Count > 0)
+                {
+                    LogLine($"Error Summary");
+                    foreach (string message in errorMessages)
+                    {
+                        LogLine(message);
+                    }
+                }
                 if (issueMessages.Count > 0)
                 {
                     LogLine($"Issue Summary");
@@ -345,7 +355,7 @@
                 }
                 if (informationMessages.Count > 0)
                 {
-                    LogLine($"Information Alert Summary");
+                    LogLine($"Information Message Summary");
                     foreach (string message in informationMessages)
                     {
                         LogLine(message);
@@ -354,13 +364,13 @@
             }
 
             // Set the status field depending on the outcome
-            if ((informationMessages.Count == 0) & (issueMessages.Count == 0))
+            if ((informationMessages.Count == 0) & (issueMessages.Count == 0) & (errorMessages.Count == 0))
             {
-                SetStatus($"Congratulations, there were no issues!");
+                SetStatus($"Congratulations, there were no errors, issues or information messages!");
             }
             else
             {
-                SetStatus($"Found {issueMessages.Count} issue{(issueMessages.Count == 1 ? "" : "s")} and {informationMessages.Count} information alert{(informationMessages.Count == 1 ? "" : "s")}.");
+                SetStatus($"Found {errorMessages.Count} error{(errorMessages.Count == 1 ? "" : "s")}, {issueMessages.Count} issue{(issueMessages.Count == 1 ? "" : "s")} and {informationMessages.Count} information messages{(informationMessages.Count == 1 ? "" : "s")}.");
             }
         }
         catch (Exception ex)
@@ -379,7 +389,98 @@
 
     private async Task TestCamera()
     {
-        await InvokeAsync(() => { StateHasChanged(); });
+        string parameter1 = "";
+
+        using (AlpacaCamera camera = AlpacaClient.GetDevice<AlpacaCamera>(settings.AlpacaDevice))
+        {
+            // Connect to the selected camera to ensure we get correct values
+            try { camera.Connected = true; } catch { }
+
+            await GetProperty("BayerOffsetX");
+            await GetProperty("BayerOffsetY");
+            await GetProperty("BinX");
+            try { parameter1 = camera.BinX.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("BinX", "BinX", parameter1);
+            await GetProperty("BinY");
+            try { parameter1 = camera.BinY.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("BinY", "BinY", parameter1);
+            await GetProperty("CameraState");
+            await GetProperty("CameraXSize");
+            await GetProperty("CameraYSize");
+            await GetProperty("CanAbortExposure");
+            await GetProperty("CanAsymmetricBin");
+            await GetProperty("CanFastReadout");
+            await GetProperty("CanGetCoolerPower");
+            await GetProperty("CanPulseGuide");
+            await GetProperty("CanSetCCDTemperature");
+            await GetProperty("CanStopExposure");
+            await GetProperty("CCDTemperature");
+            await GetProperty("CoolerOn");
+            try { parameter1 = camera.CoolerOn.ToString(); } catch (Exception) { parameter1 = "False"; }
+            await PutOneParameter("CoolerOn", "CoolerOn", parameter1);
+            await GetProperty("CoolerPower");
+            await GetProperty("ElectronsPerADU");
+            await GetProperty("ExposureMax");
+            await GetProperty("ExposureMin");
+            await GetProperty("ExposureResolution");
+            await GetProperty("FastReadout");
+            try { parameter1 = camera.FastReadout.ToString(); } catch (Exception) { parameter1 = "False"; }
+            await PutOneParameter("FastReadout", "FastReadout", parameter1);
+            await GetProperty("FullWellCapacity");
+            await GetProperty("Gain");
+            try { parameter1 = camera.Gain.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("Gain", "Gain", parameter1);
+            await GetProperty("GainMax");
+            await GetProperty("GainMin");
+            await GetProperty("Gains");
+            await GetProperty("HasShutter");
+            await GetProperty("HeatSinkTemperature");
+            await GetProperty("ImageArray");
+            await GetProperty("ImageArrayVariant");
+            await GetProperty("ImageReady");
+            await GetProperty("IsPulseGuiding");
+            await GetProperty("LastExposureDuration");
+            await GetProperty("LastExposureStartTime");
+            await GetProperty("MaxADU");
+            await GetProperty("MaxBinX");
+            await GetProperty("MaxBinY");
+            await GetProperty("NumX");
+            try { parameter1 = camera.NumX.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("NumX", "NumX", camera.NumX.ToString());
+            await GetProperty("NumY");
+            try { parameter1 = camera.NumY.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("NumY", "NumY", camera.NumY.ToString());
+            await GetProperty("Offset");
+            try { parameter1 = camera.Offset.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("Offset", "Offset", parameter1);
+            await GetProperty("OffsetMax");
+            await GetProperty("OffsetMin");
+            await GetProperty("Offsets");
+            await GetProperty("PercentCompleted");
+            await GetProperty("PixelSizeX");
+            await GetProperty("PixelSizeY");
+            await GetProperty("ReadoutMode");
+            try { parameter1 = camera.ReadoutMode.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("ReadoutMode", "ReadoutMode", parameter1);
+            await GetProperty("ReadoutModes");
+            await GetProperty("SensorName");
+            await GetProperty("SensorType");
+            await GetProperty("SetCCDTemperature");
+            try { parameter1 = camera.SetCCDTemperature.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("SetCCDTemperature", "SetCCDTemperature", parameter1);
+            await GetProperty("StartX");
+            try { parameter1 = camera.StartX.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("StartX", "StartX", parameter1);
+            await GetProperty("StartY");
+            try { parameter1 = camera.StartY.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("StartY", "StartY", parameter1);
+            await GetProperty("SubExposureDuration");
+            try { parameter1 = camera.SubExposureDuration.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("SubExposureDuration", "SubExposureDuration", parameter1);
+
+            try { camera.Connected = false; } catch { }
+
+        }
     }
 
     private async Task TestCoverCalibrator()
@@ -409,7 +510,19 @@
 
     private async Task TestRotator()
     {
-        await InvokeAsync(() => { StateHasChanged(); });
+        await GetProperty("CanReverse");
+        await GetProperty("IsMoving");
+        await GetProperty("MechanicalPosition");
+        await GetProperty("Position");
+        await GetProperty("Reverse");
+        await PutOneParameter("Reverse", "Reverse", "False");
+        await GetProperty("StepSize");
+        await GetProperty("TargetPosition");
+        await PutNoParameters("Halt");
+        await PutOneParameter("Move", "Position", "0");
+        await PutOneParameter("MoveAbsolute", "Position", "0");
+        await PutOneParameter("MoveMechanical", "Position", "0");
+        await PutOneParameter("Sync", "Position", "0");
     }
 
     private async Task TestSafetyMonitor()
@@ -424,7 +537,14 @@
 
     private async Task TestTelescope()
     {
-        // Test properties
+        string parameter1 = "";
+        string parameter2 = "";
+
+        using (AlpacaTelescope telescope = AlpacaClient.GetDevice<AlpacaTelescope>(settings.AlpacaDevice))
+        {
+            try { telescope.Connected = true; } catch { }
+
+            // Test properties
             await GetProperty("AlignmentMode");
             await GetProperty("Altitude");
             await GetProperty("ApertureArea");
@@ -447,62 +567,100 @@
             await GetProperty("CanUnpark");
             await GetProperty("Declination");
             await GetProperty("DeclinationRate");
-            await PutOneParameter("DeclinationRate", "DeclinationRate", "0.0");
+            try { parameter1 = telescope.DeclinationRate.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+            await PutOneParameter("DeclinationRate", "DeclinationRate", parameter1);
             await GetProperty("DoesRefraction");
-            await PutOneParameter("DoesRefraction", "DoesRefraction", "false");
+            try { parameter1 = telescope.DoesRefraction.ToString(); } catch (Exception) { parameter1 = "false"; }
+            await PutOneParameter("DoesRefraction", "DoesRefraction", parameter1);
             await GetProperty("EquatorialSystem");
             await GetProperty("FocalLength");
             await GetProperty("GuideRateDeclination");
-            await PutOneParameter("GuideRateDeclination", "GuideRateDeclination", "0.0");
+            try { parameter1 = telescope.GuideRateDeclination.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+            await PutOneParameter("GuideRateDeclination", "GuideRateDeclination", parameter1);
             await GetProperty("GuideRateRightAscension");
-            await PutOneParameter("GuideRateRightAscension", "GuideRateRightAscension", "0.0");
+            try { parameter1 = telescope.GuideRateRightAscension.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+            await PutOneParameter("GuideRateRightAscension", "GuideRateRightAscension", parameter1);
             await GetProperty("IsPulseGuiding");
             await GetProperty("RightAscension");
             await GetProperty("RightAscensionRate");
-            await PutOneParameter("RightAscensionRate", "RightAscensionRate", "0.0");
+            try { parameter1 = telescope.RightAscensionRate.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+            await PutOneParameter("RightAscensionRate", "RightAscensionRate", parameter1);
             await GetProperty("SideOfPier");
-            await PutOneParameter("SideOfPier", "SideOfPier", "0");
+            try { parameter1 = ((int)telescope.SideOfPier).ToString(); } catch (Exception) { parameter1 = "0"; }
+            await PutOneParameter("SideOfPier", "SideOfPier", parameter1);
             await GetProperty("SiderealTime");
             await GetProperty("SiteElevation");
-            await PutOneParameter("SiteElevation", "SiteElevation", "0.0");
+            try { parameter1 = telescope.SiteElevation.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+            await PutOneParameter("SiteElevation", "SiteElevation", parameter1);
             await GetProperty("SiteLatitude");
-            await PutOneParameter("SiteLatitude", "SiteLatitude", "0.0");
+            try { parameter1 = telescope.SiteLatitude.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+            await PutOneParameter("SiteLatitude", "SiteLatitude", parameter1);
             await GetProperty("SiteLongitude");
-            await PutOneParameter("SiteLongitude", "SiteLongitude", "0.0");
+            try { parameter1 = telescope.SiteLongitude.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+            await PutOneParameter("SiteLongitude", "SiteLongitude", parameter1);
             await GetProperty("Slewing");
             await GetProperty("SlewSettleTime");
-            await PutOneParameter("SlewSettleTime", "SlewSettleTime", "0");
+            try { parameter1 = telescope.SlewSettleTime.ToString(); } catch (Exception) { parameter1 = "0"; }
+            await PutOneParameter("SlewSettleTime", "SlewSettleTime", parameter1);
             await GetProperty("TargetDeclination");
-            await PutOneParameter("TargetDeclination", "TargetDeclination", "0.0");
+            try { parameter1 = telescope.TargetDeclination.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+            await PutOneParameter("TargetDeclination", "TargetDeclination", parameter1);
             await GetProperty("TargetRightAscension");
-            await PutOneParameter("TargetRightAscension", "TargetRightAscension", "0.0");
+            try { parameter1 = telescope.TargetRightAscension.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+            await PutOneParameter("TargetRightAscension", "TargetRightAscension", parameter1);
             await GetProperty("Tracking");
-            await PutOneParameter("Tracking", "Tracking", "True");
+            try { parameter1 = telescope.Tracking.ToString(); } catch (Exception) { parameter1 = "false"; }
+            await PutOneParameter("Tracking", "Tracking", parameter1);
             await GetProperty("TrackingRate");
-            await PutOneParameter("TrackingRate", "TrackingRate", "0");
+            try { parameter1 = ((int)telescope.TrackingRate).ToString(); } catch (Exception) { parameter1 = "0"; }
+            await PutOneParameter("TrackingRate", "TrackingRate", parameter1);
             await GetProperty("UTCDate");
-            await PutOneParameter("UTCDate", "UTCDate", "2016 - 03 - 04T17: 45:31.1234567Z");
+            try { parameter1 = telescope.UTCDate.ToString(); } catch (Exception) { parameter1 = "2022 - 12 - 04T17: 45:31.1234567Z"; }
+            await PutOneParameter("UTCDate", "UTCDate", parameter1);
 
-        // Test Methods
-        await PutNoParameters("AbortSlew");
-        await GetOneParameter("AxisRates", "Axis", "0");
-        await GetOneParameter("CanMoveAxis", "Axis", "0");
-        await GetTwoParameters("DestinationSideOfPier", "RightAscension", "0.0", "Declination", "0.0");
-        await PutNoParameters("FindHome");
-        await PutTwoParameters("MoveAxis", "Axis", "0", "Rate", "0.0");
-        await PutNoParameters("Park");
-        await PutTwoParameters("PulseGuide", "Direction", "0", "Duration", "0");
-        await PutNoParameters("SetPark");
-        await PutTwoParameters("SlewToAltAz", "Azimuth", "0", "Altitude", "0.0");
-        await PutTwoParameters("SlewToAltAzAsync", "Azimuth", "0", "Altitude", "0.0");
-        await PutTwoParameters("SlewToCoordinates", "RightAscension", "0", "Declination", "0.0");
-        await PutTwoParameters("SlewToCoordinatesAsync", "RightAscension", "0", "Declination", "0.0");
-        await PutNoParameters("SlewToTarget");
-        await PutNoParameters("SlewToTargetAsync");
-        await PutTwoParameters("SyncToAltAz", "Azimuth", "0.0", "Altitude", "0.0");
-        await PutTwoParameters("SyncToCoordinates", "RightAscension", "0", "Declination", "0.0");
-        await PutNoParameters("SyncToTarget");
-        await PutNoParameters("Unpark");
+            // Test Methods
+            await PutNoParameters("AbortSlew");
+            await GetOneParameter("AxisRates", "Axis", "0");
+            await GetOneParameter("CanMoveAxis", "Axis", "0");
+            await GetTwoParameters("DestinationSideOfPier", "RightAscension", "0.0", "Declination", "0.0");
+            await PutNoParameters("FindHome");
+            await PutTwoParameters("MoveAxis", "Axis", "0", "Rate", "0.0");
+            await PutNoParameters("Park");
+            await PutTwoParameters("PulseGuide", "Direction", "0", "Duration", "0");
+            await PutNoParameters("SetPark");
+
+            try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
+            try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
+            await PutTwoParameters("SlewToAltAz", "Azimuth", parameter1, "Altitude", parameter2);
+
+            try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
+            try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
+            await PutTwoParameters("SlewToAltAzAsync", "Azimuth", parameter1, "Altitude", parameter2);
+
+            try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "45"; }
+            try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "45"; }
+            await PutTwoParameters("SlewToCoordinates", "RightAscension", parameter1, "Declination", parameter2);
+
+            try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "45"; }
+            try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "45"; }
+            await PutTwoParameters("SlewToCoordinatesAsync", "RightAscension", parameter1, "Declination", parameter2);
+
+            await PutNoParameters("SlewToTarget");
+            await PutNoParameters("SlewToTargetAsync");
+
+            try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
+            try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
+            await PutTwoParameters("SyncToAltAz", "Azimuth", parameter1, "Altitude", parameter2);
+
+            try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "45"; }
+            try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "45"; }
+            await PutTwoParameters("SyncToCoordinates", "RightAscension", parameter1, "Declination", parameter2);
+            
+            await PutNoParameters("SyncToTarget");
+            await PutNoParameters("Unpark");
+
+            try { telescope.Connected = false; } catch { }
+        }
     }
 
     private async Task GetOneParameter(string method, string parameterName, string parameterValue)
@@ -894,6 +1052,10 @@
 
                 case TestOutcome.Issue:
                     issueMessages.Add(logLine.Replace("Response:", ""));
+                    break;
+
+                case TestOutcome.Error:
+                    errorMessages.Add(logLine.Replace("Response:", ""));
                     break;
 
                 default:
