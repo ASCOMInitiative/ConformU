@@ -232,7 +232,12 @@
                                         Change=@(args => OnImageArrayTypeChange(args)) />
                         <RadzenLabel Text="Image array transfer type (Default JSON)" Component="DROP2" Style="margin-left: 20px;margin-top:5px" />
                     </div>
-
+                    <p>&nbsp;</p>
+                    <h4 style="color: #479cc8;">Check Alpaca Protocol</h4>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHKSHOWSUCCESSRESPONSES" @bind-Value=@chkProtocolShowSuccessResponses TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolShowSuccessResponses)) />
+                        <RadzenLabel Text="Show success responses" Component="CHKSHOWSUCCESSRESPONSES" Style="margin-left: 20px;" />
+                    </div>
                 </RadzenCard>
 
                 @if (OperatingSystem.IsWindows())
@@ -537,6 +542,7 @@
     private bool chkTraceDiscovery;
     private bool chkTraceAlpacaCalls;
     private ComAccessMechanic comAccessMechanic = ComAccessMechanic.Native;
+    private bool chkProtocolShowSuccessResponses;
 
     // Camera test configuration
     private int cameraTestMaxBinX;
@@ -585,7 +591,7 @@
     private double telescopeSlewTolerance;
     private int telescopeMaximumSlewTime;
 
-    # region Enums
+    #region Enums
 
     private enum NumericConfigurationItem
     {
@@ -632,7 +638,8 @@
         DiscoveryEnabled,
         TelescopeFirstUseTests,
         GoHomeOnDeviceSelection,
-        RunAs32Bit
+        RunAs32Bit,
+        ProtocolShowSuccessResponses
     }
 
     private enum BoolConfigurationItem
@@ -857,6 +864,10 @@
                 configuration.Settings.RunAs32Bit = runAs32Bit;
                 break;
 
+            case CheckBoxConfigurationItem.ProtocolShowSuccessResponses:
+                configuration.Settings.AlpacaConfiguration.ProtocolShowSuccessResponses = chkProtocolShowSuccessResponses;
+                break;
+
             default:
                 throw new InvalidValueException($"OnCheckboxChange - Unknown checkbox name: {name}");
         }
@@ -869,7 +880,6 @@
         notificationService.Notify(message);
         await InvokeAsync(() => { StateHasChanged(); });
     }
-
 
     private void OnImageArrayTypeChange(object imageArrayTransferTypeObject)
     {
@@ -1090,6 +1100,7 @@
         alpacaServiceType = configuration.Settings.AlpacaConfiguration.AccessServiceType;
         strictCasing = configuration.Settings.AlpacaConfiguration.StrictCasing;
         alpacaImageArrayTransferType = configuration.Settings.AlpacaConfiguration.ImageArrayTransferType;
+        chkProtocolShowSuccessResponses = configuration.Settings.AlpacaConfiguration.ProtocolShowSuccessResponses;
     }
 
     private void SaveConfiguration()

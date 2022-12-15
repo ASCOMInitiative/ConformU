@@ -1,0 +1,982 @@
+﻿@page "/CheckAlpacaProtocol"
+@using ASCOM.Alpaca.Discovery;
+@using System.Threading;
+@using System.Text;
+@using System.Text.Json;
+@using System.Net;
+@using System.Net.Sockets;
+@using ASCOM.Common.Alpaca;
+@using ASCOM.Common;
+@using System.Net.Http.Headers;
+
+@inject ConformLogger logger
+@inject ConformConfiguration configuration
+@inject BrowserResizeService listener
+@inject IJSRuntime JS
+
+<h2>Check Alpaca Protocol</h2>
+
+<div>
+    <RadzenButton Id="testButton" Click=@(() => StartCheckAlpacaProtocol()) Text="Check Protocol" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" IsBusy=@settings.OperationInProgress Disabled=@(configuration.Settings.DeviceTechnology!=DeviceTechnology.Alpaca) />
+    <RadzenLabel Text="Outcome:" Component="TESTSTATUS" Style="margin-left: 40px;margin-right:2px" />
+    <RadzenTextBox Name="TESTSTATUS" Placeholder="Test not run." @bind-Value=@statusText ReadOnly=true Style="width:500px;font-weight:bold;" />
+</div>
+
+<RadzenTextArea Id="ProtocolLog" Style="line-height: 18px; padding-bottom: 0px" Name="ProtocolLogName" @bind-Value=@screenLog Rows="@screenLogRows" ReadOnly=true />
+@code
+{
+    // Constants
+    const int COLUMN_WIDTH = 30; //
+    const int OUTCOME_WIDTH = 6;
+
+    string screenLog = "";
+    int screenLogRows;
+    int screenLogColumns = 139;
+    HttpClient httpClient;
+    string statusText;
+    List<string> issueMessages;
+    List<string> informationMessages;
+
+    // HTTP status codes used to assess the outcome of protocol tests
+    List<HttpStatusCode> HttpStatusCode200 = new() { HttpStatusCode.OK };
+    List<HttpStatusCode> HttpStatusCode400 = new() { HttpStatusCode.BadRequest };
+    List<HttpStatusCode> HttpStatusCode400_404 = new() { HttpStatusCode.BadRequest, HttpStatusCode.NotFound };
+
+    // Parameters that can be sent to clients
+    List<CheckProtocolParameter> ParamNone = new();
+    List<CheckProtocolParameter> ParamClientIdOk = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionId", "67890") };
+    List<CheckProtocolParameter> ParamClientIdOkPlus = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionId", "67890"), new CheckProtocolParameter("DummyParaemeter", "DummyValue") };
+    List<CheckProtocolParameter> ParamClientIdBadEmpty = new() { new CheckProtocolParameter("ClientID", ""), new CheckProtocolParameter("ClientTransactionId", "") };
+    List<CheckProtocolParameter> ParamClientIdBadNegative = new() { new CheckProtocolParameter("ClientID", "-12345"), new CheckProtocolParameter("ClientTransactionId", "-67890") };
+    List<CheckProtocolParameter> ParamClientIdBadString = new() { new CheckProtocolParameter("ClientID", "asdasd"), new CheckProtocolParameter("ClientTransactionId", "qweqwe") };
+    List<CheckProtocolParameter> ParamConnectedTrue = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionId", "67890"), new CheckProtocolParameter("Connected", "True") };
+    List<CheckProtocolParameter> ParamConnectedFalse = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionId", "67890"), new CheckProtocolParameter("Connected", "False") };
+    List<CheckProtocolParameter> ParamConnectedEmpty = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionId", "67890"), new CheckProtocolParameter("Connected", "") };
+    List<CheckProtocolParameter> ParamConnectedNumeric = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionId", "67890"), new CheckProtocolParameter("Connected", "12345") };
+
+    ConformU.Settings settings;
+
+    internal enum TestOutcome
+    {
+        OK,
+        Info,
+        Issue,
+        Error,
+        Indent
+    }
+
+    #region Blazor lifetime event handlers
+    protected async override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Subscribe to the OnResized event. This will do work when the browser is resized.
+            listener.Init(JS);
+            listener.OnResize += WindowResized;
+            await ResizeLogWindow();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        configuration.UiHasChanged += OnUiHasChanged;
+        settings = configuration.Settings;
+        httpClient = new();
+        StartCheckAlpacaProtocol();
+        httpClient = new HttpClient();
+    }
+
+    #endregion
+
+    #region Check Alpaca Protocol
+
+    /// <summary>
+    /// Test the Alpaca protocol
+    ///</summary>
+    internal void StartCheckAlpacaProtocol()
+    {
+        try
+        {
+            informationMessages = new();
+            issueMessages = new();
+
+            // Clear the screen
+            ClearLogScreen();
+
+            // Make sure we only test Alpaca devices
+            if (configuration.Settings.DeviceTechnology == DeviceTechnology.Alpaca)
+            {
+                //Initialise Status field
+                SetStatus("Testing for Alpaca protocol violations...");
+
+                // Start the task to run the Alpaca protocol test
+                LogMessage("StartCheckAlpacaProtocol", null, $"Starting check...");
+                LogBlankLine();
+
+                // Start the test
+                Task.Run(async () => { await TestAlpacaProtocol(); });
+            }
+            else
+            {
+                //Initialise Status field
+                SetStatus("Selected device is not an Alpaca device");
+            }
+        }
+        catch (Exception ex)
+        {
+            LogMessage("StartCheckAlpacaProtocol", TestOutcome.Error, $"Exception: {ex}");
+        }
+    }
+
+    internal async Task TestAlpacaProtocol()
+    {
+        try
+        {
+            logger.LogMessage("TestAlpacaProtocol", $"Task started");
+
+            // Set the operation in progress flag and refresh state throughout the page and navigation menu.
+            configuration.Settings.OperationInProgress = true;
+            configuration.RaiseUiHasChangedEvent();
+            await InvokeAsync(() => { StateHasChanged(); });
+
+            string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString().ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
+
+            LogMessage("", null, $"Connecting to device: {settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} through URL: {clientHostAddress}");
+            LogBlankLine();
+            // Remove any old client, if present
+            if (httpClient != null)
+            {
+                httpClient.Dispose();
+            }
+
+            // Convert from the Alpaca decompression enum to the HttpClient decompression enum
+            DecompressionMethods decompressionMethods;
+            switch (settings.AlpacaConfiguration.ImageArrayCompression)
+            {
+                case ImageArrayCompression.None:
+                    decompressionMethods = DecompressionMethods.None;
+                    break;
+
+                case ImageArrayCompression.GZip:
+                    decompressionMethods = DecompressionMethods.GZip;
+                    break;
+
+                case ImageArrayCompression.Deflate:
+                    decompressionMethods = DecompressionMethods.Deflate;
+                    break;
+
+                case ImageArrayCompression.GZipOrDeflate:
+                    decompressionMethods = DecompressionMethods.Deflate | DecompressionMethods.GZip;
+                    break;
+
+                default:
+                    throw new ASCOM.InvalidValueException($"Invalid image array compression value: {settings.AlpacaConfiguration.ImageArrayCompression}");
+            }
+
+            // Create a new http handler to control authentication and automatic decompression
+            HttpClientHandler httpClientHandler = new HttpClientHandler()
+                {
+                    PreAuthenticate = true,
+                    AutomaticDecompression = decompressionMethods
+                };
+
+            // Create a new client pointing at the alpaca device
+            httpClient = new HttpClient(httpClientHandler);
+
+            // Add a basic authenticator if the user name is not null
+            if (!string.IsNullOrEmpty(settings.AlpacaConfiguration.AccessUserName))
+            {
+                byte[] authenticationBytes;
+                // Deal with null passwords
+                if (string.IsNullOrEmpty(settings.AlpacaConfiguration.AccessPassword)) // Handle the special case of a null string password
+                {
+                    // Create authenticator bytes configured with the user name and empty password
+                    authenticationBytes = Encoding.ASCII.GetBytes($"{settings.AlpacaConfiguration.AccessUserName}:");
+                }
+                else // Handle the normal case of a non-empty string username and password
+                {
+                    // Create authenticator bytes configured with the user name and provided password
+                    authenticationBytes = Encoding.ASCII.GetBytes($"{settings.AlpacaConfiguration.AccessUserName}:{settings.AlpacaConfiguration.AccessPassword}");
+                }
+
+                // Set the authentication header for all requests
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(authenticationBytes));
+            }
+
+            // Set the base URI for the device
+            httpClient.BaseAddress = new Uri(clientHostAddress);
+
+            string userproductName = Globals.USER_AGENT_PRODUCT_NAME;
+            string productVersion = Update.ConformuVersion;
+
+            // Add default headers for JSON
+            httpClient.DefaultRequestHeaders.Accept.Clear();
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(AlpacaConstants.APPLICATION_JSON_MIME_TYPE));
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(AlpacaConstants.TEXT_JSON_MIME_TYPE));
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(userproductName, productVersion));
+            httpClient.DefaultRequestHeaders.Connection.Add("keep-alive");
+            httpClient.DefaultRequestHeaders.ConnectionClose = false;
+
+            try
+            {
+                // Get Connected
+                await SendRequest("GET Connected", "Ids OK", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Get, ParamClientIdOk, HttpStatusCode200);
+                await SendRequest("GET Connected", "Ids OK +extra parameter", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Get, ParamClientIdOkPlus, HttpStatusCode200);
+
+                // Test bad GET Connected values
+                await SendRequest("GET Connected", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
+                await SendRequest("GET Connected", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Get, ParamClientIdBadNegative, HttpStatusCode400);
+                await SendRequest("GET Connected", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
+
+                // Set Connected true to start the test
+                await SendRequest("PUT Connected True", "Ids OK", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Put, ParamConnectedTrue, HttpStatusCode200);
+
+                // Test bad PUT Connected values
+                await SendRequest("PUT Connected", "Ids Empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Put, ParamConnectedEmpty, HttpStatusCode400);
+                await SendRequest("PUT Connected", "Ids numeric", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Put, ParamConnectedNumeric, HttpStatusCode400);
+                await SendRequest("PUT Connected", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Put, ParamConnectedNumeric, HttpStatusCode400);
+
+                // Test bad POST HTTP methods
+                await SendRequest("POST Connected", "True", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Post, ParamConnectedTrue, HttpStatusCode400);
+                await SendRequest("POST Connected", "False", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Post, ParamConnectedFalse, HttpStatusCode400);
+                await SendRequest("POST Connected", "Value empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Post, ParamConnectedEmpty, HttpStatusCode400);
+                await SendRequest("POST Connected", "Number", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Post, ParamConnectedNumeric, HttpStatusCode400);
+
+                // Test bad DELETE HTTP methods
+                await SendRequest("DELETE Connected", "True", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Delete, ParamConnectedTrue, HttpStatusCode400);
+                await SendRequest("DELETE Connected", "False", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Delete, ParamConnectedFalse, HttpStatusCode400);
+                await SendRequest("DELETE Connected", "Empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Delete, ParamConnectedEmpty, HttpStatusCode400);
+                await SendRequest("DELETE Connected", "Number", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Delete, ParamConnectedNumeric, HttpStatusCode400);
+
+                // Test primary URL structure: /api/v1/devicetype/0
+                await SendRequest("GET Description", "Good call", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode200);
+                await SendRequest("GET Description", "Bad client id (negative)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdBadNegative, HttpStatusCode400);
+                await SendRequest("GET Description", "Bad client id (non-numeric)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdBadNegative, HttpStatusCode400);
+                await SendRequest("GET Description", "Bad Alpaca URL base element \"api\" (apx)\"", $"/apx/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400_404);
+                await SendRequest("GET Description", "Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400);
+                await SendRequest("GET Description", "Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400);
+                await SendRequest("GET Description", "Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400);
+                await SendRequest("GET Description", $"Bad Alpaca URL device type (capitalised {settings.DeviceType.ToString().ToUpper()})", $"/api/v1/{settings.DeviceType.ToString().ToUpper()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400);
+                await SendRequest("GET Description", "Bad Alpaca URL device type (baddevicetype)", $"/api/v1/baddevicetype/0/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400);
+                await SendRequest("GET Description", "Bad Alpaca URL device number (-1)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/-1/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400);
+                await SendRequest("GET Description", "Bad Alpaca URL device number (99999)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/99999/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400);
+                await SendRequest("GET Description", "Bad Alpaca URL device number (A)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/A/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400);
+                await SendRequest("GET Description", "Bad Alpaca URL method name (descrip)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/descrip", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400);
+
+                // Test common methods
+                await GetProperty("Description");
+                await GetProperty("DriverInfo");
+                await GetProperty("DriverVersion");
+                await GetProperty("InterfaceVersion");
+                await GetProperty("Name");
+                await GetProperty("SupportedActions");
+
+                switch (settings.DeviceType)
+                {
+                    case DeviceTypes.Camera:
+                        await TestCamera();
+                        break;
+
+                    case DeviceTypes.CoverCalibrator:
+                        await TestCoverCalibrator();
+                        break;
+
+                    case DeviceTypes.Dome:
+                        await TestDome();
+                        break;
+
+                    case DeviceTypes.FilterWheel:
+                        await TestFilterWheel();
+                        break;
+
+                    case DeviceTypes.Focuser:
+                        await TestFocuser();
+                        break;
+
+                    case DeviceTypes.ObservingConditions:
+                        await TestCamera();
+                        break;
+
+                    case DeviceTypes.Rotator:
+                        await TestRotator();
+                        break;
+
+                    case DeviceTypes.SafetyMonitor:
+                        await TestSafetyMonitor();
+                        break;
+
+                    case DeviceTypes.Switch:
+                        await TestSwitch();
+                        break;
+
+                    case DeviceTypes.Telescope:
+                        await TestTelescope();
+                        break;
+
+                    default:
+                        throw new Exception($"Unknown device type: {settings.DeviceType}");
+                }
+
+
+                // Finally set Connected false
+                LogBlankLine();
+                await SendRequest("PUT Connected False", "Ids OK", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Put, ParamConnectedFalse, HttpStatusCode200);
+            }
+            catch (Exception ex)
+            {
+                LogMessage("", TestOutcome.Error, ex.ToString());
+            }
+
+            // Summarise the protocol test outcome
+            LogBlankLine();
+            if ((informationMessages.Count == 0) & (issueMessages.Count == 0))
+            {
+                LogLine($"No issues or information alerts found: Your devices pass ASCOM Alpaca protocol validation!!");
+            }
+            else
+            {
+                if (issueMessages.Count > 0)
+                {
+                    LogLine($"Issue Summary");
+                    foreach (string message in issueMessages)
+                    {
+                        LogLine(message);
+                    }
+                }
+                if (informationMessages.Count > 0)
+                {
+                    LogLine($"Information Alert Summary");
+                    foreach (string message in informationMessages)
+                    {
+                        LogLine(message);
+                    }
+                }
+            }
+
+            // Set the status field depending on the outcome
+            if ((informationMessages.Count == 0) & (issueMessages.Count == 0))
+            {
+                SetStatus($"Congratulations, there were no issues!");
+            }
+            else
+            {
+                SetStatus($"Found {issueMessages.Count} issue{(issueMessages.Count == 1 ? "" : "s")} and {informationMessages.Count} information alert{(informationMessages.Count == 1 ? "" : "s")}.");
+            }
+        }
+        catch (Exception ex)
+        {
+            LogMessage("TestAlpacaProtocol", TestOutcome.Error, $"Exception: {ex}");
+        }
+        finally
+        {
+            // Unset the operation in progress flag to restore the navigation menu
+            configuration.Settings.OperationInProgress = false;
+            configuration.RaiseUiHasChangedEvent();
+            await InvokeAsync(() => { StateHasChanged(); });
+            await JS.InvokeVoidAsync("ScrollToBottom", "ProtocolLog");
+        }
+    }
+
+    private async Task TestCamera()
+    {
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private async Task TestCoverCalibrator()
+    {
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private async Task TestDome()
+    {
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private async Task TestFilterWheel()
+    {
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private async Task TestFocuser()
+    {
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private async Task TestObservingConditions()
+    {
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private async Task TestRotator()
+    {
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private async Task TestSafetyMonitor()
+    {
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private async Task TestSwitch()
+    {
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private async Task TestTelescope()
+    {
+        // Test properties
+            await GetProperty("AlignmentMode");
+            await GetProperty("Altitude");
+            await GetProperty("ApertureArea");
+            await GetProperty("ApertureDiameter");
+            await GetProperty("AtHome");
+            await GetProperty("AtPark");
+            await GetProperty("Azimuth");
+            await GetProperty("CanPark");
+            await GetProperty("CanPulseGuide");
+            await GetProperty("CanSetDeclinationRate");
+            await GetProperty("CanSetGuideRates");
+            await GetProperty("CanSetPark");
+            await GetProperty("CanSetPierSide");
+            await GetProperty("CanSetTracking");
+            await GetProperty("CanSlew");
+            await GetProperty("CanSlewAltAz");
+            await GetProperty("CanSlewAltAzAsync");
+            await GetProperty("CanSync");
+            await GetProperty("CanSyncAltAz");
+            await GetProperty("CanUnpark");
+            await GetProperty("Declination");
+            await GetProperty("DeclinationRate");
+            await PutOneParameter("DeclinationRate", "DeclinationRate", "0.0");
+            await GetProperty("DoesRefraction");
+            await PutOneParameter("DoesRefraction", "DoesRefraction", "false");
+            await GetProperty("EquatorialSystem");
+            await GetProperty("FocalLength");
+            await GetProperty("GuideRateDeclination");
+            await PutOneParameter("GuideRateDeclination", "GuideRateDeclination", "0.0");
+            await GetProperty("GuideRateRightAscension");
+            await PutOneParameter("GuideRateRightAscension", "GuideRateRightAscension", "0.0");
+            await GetProperty("IsPulseGuiding");
+            await GetProperty("RightAscension");
+            await GetProperty("RightAscensionRate");
+            await PutOneParameter("RightAscensionRate", "RightAscensionRate", "0.0");
+            await GetProperty("SideOfPier");
+            await PutOneParameter("SideOfPier", "SideOfPier", "0");
+            await GetProperty("SiderealTime");
+            await GetProperty("SiteElevation");
+            await PutOneParameter("SiteElevation", "SiteElevation", "0.0");
+            await GetProperty("SiteLatitude");
+            await PutOneParameter("SiteLatitude", "SiteLatitude", "0.0");
+            await GetProperty("SiteLongitude");
+            await PutOneParameter("SiteLongitude", "SiteLongitude", "0.0");
+            await GetProperty("Slewing");
+            await GetProperty("SlewSettleTime");
+            await PutOneParameter("SlewSettleTime", "SlewSettleTime", "0");
+            await GetProperty("TargetDeclination");
+            await PutOneParameter("TargetDeclination", "TargetDeclination", "0.0");
+            await GetProperty("TargetRightAscension");
+            await PutOneParameter("TargetRightAscension", "TargetRightAscension", "0.0");
+            await GetProperty("Tracking");
+            await PutOneParameter("Tracking", "Tracking", "True");
+            await GetProperty("TrackingRate");
+            await PutOneParameter("TrackingRate", "TrackingRate", "0");
+            await GetProperty("UTCDate");
+            await PutOneParameter("UTCDate", "UTCDate", "2016 - 03 - 04T17: 45:31.1234567Z");
+
+        // Test Methods
+        await PutNoParameters("AbortSlew");
+        await GetOneParameter("AxisRates", "Axis", "0");
+        await GetOneParameter("CanMoveAxis", "Axis", "0");
+        await GetTwoParameters("DestinationSideOfPier", "RightAscension", "0.0", "Declination", "0.0");
+        await PutNoParameters("FindHome");
+        await PutTwoParameters("MoveAxis", "Axis", "0", "Rate", "0.0");
+        await PutNoParameters("Park");
+        await PutTwoParameters("PulseGuide", "Direction", "0", "Duration", "0");
+        await PutNoParameters("SetPark");
+        await PutTwoParameters("SlewToAltAz", "Azimuth", "0", "Altitude", "0.0");
+        await PutTwoParameters("SlewToAltAzAsync", "Azimuth", "0", "Altitude", "0.0");
+        await PutTwoParameters("SlewToCoordinates", "RightAscension", "0", "Declination", "0.0");
+        await PutTwoParameters("SlewToCoordinatesAsync", "RightAscension", "0", "Declination", "0.0");
+        await PutNoParameters("SlewToTarget");
+        await PutNoParameters("SlewToTargetAsync");
+        await PutTwoParameters("SyncToAltAz", "Azimuth", "0.0", "Altitude", "0.0");
+        await PutTwoParameters("SyncToCoordinates", "RightAscension", "0", "Declination", "0.0");
+        await PutNoParameters("SyncToTarget");
+        await PutNoParameters("Unpark");
+    }
+
+    private async Task GetOneParameter(string method, string parameterName, string parameterValue)
+    {
+        string methodLowerCase = method.ToLowerInvariant();
+
+        // Test bad SET IDs
+        await SendRequest($"PUT {method}", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
+        await SendRequest($"PUT {method}", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadNegative, HttpStatusCode400);
+        await SendRequest($"PUT {method}", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
+
+        // Test good parameter name casing
+        List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
+        clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+        await SendRequest($"PUT {method}", $"Parameter {parameterName} (Good casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, clientIdGoodParamCasing, HttpStatusCode200);
+
+        // Test bad parameter name casing
+        List<CheckProtocolParameter> clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
+        clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName), parameterValue));
+        await SendRequest($"PUT {method}", $"Parameter {parameterName} (Bad casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, clientIdBadParamCasing, HttpStatusCode400);
+    }
+
+    private async Task GetTwoParameters(string method, string parameterName1, string parameterValue1, string parameterName2, string parameterValue2)
+    {
+        string methodLowerCase = method.ToLowerInvariant();
+
+        // Test bad SET IDs
+        await SendRequest($"GET {method}", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
+        await SendRequest($"GET {method}", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadNegative, HttpStatusCode400);
+        await SendRequest($"GET {method}", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
+
+        // Test good parameter name casing
+        List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
+        clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        await SendRequest($"GET {method}", $"Parameter {parameterName1} (Good casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, clientIdGoodParamCasing, HttpStatusCode200);
+
+        // Test bad parameter 1 name casing
+        List<CheckProtocolParameter> clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
+        clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName1), parameterValue1));
+        clientIdBadParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        await SendRequest($"GET {method}", $"Parameter {parameterName1} (Bad casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, clientIdBadParamCasing, HttpStatusCode400);
+
+        // Test bad parameter 2 name casing
+        clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
+        clientIdBadParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName2), parameterValue2));
+        await SendRequest($"GET {method}", $"Parameter {parameterName2} (Bad casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, clientIdBadParamCasing, HttpStatusCode400);
+    }
+
+    private async Task PutNoParameters(string method)
+    {
+        string methodLowerCase = method.ToLowerInvariant();
+
+        // Test bad SET IDs
+        await SendRequest($"PUT {method}", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadEmpty, HttpStatusCode400);
+        await SendRequest($"PUT {method}", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadNegative, HttpStatusCode400);
+        await SendRequest($"PUT {method}", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadEmpty, HttpStatusCode400);
+
+        // Test Good call
+        List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
+        await SendRequest($"PUT {method}", "Good parameter name casing", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
+    }
+
+    private async Task PutTwoParameters(string method, string parameterName1, string parameterValue1, string parameterName2, string parameterValue2)
+    {
+        string methodLowerCase = method.ToLowerInvariant();
+
+        // Test bad SET IDs
+        await SendRequest($"PUT {method}", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadEmpty, HttpStatusCode400);
+        await SendRequest($"PUT {method}", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadNegative, HttpStatusCode400);
+        await SendRequest($"PUT {method}", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadEmpty, HttpStatusCode400);
+
+        // Test good parameter name casing
+        List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
+        clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        await SendRequest($"PUT {method}", $"Parameter {parameterName1} (Good casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
+
+        // Test bad parameter 1 name casing
+        List<CheckProtocolParameter> clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
+        clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName1), parameterValue1));
+        clientIdBadParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        await SendRequest($"PUT {method}", $"Parameter {parameterName1} (Bad casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, clientIdBadParamCasing, HttpStatusCode400);
+
+        // Test bad parameter 2 name casing
+        clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
+        clientIdBadParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName2), parameterValue2));
+        await SendRequest($"PUT {method}", $"Parameter {parameterName2} (Bad casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, clientIdBadParamCasing, HttpStatusCode400);
+    }
+
+    private async Task PutOneParameter(string method, string parameterName, string parameterValue)
+    {
+        string methodLowerCase = method.ToLowerInvariant();
+
+        // Test bad SET IDs
+        await SendRequest($"PUT {method}", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadEmpty, HttpStatusCode400);
+        await SendRequest($"PUT {method}", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadNegative, HttpStatusCode400);
+        await SendRequest($"PUT {method}", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadEmpty, HttpStatusCode400);
+
+        // Test good parameter name casing
+        List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
+        clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+        await SendRequest($"PUT {method}", $"Parameter {parameterName} (Good casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
+
+        // Test bad parameter name casing
+        List<CheckProtocolParameter> clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
+        clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName), parameterValue));
+        await SendRequest($"PUT {method}", $"Parameter {parameterName} (Bad casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, clientIdBadParamCasing, HttpStatusCode400);
+    }
+
+    private async Task GetProperty(string method)
+    {
+        string methodLowerCase = method.ToLowerInvariant();
+        // Test good GET
+        await SendRequest($"GET {method}", "OK", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdOk, HttpStatusCode200);
+        await SendRequest($"GET {method}", "Ids OK +extra parameter", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdOkPlus, HttpStatusCode200);
+
+        // Test bad GETs
+        await SendRequest($"GET {method}", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
+        await SendRequest($"GET {method}", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadNegative, HttpStatusCode400);
+        await SendRequest($"GET {method}", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
+    }
+
+    private async Task SendRequest(string testName, string messagePrefix, string url, HttpMethod httpMethod, List<CheckProtocolParameter> parameters, List<HttpStatusCode> expectedCodes)
+    {
+        if (expectedCodes is null)
+        {
+            throw new ArgumentNullException(nameof(expectedCodes));
+        }
+
+        try
+        {
+            string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString().ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
+
+            // Create the URI for this transaction and apply it to the request, adding "client id" and "transaction number" query parameters
+            UriBuilder transactionUri = new UriBuilder($"{clientHostAddress}{url}");
+
+            HttpRequestMessage request;
+
+            // Process HTTP GET and PUT methods
+            if (httpMethod == HttpMethod.Get) // HTTP GET methods
+            {
+                // Add to the query string any further required parameters for HTTP GET methods
+                if (parameters.Count > 0)
+                {
+                    foreach (CheckProtocolParameter parameter in parameters)
+                    {
+                        transactionUri.Query = $"{transactionUri.Query}&{parameter.ParameterName}={parameter.ParameterValue}";
+                    }
+                }
+
+                // Create a new request based on the transaction Uri
+                request = new HttpRequestMessage(httpMethod, transactionUri.Uri);
+
+            }
+            else // All other HTTP methods
+            {
+                // Create a new request based on the transaction Uri
+                request = new HttpRequestMessage(httpMethod, transactionUri.Uri);
+
+                // Add all parameters to the request body as form URL encoded content
+                if (parameters.Count > 0)
+                {
+                    Dictionary<string, string> formParameters = new();
+                    foreach (CheckProtocolParameter parameter in parameters)
+                    {
+                        formParameters.Add(parameter.ParameterName, parameter.ParameterValue);
+                    }
+
+
+                    FormUrlEncodedContent formUrlParameters = new FormUrlEncodedContent(formParameters);
+                    request.Content = formUrlParameters;
+                }
+            }
+
+            // Create a cancellation token that will time out after the required retry interval
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(settings.AlpacaConfiguration.LongResponseTimeout));
+
+            // Send the request to the remote device and wait synchronously for the response
+            HttpResponseMessage response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationTokenSource.Token);
+
+            if (expectedCodes.Contains(response.StatusCode))
+            {
+                LogOk(testName, $"{messagePrefix} - Received HTTP status code {(int)response.StatusCode} as expected.");
+                if ((settings.AlpacaConfiguration.ProtocolShowSuccessResponses) & (response.StatusCode != HttpStatusCode.OK))
+                {
+                    LogIndent($"{await response.Content.ReadAsStringAsync()}");
+                    LogBlankLine();
+                }
+            }
+            else
+            {
+                string expectedCodeList = "";
+                foreach (HttpStatusCode statusCode in expectedCodes)
+                {
+                    expectedCodeList += $"{(int)statusCode}, ";
+                }
+                expectedCodeList = expectedCodeList.TrimEnd(' ', ',');
+
+                LogIssue(testName, $"{messagePrefix} - Received HTTP status code: {(int)response.StatusCode} but expected HTTP status code(s): {expectedCodeList}. Response:");
+                LogIndent($"{await response.Content.ReadAsStringAsync()}");
+                LogBlankLine();
+            }
+        }
+        catch (Exception ex)
+        {
+            LogMessage(testName, TestOutcome.Error, $"{messagePrefix} - {ex}");
+        }
+    }
+
+    static string InvertCasing(string s)
+    {
+        char[] c = s.ToCharArray();
+        char[] cUpper = s.ToUpper().ToCharArray();
+        char[] cLower = s.ToLower().ToCharArray();
+
+        for (int i = 0; i < c.Length; i++)
+        {
+            if (c[i] == cUpper[i])
+            {
+                c[i] = cLower[i];
+            }
+            else
+            {
+                c[i] = cUpper[i];
+            }
+        }
+
+        return new string(c);
+    }
+
+    #endregion
+
+    #region Logging and window resize
+
+    public async void OnUiHasChanged(object sender, EventArgs e)
+    {
+        await ResizeLogWindow();
+    }
+
+    /// <summary>
+    /// Make the log window fit the browser size
+    ///    </summary>
+    /// <returns></returns>
+    async Task ResizeLogWindow()
+    {
+        try
+        {
+            BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>
+                ("GetBoundingWindowRect");
+            BrowserWindowSize blazorProWindowSize = new();
+            blazorProWindowSize.Width = (int)browserWindowSize.Width;
+            blazorProWindowSize.Height = (int)browserWindowSize.Height;
+
+            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
+            WindowResized(new object(), blazorProWindowSize);
+            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
+        }
+        catch { }
+    }
+
+    // This method will be called when the window resizes.
+    // It is ONLY called when the user stops dragging the window's edge. (It is already throttled to protect your app from performance nightmares)
+    async void WindowResized(object _, BrowserWindowSize window)
+    {
+        try
+        {
+            // Get the browsers's width / height
+            // Find the current position of the Conform log text area in the viewport
+            BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>
+                ("GetBoundingClientRect", "ProtocolLog");
+            if (result is not null)
+            {
+                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 2;
+                screenLogColumns = Convert.ToInt32(Convert.ToDouble(result.Width) / 10.5);
+
+                // Hide the status field at small heights
+                if (window.Height < 600)
+                {
+                    screenLogRows += 0;
+                }
+                else
+                {
+
+                }
+
+                string browser = "";
+                browser = await JS.InvokeAsync<string>
+                    (identifier: "IdentifyBrowser");
+
+                if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
+
+
+                //conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
+                await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
+            }
+
+            else
+            {
+                logger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"BoundingClientRectangle is NULL - No action taken.");
+            }
+        }
+        catch
+        {
+            // conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
+        }
+    }
+
+    /// <summary>
+    /// Clear the log window
+    ///    </summary>
+    private void ClearLogScreen()
+    {
+        screenLog = "";
+    }
+
+    /// <summary>
+    /// Log a message to the screen and log file
+    ///</summary>
+    ///<param name="method">Calling method name</param>
+    ///    <param name = "message" > Message to log</param>
+    ///    <param name = "padding" > Number of characters to which the message should be right padded</param>
+    private async void LogMessage(string method, TestOutcome? outcome, string message)
+    {
+        string methodString, outcomeString;
+
+        if (outcome is not null)
+        {
+            switch (outcome)
+            {
+                case TestOutcome.OK:
+                    outcomeString = "OK";
+                    break;
+
+                case TestOutcome.Info:
+                    outcomeString = "INFO";
+                    break;
+
+                case TestOutcome.Issue:
+                    outcomeString = "ISSUE";
+                    break;
+                case TestOutcome.Error:
+                    outcomeString = "ERROR";
+                    break;
+
+                case TestOutcome.Indent:
+                    outcomeString = "     ";
+                    break;
+
+                default:
+                    throw new Exception($"Unknown test outcome type: {outcome}");
+            }
+            methodString = $"{method.PadRight(COLUMN_WIDTH)}{outcomeString.PadRight(OUTCOME_WIDTH)}";
+
+            int breakPoint = screenLogColumns - COLUMN_WIDTH - OUTCOME_WIDTH;
+            string padString = new string(' ', COLUMN_WIDTH + (outcome == TestOutcome.Indent ? OUTCOME_WIDTH + 2 : OUTCOME_WIDTH));
+
+            // Reformat the text across multiple screen lines if the message does not contain HTML code. If it does contain HTML display as-is.
+            if (!message.ToLowerInvariant().Contains("<!doctype html>"))
+            {
+                if (message.Length > breakPoint)
+                {
+                    int breakCount = 1;
+                    while (message.Length > (padString.Length * (breakCount - 1) + breakPoint * breakCount))
+                    {
+                        int breakPosition = message.LastIndexOf(" ", padString.Length * (breakCount - 1) + breakPoint * breakCount);
+                        message = $"{message.Substring(0, breakPosition + 1)}\r\n{padString}{message.Substring(breakPosition + 1)}";
+                        breakCount++;
+                    }
+
+                    message = $"{(outcome == TestOutcome.Indent ? "  " : "")}{message}";
+                }
+            }
+            logger?.LogMessage(methodString, message);
+            string logLine = $"\r\n{methodString}{message}".Trim(new char[] { '\r', '\n' });
+            screenLog = screenLog + $"\r\n{logLine}";
+
+            switch (outcome)
+            {
+                case TestOutcome.OK:
+                    break;
+
+                case TestOutcome.Info:
+                    informationMessages.Add(logLine.Replace("Response:", ""));
+                    break;
+
+                case TestOutcome.Issue:
+                    issueMessages.Add(logLine.Replace("Response:", ""));
+                    break;
+
+                default:
+                    break;
+            }
+
+        }
+        else
+        {
+            methodString = method;
+            logger?.LogMessage(method, message);
+            screenLog = (screenLog + $"\r\n{message}").Trim(new char[] { '\r', '\n' });
+        }
+        try
+        {
+            await InvokeAsync(() => { StateHasChanged(); });
+            await JS.InvokeVoidAsync("ScrollToBottom", "ProtocolLog");
+        }
+        catch { }
+    }
+
+    /// <summary>
+    /// Log an OK message
+    ///    </summary>
+    ///    <param name="method">Calling method name</param>
+    /// <param name = "message" > Message to log</param>
+    private void LogOk(string method, string message)
+    {
+        LogMessage(method, TestOutcome.OK, message);
+    }
+
+    /// <summary>
+    /// Log an issue message
+    /// </summary>
+    /// <param name="method">    Calling method name</param>
+    /// <param name = "message" > Message to log</param>
+    private void LogIssue(string method, string message)
+    {
+        LogMessage(method, TestOutcome.Issue, message);
+    }
+
+    /// <summary>
+    /// Log an information message
+    /// </summary>
+    /// <param name="method"> Calling method name</param>
+    ///<param name = "message" > Message to log</param>
+    private void LogInformation(string method, string message)
+    {
+        LogMessage(method, TestOutcome.Info, message);
+    }
+
+    /// <summary>
+    /// Log an information message
+    ///    </summary>
+    ///    <param name="message">    Message to log</param>
+    private void LogIndent(string message)
+    {
+        LogMessage("", TestOutcome.Indent, $"{message}");
+    }
+
+    private void LogLine(string message)
+    {
+        logger?.LogMessage(message, "");
+        screenLog = screenLog + $"\r\n{message}";
+    }
+
+    /// <summary>
+    /// Add a blank line to the log
+    ///    </summary>
+    private void LogBlankLine()
+    {
+        screenLog += $"\r\n";
+    }
+
+    /// <summary>
+    /// Set the status message
+    ///    </summary>
+    ///    <param name="message"></param>
+    private async void SetStatus(string message)
+    {
+        statusText = message;
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    #endregion
+}

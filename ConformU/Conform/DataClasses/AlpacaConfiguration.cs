@@ -23,5 +23,6 @@ namespace ConformU
         public int EstablishConnectionTimeout { get; set; } = 5;
         public int StandardResponseTimeout{ get; set; } = 10;
         public int LongResponseTimeout{ get; set; } = 100;
+        public bool ProtocolShowSuccessResponses { get; set; } = true;
     }
 }
