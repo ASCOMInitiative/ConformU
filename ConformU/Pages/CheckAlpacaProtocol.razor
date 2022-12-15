@@ -297,7 +297,7 @@
                         break;
 
                     case DeviceTypes.ObservingConditions:
-                        await TestCamera();
+                        await TestObservingConditions();
                         break;
 
                     case DeviceTypes.Rotator:
@@ -485,27 +485,167 @@
 
     private async Task TestCoverCalibrator()
     {
-        await InvokeAsync(() => { StateHasChanged(); });
+        string parameter1 = "";
+
+        using (AlpacaCoverCalibrator coverCalibrator = AlpacaClient.GetDevice<AlpacaCoverCalibrator>(settings.AlpacaDevice))
+        {
+            try { coverCalibrator.Connected = true; } catch { }
+
+            // Test properties
+            await GetProperty("Brightness");
+            await GetProperty("CalibratorState");
+            await GetProperty("CoverState");
+            await GetProperty("MaxBrightness");
+
+            // Test Methods
+            await PutNoParameters("CalibratorOff");
+
+            try { parameter1 = (coverCalibrator.MaxBrightness / 2).ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("CalibratorOn", "Brightness", parameter1);
+
+            await PutNoParameters("OpenCover");
+            await PutNoParameters("HaltCover");
+            await PutNoParameters("CloseCover");
+
+            try { coverCalibrator.Connected = false; } catch { }
+        }
     }
 
     private async Task TestDome()
     {
-        await InvokeAsync(() => { StateHasChanged(); });
+        string parameter1 = "";
+
+        using (AlpacaDome dome = AlpacaClient.GetDevice<AlpacaDome>(settings.AlpacaDevice))
+        {
+            try { dome.Connected = true; } catch { }
+
+            // Test properties
+            await GetProperty("Altitude");
+            await GetProperty("AtHome");
+            await GetProperty("AtPark");
+            await GetProperty("Azimuth");
+            await GetProperty("CanFindHome");
+            await GetProperty("CanPark");
+            await GetProperty("CanSetAltitude");
+            await GetProperty("CanSetAzimuth");
+            await GetProperty("CanSetPark");
+            await GetProperty("CanSetShutter");
+            await GetProperty("CanSlave");
+            await GetProperty("CanSyncAzimuth");
+            await GetProperty("ShutterStatus");
+
+            await GetProperty("Slaved");
+            try { parameter1 = dome.Slaved.ToString(); } catch (Exception) { parameter1 = "false"; }
+            await PutOneParameter("Slaved", "Slaved", parameter1);
+
+            await GetProperty("Slewing");
+
+            // Test Methods
+            await PutNoParameters("AbortSlew");
+            await PutNoParameters("CloseShutter");
+            await PutNoParameters("FindHome");
+            await PutNoParameters("OpenShutter");
+            await PutNoParameters("Park");
+            await PutNoParameters("SetPark");
+
+            try { parameter1 = dome.Altitude.ToString(); } catch (Exception) { parameter1 = "45"; }
+            await PutOneParameter("SlewToAltitude", "Altitude", parameter1);
+
+            try { parameter1 = dome.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
+            await PutOneParameter("SlewToAzimuth", "Azimuth", parameter1);
+
+            try { parameter1 = dome.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
+            await PutOneParameter("SyncToAzimuth", "Azimuth", parameter1);
+
+            try { dome.Connected = false; } catch { }
+        }
     }
 
     private async Task TestFilterWheel()
     {
-        await InvokeAsync(() => { StateHasChanged(); });
+        string parameter1 = "";
+
+        using (AlpacaFilterWheel filterWheel = AlpacaClient.GetDevice<AlpacaFilterWheel>(settings.AlpacaDevice))
+        {
+            try { filterWheel.Connected = true; } catch { }
+
+            // Test properties
+            await GetProperty("FocusOffsets");
+            await GetProperty("Names");
+            await GetProperty("Position");
+
+            try { parameter1 = filterWheel.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("Position", "Position", parameter1);
+
+            try { filterWheel.Connected = false; } catch { }
+        }
     }
 
     private async Task TestFocuser()
     {
-        await InvokeAsync(() => { StateHasChanged(); });
+        string parameter1 = "";
+
+        using (AlpacaFocuser focuser = AlpacaClient.GetDevice<AlpacaFocuser>(settings.AlpacaDevice))
+        {
+            try { focuser.Connected = true; } catch { }
+
+            // Test properties
+            await GetProperty("Absolute");
+            await GetProperty("IsMoving");
+            await GetProperty("MaxIncrement");
+            await GetProperty("MaxStep");
+            await GetProperty("Position");
+            await GetProperty("StepSize");
+
+            await GetProperty("TempComp");
+            try { parameter1 = focuser.TempComp.ToString(); } catch (Exception) { parameter1 = "false"; }
+            await PutOneParameter("TempComp", "TempComp", parameter1);
+
+            await GetProperty("TempCompAvailable");
+            await GetProperty("Temperature");
+
+            // Methods
+            await PutNoParameters("Halt");
+            try { parameter1 = focuser.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("Move", "Position", parameter1);
+
+            try { focuser.Connected = false; } catch { }
+        }
     }
 
     private async Task TestObservingConditions()
     {
-        await InvokeAsync(() => { StateHasChanged(); });
+        string parameter1 = "";
+
+        using (AlpacaObservingConditions observingConditions = AlpacaClient.GetDevice<AlpacaObservingConditions>(settings.AlpacaDevice))
+        {
+            try { observingConditions.Connected = true; } catch { }
+
+            // Test properties
+            await GetProperty("AveragePeriod");
+            try { parameter1 = observingConditions.AveragePeriod.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+            await PutOneParameter("AveragePeriod", "AveragePeriod", parameter1);
+            await GetProperty("CloudCover");
+            await GetProperty("DewPoint");
+            await GetProperty("Humidity");
+            await GetProperty("Pressure");
+            await GetProperty("RainRate");
+            await GetProperty("SkyBrightness");
+            await GetProperty("SkyQuality");
+            await GetProperty("SkyTemperature");
+            await GetProperty("StarFWHM");
+            await GetProperty("Temperature");
+            await GetProperty("WindDirection");
+            await GetProperty("WindGust");
+            await GetProperty("WindSpeed");
+
+            // Methods
+            await PutNoParameters("Refresh");
+            await GetOneParameter("SensorDescription", "SensorName", "Pressure");
+            await GetOneParameter("TimeSinceLastUpdate", "SensorName", "Pressure");
+
+            try { observingConditions.Connected = false; } catch { }
+        }
     }
 
     private async Task TestRotator()
@@ -655,7 +795,7 @@
             try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "45"; }
             try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "45"; }
             await PutTwoParameters("SyncToCoordinates", "RightAscension", parameter1, "Declination", parameter2);
-            
+
             await PutNoParameters("SyncToTarget");
             await PutNoParameters("Unpark");
 
