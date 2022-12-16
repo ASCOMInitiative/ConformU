@@ -650,29 +650,74 @@
 
     private async Task TestRotator()
     {
-        await GetProperty("CanReverse");
-        await GetProperty("IsMoving");
-        await GetProperty("MechanicalPosition");
-        await GetProperty("Position");
-        await GetProperty("Reverse");
-        await PutOneParameter("Reverse", "Reverse", "False");
-        await GetProperty("StepSize");
-        await GetProperty("TargetPosition");
-        await PutNoParameters("Halt");
-        await PutOneParameter("Move", "Position", "0");
-        await PutOneParameter("MoveAbsolute", "Position", "0");
-        await PutOneParameter("MoveMechanical", "Position", "0");
-        await PutOneParameter("Sync", "Position", "0");
+        string parameter1 = "";
+
+        using (AlpacaRotator rotator = AlpacaClient.GetDevice<AlpacaRotator>(settings.AlpacaDevice))
+        {
+            try { rotator.Connected = true; } catch { }
+
+            // Test properties
+            await GetProperty("CanReverse");
+            await GetProperty("IsMoving");
+            await GetProperty("MechanicalPosition");
+            await GetProperty("Position");
+            await GetProperty("Reverse");
+            try { parameter1 = rotator.Reverse.ToString(); } catch (Exception) { parameter1 = "false"; }
+            await PutOneParameter("Reverse", "Reverse", parameter1);
+            await GetProperty("StepSize");
+            await GetProperty("TargetPosition");
+            await PutNoParameters("Halt");
+            try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("Move", "Position", parameter1);
+            try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("MoveAbsolute", "Position", parameter1);
+            try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("MoveMechanical", "Position", parameter1);
+            try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
+            await PutOneParameter("Sync", "Position", parameter1);
+
+            try { rotator.Connected = false; } catch { }
+        }
     }
 
     private async Task TestSafetyMonitor()
     {
-        await InvokeAsync(() => { StateHasChanged(); });
+        // Test properties
+        await GetProperty("IsSafe");
     }
 
     private async Task TestSwitch()
     {
-        await InvokeAsync(() => { StateHasChanged(); });
+        string parameter1 = "";
+
+        using (AlpacaSwitch switchDevice = AlpacaClient.GetDevice<AlpacaSwitch>(settings.AlpacaDevice))
+        {
+            try { switchDevice.Connected = true; } catch { }
+
+            // Test properties
+            await GetProperty("MaxSwitch");
+            await GetOneParameter("CanWrite", "Id", "0");
+            await GetOneParameter("GetSwitch", "Id", "0");
+            await GetOneParameter("GetSwitchDescription", "Id", "0");
+            await GetOneParameter("GetSwitchName", "Id", "0");
+            await GetOneParameter("GetSwitchValue", "Id", "0");
+            await GetOneParameter("MinSwitchValue", "Id", "0");
+            await GetOneParameter("MaxSwitchValue", "Id", "0");
+
+
+            try { parameter1 = switchDevice.GetSwitch(0).ToString(); } catch (Exception) { parameter1 = "false"; }
+            await PutTwoParameters("SetSwitch", "Id", "0", "State", parameter1);
+
+            try { parameter1 = switchDevice.GetSwitchName(0).ToString(); } catch (Exception) { parameter1 = "Unknown name"; }
+            await PutTwoParameters("SetSwitchName", "Id", "0", "Name", parameter1);
+
+            try { parameter1 = switchDevice.GetSwitchValue(0).ToString(); } catch (Exception) { try { parameter1 = switchDevice.MinSwitchValue(0).ToString(); } catch { parameter1 = "0.0"; } }
+            await PutTwoParameters("SetSwitchValue", "Id", "0", "Value", parameter1);
+
+            await GetOneParameter("SwitchStep", "Id", "0");
+
+            try { switchDevice.Connected = false; } catch { }
+        }
     }
 
     private async Task TestTelescope()
