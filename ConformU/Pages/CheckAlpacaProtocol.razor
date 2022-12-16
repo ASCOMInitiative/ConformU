@@ -42,7 +42,7 @@
     // HTTP status codes used to assess the outcome of protocol tests
     List<HttpStatusCode> HttpStatusCode200 = new() { HttpStatusCode.OK };
     List<HttpStatusCode> HttpStatusCode400 = new() { HttpStatusCode.BadRequest };
-    List<HttpStatusCode> HttpStatusCode400_404 = new() { HttpStatusCode.BadRequest, HttpStatusCode.NotFound };
+    List<HttpStatusCode> HttpStatusCode200_400_404 = new() { HttpStatusCode.OK, HttpStatusCode.BadRequest, HttpStatusCode.NotFound };
 
     // Parameters that can be sent to clients
     List<CheckProtocolParameter> ParamNone = new();
@@ -264,7 +264,7 @@
                 await SendRequest("GET Description", "Good call", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode200);
                 await SendRequest("GET Description", "Bad client id (negative)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdNegative, HttpStatusCode400);
                 await SendRequest("GET Description", "Bad client id (non-numeric)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdNegative, HttpStatusCode400);
-                await SendRequest("GET Description", "Bad Alpaca URL base element \"api\" (apx)\"", $"/apx/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400_404);
+                await SendRequest("GET Description", "Bad Alpaca URL base element \"api\" (apx)\"", $"/apx/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode200_400_404);
                 await SendRequest("GET Description", "Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400);
                 await SendRequest("GET Description", "Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400);
                 await SendRequest("GET Description", "Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400);
