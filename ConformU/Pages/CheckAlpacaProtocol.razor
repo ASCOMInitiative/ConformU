@@ -1093,7 +1093,7 @@
 
             if (expectedCodes.Contains(response.StatusCode))
             {
-                LogOk(testName, $"{messagePrefix} - Received HTTP status code {(int)response.StatusCode} as expected.");
+                LogOk(testName, $"{messagePrefix} - Received HTTP status code {(int)response.StatusCode} ({response.StatusCode}) as expected.");
                 if ((settings.AlpacaConfiguration.ProtocolShowSuccessResponses) & (response.StatusCode != HttpStatusCode.OK))
                 {
                     LogIndent($"{await response.Content.ReadAsStringAsync()}");
@@ -1109,7 +1109,7 @@
                 }
                 expectedCodeList = expectedCodeList.TrimEnd(' ', ',');
 
-                LogIssue(testName, $"{messagePrefix} - Expected HTTP status code{(expectedCodeList.Contains(',')?"s":"")}: {expectedCodeList.Trim()} but received status code: {(int)response.StatusCode} ({response.StatusCode}). Response:");
+                LogIssue(testName, $"{messagePrefix} - Expected HTTP status code{(expectedCodeList.Contains(',') ? "s" : "")}: {expectedCodeList.Trim()} but received status code: {(int)response.StatusCode} ({response.StatusCode}). Response:");
                 LogIndent($"{await response.Content.ReadAsStringAsync()}");
                 LogBlankLine();
             }
