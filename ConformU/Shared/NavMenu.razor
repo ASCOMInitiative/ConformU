@@ -64,14 +64,24 @@ else
                 <NavLink class="nav-link" href="/Setup" Match="NavLinkMatch.All">
                     <span class="oi oi-zoom-in" aria-hidden="true"></span> Device Setup
                 </NavLink>
+                @* Disable the Check Alpaca Protocol page when a Video device is selected because these are not available on Alpaca *@
+                @if (configuration.Settings.DeviceType != ASCOM.Common.DeviceTypes.Video)
+                {
+                    <NavLink class="nav-link" href="/CheckAlpacaProtocol" Match="NavLinkMatch.All">
+                        <span class="oi oi-bug" aria-hidden="true"></span> Check Alpaca Protocol
+                    </NavLink>
+                }
+                else
+                {
+                    <NavLink class="nav-link" style="color:red" Match="NavLinkMatch.All">
+                        <span class="oi oi-bug" aria-hidden="true" style="color:red;"></span> Check Alpaca Protocol
+                    </NavLink>
+                }
                 <NavLink class="nav-link" href="/AlpacaDiscoveryPage" Match="NavLinkMatch.All">
                     <span class="oi oi-camera-slr" aria-hidden="true"></span> Alpaca Discovery Map
                 </NavLink>
                 <NavLink class="nav-link" href="/DiscoveryDiagnostics" Match="NavLinkMatch.All">
                     <span class="oi oi-loop" aria-hidden="true"></span> Discovery Diagnostics
-                </NavLink>
-                <NavLink class="nav-link" href="/CheckAlpacaProtocol" Match="NavLinkMatch.All" >
-                    <span class="oi oi-bug" aria-hidden="true"></span> Check Alpaca Protocol
                 </NavLink>
                 @if (Update.UpdateAvailable())
                 {

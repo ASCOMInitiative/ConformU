@@ -46,15 +46,22 @@
 
     // Parameters that can be sent to clients
     List<CheckProtocolParameter> ParamNone = new();
-    List<CheckProtocolParameter> ParamClientIdOk = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionId", "67890") };
-    List<CheckProtocolParameter> ParamClientIdOkPlus = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionId", "67890"), new CheckProtocolParameter("DummyParaemeter", "DummyValue") };
-    List<CheckProtocolParameter> ParamClientIdBadEmpty = new() { new CheckProtocolParameter("ClientID", ""), new CheckProtocolParameter("ClientTransactionId", "") };
-    List<CheckProtocolParameter> ParamClientIdBadNegative = new() { new CheckProtocolParameter("ClientID", "-12345"), new CheckProtocolParameter("ClientTransactionId", "-67890") };
-    List<CheckProtocolParameter> ParamClientIdBadString = new() { new CheckProtocolParameter("ClientID", "asdasd"), new CheckProtocolParameter("ClientTransactionId", "qweqwe") };
-    List<CheckProtocolParameter> ParamConnectedTrue = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionId", "67890"), new CheckProtocolParameter("Connected", "True") };
-    List<CheckProtocolParameter> ParamConnectedFalse = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionId", "67890"), new CheckProtocolParameter("Connected", "False") };
-    List<CheckProtocolParameter> ParamConnectedEmpty = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionId", "67890"), new CheckProtocolParameter("Connected", "") };
-    List<CheckProtocolParameter> ParamConnectedNumeric = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionId", "67890"), new CheckProtocolParameter("Connected", "12345") };
+    List<CheckProtocolParameter> ParamClientIdOk = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890") };
+    List<CheckProtocolParameter> ParamClientIdDifferentCase = new() { new CheckProtocolParameter("clientid", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890") };
+    List<CheckProtocolParameter> ParamTransactionIdDifferentCase = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890") };
+    List<CheckProtocolParameter> ParamClientIdOkPlus = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("DummyParaemeter", "DummyValue") };
+    List<CheckProtocolParameter> ParamClientIdEmpty = new() { new CheckProtocolParameter("ClientID", ""), new CheckProtocolParameter("ClientTransactionID", "67890") };
+    List<CheckProtocolParameter> ParamClientIdWhiteSpace = new() { new CheckProtocolParameter("ClientID", "     "), new CheckProtocolParameter("ClientTransactionID", "67890") };
+    List<CheckProtocolParameter> ParamClientIdNegative = new() { new CheckProtocolParameter("ClientID", "-12345"), new CheckProtocolParameter("ClientTransactionID", "67890") };
+    List<CheckProtocolParameter> ParamClientIdString = new() { new CheckProtocolParameter("ClientID", "asdasd"), new CheckProtocolParameter("ClientTransactionID", "67890") };
+    List<CheckProtocolParameter> ParamTransactionIdEmpty = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "") };
+    List<CheckProtocolParameter> ParamTransactionIdWhiteSpace = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "     ") };
+    List<CheckProtocolParameter> ParamTransactionIdNegative = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "-67890") };
+    List<CheckProtocolParameter> ParamTransactionIdString = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "qweqwe") };
+    List<CheckProtocolParameter> ParamConnectedTrue = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "True") };
+    List<CheckProtocolParameter> ParamConnectedFalse = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "False") };
+    List<CheckProtocolParameter> ParamConnectedEmpty = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "") };
+    List<CheckProtocolParameter> ParamConnectedNumeric = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "12345") };
 
     ConformU.Settings settings;
 
@@ -93,7 +100,7 @@
     #region Check Alpaca Protocol
 
     /// <summary>
-    /// Test the Alpaca protocol
+    /// Start an Alpaca protocol check
     ///</summary>
     internal void StartCheckAlpacaProtocol()
     {
@@ -130,6 +137,8 @@
             LogMessage("StartCheckAlpacaProtocol", TestOutcome.Error, $"Exception: {ex}");
         }
     }
+
+    #region Device tests
 
     internal async Task TestAlpacaProtocol()
     {
@@ -227,9 +236,9 @@
                 await SendRequest("GET Connected", "Ids OK +extra parameter", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Get, ParamClientIdOkPlus, HttpStatusCode200);
 
                 // Test bad GET Connected values
-                await SendRequest("GET Connected", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
-                await SendRequest("GET Connected", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Get, ParamClientIdBadNegative, HttpStatusCode400);
-                await SendRequest("GET Connected", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
+                await SendRequest("GET Connected", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Get, ParamClientIdEmpty, HttpStatusCode400);
+                await SendRequest("GET Connected", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Get, ParamClientIdNegative, HttpStatusCode400);
+                await SendRequest("GET Connected", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Get, ParamClientIdEmpty, HttpStatusCode400);
 
                 // Set Connected true to start the test
                 await SendRequest("PUT Connected True", "Ids OK", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/connected", HttpMethod.Put, ParamConnectedTrue, HttpStatusCode200);
@@ -253,8 +262,8 @@
 
                 // Test primary URL structure: /api/v1/devicetype/0
                 await SendRequest("GET Description", "Good call", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode200);
-                await SendRequest("GET Description", "Bad client id (negative)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdBadNegative, HttpStatusCode400);
-                await SendRequest("GET Description", "Bad client id (non-numeric)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdBadNegative, HttpStatusCode400);
+                await SendRequest("GET Description", "Bad client id (negative)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdNegative, HttpStatusCode400);
+                await SendRequest("GET Description", "Bad client id (non-numeric)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdNegative, HttpStatusCode400);
                 await SendRequest("GET Description", "Bad Alpaca URL base element \"api\" (apx)\"", $"/apx/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400_404);
                 await SendRequest("GET Description", "Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400);
                 await SendRequest("GET Description", "Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamClientIdOk, HttpStatusCode400);
@@ -383,6 +392,7 @@
             configuration.Settings.OperationInProgress = false;
             configuration.RaiseUiHasChangedEvent();
             await InvokeAsync(() => { StateHasChanged(); });
+            await Task.Delay(500);
             await JS.InvokeVoidAsync("ScrollToBottom", "ProtocolLog");
         }
     }
@@ -800,7 +810,8 @@
             try { parameter1 = ((int)telescope.TrackingRate).ToString(); } catch (Exception) { parameter1 = "0"; }
             await PutOneParameter("TrackingRate", "TrackingRate", parameter1);
             await GetProperty("UTCDate");
-            try { parameter1 = telescope.UTCDate.ToString(); } catch (Exception) { parameter1 = "2022 - 12 - 04T17: 45:31.1234567Z"; }
+            //                                                                                   yyyy-MM-ddTHH:mm:ss.fffffffZ
+            try { parameter1 = telescope.UTCDate.ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ"); } catch (Exception) { parameter1 = @"2022-12-04T17:45:31.1234567Z"; }
             await PutOneParameter("UTCDate", "UTCDate", parameter1);
 
             // Test Methods
@@ -848,19 +859,30 @@
         }
     }
 
+    #endregion
+
+    #region Test support
+
     private async Task GetOneParameter(string method, string parameterName, string parameterValue)
     {
         string methodLowerCase = method.ToLowerInvariant();
 
-        // Test bad SET IDs
-        await SendRequest($"PUT {method}", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
-        await SendRequest($"PUT {method}", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadNegative, HttpStatusCode400);
-        await SendRequest($"PUT {method}", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
+        // Test bad client and transaction Ids
+        await TestBadIds(method, HttpMethod.Get);
 
         // Test good parameter name casing
         List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
         clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+
+        List<CheckProtocolParameter> differentClientIdCasing = new List<CheckProtocolParameter>(ParamClientIdDifferentCase);
+        differentClientIdCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+
+        List<CheckProtocolParameter> differentTransactionIdCasing = new List<CheckProtocolParameter>(ParamTransactionIdDifferentCase);
+        differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+
         await SendRequest($"PUT {method}", $"Parameter {parameterName} (Good casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, clientIdGoodParamCasing, HttpStatusCode200);
+        await SendRequest($"GET {method}", "Different ClientId case", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, differentClientIdCasing, HttpStatusCode200);
+        await SendRequest($"GET {method}", "Different ClientTransactionId case", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, differentTransactionIdCasing, HttpStatusCode200);
 
         // Test bad parameter name casing
         List<CheckProtocolParameter> clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
@@ -872,16 +894,25 @@
     {
         string methodLowerCase = method.ToLowerInvariant();
 
-        // Test bad SET IDs
-        await SendRequest($"GET {method}", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
-        await SendRequest($"GET {method}", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadNegative, HttpStatusCode400);
-        await SendRequest($"GET {method}", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
+        // Test bad client and transaction Ids
+        await TestBadIds(method, HttpMethod.Get);
 
         // Test good parameter name casing
         List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
         clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
         clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+
+        List<CheckProtocolParameter> differentClientIdCasing = new List<CheckProtocolParameter>(ParamClientIdDifferentCase);
+        differentClientIdCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        differentClientIdCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+
+        List<CheckProtocolParameter> differentTransactionIdCasing = new List<CheckProtocolParameter>(ParamTransactionIdDifferentCase);
+        differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+
         await SendRequest($"GET {method}", $"Parameter {parameterName1} (Good casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, clientIdGoodParamCasing, HttpStatusCode200);
+        await SendRequest($"GET {method}", "Different ClientId case", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, differentClientIdCasing, HttpStatusCode200);
+        await SendRequest($"GET {method}", "Different ClientTransactionId case", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, differentTransactionIdCasing, HttpStatusCode200);
 
         // Test bad parameter 1 name casing
         List<CheckProtocolParameter> clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
@@ -900,30 +931,39 @@
     {
         string methodLowerCase = method.ToLowerInvariant();
 
-        // Test bad SET IDs
-        await SendRequest($"PUT {method}", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadEmpty, HttpStatusCode400);
-        await SendRequest($"PUT {method}", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadNegative, HttpStatusCode400);
-        await SendRequest($"PUT {method}", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadEmpty, HttpStatusCode400);
+        // Test bad client and transaction Ids
+        await TestBadIds(method, HttpMethod.Put);
 
         // Test Good call
         List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
         await SendRequest($"PUT {method}", "Good parameter name casing", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
+        await SendRequest($"PUT {method}", "Different ClientId case", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdDifferentCase, HttpStatusCode200);
+        await SendRequest($"PUT {method}", "Different ClientTransactionId case", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamTransactionIdDifferentCase, HttpStatusCode200);
     }
 
     private async Task PutTwoParameters(string method, string parameterName1, string parameterValue1, string parameterName2, string parameterValue2)
     {
         string methodLowerCase = method.ToLowerInvariant();
 
-        // Test bad SET IDs
-        await SendRequest($"PUT {method}", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadEmpty, HttpStatusCode400);
-        await SendRequest($"PUT {method}", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadNegative, HttpStatusCode400);
-        await SendRequest($"PUT {method}", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadEmpty, HttpStatusCode400);
+        // Test bad client and transaction Ids
+        await TestBadIds(method, HttpMethod.Put);
 
         // Test good parameter name casing
         List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
         clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
         clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+
+        List<CheckProtocolParameter> differentClientIdCasing = new List<CheckProtocolParameter>(ParamClientIdDifferentCase);
+        differentClientIdCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        differentClientIdCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+
+        List<CheckProtocolParameter> differentTransactionIdCasing = new List<CheckProtocolParameter>(ParamTransactionIdDifferentCase);
+        differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+
         await SendRequest($"PUT {method}", $"Parameter {parameterName1} (Good casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
+        await SendRequest($"PUT {method}", "Different ClientId case", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, differentClientIdCasing, HttpStatusCode200);
+        await SendRequest($"PUT {method}", "Different ClientTransactionId case", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, differentTransactionIdCasing, HttpStatusCode200);
 
         // Test bad parameter 1 name casing
         List<CheckProtocolParameter> clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
@@ -942,20 +982,42 @@
     {
         string methodLowerCase = method.ToLowerInvariant();
 
-        // Test bad SET IDs
-        await SendRequest($"PUT {method}", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadEmpty, HttpStatusCode400);
-        await SendRequest($"PUT {method}", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadNegative, HttpStatusCode400);
-        await SendRequest($"PUT {method}", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, ParamClientIdBadEmpty, HttpStatusCode400);
+        // Test bad client and transaction Ids
+        await TestBadIds(method, HttpMethod.Put);
 
         // Test good parameter name casing
         List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
         clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+
+        List<CheckProtocolParameter> differentClientIdCasing = new List<CheckProtocolParameter>(ParamClientIdDifferentCase);
+        differentClientIdCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+
+        List<CheckProtocolParameter> differentTransactionIdCasing = new List<CheckProtocolParameter>(ParamTransactionIdDifferentCase);
+        differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+
         await SendRequest($"PUT {method}", $"Parameter {parameterName} (Good casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
+        await SendRequest($"PUT {method}", "Different ClientId case", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, differentClientIdCasing, HttpStatusCode200);
+        await SendRequest($"PUT {method}", "Different ClientTransactionId case", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, differentTransactionIdCasing, HttpStatusCode200);
 
         // Test bad parameter name casing
         List<CheckProtocolParameter> clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamClientIdOk);
         clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName), parameterValue));
         await SendRequest($"PUT {method}", $"Parameter {parameterName} (Bad casing)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Put, clientIdBadParamCasing, HttpStatusCode400);
+    }
+
+    private async Task TestBadIds(string method, HttpMethod httpMethod)
+    {
+        string methodLowerCase = method.ToLowerInvariant();
+        string httpmethodString = httpMethod.ToString().ToUpper();
+        // Test bad GETs
+        await SendRequest($"{httpmethodString} {method}", "Client Id empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", httpMethod, ParamClientIdEmpty, HttpStatusCode400);
+        await SendRequest($"{httpmethodString} {method}", "Client Id white space", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", httpMethod, ParamClientIdWhiteSpace, HttpStatusCode400);
+        await SendRequest($"{httpmethodString} {method}", "Client Id negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", httpMethod, ParamClientIdNegative, HttpStatusCode400);
+        await SendRequest($"{httpmethodString} {method}", "Client Id string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", httpMethod, ParamClientIdEmpty, HttpStatusCode400);
+        await SendRequest($"{httpmethodString} {method}", "Transaction Id empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", httpMethod, ParamTransactionIdEmpty, HttpStatusCode400);
+        await SendRequest($"{httpmethodString} {method}", "Transaction Id white space", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", httpMethod, ParamTransactionIdWhiteSpace, HttpStatusCode400);
+        await SendRequest($"{httpmethodString} {method}", "Transaction Id negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", httpMethod, ParamClientIdNegative, HttpStatusCode400);
+        await SendRequest($"{httpmethodString} {method}", "Transaction Id string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", httpMethod, ParamClientIdString, HttpStatusCode400);
     }
 
     private async Task GetProperty(string method)
@@ -964,11 +1026,10 @@
         // Test good GET
         await SendRequest($"GET {method}", "OK", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdOk, HttpStatusCode200);
         await SendRequest($"GET {method}", "Ids OK +extra parameter", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdOkPlus, HttpStatusCode200);
+        await SendRequest($"GET {method}", "Different ClientId case", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdDifferentCase, HttpStatusCode200);
+        await SendRequest($"GET {method}", "Different ClientTransactionId case", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamTransactionIdDifferentCase, HttpStatusCode200);
 
-        // Test bad GETs
-        await SendRequest($"GET {method}", "Ids empty", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
-        await SendRequest($"GET {method}", "Ids negative", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadNegative, HttpStatusCode400);
-        await SendRequest($"GET {method}", "Ids string", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}", HttpMethod.Get, ParamClientIdBadEmpty, HttpStatusCode400);
+        await TestBadIds(method, HttpMethod.Get);
     }
 
     private async Task SendRequest(string testName, string messagePrefix, string url, HttpMethod httpMethod, List<CheckProtocolParameter> parameters, List<HttpStatusCode> expectedCodes)
@@ -1044,11 +1105,11 @@
                 string expectedCodeList = "";
                 foreach (HttpStatusCode statusCode in expectedCodes)
                 {
-                    expectedCodeList += $"{(int)statusCode}, ";
+                    expectedCodeList += $"{(int)statusCode} ({statusCode}), ";
                 }
                 expectedCodeList = expectedCodeList.TrimEnd(' ', ',');
 
-                LogIssue(testName, $"{messagePrefix} - Received HTTP status code: {(int)response.StatusCode} but expected HTTP status code(s): {expectedCodeList}. Response:");
+                LogIssue(testName, $"{messagePrefix} - Expected HTTP status code{(expectedCodeList.Contains(',')?"s":"")}: {expectedCodeList.Trim()} but received status code: {(int)response.StatusCode} ({response.StatusCode}). Response:");
                 LogIndent($"{await response.Content.ReadAsStringAsync()}");
                 LogBlankLine();
             }
@@ -1079,6 +1140,8 @@
 
         return new string(c);
     }
+
+    #endregion
 
     #endregion
 
