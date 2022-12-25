@@ -119,9 +119,23 @@ else
     /// Event handler for page initialised event
     /// </summary>
     /// <remarks>Hook up an event handler to redisplay the page header whenever the configuraiton is changed. </remarks>
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         configuration.UiHasChanged += OnUiChanged;
+        try
+        {
+            BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
+            BrowserWindowSize blazorProWindowSize = new();
+            blazorProWindowSize.Width = (int)browserWindowSize.Width;
+            blazorProWindowSize.Height = (int)browserWindowSize.Height;
+            IsSmall = Globals.IsSmall(blazorProWindowSize.Width, blazorProWindowSize.Height);//window.Width < Globals.UI_SMALL_TRANSITION_SIZE;
+
+            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
+            //WindowResized(new object(), blazorProWindowSize);
+            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
+        }
+        catch { }
+
     }
 
     protected override void OnAfterRender(bool firstRender)
