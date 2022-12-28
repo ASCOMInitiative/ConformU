@@ -873,7 +873,7 @@
             }
             else // Test omitted
             {
-                LogInformation(TelescopeTester.TELTEST_PARK_UNPARK, "Test omitted due to Conform configuration setting", null);
+                LogInformation($"PUT {TelescopeTester.TELTEST_PARK_UNPARK}", "Test omitted due to Conform configuration setting", null);
             }
 
             if (settings.TelescopeTests[TelescopeTester.TELTEST_FIND_HOME]) // Test enabled
@@ -884,7 +884,7 @@
             }
             else // Test omitted
             {
-                LogInformation(TelescopeTester.TELTEST_FIND_HOME, "Test omitted due to Conform configuration setting", null);
+                LogInformation($"PUT {TelescopeTester.TELTEST_FIND_HOME}", "Test omitted due to Conform configuration setting", null);
             }
 
             // Set tracking to TRUE for RA/Dec slews
@@ -896,7 +896,7 @@
             }
             else // Test omitted
             {
-                LogInformation(TelescopeTester.TELTEST_ABORT_SLEW, "Test omitted due to Conform configuration setting", null);
+                LogInformation($"PUT {TelescopeTester.TELTEST_ABORT_SLEW}", "Test omitted due to Conform configuration setting", null);
             }
 
             await GetOneParameter("AxisRates", "Axis", "0");
@@ -912,7 +912,7 @@
             }
             else // Test omitted
             {
-                LogInformation(TelescopeTester.TELTEST_MOVE_AXIS, "Test omitted due to Conform configuration setting", null);
+                LogInformation($"PUT {TelescopeTester.TELTEST_MOVE_AXIS}", "Test omitted due to Conform configuration setting", null);
             }
 
             if (settings.TelescopeTests[TelescopeTester.TELTEST_PULSE_GUIDE]) // Test enabled
@@ -924,7 +924,7 @@
             }
             else // Test omitted
             {
-                LogInformation(TelescopeTester.TELTEST_PULSE_GUIDE, "Test omitted due to Conform configuration setting", null);
+                LogInformation($"PUT {TelescopeTester.TELTEST_PULSE_GUIDE}", "Test omitted due to Conform configuration setting", null);
             }
 
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_COORDINATES_ASYNC]) // Test enabled
@@ -938,7 +938,7 @@
             }
             else // Test omitted
             {
-                LogInformation(TelescopeTester.TELTEST_SLEW_TO_COORDINATES_ASYNC, "Test omitted due to Conform configuration setting", null);
+                LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_COORDINATES_ASYNC}", "Test omitted due to Conform configuration setting", null);
             }
 
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_COORDINATES]) // Test enabled
@@ -952,7 +952,7 @@
             }
             else // Test omitted
             {
-                LogInformation(TelescopeTester.TELTEST_SLEW_TO_COORDINATES, "Test omitted due to Conform configuration setting", null);
+                LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_COORDINATES}", "Test omitted due to Conform configuration setting", null);
             }
 
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_TARGET_ASYNC]) // Test enabled
@@ -966,7 +966,7 @@
             }
             else // Test omitted
             {
-                LogInformation(TelescopeTester.TELTEST_SLEW_TO_TARGET_ASYNC, "Test omitted due to Conform configuration setting", null);
+                LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_TARGET_ASYNC}", "Test omitted due to Conform configuration setting", null);
             }
 
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_TARGET]) // Test enabled
@@ -978,7 +978,7 @@
             }
             else // Test omitted
             {
-                LogInformation(TelescopeTester.TELTEST_SLEW_TO_TARGET, "Test omitted due to Conform configuration setting", null);
+                LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_TARGET}", "Test omitted due to Conform configuration setting", null);
             }
 
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SYNC_TO_COORDINATES]) // Test enabled
@@ -989,7 +989,7 @@
             }
             else // Test omitted
             {
-                LogInformation(TelescopeTester.TELTEST_SYNC_TO_COORDINATES, "Test omitted due to Conform configuration setting", null);
+                LogInformation($"PUT {TelescopeTester.TELTEST_SYNC_TO_COORDINATES}", "Test omitted due to Conform configuration setting", null);
             }
 
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SYNC_TO_TARGET]) // Test enabled
@@ -998,7 +998,7 @@
             }
             else // Test omitted
             {
-                LogInformation(TelescopeTester.TELTEST_SYNC_TO_TARGET, "Test omitted due to Conform configuration setting", null);
+                LogInformation($"PUT {TelescopeTester.TELTEST_SYNC_TO_TARGET}", "Test omitted due to Conform configuration setting", null);
             }
 
             // Set tracking to FALSE for Alt/Az slews
@@ -1015,7 +1015,7 @@
             }
             else // Test omitted
             {
-                LogInformation(TelescopeTester.TELTEST_SLEW_TO_ALTAZ_ASYNC, "Test omitted due to Conform configuration setting", null);
+                LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_ALTAZ_ASYNC}", "Test omitted due to Conform configuration setting", null);
             }
 
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_ALTAZ]) // Test enabled
@@ -1029,7 +1029,7 @@
             }
             else // Test omitted
             {
-                LogInformation(TelescopeTester.TELTEST_SLEW_TO_ALTAZ, "Test omitted due to Conform configuration setting", null);
+                LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_ALTAZ}", "Test omitted due to Conform configuration setting", null);
             }
 
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SYNC_TO_ALTAZ]) // Test enabled
@@ -1040,7 +1040,7 @@
             }
             else // Test omitted
             {
-                LogInformation(TelescopeTester.TELTEST_SYNC_TO_ALTAZ, "Test omitted due to Conform configuration setting", null);
+                LogInformation($"PUT {TelescopeTester.TELTEST_SYNC_TO_ALTAZ}", "Test omitted due to Conform configuration setting", null);
             }
 
             // Set tracking to FALSE
@@ -1606,7 +1606,7 @@
     private void LogInformation(string method, string message, string contextMessage)
     {
         LogMessage(method, TestOutcome.Info, message, contextMessage);
-        informationMessages.Add($"{method} ==> {message}\r\n  Response: {contextMessage}\r\n");
+        informationMessages.Add($"{method} ==> {message} {(string.IsNullOrEmpty(contextMessage) ? "" : $"\r\n  Response: {contextMessage}")}\r\n"); //
     }
 
     /// <summary>
