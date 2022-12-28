@@ -78,6 +78,10 @@
     internal List<CheckProtocolParameter> ParamConnectedTrue = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "True") };
     internal List<CheckProtocolParameter> ParamConnectedFalse = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "False") };
 
+    // Set Telescope.Tracking True and False
+    internal List<CheckProtocolParameter> ParamTrackingTrue = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Tracking", "True") };
+    internal List<CheckProtocolParameter> ParamTrackingFalse = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Tracking", "False") };
+
     #endregion
 
     internal enum TestOutcome
@@ -888,7 +892,7 @@
             }
 
             // Set tracking to TRUE for RA/Dec slews
-            await PutOneParameter("Tracking", "Tracking", "True", null);
+            await SendApi("True", "Tracking", HttpMethod.Put, ParamTrackingTrue, HttpStatusCode200);
 
             if (settings.TelescopeTests[TelescopeTester.TELTEST_ABORT_SLEW]) // Test enabled
             {
@@ -1002,7 +1006,7 @@
             }
 
             // Set tracking to FALSE for Alt/Az slews
-            await PutOneParameter("Tracking", "Tracking", "False", null);
+            await SendApi("False", "Tracking", HttpMethod.Put, ParamTrackingFalse, HttpStatusCode200);
 
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_ALTAZ_ASYNC]) // Test enabled
             {
@@ -1042,9 +1046,10 @@
             {
                 LogInformation($"PUT {TelescopeTester.TELTEST_SYNC_TO_ALTAZ}", "Test omitted due to Conform configuration setting", null);
             }
+            LogBlankLine();
 
             // Set tracking to FALSE
-            await PutOneParameter("Tracking", "Tracking", "False", null);
+            await SendApi("False", "Tracking", HttpMethod.Put, ParamTrackingFalse, HttpStatusCode200);
 
             try { telescope.Connected = false; } catch { }
         }
