@@ -19,7 +19,7 @@ namespace ConformU
 {
     public class Program
     {
-        private static ConformConfiguration conformConfiguration;
+        private static ConformConfigurationService conformConfiguration;
         private static string[] commandLineArguments;
 
 #if WINDOWS7_0_OR_GREATER
@@ -314,7 +314,7 @@ namespace ConformU
             return 0;
         }
 
-        public static IHostBuilder CreateHostBuilder(ConformLogger conformLogger, ConformConfiguration conformConfiguration, string[] args)
+        public static IHostBuilder CreateHostBuilder(ConformLogger conformLogger, ConformConfigurationService conformConfiguration, string[] args)
         {
             IHostBuilder builder = null;
 

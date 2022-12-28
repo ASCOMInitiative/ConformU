@@ -30,14 +30,14 @@ namespace ConformU
     public class ConformanceTestManager : IDisposable
     {
         string l_Message;
-        readonly ConformConfiguration configuration;
+        readonly ConformConfigurationService configuration;
         readonly CancellationToken cancellationToken;
         private bool disposedValue;
         private readonly ConformLogger TL;
         private readonly Settings settings;
         DeviceTesterBaseClass testDevice = null; // Variable to hold the device tester class
 
-        public ConformanceTestManager(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken)
+        public ConformanceTestManager(ConformConfigurationService conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken)
         {
             configuration = conformConfiguration;
             cancellationToken = conformCancellationToken;
