@@ -789,39 +789,53 @@
             await GetNoParameters("CanSyncAltAz");
             await GetNoParameters("CanUnpark");
             await GetNoParameters("Declination");
+
             await GetNoParameters("DeclinationRate");
             try { parameter1 = telescope.DeclinationRate.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("DeclinationRate", "DeclinationRate", parameter1, null);
+
             await GetNoParameters("DoesRefraction");
             try { parameter1 = telescope.DoesRefraction.ToString(); } catch (Exception) { parameter1 = "false"; }
             await PutOneParameter("DoesRefraction", "DoesRefraction", parameter1, null);
+
             await GetNoParameters("EquatorialSystem");
             await GetNoParameters("FocalLength");
+
             await GetNoParameters("GuideRateDeclination");
             try { parameter1 = telescope.GuideRateDeclination.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("GuideRateDeclination", "GuideRateDeclination", parameter1, null);
+
             await GetNoParameters("GuideRateRightAscension");
             try { parameter1 = telescope.GuideRateRightAscension.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("GuideRateRightAscension", "GuideRateRightAscension", parameter1, null);
+
             await GetNoParameters("IsPulseGuiding");
             await GetNoParameters("RightAscension");
+
             await GetNoParameters("RightAscensionRate");
             try { parameter1 = telescope.RightAscensionRate.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("RightAscensionRate", "RightAscensionRate", parameter1, null);
+
             await GetNoParameters("SideOfPier");
             try { parameter1 = ((int)telescope.SideOfPier).ToString(); } catch (Exception) { parameter1 = "0"; }
             await PutOneParameter("SideOfPier", "SideOfPier", parameter1, null);
+
             await GetNoParameters("SiderealTime");
+
             await GetNoParameters("SiteElevation");
             try { parameter1 = telescope.SiteElevation.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("SiteElevation", "SiteElevation", parameter1, null);
+
             await GetNoParameters("SiteLatitude");
             try { parameter1 = telescope.SiteLatitude.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("SiteLatitude", "SiteLatitude", parameter1, null);
+
             await GetNoParameters("SiteLongitude");
             try { parameter1 = telescope.SiteLongitude.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("SiteLongitude", "SiteLongitude", parameter1, null);
+
             await GetNoParameters("Slewing");
+
             await GetNoParameters("SlewSettleTime");
             try { parameter1 = telescope.SlewSettleTime.ToString(); } catch (Exception) { parameter1 = "0"; }
             await PutOneParameter("SlewSettleTime", "SlewSettleTime", parameter1, null);
@@ -837,92 +851,200 @@
             await GetNoParameters("Tracking");
             try { parameter1 = telescope.Tracking.ToString(); } catch (Exception) { parameter1 = "false"; }
             await PutOneParameter("Tracking", "Tracking", parameter1, null);
+
             await GetNoParameters("TrackingRate");
             try { parameter1 = ((int)telescope.TrackingRate).ToString(); } catch (Exception) { parameter1 = "0"; }
             await PutOneParameter("TrackingRate", "TrackingRate", parameter1, null);
-            await GetNoParameters("UTCDate");
-            //                                                                                                                  yyyy-MM-ddTHH:mm:ss.fffffffZ
+
+            await GetNoParameters("UTCDate"); // Date format:                                                                   yyyy-MM-ddTHH:mm:ss.fffffffZ
             try { parameter1 = telescope.UTCDate.ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ"); } catch (Exception) { parameter1 = @"2022-12-04T17:45:31.1234567Z"; }
             await PutOneParameter("UTCDate", "UTCDate", parameter1, null);
 
             // Test Methods
-            SetStatus("Parking scope...");
-            await PutNoParameters("Park", null);
-            WaitWhile("Park", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
 
-            await PutNoParameters("SetPark", null);
-            await PutNoParameters("Unpark", null);
+            if (settings.TelescopeTests[TelescopeTester.TELTEST_PARK_UNPARK]) // Test enabled
+            {
+                SetStatus("Parking scope...");
+                await PutNoParameters("Park", null);
+                WaitWhile("Park", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
 
-            SetStatus("Finding home...");
-            await PutNoParameters("FindHome", null);
-            WaitWhile("FindHome", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+                await PutNoParameters("SetPark", null);
+                await PutNoParameters("Unpark", null);
+            }
+            else // Test omitted
+            {
+                LogInformation(TelescopeTester.TELTEST_PARK_UNPARK, "Test omitted due to Conform configuration setting", null);
+            }
 
-            // Set tracking to TRUE
-            await PutOneParameter("Tracking", "Tracking", "True", null);
-
-            await PutNoParameters("AbortSlew", null);
-            await GetOneParameter("AxisRates", "Axis", "0");
-            await GetOneParameter("CanMoveAxis", "Axis", "0");
-            await GetTwoParameters("DestinationSideOfPier", "RightAscension", "0.0", "Declination", "0.0");
-            await PutTwoParameters("MoveAxis", "Axis", "0", "Rate", "0.0", null);
-
-            await PutTwoParameters("PulseGuide", "Direction", "0", "Duration", "0", null);
+            if (settings.TelescopeTests[TelescopeTester.TELTEST_FIND_HOME]) // Test enabled
+            {
+                SetStatus("Finding home...");
+                await PutNoParameters("FindHome", null);
+                WaitWhile("FindHome", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+            }
+            else // Test omitted
+            {
+                LogInformation(TelescopeTester.TELTEST_FIND_HOME, "Test omitted due to Conform configuration setting", null);
+            }
 
             // Set tracking to TRUE for RA/Dec slews
             await PutOneParameter("Tracking", "Tracking", "True", null);
 
-            Action<string, Func<bool>, int, int, Func<string>> waitForSlew = WaitWhile;
+            if (settings.TelescopeTests[TelescopeTester.TELTEST_ABORT_SLEW]) // Test enabled
+            {
+                await PutNoParameters("AbortSlew", null);
+            }
+            else // Test omitted
+            {
+                LogInformation(TelescopeTester.TELTEST_ABORT_SLEW, "Test omitted due to Conform configuration setting", null);
+            }
+
+            await GetOneParameter("AxisRates", "Axis", "0");
+            await GetOneParameter("CanMoveAxis", "Axis", "0");
 
             try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "21.0"; }
             try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "70"; }
-            await PutTwoParameters("SlewToCoordinatesAsync", "RightAscension", parameter1, "Declination", parameter2, () =>
+            await GetTwoParameters("DestinationSideOfPier", "RightAscension", parameter1, "Declination", parameter2);
+
+            if (settings.TelescopeTests[TelescopeTester.TELTEST_MOVE_AXIS]) // Test enabled
             {
-                WaitWhile("SlewToCoordinatesAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
-            });
-
-            try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "12.0"; }
-            try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "80"; }
-            await PutTwoParameters("SlewToCoordinates", "RightAscension", parameter1, "Declination", parameter2, () =>
+                await PutTwoParameters("MoveAxis", "Axis", "0", "Rate", "0.0", null);
+            }
+            else // Test omitted
             {
-                WaitWhile("SlewToCoordinates", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
-            });
+                LogInformation(TelescopeTester.TELTEST_MOVE_AXIS, "Test omitted due to Conform configuration setting", null);
+            }
 
-            await PutNoParameters("SlewToTargetAsync", () =>
+            if (settings.TelescopeTests[TelescopeTester.TELTEST_PULSE_GUIDE]) // Test enabled
             {
-                WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
-            });
-
-            await PutNoParameters("SlewToTarget", () =>
+                await PutTwoParameters("PulseGuide", "Direction", "0", "Duration", "0", () =>
+                {
+                    WaitWhile("PulseGuide", () => { return telescope.IsPulseGuiding == true; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                });
+            }
+            else // Test omitted
             {
-                WaitWhile("SlewToTarget", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
-            });
+                LogInformation(TelescopeTester.TELTEST_PULSE_GUIDE, "Test omitted due to Conform configuration setting", null);
+            }
 
-            try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "45"; }
-            try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "45"; }
-            await PutTwoParameters("SyncToCoordinates", "RightAscension", parameter1, "Declination", parameter2, null);
+            if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_COORDINATES_ASYNC]) // Test enabled
+            {
+                try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "21.0"; }
+                try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "70"; }
+                await PutTwoParameters("SlewToCoordinatesAsync", "RightAscension", parameter1, "Declination", parameter2, () =>
+                {
+                    WaitWhile("SlewToCoordinatesAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+                });
+            }
+            else // Test omitted
+            {
+                LogInformation(TelescopeTester.TELTEST_SLEW_TO_COORDINATES_ASYNC, "Test omitted due to Conform configuration setting", null);
+            }
 
-            await PutNoParameters("SyncToTarget", null);
+            if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_COORDINATES]) // Test enabled
+            {
+                try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "12.0"; }
+                try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "80"; }
+                await PutTwoParameters("SlewToCoordinates", "RightAscension", parameter1, "Declination", parameter2, () =>
+                {
+                    WaitWhile("SlewToCoordinates", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+                });
+            }
+            else // Test omitted
+            {
+                LogInformation(TelescopeTester.TELTEST_SLEW_TO_COORDINATES, "Test omitted due to Conform configuration setting", null);
+            }
+
+            if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_TARGET_ASYNC]) // Test enabled
+            {
+                try { telescope.TargetRightAscension = telescope.RightAscension; } catch { }
+                try { telescope.TargetDeclination = telescope.Declination; } catch { }
+                await PutNoParameters("SlewToTargetAsync", () =>
+                {
+                    WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+                });
+            }
+            else // Test omitted
+            {
+                LogInformation(TelescopeTester.TELTEST_SLEW_TO_TARGET_ASYNC, "Test omitted due to Conform configuration setting", null);
+            }
+
+            if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_TARGET]) // Test enabled
+            {
+                await PutNoParameters("SlewToTarget", () =>
+                {
+                    WaitWhile("SlewToTarget", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+                });
+            }
+            else // Test omitted
+            {
+                LogInformation(TelescopeTester.TELTEST_SLEW_TO_TARGET, "Test omitted due to Conform configuration setting", null);
+            }
+
+            if (settings.TelescopeTests[TelescopeTester.TELTEST_SYNC_TO_COORDINATES]) // Test enabled
+            {
+                try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "45"; }
+                try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "45"; }
+                await PutTwoParameters("SyncToCoordinates", "RightAscension", parameter1, "Declination", parameter2, null);
+            }
+            else // Test omitted
+            {
+                LogInformation(TelescopeTester.TELTEST_SYNC_TO_COORDINATES, "Test omitted due to Conform configuration setting", null);
+            }
+
+            if (settings.TelescopeTests[TelescopeTester.TELTEST_SYNC_TO_TARGET]) // Test enabled
+            {
+                await PutNoParameters("SyncToTarget", null);
+            }
+            else // Test omitted
+            {
+                LogInformation(TelescopeTester.TELTEST_SYNC_TO_TARGET, "Test omitted due to Conform configuration setting", null);
+            }
 
             // Set tracking to FALSE for Alt/Az slews
             await PutOneParameter("Tracking", "Tracking", "False", null);
 
-            try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "60"; }
-            try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "60"; }
-            await PutTwoParameters("SlewToAltAzAsync", "Azimuth", parameter1, "Altitude", parameter2, () =>
+            if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_ALTAZ_ASYNC]) // Test enabled
             {
-                WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
-            });
-
-            try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
-            try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
-            await PutTwoParameters("SlewToAltAz", "Azimuth", parameter1, "Altitude", parameter2, () =>
+                try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "60"; }
+                try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "60"; }
+                await PutTwoParameters("SlewToAltAzAsync", "Azimuth", parameter1, "Altitude", parameter2, () =>
+                {
+                    WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+                });
+            }
+            else // Test omitted
             {
-                WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
-            });
+                LogInformation(TelescopeTester.TELTEST_SLEW_TO_ALTAZ_ASYNC, "Test omitted due to Conform configuration setting", null);
+            }
 
-            try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
-            try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
-            await PutTwoParameters("SyncToAltAz", "Azimuth", parameter1, "Altitude", parameter2, null);
+            if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_ALTAZ]) // Test enabled
+            {
+                try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
+                try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
+                await PutTwoParameters("SlewToAltAz", "Azimuth", parameter1, "Altitude", parameter2, () =>
+                {
+                    WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+                });
+            }
+            else // Test omitted
+            {
+                LogInformation(TelescopeTester.TELTEST_SLEW_TO_ALTAZ, "Test omitted due to Conform configuration setting", null);
+            }
+
+            if (settings.TelescopeTests[TelescopeTester.TELTEST_SYNC_TO_ALTAZ]) // Test enabled
+            {
+                try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
+                try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
+                await PutTwoParameters("SyncToAltAz", "Azimuth", parameter1, "Altitude", parameter2, null);
+            }
+            else // Test omitted
+            {
+                LogInformation(TelescopeTester.TELTEST_SYNC_TO_ALTAZ, "Test omitted due to Conform configuration setting", null);
+            }
+
+            // Set tracking to FALSE
+            await PutOneParameter("Tracking", "Tracking", "False", null);
 
             try { telescope.Connected = false; } catch { }
         }
@@ -1230,8 +1352,7 @@
             string responseString = await httpResponse.Content.ReadAsStringAsync();
 
             // If there was an ASCOM error flag this
-
-            if (httpResponse.StatusCode == HttpStatusCode.OK)
+            if ((httpResponse.StatusCode == HttpStatusCode.OK) & (!responseString.Contains("<!DOCTYPE")))
             {
                 // Parse the common httpResponse values from the JSON response
                 Response deviceesponse = JsonSerializer.Deserialize<ASCOM.Common.Alpaca.Response>(responseString);

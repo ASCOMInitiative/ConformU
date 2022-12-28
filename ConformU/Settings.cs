@@ -131,23 +131,23 @@ namespace ConformU
         /// </summary>
         public Dictionary<string, bool> TelescopeTests { get; set; } = new()
         {
-            { "CanMoveAxis", true },
-            { "Park/Unpark", true },
-            { "AbortSlew", true },
-            { "AxisRate", true },
-            { "FindHome", true },
-            { "MoveAxis", true },
-            { "PulseGuide", true },
-            { "SlewToCoordinates", true },
-            { "SlewToCoordinatesAsync", true },
-            { "SlewToTarget", true },
-            { "SlewToTargetAsync", true },
-            { "DestinationSideOfPier", true },
-            { "SlewToAltAz", true },
-            { "SlewToAltAzAsync", true },
-            { "SyncToCoordinates", true },
-            { "SyncToTarget", true },
-            { "SyncToAltAz", true }
+            { TelescopeTester.TELTEST_CAN_MOVE_AXIS, true },
+            { TelescopeTester.TELTEST_PARK_UNPARK, true },
+            { TelescopeTester.TELTEST_ABORT_SLEW, true },
+            { TelescopeTester.TELTEST_AXIS_RATE, true },
+            { TelescopeTester.TELTEST_FIND_HOME, true },
+            { TelescopeTester.TELTEST_MOVE_AXIS, true },
+            { TelescopeTester.TELTEST_PULSE_GUIDE, true },
+            { TelescopeTester.TELTEST_SLEW_TO_COORDINATES, true },
+            { TelescopeTester.TELTEST_SLEW_TO_COORDINATES_ASYNC, true },
+            { TelescopeTester.TELTEST_SLEW_TO_TARGET, true },
+            { TelescopeTester.TELTEST_SLEW_TO_TARGET_ASYNC, true },
+            { TelescopeTester.TELTEST_DESTINATION_SIDE_OF_PIER, true },
+            { TelescopeTester.TELTEST_SLEW_TO_ALTAZ, true },
+            { TelescopeTester.TELTEST_SLEW_TO_ALTAZ_ASYNC, true },
+            { TelescopeTester.TELTEST_SYNC_TO_COORDINATES, true },
+            { TelescopeTester.TELTEST_SYNC_TO_TARGET, true },
+            { TelescopeTester.TELTEST_SYNC_TO_ALTAZ, true }
         };
         public bool TelescopeFirstUseTests { get; set; } = true;
         public double TelescopeSlewTolerance { get; set; } = 10.0; // Arc-seconds
