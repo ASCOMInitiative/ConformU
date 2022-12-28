@@ -39,12 +39,14 @@
     List<string> informationMessages;
     List<string> errorMessages;
 
+    ConformU.Settings settings;
+
+    #region Pre-formed parameters that can be sent to clients
+
     // HTTP statuses used to assess the outcome of protocol tests
     List<HttpStatusCode> HttpStatusCode200 = new() { HttpStatusCode.OK };
     List<HttpStatusCode> HttpStatusCode400 = new() { HttpStatusCode.BadRequest };
     List<HttpStatusCode> HttpStatusCode200_400_404 = new() { HttpStatusCode.OK, HttpStatusCode.BadRequest, HttpStatusCode.NotFound };
-
-    // Pre-formed parameters that can be sent to clients
 
     // ClientID and ClientTransactionID OK
     internal List<CheckProtocolParameter> ParamOk = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890") };
@@ -76,7 +78,7 @@
     internal List<CheckProtocolParameter> ParamConnectedTrue = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "True") };
     internal List<CheckProtocolParameter> ParamConnectedFalse = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "False") };
 
-    ConformU.Settings settings;
+    #endregion
 
     internal enum TestOutcome
     {
@@ -537,7 +539,7 @@
             await PutNoParameters("CalibratorOff", null);
 
             try { parameter1 = (coverCalibrator.MaxBrightness / 2).ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("CalibratorOn", "Brightness", parameter1,null);
+            await PutOneParameter("CalibratorOn", "Brightness", parameter1, null);
 
             await PutNoParameters("OpenCover", null);
             await PutNoParameters("HaltCover", null);
@@ -579,16 +581,16 @@
             // Test Methods
             await PutNoParameters("AbortSlew", null);
             await PutNoParameters("CloseShutter", null);
-            await PutNoParameters("FindHome",null);
-            await PutNoParameters("OpenShutter",null);
-            await PutNoParameters("Park",null);
+            await PutNoParameters("FindHome", null);
+            await PutNoParameters("OpenShutter", null);
+            await PutNoParameters("Park", null);
             await PutNoParameters("SetPark", null);
 
             try { parameter1 = dome.Altitude.ToString(); } catch (Exception) { parameter1 = "45"; }
-            await PutOneParameter("SlewToAltitude", "Altitude", parameter1,null);
+            await PutOneParameter("SlewToAltitude", "Altitude", parameter1, null);
 
             try { parameter1 = dome.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
-            await PutOneParameter("SlewToAzimuth", "Azimuth", parameter1,null);
+            await PutOneParameter("SlewToAzimuth", "Azimuth", parameter1, null);
 
             try { parameter1 = dome.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
             await PutOneParameter("SyncToAzimuth", "Azimuth", parameter1, null);
@@ -885,12 +887,12 @@
                 WaitWhile("SlewToCoordinates", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
             });
 
-            await PutNoParameters("SlewToTargetAsync", ()=>
+            await PutNoParameters("SlewToTargetAsync", () =>
             {
                 WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
             });
 
-            await PutNoParameters("SlewToTarget", ()=>
+            await PutNoParameters("SlewToTarget", () =>
             {
                 WaitWhile("SlewToTarget", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
             });
@@ -906,14 +908,14 @@
 
             try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "60"; }
             try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "60"; }
-            await PutTwoParameters("SlewToAltAzAsync", "Azimuth", parameter1, "Altitude", parameter2, ()=>
+            await PutTwoParameters("SlewToAltAzAsync", "Azimuth", parameter1, "Altitude", parameter2, () =>
             {
                 WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
             });
 
             try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
             try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
-            await PutTwoParameters("SlewToAltAz", "Azimuth", parameter1, "Altitude", parameter2, ()=>
+            await PutTwoParameters("SlewToAltAz", "Azimuth", parameter1, "Altitude", parameter2, () =>
             {
                 WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
             });
