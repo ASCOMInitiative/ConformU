@@ -9,6 +9,7 @@
 @using ASCOM.Common.Alpaca;
 @using ASCOM.Common;
 @using System.Net.Http.Headers;
+@using System.Diagnostics;
 
 @inject ConformLogger logger
 @inject ConformConfiguration configuration
@@ -20,12 +21,14 @@
 <div>
     <RadzenButton Id="testButton" Click=@(() => StartCheckAlpacaProtocol()) Text="Check Protocol" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" IsBusy=@settings.OperationInProgress Disabled=@(configuration.Settings.DeviceTechnology!=DeviceTechnology.Alpaca) />
     <RadzenLabel Text="Outcome:" Component="TESTSTATUS" Style="margin-left: 40px;margin-right:2px" />
-    <RadzenTextBox Name="TESTSTATUS" Placeholder="Test not run." @bind-Value=@statusText ReadOnly=true Style="width:500px;font-weight:bold;" />
+    <RadzenTextBox Name="TESTSTATUS" Placeholder="" @bind-Value=@statusText ReadOnly=true Style="width:1000px;font-weight:bold;" />
 </div>
 
 <RadzenTextArea Id="ProtocolLog" Style="line-height: 18px; padding-bottom: 0px" Name="ProtocolLogName" @bind-Value=@screenLog Rows="@screenLogRows" @bind-Cols=@screenLogColumns ReadOnly=true />
 @code
 {
+    CancellationTokenSource cancellationTokenSource;
+    CancellationToken applicationCancellationToken;
     string screenLog = "";
     int screenLogRows;
     int screenLogColumns;
@@ -91,6 +94,8 @@
         httpClient = new();
         StartCheckAlpacaProtocol();
         httpClient = new HttpClient();
+        cancellationTokenSource = new CancellationTokenSource();
+        applicationCancellationToken = cancellationTokenSource.Token;
     }
 
     protected async override void OnAfterRender(bool firstRender)
@@ -106,7 +111,7 @@
 
     #endregion
 
-    #region Check Alpaca Protocol
+    #region Alpaca protocol test management
 
     /// <summary>
     /// Start an Alpaca protocol check
@@ -363,7 +368,9 @@
         }
     }
 
-    #region Device tests
+    #endregion
+
+    #region Common method tests
 
     private async Task TestCommon()
     {
@@ -411,7 +418,9 @@
         await GetNoParameters("SupportedActions");
     }
 
-    #region device specific tests
+    #endregion
+
+    #region Device specific tests
 
     private async Task TestCamera()
     {
@@ -426,10 +435,10 @@
             await GetNoParameters("BayerOffsetY");
             await GetNoParameters("BinX");
             try { parameter1 = camera.BinX.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("BinX", "BinX", parameter1);
+            await PutOneParameter("BinX", "BinX", parameter1, null);
             await GetNoParameters("BinY");
             try { parameter1 = camera.BinY.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("BinY", "BinY", parameter1);
+            await PutOneParameter("BinY", "BinY", parameter1, null);
             await GetNoParameters("CameraState");
             await GetNoParameters("CameraXSize");
             await GetNoParameters("CameraYSize");
@@ -443,7 +452,7 @@
             await GetNoParameters("CCDTemperature");
             await GetNoParameters("CoolerOn");
             try { parameter1 = camera.CoolerOn.ToString(); } catch (Exception) { parameter1 = "False"; }
-            await PutOneParameter("CoolerOn", "CoolerOn", parameter1);
+            await PutOneParameter("CoolerOn", "CoolerOn", parameter1, null);
             await GetNoParameters("CoolerPower");
             await GetNoParameters("ElectronsPerADU");
             await GetNoParameters("ExposureMax");
@@ -451,11 +460,11 @@
             await GetNoParameters("ExposureResolution");
             await GetNoParameters("FastReadout");
             try { parameter1 = camera.FastReadout.ToString(); } catch (Exception) { parameter1 = "False"; }
-            await PutOneParameter("FastReadout", "FastReadout", parameter1);
+            await PutOneParameter("FastReadout", "FastReadout", parameter1, null);
             await GetNoParameters("FullWellCapacity");
             await GetNoParameters("Gain");
             try { parameter1 = camera.Gain.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("Gain", "Gain", parameter1);
+            await PutOneParameter("Gain", "Gain", parameter1, null);
             await GetNoParameters("GainMax");
             await GetNoParameters("GainMin");
             await GetNoParameters("Gains");
@@ -472,13 +481,13 @@
             await GetNoParameters("MaxBinY");
             await GetNoParameters("NumX");
             try { parameter1 = camera.NumX.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("NumX", "NumX", camera.NumX.ToString());
+            await PutOneParameter("NumX", "NumX", camera.NumX.ToString(), null);
             await GetNoParameters("NumY");
             try { parameter1 = camera.NumY.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("NumY", "NumY", camera.NumY.ToString());
+            await PutOneParameter("NumY", "NumY", camera.NumY.ToString(), null);
             await GetNoParameters("Offset");
             try { parameter1 = camera.Offset.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("Offset", "Offset", parameter1);
+            await PutOneParameter("Offset", "Offset", parameter1, null);
             await GetNoParameters("OffsetMax");
             await GetNoParameters("OffsetMin");
             await GetNoParameters("Offsets");
@@ -487,22 +496,22 @@
             await GetNoParameters("PixelSizeY");
             await GetNoParameters("ReadoutMode");
             try { parameter1 = camera.ReadoutMode.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("ReadoutMode", "ReadoutMode", parameter1);
+            await PutOneParameter("ReadoutMode", "ReadoutMode", parameter1, null);
             await GetNoParameters("ReadoutModes");
             await GetNoParameters("SensorName");
             await GetNoParameters("SensorType");
             await GetNoParameters("SetCCDTemperature");
             try { parameter1 = camera.SetCCDTemperature.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("SetCCDTemperature", "SetCCDTemperature", parameter1);
+            await PutOneParameter("SetCCDTemperature", "SetCCDTemperature", parameter1, null);
             await GetNoParameters("StartX");
             try { parameter1 = camera.StartX.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("StartX", "StartX", parameter1);
+            await PutOneParameter("StartX", "StartX", parameter1, null);
             await GetNoParameters("StartY");
             try { parameter1 = camera.StartY.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("StartY", "StartY", parameter1);
+            await PutOneParameter("StartY", "StartY", parameter1, null);
             await GetNoParameters("SubExposureDuration");
             try { parameter1 = camera.SubExposureDuration.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("SubExposureDuration", "SubExposureDuration", parameter1);
+            await PutOneParameter("SubExposureDuration", "SubExposureDuration", parameter1, null);
 
             try { camera.Connected = false; } catch { }
 
@@ -524,14 +533,14 @@
             await GetNoParameters("MaxBrightness");
 
             // Test Methods
-            await PutNoParameters("CalibratorOff");
+            await PutNoParameters("CalibratorOff", null);
 
             try { parameter1 = (coverCalibrator.MaxBrightness / 2).ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("CalibratorOn", "Brightness", parameter1);
+            await PutOneParameter("CalibratorOn", "Brightness", parameter1,null);
 
-            await PutNoParameters("OpenCover");
-            await PutNoParameters("HaltCover");
-            await PutNoParameters("CloseCover");
+            await PutNoParameters("OpenCover", null);
+            await PutNoParameters("HaltCover", null);
+            await PutNoParameters("CloseCover", null);
 
             try { coverCalibrator.Connected = false; } catch { }
         }
@@ -562,26 +571,26 @@
 
             await GetNoParameters("Slaved");
             try { parameter1 = dome.Slaved.ToString(); } catch (Exception) { parameter1 = "false"; }
-            await PutOneParameter("Slaved", "Slaved", parameter1);
+            await PutOneParameter("Slaved", "Slaved", parameter1, null);
 
             await GetNoParameters("Slewing");
 
             // Test Methods
-            await PutNoParameters("AbortSlew");
-            await PutNoParameters("CloseShutter");
-            await PutNoParameters("FindHome");
-            await PutNoParameters("OpenShutter");
-            await PutNoParameters("Park");
-            await PutNoParameters("SetPark");
+            await PutNoParameters("AbortSlew", null);
+            await PutNoParameters("CloseShutter", null);
+            await PutNoParameters("FindHome",null);
+            await PutNoParameters("OpenShutter",null);
+            await PutNoParameters("Park",null);
+            await PutNoParameters("SetPark", null);
 
             try { parameter1 = dome.Altitude.ToString(); } catch (Exception) { parameter1 = "45"; }
-            await PutOneParameter("SlewToAltitude", "Altitude", parameter1);
+            await PutOneParameter("SlewToAltitude", "Altitude", parameter1,null);
 
             try { parameter1 = dome.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
-            await PutOneParameter("SlewToAzimuth", "Azimuth", parameter1);
+            await PutOneParameter("SlewToAzimuth", "Azimuth", parameter1,null);
 
             try { parameter1 = dome.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
-            await PutOneParameter("SyncToAzimuth", "Azimuth", parameter1);
+            await PutOneParameter("SyncToAzimuth", "Azimuth", parameter1, null);
 
             try { dome.Connected = false; } catch { }
         }
@@ -601,7 +610,7 @@
             await GetNoParameters("Position");
 
             try { parameter1 = filterWheel.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("Position", "Position", parameter1);
+            await PutOneParameter("Position", "Position", parameter1, null);
 
             try { filterWheel.Connected = false; } catch { }
         }
@@ -625,15 +634,15 @@
 
             await GetNoParameters("TempComp");
             try { parameter1 = focuser.TempComp.ToString(); } catch (Exception) { parameter1 = "false"; }
-            await PutOneParameter("TempComp", "TempComp", parameter1);
+            await PutOneParameter("TempComp", "TempComp", parameter1, null);
 
             await GetNoParameters("TempCompAvailable");
             await GetNoParameters("Temperature");
 
             // Methods
-            await PutNoParameters("Halt");
+            await PutNoParameters("Halt", null);
             try { parameter1 = focuser.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("Move", "Position", parameter1);
+            await PutOneParameter("Move", "Position", parameter1, null);
 
             try { focuser.Connected = false; } catch { }
         }
@@ -650,7 +659,7 @@
             // Test properties
             await GetNoParameters("AveragePeriod");
             try { parameter1 = observingConditions.AveragePeriod.ToString(); } catch (Exception) { parameter1 = "0.0"; }
-            await PutOneParameter("AveragePeriod", "AveragePeriod", parameter1);
+            await PutOneParameter("AveragePeriod", "AveragePeriod", parameter1, null);
             await GetNoParameters("CloudCover");
             await GetNoParameters("DewPoint");
             await GetNoParameters("Humidity");
@@ -666,7 +675,7 @@
             await GetNoParameters("WindSpeed");
 
             // Methods
-            await PutNoParameters("Refresh");
+            await PutNoParameters("Refresh", null);
             await GetOneParameter("SensorDescription", "SensorName", "Pressure");
             await GetOneParameter("TimeSinceLastUpdate", "SensorName", "Pressure");
 
@@ -689,18 +698,18 @@
             await GetNoParameters("Position");
             await GetNoParameters("Reverse");
             try { parameter1 = rotator.Reverse.ToString(); } catch (Exception) { parameter1 = "false"; }
-            await PutOneParameter("Reverse", "Reverse", parameter1);
+            await PutOneParameter("Reverse", "Reverse", parameter1, null);
             await GetNoParameters("StepSize");
             await GetNoParameters("TargetPosition");
-            await PutNoParameters("Halt");
+            await PutNoParameters("Halt", null);
             try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("Move", "Position", parameter1);
+            await PutOneParameter("Move", "Position", parameter1, null);
             try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("MoveAbsolute", "Position", parameter1);
+            await PutOneParameter("MoveAbsolute", "Position", parameter1, null);
             try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("MoveMechanical", "Position", parameter1);
+            await PutOneParameter("MoveMechanical", "Position", parameter1, null);
             try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
-            await PutOneParameter("Sync", "Position", parameter1);
+            await PutOneParameter("Sync", "Position", parameter1, null);
 
             try { rotator.Connected = false; } catch { }
         }
@@ -732,13 +741,13 @@
 
 
             try { parameter1 = switchDevice.GetSwitch(0).ToString(); } catch (Exception) { parameter1 = "false"; }
-            await PutTwoParameters("SetSwitch", "Id", "0", "State", parameter1);
+            await PutTwoParameters("SetSwitch", "Id", "0", "State", parameter1, null);
 
             try { parameter1 = switchDevice.GetSwitchName(0).ToString(); } catch (Exception) { parameter1 = "Unknown name"; }
-            await PutTwoParameters("SetSwitchName", "Id", "0", "Name", parameter1);
+            await PutTwoParameters("SetSwitchName", "Id", "0", "Name", parameter1, null);
 
             try { parameter1 = switchDevice.GetSwitchValue(0).ToString(); } catch (Exception) { try { parameter1 = switchDevice.MinSwitchValue(0).ToString(); } catch { parameter1 = "0.0"; } }
-            await PutTwoParameters("SetSwitchValue", "Id", "0", "Value", parameter1);
+            await PutTwoParameters("SetSwitchValue", "Id", "0", "Value", parameter1, null);
 
             await GetOneParameter("SwitchStep", "Id", "0");
 
@@ -779,103 +788,142 @@
             await GetNoParameters("Declination");
             await GetNoParameters("DeclinationRate");
             try { parameter1 = telescope.DeclinationRate.ToString(); } catch (Exception) { parameter1 = "0.0"; }
-            await PutOneParameter("DeclinationRate", "DeclinationRate", parameter1);
+            await PutOneParameter("DeclinationRate", "DeclinationRate", parameter1, null);
             await GetNoParameters("DoesRefraction");
             try { parameter1 = telescope.DoesRefraction.ToString(); } catch (Exception) { parameter1 = "false"; }
-            await PutOneParameter("DoesRefraction", "DoesRefraction", parameter1);
+            await PutOneParameter("DoesRefraction", "DoesRefraction", parameter1, null);
             await GetNoParameters("EquatorialSystem");
             await GetNoParameters("FocalLength");
             await GetNoParameters("GuideRateDeclination");
             try { parameter1 = telescope.GuideRateDeclination.ToString(); } catch (Exception) { parameter1 = "0.0"; }
-            await PutOneParameter("GuideRateDeclination", "GuideRateDeclination", parameter1);
+            await PutOneParameter("GuideRateDeclination", "GuideRateDeclination", parameter1, null);
             await GetNoParameters("GuideRateRightAscension");
             try { parameter1 = telescope.GuideRateRightAscension.ToString(); } catch (Exception) { parameter1 = "0.0"; }
-            await PutOneParameter("GuideRateRightAscension", "GuideRateRightAscension", parameter1);
+            await PutOneParameter("GuideRateRightAscension", "GuideRateRightAscension", parameter1, null);
             await GetNoParameters("IsPulseGuiding");
             await GetNoParameters("RightAscension");
             await GetNoParameters("RightAscensionRate");
             try { parameter1 = telescope.RightAscensionRate.ToString(); } catch (Exception) { parameter1 = "0.0"; }
-            await PutOneParameter("RightAscensionRate", "RightAscensionRate", parameter1);
+            await PutOneParameter("RightAscensionRate", "RightAscensionRate", parameter1, null);
             await GetNoParameters("SideOfPier");
             try { parameter1 = ((int)telescope.SideOfPier).ToString(); } catch (Exception) { parameter1 = "0"; }
-            await PutOneParameter("SideOfPier", "SideOfPier", parameter1);
+            await PutOneParameter("SideOfPier", "SideOfPier", parameter1, null);
             await GetNoParameters("SiderealTime");
             await GetNoParameters("SiteElevation");
             try { parameter1 = telescope.SiteElevation.ToString(); } catch (Exception) { parameter1 = "0.0"; }
-            await PutOneParameter("SiteElevation", "SiteElevation", parameter1);
+            await PutOneParameter("SiteElevation", "SiteElevation", parameter1, null);
             await GetNoParameters("SiteLatitude");
             try { parameter1 = telescope.SiteLatitude.ToString(); } catch (Exception) { parameter1 = "0.0"; }
-            await PutOneParameter("SiteLatitude", "SiteLatitude", parameter1);
+            await PutOneParameter("SiteLatitude", "SiteLatitude", parameter1, null);
             await GetNoParameters("SiteLongitude");
             try { parameter1 = telescope.SiteLongitude.ToString(); } catch (Exception) { parameter1 = "0.0"; }
-            await PutOneParameter("SiteLongitude", "SiteLongitude", parameter1);
+            await PutOneParameter("SiteLongitude", "SiteLongitude", parameter1, null);
             await GetNoParameters("Slewing");
             await GetNoParameters("SlewSettleTime");
             try { parameter1 = telescope.SlewSettleTime.ToString(); } catch (Exception) { parameter1 = "0"; }
-            await PutOneParameter("SlewSettleTime", "SlewSettleTime", parameter1);
-            await GetNoParameters("TargetDeclination");
+            await PutOneParameter("SlewSettleTime", "SlewSettleTime", parameter1, null);
+
             try { parameter1 = telescope.TargetDeclination.ToString(); } catch (Exception) { parameter1 = "0.0"; }
-            await PutOneParameter("TargetDeclination", "TargetDeclination", parameter1);
-            await GetNoParameters("TargetRightAscension");
+            await PutOneParameter("TargetDeclination", "TargetDeclination", parameter1, null);
+            await GetNoParameters("TargetDeclination");
+
             try { parameter1 = telescope.TargetRightAscension.ToString(); } catch (Exception) { parameter1 = "0.0"; }
-            await PutOneParameter("TargetRightAscension", "TargetRightAscension", parameter1);
+            await PutOneParameter("TargetRightAscension", "TargetRightAscension", parameter1, null);
+            await GetNoParameters("TargetRightAscension");
+
             await GetNoParameters("Tracking");
             try { parameter1 = telescope.Tracking.ToString(); } catch (Exception) { parameter1 = "false"; }
-            await PutOneParameter("Tracking", "Tracking", parameter1);
+            await PutOneParameter("Tracking", "Tracking", parameter1, null);
             await GetNoParameters("TrackingRate");
             try { parameter1 = ((int)telescope.TrackingRate).ToString(); } catch (Exception) { parameter1 = "0"; }
-            await PutOneParameter("TrackingRate", "TrackingRate", parameter1);
+            await PutOneParameter("TrackingRate", "TrackingRate", parameter1, null);
             await GetNoParameters("UTCDate");
-            //                                                                                   yyyy-MM-ddTHH:mm:ss.fffffffZ
+            //                                                                                                                  yyyy-MM-ddTHH:mm:ss.fffffffZ
             try { parameter1 = telescope.UTCDate.ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ"); } catch (Exception) { parameter1 = @"2022-12-04T17:45:31.1234567Z"; }
-            await PutOneParameter("UTCDate", "UTCDate", parameter1);
+            await PutOneParameter("UTCDate", "UTCDate", parameter1, null);
 
             // Test Methods
-            await PutNoParameters("AbortSlew");
+            SetStatus("Parking scope...");
+            await PutNoParameters("Park", null);
+            WaitWhile("Park", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+
+            await PutNoParameters("SetPark", null);
+            await PutNoParameters("Unpark", null);
+
+            SetStatus("Finding home...");
+            await PutNoParameters("FindHome", null);
+            WaitWhile("FindHome", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+
+            // Set tracking to TRUE
+            await PutOneParameter("Tracking", "Tracking", "True", null);
+
+            await PutNoParameters("AbortSlew", null);
             await GetOneParameter("AxisRates", "Axis", "0");
             await GetOneParameter("CanMoveAxis", "Axis", "0");
             await GetTwoParameters("DestinationSideOfPier", "RightAscension", "0.0", "Declination", "0.0");
-            await PutNoParameters("FindHome");
-            await PutTwoParameters("MoveAxis", "Axis", "0", "Rate", "0.0");
-            await PutNoParameters("Park");
-            await PutTwoParameters("PulseGuide", "Direction", "0", "Duration", "0");
-            await PutNoParameters("SetPark");
+            await PutTwoParameters("MoveAxis", "Axis", "0", "Rate", "0.0", null);
 
-            try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
-            try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
-            await PutTwoParameters("SlewToAltAz", "Azimuth", parameter1, "Altitude", parameter2);
+            await PutTwoParameters("PulseGuide", "Direction", "0", "Duration", "0", null);
 
-            try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
-            try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
-            await PutTwoParameters("SlewToAltAzAsync", "Azimuth", parameter1, "Altitude", parameter2);
+            // Set tracking to TRUE for RA/Dec slews
+            await PutOneParameter("Tracking", "Tracking", "True", null);
+
+            Action<string, Func<bool>, int, int, Func<string>> waitForSlew = WaitWhile;
+
+            try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "21.0"; }
+            try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "70"; }
+            await PutTwoParameters("SlewToCoordinatesAsync", "RightAscension", parameter1, "Declination", parameter2, () =>
+            {
+                WaitWhile("SlewToCoordinatesAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+            });
+
+            try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "12.0"; }
+            try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "80"; }
+            await PutTwoParameters("SlewToCoordinates", "RightAscension", parameter1, "Declination", parameter2, () =>
+            {
+                WaitWhile("SlewToCoordinates", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+            });
+
+            await PutNoParameters("SlewToTargetAsync", ()=>
+            {
+                WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+            });
+
+            await PutNoParameters("SlewToTarget", ()=>
+            {
+                WaitWhile("SlewToTarget", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+            });
 
             try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "45"; }
             try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "45"; }
-            await PutTwoParameters("SlewToCoordinates", "RightAscension", parameter1, "Declination", parameter2);
+            await PutTwoParameters("SyncToCoordinates", "RightAscension", parameter1, "Declination", parameter2, null);
 
-            try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "45"; }
-            try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "45"; }
-            await PutTwoParameters("SlewToCoordinatesAsync", "RightAscension", parameter1, "Declination", parameter2);
+            await PutNoParameters("SyncToTarget", null);
 
-            await PutNoParameters("SlewToTarget");
-            await PutNoParameters("SlewToTargetAsync");
+            // Set tracking to FALSE for Alt/Az slews
+            await PutOneParameter("Tracking", "Tracking", "False", null);
+
+            try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "60"; }
+            try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "60"; }
+            await PutTwoParameters("SlewToAltAzAsync", "Azimuth", parameter1, "Altitude", parameter2, ()=>
+            {
+                WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+            });
 
             try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
             try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
-            await PutTwoParameters("SyncToAltAz", "Azimuth", parameter1, "Altitude", parameter2);
+            await PutTwoParameters("SlewToAltAz", "Azimuth", parameter1, "Altitude", parameter2, ()=>
+            {
+                WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.AlpacaConfiguration.LongResponseTimeout, null);
+            });
 
-            try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "45"; }
-            try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "45"; }
-            await PutTwoParameters("SyncToCoordinates", "RightAscension", parameter1, "Declination", parameter2);
-
-            await PutNoParameters("SyncToTarget");
-            await PutNoParameters("Unpark");
+            try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
+            try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
+            await PutTwoParameters("SyncToAltAz", "Azimuth", parameter1, "Altitude", parameter2, null);
 
             try { telescope.Connected = false; } catch { }
         }
     }
-
-    #endregion
 
     #endregion
 
@@ -952,27 +1000,33 @@
         await SendApi($"Parameter {parameterName2} (Inverted casing)", method, HttpMethod.Get, clientIdBadParamCasing, HttpStatusCode200);
     }
 
-    private async Task PutNoParameters(string method)
+    private async Task PutNoParameters(string method, Action waitForCompletion)
     {
         // Test bad client and transaction Ids
         await TestBadIds(method, HttpMethod.Put, null, null, null, null);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
         // Test Good call
         List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamOk);
         await SendApi("Good parameter name casing", method, HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
         // Add an additional parameter
         clientIdGoodParamCasing.Add(new CheckProtocolParameter("ExtraParameter", "ExtraValue"));
         await SendApi("Good parameter casing + extra parameter", method, HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
         await SendApi("Different ClientId case", method, HttpMethod.Put, ParamClientIdLowerCase, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
         await SendApi("Different ClientTransactionId case", method, HttpMethod.Put, ParamTransactionIdLowerCase, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
     }
 
-    private async Task PutOneParameter(string method, string parameterName, string parameterValue)
+    private async Task PutOneParameter(string method, string parameterName, string parameterValue, Action waitForCompletion)
     {
         // Test bad client and transaction Ids
         await TestBadIds(method, HttpMethod.Put, parameterName, parameterValue, null, null);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
         // Test good parameter name casing
         List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamOk);
@@ -985,24 +1039,31 @@
         differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
 
         await SendApi($"Parameter {parameterName} (Good casing)", method, HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
         // Add an additional parameter
         clientIdGoodParamCasing.Add(new CheckProtocolParameter("ExtraParameter", "ExtraValue"));
         await SendApi($"Good {parameterName} casing + extra parameter", method, HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
         await SendApi("Different ClientId case", method, HttpMethod.Put, differentClientIdCasing, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
         await SendApi("Different ClientTransactionId case", method, HttpMethod.Put, differentTransactionIdCasing, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
         // Test bad parameter name casing
         List<CheckProtocolParameter> clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamOk);
         clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName), parameterValue));
         await SendApi($"Parameter {parameterName} (Bad casing)", method, HttpMethod.Put, clientIdBadParamCasing, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
     }
 
-    private async Task PutTwoParameters(string method, string parameterName1, string parameterValue1, string parameterName2, string parameterValue2)
+#nullable enable
+    private async Task PutTwoParameters(string method, string parameterName1, string parameterValue1, string parameterName2, string parameterValue2, Action waitForCompletion)
     {
         // Test bad client and transaction Ids
         await TestBadIds(method, HttpMethod.Put, parameterName1, parameterValue1, parameterName2, parameterValue2);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
         // Test good parameter name casing
         List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamOk);
@@ -1017,27 +1078,36 @@
         differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
         differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
 
+        // Send a good command
         await SendApi($"Good {parameterName1}, {parameterName2} casing", method, HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
-        // Add an additional parameter
+        // Good command with an additional parameter
         clientIdGoodParamCasing.Add(new CheckProtocolParameter("ExtraParameter", "ExtraValue"));
         await SendApi($"Good {parameterName1}, {parameterName2} casing + extra parameter", method, HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
+        // Test incorrect ID casing
         await SendApi("Different ClientId case", method, HttpMethod.Put, differentClientIdCasing, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
         await SendApi("Different ClientTransactionId case", method, HttpMethod.Put, differentTransactionIdCasing, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
         // Test bad parameter 1 name casing
         List<CheckProtocolParameter> clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamOk);
         clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName1), parameterValue1));
         clientIdBadParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
         await SendApi($"Parameter {parameterName1} (Bad casing)", method, HttpMethod.Put, clientIdBadParamCasing, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
         // Test bad parameter 2 name casing
         clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamOk);
         clientIdBadParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
         clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName2), parameterValue2));
         await SendApi($"Parameter {parameterName2} (Bad casing)", method, HttpMethod.Put, clientIdBadParamCasing, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
     }
+#nullable disable
 
     private async Task TestBadIds(string method, HttpMethod httpMethod, string parameterName1, string parameterValue1, string parameterName2, string parameterValue2)
     {
@@ -1152,13 +1222,26 @@
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(settings.AlpacaConfiguration.LongResponseTimeout));
 
-            // Send the request to the remote device and wait synchronously for the response
-            HttpResponseMessage response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationTokenSource.Token);
-            string responseString = await response.Content.ReadAsStringAsync();
+            // Send the request to the remote device and wait for the response
+            HttpResponseMessage httpResponse = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationTokenSource.Token);
+            string responseString = await httpResponse.Content.ReadAsStringAsync();
 
-            if (expectedCodes.Contains(response.StatusCode)) // We got the expected outcome
+            // If there was an ASCOM error flag this
+
+            if (httpResponse.StatusCode == HttpStatusCode.OK)
             {
-                LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)response.StatusCode} ({response.StatusCode}) as expected.", responseString);
+                // Parse the common httpResponse values from the JSON response
+                Response deviceesponse = JsonSerializer.Deserialize<ASCOM.Common.Alpaca.Response>(responseString);
+                if ((deviceesponse.ErrorNumber != 0) | (deviceesponse.ErrorMessage != ""))
+                {
+                    LogInformation(testName, $"{messagePrefix} - Device returned ASCOM error number: {deviceesponse.ErrorNumber:X} for client transaction: {deviceesponse.ClientTransactionID}, server transaction: {deviceesponse.ServerTransactionID}", $"Error message: {deviceesponse.ErrorMessage}");
+                    LogBlankLine();
+                }
+            }
+
+            if (expectedCodes.Contains(httpResponse.StatusCode)) // We got the expected outcome
+            {
+                LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
             }
             else // Unexpected outcome
             {
@@ -1171,21 +1254,21 @@
 
                 if (infoCodes is not null)
                 {
-                    if (infoCodes.Contains(response.StatusCode))
+                    if (infoCodes.Contains(httpResponse.StatusCode))
                     {
-                        LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)response.StatusCode} ({response.StatusCode}) rather than " +
+                        LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) rather than " +
                             $"{(expectedCodeList.Contains(',') ? "one of the expected statuses:" : "the expected status")} {expectedCodeList}", responseString);
                     }
                     else
                     {
                         LogIssue(testName, $"{messagePrefix} - Expected HTTP status{(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: " +
-                            $"{(int)response.StatusCode} ({response.StatusCode}).", responseString);
+                            $"{(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString);
                     }
                 }
                 else
                 {
                     LogIssue(testName, $"{messagePrefix} - Expected HTTP status {(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: " +
-                        $"{(int)response.StatusCode} ({response.StatusCode}).", responseString);
+                        $"{(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString);
                 }
                 LogBlankLine();
             }
@@ -1217,82 +1300,70 @@
         return new string(c);
     }
 
-    #endregion
+#nullable enable
+    /// <summary>
+    /// Call the wait function every poll interval milliseconds and delay until the wait function becomes false
+    /// </summary>
+    /// <param name="actionName">Text to set in the status Action field</param>
+    /// <param name="waitFunction">Completion Func that returns false when the process is complete</param>
+    /// <param name="pollInterval">Interval between calls of the completion function in milliseconds</param>
+    /// <param name="timeoutSeconds">Number of seconds before the operation times out</param>
+    /// <exception cref="InvalidValueException"></exception>
+    /// <exception cref="TimeoutException">If the operation takes longer than the timeout value</exception>
+    internal void WaitWhile(string actionName, Func<bool> waitFunction, int pollInterval, int timeoutSeconds, Func<string> statusString)
+    {
+        // Validate the supplied poll interval
+        if (pollInterval < 100) throw new ASCOM.InvalidValueException($"The poll interval must be >=100ms: {pollInterval}");
+
+        // Initialise the status message
+        if (statusString is null)
+            SetStatus($"Waiting for the {actionName} operation to complete: 0.0 / {timeoutSeconds:0.0} seconds");
+        else
+            SetStatus($"Waiting for the {actionName} operation to complete: {statusString()}");
+
+        // Create a timeout cancellation token source that times out after the required timeout period
+        CancellationTokenSource timeoutCts = new();
+        timeoutCts.CancelAfter(TimeSpan.FromSeconds(Convert.ToDouble(timeoutSeconds) + 2.0 * (Convert.ToDouble(pollInterval) / 1000.0))); // Allow two poll intervals beyond the timeout time to prevent early termination
+
+        // Combine the provided cancellation token parameter with the new timeout cancellation token
+        CancellationTokenSource combinedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, applicationCancellationToken);
+
+        // Wait for the completion function to return false
+        Stopwatch sw = Stopwatch.StartNew(); // Start the loop timing stopwatch
+        do
+        {
+            // Calculate the current loop number (starts at 0 given that the timer's elapsed time will be zero or very low on the first loop)
+            int currentLoopNumber = ((int)(sw.ElapsedMilliseconds) + 50) / pollInterval; // Add a small positive offset (50) because integer division always rounds down
+
+            // Calculate the sleep time required to start the next loop at a multiple of the poll interval
+            int sleeptime = pollInterval * (currentLoopNumber + 1) - (int)sw.ElapsedMilliseconds;
+
+            // Sleep until it is time for the next completion function poll
+            Thread.Sleep(sleeptime);
+
+            // Set the status message status field
+            if (statusString is null) // No status string function was provided so display an elapsed time message
+                SetStatus($"Waiting for the {actionName} operation to complete: {Math.Round(Convert.ToDouble(currentLoopNumber + 1) * pollInterval / 1000.0, 1):0.0} / {timeoutSeconds:0.0} seconds");
+            else // Display the supplied message instead of the elapsed time message
+                SetStatus($"Waiting for the {actionName} operation to complete: {statusString()}");
+
+        } while (waitFunction() & !combinedCts.Token.IsCancellationRequested);
+
+        // Test whether the operation timed out
+        if (timeoutCts.IsCancellationRequested) // The operation did time out
+        {
+            //  Log the timeout and throw an exception to cancel the operation
+            LogIssue("WaitUntil", $"The {actionName} operation timed out after {timeoutSeconds} seconds.", null);
+            throw new TimeoutException($"The \"{actionName}\" operation exceeded the timeout of {timeoutSeconds} seconds specified for this operation.");
+        }
+
+        SetStatus("");
+    }
+#nullable disable
 
     #endregion
 
     #region Logging and window resize
-
-    public async void OnUiHasChanged(object sender, EventArgs e)
-    {
-        await ResizeLogWindow();
-    }
-
-    /// <summary>
-    /// Make the log window fit the browser size
-    ///    </summary>
-    /// <returns></returns>
-    async Task ResizeLogWindow()
-    {
-        try
-        {
-            BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>
-                ("GetBoundingWindowRect");
-            BrowserWindowSize blazorProWindowSize = new();
-            blazorProWindowSize.Width = (int)browserWindowSize.Width;
-            blazorProWindowSize.Height = (int)browserWindowSize.Height;
-
-            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
-            WindowResized(new object(), blazorProWindowSize);
-            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
-        }
-        catch { }
-    }
-
-    // This method will be called when the window resizes.
-    // It is ONLY called when the user stops dragging the window's edge. (It is already throttled to protect your app from performance nightmares)
-    async void WindowResized(object _, BrowserWindowSize window)
-    {
-        try
-        {
-            // Get the browsers's width / height
-            // Find the current position of the Conform log text area in the viewport
-            BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ProtocolLog");
-            if (result is not null)
-            {
-                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 2;
-                //screenLogColumns = Convert.ToInt32(Convert.ToDouble(result.Width) / (Globals.IsSmall(window.Width, window.Height) ? 8.4 : 9.3));
-                screenLogColumns = Convert.ToInt32((Convert.ToDouble(result.Width) - 32.0) / (Globals.IsSmall(window.Width, window.Height) ? 8.4 : 8.482));
-                // Hide the status field at small heights
-                if (window.Height < 600)
-                {
-                    screenLogRows += 0;
-                }
-                else
-                {
-
-                }
-
-                string browser = "";
-                browser = await JS.InvokeAsync<string>(identifier: "IdentifyBrowser");
-
-                if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
-
-
-                //conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
-                await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
-            }
-
-            else
-            {
-                logger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"BoundingClientRectangle is NULL - No action taken.");
-            }
-        }
-        catch
-        {
-            // conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
-        }
-    }
 
     /// <summary>
     /// Clear the log window
@@ -1303,7 +1374,7 @@
     }
 
     /// <summary>
-    /// Log a message to the screen and log file
+    /// Log a formatted message to the screen and log file
     ///</summary>
     ///<param name="method">Calling method name</param>
     ///    <param name = "message" > Message to log</param>
@@ -1356,6 +1427,11 @@
         catch { }
     }
 
+    /// <summary>
+    /// Log an unformatted message to the screen and log file
+    /// </summary>
+    /// <param name="method"></param>
+    /// <param name="message"></param>
     private async void LogText(string method, string message)
     {
         logger?.LogMessage(method, message);
@@ -1435,6 +1511,77 @@
     {
         statusText = message;
         await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    /// <summary>
+    /// Make the log window fit the browser size
+    ///    </summary>
+    /// <returns></returns>
+    async Task ResizeLogWindow()
+    {
+        try
+        {
+            BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>
+                ("GetBoundingWindowRect");
+            BrowserWindowSize blazorProWindowSize = new();
+            blazorProWindowSize.Width = (int)browserWindowSize.Width;
+            blazorProWindowSize.Height = (int)browserWindowSize.Height;
+
+            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
+            WindowResized(new object(), blazorProWindowSize);
+            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
+        }
+        catch { }
+    }
+
+    // This method will be called when the window resizes.
+    // It is ONLY called when the user stops dragging the window's edge. (It is already throttled to protect your app from performance nightmares)
+    async void WindowResized(object _, BrowserWindowSize window)
+    {
+        try
+        {
+            // Get the browsers's width / height
+            // Find the current position of the Conform log text area in the viewport
+            BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ProtocolLog");
+            if (result is not null)
+            {
+                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 2;
+                //screenLogColumns = Convert.ToInt32(Convert.ToDouble(result.Width) / (Globals.IsSmall(window.Width, window.Height) ? 8.4 : 9.3));
+                screenLogColumns = Convert.ToInt32((Convert.ToDouble(result.Width) - 32.0) / (Globals.IsSmall(window.Width, window.Height) ? 8.4 : 8.482));
+                // Hide the status field at small heights
+                if (window.Height < 600)
+                {
+                    screenLogRows += 0;
+                }
+                else
+                {
+
+                }
+
+                string browser = "";
+                browser = await JS.InvokeAsync<string>(identifier: "IdentifyBrowser");
+
+                if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
+
+
+                //conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
+                await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
+            }
+
+            else
+            {
+                logger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"BoundingClientRectangle is NULL - No action taken.");
+            }
+        }
+        catch
+        {
+            // conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
+        }
+    }
+
+    public async void OnUiHasChanged(object sender, EventArgs e)
+    {
+        await ResizeLogWindow();
     }
 
     #endregion
