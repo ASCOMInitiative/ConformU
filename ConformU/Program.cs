@@ -338,8 +338,12 @@ namespace ConformU
                  {
                      // Add the logger component to the list of injectable services
                      servicesCollection.AddSingleton(conformLogger);
+
                      // Add the configuration component to the list of injectable services
                      servicesCollection.AddSingleton(conformConfiguration);
+
+                     // Add the state management component to the list of injectable services
+                     servicesCollection.AddSingleton(new ConformStateManager(conformLogger));
                  })
 
                  .ConfigureWebHostDefaults(webBuilder =>

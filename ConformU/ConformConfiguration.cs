@@ -1,4 +1,5 @@
 ﻿using Blazorise.Utilities;
+using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,6 +20,9 @@ namespace ConformU
         private bool disposedValue;
         readonly int settingsFileVersion;
         private readonly JsonDocument appSettingsDocument = null;
+
+        [Inject]
+        public ConformStateManager ConformStateManager{ get; set; }
 
         #region Initialiser and Dispose
 
@@ -240,7 +244,7 @@ namespace ConformU
             settings = new();
             PersistSettings(settings);
             Status = $"Settings reset at {DateTime.Now:HH:mm:ss}.";
-            RaiseUiHasChangedEvent();
+            ConformStateManager.RaiseUiHasChangedEvent();
         }
 
         /// <summary>
@@ -313,7 +317,7 @@ namespace ConformU
 
         public event EventHandler ConfigurationChanged;
 
-        public event EventHandler UiHasChanged;
+        //public event EventHandler UiHasChanged;
 
         #endregion
 
@@ -351,16 +355,16 @@ namespace ConformU
 
         }
 
-        internal void RaiseUiHasChangedEvent()
-        {
-            if (UiHasChanged is not null)
-            {
-                EventArgs args = new();
-                TL?.LogMessage("RaiseUiHasChangedEvent", MessageLevel.Debug, "About to call UI has changed event handler");
-                UiHasChanged(this, args);
-                TL?.LogMessage("RaiseUiHasChangedEvent", MessageLevel.Debug, "Returned from UI has changed event handler");
-            }
-        }
+        //internal void RaiseUiHasChangedEvent()
+        //{
+        //    if (UiHasChanged is not null)
+        //    {
+        //        EventArgs args = new();
+        //        TL?.LogMessage("RaiseUiHasChangedEvent", MessageLevel.Debug, "About to call UI has changed event handler");
+        //        UiHasChanged(this, args);
+        //        TL?.LogMessage("RaiseUiHasChangedEvent", MessageLevel.Debug, "Returned from UI has changed event handler");
+        //    }
+        //}
 
         #endregion
 

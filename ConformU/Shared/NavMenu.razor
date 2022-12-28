@@ -1,6 +1,7 @@
 ﻿@inject ILogger<App> logger
 @inject IJSRuntime JsRuntime
 @inject ConformConfiguration configuration
+@inject ConformStateManager state
 @inject BrowserResizeService resizeListener
 @inject ConformLogger conformLogger
 @inject IJSRuntime JS
@@ -121,7 +122,7 @@ else
     /// <remarks>Hook up an event handler to redisplay the page header whenever the configuraiton is changed. </remarks>
     protected override async Task OnInitializedAsync()
     {
-        configuration.UiHasChanged += OnUiChanged;
+        state.UiHasChanged += OnUiChanged;
         try
         {
             BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
@@ -189,7 +190,7 @@ else
     {
         if (IsSmall) collapseNavMenu = !collapseNavMenu;
         conformLogger.LogMessage("NavMenu-ToggleNavMenu", MessageLevel.Debug, $"Collapse menu: {collapseNavMenu}");
-        configuration.RaiseUiHasChangedEvent();
+        state.RaiseUiHasChangedEvent();
         conformLogger.LogMessage("NavMenu-ToggleNavMenu", MessageLevel.Debug, $"UI changed event complete");
 
         // Start a task that waits a short time and then fires a UI has changed event. Required to ensure that the log text area fully resizes at small widths after the nav bar has resized.
@@ -200,7 +201,7 @@ else
     {
         conformLogger.LogMessage("NavMenu-DelayedUiChangedTask", MessageLevel.Debug, $"Delay started");
         await Task.Delay(100);
-        configuration.RaiseUiHasChangedEvent();
+        state.RaiseUiHasChangedEvent();
         conformLogger.LogMessage("NavMenu-DelayedUiChangedTask", MessageLevel.Debug, $"Delayed UI changed event complete");
 
     }

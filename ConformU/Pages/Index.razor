@@ -4,6 +4,7 @@
 @inject BrowserResizeService listener
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
+@inject ConformStateManager state
 @inject IJSRuntime JS
 @using ASCOM.Common
 @using Microsoft.Extensions.Configuration
@@ -49,7 +50,7 @@
     protected override void OnInitialized()
     {
         conformLogger.Debug = configuration.Settings.Debug;
-        configuration.UiHasChanged += OnUiHasChanged;
+        state.UiHasChanged += OnUiHasChanged;
         conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"Before Task.Run");
 
         if (configuration.Settings.DeviceTechnology == DeviceTechnology.Alpaca)
@@ -129,7 +130,7 @@
         {
             // Set the operation in progress flag and refresh state throughout the page and navigation menu.
             configuration.Settings.OperationInProgress = true;
-            configuration.RaiseUiHasChangedEvent();
+            state.RaiseUiHasChangedEvent();
             StateHasChanged();
 
             // Validate the supplied configuration and only start if there are no settings issues
@@ -213,7 +214,7 @@
         finally
         {
             configuration.Settings.OperationInProgress = false;
-            configuration.RaiseUiHasChangedEvent();
+            state.RaiseUiHasChangedEvent();
             StateHasChanged();
             try
             {
@@ -340,7 +341,7 @@
             if (disposing)
             {
                 listener.OnResize -= WindowResized;
-                configuration.UiHasChanged -= OnUiHasChanged;
+                state.UiHasChanged -= OnUiHasChanged;
             }
 
             disposedValue = true;

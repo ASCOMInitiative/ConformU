@@ -1,6 +1,7 @@
 ﻿@page "/Setup"
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
+@inject ConformStateManager state
 @inject IJSRuntime jsRuntime
 
 @using System.Threading
@@ -74,7 +75,7 @@
     {
         string url = "";
 
-        configuration.RaiseUiHasChangedEvent();
+        state.RaiseUiHasChangedEvent();
         StateHasChanged();
 
         try
@@ -94,7 +95,7 @@
     {
         string url = "";
 
-        configuration.RaiseUiHasChangedEvent();
+        state.RaiseUiHasChangedEvent();
         StateHasChanged();
 
         try
@@ -123,7 +124,7 @@
         try
         {
             configuration.Settings.OperationInProgress = true;
-            configuration.RaiseUiHasChangedEvent();
+            state.RaiseUiHasChangedEvent();
             StateHasChanged();
 
             conformLogger.Debug = configuration.Settings.Debug;
@@ -170,7 +171,7 @@
         {
             // Renable the button and remove operationin progress status
             configuration.Settings.OperationInProgress = false;
-            configuration.RaiseUiHasChangedEvent();
+            state.RaiseUiHasChangedEvent();
             StateHasChanged();
         }
     }

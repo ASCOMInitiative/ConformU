@@ -2,6 +2,7 @@
 @implements IDisposable
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
+@inject ConformStateManager state
 @using System.Threading
 @using ASCOM.Alpaca.Discovery
 @using Blazorise.TreeView
@@ -84,7 +85,7 @@
 
             // Set the operation in progress flag and refresh state throughout the page and navigation menu.
             configuration.Settings.OperationInProgress = true;
-            configuration.RaiseUiHasChangedEvent();
+            state.RaiseUiHasChangedEvent();
             await InvokeAsync(() => { StateHasChanged(); });
 
             // Create a task cancellation token source and cancellation token
@@ -237,7 +238,7 @@
         finally
         {
             configuration.Settings.OperationInProgress = false;
-            configuration.RaiseUiHasChangedEvent();
+            state.RaiseUiHasChangedEvent();
             await InvokeAsync(() => { StateHasChanged(); });
         }
     }

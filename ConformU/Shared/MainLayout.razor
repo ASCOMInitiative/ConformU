@@ -2,6 +2,7 @@
 @inherits LayoutComponentBase
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
+@inject ConformStateManager state
 @using static ConformU.Globals
 
 @* Top level page layout including page header at top and navigation bar at left *@
@@ -34,7 +35,7 @@
     /// <remarks>Hook up an event handler to redisplay the page header whenever the configuraiton is changed. </remarks>
     protected override void OnInitialized()
     {
-        configuration.UiHasChanged += OnUiChanged;
+        state.UiHasChanged += OnUiChanged;
         SetDisplayVariables();
     }
 

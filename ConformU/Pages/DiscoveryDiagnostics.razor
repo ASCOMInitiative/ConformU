@@ -10,6 +10,7 @@
 
 @inject ConformLogger logger
 @inject ConformConfiguration configuration
+@inject ConformStateManager state
 @inject BrowserResizeService listener
 @inject IJSRuntime JS
 
@@ -88,7 +89,7 @@
 
                         // Set the operation in progress flag and refresh state throughout the page and navigation menu.
                         configuration.Settings.OperationInProgress = true;
-                        configuration.RaiseUiHasChangedEvent();
+                        state.RaiseUiHasChangedEvent();
                         await InvokeAsync(() => { StateHasChanged(); });
 
                         // Create a Finder to send the discovery broadcast and collect responses
@@ -309,7 +310,7 @@
                     {
                         // Unset the operation in progress flag to restore the navigation menu
                         configuration.Settings.OperationInProgress = false;
-                        configuration.RaiseUiHasChangedEvent();
+                        state.RaiseUiHasChangedEvent();
                         await InvokeAsync(() => { StateHasChanged(); });
                         await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
                     }

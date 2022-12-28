@@ -14,6 +14,7 @@
 @inject ConformLogger conformLogger
 @* Shared configuration object *@
 @inject ConformConfiguration configuration
+@inject ConformStateManager state
 @* Radzen notification service to enable pop-up alerts *@
 @inject NotificationService notificationService
 @* JavaScript runtime reference *@
@@ -351,7 +352,7 @@
             configuration.Settings.AlpacaDevice = selectedAlpacaDevice;
             ascomDevice = null;
             SaveConfiguration();
-            configuration.RaiseUiHasChangedEvent();
+            state.RaiseUiHasChangedEvent();
         }
         catch (Exception ex)
         {
@@ -377,7 +378,7 @@
             configuration.Settings.AlpacaDevice = selectedAlpacaDevice;
 
             SaveConfiguration();
-            configuration.RaiseUiHasChangedEvent();
+            state.RaiseUiHasChangedEvent();
 
             if (configuration.Settings.GoHomeOnDeviceSelected) UriHelper.NavigateTo("/");
         }
@@ -439,7 +440,7 @@
         configuration.Settings.DeviceTechnology = technologyType;
 
         SaveConfiguration();
-        configuration.RaiseUiHasChangedEvent();
+        state.RaiseUiHasChangedEvent();
 
         if (configuration.Settings.GoHomeOnDeviceSelected) UriHelper.NavigateTo("/");
 
@@ -461,7 +462,7 @@
         }
         discoveryInProgress = false;
         configuration.Settings.OperationInProgress = false;
-        configuration.RaiseUiHasChangedEvent();
+        state.RaiseUiHasChangedEvent();
 
         ascomDevices.Sort((a, b) => a.DisplayName.CompareTo(b.DisplayName));
 
@@ -535,7 +536,7 @@
         {
 
             configuration.Settings.OperationInProgress = true;
-            configuration.RaiseUiHasChangedEvent();
+            state.RaiseUiHasChangedEvent();
             discoveredAlpacaDevices.Clear();
             discoveryInProgress = true;
             alpacaDiscoveryProgress = $"Discovery started (Duration {configuration.Settings.AlpacaConfiguration.DiscoveryDuration:0.0} seconds)...\r\n";

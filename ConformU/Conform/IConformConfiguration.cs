@@ -9,7 +9,7 @@ namespace ConformU
         string Status { get; }
 
         event EventHandler ConfigurationChanged;
-        event EventHandler UiHasChanged;
+        //event EventHandler UiHasChanged;
 
         void Dispose();
         void Reset();
