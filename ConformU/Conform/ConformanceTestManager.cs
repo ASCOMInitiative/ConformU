@@ -1,26 +1,8 @@
 ﻿using ASCOM.Common;
 using System;
 using System.Collections.Generic;
-
-/* Unmerged change from project 'ConformU (net5.0)'
-Before:
-using System.Threading;
-using static ConformU.Globals;
-After:
-using System.Diagnostics;
-using System.IO;
-*/
 using System.IO;
 using System.Text.Json;
-
-/* Unmerged change from project 'ConformU (net5.0)'
-Before:
-using System.Collections.Generic;
-using System.Diagnostics;
-After:
-using System.Text.Json;
-using System.Threading;
-*/
 using System.Threading;
 using System.Threading.Tasks;
 using static ConformU.Globals;
@@ -359,8 +341,10 @@ namespace ConformU
                 try
                 {
                     TL.LogMessage("WriteResultsFile", MessageLevel.Debug, $"TraceLogger Log file path: {TL.LogFilePath}, Log file name: {TL.LogFileName}");
-                    JsonSerializerOptions options = new();
-                    options.WriteIndented = true;
+                    JsonSerializerOptions options = new()
+                    {
+                        WriteIndented = true
+                    };
                     string json = JsonSerializer.Serialize<ConformResults>(conformResults, options);
                     TL.LogMessage("WriteResultsFile", MessageLevel.Debug, json);
 
