@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 namespace ConformU
 {
     [DefaultMember("Settings")]
-    public class ConformConfigurationService : IDisposable, IConformConfiguration
+    public class ConformConfiguration : IDisposable, IConformConfiguration
     {
         private const string FOLDER_NAME = "conform"; // Folder name underneath the local application data folder
         private const string SETTINGS_FILENAME = "conform.settings"; // Settings file name
@@ -26,7 +26,7 @@ namespace ConformU
         /// Create a Configuration management instance and load the current settings
         /// </summary>
         /// <param name="logger">Data logger instance.</param>
-        public ConformConfigurationService(ConformLogger logger, string configurationFile)
+        public ConformConfiguration(ConformLogger logger, string configurationFile)
         {
             TL = logger;
 
