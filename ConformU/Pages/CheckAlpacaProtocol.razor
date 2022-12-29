@@ -1349,11 +1349,13 @@
         string httpMethodUpperCase = httpMethod.ToString().ToUpperInvariant();
 
         string url = $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}";
-        await Send($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, infoCodes);
+        await Send($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes);
     }
 
-    private async Task Send(string testName, string messagePrefix, string url, HttpMethod httpMethod, List<CheckProtocolParameter> parameters, List<HttpStatusCode> expectedCodes, List<HttpStatusCode> infoCodes = null)
+    private async Task Send(string testName, string messagePrefix, string url, HttpMethod httpMethod, List<CheckProtocolParameter> parameters, List<HttpStatusCode> expectedCodes)
     {
+        string ascomOutcome = null;
+
         if (expectedCodes is null)
         {
             throw new ArgumentNullException(nameof(expectedCodes));
@@ -1415,18 +1417,58 @@
             // If there was an ASCOM error flag this
             if ((httpResponse.StatusCode == HttpStatusCode.OK) & (!responseString.Contains("<!DOCTYPE")))
             {
-                // Parse the common httpResponse values from the JSON response
-                Response deviceesponse = JsonSerializer.Deserialize<ASCOM.Common.Alpaca.Response>(responseString);
-                if ((deviceesponse.ErrorNumber != 0) | (deviceesponse.ErrorMessage != ""))
+                try
                 {
-                    LogInformation(testName, $"{messagePrefix} - Device returned ASCOM error number: {deviceesponse.ErrorNumber:X} for client transaction: {deviceesponse.ClientTransactionID}, server transaction: {deviceesponse.ServerTransactionID}", $"Error message: {deviceesponse.ErrorMessage}");
+                    // Parse the common httpResponse values from the JSON response
+                    Response deviceesponse = JsonSerializer.Deserialize<ASCOM.Common.Alpaca.Response>(responseString);
+                    if ((deviceesponse.ErrorNumber != 0) | (deviceesponse.ErrorMessage != ""))
+                    {
+                        // Create a message indicating what went wrong.
+                        try
+                        {
+                            // Only report not implemented errors if configured to do so
+                            if (((AlpacaErrors)deviceesponse.ErrorNumber == AlpacaErrors.NotImplemented) & !settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors)
+                            {
+                                // Do nothing because we are not reporting not implemented errors
+                            }
+                            else
+                            {
+                                ascomOutcome = $"Device returned a {(AlpacaErrors)deviceesponse.ErrorNumber} exception (0x{deviceesponse.ErrorNumber:X}) for client transaction: {deviceesponse.ClientTransactionID}, server transaction: {deviceesponse.ServerTransactionID}. " +
+                                    $"Error message: {deviceesponse.ErrorMessage}";
+                            }
+                        }
+                        catch (Exception) // Handle possibility of a non-ASCOM error number
+                        {
+                            ascomOutcome = $"Device returned error number 0x{deviceesponse.ErrorNumber:X} for client transaction: {deviceesponse.ClientTransactionID}, server transaction: {deviceesponse.ServerTransactionID}. " +
+                                $"Error message: {deviceesponse.ErrorMessage}";
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogIssue(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) but could not de-serialise the returned JSON string. Exception message: {ex.Message}", responseString);
                     LogBlankLine();
+                    return;
                 }
             }
 
             if (expectedCodes.Contains(httpResponse.StatusCode)) // We got the expected outcome
             {
-                LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
+                if (httpResponse.StatusCode == HttpStatusCode.OK)
+                {
+                    if (string.IsNullOrEmpty(ascomOutcome))
+                    {
+                        LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
+                    }
+                    else
+                    {
+                        LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected but the device reported an ASCOM error:", ascomOutcome);
+                    }
+                }
+                else
+                {
+                    LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
+                }
             }
             else // Unexpected outcome
             {
@@ -1437,24 +1479,9 @@
                 }
                 expectedCodeList = expectedCodeList.TrimEnd(' ', ',');
 
-                if (infoCodes is not null)
-                {
-                    if (infoCodes.Contains(httpResponse.StatusCode))
-                    {
-                        LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) rather than " +
-                            $"{(expectedCodeList.Contains(',') ? "one of the expected statuses:" : "the expected status")} {expectedCodeList}", responseString);
-                    }
-                    else
-                    {
-                        LogIssue(testName, $"{messagePrefix} - Expected HTTP status{(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: " +
-                            $"{(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString);
-                    }
-                }
-                else
-                {
-                    LogIssue(testName, $"{messagePrefix} - Expected HTTP status {(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: " +
-                        $"{(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString);
-                }
+                LogIssue(testName, $"{messagePrefix} - Expected HTTP status {(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: " +
+                    $"{(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString);
+
                 LogBlankLine();
             }
         }

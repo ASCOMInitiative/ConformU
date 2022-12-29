@@ -239,6 +239,10 @@ using static ConformU.Globals
                         <RadzenCheckBox Name="CHKSHOWSUCCESSRESPONSES" @bind-Value=@chkProtocolShowSuccessResponses TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolShowSuccessResponses)) />
                         <RadzenLabel Text="Show success responses" Component="CHKSHOWSUCCESSRESPONSES" Style="margin-left: 20px;" />
                     </div>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHRREPORTNOTIMPLEMENTED" @bind-Value=@chkProtocolReportNotImplementedErrors TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolReportNotImplementedErrors)) />
+                        <RadzenLabel Text="Report ASCOM not implemented errors" Component="CHRREPORTNOTIMPLEMENTED" Style="margin-left: 20px;" />
+                    </div>
                 </RadzenCard>
 
                 @if (OperatingSystem.IsWindows())
@@ -280,7 +284,7 @@ using static ConformU.Globals
                                         Orientation="Orientation.Vertical"
                                         Change=@(args => OnTelescopeTestsChange(args))>
                         <Items>
-                            @foreach (var item in configuration.Settings.TelescopeTests)
+                            @foreach (var item in settings.TelescopeTests)
                             {
                                 <RadzenCheckBoxListItem Text="@item.Key" Value="@item.Key" />
                             }
@@ -507,6 +511,8 @@ using static ConformU.Globals
 </div>
 
 @code {
+    private ConformU.Settings settings;
+
     // Conform general configuration
     private IEnumerable<int> conformanceTestScope = new List<int>() { 0, 1, 2, 3 };
     private bool checkForUpdates;
@@ -544,6 +550,7 @@ using static ConformU.Globals
     private bool chkTraceAlpacaCalls;
     private ComAccessMechanic comAccessMechanic = ComAccessMechanic.Native;
     private bool chkProtocolShowSuccessResponses;
+    private bool chkProtocolReportNotImplementedErrors;
 
     // Camera test configuration
     private int cameraTestMaxBinX;
@@ -640,7 +647,8 @@ using static ConformU.Globals
         TelescopeFirstUseTests,
         GoHomeOnDeviceSelection,
         RunAs32Bit,
-        ProtocolShowSuccessResponses
+        ProtocolShowSuccessResponses,
+        ProtocolReportNotImplementedErrors
     }
 
     private enum BoolConfigurationItem
@@ -652,6 +660,7 @@ using static ConformU.Globals
 
     protected override void OnInitialized()
     {
+        settings = configuration.Settings; // Create a shortcut to the configuration settings
         status = $"{configuration.Status}";
         SetConfiguration();
 
@@ -672,7 +681,7 @@ using static ConformU.Globals
         switch (boolConfigurationItem)
         {
             case BoolConfigurationItem.TestImageArrayVariant:
-                configuration.Settings.CameraTestImageArrayVariant = newValue;
+                settings.CameraTestImageArrayVariant = newValue;
                 break;
 
             default:
@@ -686,27 +695,27 @@ using static ConformU.Globals
         switch (numericConfigurationItem)
         {
             case NumericConfigurationItem.AlpacaDiscoveryDuration:
-                configuration.Settings.AlpacaConfiguration.DiscoveryDuration = newValue;
+                settings.AlpacaConfiguration.DiscoveryDuration = newValue;
                 break;
 
             case NumericConfigurationItem.AlpacaDiscoveryPollInterval:
-                configuration.Settings.AlpacaConfiguration.DiscoveryPollInterval = newValue;
+                settings.AlpacaConfiguration.DiscoveryPollInterval = newValue;
                 break;
 
             case NumericConfigurationItem.TelescopeSlewTolerance:
-                configuration.Settings.TelescopeSlewTolerance = newValue;
+                settings.TelescopeSlewTolerance = newValue;
                 break;
 
             case NumericConfigurationItem.DomeSlewtolerance:
-                configuration.Settings.DomeSlewTolerance = newValue;
+                settings.DomeSlewTolerance = newValue;
                 break;
 
             case NumericConfigurationItem.CameraExposureDuration:
-                configuration.Settings.CameraExposureDuration = newValue;
+                settings.CameraExposureDuration = newValue;
                 break;
 
             case NumericConfigurationItem.waitTimeBeforeConformApplicationExits:
-                configuration.Settings.ConnectionTimeout = newValue;
+                settings.ConnectionTimeout = newValue;
                 break;
 
             default:
@@ -720,75 +729,75 @@ using static ConformU.Globals
         switch (numericConfigurationItem)
         {
             case NumericConfigurationItem.ApplicationPort:
-                configuration.Settings.ApplicationPort = newValue;
+                settings.ApplicationPort = newValue;
                 break;
 
             case NumericConfigurationItem.CameraMaxBinX:
-                configuration.Settings.CameraMaxBinX = newValue;
+                settings.CameraMaxBinX = newValue;
                 break;
 
             case NumericConfigurationItem.CameraMaxBinY:
-                configuration.Settings.CameraMaxBinY = newValue;
+                settings.CameraMaxBinY = newValue;
                 break;
 
             case NumericConfigurationItem.DomeAltitudeTimeout:
-                configuration.Settings.DomeAltitudeMovementTimeout = newValue;
+                settings.DomeAltitudeMovementTimeout = newValue;
                 break;
 
             case NumericConfigurationItem.DomeAzimuthTimeout:
-                configuration.Settings.DomeAzimuthMovementTimeout = newValue;
+                settings.DomeAzimuthMovementTimeout = newValue;
                 break;
 
             case NumericConfigurationItem.DomeStabilisationWaitTime:
-                configuration.Settings.DomeStabilisationWaitTime = newValue;
+                settings.DomeStabilisationWaitTime = newValue;
                 break;
 
             case NumericConfigurationItem.DomeShutterTimeout:
-                configuration.Settings.DomeShutterMovementTimeout = newValue;
+                settings.DomeShutterMovementTimeout = newValue;
                 break;
 
             case NumericConfigurationItem.ObservingConditionsMaxRetries:
-                configuration.Settings.ObservingConditionsMaxRetries = newValue;
+                settings.ObservingConditionsMaxRetries = newValue;
                 break;
 
             case NumericConfigurationItem.ObservingConditionsRetryTime:
-                configuration.Settings.ObservingConditionsRetryTime = newValue;
+                settings.ObservingConditionsRetryTime = newValue;
                 break;
 
             case NumericConfigurationItem.SwitchExtendedNumberTestRange:
-                configuration.Settings.SwitchExtendedNumberTestRange = newValue;
+                settings.SwitchExtendedNumberTestRange = newValue;
                 break;
 
             case NumericConfigurationItem.SwitchReadDelay:
-                configuration.Settings.SwitchReadDelay = newValue;
+                settings.SwitchReadDelay = newValue;
                 break;
 
             case NumericConfigurationItem.SwitchWriteDelay:
-                configuration.Settings.SwitchWriteDelay = newValue;
+                settings.SwitchWriteDelay = newValue;
                 break;
 
             case NumericConfigurationItem.AlpacaDiscoveryPort:
-                configuration.Settings.AlpacaConfiguration.DiscoveryPort = newValue;
+                settings.AlpacaConfiguration.DiscoveryPort = newValue;
                 break;
 
             case NumericConfigurationItem.AlpacaNumberOfDiscoveryPolls:
-                configuration.Settings.AlpacaConfiguration.NumberOfDiscoveryPolls = newValue;
+                settings.AlpacaConfiguration.NumberOfDiscoveryPolls = newValue;
                 break;
 
             case NumericConfigurationItem.TelescopeMaximumSlewTime:
-                configuration.Settings.TelescopeMaximumSlewTime = newValue;
+                settings.TelescopeMaximumSlewTime = newValue;
                 break;
 
             case NumericConfigurationItem.FocuserTimeout:
-                configuration.Settings.FocuserTimeout = newValue;
+                settings.FocuserTimeout = newValue;
                 break;
 
             case NumericConfigurationItem.RotatorTimeout:
-                configuration.Settings.RotatorTimeout = newValue;
+                settings.RotatorTimeout = newValue;
                 break;
 
             case NumericConfigurationItem.focuserMoveTolerance:
-                configuration.Settings.FocuserMoveTolerance = newValue;
+                settings.FocuserMoveTolerance = newValue;
                 break;
 
             default:
@@ -802,71 +811,75 @@ using static ConformU.Globals
         switch (name)
         {
             case CheckBoxConfigurationItem.UpdateCheck:
-                configuration.Settings.UpdateCheck = checkForUpdates;
+                settings.UpdateCheck = checkForUpdates;
                 break;
 
             case CheckBoxConfigurationItem.DisplayCalls:
-                configuration.Settings.DisplayMethodCalls = displayMethodCalls; ;
+                settings.DisplayMethodCalls = displayMethodCalls; ;
                 break;
 
             case CheckBoxConfigurationItem.Debug:
-                configuration.Settings.Debug = enableDebugLogging;
+                settings.Debug = enableDebugLogging;
                 break;
 
             case CheckBoxConfigurationItem.DomeOpenShutter:
-                configuration.Settings.DomeOpenShutter = domeOpenShutter;
+                settings.DomeOpenShutter = domeOpenShutter;
                 break;
 
             case CheckBoxConfigurationItem.SwitchEnableSet:
-                configuration.Settings.SwitchEnableSet = switchEnableSet;
+                settings.SwitchEnableSet = switchEnableSet;
                 break;
 
             case CheckBoxConfigurationItem.AlpacaDiscoveryResolveName:
-                configuration.Settings.AlpacaConfiguration.DiscoveryResolveName = alpacaDiscoveryResolveName;
+                settings.AlpacaConfiguration.DiscoveryResolveName = alpacaDiscoveryResolveName;
                 break;
 
             case CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV4:
-                configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4 = alpacaDiscoveryUseIpV4;
+                settings.AlpacaConfiguration.DiscoveryUseIpV4 = alpacaDiscoveryUseIpV4;
                 break;
 
             case CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV6:
-                configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6 = alpacaDiscoveryUseIpV6;
+                settings.AlpacaConfiguration.DiscoveryUseIpV6 = alpacaDiscoveryUseIpV6;
                 break;
 
             case CheckBoxConfigurationItem.StrictCasing:
-                configuration.Settings.AlpacaConfiguration.StrictCasing = strictCasing;
+                settings.AlpacaConfiguration.StrictCasing = strictCasing;
                 break;
 
             case CheckBoxConfigurationItem.TraceDiscovery:
-                configuration.Settings.TraceDiscovery = chkTraceDiscovery;
+                settings.TraceDiscovery = chkTraceDiscovery;
                 break;
 
             case CheckBoxConfigurationItem.TraceAlpacaCalls:
-                configuration.Settings.TraceAlpacaCalls = chkTraceAlpacaCalls;
+                settings.TraceAlpacaCalls = chkTraceAlpacaCalls;
                 break;
 
             case CheckBoxConfigurationItem.CameraFirstUseTests:
-                configuration.Settings.CameraFirstUseTests = cameraFirstUseTests;
+                settings.CameraFirstUseTests = cameraFirstUseTests;
                 break;
 
             case CheckBoxConfigurationItem.DiscoveryEnabled:
-                configuration.Settings.AlpacaConfiguration.DiscoveryEnabled = alpacaDiscoveryEnabled;
+                settings.AlpacaConfiguration.DiscoveryEnabled = alpacaDiscoveryEnabled;
                 break;
 
             case CheckBoxConfigurationItem.TelescopeFirstUseTests:
-                configuration.Settings.TelescopeFirstUseTests = telescopeFirstUseTests;
+                settings.TelescopeFirstUseTests = telescopeFirstUseTests;
                 break;
 
             case CheckBoxConfigurationItem.GoHomeOnDeviceSelection:
-                configuration.Settings.GoHomeOnDeviceSelected = goHomeOnDeviceSelection;
+                settings.GoHomeOnDeviceSelected = goHomeOnDeviceSelection;
                 break;
 
             case CheckBoxConfigurationItem.RunAs32Bit:
-                configuration.Settings.RunAs32Bit = runAs32Bit;
+                settings.RunAs32Bit = runAs32Bit;
                 break;
 
             case CheckBoxConfigurationItem.ProtocolShowSuccessResponses:
-                configuration.Settings.AlpacaConfiguration.ProtocolShowSuccessResponses = chkProtocolShowSuccessResponses;
+                settings.AlpacaConfiguration.ProtocolShowSuccessResponses = chkProtocolShowSuccessResponses;
+                break;
+
+            case CheckBoxConfigurationItem.ProtocolReportNotImplementedErrors:
+                settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors = chkProtocolReportNotImplementedErrors;
                 break;
 
             default:
@@ -885,21 +898,21 @@ using static ConformU.Globals
     private void OnImageArrayTypeChange(object imageArrayTransferTypeObject)
     {
         ImageArrayTransferType imageArrayTransferType = (ImageArrayTransferType)imageArrayTransferTypeObject;
-        configuration.Settings.AlpacaConfiguration.ImageArrayTransferType = imageArrayTransferType;
+        settings.AlpacaConfiguration.ImageArrayTransferType = imageArrayTransferType;
         SaveConfiguration();
     }
 
     private void OnServiceTypeChange(object serviceMode)
     {
         ServiceType serviceType = (ServiceType)serviceMode;
-        configuration.Settings.AlpacaConfiguration.AccessServiceType = serviceType;
+        settings.AlpacaConfiguration.AccessServiceType = serviceType;
         SaveConfiguration();
     }
 
     private void OnComAccessModeChange(object accessMode)
     {
         ComAccessMechanic comMechanic = (ComAccessMechanic)accessMode;
-        configuration.Settings.ComConfiguration.ComAccessMechanic = comAccessMechanic;
+        settings.ComConfiguration.ComAccessMechanic = comAccessMechanic;
         SaveConfiguration();
     }
 
@@ -915,10 +928,10 @@ using static ConformU.Globals
         if (sideofPierWriteEnabled)
         {
             newScope = new List<int>() { 0, 1, 2, 3 };
-            configuration.Settings.TestProperties = true;
-            configuration.Settings.TestMethods = true;
-            configuration.Settings.TestSideOfPierRead = true;
-            configuration.Settings.TestSideOfPierWrite = true;
+            settings.TestProperties = true;
+            settings.TestMethods = true;
+            settings.TestSideOfPierRead = true;
+            settings.TestSideOfPierWrite = true;
 
         }
         else
@@ -926,38 +939,38 @@ using static ConformU.Globals
             if (sideofPierReadEnabled)
             {
                 newScope = new List<int>() { 0, 1, 2 };
-                configuration.Settings.TestProperties = true;
-                configuration.Settings.TestMethods = true;
-                configuration.Settings.TestSideOfPierRead = true;
-                configuration.Settings.TestSideOfPierWrite = false;
+                settings.TestProperties = true;
+                settings.TestMethods = true;
+                settings.TestSideOfPierRead = true;
+                settings.TestSideOfPierWrite = false;
             }
             else
             {
                 if (methodsEnabled)
                 {
                     newScope = new List<int>() { 0, 1 };
-                    configuration.Settings.TestProperties = true;
-                    configuration.Settings.TestMethods = true;
-                    configuration.Settings.TestSideOfPierRead = false;
-                    configuration.Settings.TestSideOfPierWrite = false;
+                    settings.TestProperties = true;
+                    settings.TestMethods = true;
+                    settings.TestSideOfPierRead = false;
+                    settings.TestSideOfPierWrite = false;
                 }
                 else
                 {
                     if (propertiesEnabled)
                     {
                         newScope = new List<int>() { 0 };
-                        configuration.Settings.TestProperties = true;
-                        configuration.Settings.TestMethods = false;
-                        configuration.Settings.TestSideOfPierRead = false;
-                        configuration.Settings.TestSideOfPierWrite = false;
+                        settings.TestProperties = true;
+                        settings.TestMethods = false;
+                        settings.TestSideOfPierRead = false;
+                        settings.TestSideOfPierWrite = false;
                     }
                     else
                     {
                         newScope = new List<int>();
-                        configuration.Settings.TestProperties = false;
-                        configuration.Settings.TestMethods = false;
-                        configuration.Settings.TestSideOfPierRead = false;
-                        configuration.Settings.TestSideOfPierWrite = false;
+                        settings.TestProperties = false;
+                        settings.TestMethods = false;
+                        settings.TestSideOfPierRead = false;
+                        settings.TestSideOfPierWrite = false;
                     }
                 }
             }
@@ -965,11 +978,11 @@ using static ConformU.Globals
         if (performanceEnabled)
         {
             newScope.Add(4);
-            configuration.Settings.TestPerformance = true;
+            settings.TestPerformance = true;
         }
         else
         {
-            configuration.Settings.TestPerformance = false;
+            settings.TestPerformance = false;
         }
 
         scope = newScope;
@@ -979,7 +992,7 @@ using static ConformU.Globals
     private void OnTelescopeTestsChange(IEnumerable<string> value)
     {
         Dictionary<string, bool> newTelescopetestValues = new();
-        foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
+        foreach (KeyValuePair<string, bool> item in settings.TelescopeTests)
         {
             newTelescopetestValues[item.Key] = false;
         }
@@ -988,7 +1001,7 @@ using static ConformU.Globals
         {
             newTelescopetestValues[i] = true;
         }
-        configuration.Settings.TelescopeTests = newTelescopetestValues;
+        settings.TelescopeTests = newTelescopetestValues;
         SaveConfiguration();
     }
 
@@ -1003,11 +1016,11 @@ using static ConformU.Globals
     private void OnSetTelescopeTestsButtonClick(bool state)
     {
         Dictionary<string, bool> changedTests = new();
-        foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
+        foreach (KeyValuePair<string, bool> item in settings.TelescopeTests)
         {
             changedTests.Add(item.Key, state);
         }
-        configuration.Settings.TelescopeTests = changedTests;
+        settings.TelescopeTests = changedTests;
 
         SaveConfiguration();
         SetConfiguration();
@@ -1024,84 +1037,85 @@ using static ConformU.Globals
         List<int> newScope = new();
 
         // Set scope
-        if (configuration.Settings.TestProperties) newScope.Add(0);
-        if (configuration.Settings.TestMethods) newScope.Add(1);
-        if (configuration.Settings.TestSideOfPierRead) newScope.Add(2);
-        if (configuration.Settings.TestSideOfPierWrite) newScope.Add(3);
-        if (configuration.Settings.TestPerformance) newScope.Add(4);
+        if (settings.TestProperties) newScope.Add(0);
+        if (settings.TestMethods) newScope.Add(1);
+        if (settings.TestSideOfPierRead) newScope.Add(2);
+        if (settings.TestSideOfPierWrite) newScope.Add(3);
+        if (settings.TestPerformance) newScope.Add(4);
         conformanceTestScope = newScope;
 
         // Operation settings
-        checkForUpdates = configuration.Settings.UpdateCheck;
-        displayMethodCalls = configuration.Settings.DisplayMethodCalls;
-        enableDebugLogging = configuration.Settings.Debug;
-        goHomeOnDeviceSelection = configuration.Settings.GoHomeOnDeviceSelected;
-        waitTimeBeforeConformApplicationExits = configuration.Settings.ConnectionTimeout;
-        applicationPort = configuration.Settings.ApplicationPort;
-        runAs32Bit = configuration.Settings.RunAs32Bit;
+        checkForUpdates = settings.UpdateCheck;
+        displayMethodCalls = settings.DisplayMethodCalls;
+        enableDebugLogging = settings.Debug;
+        goHomeOnDeviceSelection = settings.GoHomeOnDeviceSelected;
+        waitTimeBeforeConformApplicationExits = settings.ConnectionTimeout;
+        applicationPort = settings.ApplicationPort;
+        runAs32Bit = settings.RunAs32Bit;
 
         // Trace settings
-        chkTraceDiscovery = configuration.Settings.TraceDiscovery;
-        chkTraceAlpacaCalls = configuration.Settings.TraceAlpacaCalls;
+        chkTraceDiscovery = settings.TraceDiscovery;
+        chkTraceAlpacaCalls = settings.TraceAlpacaCalls;
 
         // COM Settings
-        comAccessMechanic = configuration.Settings.ComConfiguration.ComAccessMechanic;
+        comAccessMechanic = settings.ComConfiguration.ComAccessMechanic;
 
         // Telescope tests
         telescopeTests = new List<string>();
-        foreach (KeyValuePair<string, bool> item in configuration.Settings.TelescopeTests)
+        foreach (KeyValuePair<string, bool> item in settings.TelescopeTests)
         {
             if (item.Value) ((List<string>)telescopeTests).Add(item.Key);
         }
-        telescopeFirstUseTests = configuration.Settings.TelescopeFirstUseTests;
-        telescopeSlewTolerance = configuration.Settings.TelescopeSlewTolerance;
-        telescopeMaximumSlewTime = configuration.Settings.TelescopeMaximumSlewTime;
+        telescopeFirstUseTests = settings.TelescopeFirstUseTests;
+        telescopeSlewTolerance = settings.TelescopeSlewTolerance;
+        telescopeMaximumSlewTime = settings.TelescopeMaximumSlewTime;
 
         // Camera tests
-        cameraTestMaxBinX = configuration.Settings.CameraMaxBinX;
-        cameraTestMaxBinY = configuration.Settings.CameraMaxBinY;
-        cameraFirstUseTests = configuration.Settings.CameraFirstUseTests;
-        cameraTestImageArrayVariant = configuration.Settings.CameraTestImageArrayVariant;
-        cameraExposureDuration = configuration.Settings.CameraExposureDuration;
+        cameraTestMaxBinX = settings.CameraMaxBinX;
+        cameraTestMaxBinY = settings.CameraMaxBinY;
+        cameraFirstUseTests = settings.CameraFirstUseTests;
+        cameraTestImageArrayVariant = settings.CameraTestImageArrayVariant;
+        cameraExposureDuration = settings.CameraExposureDuration;
 
         // Dome tests
-        domeShutterTimeout = configuration.Settings.DomeShutterMovementTimeout;
-        domeAzimuthTimeout = configuration.Settings.DomeAzimuthMovementTimeout;
-        domeAltitudeTimeout = configuration.Settings.DomeAltitudeMovementTimeout;
-        domeStabilisationWaitTime = configuration.Settings.DomeStabilisationWaitTime;
-        domeOpenShutter = configuration.Settings.DomeOpenShutter;
-        domeSlewTolerance = configuration.Settings.DomeSlewTolerance;
+        domeShutterTimeout = settings.DomeShutterMovementTimeout;
+        domeAzimuthTimeout = settings.DomeAzimuthMovementTimeout;
+        domeAltitudeTimeout = settings.DomeAltitudeMovementTimeout;
+        domeStabilisationWaitTime = settings.DomeStabilisationWaitTime;
+        domeOpenShutter = settings.DomeOpenShutter;
+        domeSlewTolerance = settings.DomeSlewTolerance;
 
         // Focuser tests
-        focuserTimeout = configuration.Settings.FocuserTimeout;
-        focuserMoveTolerance = configuration.Settings.FocuserMoveTolerance;
+        focuserTimeout = settings.FocuserTimeout;
+        focuserMoveTolerance = settings.FocuserMoveTolerance;
 
         // ObservingConditions tests
-        observingConditionsMaxRetries = configuration.Settings.ObservingConditionsMaxRetries;
-        observingConditionsRetryTime = configuration.Settings.ObservingConditionsRetryTime;
+        observingConditionsMaxRetries = settings.ObservingConditionsMaxRetries;
+        observingConditionsRetryTime = settings.ObservingConditionsRetryTime;
 
         // Rotator tests
-        rotatorTimeout = configuration.Settings.RotatorTimeout;
+        rotatorTimeout = settings.RotatorTimeout;
 
         // Switch tests
-        switchEnableSet = configuration.Settings.SwitchEnableSet;
-        switchExtendedNumberTestRange = configuration.Settings.SwitchExtendedNumberTestRange;
-        switchReadDelay = configuration.Settings.SwitchReadDelay;
-        switchWriteDelay = configuration.Settings.SwitchWriteDelay;
+        switchEnableSet = settings.SwitchEnableSet;
+        switchExtendedNumberTestRange = settings.SwitchExtendedNumberTestRange;
+        switchReadDelay = settings.SwitchReadDelay;
+        switchWriteDelay = settings.SwitchWriteDelay;
 
         // Alpaca configuration
-        alpacaDiscoveryEnabled = configuration.Settings.AlpacaConfiguration.DiscoveryEnabled;
-        alpacaDiscoveryDuration = configuration.Settings.AlpacaConfiguration.DiscoveryDuration;
-        alpacaDiscoveryPollInterval = configuration.Settings.AlpacaConfiguration.DiscoveryPollInterval;
-        alpacaDiscoveryPort = configuration.Settings.AlpacaConfiguration.DiscoveryPort;
-        alpacaNumberOfDiscoveryPolls = configuration.Settings.AlpacaConfiguration.NumberOfDiscoveryPolls;
-        alpacaDiscoveryResolveName = configuration.Settings.AlpacaConfiguration.DiscoveryResolveName;
-        alpacaDiscoveryUseIpV4 = configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4;
-        alpacaDiscoveryUseIpV6 = configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6;
-        alpacaServiceType = configuration.Settings.AlpacaConfiguration.AccessServiceType;
-        strictCasing = configuration.Settings.AlpacaConfiguration.StrictCasing;
-        alpacaImageArrayTransferType = configuration.Settings.AlpacaConfiguration.ImageArrayTransferType;
-        chkProtocolShowSuccessResponses = configuration.Settings.AlpacaConfiguration.ProtocolShowSuccessResponses;
+        alpacaDiscoveryEnabled = settings.AlpacaConfiguration.DiscoveryEnabled;
+        alpacaDiscoveryDuration = settings.AlpacaConfiguration.DiscoveryDuration;
+        alpacaDiscoveryPollInterval = settings.AlpacaConfiguration.DiscoveryPollInterval;
+        alpacaDiscoveryPort = settings.AlpacaConfiguration.DiscoveryPort;
+        alpacaNumberOfDiscoveryPolls = settings.AlpacaConfiguration.NumberOfDiscoveryPolls;
+        alpacaDiscoveryResolveName = settings.AlpacaConfiguration.DiscoveryResolveName;
+        alpacaDiscoveryUseIpV4 = settings.AlpacaConfiguration.DiscoveryUseIpV4;
+        alpacaDiscoveryUseIpV6 = settings.AlpacaConfiguration.DiscoveryUseIpV6;
+        alpacaServiceType = settings.AlpacaConfiguration.AccessServiceType;
+        strictCasing = settings.AlpacaConfiguration.StrictCasing;
+        alpacaImageArrayTransferType = settings.AlpacaConfiguration.ImageArrayTransferType;
+        chkProtocolShowSuccessResponses = settings.AlpacaConfiguration.ProtocolShowSuccessResponses;
+        chkProtocolReportNotImplementedErrors = settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors;
     }
 
     private void SaveConfiguration()
