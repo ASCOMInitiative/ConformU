@@ -10,6 +10,8 @@
 @using ASCOM.Common;
 @using System.Net.Http.Headers;
 @using System.Diagnostics;
+@using ASCOM.Common.DeviceInterfaces;
+@using ASCOM.DeviceInterface;
 
 @inject ConformLogger logger
 @inject ConformConfiguration configuration
@@ -23,7 +25,7 @@
     <RadzenButton Id="testButton" Click=@(() => StartCheckAlpacaProtocol()) Text="Check Protocol" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" IsBusy=@settings.OperationInProgress Disabled=@(configuration.Settings.DeviceTechnology!=DeviceTechnology.Alpaca) />
     <RadzenButton Id="StopButton" Click=@(() => StopTest()) Text="Stop" Style="margin-bottom: 20px; margin-right: 40px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
     <span style="white-space:nowrap">
-        <RadzenLabel Text="Outcome:" Component="TESTSTATUS" Style="margin-right:2px;margin-top:0px; color:#0366d6;font-weight:bold" />
+        <RadzenLabel Text="Status:" Component="TESTSTATUS" Style="margin-right:2px;margin-top:0px; color:#0366d6;font-weight:bold" />
         <RadzenTextBox Name="TESTSTATUS" Placeholder="" @bind-Value=@statusText ReadOnly=true Style="width:600px;font-weight:bold;margin-right:40px;margin-bottom:10px" />
     </span>
 </div>
@@ -261,10 +263,17 @@
             httpClient.DefaultRequestHeaders.Connection.Add("keep-alive");
             httpClient.DefaultRequestHeaders.ConnectionClose = false;
 
+            // Add a base 64 hand-off header, if configured to do, so because this will speed up the JSON transfer by avoiding transmission of the entire image as JSON.
+            if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.Base64HandOff) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
+            {
+                httpClient.DefaultRequestHeaders.Add(AlpacaConstants.BASE64_HANDOFF_HEADER, new string[] { AlpacaConstants.BASE64_HANDOFF_SUPPORTED });
+            }
+
             try
             {
                 // Set Connected true to start the test
                 await SendApi("True", "Connected", HttpMethod.Put, ParamConnectedTrue, HttpStatusCode200);
+                LogBlankLine();
 
                 // Test common members
                 await TestCommon();
@@ -501,12 +510,8 @@
             await GetNoParameters("Gains");
             await GetNoParameters("HasShutter");
             await GetNoParameters("HeatSinkTemperature");
-            await GetNoParameters("ImageArray");
-            await GetNoParameters("ImageArrayVariant");
             await GetNoParameters("ImageReady");
             await GetNoParameters("IsPulseGuiding");
-            await GetNoParameters("LastExposureDuration");
-            await GetNoParameters("LastExposureStartTime");
             await GetNoParameters("MaxADU");
             await GetNoParameters("MaxBinX");
             await GetNoParameters("MaxBinY");
@@ -543,6 +548,31 @@
             await GetNoParameters("SubExposureDuration");
             try { parameter1 = camera.SubExposureDuration.ToString(); } catch (Exception) { parameter1 = "1"; }
             await PutOneParameter("SubExposureDuration", "SubExposureDuration", parameter1, null);
+
+            // Test methods
+
+            await PutNoParameters("AbortExposure", null);
+
+            await PutTwoParameters("PulseGuide", "Direction", ((int)GuideDirection.North).ToString(), "Duration", "1", null);
+
+            await PutTwoParameters("StartExposure", "Duration", "0.1", "Light", "False", () =>
+                {
+                    WaitWhile("StartExposure", () => { return camera.CameraState == CameraState.Exposing; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                });
+
+            await PutNoParameters("StopExposure", null);
+
+            // test properties that require an image to have been taken first
+            SetStatus("Getting ImageArray...");
+            await GetNoParameters("ImageArray");
+
+            SetStatus("Getting ImageArrayVariant...");
+            await GetNoParameters("ImageArrayVariant");
+            SetStatus("");
+
+            await GetNoParameters("LastExposureDuration");
+            await GetNoParameters("LastExposureStartTime");
+
 
             try { camera.Connected = false; } catch { }
 
@@ -1542,7 +1572,7 @@
 
         // Wait for the completion function to return false
         Stopwatch sw = Stopwatch.StartNew(); // Start the loop timing stopwatch
-        do
+        while (waitFunction() & !combinedCts.Token.IsCancellationRequested) 
         {
             // Calculate the current loop number (starts at 0 given that the timer's elapsed time will be zero or very low on the first loop)
             int currentLoopNumber = ((int)(sw.ElapsedMilliseconds) + 50) / pollInterval; // Add a small positive offset (50) because integer division always rounds down
@@ -1558,8 +1588,7 @@
                 SetStatus($"Waiting for the {actionName} operation to complete: {Math.Round(Convert.ToDouble(currentLoopNumber + 1) * pollInterval / 1000.0, 1):0.0} / {timeoutSeconds:0.0} seconds");
             else // Display the supplied message instead of the elapsed time message
                 SetStatus($"Waiting for the {actionName} operation to complete: {statusString()}");
-
-        } while (waitFunction() & !combinedCts.Token.IsCancellationRequested);
+        }
 
         // Test whether the operation timed out
         if (timeoutCts.IsCancellationRequested) // The operation did time out
