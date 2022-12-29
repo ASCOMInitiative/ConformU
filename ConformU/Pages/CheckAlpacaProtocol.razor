@@ -21,10 +21,12 @@
 
 <div>
     <RadzenButton Id="testButton" Click=@(() => StartCheckAlpacaProtocol()) Text="Check Protocol" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" IsBusy=@settings.OperationInProgress Disabled=@(configuration.Settings.DeviceTechnology!=DeviceTechnology.Alpaca) />
-    <RadzenLabel Text="Outcome:" Component="TESTSTATUS" Style="margin-left: 40px;margin-right:2px" />
-    <RadzenTextBox Name="TESTSTATUS" Placeholder="" @bind-Value=@statusText ReadOnly=true Style="width:1000px;font-weight:bold;" />
+    <RadzenButton Id="StopButton" Click=@(() => StopTest()) Text="Stop" Style="margin-bottom: 20px; margin-right: 40px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
+    <span style="white-space:nowrap">
+        <RadzenLabel Text="Outcome:" Component="TESTSTATUS" Style="margin-right:2px;margin-top:0px; color:#0366d6;font-weight:bold" />
+        <RadzenTextBox Name="TESTSTATUS" Placeholder="" @bind-Value=@statusText ReadOnly=true Style="width:600px;font-weight:bold;margin-right:40px;margin-bottom:10px" />
+    </span>
 </div>
-
 <RadzenTextArea Id="ProtocolLog" Style="line-height: 18px; padding-bottom: 0px" Name="ProtocolLogName" @bind-Value=@screenLog Rows="@screenLogRows" @bind-Cols=@screenLogColumns ReadOnly=true />
 @code
 {
@@ -119,6 +121,17 @@
     #endregion
 
     #region Alpaca protocol test management
+
+    /// <summary>
+    /// Stop a running test
+    /// </summary>
+    private void StopTest()
+    {
+        LogBlankLine();
+        LogLine($"STOP button pressed... stopping tests");
+        LogBlankLine();
+        cancellationTokenSource.Cancel();
+    }
 
     /// <summary>
     /// Start an Alpaca protocol check
@@ -314,50 +327,61 @@
 
             // Summarise the protocol test outcome
             LogBlankLine();
-            if ((informationMessages.Count == 0) & (issueMessages.Count == 0) & (errorMessages.Count == 0))
+
+            // Summarise results depending on whether the test was cancelled or ran to completion
+            if (applicationCancellationToken.IsCancellationRequested) // Cancellation requested
             {
-                LogLine($"No errors, issues or information alerts found: Your devices pass ASCOM Alpaca protocol validation!!");
+                string message = $"The Alpaca protocol checks were interrupted before completion.";
+                SetStatus(message);
+                LogLine(message);
             }
-            else
+            else // Tests ran to completion
             {
-                if (errorMessages.Count > 0)
+                if ((informationMessages.Count == 0) & (issueMessages.Count == 0) & (errorMessages.Count == 0))
                 {
-                    LogLine($"Error Summary");
-                    foreach (string message in errorMessages)
-                    {
-                        LogLine(message);
-                    }
+                    SetStatus($"Congratulations, there were no errors, issues or information messages!");
+                    LogLine($"No errors, issues or information alerts found: Your device passes ASCOM Alpaca protocol validation!!");
                 }
-                if (issueMessages.Count > 0)
+                else
                 {
-                    if (errorMessages.Count > 0)
-                        LogBlankLine();
-                    LogLine($"Issue Summary");
-                    foreach (string message in issueMessages)
-                    {
-                        LogLine(message);
-                    }
-                }
-                if (informationMessages.Count > 0)
-                {
-                    if ((errorMessages.Count > 0) | (issueMessages.Count > 0))
-                        LogBlankLine();
-                    LogLine($"Information Message Summary");
-                    foreach (string message in informationMessages)
-                    {
-                        LogLine(message);
-                    }
+                    string message = $"Found {errorMessages.Count} error{(errorMessages.Count == 1 ? "" : "s")}, {issueMessages.Count} issue{(issueMessages.Count == 1 ? "" : "s")} and {informationMessages.Count} information messages{(informationMessages.Count == 1 ? "" : "s")}.";
+                    SetStatus(message);
+                    LogLine(message);
                 }
             }
 
-            // Set the status field depending on the outcome
-            if ((informationMessages.Count == 0) & (issueMessages.Count == 0) & (errorMessages.Count == 0))
+            // List any diagnostic ERROR messages
+            if (errorMessages.Count > 0)
             {
-                SetStatus($"Congratulations, there were no errors, issues or information messages!");
+                LogLine($"Error Summary");
+                foreach (string message in errorMessages)
+                {
+                    LogLine(message);
+                }
             }
-            else
+
+            // List any diagnostic ISSUE messages
+            if (issueMessages.Count > 0)
             {
-                SetStatus($"Found {errorMessages.Count} error{(errorMessages.Count == 1 ? "" : "s")}, {issueMessages.Count} issue{(issueMessages.Count == 1 ? "" : "s")} and {informationMessages.Count} information messages{(informationMessages.Count == 1 ? "" : "s")}.");
+                if (errorMessages.Count > 0) LogBlankLine();
+
+                LogLine($"Issue Summary");
+                foreach (string message in issueMessages)
+                {
+                    LogLine(message);
+                }
+            }
+
+            // List any diagnostic INFORMATION messages
+            if (informationMessages.Count > 0)
+            {
+                if ((errorMessages.Count > 0) | (issueMessages.Count > 0)) LogBlankLine();
+
+                LogLine($"Information Message Summary");
+                foreach (string message in informationMessages)
+                {
+                    LogLine(message);
+                }
             }
         }
         catch (Exception ex)
@@ -776,16 +800,19 @@
             await GetNoParameters("Altitude");
             await GetNoParameters("ApertureArea");
             await GetNoParameters("ApertureDiameter");
+            if (applicationCancellationToken.IsCancellationRequested) return;
             await GetNoParameters("AtHome");
             await GetNoParameters("AtPark");
             await GetNoParameters("Azimuth");
             await GetNoParameters("CanPark");
             await GetNoParameters("CanPulseGuide");
+            if (applicationCancellationToken.IsCancellationRequested) return;
             await GetNoParameters("CanSetDeclinationRate");
             await GetNoParameters("CanSetGuideRates");
             await GetNoParameters("CanSetPark");
             await GetNoParameters("CanSetPierSide");
             await GetNoParameters("CanSetTracking");
+            if (applicationCancellationToken.IsCancellationRequested) return;
             await GetNoParameters("CanSlew");
             await GetNoParameters("CanSlewAltAz");
             await GetNoParameters("CanSlewAltAzAsync");
@@ -794,38 +821,48 @@
             await GetNoParameters("CanUnpark");
             await GetNoParameters("Declination");
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
+
             await GetNoParameters("DeclinationRate");
             try { parameter1 = telescope.DeclinationRate.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("DeclinationRate", "DeclinationRate", parameter1, null);
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             await GetNoParameters("DoesRefraction");
             try { parameter1 = telescope.DoesRefraction.ToString(); } catch (Exception) { parameter1 = "false"; }
             await PutOneParameter("DoesRefraction", "DoesRefraction", parameter1, null);
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             await GetNoParameters("EquatorialSystem");
             await GetNoParameters("FocalLength");
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             await GetNoParameters("GuideRateDeclination");
             try { parameter1 = telescope.GuideRateDeclination.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("GuideRateDeclination", "GuideRateDeclination", parameter1, null);
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             await GetNoParameters("GuideRateRightAscension");
             try { parameter1 = telescope.GuideRateRightAscension.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("GuideRateRightAscension", "GuideRateRightAscension", parameter1, null);
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             await GetNoParameters("IsPulseGuiding");
             await GetNoParameters("RightAscension");
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             await GetNoParameters("RightAscensionRate");
             try { parameter1 = telescope.RightAscensionRate.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("RightAscensionRate", "RightAscensionRate", parameter1, null);
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             await GetNoParameters("SideOfPier");
             try { parameter1 = ((int)telescope.SideOfPier).ToString(); } catch (Exception) { parameter1 = "0"; }
             await PutOneParameter("SideOfPier", "SideOfPier", parameter1, null);
 
             await GetNoParameters("SiderealTime");
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             await GetNoParameters("SiteElevation");
             try { parameter1 = telescope.SiteElevation.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("SiteElevation", "SiteElevation", parameter1, null);
@@ -834,12 +871,14 @@
             try { parameter1 = telescope.SiteLatitude.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("SiteLatitude", "SiteLatitude", parameter1, null);
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             await GetNoParameters("SiteLongitude");
             try { parameter1 = telescope.SiteLongitude.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("SiteLongitude", "SiteLongitude", parameter1, null);
 
             await GetNoParameters("Slewing");
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             await GetNoParameters("SlewSettleTime");
             try { parameter1 = telescope.SlewSettleTime.ToString(); } catch (Exception) { parameter1 = "0"; }
             await PutOneParameter("SlewSettleTime", "SlewSettleTime", parameter1, null);
@@ -848,6 +887,7 @@
             await PutOneParameter("TargetDeclination", "TargetDeclination", parameter1, null);
             await GetNoParameters("TargetDeclination");
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             try { parameter1 = telescope.TargetRightAscension.ToString(); } catch (Exception) { parameter1 = "0.0"; }
             await PutOneParameter("TargetRightAscension", "TargetRightAscension", parameter1, null);
             await GetNoParameters("TargetRightAscension");
@@ -856,6 +896,7 @@
             try { parameter1 = telescope.Tracking.ToString(); } catch (Exception) { parameter1 = "false"; }
             await PutOneParameter("Tracking", "Tracking", parameter1, null);
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             await GetNoParameters("TrackingRate");
             try { parameter1 = ((int)telescope.TrackingRate).ToString(); } catch (Exception) { parameter1 = "0"; }
             await PutOneParameter("TrackingRate", "TrackingRate", parameter1, null);
@@ -866,6 +907,7 @@
 
             // Test Methods
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_PARK_UNPARK]) // Test enabled
             {
                 SetStatus("Parking scope...");
@@ -880,6 +922,7 @@
                 LogInformation($"PUT {TelescopeTester.TELTEST_PARK_UNPARK}", "Test omitted due to Conform configuration setting", null);
             }
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_FIND_HOME]) // Test enabled
             {
                 SetStatus("Finding home...");
@@ -894,6 +937,7 @@
             // Set tracking to TRUE for RA/Dec slews
             await SendApi("True", "Tracking", HttpMethod.Put, ParamTrackingTrue, HttpStatusCode200);
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_ABORT_SLEW]) // Test enabled
             {
                 await PutNoParameters("AbortSlew", null);
@@ -906,10 +950,12 @@
             await GetOneParameter("AxisRates", "Axis", "0");
             await GetOneParameter("CanMoveAxis", "Axis", "0");
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "21.0"; }
             try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "70"; }
             await GetTwoParameters("DestinationSideOfPier", "RightAscension", parameter1, "Declination", parameter2);
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_MOVE_AXIS]) // Test enabled
             {
                 await PutTwoParameters("MoveAxis", "Axis", "0", "Rate", "0.0", null);
@@ -919,6 +965,7 @@
                 LogInformation($"PUT {TelescopeTester.TELTEST_MOVE_AXIS}", "Test omitted due to Conform configuration setting", null);
             }
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_PULSE_GUIDE]) // Test enabled
             {
                 await PutTwoParameters("PulseGuide", "Direction", "0", "Duration", "0", () =>
@@ -931,6 +978,7 @@
                 LogInformation($"PUT {TelescopeTester.TELTEST_PULSE_GUIDE}", "Test omitted due to Conform configuration setting", null);
             }
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_COORDINATES_ASYNC]) // Test enabled
             {
                 try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "21.0"; }
@@ -945,6 +993,7 @@
                 LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_COORDINATES_ASYNC}", "Test omitted due to Conform configuration setting", null);
             }
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_COORDINATES]) // Test enabled
             {
                 try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "12.0"; }
@@ -959,6 +1008,7 @@
                 LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_COORDINATES}", "Test omitted due to Conform configuration setting", null);
             }
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_TARGET_ASYNC]) // Test enabled
             {
                 try { telescope.TargetRightAscension = telescope.RightAscension; } catch { }
@@ -973,6 +1023,7 @@
                 LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_TARGET_ASYNC}", "Test omitted due to Conform configuration setting", null);
             }
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_TARGET]) // Test enabled
             {
                 await PutNoParameters("SlewToTarget", () =>
@@ -985,6 +1036,7 @@
                 LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_TARGET}", "Test omitted due to Conform configuration setting", null);
             }
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SYNC_TO_COORDINATES]) // Test enabled
             {
                 try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "45"; }
@@ -996,6 +1048,7 @@
                 LogInformation($"PUT {TelescopeTester.TELTEST_SYNC_TO_COORDINATES}", "Test omitted due to Conform configuration setting", null);
             }
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SYNC_TO_TARGET]) // Test enabled
             {
                 await PutNoParameters("SyncToTarget", null);
@@ -1008,6 +1061,7 @@
             // Set tracking to FALSE for Alt/Az slews
             await SendApi("False", "Tracking", HttpMethod.Put, ParamTrackingFalse, HttpStatusCode200);
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_ALTAZ_ASYNC]) // Test enabled
             {
                 try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "60"; }
@@ -1022,6 +1076,7 @@
                 LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_ALTAZ_ASYNC}", "Test omitted due to Conform configuration setting", null);
             }
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_ALTAZ]) // Test enabled
             {
                 try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
@@ -1036,6 +1091,7 @@
                 LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_ALTAZ}", "Test omitted due to Conform configuration setting", null);
             }
 
+            if (applicationCancellationToken.IsCancellationRequested) return;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SYNC_TO_ALTAZ]) // Test enabled
             {
                 try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
