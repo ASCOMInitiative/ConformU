@@ -10,6 +10,26 @@
 
 <p style="margin-top: 20px">For support please post on the <a href="https://ascomtalk.groups.io/g/Developer" target="_blank">ASCOM Developer Support Forum</a></p>
 
+<h4 style="margin-top: 40px">Check Alpaca Protocol</h4>
+<p>
+    The Alpaca protocol uses HTTP and REST to communicate with a device that implements one of the ASCOM device interfaces. The protocol specifies command and
+    parameter names, together with correct casing, which are required for proper execution. The <b>Check Alpaca Protocol</b> test confirms that an Alpaca device is compliant with Alpaca requirements, including correct reporting of
+    missing parameters and handling of commands and parameters that are incorrectly cased..
+</p>
+<p>
+    The Alpaca protocol check does not attempt to confirm that a device is conformant with ASCOM interface specification requirements, you can use the Home page check for this. Instead, its purpose is to confirm that 
+    Alpaca command reception and happy / unhappy Alpaca path responses are as expected. 
+</p>
+<p>
+    Unlike the <b>Home</b> page ASCOM device conformance check, the Alpaca check is designed to change device state as little as possible e.g. telescope
+    devices are commanded to move to their current co-ordinates and focusers are commanded to move to their current position. For some operations state change is unavoidable, such as when parking a scope or dome, but
+    these cases have been reduced as far as possible.
+</p>
+<h5>Use</h5>
+<p>
+    To check Alpaca conformance, first select a device through the <b>Select Device</b> page and then use the <b>Check Alpaca Protocol</b> page to test compliance.
+</p>
+
 <h4 style="margin-top: 40px">Command line parameters</h4>
 <p>
     The following command line parameters are supported to override application default behaviour. If you wish to use Conform Universal as a command line tool, without a GUI,
@@ -35,8 +55,10 @@
         </tr>
         <tr>
             <td><tt>--logfile filename </tt></td>
-            <td>If filename has no directory/folder component it will be appended to the log file path to create the fully qualified log file name. If filename is fully qualified, any logfilepath parameter will be ignored. 
-                Omit or leave blank to use automatic file naming, where the file name will be based on the file creation time.</td>
+            <td>
+                If filename has no directory/folder component it will be appended to the log file path to create the fully qualified log file name. If filename is fully qualified, any logfilepath parameter will be ignored.
+                Omit or leave blank to use automatic file naming, where the file name will be based on the file creation time.
+            </td>
         </tr>
         <tr>
             <td><tt>--resultsfile FullyQualifiedFilename</tt></td>
@@ -107,6 +129,6 @@
     protected override void OnInitialized()
     {
         assemblyVersion = $"{Update.ConformuVersionDisplayString})";
-}
+    }
 
 }
