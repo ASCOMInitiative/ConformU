@@ -25,5 +25,6 @@ namespace ConformU
         public int LongResponseTimeout{ get; set; } = 100;
         public bool ProtocolShowSuccessResponses { get; set; } = true;
         public bool ProtocolReportNotImplementedErrors { get; set; } = false;
+        public bool ProtocolTestPrimaryUrlStructure { get; set; } = false;
     }
 }

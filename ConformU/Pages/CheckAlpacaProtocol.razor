@@ -47,6 +47,7 @@
     #region Pre-formed parameters that can be sent to clients
 
     // HTTP statuses used to assess the outcome of protocol tests
+    List<HttpStatusCode> HttpStatusCodeAny = new() { };
     List<HttpStatusCode> HttpStatusCode200 = new() { HttpStatusCode.OK };
     List<HttpStatusCode> HttpStatusCode400 = new() { HttpStatusCode.BadRequest };
     List<HttpStatusCode> HttpStatusCode200_400_404 = new() { HttpStatusCode.OK, HttpStatusCode.BadRequest, HttpStatusCode.NotFound };
@@ -273,9 +274,11 @@
                 // Set Connected true to start the test
                 await SendApi("True", "Connected", HttpMethod.Put, ParamConnectedTrue, HttpStatusCode200);
                 LogBlankLine();
+                if (applicationCancellationToken.IsCancellationRequested) goto EndOfTest; // Exit if user has pushed the STOP button
 
                 // Test common members
                 await TestCommon();
+                if (applicationCancellationToken.IsCancellationRequested) goto EndOfTest; // Exit if user has pushed the STOP button
 
                 // Test device specific members
                 switch (settings.DeviceType)
@@ -324,13 +327,14 @@
                         throw new Exception($"Unknown device type: {settings.DeviceType}");
                 }
 
+            EndOfTest:
                 // Finally set Connected false
                 LogBlankLine();
                 await SendApi("False", "Connected", HttpMethod.Put, ParamConnectedFalse, HttpStatusCode200);
             }
             catch (Exception ex)
             {
-                LogMessage("", TestOutcome.Error, ex.ToString());
+                LogError("", ex.ToString(),null);
             }
 
             // Summarise the protocol test outcome
@@ -417,42 +421,71 @@
         List<CheckProtocolParameter> ParamConnectedString = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "asdqwe") };
         List<CheckProtocolParameter> ParamConnectedNegative = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "-32890") };
 
-        // Test primary URL structure: /api/v1/devicetype/0
-        await Send("GET Description", "Bad Alpaca URL base element \"api\" (apx)\"", $"/apx/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCode200_400_404);
-        await Send("GET Description", "Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCode400);
-        await Send("GET Description", "Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCode400);
-        await Send("GET Description", "Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCode400);
+        // Test primary URL structure: /api/v1/ if configured to do so
+        if (settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure)
+        {
+            await Send("GET Description", $"Bad Alpaca URL base element (api = apx)\"", $"/apx/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCodeAny);
+            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+            await Send("GET Description", $"Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCodeAny);
+            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+            await Send("GET Description", $"Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCodeAny);
+            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+            await Send("GET Description", $"Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCodeAny);
+            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+        }
+
+        // Test bad Alpaca parameter values
         await Send("GET Description", $"Bad Alpaca URL device type (capitalised {settings.DeviceType.ToString().ToUpper()})", $"/api/v1/{settings.DeviceType.ToString().ToUpper()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCode400);
-        await Send("GET Description", "Bad Alpaca URL device type (baddevicetype)", $"/api/v1/baddevicetype/0/description", HttpMethod.Get, ParamOk, HttpStatusCode400);
-        await Send("GET Description", "Bad Alpaca URL device number (-1)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/-1/description", HttpMethod.Get, ParamOk, HttpStatusCode400);
-        await Send("GET Description", "Bad Alpaca URL device number (99999)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/99999/description", HttpMethod.Get, ParamOk, HttpStatusCode400);
-        await Send("GET Description", "Bad Alpaca URL device number (A)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/A/description", HttpMethod.Get, ParamOk, HttpStatusCode400);
-        await Send("GET Description", "Bad Alpaca URL method name (descrip)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/descrip", HttpMethod.Get, ParamOk, HttpStatusCode400);
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+        await Send("GET Description", $"Bad Alpaca URL device type (baddevicetype)", $"/api/v1/baddevicetype/0/description", HttpMethod.Get, ParamOk, HttpStatusCode400);
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+        await Send("GET Description", $"Bad Alpaca URL device number (-1)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/-1/description", HttpMethod.Get, ParamOk, HttpStatusCode400);
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+        await Send("GET Description", $"Bad Alpaca URL device number (99999)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/99999/description", HttpMethod.Get, ParamOk, HttpStatusCode400);
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+        await Send("GET Description", $"Bad Alpaca URL device number (A)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/A/description", HttpMethod.Get, ParamOk, HttpStatusCode400);
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+        await Send("GET Description", $"Bad Alpaca URL method name (descrip)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/descrip", HttpMethod.Get, ParamOk, HttpStatusCode400);
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
 
         // Test bad POST HTTP methods
         await SendApi("True", "Connected", HttpMethod.Post, ParamConnectedTrue, HttpStatusCode400);
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await SendApi("Value empty", "Connected", HttpMethod.Post, ParamConnectedEmpty, HttpStatusCode400);
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await SendApi("Number", "Connected", HttpMethod.Post, ParamConnectedNumeric, HttpStatusCode400);
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
 
         // Test bad DELETE HTTP methods
         await SendApi("True", "Connected", HttpMethod.Delete, ParamConnectedTrue, HttpStatusCode400);
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await SendApi("Empty", "Connected", HttpMethod.Delete, ParamConnectedEmpty, HttpStatusCode400);
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await SendApi("Number", "Connected", HttpMethod.Delete, ParamConnectedNumeric, HttpStatusCode400);
 
         // Test Connected
         await GetNoParameters("Connected");
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
 
         // Test bad PUT Connected values
         await SendApi("Ids Empty", "Connected", HttpMethod.Put, ParamConnectedEmpty, HttpStatusCode400);
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await SendApi("Ids numeric", "Connected", HttpMethod.Put, ParamConnectedNumeric, HttpStatusCode400);
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await SendApi("Ids string", "Connected", HttpMethod.Put, ParamConnectedNumeric, HttpStatusCode400);
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
 
         // Test remaining common members
         await GetNoParameters("Description");
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await GetNoParameters("DriverInfo");
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await GetNoParameters("DriverVersion");
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await GetNoParameters("InterfaceVersion");
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await GetNoParameters("Name");
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await GetNoParameters("SupportedActions");
     }
 
@@ -703,15 +736,12 @@
                 LogInformation($"PUT OpenShutter", "Test omitted due to Conform configuration setting", null);
             }
 
-            await PutNoParameters("SetPark", null);
-            if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
-
             if (settings.DomeOpenShutter)
             {
                 try { parameter1 = dome.Altitude.ToString(); } catch (Exception) { parameter1 = "45"; }
                 await PutOneParameter("SlewToAltitude", "Altitude", parameter1, () =>
                     {
-                        WaitWhile("SlewToAltitude", () => { return dome.Slewing == true; }, 500, settings.DomeAltitudeMovementTimeout, null);
+                        WaitWhile("SlewToAltitude", () => { return dome.ShutterStatus == ShutterState.Opening; }, 500, settings.DomeAltitudeMovementTimeout, null);
                     });
                 WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome altitude movement delay");
                 if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
@@ -748,7 +778,7 @@
         DomeEnd:
             await PutNoParameters("CloseShutter", () =>
                 {
-                    WaitWhile("CloseShutter", () => { return dome.Slewing == true; }, 500, settings.DomeShutterMovementTimeout, null);
+                    WaitWhile("CloseShutter", () => { return dome.ShutterStatus == ShutterState.Closing; }, 500, settings.DomeShutterMovementTimeout, null);
                 });
             WaitFor(settings.DomeStabilisationWaitTime * 1000, "close shutter delay");
             if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
@@ -758,6 +788,9 @@
                     WaitWhile("Park", () => { return dome.Slewing == true; }, 500, settings.DomeAzimuthMovementTimeout, null);
                 });
             WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome azimuth movement delay");
+            if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
+
+            await PutNoParameters("SetPark", null);
             if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
 
             try { dome.Connected = false; } catch { }
@@ -993,7 +1026,7 @@
             if (settings.SwitchEnableSet) // Test enabled
             {
                 try { parameter1 = switchDevice.GetSwitchValue(0).ToString(); } catch (Exception) { try { parameter1 = switchDevice.MinSwitchValue(0).ToString(); } catch { parameter1 = "0.0"; } }
-                await PutTwoParameters("SetSwitchValue", "Id", "0", "Name", parameter1, null);
+                await PutTwoParameters("SetSwitchValue", "Id", "0", "Value", parameter1, null);
                 WaitFor(settings.SwitchWriteDelay, "switch write delay");
             }
             else // Test omitted
@@ -1677,42 +1710,54 @@
                 }
             }
 
-            if (expectedCodes.Contains(httpResponse.StatusCode)) // We got the expected outcome
+            // Report the outcome
+            if (expectedCodes.Count > 0) // One or more codes that indicate success are expected
             {
-                if (httpResponse.StatusCode == HttpStatusCode.OK)
+                if (expectedCodes.Contains(httpResponse.StatusCode)) // We got the expected outcome
                 {
-                    if (string.IsNullOrEmpty(ascomOutcome))
+                    if (httpResponse.StatusCode == HttpStatusCode.OK)
                     {
-                        LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
+                        if (string.IsNullOrEmpty(ascomOutcome))
+                        {
+                            LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
+                        }
+                        else
+                        {
+                            LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected but the device reported an ASCOM error:", ascomOutcome);
+                        }
                     }
                     else
                     {
-                        LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected but the device reported an ASCOM error:", ascomOutcome);
+                        LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
                     }
                 }
-                else
+                else // Unexpected outcome
                 {
-                    LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
+                    string expectedCodeList = "";
+                    foreach (HttpStatusCode statusCode in expectedCodes)
+                    {
+                        expectedCodeList += $"{(int)statusCode} ({statusCode}), ";
+                    }
+                    expectedCodeList = expectedCodeList.TrimEnd(' ', ',');
+
+                    LogIssue(testName, $"{messagePrefix} - Expected HTTP status {(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: " +
+                        $"{(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString);
+
+                    LogBlankLine();
                 }
             }
-            else // Unexpected outcome
+            else // There are no expected codes, which indicates that any code is acceptable
             {
-                string expectedCodeList = "";
-                foreach (HttpStatusCode statusCode in expectedCodes)
-                {
-                    expectedCodeList += $"{(int)statusCode} ({statusCode}), ";
-                }
-                expectedCodeList = expectedCodeList.TrimEnd(' ', ',');
-
-                LogIssue(testName, $"{messagePrefix} - Expected HTTP status {(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: " +
-                    $"{(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString);
-
-                LogBlankLine();
+                LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode})", responseString);
             }
+        }
+        catch (HttpRequestException ex)
+        {
+            LogError(testName, $"{messagePrefix} - {ex.Message}", null);
         }
         catch (Exception ex)
         {
-            LogMessage(testName, TestOutcome.Error, $"{messagePrefix} - {ex}");
+            LogError(testName, $"{messagePrefix} - {ex}", null);
         }
     }
 
@@ -1951,6 +1996,17 @@
     {
         LogMessage(method, TestOutcome.Issue, message, contextMessage);
         issueMessages.Add($"{method} ==> {message}\r\n  Response: {contextMessage}\r\n");
+    }
+
+    /// <summary>
+    /// Log an issue message
+    /// </summary>
+    /// <param name="method">    Calling method name</param>
+    /// <param name = "message" > Message to log</param>
+    private void LogError(string method, string message, string contextMessage)
+    {
+        LogMessage(method, TestOutcome.Error, message, contextMessage);
+        errorMessages.Add($"{method} ==> {message}\r\n  Response: {contextMessage}\r\n");
     }
 
     /// <summary>

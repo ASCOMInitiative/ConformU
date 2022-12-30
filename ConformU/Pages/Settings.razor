@@ -243,6 +243,10 @@
                         <RadzenCheckBox Name="CHRREPORTNOTIMPLEMENTED" @bind-Value=@chkProtocolReportNotImplementedErrors TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolReportNotImplementedErrors)) />
                         <RadzenLabel Text="Report ASCOM not implemented errors" Component="CHRREPORTNOTIMPLEMENTED" Style="margin-left: 20px;" />
                     </div>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHKTESTPRIMARYURLSTRUCTURE" @bind-Value=@chkProtocolTestPrimaryUrlStructure TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolTestPrimaryUrlStructure)) />
+                        <RadzenLabel Text="Test primary URL structure" Component="CHKTESTPRIMARYURLSTRUCTURE" Style="margin-left: 20px;" />
+                    </div>
                 </RadzenCard>
 
                 @if (OperatingSystem.IsWindows())
@@ -551,6 +555,7 @@
     private ComAccessMechanic comAccessMechanic = ComAccessMechanic.Native;
     private bool chkProtocolShowSuccessResponses;
     private bool chkProtocolReportNotImplementedErrors;
+    private bool chkProtocolTestPrimaryUrlStructure;
 
     // Camera test configuration
     private int cameraTestMaxBinX;
@@ -648,7 +653,8 @@
         GoHomeOnDeviceSelection,
         RunAs32Bit,
         ProtocolShowSuccessResponses,
-        ProtocolReportNotImplementedErrors
+        ProtocolReportNotImplementedErrors,
+        ProtocolTestPrimaryUrlStructure
     }
 
     private enum BoolConfigurationItem
@@ -880,6 +886,10 @@
 
             case CheckBoxConfigurationItem.ProtocolReportNotImplementedErrors:
                 settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors = chkProtocolReportNotImplementedErrors;
+                break;
+
+            case CheckBoxConfigurationItem.ProtocolTestPrimaryUrlStructure:
+                settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure = chkProtocolTestPrimaryUrlStructure;
                 break;
 
             default:
@@ -1116,6 +1126,7 @@
         alpacaImageArrayTransferType = settings.AlpacaConfiguration.ImageArrayTransferType;
         chkProtocolShowSuccessResponses = settings.AlpacaConfiguration.ProtocolShowSuccessResponses;
         chkProtocolReportNotImplementedErrors = settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors;
+        chkProtocolTestPrimaryUrlStructure = settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure;
     }
 
     private void SaveConfiguration()
