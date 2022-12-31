@@ -31,8 +31,10 @@
 <RadzenTextArea Id="ProtocolLog" Style="line-height: 18px; padding-bottom: 0px" Name="ProtocolLogName" @bind-Value=@screenLog Rows="@screenLogRows" @bind-Cols=@screenLogColumns ReadOnly=true />
 @code
 {
-    CancellationTokenSource cancellationTokenSource;
+    // Cancellation management
+    CancellationTokenSource applicationCancellationTokenSource;
     CancellationToken applicationCancellationToken;
+
     string screenLog = "";
     int screenLogRows;
     int screenLogColumns;
@@ -105,8 +107,8 @@
         httpClient = new();
         StartCheckAlpacaProtocol();
         httpClient = new HttpClient();
-        cancellationTokenSource = new CancellationTokenSource();
-        applicationCancellationToken = cancellationTokenSource.Token;
+        applicationCancellationTokenSource = new CancellationTokenSource();
+        applicationCancellationToken = applicationCancellationTokenSource.Token;
     }
 
     protected async override void OnAfterRender(bool firstRender)
@@ -132,7 +134,7 @@
         LogBlankLine();
         LogLine($"STOP button pressed... stopping tests");
         LogBlankLine();
-        cancellationTokenSource.Cancel();
+        applicationCancellationTokenSource.Cancel();
     }
 
     /// <summary>
@@ -142,6 +144,11 @@
     {
         try
         {
+            // Create a new application cancellation token
+            applicationCancellationTokenSource = new CancellationTokenSource();
+            applicationCancellationToken = applicationCancellationTokenSource.Token;
+
+            // Initialise message lists
             informationMessages = new();
             issueMessages = new();
             errorMessages = new();
@@ -330,11 +337,11 @@
             EndOfTest:
                 // Finally set Connected false
                 LogBlankLine();
-                await SendApi("False", "Connected", HttpMethod.Put, ParamConnectedFalse, HttpStatusCode200);
+                await SendApi("False", "Connected", HttpMethod.Put, ParamConnectedFalse, HttpStatusCode200, true);
             }
             catch (Exception ex)
             {
-                LogError("", ex.ToString(),null);
+                LogError("", ex.ToString(), null);
             }
 
             // Summarise the protocol test outcome
@@ -1601,18 +1608,19 @@
         await SendApi("Transaction Id string", method, httpMethod, parameters, HttpStatusCode400);
     }
 
-    private async Task SendApi(string messagePrefix, string method, HttpMethod httpMethod, List<CheckProtocolParameter> parameters, List<HttpStatusCode> expectedCodes)
+    private async Task SendApi(string messagePrefix, string method, HttpMethod httpMethod, List<CheckProtocolParameter> parameters, List<HttpStatusCode> expectedCodes, bool ignoreApplicationCancellation = false)
     {
         string methodLowerCase = method.ToLowerInvariant();
         string httpMethodUpperCase = httpMethod.ToString().ToUpperInvariant();
 
         string url = $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}";
-        await Send($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes);
+        await Send($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation);
     }
 
-    private async Task Send(string testName, string messagePrefix, string url, HttpMethod httpMethod, List<CheckProtocolParameter> parameters, List<HttpStatusCode> expectedCodes)
+    private async Task Send(string testName, string messagePrefix, string url, HttpMethod httpMethod, List<CheckProtocolParameter> parameters, List<HttpStatusCode> expectedCodes, bool ignoreApplicationCancellation = false)
     {
         string ascomOutcome = null;
+        CancellationTokenSource requestCancellationTokenSource;
 
         if (expectedCodes is null)
         {
@@ -1664,12 +1672,25 @@
                 }
             }
 
-            // Create a cancellation token that will time out after the required retry interval
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(settings.AlpacaConfiguration.LongResponseTimeout));
+            // Create a cancellation token source that either respects or ignores the application cancellation state
+            if (ignoreApplicationCancellation) // Ignore application cancellation state (used for commands that must be sent under all circumstances e.g. setting Connected to False)
+            {
+                requestCancellationTokenSource = new CancellationTokenSource();
+            }
+            else // Respect the application cancellation state
+            {
+                // Ignore this request if the application is already cancelled
+                if (applicationCancellationToken.IsCancellationRequested) return;
+
+                // Create a combined cancellation taken that will trigger when either the application is cancelled or the request times out.
+                requestCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(applicationCancellationTokenSource.Token);
+            }
+
+            // Set the token source to time out after the specified interval
+            requestCancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(settings.AlpacaConfiguration.LongResponseTimeout));
 
             // Send the request to the remote device and wait for the response
-            HttpResponseMessage httpResponse = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationTokenSource.Token);
+            HttpResponseMessage httpResponse = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, requestCancellationTokenSource.Token);
             string responseString = await httpResponse.Content.ReadAsStringAsync();
 
             // If there was an ASCOM error flag this
@@ -1750,6 +1771,10 @@
             {
                 LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode})", responseString);
             }
+        }
+        catch (TaskCanceledException)
+        {
+            LogError(testName, $"{messagePrefix} - The HTTP request was cancelled", null);
         }
         catch (HttpRequestException ex)
         {
