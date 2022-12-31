@@ -363,7 +363,7 @@
                 }
                 else
                 {
-                    string message = $"Found {errorMessages.Count} error{(errorMessages.Count == 1 ? "" : "s")}, {issueMessages.Count} issue{(issueMessages.Count == 1 ? "" : "s")} and {informationMessages.Count} information messages{(informationMessages.Count == 1 ? "" : "s")}.";
+                    string message = $"Found {errorMessages.Count} error{(errorMessages.Count == 1 ? "" : "s")}, {issueMessages.Count} issue{(issueMessages.Count == 1 ? "" : "s")} and {informationMessages.Count} information message{(informationMessages.Count == 1 ? "" : "s")}.";
                     SetStatus(message);
                     LogLine(message);
                 }
