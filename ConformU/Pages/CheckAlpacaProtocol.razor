@@ -439,6 +439,21 @@
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
             await Send("GET Description", $"Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCodeAny);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+
+            // Test bad POST HTTP methods
+            await SendApi("True", "Connected", HttpMethod.Post, ParamConnectedTrue, HttpStatusCode400);
+            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+            await SendApi("Value empty", "Connected", HttpMethod.Post, ParamConnectedEmpty, HttpStatusCode400);
+            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+            await SendApi("Number", "Connected", HttpMethod.Post, ParamConnectedNumeric, HttpStatusCode400);
+            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+
+            // Test bad DELETE HTTP methods
+            await SendApi("True", "Connected", HttpMethod.Delete, ParamConnectedTrue, HttpStatusCode400);
+            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+            await SendApi("Empty", "Connected", HttpMethod.Delete, ParamConnectedEmpty, HttpStatusCode400);
+            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+            await SendApi("Number", "Connected", HttpMethod.Delete, ParamConnectedNumeric, HttpStatusCode400);
         }
 
         // Test bad Alpaca parameter values
@@ -454,21 +469,6 @@
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await Send("GET Description", $"Bad Alpaca URL method name (descrip)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/descrip", HttpMethod.Get, ParamOk, HttpStatusCode400);
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-
-        // Test bad POST HTTP methods
-        await SendApi("True", "Connected", HttpMethod.Post, ParamConnectedTrue, HttpStatusCode400);
-        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-        await SendApi("Value empty", "Connected", HttpMethod.Post, ParamConnectedEmpty, HttpStatusCode400);
-        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-        await SendApi("Number", "Connected", HttpMethod.Post, ParamConnectedNumeric, HttpStatusCode400);
-        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-
-        // Test bad DELETE HTTP methods
-        await SendApi("True", "Connected", HttpMethod.Delete, ParamConnectedTrue, HttpStatusCode400);
-        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-        await SendApi("Empty", "Connected", HttpMethod.Delete, ParamConnectedEmpty, HttpStatusCode400);
-        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-        await SendApi("Number", "Connected", HttpMethod.Delete, ParamConnectedNumeric, HttpStatusCode400);
 
         // Test Connected
         await GetNoParameters("Connected");
