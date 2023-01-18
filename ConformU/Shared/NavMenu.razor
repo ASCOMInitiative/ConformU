@@ -171,19 +171,28 @@ else
     /// <param name="args"></param>
     private async void OnUiChanged(object caller, EventArgs args)
     {
-        // Collapse the navigation menu if an operation has been started
-        if (configuration.Settings.OperationInProgress) collapseNavMenu = true;
-
-        // Refresh the UI according to new state
         try
         {
-            BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
-            IsSmall = Globals.IsSmall(browserWindowSize.Width, browserWindowSize.Height); //browserWindowSize.Width < Globals.UI_SMALL_TRANSITION_SIZE;
-        }
-        catch { }
+            // Collapse the navigation menu if an operation has been started
+            if (configuration.Settings.OperationInProgress) collapseNavMenu = true;
 
-        //conformLogger.LogMessage("Navmenu.OnConfigurationChange", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {browserWindowSize.Width}, Window height: {browserWindowSize.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
-        await InvokeAsync(StateHasChanged);
+            // Refresh the UI according to new state
+            try
+            {
+                BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
+                IsSmall = Globals.IsSmall(browserWindowSize.Width, browserWindowSize.Height); //browserWindowSize.Width < Globals.UI_SMALL_TRANSITION_SIZE;
+            }
+            catch { }
+
+            //conformLogger.LogMessage("Navmenu.OnConfigurationChange", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {browserWindowSize.Width}, Window height: {browserWindowSize.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("NavMenu.OnUiChanged", MessageLevel.Error, $"Exception: {ex}.");
+            throw;
+        }
+
     }
 
     private void ToggleNavMenu()
@@ -215,6 +224,8 @@ else
             if (disposing)
             {
                 resizeListener.OnResize -= WindowResized;
+                state.UiHasChanged -= OnUiChanged;
+
             }
 
             disposedValue = true;

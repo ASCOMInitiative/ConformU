@@ -1,4 +1,7 @@
 ﻿@page "/CheckAlpacaProtocol"
+
+@implements IDisposable
+
 @using ASCOM.Alpaca.Clients;
 @using ASCOM.Alpaca.Discovery;
 @using System.Threading;
@@ -31,6 +34,8 @@
 <RadzenTextArea Id="ProtocolLog" Style="line-height: 18px; padding-bottom: 0px" Name="ProtocolLogName" @bind-Value=@screenLog Rows="@screenLogRows" @bind-Cols=@screenLogColumns ReadOnly=true />
 @code
 {
+    private bool disposedValue;
+
     // Cancellation management
     CancellationTokenSource applicationCancellationTokenSource;
     CancellationToken applicationCancellationToken;
@@ -490,7 +495,7 @@
 
         // Test GET remaining common members
         await GetNoParameters("Description");
-        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button    
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await GetNoParameters("DriverInfo");
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await GetNoParameters("DriverVersion");
@@ -2147,8 +2152,43 @@
 
     public async void OnUiHasChanged(object sender, EventArgs e)
     {
-        await ResizeLogWindow();
+        try
+        {
+            await ResizeLogWindow();
+        }
+        catch (Exception ex)
+        {
+            logger.LogMessage("CheckAlpacaProtocol.OnUiHasChanged", MessageLevel.Error, $"Exception: {ex}.");
+            throw;
+        }
     }
 
     #endregion
+
+    #region Dispose support
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                listener.OnResize -= WindowResized;
+                state.UiHasChanged -= OnUiHasChanged;
+            }
+
+            disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put clean-up code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+
 }

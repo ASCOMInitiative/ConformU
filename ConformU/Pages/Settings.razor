@@ -1018,6 +1018,7 @@
     private void OnResetButtonClick()
     {
         configuration.Reset();
+        settings = configuration.Settings;
         status = configuration.Status;
         SetConfiguration();
         StateHasChanged();

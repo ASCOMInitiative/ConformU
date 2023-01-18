@@ -1,11 +1,9 @@
-﻿using Blazorise.Utilities;
-using Microsoft.AspNetCore.Components;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace ConformU
 {
@@ -21,8 +19,7 @@ namespace ConformU
         readonly int settingsFileVersion;
         private readonly JsonDocument appSettingsDocument = null;
 
-        [Inject]
-        public ConformStateManager ConformStateManager{ get; set; }
+        private readonly ConformStateManager conformStateManager;
 
         #region Initialiser and Dispose
 
@@ -30,9 +27,10 @@ namespace ConformU
         /// Create a Configuration management instance and load the current settings
         /// </summary>
         /// <param name="logger">Data logger instance.</param>
-        public ConformConfiguration(ConformLogger logger, string configurationFile)
+        public ConformConfiguration(ConformLogger logger, ConformStateManager conformStateManager, string configurationFile)
         {
             TL = logger;
+            this.conformStateManager = conformStateManager;
 
             try
             {
@@ -240,11 +238,18 @@ namespace ConformU
 
         public void Reset()
         {
-            TL?.LogMessage("Reset", MessageLevel.Debug, "Resetting settings file to default values");
-            settings = new();
-            PersistSettings(settings);
-            Status = $"Settings reset at {DateTime.Now:HH:mm:ss}.";
-            ConformStateManager.RaiseUiHasChangedEvent();
+            try
+            {
+                settings = new();
+                PersistSettings(settings);
+                Status = $"Settings reset at {DateTime.Now:HH:mm:ss}.";
+                conformStateManager.RaiseUiHasChangedEvent();
+            }
+            catch (Exception ex)
+            {
+                TL?.LogMessage("Reset", MessageLevel.Error, $"Exception during Reset: {ex}");
+                throw;
+            }
         }
 
         /// <summary>

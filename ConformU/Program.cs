@@ -19,7 +19,6 @@ namespace ConformU
 {
     public class Program
     {
-        private static ConformConfiguration conformConfiguration;
         private static string[] commandLineArguments;
 
 #if WINDOWS7_0_OR_GREATER
@@ -169,12 +168,16 @@ namespace ConformU
                 // No action required
             }
 
-            ConformLogger conformLogger = new(logFileName, logFilePath, loggerName, true);  // Create a logger component
+            // Create a logger component
+            ConformLogger conformLogger = new(logFileName, logFilePath, loggerName, true);
+
+            // Create a state manager component
+            ConformStateManager conformStateManager = new ConformStateManager(conformLogger);
 
             // Debug reading the configuration file if a command line option requires this
             if (commandLineOptions.DebugStartup) conformLogger.Debug = true;
 
-            conformConfiguration = new(conformLogger, commandLineOptions.SettingsFileLocation);
+            ConformConfiguration conformConfiguration = new(conformLogger, conformStateManager, commandLineOptions.SettingsFileLocation);
             conformLogger.Debug = conformConfiguration.Settings.Debug;
 
             // Enable logging of Alpaca discovery if a command line option requires this
@@ -298,7 +301,7 @@ namespace ConformU
                 try
                 {
                     Console.WriteLine($"Starting web server.");
-                    Task t = CreateHostBuilder(conformLogger, conformConfiguration, argList.ToArray()) // Use the revised argument list because the command line parser is fussy about prefixes and won't accept / 
+                    Task t = CreateHostBuilder(conformLogger, conformStateManager, conformConfiguration, argList.ToArray()) // Use the revised argument list because the command line parser is fussy about prefixes and won't accept / 
                          .Build()
                          .RunAsync();
 
@@ -314,7 +317,7 @@ namespace ConformU
             return 0;
         }
 
-        public static IHostBuilder CreateHostBuilder(ConformLogger conformLogger, ConformConfiguration conformConfiguration, string[] args)
+        public static IHostBuilder CreateHostBuilder(ConformLogger conformLogger, ConformStateManager conformStateManager, ConformConfiguration conformConfiguration, string[] args)
         {
             IHostBuilder builder = null;
 
@@ -339,11 +342,11 @@ namespace ConformU
                      // Add the logger component to the list of injectable services
                      servicesCollection.AddSingleton(conformLogger);
 
+                     // Add the state management component to the list of injectable services
+                     servicesCollection.AddSingleton(conformStateManager);
+
                      // Add the configuration component to the list of injectable services
                      servicesCollection.AddSingleton(conformConfiguration);
-
-                     // Add the state management component to the list of injectable services
-                     servicesCollection.AddSingleton(new ConformStateManager(conformLogger));
                  })
 
                  .ConfigureWebHostDefaults(webBuilder =>

@@ -109,7 +109,15 @@
 
     public async void OnUiHasChanged(object sender, EventArgs e)
     {
-        await ResizeLogWindow();
+        try
+        {
+            await ResizeLogWindow();
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("Index.OnUiHasChanged", MessageLevel.Error, $"Exception: {ex}.");
+            throw;
+        }
     }
 
 

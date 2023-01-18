@@ -1,4 +1,7 @@
 ﻿@using ASCOM.Common
+
+@implements IDisposable
+
 @inherits LayoutComponentBase
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
@@ -11,7 +14,7 @@
 </div>
 <div class="main">
     <div class="top-row px-4">
-        <span>Current device -&nbsp;</span><span><b style="color: #0366d6">@deviceName &nbsp;</b></span><span>(@deviceTechnology @deviceType @((deviceTechnology==DeviceTechnology.Alpaca)? alpacaDeviceNumber :""))</span>
+        <span>Current device -&nbsp;</span><span><b style="color: #0366d6">@deviceName &nbsp;</b></span><span>(@deviceTechnology @deviceType @((deviceTechnology == DeviceTechnology.Alpaca) ? alpacaDeviceNumber : ""))</span>
         <a href="https://ascom-standards.org" target="_blank">ASCOM Initiative</a>
     </div>
 
@@ -24,6 +27,8 @@
 </div>
 @code
 {
+    bool disposedValue;
+
     private string deviceName;
     private DeviceTypes deviceType;
     private DeviceTechnology deviceTechnology;
@@ -46,10 +51,18 @@
     /// <param name="args"></param>
     private async void OnUiChanged(object caller, EventArgs args)
     {
-        //conformLogger.LogMessage("MainLayout.OnUiChanged", MessageLevel.Debug,$"Method called");
-        SetDisplayVariables();
-        await InvokeAsync(StateHasChanged);
-        //conformLogger.LogMessage("MainLayout.OnUiChanged", MessageLevel.Debug, $"Method completed");
+        try
+        {
+            //conformLogger.LogMessage("MainLayout.OnUiChanged", MessageLevel.Debug,$"Method called");
+            SetDisplayVariables();
+            await InvokeAsync(StateHasChanged);
+            //conformLogger.LogMessage("MainLayout.OnUiChanged", MessageLevel.Debug, $"Method completed");
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("MainLayout.OnUiChanged", MessageLevel.Error, $"Exception: {ex}.");
+            throw;
+        }
     }
 
     private void SetDisplayVariables()
@@ -67,4 +80,30 @@
         deviceTechnology = configuration.Settings.DeviceTechnology;
 
     }
+
+    #region Dispose support
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                state.UiHasChanged -= OnUiChanged;
+            }
+
+            disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put clean-up code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+
 }
