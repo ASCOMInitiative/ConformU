@@ -25,7 +25,7 @@
 
 <div>
     <RadzenButton Id="testButton" Click=@(() => StartCheckAlpacaProtocol()) Text="Check Protocol" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" IsBusy=@settings.OperationInProgress Disabled=@(configuration.Settings.DeviceTechnology!=DeviceTechnology.Alpaca) />
-    <RadzenButton Id="StopButton" Click=@(() => StopTest()) Text="Stop" Style="margin-bottom: 20px; margin-right: 40px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
+    <RadzenButton Id="StopButton" Click=@(async () => await StopTest()) Text="Stop" Style="margin-bottom: 20px; margin-right: 40px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
     <span style="white-space:nowrap">
         <RadzenLabel Text="Status:" Component="TESTSTATUS" Style="margin-right:2px;margin-top:0px; color:#0366d6;font-weight:bold" />
         <RadzenTextBox Name="TESTSTATUS" Placeholder="" @bind-Value=@statusText ReadOnly=true Style="width:600px;font-weight:bold;margin-right:40px;margin-bottom:10px" />
@@ -137,12 +137,15 @@
     /// <summary>
     /// Stop a running test
     /// </summary>
-    private void StopTest()
+    private async Task StopTest()
     {
-        LogBlankLine();
-        LogLine($"STOP button pressed... stopping tests");
-        LogBlankLine();
-        applicationCancellationTokenSource.Cancel();
+        await Task.Run(() =>
+        {
+            LogBlankLine();
+            LogLine($"STOP button pressed... stopping tests");
+            LogBlankLine();
+            applicationCancellationTokenSource.Cancel();
+        });
     }
 
     /// <summary>
