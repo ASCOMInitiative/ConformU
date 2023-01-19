@@ -82,6 +82,7 @@
             alpacaDevices = new();
             ascomDevices = new();
             nonStandardDevices = new();
+            //using NetworkLogger listener = new NetworkLogger(conformLogger); // Enable this to include socket and http debug messages from the .NET runtime.
 
             // Set the operation in progress flag and refresh state throughout the page and navigation menu.
             configuration.Settings.OperationInProgress = true;
@@ -212,7 +213,6 @@
 
                     if (discoveredAlpacaDevices.Count == 0) discoveredAlpacaDevices.Add(new BlazoriseTreeItem() { Text = "None" });
                     if (discoveredAscomDevices.Count == 0) discoveredAscomDevices.Add(new BlazoriseTreeItem() { Text = "None" });
-                    if (discoveredNonStandardDevices.Count == 0) discoveredNonStandardDevices.Add(new BlazoriseTreeItem() { Text = "None" });
 
                     alpacaDevices = discoveredAlpacaDevices;
                     ascomDevices = discoveredAscomDevices;
