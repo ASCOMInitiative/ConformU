@@ -39,7 +39,7 @@
     const int COLUMN_PADDING = 24;
     const int COLUMN_OVERALL = COLUMN_WIDTH + COLUMN_PADDING;
 
-    # region Blazor lifetime event handlers
+    #region Blazor lifetime event handlers
     protected async override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
@@ -59,7 +59,7 @@
 
     #endregion
 
-    # region Discovery diagnostics
+    #region Discovery diagnostics
 
     /// <summary>
     /// Diagnose the discovery process including initial discovery and the Alpaca Management API
@@ -182,8 +182,15 @@
                                                 break;
 
                                             case AddressFamily.InterNetworkV6:
-                                                string scopeId = $"%{deviceManagementEndpoint.Address.ScopeId}"; // Obtain the IPv6 scope ID in text form (if present)
-                                                hostIpAndPort = $"{configuration.Settings.AlpacaConfiguration.AccessServiceType.ToString().ToLowerInvariant()}://{deviceManagementEndpoint.ToString().Replace(scopeId, string.Empty)}"; // Create the overall URI
+                                                if (OperatingSystem.IsWindows())
+                                                {
+                                                    string scopeId = $"%{deviceManagementEndpoint.Address.ScopeId}"; // Obtain the IPv6 scope ID in text form (if present)
+                                                    hostIpAndPort = $"{configuration.Settings.AlpacaConfiguration.AccessServiceType.ToString().ToLowerInvariant()}://{deviceManagementEndpoint.ToString().Replace(scopeId, string.Empty)}"; // Create the overall URI
+                                                }
+                                                else
+                                                {
+                                                    hostIpAndPort = $"{configuration.Settings.AlpacaConfiguration.AccessServiceType.ToString().ToLowerInvariant()}://{deviceManagementEndpoint}";
+                                                }
                                                 break;
 
                                             default:
