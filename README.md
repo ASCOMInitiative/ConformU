@@ -1,11 +1,13 @@
 # Conform Universal
-Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca Devices and ASCOM Drivers conform to the ASCOM interface specification. ConformU runs natively on Linux, Arm, MacOS and Windows and will supersede the original Windows Forms based Conform application.
+Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca Devices and ASCOM Drivers conform to the ASCOM interface specification, and that Alpaca devices conform to the Alpaca Protocol specification. ConformU runs natively on Linux, Arm, MacOS and Windows and will supersede the original Windows Forms based Conform application.
 
 # Features
 * Tests Alpaca devices on all Platforms and COM Drivers on the Windows platform
   * Alpaca devices that support the Alpaca discovery protocol will automatically be presented for selection.
   * An Alpaca device URL, port number and device number can be set manually to target devices that don't support discovery.
   * When running on Windows, COM Drivers will be presented for testing as well as Alpaca devices.
+* Tests Alpaca device conformance with the Alpaca API protocol
+* Tests Alpaca device conformance with the Alpaca Discovery protocol
 * The application can run:
   * in the user's default browser as a Blazor single page application
   * as a command line utility without any graphical UI
@@ -15,6 +17,7 @@ Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca De
   * as a structured machine readable JSON report file
 * The Alpaca Discovery Map provides an Alpaca Device view of discovered ASCOM devices and a unique ASCOM Device view of discovered Alpaca devices.
 * The application will advise when a new update is available on GitHub.
+* On Windows ConformU can be configured to run as a 32bit application when installed on a 64bit OS.
 
 # Changes from current Conform behaviour
 * An issue summary is appended at the end of the conformance report.
