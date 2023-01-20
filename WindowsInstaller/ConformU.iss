@@ -46,6 +46,7 @@ VersionInfoVersion={#MyAppVersion}
 WizardImageFile=NewWizardImage.bmp
 WizardSmallImageFile=ASCOMLogo.bmp
 WizardStyle=modern
+SignToolRunMinimized=yes
 SignTool = SignConformU
 
 [Languages]
