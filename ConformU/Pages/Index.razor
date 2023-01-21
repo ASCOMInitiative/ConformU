@@ -10,6 +10,7 @@
 @using Microsoft.Extensions.Configuration
 @using System.Reflection;
 @using Semver;
+@using System.Security.Principal;
 @inject IConfiguration Configuration
 @* Radzen notification service to enable pop-up alerts *@
 @inject NotificationService notificationService
@@ -38,7 +39,7 @@
     object screenLogLockObject = new object();
     object statusLockObject = new object();
     private string deviceDescription = "";
-    string statusMessage="";
+    string statusMessage = "";
 
     ConformanceTestManager tester;
 
@@ -68,14 +69,14 @@
         {
             case DeviceTypes.Dome:
                 screenLog += $"\r\n\r\nTo protect your equipment and the dome that is controlled by this driver:";
-                screenLog += $"\r\n1. The shutter will not open until enabled on the Dome tab in the Settings page. (Currently {(configuration.Settings.DomeOpenShutter? "ENABLED" : "DISABLED")}.)";
+                screenLog += $"\r\n1. The shutter will not open until enabled on the Dome tab in the Settings page. (Currently {(configuration.Settings.DomeOpenShutter ? "ENABLED" : "DISABLED")}.)";
                 screenLog += $"\r\n1. A stabilisation delay is added after each movement. (Currently {configuration.Settings.DomeStabilisationWaitTime} seconds.)";
                 screenLog += $"\r\n   The delay can also be changed on the Dome tab in the Settings page.";
                 break;
 
             case DeviceTypes.Switch:
                 screenLog += $"\r\n\r\nTo protect the equipment that is controlled by this Switch driver:";
-                screenLog += $"\r\n1. Write tests are disabled until enabled on the Switch tab in the Settings page. (Currently {(configuration.Settings.SwitchEnableSet?"ENABLED":"DISABLED")}.)";
+                screenLog += $"\r\n1. Write tests are disabled until enabled on the Switch tab in the Settings page. (Currently {(configuration.Settings.SwitchEnableSet ? "ENABLED" : "DISABLED")}.)";
                 string readDelay = $"{Convert.ToDouble(configuration.Settings.SwitchReadDelay) / 1000.0:0.0}";
                 string writeDelay = $"{Convert.ToDouble(configuration.Settings.SwitchWriteDelay) / 1000.0:0.0}";
                 screenLog += $"\r\n2. Delays of {readDelay} second{(readDelay == "1.0" ? "" : "s")} (read) and {writeDelay} second{(writeDelay == "1.0" ? "" : "s")} (write) will be added after each operation.";
@@ -87,7 +88,7 @@
         }
 
         statusMessage = $"Version {Update.ConformuVersionDisplayString}";
-        statusMessage += $"        Running as a {(Environment.Is64BitProcess ? "64bit" : "32bit")} application on {(Environment.Is64BitOperatingSystem? "64bit" : "32bit")} {Environment.OSVersion}";
+        statusMessage += $"        Running as a {(Environment.Is64BitProcess ? "64bit" : "32bit")} application on {(Environment.Is64BitOperatingSystem ? "64bit" : "32bit")} {Environment.OSVersion}";
 
         // Validate that the application SEMVER string is valid
         if (SemVersion.TryParse(Update.ConformuVersion, SemVersionStyles.AllowV, out SemVersion currentversion))
@@ -98,6 +99,27 @@
         {
             screenLog += $"\r\n\r\nINVALID PRODUCT VERSION: {Update.ConformuVersion}";
         }
+
+#if WINDOWS7_0_OR_GREATER
+
+    // Give warning message if running as ADMIN
+    using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
+    {
+        // Determine whether the user is running as admin
+        WindowsPrincipal principal = new WindowsPrincipal(identity);
+        if (principal.IsInRole(WindowsBuiltInRole.Administrator))
+        {
+            // Running as admin so show a warning message on the screen
+
+            // Display message
+                screenLog += ("\r\n\r\n***** CONFORM UNIVERSAL IS RUNNING WITH ADMIN PRIVILEGE!");
+                screenLog += ("\r\n\r\n***** This increases the risk that malicious individuals will target you and cause havoc in your life.");
+                screenLog += ("\r\n***** There is no need to run Conform Universal with Admin privilege, the application is fully functional in normal user mode.");
+                screenLog += ("\r\n***** Please close the application and re-open it in normal user mode.\r\n");
+        }
+    }
+
+#endif
 
         conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"End");
     }
