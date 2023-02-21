@@ -220,6 +220,14 @@
                     </div>
 
                     <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHKUSERCERTIFICATES"
+                                        @bind-Value=@chkTrustUserGeneratedSslCertificates
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TrustUserGeneratedSslCertificates)) />
+                        <RadzenLabel Text="Trust user generated SSL certificates." Component="CHKUSERCERTIFICATES" Style="margin-left: 20px;" />
+                    </div>
+
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenDropDown @bind-Value=@alpacaImageArrayTransferType
                                         Style="width:11em"
                                         Data="imageArrayTypeOptions"
@@ -556,6 +564,7 @@
     private bool chkProtocolShowSuccessResponses;
     private bool chkProtocolReportNotImplementedErrors;
     private bool chkProtocolTestPrimaryUrlStructure;
+    private bool chkTrustUserGeneratedSslCertificates;
 
     // Camera test configuration
     private int cameraTestMaxBinX;
@@ -654,7 +663,8 @@
         RunAs32Bit,
         ProtocolShowSuccessResponses,
         ProtocolReportNotImplementedErrors,
-        ProtocolTestPrimaryUrlStructure
+        ProtocolTestPrimaryUrlStructure,
+        TrustUserGeneratedSslCertificates
     }
 
     private enum BoolConfigurationItem
@@ -890,6 +900,10 @@
 
             case CheckBoxConfigurationItem.ProtocolTestPrimaryUrlStructure:
                 settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure = chkProtocolTestPrimaryUrlStructure;
+                break;
+
+            case CheckBoxConfigurationItem.TrustUserGeneratedSslCertificates:
+                settings.AlpacaConfiguration.TrustUserGeneratedSslCertificates = chkTrustUserGeneratedSslCertificates;
                 break;
 
             default:
@@ -1128,6 +1142,7 @@
         chkProtocolShowSuccessResponses = settings.AlpacaConfiguration.ProtocolShowSuccessResponses;
         chkProtocolReportNotImplementedErrors = settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors;
         chkProtocolTestPrimaryUrlStructure = settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure;
+        chkTrustUserGeneratedSslCertificates = settings.AlpacaConfiguration.TrustUserGeneratedSslCertificates;
     }
 
     private void SaveConfiguration()

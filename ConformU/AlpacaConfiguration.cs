@@ -26,5 +26,6 @@ namespace ConformU
         public bool ProtocolShowSuccessResponses { get; set; } = true;
         public bool ProtocolReportNotImplementedErrors { get; set; } = false;
         public bool ProtocolTestPrimaryUrlStructure { get; set; } = false;
+        public bool TrustUserGeneratedSslCertificates { get; set; } = false;
     }
 }

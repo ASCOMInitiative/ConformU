@@ -104,7 +104,8 @@ namespace ConformU
                                                     settings.AlpacaConfiguration.StrictCasing,
                                                     settings.TraceAlpacaCalls ? logger : null,
                                                     Globals.USER_AGENT_PRODUCT_NAME,
-                                                    Assembly.GetExecutingAssembly().GetName().Version.ToString(4));
+                                                    Assembly.GetExecutingAssembly().GetName().Version.ToString(4),
+                                                    settings.AlpacaConfiguration.TrustUserGeneratedSslCertificates);
                         break;
 
                     case DeviceTechnology.COM:

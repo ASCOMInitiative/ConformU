@@ -370,7 +370,8 @@ namespace ConformU
                 switch (settings.DeviceTechnology)
                 {
                     case DeviceTechnology.Alpaca:
-                        LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
+                        LogInfo("CreateDevice", $"Creating Alpaca device: Access service: {settings.AlpacaConfiguration.AccessServiceType}, IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber} " +
+                            $"({(settings.AlpacaConfiguration.TrustUserGeneratedSslCertificates ? "A" : "Not a")}ccepting user generated SSL certificates)");
                         telescopeDevice = new AlpacaTelescope(
                                                     settings.AlpacaConfiguration.AccessServiceType,
                                                     settings.AlpacaDevice.IpAddress,
@@ -385,7 +386,8 @@ namespace ConformU
                                                     settings.AlpacaConfiguration.StrictCasing,
                                                     settings.TraceAlpacaCalls ? logger : null,
                                                     Globals.USER_AGENT_PRODUCT_NAME,
-                                                    Assembly.GetExecutingAssembly().GetName().Version.ToString(4));
+                                                    Assembly.GetExecutingAssembly().GetName().Version.ToString(4),
+                                                    settings.AlpacaConfiguration.TrustUserGeneratedSslCertificates);
 
                         LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;
@@ -540,7 +542,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    HandleException("UTCDate",MemberType.Property,Required.Mandatory,ex,"");
+                    HandleException("UTCDate", MemberType.Property, Required.Mandatory, ex, "");
                 }
             }
         }
@@ -2560,7 +2562,7 @@ namespace ConformU
                                         }
                                         catch (Exception ex)
                                         {
-                                            HandleException("Unpark",MemberType.Method,Required.MustBeImplemented,ex,"CanUnpark is true");
+                                            HandleException("Unpark", MemberType.Method, Required.MustBeImplemented, ex, "CanUnpark is true");
                                         }
                                     }
                                     else // Can't UnPark
@@ -2583,7 +2585,7 @@ namespace ConformU
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleException("Park",MemberType.Method,Required.MustBeImplemented,ex,"CanPark is true");
+                                    HandleException("Park", MemberType.Method, Required.MustBeImplemented, ex, "CanPark is true");
                                 }
                             }
                             else // We are still in parked status despite a successful UnPark
@@ -4805,7 +4807,7 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage("Parked:" + p_Name, "About to call SlewToCoordinatesAsync method");
                                 telescopeDevice.SlewToCoordinatesAsync(TelescopeRAFromSiderealTime("Parked:" + p_Name, 1.0d), 0.0d);
-                                WaitForSlew("Parked:" + p_Name,"Slewing to coordinates asynchronously");
+                                WaitForSlew("Parked:" + p_Name, "Slewing to coordinates asynchronously");
                                 break;
                             }
 
@@ -6789,7 +6791,7 @@ namespace ConformU
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("SlewScope", "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(p_RA) + ", Declination: " + FormatDec(p_DEC));
                     telescopeDevice.SlewToCoordinatesAsync(p_RA, p_DEC);
-                    WaitForSlew(p_Msg,$"Slewing asynchronously to {p_Msg}");
+                    WaitForSlew(p_Msg, $"Slewing asynchronously to {p_Msg}");
                 }
                 else
                 {
