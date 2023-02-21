@@ -34,9 +34,7 @@
                         <Items>
                             <RadzenCheckBoxListItem Text="Test Properties" Value="0" />
                             <RadzenCheckBoxListItem Text="Test Methods" Value="1" />
-                            <RadzenCheckBoxListItem Text="Test SideOfPier Read" Value="2" />
-                            <RadzenCheckBoxListItem Text="Test SideOfPier Write" Value="3" />
-                            <RadzenCheckBoxListItem Text="Test Performance" Value="4" />
+                            <RadzenCheckBoxListItem Text="Test Performance" Value="2" />
                         </Items>
                     </RadzenCheckBoxList>
                 </RadzenCard>
@@ -304,7 +302,7 @@
                     </RadzenCheckBoxList>
                 </RadzenCard>
 
-                <RadzenCard Style="margin-left: 10px">
+                <RadzenCard Style="margin-left: 10px;padding-bottom:5px;margin-right: 10px;margin-bottom: 20px">
                     <h4 style="margin-top: 5px; color: #479cc8">Further configuration.</h4>
                     <div class="row">
 
@@ -344,6 +342,30 @@
                         <RadzenLabel Text="Maximum time before telescope slews time out (seconds)"
                                      Component="TELESCOPEMAXSLEWTIME"
                                      Style="margin-left: 20px;margin-top:26px; margin-right: 20px" />
+                    </div>
+
+                    <div class="row">
+
+                        <RadzenCheckBox Name="TELESIDEOFPIERREAD"
+                                        Style="margin-top:20px;margin-left:20px"
+                                        @bind-Value=@chkSideOfPierRead
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.SideOfPierRead)) />
+                        <RadzenLabel Text="Enable extended side of pier read tests"
+                                     Component="TELESIDEOFPIERREAD"
+                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
+                    </div>
+
+                    <div class="row">
+
+                        <RadzenCheckBox Name="TELESIDEOFPIERWRITE"
+                                        Style="margin-top:20px;margin-left:20px"
+                                        @bind-Value=@chkSidfeOfPierWrite
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.SideOfPierWrite)) />
+                        <RadzenLabel Text="Enable extended side of pier write tests"
+                                     Component="TELESIDEOFPIERWRITE"
+                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
                     </div>
                 </RadzenCard>
             </div>
@@ -612,6 +634,8 @@
     private bool telescopeFirstUseTests = false;
     private double telescopeSlewTolerance;
     private int telescopeMaximumSlewTime;
+    private bool chkSideOfPierRead;
+    private bool chkSidfeOfPierWrite;
 
     #region Enums
 
@@ -664,6 +688,8 @@
         ProtocolShowSuccessResponses,
         ProtocolReportNotImplementedErrors,
         ProtocolTestPrimaryUrlStructure,
+        SideOfPierRead,
+        SideOfPierWrite,
         TrustUserGeneratedSslCertificates
     }
 
@@ -906,6 +932,14 @@
                 settings.AlpacaConfiguration.TrustUserGeneratedSslCertificates = chkTrustUserGeneratedSslCertificates;
                 break;
 
+            case CheckBoxConfigurationItem.SideOfPierRead:
+                settings.TestSideOfPierRead = chkSideOfPierRead;
+                break;
+
+            case CheckBoxConfigurationItem.SideOfPierWrite:
+                settings.TestSideOfPierWrite = chkSidfeOfPierWrite;
+                break;
+
             default:
                 throw new InvalidValueException($"OnCheckboxChange - Unknown checkbox name: {name}");
         }
@@ -945,63 +979,33 @@
         List<int> newScope = new();
         bool propertiesEnabled = scope.Contains(0);
         bool methodsEnabled = scope.Contains(1);
-        bool sideofPierReadEnabled = scope.Contains(2);
-        bool sideofPierWriteEnabled = scope.Contains(3);
-        bool performanceEnabled = scope.Contains(4);
+        bool performanceEnabled = scope.Contains(2);
 
-        if (sideofPierWriteEnabled)
+        if (methodsEnabled)
         {
-            newScope = new List<int>() { 0, 1, 2, 3 };
+            newScope = new List<int>() { 0, 1 };
             settings.TestProperties = true;
             settings.TestMethods = true;
-            settings.TestSideOfPierRead = true;
-            settings.TestSideOfPierWrite = true;
-
         }
         else
         {
-            if (sideofPierReadEnabled)
+            if (propertiesEnabled)
             {
-                newScope = new List<int>() { 0, 1, 2 };
+                newScope = new List<int>() { 0 };
                 settings.TestProperties = true;
-                settings.TestMethods = true;
-                settings.TestSideOfPierRead = true;
-                settings.TestSideOfPierWrite = false;
+                settings.TestMethods = false;
             }
             else
             {
-                if (methodsEnabled)
-                {
-                    newScope = new List<int>() { 0, 1 };
-                    settings.TestProperties = true;
-                    settings.TestMethods = true;
-                    settings.TestSideOfPierRead = false;
-                    settings.TestSideOfPierWrite = false;
-                }
-                else
-                {
-                    if (propertiesEnabled)
-                    {
-                        newScope = new List<int>() { 0 };
-                        settings.TestProperties = true;
-                        settings.TestMethods = false;
-                        settings.TestSideOfPierRead = false;
-                        settings.TestSideOfPierWrite = false;
-                    }
-                    else
-                    {
-                        newScope = new List<int>();
-                        settings.TestProperties = false;
-                        settings.TestMethods = false;
-                        settings.TestSideOfPierRead = false;
-                        settings.TestSideOfPierWrite = false;
-                    }
-                }
+                newScope = new List<int>();
+                settings.TestProperties = false;
+                settings.TestMethods = false;
             }
         }
+
         if (performanceEnabled)
         {
-            newScope.Add(4);
+            newScope.Add(2);
             settings.TestPerformance = true;
         }
         else
@@ -1064,9 +1068,7 @@
         // Set scope
         if (settings.TestProperties) newScope.Add(0);
         if (settings.TestMethods) newScope.Add(1);
-        if (settings.TestSideOfPierRead) newScope.Add(2);
-        if (settings.TestSideOfPierWrite) newScope.Add(3);
-        if (settings.TestPerformance) newScope.Add(4);
+        if (settings.TestPerformance) newScope.Add(2);
         conformanceTestScope = newScope;
 
         // Operation settings
@@ -1094,6 +1096,8 @@
         telescopeFirstUseTests = settings.TelescopeFirstUseTests;
         telescopeSlewTolerance = settings.TelescopeSlewTolerance;
         telescopeMaximumSlewTime = settings.TelescopeMaximumSlewTime;
+        chkSideOfPierRead = settings.TestSideOfPierRead;
+        chkSidfeOfPierWrite = settings.TestSideOfPierWrite;
 
         // Camera tests
         cameraTestMaxBinX = settings.CameraMaxBinX;
