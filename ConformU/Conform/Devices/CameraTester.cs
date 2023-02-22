@@ -788,6 +788,12 @@ namespace ConformU
                 }
             }
             SetAction("Releasing memory");
+            if (OperatingSystem.IsWindows())
+            {
+                try { if (m_ImageArray is not null) Marshal.ReleaseComObject(m_ImageArray); } catch { }
+
+                try { if (m_ImageArrayVariant is not null) Marshal.ReleaseComObject(m_ImageArrayVariant); } catch { }
+            }
 
             m_ImageArray = null;
             m_ImageArrayVariant = null;
@@ -2422,7 +2428,7 @@ namespace ConformU
                 {
                     for (l_BinX = 1; l_BinX <= l_MaxBinX; l_BinX++)
                     {
-                        CameraExposure("Take image full frame " + l_BinX + " x " + l_BinY + " bin", l_BinX, l_BinY, 0, 0, m_CameraXSize / l_BinX, m_CameraYSize / l_BinY, settings.CameraExposureDuration, "");
+                        CameraExposure($"Take image full frame {l_BinX} x {l_BinY} bin ({m_CameraXSize/l_BinX}) x {m_CameraYSize/l_BinY})", l_BinX, l_BinY, 0, 0, m_CameraXSize / l_BinX, m_CameraYSize / l_BinY, settings.CameraExposureDuration, "");
                         if (cancellationToken.IsCancellationRequested)
                             return;
                     }
@@ -2431,7 +2437,7 @@ namespace ConformU
             else
                 for (l_BinX = 1; l_BinX <= l_MaxBinX; l_BinX++)
                 {
-                    CameraExposure("Take image full frame " + l_BinX + " x " + l_BinX + " bin", l_BinX, l_BinX, 0, 0, m_CameraXSize / l_BinX, m_CameraYSize / l_BinX, settings.CameraExposureDuration, "");
+                    CameraExposure($"Take image full frame {l_BinX} x {l_BinX} bin ({m_CameraXSize/l_BinX}) x {m_CameraYSize/l_BinX})", l_BinX, l_BinX, 0, 0, m_CameraXSize / l_BinX, m_CameraYSize / l_BinX, settings.CameraExposureDuration, "");
                     if (cancellationToken.IsCancellationRequested)
                         return;
                 }
@@ -2720,12 +2726,17 @@ namespace ConformU
                             }
 
                             SetAction("Releasing ImageArray memory");
+                            if (OperatingSystem.IsWindows())
+                            {
+                                try { if (m_ImageArray is not null) Marshal.ReleaseComObject(m_ImageArray); } catch { }
+                                try { if (m_ImageArrayVariant is not null) Marshal.ReleaseComObject(m_ImageArrayVariant); } catch { }
+                            }
+
                             m_ImageArray = null;
                             m_ImageArrayVariant = null;
                             GC.Collect();
 
                             // Check image array variant dimensions
-                            Array imageArrayObject;
 
                             if (settings.CameraTestImageArrayVariant) // Test if configured to do so. No need to report an issue because it's already been reported when the ImageArrayVariant property was tested
                             {
@@ -2736,11 +2747,12 @@ namespace ConformU
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
                                     sw.Restart();
-                                    imageArrayObject = (Array)m_Camera.ImageArrayVariant;
+                                    m_ImageArrayVariant = (Array)m_Camera.ImageArrayVariant;
                                     sw.Stop();
+
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage("ConformanceCheck", "Get ImageArrayVariant completed in " + sw.ElapsedMilliseconds + "ms");
-                                    m_ImageArrayVariant = (Array)imageArrayObject;
+
                                     if ((m_ImageArrayVariant.GetLength(0) == p_NumX) & (m_ImageArrayVariant.GetLength(1) == p_NumY))
                                     {
                                         if (m_ImageArrayVariant.GetType().ToString() == "System.Object[,]" | m_ImageArrayVariant.GetType().ToString() == "System.Object[,,]")
@@ -2783,8 +2795,14 @@ namespace ConformU
 
                             SetAction("Releasing ImageArrayVariant memory");
                             // Release large image objects from memory
+                            if (OperatingSystem.IsWindows())
+                            {
+                                try { if (m_ImageArray is not null) Marshal.ReleaseComObject(m_ImageArray); } catch { }
+                                try { if (m_ImageArrayVariant is not null) Marshal.ReleaseComObject(m_ImageArrayVariant); } catch { }
+                            }
+
+                            m_ImageArray = null;
                             m_ImageArrayVariant = null;
-                            imageArrayObject = null;
                             GC.Collect();
                         }
                         else
