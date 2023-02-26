@@ -2704,9 +2704,18 @@ namespace ConformU
                                 else
                                     LogIssue("ImageArray", "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
                             }
+                            catch (OutOfMemoryException ex)
+                            {
+                                if (Environment.Is64BitProcess) // Message when running as a 64bit process
+                                    LogError("ImageArray", $"InsufficientMemoryException - The application ran out of available memory: {ex.Message}");
+                                else // Message when running as a 32bit process
+                                    LogError("ImageArray", $"InsufficientMemoryException - The application ran out of available memory.\r\n" +
+                                        new string(' ', 58) +
+                                        $"***** If your camera device supports this, please re-test with the 64bit version of Conform Universal because it has greater memory headroom.");
+                            }
                             catch (Exception ex)
                             {
-                                LogIssue("StartExposure", $"Exception when reading ImageArray\r\n {ex}");
+                                LogIssue("ImageArray", $"Exception when reading ImageArray: {ex.Message}");
                             }
 
                             SetAction("Releasing ImageArray memory");
@@ -2767,9 +2776,18 @@ namespace ConformU
                                     else
                                         LogIssue("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
                                 }
+                                catch (OutOfMemoryException ex)
+                                {
+                                    if (Environment.Is64BitProcess) // Message when running as a 64bit process
+                                        LogError("ImageArrayVariant", $"InsufficientMemoryException - The application ran out of available memory: {ex.Message}");
+                                    else // Message when running as a 32bit process
+                                        LogError("ImageArrayVariant", $"InsufficientMemoryException - The application ran out of available memory.\r\n" +
+                                            new string(' ', 58) +
+                                            $"***** If your camera device supports this, please re-test with the 64bit version of Conform Universal because it has greater memory headroom.");
+                                }
                                 catch (Exception ex)
                                 {
-                                    LogIssue("ImageArrayVariant", $"Exception when reading ImageArrayVariant:\r\n{ex}");
+                                    LogIssue("ImageArrayVariant", $"Exception when reading ImageArrayVariant: {ex.Message}");
                                 }
                             }
 
@@ -2972,12 +2990,12 @@ namespace ConformU
                         }
                     }
                     else
-                    LogIssue("LastExposureStartTime", "LastExposureStartTime not in the expected format yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
+                        LogIssue("LastExposureStartTime", "LastExposureStartTime not in the expected format yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
                 }
                 else if (m_LastExposureStartTime == "")
                     LogIssue("LastExposureStartTime", "LastExposureStartTime has returned an empty string - expected yyyy-mm-ddThh:mm:ss");
                 else
-                LogIssue("LastExposureStartTime", "LastExposureStartTime is less than 19 characters - expected yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
+                    LogIssue("LastExposureStartTime", "LastExposureStartTime is less than 19 characters - expected yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
             }
             catch (Exception ex)
             {
