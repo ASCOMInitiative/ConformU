@@ -345,9 +345,23 @@
             ctsDescription.CancelAfter(Convert.ToInt32(configuration.Settings.AlpacaConfiguration.DiscoveryDuration * 1000));
             string deviceDescriptionJsonResponse = await httpClient.GetStringAsync($"{hostIpAndPort}/management/v1/description", ctsDescription.Token);
             AlpacaDescriptionResponse deviceDescriptionResponse = JsonSerializer.Deserialize<AlpacaDescriptionResponse>(deviceDescriptionJsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = configuration.Settings.AlpacaConfiguration.StrictCasing });
-            LogOk("TestManagementApi", $"Successfully read device description", COLUMN_OVERALL);
+
+            // Make sure that we can parse the returned JSON string successfully
+            if (deviceDescriptionResponse is null)
+            {
+                throw new Exception($"Unable to parse the device description from the returned JSON string: {deviceDescriptionJsonResponse}");
+            }
+
+            LogOk("TestManagementApi", $"Successfully read the device description", COLUMN_OVERALL);
 
             AlpacaDeviceDescription deviceDescription = deviceDescriptionResponse.Value;
+
+            // Make sure that we can extract a valid device description from the response class
+            if (deviceDescription is null)
+            {
+                throw new Exception($"Unable to create a valid device description object. This is most likely due to an issue in the returned JSON string: {deviceDescriptionJsonResponse}");
+            }
+
             // Validate the manufacturer name
             if (!string.IsNullOrWhiteSpace(deviceDescription.Manufacturer))
             {
@@ -406,10 +420,24 @@
             CancellationTokenSource ctsDevices = new CancellationTokenSource();
             ctsDevices.CancelAfter(Convert.ToInt32(configuration.Settings.AlpacaConfiguration.DiscoveryDuration * 1000));
             string configuredDevicesJsonResponse = await httpClient.GetStringAsync($"{hostIpAndPort}/management/v1/configureddevices", ctsDevices.Token);
+
             AlpacaConfiguredDevicesResponse configuredDevicesResponse = JsonSerializer.Deserialize<AlpacaConfiguredDevicesResponse>(configuredDevicesJsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = configuration.Settings.AlpacaConfiguration.StrictCasing });
 
+            // Make sure that we can parse the returned JSON string successfully
+            if (configuredDevicesResponse is null)
+            {
+                throw new Exception($"Unable to parse the configured devices response from the returned JSON string: {configuredDevicesJsonResponse}");
+            }
+
             List<AlpacaConfiguredDevice> configuredDevices = configuredDevicesResponse.Value;
-            LogOk("TestManagementApi", $"Successfully read configured devices response", COLUMN_OVERALL);
+
+            // Make sure that we can extract a valid device description from the response class
+            if (configuredDevices is null)
+            {
+                throw new Exception($"Unable to create a valid configured devices object. This is most likely due to an issue in the returned JSON string: {configuredDevicesJsonResponse}");
+            }
+
+            LogOk("TestManagementApi", $"Successfully read the configured devices response", COLUMN_OVERALL);
 
             // Validate that there is at least one configured device
             if (configuredDevices.Count > 0) // There is a t least one configured device
@@ -601,6 +629,11 @@
     private void LogInformation(BroadcastResponse broadcastResponse, string method, string message, int padding)
     {
         LogMessage(method, $"INFO  - {message}", padding);
+
+        // Ignore null broadcast responses
+        if (broadcastResponse is null)
+            return;
+
         informationMessages.Add(new AlpacaDiscoveryDiagnostic(broadcastResponse.IPEndpoint.ToString(), message));
     }
 
