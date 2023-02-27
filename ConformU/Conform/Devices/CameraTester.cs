@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -183,7 +184,6 @@ namespace ConformU
                     m_Camera = null;
                     m_ImageArray = null;
                     m_ImageArrayVariant = null;
-                    GC.Collect();
                 }
             }
 
@@ -745,6 +745,10 @@ namespace ConformU
 
             // ImageArray 
             SetFullStatus("ImageArray", "Getting image data from device...", "");
+
+            // Release memory currently consumed by images
+            ReleaseMemory();
+
             if (m_ImageReady) // ImageReady is true
             {
                 try
@@ -787,19 +791,16 @@ namespace ConformU
                     LogOK("ImageArray", "Exception correctly generated when ImageReady is false");
                 }
             }
+
+            // Release memory currently consumed by images
             SetAction("Releasing memory");
-            if (OperatingSystem.IsWindows())
-            {
-                try { if (m_ImageArray is not null) Marshal.ReleaseComObject(m_ImageArray); } catch { }
-
-                try { if (m_ImageArrayVariant is not null) Marshal.ReleaseComObject(m_ImageArrayVariant); } catch { }
-            }
-
-            m_ImageArray = null;
-            m_ImageArrayVariant = null;
-            GC.Collect();
+            ReleaseMemory();
 
             // ImageArrayVariant
+            // Release memory currently consumed by images
+            SetAction("Releasing memory");
+            ReleaseMemory();
+
             SetFullStatus("ImageArrayVariant", "Getting image data from device...", "");
             if (settings.CameraTestImageArrayVariant) // Test if configured to do so
             {
@@ -852,17 +853,10 @@ namespace ConformU
                 LogIssue("ImageArrayVariant", "Test omitted due to Conform configuration.");
             }
 
+            // Release memory currently consumed by images
             SetAction("Releasing memory");
-            if (OperatingSystem.IsWindows())
-            {
-                try { if (m_ImageArray is not null) Marshal.ReleaseComObject(m_ImageArray); } catch { }
+            ReleaseMemory();
 
-                try { if (m_ImageArrayVariant is not null) Marshal.ReleaseComObject(m_ImageArrayVariant); } catch { }
-            }
-
-            m_ImageArray = null;
-            m_ImageArrayVariant = null;
-            GC.Collect();
             ClearStatus();
 
             m_IsPulseGuiding = CameraPropertyTestBoolean(CamPropertyType.IsPulseGuiding, "IsPulseGuiding", false); if (cancellationToken.IsCancellationRequested) return;
@@ -2671,6 +2665,10 @@ namespace ConformU
                             // Check image array dimensions
                             try
                             {
+                                // Release memory currently consumed by images
+                                SetAction("Releasing memory");
+                                ReleaseMemory();
+
                                 // Retrieve the image array
                                 SetAction("Retrieving ImageArray");
                                 if (settings.DisplayMethodCalls)
@@ -2718,21 +2716,19 @@ namespace ConformU
                                 LogIssue("ImageArray", $"Exception when reading ImageArray: {ex.Message}");
                             }
 
-                            SetAction("Releasing ImageArray memory");
-                            if (OperatingSystem.IsWindows())
-                            {
-                                try { if (m_ImageArray is not null) Marshal.ReleaseComObject(m_ImageArray); } catch { }
-                                try { if (m_ImageArrayVariant is not null) Marshal.ReleaseComObject(m_ImageArrayVariant); } catch { }
-                            }
+                            // Release memory currently consumed by images
+                            SetAction("Releasing memory");
+                            ReleaseMemory();
 
-                            m_ImageArray = null;
-                            m_ImageArrayVariant = null;
-                            GC.Collect();
 
                             // Check image array variant dimensions
 
                             if (settings.CameraTestImageArrayVariant) // Test if configured to do so. No need to report an issue because it's already been reported when the ImageArrayVariant property was tested
                             {
+                                // Release memory currently consumed by images
+                                SetAction("Releasing memory");
+                                ReleaseMemory();
+
                                 SetAction("Retrieving ImageArrayVariant");
 
                                 try
@@ -2791,17 +2787,10 @@ namespace ConformU
                                 }
                             }
 
-                            SetAction("Releasing ImageArrayVariant memory");
-                            // Release large image objects from memory
-                            if (OperatingSystem.IsWindows())
-                            {
-                                try { if (m_ImageArray is not null) Marshal.ReleaseComObject(m_ImageArray); } catch { }
-                                try { if (m_ImageArrayVariant is not null) Marshal.ReleaseComObject(m_ImageArrayVariant); } catch { }
-                            }
+                            // Release memory currently consumed by images
+                            SetAction("Releasing memory");
+                            ReleaseMemory();
 
-                            m_ImageArray = null;
-                            m_ImageArrayVariant = null;
-                            GC.Collect();
                         }
                         else
                         {
@@ -3168,12 +3157,20 @@ namespace ConformU
 
                         case CameraPerformance.ImageArray:
                             {
+                                // Release memory currently consumed by images
+                                SetAction("Releasing memory");
+                                ReleaseMemory();
+
                                 m_ImageArray = (Array)m_Camera.ImageArray;
                                 break;
                             }
 
                         case CameraPerformance.ImageArrayVariant:
                             {
+                                // Release memory currently consumed by images
+                                SetAction("Releasing memory");
+                                ReleaseMemory();
+
                                 m_ImageArrayVariant = (Array)m_Camera.ImageArrayVariant;
                                 break;
                             }
@@ -3287,6 +3284,18 @@ namespace ConformU
             {
             }
             LogOK("PostRunCheck", "Camera returned to initial cooler temperature");
+        }
+
+        /// <summary>
+        /// Release memory allocated to the large arrays on the large object heap.
+        /// </summary>
+        private void ReleaseMemory()
+        {
+            // Clear out any previous memory allocations
+            m_ImageArray = null;
+            m_ImageArrayVariant = null;
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect(2, GCCollectionMode.Forced, true, true);
         }
     }
 
