@@ -90,7 +90,7 @@ namespace ConformU
             if (commandLineOptions.Version)
             {
                 Console.WriteLine($"Conform Universal {Update.ConformuVersionDisplayString}");
-                Console.WriteLine($"Copyright (c) 2021-{DateTime.Now.Year} Peter Simpson");
+                Console.WriteLine($"Copyright (c) 2023-{DateTime.Now.Year} Peter Simpson");
                 return 0;
             }
 

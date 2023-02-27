@@ -666,6 +666,9 @@ namespace ConformU
             LogTestOnly($"ASCOM Universal Device Conformance Checker Version {this.GetType().Assembly.GetName().Version}, Build time: {lastModifiedTime:ddd dd MMMM yyyy HH:mm:ss}");
             LogNewLine(); // Blank line
 
+            LogTestOnly($"Operating system is {(Environment.Is64BitOperatingSystem?"64bit":"32bit")}, Application is {(Environment.Is64BitProcess? "64bit" : "32bit")}.");
+            LogNewLine(); // Blank line
+
             switch (settings.DeviceTechnology)
             {
                 case DeviceTechnology.Alpaca:

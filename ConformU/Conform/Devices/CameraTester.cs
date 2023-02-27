@@ -2735,44 +2735,47 @@ namespace ConformU
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
                                     sw.Restart();
-                                    m_ImageArrayVariant = (Array)m_Camera.ImageArrayVariant;
+                                    object imageObject = m_Camera.ImageArrayVariant;
                                     sw.Stop();
 
                                     GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+
+                                    Array imageArr4ayVariant = (Array)imageObject;
+
                                     GC.Collect(2, GCCollectionMode.Forced, true, true);
 
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage("ConformanceCheck", "Get ImageArrayVariant completed in " + sw.ElapsedMilliseconds + "ms");
 
-                                    if ((m_ImageArrayVariant.GetLength(0) == p_NumX) & (m_ImageArrayVariant.GetLength(1) == p_NumY))
+                                    if ((imageArr4ayVariant.GetLength(0) == p_NumX) & (imageArr4ayVariant.GetLength(1) == p_NumY))
                                     {
-                                        if (m_ImageArrayVariant.GetType().ToString() == "System.Object[,]" | m_ImageArrayVariant.GetType().ToString() == "System.Object[,,]")
+                                        if (imageArr4ayVariant.GetType().ToString() == "System.Object[,]" | imageArr4ayVariant.GetType().ToString() == "System.Object[,,]")
                                         {
-                                            if (m_ImageArrayVariant.Rank == 2)
+                                            if (imageArr4ayVariant.Rank == 2)
                                             {
                                                 l_NumPlanes = "1 plane";
-                                                l_VariantType = ((object[,])m_ImageArrayVariant)[0, 0].GetType().ToString();
+                                                l_VariantType = ((object[,])imageArr4ayVariant)[0, 0].GetType().ToString();
                                             }
                                             else
                                             {
                                                 l_NumPlanes = "1 plane";
-                                                if (m_ImageArrayVariant.GetUpperBound(2) > 0)
+                                                if (imageArr4ayVariant.GetUpperBound(2) > 0)
                                                 {
-                                                    l_NumPlanes = System.Convert.ToString(m_ImageArrayVariant.GetUpperBound(2) + 1) + " planes";
-                                                    l_VariantType = ((object[,,])m_ImageArrayVariant)[0, 0, 0].GetType().ToString();
+                                                    l_NumPlanes = System.Convert.ToString(imageArr4ayVariant.GetUpperBound(2) + 1) + " planes";
+                                                    l_VariantType = ((object[,,])imageArr4ayVariant)[0, 0, 0].GetType().ToString();
                                                 }
                                                 else
-                                                    l_VariantType = ((object[,])m_ImageArrayVariant)[0, 0].GetType().ToString();
+                                                    l_VariantType = ((object[,])imageArr4ayVariant)[0, 0].GetType().ToString();
                                             }
-                                            LogOK("ImageArrayVariant", $"Successfully read variant array ({l_NumPlanes}) with {l_VariantType} elements {m_ImageArrayVariant.GetLength(0)} x {m_ImageArrayVariant.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
+                                            LogOK("ImageArrayVariant", $"Successfully read variant array ({l_NumPlanes}) with {l_VariantType} elements {imageArr4ayVariant.GetLength(0)} x {imageArr4ayVariant.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
                                         }
                                         else
-                                            LogIssue("ImageArrayVariant", "Expected variant array, actually got: " + m_ImageArrayVariant.GetType().ToString());
+                                            LogIssue("ImageArrayVariant", "Expected variant array, actually got: " + imageArr4ayVariant.GetType().ToString());
                                     }
-                                    else if ((m_ImageArrayVariant.GetLength(0) == p_NumY) & (m_ImageArrayVariant.GetLength(1) == p_NumX))
-                                        LogIssue("ImageArrayVariant", "Camera image dimensions swapped, expected values: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
+                                    else if ((imageArr4ayVariant.GetLength(0) == p_NumY) & (imageArr4ayVariant.GetLength(1) == p_NumX))
+                                        LogIssue("ImageArrayVariant", "Camera image dimensions swapped, expected values: " + p_NumX + " x " + p_NumY + " - actual values: " + imageArr4ayVariant.GetLength(0) + " x " + imageArr4ayVariant.GetLength(1));
                                     else
-                                        LogIssue("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
+                                        LogIssue("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + p_NumX + " x " + p_NumY + " - actual values: " + imageArr4ayVariant.GetLength(0) + " x " + imageArr4ayVariant.GetLength(1));
                                 }
                                 catch (OutOfMemoryException ex)
                                 {
