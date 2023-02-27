@@ -2720,7 +2720,6 @@ namespace ConformU
                             SetAction("Releasing memory");
                             ReleaseMemory();
 
-
                             // Check image array variant dimensions
 
                             if (settings.CameraTestImageArrayVariant) // Test if configured to do so. No need to report an issue because it's already been reported when the ImageArrayVariant property was tested
@@ -2738,6 +2737,9 @@ namespace ConformU
                                     sw.Restart();
                                     m_ImageArrayVariant = (Array)m_Camera.ImageArrayVariant;
                                     sw.Stop();
+
+                                    GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                                    GC.Collect(2, GCCollectionMode.Forced, true, true);
 
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage("ConformanceCheck", "Get ImageArrayVariant completed in " + sw.ElapsedMilliseconds + "ms");
