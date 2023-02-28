@@ -159,12 +159,14 @@ namespace ConformU
         public bool CameraFirstUseTests { get; set; } = true;
         public bool CameraTestImageArrayVariant { get; set; } = true;
         public double CameraExposureDuration { get; set; } = 2.0;
+        public int CameraXMax { get; set; } = 0;
+        public int CameraYMax { get; set; } = 0;
 
         // Dome test configuration
         public int DomeShutterMovementTimeout { get; set; } = 240;
         public int DomeAzimuthMovementTimeout { get; set; } = 240;
         public int DomeAltitudeMovementTimeout { get; set; } = 240;
-        
+
         /// <summary>
         /// Dome stabilisation time (seconds)
         /// </summary>

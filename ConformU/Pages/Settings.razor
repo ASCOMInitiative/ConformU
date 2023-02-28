@@ -416,6 +416,16 @@
                              Component="CHKTESTIMAGEARRAYVARIANT"
                              Style="margin-left: 20px;" />
             </div>
+
+            <div class="row" style="margin-top: 20px">
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraXMax" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraXMax)) />
+                <p style="margin-left: 20px;margin-top: 5px;">Max image size for take image tests (Zero uses the cameras configured value.)</p>
+            </div>
+            <div class="row">
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraYMax" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraYMax)) />
+                <p style="margin-left: 20px;margin-top: 5px;">Max image size for take image tests (Zero uses the cameras configured value.)</p>
+            </div>
+
         </RadzenTabsItem>
 
         @*Dome configuration*@
@@ -589,6 +599,8 @@
     private bool chkTrustUserGeneratedSslCertificates;
 
     // Camera test configuration
+    private int cameraXMax;
+    private int cameraYMax;
     private int cameraTestMaxBinX;
     private int cameraTestMaxBinY;
     private bool cameraFirstUseTests = false;
@@ -649,6 +661,8 @@
         CameraMaxBinX,
         CameraMaxBinY,
         CameraExposureDuration,
+        CameraXMax,
+        CameraYMax,
         waitTimeBeforeConformApplicationExits,
         DomeShutterTimeout,
         DomeAzimuthTimeout,
@@ -840,6 +854,14 @@
 
             case NumericConfigurationItem.focuserMoveTolerance:
                 settings.FocuserMoveTolerance = newValue;
+                break;
+
+            case NumericConfigurationItem.CameraXMax:
+                settings.CameraXMax = newValue;
+                break;
+
+            case NumericConfigurationItem.CameraYMax:
+                settings.CameraYMax = newValue;
                 break;
 
             default:
@@ -1105,6 +1127,8 @@
         cameraFirstUseTests = settings.CameraFirstUseTests;
         cameraTestImageArrayVariant = settings.CameraTestImageArrayVariant;
         cameraExposureDuration = settings.CameraExposureDuration;
+        cameraXMax = settings.CameraXMax;
+        cameraYMax = settings.CameraYMax;
 
         // Dome tests
         domeShutterTimeout = settings.DomeShutterMovementTimeout;

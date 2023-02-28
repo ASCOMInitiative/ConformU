@@ -33,7 +33,7 @@ namespace ConformU
         // Camera variables
         private bool m_CanAbortExposure, m_CanAsymmetricBin, m_CanGetCoolerPower, m_CanSetCCDTemperature, m_CanStopExposure, m_CanFastReadout;
         private bool m_CoolerOn, m_ImageReady;
-        private int m_CameraXSize, m_CameraYSize;
+        private int cameraXSize, cameraYSize;
         private short m_MaxBinX, m_MaxBinY, m_BinX, m_BinY;
         private double m_LastExposureDuration;
         private double m_SetCCDTemperature;
@@ -677,8 +677,8 @@ namespace ConformU
             }
 
             m_CameraState = CameraPropertyTestCameraState(CamPropertyType.CameraState, "CameraState"); if (cancellationToken.IsCancellationRequested) return;
-            m_CameraXSize = CameraPropertyTestInteger(CamPropertyType.CameraXSize, "CameraXSize", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
-            m_CameraYSize = CameraPropertyTestInteger(CamPropertyType.CameraYSize, "CameraYSize", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
+            cameraXSize = CameraPropertyTestInteger(CamPropertyType.CameraXSize, "CameraXSize", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
+            cameraYSize = CameraPropertyTestInteger(CamPropertyType.CameraYSize, "CameraYSize", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
 
             CameraPropertyTestDouble(CamPropertyType.CCDTemperature, "CCDTemperature", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
             m_CoolerOn = CameraPropertyTestBoolean(CamPropertyType.CoolerOn, "CoolerOn Read", false); if (cancellationToken.IsCancellationRequested) return;
@@ -865,11 +865,11 @@ namespace ConformU
 
             CameraPropertyTestInteger(CamPropertyType.MaxADU, "MaxADU", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
 
-            CameraPropertyTestInteger(CamPropertyType.NumX, "NumX Read", 1, m_CameraXSize); if (cancellationToken.IsCancellationRequested) return;
-            CameraPropertyWriteTest(CamPropertyType.NumX, "NumX", System.Convert.ToInt32(m_CameraXSize / (double)2));
+            CameraPropertyTestInteger(CamPropertyType.NumX, "NumX Read", 1, cameraXSize); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyWriteTest(CamPropertyType.NumX, "NumX", System.Convert.ToInt32(cameraXSize / (double)2));
 
-            CameraPropertyTestInteger(CamPropertyType.NumY, "NumY Read", 1, m_CameraYSize); if (cancellationToken.IsCancellationRequested) return;
-            CameraPropertyWriteTest(CamPropertyType.NumY, "NumY", System.Convert.ToInt32(m_CameraYSize / (double)2));
+            CameraPropertyTestInteger(CamPropertyType.NumY, "NumY Read", 1, cameraYSize); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyWriteTest(CamPropertyType.NumY, "NumY", System.Convert.ToInt32(cameraYSize / (double)2));
 
             CameraPropertyTestDouble(CamPropertyType.PixelSizeX, "PixelSizeX", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyTestDouble(CamPropertyType.PixelSizeY, "PixelSizeY", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
@@ -1002,10 +1002,10 @@ namespace ConformU
                     HandleException("SetCCDTemperature Write", MemberType.Property, Required.Optional, ex, "");
                 }
 
-            CameraPropertyTestInteger(CamPropertyType.StartX, "StartX Read", 0, m_CameraXSize - 1); if (cancellationToken.IsCancellationRequested) return;
-            CameraPropertyWriteTest(CamPropertyType.StartX, "StartX", System.Convert.ToInt32(m_CameraXSize / (double)2));
-            CameraPropertyTestInteger(CamPropertyType.StartY, "StartY Read", 0, m_CameraYSize - 1); if (cancellationToken.IsCancellationRequested) return;
-            CameraPropertyWriteTest(CamPropertyType.StartY, "StartY", System.Convert.ToInt32(m_CameraYSize / (double)2));
+            CameraPropertyTestInteger(CamPropertyType.StartX, "StartX Read", 0, cameraXSize - 1); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyWriteTest(CamPropertyType.StartX, "StartX", System.Convert.ToInt32(cameraXSize / (double)2));
+            CameraPropertyTestInteger(CamPropertyType.StartY, "StartY Read", 0, cameraYSize - 1); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyWriteTest(CamPropertyType.StartY, "StartY", System.Convert.ToInt32(cameraYSize / (double)2));
 
             if (settings.DisplayMethodCalls)
                 LogTestAndMessage("ConformanceCheck", "About to get InterfaceVersion");
@@ -2241,7 +2241,7 @@ namespace ConformU
 
         public override void CheckMethods()
         {
-            int l_i, l_j, l_MaxBinX, l_MaxBinY;
+            int i, j, maxBinX, maxBinY;
             // AbortExposure - Mandatory
             SetTest("AbortExposure");
             try
@@ -2382,44 +2382,90 @@ namespace ConformU
                 LogNewLine(); // Insert a blank line if required
             if (settings.CameraMaxBinX > 0)
             {
-                l_MaxBinX = settings.CameraMaxBinX;
-                LogTestAndMessage("StartExposure", string.Format("Test range set to MaxBinX = {0} by Conform configuration, camera MaxBinX = {1}", l_MaxBinX, m_MaxBinX));
+                maxBinX = settings.CameraMaxBinX;
+                LogTestAndMessage("StartExposure", string.Format("Test range set to MaxBinX = {0} by Conform configuration, camera MaxBinX = {1}", maxBinX, m_MaxBinX));
             }
             else
-                l_MaxBinX = m_MaxBinX;
+                maxBinX = m_MaxBinX;
             if (settings.CameraMaxBinY > 0)
             {
-                l_MaxBinY = settings.CameraMaxBinY;
-                LogTestAndMessage("StartExposure", string.Format("Test range set to MaxBinY = {0} by Conform configuration, camera MaxBinY = {1}", l_MaxBinY, m_MaxBinY));
+                maxBinY = settings.CameraMaxBinY;
+                LogTestAndMessage("StartExposure", string.Format("Test range set to MaxBinY = {0} by Conform configuration, camera MaxBinY = {1}", maxBinY, m_MaxBinY));
             }
             else
-                l_MaxBinY = m_MaxBinY;
+                maxBinY = m_MaxBinY;
 
             if ((settings.CameraMaxBinX > m_MaxBinX) | (settings.CameraMaxBinY > m_MaxBinY))
                 LogNewLine(); // Insert a blank line if required
             if (settings.CameraMaxBinX > m_MaxBinX)
-                LogTestAndMessage("StartExposure", string.Format("WARNING - Conform's configured MaxBinX: {0} is greater than the camera's reported MaxBinX: {1}!", l_MaxBinX, m_MaxBinX));
+                LogTestAndMessage("StartExposure", string.Format("WARNING - Conform's configured MaxBinX: {0} is greater than the camera's reported MaxBinX: {1}!", maxBinX, m_MaxBinX));
             if (settings.CameraMaxBinY > m_MaxBinY)
-                LogTestAndMessage("StartExposure", string.Format("WARNING - Conform's configured MaxBinY: {0} is greater than the camera's reported MaxBinY: {1}!", l_MaxBinY, m_MaxBinY));
+                LogTestAndMessage("StartExposure", string.Format("WARNING - Conform's configured MaxBinY: {0} is greater than the camera's reported MaxBinY: {1}!", maxBinY, m_MaxBinY));
 
             // StartExposure - Confirm that correct operation occurs
-            int l_BinX, l_BinY;
+            int binX, binY;
             if (m_CanAsymmetricBin)
             {
-                for (l_BinY = 1; l_BinY <= l_MaxBinY; l_BinY++)
+                for (binY = 1; binY <= maxBinY; binY++)
                 {
-                    for (l_BinX = 1; l_BinX <= l_MaxBinX; l_BinX++)
+                    for (binX = 1; binX <= maxBinX; binX++)
                     {
-                        CameraExposure($"Take image full frame {l_BinX} x {l_BinY} bin ({m_CameraXSize / l_BinX}) x {m_CameraYSize / l_BinY})", l_BinX, l_BinY, 0, 0, m_CameraXSize / l_BinX, m_CameraYSize / l_BinY, settings.CameraExposureDuration, "");
+                        // Calculate required image size
+                        int xSize = cameraXSize / binX;
+                        int ySize = cameraYSize / binY;
+                        bool constrainedXSize = false;
+                        bool constrainedYSize = false;
+
+                        // Test whether the image size exceeds to configured maximum image dimensions and adjust down if needed
+                        if ((xSize > settings.CameraXMax) & (settings.CameraXMax > 0))
+                        {
+                            constrainedXSize = true;
+                            LogInfo("StartExposure", $" Camera X dimension reduced from {xSize} to {settings.CameraXMax} because of Confirm Universal configuration.");
+                            xSize = settings.CameraXMax;
+                        }
+
+                        if ((ySize > settings.CameraYMax) & (settings.CameraYMax > 0))
+                        {
+                            constrainedYSize = true;
+                            LogInfo("StartExposure", $" Camera Y dimension reduced from {ySize} to {settings.CameraYMax} because of Confirm Universal configuration.");
+                            ySize = settings.CameraYMax;
+                        }
+
+                        CameraExposure($"Taking {(constrainedXSize | constrainedYSize ? "configured size" : "full frame")} image {binX} x {binY} bin " +
+                            $"({xSize}{(constrainedXSize ? "*" : "")} x {ySize}{(constrainedYSize ? "*" : "")}) - {Convert.ToDouble(xSize * ySize) / 1000000.0:0.0} MPix",
+                            binX, binY, 0, 0, xSize, ySize, settings.CameraExposureDuration, "");
+
                         if (cancellationToken.IsCancellationRequested)
                             return;
                     }
                 }
             }
             else
-                for (l_BinX = 1; l_BinX <= l_MaxBinX; l_BinX++)
+                for (binX = 1; binX <= maxBinX; binX++)
                 {
-                    CameraExposure($"Take image full frame {l_BinX} x {l_BinX} bin ({m_CameraXSize / l_BinX} x {m_CameraYSize / l_BinX})", l_BinX, l_BinX, 0, 0, m_CameraXSize / l_BinX, m_CameraYSize / l_BinX, settings.CameraExposureDuration, "");
+                    // Calculate required image size
+                    int xSize = cameraXSize / binX;
+                    int ySize = cameraYSize / binX;
+                    bool constrainedXSize = false;
+                    bool constrainedYSize = false;
+
+                    // Test whether the image size exceeds to configured maximum image dimensions and adjust down if needed
+                    if ((xSize > settings.CameraXMax) & (settings.CameraXMax > 0))
+                    {
+                        constrainedXSize = true;
+                        xSize = settings.CameraXMax;
+                    }
+
+                    if ((ySize > settings.CameraYMax) & (settings.CameraYMax > 0))
+                    {
+                        constrainedYSize = true;
+                        ySize = settings.CameraYMax;
+                    }
+
+                    CameraExposure($"Taking {(constrainedXSize | constrainedYSize ? "configured size" : "full frame")} image {binX} x {binX} bin " +
+                        $"({xSize}{(constrainedXSize ? "*" : "")} x {ySize}{(constrainedYSize ? "*" : "")}) - {Convert.ToDouble(xSize * ySize) / 1000000.0:0.0} MPix",
+                        binX, binX, 0, 0, xSize, ySize, settings.CameraExposureDuration, "");
+
                     if (cancellationToken.IsCancellationRequested)
                         return;
                 }
@@ -2428,34 +2474,34 @@ namespace ConformU
             LogNewLine();
             LogTestOnly("StartExposure error cases");
             // StartExposure - Negative time
-            CameraExposure("", 1, 1, 0, 0, m_CameraXSize, m_CameraYSize, -1.0, "negative duration"); if (cancellationToken.IsCancellationRequested)
+            CameraExposure("", 1, 1, 0, 0, cameraXSize, cameraYSize, -1.0, "negative duration"); if (cancellationToken.IsCancellationRequested)
                 return; // Test that negative duration generates an error
 
             // StartExposure - Invalid Bin values
-            for (l_i = 1; l_i <= l_MaxBinX; l_i++)
+            for (i = 1; i <= maxBinX; i++)
             {
-                for (l_j = 1; l_j <= l_MaxBinY; l_j++)
+                for (j = 1; j <= maxBinY; j++)
                 {
                     if (m_CanAsymmetricBin)
                     {
-                        CameraExposure("", l_i, l_j, 0, 0, System.Convert.ToInt32((m_CameraXSize / (double)l_i) + 1), System.Convert.ToInt32(m_CameraYSize / (double)l_j), 0.1, "X size larger than binned chip size, Bin " + l_i + "x" + l_j); if (cancellationToken.IsCancellationRequested)
+                        CameraExposure("", i, j, 0, 0, System.Convert.ToInt32((cameraXSize / (double)i) + 1), System.Convert.ToInt32(cameraYSize / (double)j), 0.1, "X size larger than binned chip size, Bin " + i + "x" + j); if (cancellationToken.IsCancellationRequested)
                             return; // X size too large for binned size
-                        CameraExposure("", l_i, l_j, 0, 0, System.Convert.ToInt32(m_CameraXSize / (double)l_i), System.Convert.ToInt32((m_CameraYSize / (double)l_j) + 1), 0.1, "Y size larger than binned chip size, Bin " + l_i + "x" + l_j); if (cancellationToken.IsCancellationRequested)
+                        CameraExposure("", i, j, 0, 0, System.Convert.ToInt32(cameraXSize / (double)i), System.Convert.ToInt32((cameraYSize / (double)j) + 1), 0.1, "Y size larger than binned chip size, Bin " + i + "x" + j); if (cancellationToken.IsCancellationRequested)
                             return; // Y size too large for binned size
-                        CameraExposure("", l_i, l_j, System.Convert.ToInt32((m_CameraXSize / (double)l_i) + 1), 0, System.Convert.ToInt32(m_CameraXSize / (double)l_i), System.Convert.ToInt32(m_CameraYSize / (double)l_j), 0.1, "X start outside binned chip size, Bin " + l_i + "x" + l_j); if (cancellationToken.IsCancellationRequested)
+                        CameraExposure("", i, j, System.Convert.ToInt32((cameraXSize / (double)i) + 1), 0, System.Convert.ToInt32(cameraXSize / (double)i), System.Convert.ToInt32(cameraYSize / (double)j), 0.1, "X start outside binned chip size, Bin " + i + "x" + j); if (cancellationToken.IsCancellationRequested)
                             return; // X start outside binned chip dimensions
-                        CameraExposure("", l_i, l_j, 0, System.Convert.ToInt32((m_CameraYSize / (double)l_j) + 1), System.Convert.ToInt32(m_CameraXSize / (double)l_i), System.Convert.ToInt32(m_CameraYSize / (double)l_j), 0.1, "Y start outside binned chip size, Bin " + l_i + "x" + l_j); if (cancellationToken.IsCancellationRequested)
+                        CameraExposure("", i, j, 0, System.Convert.ToInt32((cameraYSize / (double)j) + 1), System.Convert.ToInt32(cameraXSize / (double)i), System.Convert.ToInt32(cameraYSize / (double)j), 0.1, "Y start outside binned chip size, Bin " + i + "x" + j); if (cancellationToken.IsCancellationRequested)
                             return; // Y start outside binned chip dimensions
                     }
-                    else if (l_i == l_j)
+                    else if (i == j)
                     {
-                        CameraExposure("", l_i, l_j, 0, 0, System.Convert.ToInt32((m_CameraXSize / (double)l_i) + 1), System.Convert.ToInt32(m_CameraYSize / (double)l_j), 0.1, "X size larger than binned chip size, Bin " + l_i + "x" + l_j); if (cancellationToken.IsCancellationRequested)
+                        CameraExposure("", i, j, 0, 0, System.Convert.ToInt32((cameraXSize / (double)i) + 1), System.Convert.ToInt32(cameraYSize / (double)j), 0.1, "X size larger than binned chip size, Bin " + i + "x" + j); if (cancellationToken.IsCancellationRequested)
                             return; // X size too large for binned size
-                        CameraExposure("", l_i, l_j, 0, 0, System.Convert.ToInt32(m_CameraXSize / (double)l_i), System.Convert.ToInt32((m_CameraYSize / (double)l_j) + 1), 0.1, "Y size larger than binned chip size, Bin " + l_i + "x" + l_j); if (cancellationToken.IsCancellationRequested)
+                        CameraExposure("", i, j, 0, 0, System.Convert.ToInt32(cameraXSize / (double)i), System.Convert.ToInt32((cameraYSize / (double)j) + 1), 0.1, "Y size larger than binned chip size, Bin " + i + "x" + j); if (cancellationToken.IsCancellationRequested)
                             return; // Y size too large for binned size
-                        CameraExposure("", l_i, l_j, System.Convert.ToInt32((m_CameraXSize / (double)l_i) + 1), 0, System.Convert.ToInt32(m_CameraXSize / (double)l_i), System.Convert.ToInt32(m_CameraYSize / (double)l_j), 0.1, "X start outside binned chip size, Bin " + l_i + "x" + l_j); if (cancellationToken.IsCancellationRequested)
+                        CameraExposure("", i, j, System.Convert.ToInt32((cameraXSize / (double)i) + 1), 0, System.Convert.ToInt32(cameraXSize / (double)i), System.Convert.ToInt32(cameraYSize / (double)j), 0.1, "X start outside binned chip size, Bin " + i + "x" + j); if (cancellationToken.IsCancellationRequested)
                             return; // X start outside binned chip dimensions
-                        CameraExposure("", l_i, l_j, 0, System.Convert.ToInt32((m_CameraYSize / (double)l_j) + 1), System.Convert.ToInt32(m_CameraXSize / (double)l_i), System.Convert.ToInt32(m_CameraYSize / (double)l_j), 0.1, "Y start outside binned chip size, Bin " + l_i + "x" + l_j); if (cancellationToken.IsCancellationRequested)
+                        CameraExposure("", i, j, 0, System.Convert.ToInt32((cameraYSize / (double)j) + 1), System.Convert.ToInt32(cameraXSize / (double)i), System.Convert.ToInt32(cameraYSize / (double)j), 0.1, "Y start outside binned chip size, Bin " + i + "x" + j); if (cancellationToken.IsCancellationRequested)
                             return; // Y start outside binned chip dimensions
                     }
                 }
@@ -2704,12 +2750,8 @@ namespace ConformU
                             }
                             catch (OutOfMemoryException ex)
                             {
-                                if (Environment.Is64BitProcess) // Message when running as a 64bit process
-                                    LogError("ImageArray", $"InsufficientMemoryException - Conform Universal or the device ran out of available memory: {ex.Message}");
-                                else // Message when running as a 32bit process
-                                    LogError("ImageArray", $"InsufficientMemoryException - Conform Universal or the device ran out of available memory.\r\n" +
-                                        new string(' ', 58) +
-                                        $"***** If your camera device supports this, please re-test with the 64bit version of Conform Universal because it has greater memory headroom.");
+                                // Log an error
+                                LogError("ImageArray", $"OutOfMemoryException - Conform Universal or the device ran out of memory: {ex.Message}");
                             }
                             catch (Exception ex)
                             {
@@ -2779,12 +2821,8 @@ namespace ConformU
                                 }
                                 catch (OutOfMemoryException ex)
                                 {
-                                    if (Environment.Is64BitProcess) // Message when running as a 64bit process
-                                        LogError("ImageArrayVariant", $"InsufficientMemoryException - Conform Universal or the device ran out of available memory: {ex.Message}");
-                                    else // Message when running as a 32bit process
-                                        LogError("ImageArrayVariant", $"InsufficientMemoryException - Conform Universal or the device ran out of available memory.\r\n" +
-                                            new string(' ', 58) +
-                                            $"***** If your camera device supports this, please re-test with the 64bit version of Conform Universal because it has greater memory headroom.");
+                                    // Log an error
+                                    LogError("ImageArray", $"OutOfMemoryException - Conform Universal or the device ran out of memory: {ex.Message}");
                                 }
                                 catch (Exception ex)
                                 {
