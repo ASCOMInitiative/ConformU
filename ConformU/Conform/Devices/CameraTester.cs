@@ -2705,9 +2705,9 @@ namespace ConformU
                             catch (OutOfMemoryException ex)
                             {
                                 if (Environment.Is64BitProcess) // Message when running as a 64bit process
-                                    LogError("ImageArray", $"InsufficientMemoryException - The application ran out of available memory: {ex.Message}");
+                                    LogError("ImageArray", $"InsufficientMemoryException - Conform Universal or the device ran out of available memory: {ex.Message}");
                                 else // Message when running as a 32bit process
-                                    LogError("ImageArray", $"InsufficientMemoryException - The application ran out of available memory.\r\n" +
+                                    LogError("ImageArray", $"InsufficientMemoryException - Conform Universal or the device ran out of available memory.\r\n" +
                                         new string(' ', 58) +
                                         $"***** If your camera device supports this, please re-test with the 64bit version of Conform Universal because it has greater memory headroom.");
                             }
