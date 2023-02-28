@@ -2420,14 +2420,14 @@ namespace ConformU
                         if ((xSize > settings.CameraXMax) & (settings.CameraXMax > 0))
                         {
                             constrainedXSize = true;
-                            LogInfo("StartExposure", $"Camera X dimension reduced from {xSize} to {settings.CameraXMax} because of Confirm Universal configuration.");
+                            LogTestAndMessage("StartExposure", $"Camera X dimension reduced from {xSize} to {settings.CameraXMax} by Conform configuration.");
                             xSize = settings.CameraXMax;
                         }
 
                         if ((ySize > settings.CameraYMax) & (settings.CameraYMax > 0))
                         {
                             constrainedYSize = true;
-                            LogInfo("StartExposure", $"Camera Y dimension reduced from {ySize} to {settings.CameraYMax} because of Confirm Universal configuration.");
+                            LogTestAndMessage("StartExposure", $"Camera Y dimension reduced from {ySize} to {settings.CameraYMax} by Conform configuration.");
                             ySize = settings.CameraYMax;
                         }
 
@@ -2453,14 +2453,14 @@ namespace ConformU
                     if ((xSize > settings.CameraXMax) & (settings.CameraXMax > 0))
                     {
                         constrainedXSize = true;
-                        LogInfo("StartExposure", $"Camera X dimension reduced from {xSize} to {settings.CameraXMax} because of Confirm Universal configuration.");
+                        LogTestAndMessage("StartExposure", $"Camera X dimension reduced from {xSize} to {settings.CameraXMax} by Conform configuration.");
                         xSize = settings.CameraXMax;
                     }
 
                     if ((ySize > settings.CameraYMax) & (settings.CameraYMax > 0))
                     {
                         constrainedYSize = true;
-                        LogInfo("StartExposure", $"Camera Y dimension reduced from {ySize} to {settings.CameraYMax} because of Confirm Universal configuration.");
+                        LogTestAndMessage("StartExposure", $"Camera Y dimension reduced from {ySize} to {settings.CameraYMax} by Conform configuration.");
                         ySize = settings.CameraYMax;
                     }
 
