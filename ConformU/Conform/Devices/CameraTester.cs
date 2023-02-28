@@ -2824,7 +2824,7 @@ namespace ConformU
                                 catch (OutOfMemoryException ex)
                                 {
                                     // Log an error
-                                    LogError("ImageArray", $"OutOfMemoryException - Conform Universal or the device ran out of memory: {ex.Message}");
+                                    LogError("ImageArrayVariant", $"OutOfMemoryException - Conform Universal or the device ran out of memory: {ex.Message}");
                                 }
                                 catch (Exception ex)
                                 {
