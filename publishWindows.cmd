@@ -21,9 +21,12 @@ echo *** Publishing Windows 32bit
 dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r win-x86 --framework net7.0-windows --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=false -o ./publish/ConformU86
 echo *** Completed 32bit publish
 
+editbin /LARGEADDRESSAWARE ./publish/ConformU86/Conformu.exe
+echo *** Completed setting large address aware flag on 32bit EXE
+
 echo *** Creating Windows installer
 cd WindowsInstaller
-"C:\Program Files (x86)\Inno Script Studio\isstudio.exe" -compile "J:\ConformU\WindowsInstaller\ConformU.iss"
+"C:\Program Files (x86)\Inno Script Studio\isstudio.exe" -compile "J:\ConformU\WindowsInstaller\conformu.iss"
 cd ..
 
 echo *** Builds complete
