@@ -2419,7 +2419,7 @@ namespace ConformU
             else
                 for (l_BinX = 1; l_BinX <= l_MaxBinX; l_BinX++)
                 {
-                    CameraExposure($"Take image full frame {l_BinX} x {l_BinX} bin ({m_CameraXSize / l_BinX}) x {m_CameraYSize / l_BinX})", l_BinX, l_BinX, 0, 0, m_CameraXSize / l_BinX, m_CameraYSize / l_BinX, settings.CameraExposureDuration, "");
+                    CameraExposure($"Take image full frame {l_BinX} x {l_BinX} bin ({m_CameraXSize / l_BinX} x {m_CameraYSize / l_BinX})", l_BinX, l_BinX, 0, 0, m_CameraXSize / l_BinX, m_CameraYSize / l_BinX, settings.CameraExposureDuration, "");
                     if (cancellationToken.IsCancellationRequested)
                         return;
                 }
