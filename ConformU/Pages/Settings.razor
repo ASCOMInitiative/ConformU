@@ -419,11 +419,11 @@
 
             <div class="row" style="margin-top: 20px">
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraXMax" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraXMax)) />
-                <p style="margin-left: 20px;margin-top: 5px;">Max image size for take image tests (Zero uses the cameras configured value.)</p>
+                <p style="margin-left: 20px;margin-top: 5px;">Maximum image X size for StartExposure tests (Set to zero to use the camera's CameraXSize value.)</p>
             </div>
             <div class="row">
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraYMax" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraYMax)) />
-                <p style="margin-left: 20px;margin-top: 5px;">Max image size for take image tests (Zero uses the cameras configured value.)</p>
+                <p style="margin-left: 20px;margin-top: 5px;">Maximum image Y size for StartExposure tests (Set to zero to use the camera's CameraYSize value.)</p>
             </div>
 
         </RadzenTabsItem>
