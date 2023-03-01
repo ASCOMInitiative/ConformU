@@ -31,6 +31,9 @@ namespace ConformU
         internal const int DEVICE_DESTROY_WAIT = 500; // Time to wait after destroying a device before continuing
         internal const int WAITFOR_UPDATE_INTERVAL = 500; // Time in milliseconds between updates in the WaitFor method
 
+        // Class not registered COM exception error number
+        internal const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
+
         #endregion
 
         internal int g_InterfaceVersion; // Variable to held interface version of the current device
@@ -666,7 +669,7 @@ namespace ConformU
             LogTestOnly($"ASCOM Universal Device Conformance Checker Version {this.GetType().Assembly.GetName().Version}, Build time: {lastModifiedTime:ddd dd MMMM yyyy HH:mm:ss}");
             LogNewLine(); // Blank line
 
-            LogTestOnly($"Operating system is {(Environment.Is64BitOperatingSystem?"64bit":"32bit")}, Application is {(Environment.Is64BitProcess? "64bit" : "32bit")}.");
+            LogTestOnly($"Operating system is {(Environment.Is64BitOperatingSystem ? "64bit" : "32bit")}, Application is {(Environment.Is64BitProcess ? "64bit" : "32bit")}.");
             LogNewLine(); // Blank line
 
             switch (settings.DeviceTechnology)

@@ -284,14 +284,18 @@ namespace ConformU
                 baseClassDevice = m_Camera; // Assign the driver to the base class
 
                 LogInfo("CreateDevice", "Successfully created driver");
+            }
+            catch (COMException exCom) when (exCom.ErrorCode == REGDB_E_CLASSNOTREG)
+            {
+                LogDebug("CreateDevice", $"Exception thrown: {exCom.Message}\r\n{exCom}");
 
+                throw new Exception($"The driver is not registered as a {(Environment.Is64BitProcess ? "64bit" : "32bit")} driver");
             }
             catch (Exception ex)
             {
-                LogDebug("CreateDevice", "Exception thrown: " + ex.Message);
+                LogDebug("CreateDevice", $"Exception thrown: {ex.Message}\r\n{ex}");
                 throw; // Re throw exception 
             }
-
         }
 
         public override bool Connected

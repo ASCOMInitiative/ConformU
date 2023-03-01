@@ -5,6 +5,7 @@ using ASCOM.Common.DeviceInterfaces;
 using ASCOM.Tools;
 using System;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace ConformU
@@ -159,15 +160,18 @@ namespace ConformU
                     default:
                         throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
+            }
+            catch (COMException exCom) when (exCom.ErrorCode == REGDB_E_CLASSNOTREG)
+            {
+                LogDebug("CreateDevice", $"Exception thrown: {exCom.Message}\r\n{exCom}");
 
-
+                throw new Exception($"The driver is not registered as a {(Environment.Is64BitProcess ? "64bit" : "32bit")} driver");
             }
             catch (Exception ex)
             {
-                LogInfo("CreateDevice", "Exception thrown: " + ex.Message);
+                LogDebug("CreateDevice", $"Exception thrown: {ex.Message}\r\n{ex}");
                 throw; // Re throw exception 
             }
-
         }
 
         public override bool Connected
