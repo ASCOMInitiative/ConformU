@@ -556,7 +556,7 @@ namespace ConformU
             DateTime l_StartTime;
             l_StartTime = DateTime.Now;
 
-            WaitWhile("", () => { return domeDevice.Slewing; }, 500, Convert.ToInt32(p_TimeOut), reportingFunction);
+            WaitWhile(GetAction(), () => { return domeDevice.Slewing; }, 500, Convert.ToInt32(p_TimeOut), reportingFunction);
 
             SetStatus("");
             if ((DateTime.Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut))
