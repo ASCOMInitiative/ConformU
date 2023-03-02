@@ -24,11 +24,13 @@ namespace ConformU
 
         const int MAX_BIN_X = 16; // Values of MaxBin above which warnings are given. Implemented to warn developers if they are returning "silly" values
         const int MAX_BIN_Y = 16;
-
-        const double MIN_CAMERA_SETPOINT_TEMPERATURE = -280.0; // Value below which CCD temperatures will be flagged as "silly" values
-        const double MAX_CAMERA_SETPOINT_TEMPERATURE = 100.0; // Value above which CCD setpoint temperatures will be flagged as "silly" values
-        const double MAX_CAMERA_REPORTED_TEMPERATURE = 1000.0; // Value above which the CCD reported temperature will be flagged as a "silly" value. It is higher than the SetPoint temperature because this value is not specified in the Interface Standard.
-        const double CAMERA_SETPOINT_TEST_INCREMENT = 0.000000001; // Value to add to MAX_CAMERA_SETPOINT_TEMPERATURE to test whether an exception is thrown at this setpoint
+        const double ABSOLUTE_ZERO_TEMPERATURE = -273.15; // Absolute zero (Celsius)
+        const double BELOW_ABSOLUTE_ZERO_TEMPERATURE = -273.25; // Value (Celsius) below which CCD temperatures will be flagged as "silly", "un-physical" values.
+        const double CAMERA_SETPOINT_INCREMENT = 5.0; // Amount by which the test temperature is decremented or incremented when finding the lowest and highest supported set points.
+        const double BOILING_POINT_TEMPERATURE = 100.0; // Value above which CCD set point temperatures will be flagged as "silly" values
+        const double MAX_CAMERA_REPORTED_TEMPERATURE = 1000.0; // Value above which the CCD reported temperature will be flagged as a "silly" value. It is higher than the MAX_CAMERA_SETPOINT_TEMPERATURE temperature because this value is not specified in the Interface Standard.
+        const double CAMERA_LOW_SETPOINT_START_TEMPERATURE = 15.0; // Start temperature for determining minimum set point value.
+        const double CAMERA_HIGH_SETPOINT_START_TEMPERATURE = 0.0; // Start temperature for determining maximum set point value.
 
         // Camera variables
         private bool m_CanAbortExposure, m_CanAsymmetricBin, m_CanGetCoolerPower, m_CanSetCCDTemperature, m_CanStopExposure, m_CanFastReadout;
@@ -302,12 +304,14 @@ namespace ConformU
         {
             get
             {
-                if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get Connected");
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("ConformanceCheck", "About to get Connected");
                 return m_Camera.Connected;
             }
             set
             {
-                if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to set Connected");
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("ConformanceCheck", "About to set Connected");
                 m_Camera.Connected = value;
 
             }
@@ -684,7 +688,7 @@ namespace ConformU
             cameraXSize = CameraPropertyTestInteger(CamPropertyType.CameraXSize, "CameraXSize", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
             cameraYSize = CameraPropertyTestInteger(CamPropertyType.CameraYSize, "CameraYSize", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
 
-            CameraPropertyTestDouble(CamPropertyType.CCDTemperature, "CCDTemperature", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyTestDouble(CamPropertyType.CCDTemperature, "CCDTemperature", ABSOLUTE_ZERO_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
             m_CoolerOn = CameraPropertyTestBoolean(CamPropertyType.CoolerOn, "CoolerOn Read", false); if (cancellationToken.IsCancellationRequested) return;
 
             // Write CoolerOn
@@ -741,7 +745,7 @@ namespace ConformU
             CameraPropertyTestDouble(CamPropertyType.ElectronsPerADU, "ElectronsPerADU", 0.00001, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyTestDouble(CamPropertyType.FullWellCapacity, "FullWellCapacity", 0.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyTestBoolean(CamPropertyType.HasShutter, "HasShutter", false); if (cancellationToken.IsCancellationRequested) return;
-            CameraPropertyTestDouble(CamPropertyType.HeatSinkTemperature, "HeatSinkTemperature", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyTestDouble(CamPropertyType.HeatSinkTemperature, "HeatSinkTemperature", ABSOLUTE_ZERO_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
 
             m_ImageReady = CameraPropertyTestBoolean(CamPropertyType.ImageReady, "ImageReady", false); if (cancellationToken.IsCancellationRequested) return;
             if (m_ImageReady & settings.CameraFirstUseTests) // Issue this warning if configured to do so
@@ -757,7 +761,8 @@ namespace ConformU
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
                     m_ImageArray = (Array)m_Camera.ImageArray;
                     if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
                     {
@@ -785,7 +790,8 @@ namespace ConformU
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
                     m_ImageArray = (Array)m_Camera.ImageArray;
                     LogIssue("ImageArray", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                 }
@@ -812,7 +818,8 @@ namespace ConformU
                 {
                     try
                     {
-                        if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
+                        if (settings.DisplayMethodCalls)
+                            LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
                         m_ImageArrayVariant = (Array)m_Camera.ImageArrayVariant;
 
                         if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
@@ -842,7 +849,8 @@ namespace ConformU
                 {
                     try
                     {
-                        if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
+                        if (settings.DisplayMethodCalls)
+                            LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
                         m_ImageArrayVariant = (Array)m_Camera.ImageArrayVariant;
                         LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not generated an exception");
                     }
@@ -878,7 +886,7 @@ namespace ConformU
             CameraPropertyTestDouble(CamPropertyType.PixelSizeX, "PixelSizeX", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyTestDouble(CamPropertyType.PixelSizeY, "PixelSizeY", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
 
-            m_SetCCDTemperature = CameraPropertyTestDouble(CamPropertyType.SetCCDTemperature, "SetCCDTemperature Read", MIN_CAMERA_SETPOINT_TEMPERATURE, MAX_CAMERA_SETPOINT_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
+            m_SetCCDTemperature = CameraPropertyTestDouble(CamPropertyType.SetCCDTemperature, "SetCCDTemperature Read", ABSOLUTE_ZERO_TEMPERATURE, BOILING_POINT_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
 
             if (m_CanSetCCDTemperature)
             {
@@ -890,92 +898,84 @@ namespace ConformU
                     LogOK("SetCCDTemperature Write", "Successfully wrote 0.0");
 
                     // Execution only gets here if the CCD temperature can be set successfully
-                    bool l_ExceptionGenerated;
-                    double l_SetPoint;
+                    bool exceptionGenerated;
+                    double setPoint;
 
-                    // Find low setpoint at which an exception is generated, stop at -280 as this is unphysical
-                    l_ExceptionGenerated = false;
-                    l_SetPoint = -0.0;
-                    LogTestAndMessage("ConformanceCheck", "About to set SetCCDTemperature multiple times...");
+                    // Find low set-point at which an exception is generated, stop at CAMERA_SETPOINT_UNPHYSICAL_TEMPERATURE because this is unphysical
+                    exceptionGenerated = false;
+                    setPoint = CAMERA_LOW_SETPOINT_START_TEMPERATURE;
+
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("ConformanceCheck", "About to set SetCCDTemperature multiple times...");
+
+                    // Loop downward in CAMERA_SETPOINT_INCREMENT degree temperature steps to find the maximum temperature that can be set
                     do
                     {
                         try
                         {
-                            l_SetPoint -= 5;
-                            if (settings.DisplayMethodCalls)
-                                m_Camera.SetCCDTemperature = l_SetPoint;
+                            // Calculate the new test set point ensuring that the value is no lower than absolute zero
+                            setPoint -= CAMERA_SETPOINT_INCREMENT;
+
+                            // Set the new temperature set point or a value just below absolute zero on the last cycle
+                            if (setPoint >= ABSOLUTE_ZERO_TEMPERATURE) // Normal case so use the calculated value
+                            {
+                                m_Camera.SetCCDTemperature = setPoint;
+                            }
+                            else // The new set point is below absolute zero so use the below absolute zero test value instead of the calculated set point value.
+                            {
+                                m_Camera.SetCCDTemperature = BELOW_ABSOLUTE_ZERO_TEMPERATURE;
+                            }
                         }
                         catch (Exception)
                         {
-                            l_ExceptionGenerated = true;
+                            exceptionGenerated = true;
                         }
                     }
-                    while (!l_ExceptionGenerated & (l_SetPoint > MIN_CAMERA_SETPOINT_TEMPERATURE))// Reached lower limit so exit loop
-    ;
+                    while (!exceptionGenerated & (setPoint >= ABSOLUTE_ZERO_TEMPERATURE)); // Reached the camera's lower limit or exceeded absolute zero 
 
-                    if (!l_ExceptionGenerated & (l_SetPoint == MIN_CAMERA_SETPOINT_TEMPERATURE))
+                    // Check whether we found a valid set point or whether the lower test limit caused the test to stop
+                    if (!exceptionGenerated) // We can set temperature below absolute zero 
                     {
-                        // Now test whether it is possible to set the temperature just below the minimum setpoint, which should result in an exception if all is well
-                        l_ExceptionGenerated = false;
-                        try
-                        {
-                            m_Camera.SetCCDTemperature = MIN_CAMERA_SETPOINT_TEMPERATURE - CAMERA_SETPOINT_TEST_INCREMENT;
-                        }
-                        catch (Exception)
-                        {
-                            l_ExceptionGenerated = true;
-                        }// Reached lower limit
-
-                        if (l_ExceptionGenerated)
-                            LogInfo("SetCCDTemperature Write", $"Setpoint can be set to {MIN_CAMERA_SETPOINT_TEMPERATURE} degrees");
-                        else
-                            LogIssue("SetCCDTemperature Write", $"Setpoint can be set below {MIN_CAMERA_SETPOINT_TEMPERATURE} degrees, which is below absolute zero!");
+                        LogIssue("SetCCDTemperature Write", $"Set point can be set to {BELOW_ABSOLUTE_ZERO_TEMPERATURE} degrees, which is below absolute zero!");
                     }
-                    else
-                        LogInfo("SetCCDTemperature Write", $"Setpoint lower limit found in the range {l_SetPoint + 5.0} to {l_SetPoint + 0.001} degrees");
+                    else // We found the camera's lowest settable temperature
+                    {
+                        if (setPoint >= ABSOLUTE_ZERO_TEMPERATURE) // Normal case
+                            LogInfo("SetCCDTemperature Write", $"Set point lower limit found in the range {setPoint + 5.0:+0.00;-0.00;+0.00} to {setPoint + 0.01:+0.00;-0.00} degrees");
+                        else // The new set point is below absolute zero 
+                            LogInfo("SetCCDTemperature Write", $"Set point lower limit found in the range {setPoint + 5.0:+0.00;-0.00;+0.00} to {BELOW_ABSOLUTE_ZERO_TEMPERATURE:+0.00;-0.00} degrees");
+                    }
 
-                    // Find high setpoint at which an exception is generated, stop at MAX_CAMERA_SETPOINT_TEMPERATURE as this is a suitably high value
-                    l_ExceptionGenerated = false;
-                    l_SetPoint = 0.0; // Start at 0.0C
+                    // Find high set point at which an exception is generated, stop at MAX_CAMERA_SETPOINT_TEMPERATURE as this is a suitably high value
+                    exceptionGenerated = false;
+                    setPoint = CAMERA_HIGH_SETPOINT_START_TEMPERATURE; // Start at 0.0C
 
-                    // Loop upward in 5 degree temperature steps to find the maximum temperature that can be set
-                    LogTestAndMessage("ConformanceCheck", "About to set SetCCDTemperature multiple times...");
+                    // Loop upward in CAMERA_SETPOINT_INCREMENT degree temperature steps to find the maximum temperature that can be set
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("ConformanceCheck", "About to set SetCCDTemperature multiple times...");
                     do
                     {
                         try
                         {
-                            l_SetPoint += 5.0;
-                            m_Camera.SetCCDTemperature = l_SetPoint;
+                            setPoint += CAMERA_SETPOINT_INCREMENT;
+                            m_Camera.SetCCDTemperature = setPoint;
                         }
                         catch (Exception)
                         {
-                            l_ExceptionGenerated = true;
+                            exceptionGenerated = true;
                         }
                     }
-                    while (!l_ExceptionGenerated & (l_SetPoint < MAX_CAMERA_SETPOINT_TEMPERATURE));// Reached upper limit so exit loop
+                    while (!exceptionGenerated & (setPoint < BOILING_POINT_TEMPERATURE));// Reached upper limit so exit loop
 
-                    if (!l_ExceptionGenerated & (l_SetPoint == MAX_CAMERA_SETPOINT_TEMPERATURE))
+                    // Check whether we found a valid set point or whether the higher test limit caused the test to stop
+                    if (!exceptionGenerated) // We hit the higher temperature limit
                     {
-                        // Now test whether it is possible to set the temperature just above the maximum setpoint, which should result in an exception if all is well
-                        l_ExceptionGenerated = false;
-                        try
-                        {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to set SetCCDTemperature");
-                            m_Camera.SetCCDTemperature = MAX_CAMERA_SETPOINT_TEMPERATURE + CAMERA_SETPOINT_TEST_INCREMENT;
-                        }
-                        catch (Exception)
-                        {
-                            l_ExceptionGenerated = true;
-                        }// Reached upper limit
-
-                        if (l_ExceptionGenerated)
-                            LogInfo("SetCCDTemperature Write", $"Setpoint can be set to {MAX_CAMERA_SETPOINT_TEMPERATURE} degrees");
-                        else
-                            LogIssue("SetCCDTemperature Write", $"Setpoint can be set in excess of {MAX_CAMERA_SETPOINT_TEMPERATURE} degrees");
+                        LogIssue("SetCCDTemperature Write", $"The set point can be set to {BOILING_POINT_TEMPERATURE} degrees Celsius!");
                     }
-                    else
-                        LogInfo("SetCCDTemperature Write", $"Setpoint upper limit found in the range {l_SetPoint - 5.0} to {l_SetPoint - 0.001} degrees");
+                    else // We found a limit below 100C.
+                    {
+                        LogInfo("SetCCDTemperature Write", $"Set point upper limit found in the range {setPoint - 5.0:+0.00;-0.00} to {setPoint - 0.01:+0.00;-0.00} degrees");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -2581,30 +2581,27 @@ namespace ConformU
                                 SetStatus("Waiting for exposure to start");
 
                                 // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
-                                if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
+                                if (settings.DisplayMethodCalls)
+                                    LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
                                 imageReadyTooEarly = Convert.ToBoolean(m_Camera.ImageReady);
 
                                 // Wait for exposing state
-                                if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
-                                //do
-                                //{
-                                //    WaitFor(CAMERA_SLEEP_TIME);
-                                //    if (cancellationToken.IsCancellationRequested)
-                                //        return;
-                                //}
-                                //while ((m_Camera.CameraState != CameraState.Exposing) & (m_Camera.CameraState != CameraState.Error));
+                                if (settings.DisplayMethodCalls)
+                                    LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
                                 Stopwatch sw = Stopwatch.StartNew();
-                                WaitWhile("", () => { return (m_Camera.CameraState != CameraState.Exposing) & (m_Camera.CameraState != CameraState.Error); }, 500, Convert.ToInt32(p_Duration + 2), () => { return $"{sw.Elapsed.TotalSeconds:0.0} / {p_Duration:0.0}"; });
+                                WaitWhile(GetAction(), () => { return (m_Camera.CameraState != CameraState.Exposing) & (m_Camera.CameraState != CameraState.Error); }, 500, Convert.ToInt32(p_Duration + 2), () => { return $"{sw.Elapsed.TotalSeconds:0.0} / {p_Duration:0.0}"; });
 
                                 // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
-                                if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
+                                if (settings.DisplayMethodCalls)
+                                    LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
                                 imageReadyTooEarly = m_Camera.ImageReady;
 
                                 // Wait for the exposing state to finish
                                 l_StartTime = DateTime.Now;
                                 l_StartTimeUTC = DateTime.UtcNow;
                                 SetAction($"Waiting for exposure to complete");
-                                if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
+                                if (settings.DisplayMethodCalls)
+                                    LogTestAndMessage("ConformanceCheck", "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
 
                                 // Start the loop timing stopwatch
                                 sw.Restart();
@@ -2674,7 +2671,8 @@ namespace ConformU
                                 // Wait for camera to become idle
                                 l_EndTime = DateTime.Now;
                                 SetAction("Waiting for camera idle state, reading/downloading image");
-                                if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
+                                if (settings.DisplayMethodCalls)
+                                    LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
                                 do
                                 {
                                     WaitFor(CAMERA_SLEEP_TIME);
@@ -2684,7 +2682,8 @@ namespace ConformU
 
                                 // Wait for image to become ready
                                 SetAction("Waiting for image ready");
-                                if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
+                                if (settings.DisplayMethodCalls)
+                                    LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
                                 do
                                 {
                                     WaitFor(CAMERA_SLEEP_TIME);
@@ -2692,7 +2691,8 @@ namespace ConformU
                                 }
                                 while (!m_Camera.ImageReady & (m_Camera.CameraState != CameraState.Error));
 
-                                if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
+                                if (settings.DisplayMethodCalls)
+                                    LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
                                 if (m_Camera.ImageReady)
                                 {
                                     LogOK("StartExposure", "Asynchronous exposure found OK: " + p_Duration + " seconds");
@@ -2839,7 +2839,6 @@ namespace ConformU
                             // Release memory currently consumed by images
                             SetAction("Releasing memory");
                             ReleaseMemory();
-
                         }
                         else
                         {
@@ -2865,18 +2864,25 @@ namespace ConformU
                             }
                         }
                     }
+                    catch (TimeoutException)
+                    {
+                        LogIssue("StartExposure", $"The StartExposure {p_NumX} x {p_NumY} (Bin {p_BinX} x {p_BinY}) method timed out after {p_Duration + WAITWHILE_EXTRA_WAIT_TIME} seconds.");
+                    }
                     catch (Exception ex)
                     {
                         if (p_ExpectedErrorMessage != "")
                             LogOK("StartExposure", "Exception correctly generated for " + p_ExpectedErrorMessage);
                         else
-                            LogIssue("StartExposure", "Exception generated when exposing, further StartExposure tests skipped - " + ex.ToString());
+                        {
+                            LogDebug("StartExposure", $"Exception: {ex}");
+                            LogIssue("StartExposure", $"Exception generated when exposing: {ex.Message}");
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogInfo("StartExposure", "Exception: " + ex.Message);
-                    LogIssue("StartExposure", "Exception generated when setting camera properties, further StartExposure tests skipped");
+                    LogDebug("StartExposure", "Exception: " + ex.ToString());
+                    LogIssue("StartExposure", $"Exception generated when setting camera properties: {ex.Message}");
                 }
             }
             catch (COMException ex)
@@ -2923,7 +2929,8 @@ namespace ConformU
             // LastExposureDuration
             try
             {
-                if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get LastExposureDuration");
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("ConformanceCheck", "About to get LastExposureDuration");
                 m_LastExposureDuration = m_Camera.LastExposureDuration;
                 if ((Math.Abs(m_LastExposureDuration - p_Duration) / p_Duration) < 0.02)
                     LogOK("LastExposureDuration", "LastExposureDuration is: " + m_LastExposureDuration + " seconds");
@@ -2938,7 +2945,8 @@ namespace ConformU
             // LastExposurestartTime
             try // Confirm that it can be read
             {
-                if (settings.DisplayMethodCalls) LogTestAndMessage("ConformanceCheck", "About to get LastExposureStartTime");
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("ConformanceCheck", "About to get LastExposureStartTime");
                 m_LastExposureStartTime = m_Camera.LastExposureStartTime;
                 int l_i;
                 // Confirm that the format is as expected
@@ -3051,63 +3059,70 @@ namespace ConformU
                 LogTestAndMessage("ConformanceCheck", $"About to call PulseGuide - {p_Direction}");
             m_Camera.PulseGuide(p_Direction, CAMERA_PULSE_DURATION); // Start a 2 second pulse
             l_EndTime = DateTime.Now;
-
-            if (m_IsPulseGuidingSupported)
+            try
             {
-                if (l_EndTime.Subtract(l_StartTime).TotalMilliseconds < (CAMERA_PULSE_DURATION - 500))
+                if (m_IsPulseGuidingSupported)
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get IsPulseGuiding");
-                    if (m_Camera.IsPulseGuiding)
+                    if (l_EndTime.Subtract(l_StartTime).TotalMilliseconds < (CAMERA_PULSE_DURATION - 500))
                     {
                         if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to get IsPulseGuiding multiple times");
-                        Stopwatch sw = Stopwatch.StartNew();
-                        WaitWhile($"Guiding {p_Direction}", () => { return m_Camera.IsPulseGuiding; }, 500, 3, () => { return $"{sw.Elapsed.TotalSeconds:0.0} / {CAMERA_PULSE_DURATION / 1000:0.0} seconds"; });
+                            LogTestAndMessage("ConformanceCheck", "About to get IsPulseGuiding");
+                        if (m_Camera.IsPulseGuiding)
+                        {
+                            if (settings.DisplayMethodCalls)
+                                LogTestAndMessage("ConformanceCheck", "About to get IsPulseGuiding multiple times");
+                            Stopwatch sw = Stopwatch.StartNew();
+                            WaitWhile($"Guiding {p_Direction}", () => { return m_Camera.IsPulseGuiding; }, 500, 3, () => { return $"{sw.Elapsed.TotalSeconds:0.0} / {CAMERA_PULSE_DURATION / 1000:0.0} seconds"; });
 
+                            if (settings.DisplayMethodCalls)
+                                LogTestAndMessage("ConformanceCheck", "About to get IsPulseGuiding");
+                            if (!m_Camera.IsPulseGuiding)
+                                LogOK("PulseGuide " + p_Direction.ToString(), "Asynchronous pulse guide found OK");
+                            else
+                                LogIssue("PulseGuide " + p_Direction.ToString(), "Asynchronous pulse guide expected but IsPulseGuiding is TRUE beyond expected time of 2 seconds");
+                        }
+                        else
+                            LogIssue("PulseGuide " + p_Direction.ToString(), "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE");
+                    }
+                    else
+                    {
                         if (settings.DisplayMethodCalls)
                             LogTestAndMessage("ConformanceCheck", "About to get IsPulseGuiding");
                         if (!m_Camera.IsPulseGuiding)
-                            LogOK("PulseGuide " + p_Direction.ToString(), "Asynchronous pulse guide found OK");
+                            LogOK("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide found OK");
                         else
-                            LogIssue("PulseGuide " + p_Direction.ToString(), "Asynchronous pulse guide expected but IsPulseGuiding is TRUE beyond expected time of 2 seconds");
+                            LogIssue("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE");
                     }
-                    else
-                        LogIssue("PulseGuide " + p_Direction.ToString(), "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE");
                 }
                 else
-                {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get IsPulseGuiding");
-                    if (!m_Camera.IsPulseGuiding)
-                        LogOK("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide found OK");
-                    else
-                        LogIssue("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE");
-                }
+                    switch (l_EndTime.Subtract(l_StartTime).TotalMilliseconds - CAMERA_PULSE_DURATION)
+                    {
+                        case object _ when l_EndTime.Subtract(l_StartTime).TotalMilliseconds - CAMERA_PULSE_DURATION > CAMERA_PULSE_TOLERANCE // Duration was more than 0.5 seconds longer than expected
+                       :
+                            {
+                                LogIssue("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide longer than expected " + (CAMERA_PULSE_DURATION) / (double)1000 + " seconds: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
+                                break;
+                            }
+
+                        case object _ when l_EndTime.Subtract(l_StartTime).TotalMilliseconds - CAMERA_PULSE_DURATION < 20 // Duration was more than 20ms shorter than expected
+                 :
+                            {
+                                LogIssue("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide shorter than expected " + (CAMERA_PULSE_DURATION) / (double)1000 + " seconds: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
+                                break;
+                            }
+
+                        default:
+                            {
+                                LogOK("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide found OK: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
+                                break;
+                            }
+                    }
+
             }
-            else
-                switch (l_EndTime.Subtract(l_StartTime).TotalMilliseconds - CAMERA_PULSE_DURATION)
-                {
-                    case object _ when l_EndTime.Subtract(l_StartTime).TotalMilliseconds - CAMERA_PULSE_DURATION > CAMERA_PULSE_TOLERANCE // Duration was more than 0.5 seconds longer than expected
-                   :
-                        {
-                            LogIssue("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide longer than expected " + (CAMERA_PULSE_DURATION) / (double)1000 + " seconds: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
-                            break;
-                        }
-
-                    case object _ when l_EndTime.Subtract(l_StartTime).TotalMilliseconds - CAMERA_PULSE_DURATION < 20 // Duration was more than 20ms shorter than expected
-             :
-                        {
-                            LogIssue("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide shorter than expected " + (CAMERA_PULSE_DURATION) / (double)1000 + " seconds: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
-                            break;
-                        }
-
-                    default:
-                        {
-                            LogOK("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide found OK: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
-                            break;
-                        }
-                }
+            catch (TimeoutException)
+            {
+                LogIssue("PulseGuide " + p_Direction.ToString(), $"Timed out waiting for IsPulseGuiding to go false. It should have done this in {Convert.ToDouble(CAMERA_PULSE_DURATION) / 1000.0:0.0} seconds");
+            }
         }
 
         public override void CheckPerformance()
@@ -3302,10 +3317,10 @@ namespace ConformU
                 {
                 }
             }
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set SetCCDTemperature");
             if (m_CanSetCCDTemperature)
             {
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("ConformanceCheck", "About to set SetCCDTemperature");
                 try
                 {
                     m_Camera.SetCCDTemperature = m_SetCCDTemperature;

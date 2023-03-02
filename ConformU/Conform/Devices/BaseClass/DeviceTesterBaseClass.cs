@@ -30,6 +30,7 @@ namespace ConformU
         internal const int CAMERA_SLEEP_TIME = 10; // Loop time for testing whether camera events have completed
         internal const int DEVICE_DESTROY_WAIT = 500; // Time to wait after destroying a device before continuing
         internal const int WAITFOR_UPDATE_INTERVAL = 500; // Time in milliseconds between updates in the WaitFor method
+        internal const int WAITWHILE_EXTRA_WAIT_TIME = 2; // Additional time to wait after the expected run time before raising a TimeoutException (seconds)
 
         // Class not registered COM exception error number
         internal const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
@@ -775,6 +776,11 @@ namespace ConformU
             SetFullStatus(test, testAction, testStatus);
         }
 
+        public string GetAction()
+        {
+            return testAction;
+        }
+
         public void SetAction(string action)
         {
             this.testAction = action;
@@ -856,8 +862,8 @@ namespace ConformU
             // Validate the supplied poll interval
             if (pollInterval < 100) throw new InvalidValueException($"The poll interval must be >=100ms: {pollInterval}");
 
-            // Set the status message action field to the supplied action name
-            if (!string.IsNullOrEmpty(actionName))
+            // Set the status message action field to the supplied action name if it has not already been set
+            if ((!string.IsNullOrEmpty(actionName)) & (actionName != GetAction()))
             {
                 SetAction(actionName);
             }
@@ -870,7 +876,7 @@ namespace ConformU
 
             // Create a timeout cancellation token source that times out after the required timeout period
             CancellationTokenSource timeoutCts = new();
-            timeoutCts.CancelAfter(TimeSpan.FromSeconds(Convert.ToDouble(timeoutSeconds) + 2.0 * (Convert.ToDouble(pollInterval) / 1000.0))); // Allow two poll intervals beyond the timeout time to prevent early termination
+            timeoutCts.CancelAfter(TimeSpan.FromSeconds(Convert.ToDouble(timeoutSeconds) + WAITWHILE_EXTRA_WAIT_TIME * (Convert.ToDouble(pollInterval) / 1000.0))); // Allow two poll intervals beyond the timeout time to prevent early termination
 
             // Combine the provided cancellation token parameter with the new timeout cancellation token
             CancellationTokenSource combinedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, applicationCancellationToken);
