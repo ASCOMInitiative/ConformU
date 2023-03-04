@@ -46,7 +46,7 @@ namespace ConformU
         private string testName, testAction, testStatus;
 
         private readonly ConformLogger TL;
-        private readonly CancellationToken applicationCancellationToken;
+        internal readonly CancellationToken applicationCancellationToken;
 
         private readonly Settings settings;
 
@@ -896,7 +896,10 @@ namespace ConformU
 
                 // Set the status message status field
                 if (statusString is null) // No status string function was provided so display an elapsed time message
-                    SetStatus($"{Math.Round(Convert.ToDouble(currentLoopNumber + 1) * pollInterval / 1000.0, 1):0.0} / {timeoutSeconds:0.0} seconds");
+                {
+                    double elapsedTime = Math.Min(Math.Round(Convert.ToDouble(currentLoopNumber + 1) * pollInterval / 1000.0, 1), timeoutSeconds);
+                    SetStatus($"{elapsedTime:0.0} / {timeoutSeconds:0.0} seconds");
+                }
                 else // Display the supplied message instead of the elapsed time message
                     SetStatus(statusString());
 
@@ -907,7 +910,7 @@ namespace ConformU
             {
                 //  Log the timeout and throw an exception to cancel the operation
                 LogDebug("WaitUntil", $"The {actionName} operation timed out after {timeoutSeconds} seconds.");
-                throw new TimeoutException($"The \"{actionName}\" operation exceeded the timeout of {timeoutSeconds} seconds specified for this operation.");
+                throw new TimeoutException($"The \"{actionName}\" operation exceeded its {timeoutSeconds} second timeout.");
             }
 
             SetStatus("");
@@ -1258,7 +1261,7 @@ namespace ConformU
             // Handle all other types of error
             else
             {
-                LogIssue(MemberName, "Unexpected " + GetExceptionName(ex, TypeOfMember) + ", " + UserMessage + ": " + ex.Message);
+                LogIssue(MemberName, $"Unexpected {GetExceptionName(ex, TypeOfMember)}{(string.IsNullOrEmpty(UserMessage) ? ":" : $" - {UserMessage}:")} {ex.Message}");
             }
 
             LogDebug(MemberName, "Exception: " + ex.ToString());
