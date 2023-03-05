@@ -1,5 +1,5 @@
 ﻿
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
 namespace ConformU
 {
     partial class DriverHostForm

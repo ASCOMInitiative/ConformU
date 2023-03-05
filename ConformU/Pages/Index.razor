@@ -100,7 +100,7 @@
             screenLog += $"\r\n\r\nINVALID PRODUCT VERSION: {Update.ConformuVersion}";
         }
 
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
 
     // Give warning message if running as ADMIN
     using (WindowsIdentity identity = WindowsIdentity.GetCurrent())

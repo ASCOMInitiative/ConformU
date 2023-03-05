@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Threading;
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
 using System.Windows.Forms;
 #endif
 
@@ -22,7 +22,7 @@ namespace ConformU
         internal readonly ConformLogger logger;
         private bool disposedValue;
 
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
         internal DriverHostForm driverHostForm;
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace ConformU
             this.logger = logger;
             try
             {
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
                 if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Using COM host form to create driver : {settings.ComDevice.ProgId}. This is thread: {Environment.CurrentManagedThreadId}");
 
                 // Create a new thread to host the sandbox form
@@ -113,6 +113,7 @@ namespace ConformU
 
         protected virtual void Dispose(bool disposing)
         {
+            if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Entered Dispose class, Disposing: {disposing}, Disposed value: {disposedValue}, Driver is null: {driver is null}.");
             if (!disposedValue)
             {
                 if (disposing)
@@ -147,7 +148,7 @@ namespace ConformU
                                 }
                                 catch (Exception ex)
                                 {
-                                    if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception setting Connected false: \r\n{ex}");
+                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception setting Connected false: \r\n{ex}");
                                 }
 
                                 // Dispose of the driver
@@ -158,7 +159,7 @@ namespace ConformU
                                 }
                                 catch (Exception ex)
                                 {
-                                    if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception disposing driver: \r\n{ex}");
+                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception disposing driver: \r\n{ex}");
                                 }
 
                                 // Fully remove the COM object
@@ -169,20 +170,20 @@ namespace ConformU
                                     {
                                         loopCount += 1;
                                         remainingObjectCount = Marshal.ReleaseComObject(driver);
-                                        //if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
+                                        logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
                                     }
                                     while ((remainingObjectCount > 0) & (loopCount <= 20));
                                 }
                                 catch (Exception ex)
                                 {
-                                    if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception releasing COM object: \r\n{ex}");
+                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception releasing COM object: \r\n{ex}");
                                 }
                             }
 
                             // Close the sandbox hosting form
                             try
                             {
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
                                 //if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Ending COM facade application.");
                                 Application.Exit();
                                 //if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"COM facade application ended.");
@@ -192,7 +193,7 @@ namespace ConformU
                             }
                             catch (Exception ex)
                             {
-                                if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception ending application: \r\n{ex}");
+                                logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception ending application: \r\n{ex}");
                             }
 
                             break;
@@ -217,7 +218,7 @@ namespace ConformU
         internal void MethodNoParameters(Action action)
         {
             if (LOG_ENABLED) logger?.LogMessage("MethodNoParameters", MessageLevel.Debug, $"About to call driverHostForm.ActionNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
             if (driverHostForm.InvokeRequired)
             {
                 if (LOG_ENABLED) logger?.LogMessage("MethodNoParameters", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.MethodNoParameters(action) because we are on thread {Environment.CurrentManagedThreadId}");
@@ -238,7 +239,7 @@ namespace ConformU
         {
             if (LOG_ENABLED) logger?.LogMessage("Method1Parameter", MessageLevel.Debug, $"About to call driverHostForm.Action1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
 
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
             if (driverHostForm.InvokeRequired)
             {
                 if (LOG_ENABLED) logger?.LogMessage("Method1Parameter", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.Method1Parameter(action) because we are on thread {Environment.CurrentManagedThreadId}");
@@ -259,7 +260,7 @@ namespace ConformU
         {
             if (LOG_ENABLED) logger?.LogMessage("Method2Parameters", MessageLevel.Debug, $"About to call driverHostForm.Action2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
 
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
             if (driverHostForm.InvokeRequired)
             {
                 if (LOG_ENABLED) logger?.LogMessage("Method2Parameters", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.Method2Parameters(action) because we are on thread {Environment.CurrentManagedThreadId}");
@@ -280,7 +281,7 @@ namespace ConformU
         {
             if (LOG_ENABLED) logger?.LogMessage("FunctionNoParameters", MessageLevel.Debug, $"About to call driverHostForm.FuncNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
 
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
             object returnValue;
 
             if (driverHostForm.InvokeRequired)
@@ -304,7 +305,7 @@ namespace ConformU
         {
             if (LOG_ENABLED) logger?.LogMessage("Function1Parameter", MessageLevel.Debug, $"About to call driverHostForm.Func1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
 
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
             object returnValue;
 
             if (driverHostForm.InvokeRequired)
@@ -328,7 +329,7 @@ namespace ConformU
         {
             if (LOG_ENABLED) logger?.LogMessage("Function2Parameters", MessageLevel.Debug, $"About to call driverHostForm.Func2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
 
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
             object returnValue;
 
             if (driverHostForm.InvokeRequired)

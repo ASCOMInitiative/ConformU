@@ -5660,7 +5660,7 @@ namespace ConformU
 
                         try
                         {
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
                             Marshal.ReleaseComObject(l_AxisRates);
 #endif
                         }
@@ -6045,7 +6045,7 @@ namespace ConformU
                         // Clean up and release each object after use
                         try
                         {
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
                             Marshal.ReleaseComObject(l_Rate);
 #endif
                         }
@@ -6063,7 +6063,7 @@ namespace ConformU
                     // Clean up and release each object after use
                     try
                     {
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
                         Marshal.ReleaseComObject(l_Rate);
 #endif
                     }
@@ -6088,7 +6088,7 @@ namespace ConformU
                         // Clean up and release each object after use
                         try
                         {
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
                             Marshal.ReleaseComObject(l_Rate);
 #endif
                         }
@@ -6105,7 +6105,7 @@ namespace ConformU
                     // Clean up and release each object after use
                     try
                     {
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
                         if (l_Rate is not null) Marshal.ReleaseComObject(l_Rate);
 #endif
                     }

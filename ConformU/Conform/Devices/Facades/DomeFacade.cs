@@ -1,5 +1,5 @@
 ﻿using ASCOM.Common.DeviceInterfaces;
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
 using System.Windows.Forms;
 #endif
 
@@ -11,7 +11,7 @@ namespace ConformU
         // Create the test device in the facade base class
         public DomeFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger)
         {
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
             Form f = new();
 #endif
         }

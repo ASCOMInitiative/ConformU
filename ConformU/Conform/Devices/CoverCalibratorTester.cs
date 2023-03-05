@@ -58,7 +58,7 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    if (coverCalibratorDevice is not null) coverCalibratorDevice.Dispose();
+                    coverCalibratorDevice?.Dispose();
                     coverCalibratorDevice = null;
                 }
             }

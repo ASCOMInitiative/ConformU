@@ -425,6 +425,10 @@
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraYMax" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraYMax)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Maximum image Y size for StartExposure tests. Set to zero to use the value determined by the camera's configuration.</p>
             </div>
+            <div class="row">
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraWaitTimeout" TValue="int" Min="1" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraWaitTimeout)) />
+                <p style="margin-left: 20px;margin-top: 5px;">Image ready timeout (seconds)</p>
+            </div>
 
         </RadzenTabsItem>
 
@@ -601,6 +605,7 @@
     // Camera test configuration
     private int cameraXMax;
     private int cameraYMax;
+    private int cameraWaitTimeout;
     private int cameraTestMaxBinX;
     private int cameraTestMaxBinY;
     private bool cameraFirstUseTests = false;
@@ -661,6 +666,7 @@
         CameraMaxBinX,
         CameraMaxBinY,
         CameraExposureDuration,
+        CameraWaitTimeout,
         CameraXMax,
         CameraYMax,
         waitTimeBeforeConformApplicationExits,
@@ -862,6 +868,10 @@
 
             case NumericConfigurationItem.CameraYMax:
                 settings.CameraYMax = newValue;
+                break;
+
+            case NumericConfigurationItem.CameraWaitTimeout:
+                settings.CameraWaitTimeout = newValue;
                 break;
 
             default:
@@ -1129,6 +1139,7 @@
         cameraExposureDuration = settings.CameraExposureDuration;
         cameraXMax = settings.CameraXMax;
         cameraYMax = settings.CameraYMax;
+        cameraWaitTimeout = settings.CameraWaitTimeout;
 
         // Dome tests
         domeShutterTimeout = settings.DomeShutterMovementTimeout;

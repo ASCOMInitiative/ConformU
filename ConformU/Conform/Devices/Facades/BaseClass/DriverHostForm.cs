@@ -1,4 +1,4 @@
-﻿#if WINDOWS7_0_OR_GREATER
+﻿#if WINDOWS
 using System.Windows.Forms;
 #endif
 
@@ -6,7 +6,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
 namespace ConformU
 {
     public partial class DriverHostForm : Form
@@ -95,7 +95,7 @@ namespace ConformU
 
                 try
                 {
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
                     //if (LOG_DISABLED) logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Ending COM facade application.");
                     Application.Exit();
                     //if (LOG_DISABLED) logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"COM facade application ended.");

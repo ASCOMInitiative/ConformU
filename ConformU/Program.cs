@@ -21,7 +21,7 @@ namespace ConformU
     {
         private static string[] commandLineArguments;
 
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
         [DllImport("kernel32.dll")]
         static extern IntPtr GetConsoleWindow();
 
@@ -37,7 +37,7 @@ namespace ConformU
         {
             try
             {
-#if WINDOWS7_0_OR_GREATER
+#if WINDOWS
                 // Minimise the console window
                 ShowWindow(GetConsoleWindow(), SW_SHOWMINIMIZED);
 #endif

@@ -161,6 +161,7 @@ namespace ConformU
         public double CameraExposureDuration { get; set; } = 2.0;
         public int CameraXMax { get; set; } = 0;
         public int CameraYMax { get; set; } = 0;
+        public int CameraWaitTimeout { get; set; } = 10;
 
         // Dome test configuration
         public int DomeShutterMovementTimeout { get; set; } = 240;
