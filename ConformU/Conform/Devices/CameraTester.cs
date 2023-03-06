@@ -2823,6 +2823,8 @@ namespace ConformU
                         LogNewLine();
                         LogError("CONFORMU", "START EXPOSURE TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
                         LogNewLine();
+
+                        return;
                     }
 
                     #endregion
@@ -3123,6 +3125,8 @@ namespace ConformU
                                     LogNewLine();
                                     LogError("CONFORMU", "IMAGEARRAY TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
                                     LogNewLine();
+
+                                    return;
                                 }
 
                                 if (applicationCancellationToken.IsCancellationRequested) // Exit if required
@@ -3295,6 +3299,8 @@ namespace ConformU
                                     LogNewLine();
                                     LogError("CONFORMU", "IMAGEARRAYVARIANT TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
                                     LogNewLine();
+
+                                    return;
                                 }
 
                                 // Exit if cancelled
