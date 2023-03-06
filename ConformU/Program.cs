@@ -172,7 +172,7 @@ namespace ConformU
             ConformLogger conformLogger = new(logFileName, logFilePath, loggerName, true);
 
             // Create a state manager component
-            ConformStateManager conformStateManager = new ConformStateManager(conformLogger);
+            ConformStateManager conformStateManager = new(conformLogger);
 
             // Debug reading the configuration file if a command line option requires this
             if (commandLineOptions.DebugStartup) conformLogger.Debug = true;
@@ -215,11 +215,13 @@ namespace ConformU
                         {
                             try
                             {
-                                ProcessStartInfo processStartInfo = new ProcessStartInfo();
-                                processStartInfo.UseShellExecute = true;
-                                processStartInfo.WindowStyle = ProcessWindowStyle.Minimized;
-                                processStartInfo.FileName = "CMD.exe";
-                                processStartInfo.Arguments = $"/c \"{executable32}\" {string.Join(" ", commandLineArguments)}";
+                                ProcessStartInfo processStartInfo = new()
+                                {
+                                    UseShellExecute = true,
+                                    WindowStyle = ProcessWindowStyle.Minimized,
+                                    FileName = "CMD.exe",
+                                    Arguments = $"/c \"{executable32}\" {string.Join(" ", commandLineArguments)}"
+                                };
 
                                 Console.WriteLine($"Starting 32bit process");
                                 Process.Start(processStartInfo);

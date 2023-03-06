@@ -991,7 +991,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogIssue("IsMethodNotImplementedException", "Unexpected exception: " + ex.ToString());
+                LogError("IsMethodNotImplementedException", "Unexpected exception: " + ex.ToString());
             }
 
             return IsMethodNotImplementedExceptionRet;
@@ -1023,7 +1023,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogIssue("IsNotImplementedException", "Unexpected exception: " + ex.ToString());
+                LogError("IsNotImplementedException", "Unexpected exception: " + ex.ToString());
             }
 
             return IsNotImplementedExceptionRet;
@@ -1055,7 +1055,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogIssue("IsPropertyNotImplementedException", "Unexpected exception: " + ex.ToString());
+                LogError("IsPropertyNotImplementedException", "Unexpected exception: " + ex.ToString());
             }
 
             return IsPropertyNotImplementedExceptionRet;
@@ -1100,7 +1100,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogIssue("IsInvalidValueException", "Unexpected exception: " + ex.ToString());
+                LogError("IsInvalidValueException", "Unexpected exception: " + ex.ToString());
             }
 
             return IsInvalidValueExceptionRet;
@@ -1145,7 +1145,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogIssue("IsInvalidOperationException", "Unexpected exception: " + ex.ToString());
+                LogError("IsInvalidOperationException", "Unexpected exception: " + ex.ToString());
             }
 
             return IsInvalidOperationExceptionRet;
@@ -1177,7 +1177,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogIssue("IsNotSetException", "Unexpected exception: " + ex.ToString());
+                LogError("IsNotSetException", "Unexpected exception: " + ex.ToString());
             }
 
             return IsNotSetExceptionRet;
@@ -1202,31 +1202,31 @@ namespace ConformU
                 {
                     case Required.Mandatory:
                         {
-                            LogIssue(MemberName, "This member is mandatory but threw a " + GetExceptionName(ex, TypeOfMember) + " exception, it must function per the ASCOM specification.");
+                            LogIssue(MemberName, "This member is mandatory but returned a " + GetExceptionName(ex, TypeOfMember) + " error, it must function per the ASCOM specification.");
                             break;
                         }
 
                     case Required.MustNotBeImplemented:
                         {
-                            LogOK(MemberName, UserMessage + " and a " + GetExceptionName(ex, TypeOfMember) + " exception was generated as expected");
+                            LogOK(MemberName, UserMessage + " and a " + GetExceptionName(ex, TypeOfMember) + " error was generated as expected");
                             break;
                         }
 
                     case Required.MustBeImplemented:
                         {
-                            LogIssue(MemberName, UserMessage + " and a " + GetExceptionName(ex, TypeOfMember) + " exception was thrown, this method must function per the ASCOM specification.");
+                            LogIssue(MemberName, UserMessage + " and a " + GetExceptionName(ex, TypeOfMember) + " error was returned, this method must function per the ASCOM specification.");
                             break;
                         }
 
                     case Required.Optional:
                         {
-                            LogOK(MemberName, "Optional member threw a " + GetExceptionName(ex, TypeOfMember) + " exception.");
+                            LogOK(MemberName, "Optional member returned a " + GetExceptionName(ex, TypeOfMember) + " error.");
                             break;
                         }
 
                     default:
                         {
-                            LogIssue(MemberName, "CONFORM ERROR! - Received unexpected member of 'Required' enum: " + IsRequired.ToString());
+                            LogError(MemberName, "CONFORM ERROR! - Received unexpected member of 'Required' enum: " + IsRequired.ToString());
                             break;
                         }
                 }
@@ -1261,10 +1261,10 @@ namespace ConformU
             // Handle all other types of error
             else
             {
-                LogIssue(MemberName, $"Unexpected {GetExceptionName(ex, TypeOfMember)}{(string.IsNullOrEmpty(UserMessage) ? ":" : $" - {UserMessage}:")} {ex.Message}");
+                LogIssue(MemberName, $"Unexpected error{(string.IsNullOrEmpty(UserMessage) ? ":" : $" - {UserMessage}:")} {ex.Message}");
             }
 
-            LogDebug(MemberName, "Exception: " + ex.ToString());
+            LogDebug(MemberName, "Exception detail: " + ex.ToString());
         }
 
         protected void HandleInvalidValueExceptionAsOK(string MemberName, MemberType TypeOfMember, Required IsRequired, Exception ex, string UserAction, string Message)

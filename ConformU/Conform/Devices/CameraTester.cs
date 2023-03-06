@@ -2711,6 +2711,8 @@ namespace ConformU
 
                     #region Initiate exposure
 
+                    bool ranToCompletion;
+
                     SetAction($"Exposing for {requiredDuration} seconds");
 
                     startTime = DateTime.Now;
@@ -2754,8 +2756,32 @@ namespace ConformU
                         }
                     }, cancellationToken);
 
-                    // Wait for the task to complete or be cancelled
-                    bool ranToCompletion = startExposureTask.Wait(TimeSpan.FromSeconds(requiredDuration + WAITWHILE_EXTRA_WAIT_TIME), applicationCancellationToken);
+                    // Start  a UI update task to display timing information
+                    CancellationTokenSource exposeUiTaskTokenSource = new();
+                    CancellationToken exposeUiTaskCancellationToken = exposeUiTaskTokenSource.Token;
+
+                    Task.Run(() =>
+                    {
+                        UpdateUI(exposeUiTaskCancellationToken);
+                    }, exposeUiTaskCancellationToken);
+
+                    try
+                    {
+                        // Wait for the start exposure task to complete or be cancelled
+                        ranToCompletion = startExposureTask.Wait(TimeSpan.FromSeconds(requiredDuration + WAITWHILE_EXTRA_WAIT_TIME), applicationCancellationToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        LogNewLine();
+                        LogError("CONFORMU", "START EXPOSURE WAS INTERRUPTTED LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                        LogNewLine();
+                        throw;
+                    }
+                    finally
+                    {
+                        // Stop the UI update task
+                        exposeUiTaskTokenSource.Cancel();
+                    }
 
                     // Test the outcome from the task
                     if (ranToCompletion) // Completed within the cancellation timeout
@@ -2792,6 +2818,11 @@ namespace ConformU
 
                         // Log an issue because of the timeout
                         LogIssue(testName, $"StartExposure {(expectedErrorMessage == "" ? "" : $"{expectedErrorMessage} ")}did not return within the timeout period: {requiredDuration + WAITWHILE_EXTRA_WAIT_TIME} seconds.");
+
+                        // Provide a warning about possible application corruption
+                        LogNewLine();
+                        LogError("CONFORMU", "START EXPOSURE TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                        LogNewLine();
                     }
 
                     #endregion
@@ -2843,7 +2874,7 @@ namespace ConformU
                                 {
                                     // Wait while the camera is exposing and is not in an error state
                                     return (camera.CameraState != CameraState.Exposing) & (camera.CameraState != CameraState.Error);
-                                }, 500, Convert.ToInt32(requiredDuration + settings.CameraWaitTimeout), () =>
+                                }, 500, settings.CameraWaitTimeout, () =>
                                 {
                                     return $"{sw.Elapsed.TotalSeconds:0.0} / {requiredDuration:0.0}";
                                 });
@@ -2948,7 +2979,7 @@ namespace ConformU
                                 {
                                     // Wait until ImageReady is true or the camera is in the error state
                                     return !camera.ImageReady & (camera.CameraState != CameraState.Error);
-                                }, 500, 10);
+                                }, 500, settings.CameraWaitTimeout);
 
                                 if (applicationCancellationToken.IsCancellationRequested) // Exit if required
                                     return;
@@ -3087,6 +3118,11 @@ namespace ConformU
 
                                     // Log an issue because of the timeout
                                     LogIssue(testName, $"ImageArray did not return within the timeout period: {settings.CameraWaitTimeout} seconds.");
+
+                                    // Provide a warning about possible application corruption
+                                    LogNewLine();
+                                    LogError("CONFORMU", "IMAGEARRAY TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                                    LogNewLine();
                                 }
 
                                 if (applicationCancellationToken.IsCancellationRequested) // Exit if required
@@ -3254,6 +3290,11 @@ namespace ConformU
                                     iavTokenSource.Cancel();
                                     // Log an issue because of the timeout
                                     LogIssue(testName, $"ImageArrayVariant did not return within the timeout period: {settings.CameraWaitTimeout} seconds.");
+
+                                    // Provide a warning about possible application corruption
+                                    LogNewLine();
+                                    LogError("CONFORMU", "IMAGEARRAYVARIANT TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                                    LogNewLine();
                                 }
 
                                 // Exit if cancelled
@@ -3338,19 +3379,26 @@ namespace ConformU
                 }
                 catch (TimeoutException ex) // StartExposure timed out
                 {
-                    LogIssue(testName, $"The StartExposure {requiredNumX} x {requiredNumY} (Bin {requiredBinX} x {requiredBinY}) method timed out: {ex.Message}");
+                    LogIssue(testName, $"The {requiredNumX} x {requiredNumY} (Bin {requiredBinX} x {requiredBinY}) exposure timed out: {ex.Message}");
                     LogDebug(testName, $"Exception detail:\r\n {ex}");
+
+                    // Provide a warning about possible application corruption
+                    LogNewLine();
+                    LogError("CONFORMU", "EXPOSURE TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                    LogNewLine();
                 }
                 catch (Exception ex) // Something else went wrong...
                 {
                     LogIssue(testName, $"Received error when exposing: {ex.Message}");
                     LogDebug(testName, $"Exception: {ex}");
                 }
+
                 #endregion
 
             }
             else // At least one of BinX, BinY, StartX, StartY, NumX or NumY could not be set
             {
+                LogInfo(testName, "Exposure test abandoned because at least one of BinX, BinY, NumX, NumY, StartX or StartY could not be set.");
                 // No action required
             }
 
