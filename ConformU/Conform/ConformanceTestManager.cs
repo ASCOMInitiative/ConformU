@@ -264,7 +264,7 @@ namespace ConformU
                             // Display completion or "test cancelled" message
                             if (!cancellationToken.IsCancellationRequested)
                             {
-                                TL.LogMessage("Conformance test complete", MessageLevel.TestOnly, "");
+                                TL.LogMessage("Conformance test has finished", MessageLevel.TestOnly, "");
                             }
                             else
                             {
@@ -370,7 +370,7 @@ namespace ConformU
                     TL.LogMessage("WriteResultsFile", MessageLevel.Error, ex.ToString());
                 }
 
-                TL.SetStatusMessage("Conformance test complete");
+                TL.SetStatusMessage("Conformance test has finished");
             }
             catch (Exception ex)
             {
