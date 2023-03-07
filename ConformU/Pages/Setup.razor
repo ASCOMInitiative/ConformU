@@ -135,7 +135,7 @@
             setupCancelConformToken.ThrowIfCancellationRequested();
             CancellationToken taskCancellationToken = setupCancellationTokenSource.Token;
 
-            using (ConformanceTestManager testManager = new(configuration, conformLogger, setupCancelConformToken))
+            using (ConformanceTestManager testManager = new(configuration, conformLogger, setupCancellationTokenSource, setupCancelConformToken))
             {
                 // Create a task to run the conformance test
                 Task conformanceTest = new Task(() =>

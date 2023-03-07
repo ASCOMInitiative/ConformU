@@ -3,6 +3,7 @@ using ASCOM.Alpaca.Clients;
 using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
+using ASCOM.DeviceInterface;
 using Microsoft.Extensions.Logging.Configuration;
 using System;
 using System.Collections.Generic;
@@ -53,7 +54,7 @@ namespace ConformU
         private bool m_FastReadout, m_CanReadGain, m_CanReadGainMax, m_CanReadGainMin, m_CanReadGains, m_CanReadReadoutModes;
         private IList<string> m_Gains;
         private IList<string> m_ReadoutModes;
-        private SensorType m_SensorType;
+        private ASCOM.DeviceInterface.SensorType m_SensorType;
         private bool m_CanReadSensorType = false;
         private readonly Stopwatch sw = new();
 
@@ -786,11 +787,11 @@ namespace ConformU
             if (m_ImageReady & settings.CameraFirstUseTests) // Issue this warning if configured to do so
                 LogIssue("ImageReady", "Image is flagged as ready but no exposure has been started!");
 
-            // ImageArray 
-            SetFullStatus("ImageArray", "Getting image data from device...", "");
-
             // Release memory currently consumed by images
             ReleaseMemory();
+
+            // ImageArray 
+            SetFullStatus("ImageArray", "Getting image data from device...", "");
 
             if (m_ImageReady) // ImageReady is true
             {
@@ -839,12 +840,10 @@ namespace ConformU
             }
 
             // Release memory currently consumed by images
-            SetAction("Releasing memory");
             ReleaseMemory();
 
             // ImageArrayVariant
             // Release memory currently consumed by images
-            SetAction("Releasing memory");
             ReleaseMemory();
 
             SetFullStatus("ImageArrayVariant", "Getting image data from device...", "");
@@ -901,7 +900,6 @@ namespace ConformU
             }
 
             // Release memory currently consumed by images
-            SetAction("Releasing memory");
             ReleaseMemory();
 
             ClearStatus();
@@ -1058,7 +1056,7 @@ namespace ConformU
                 {
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("ConformanceCheck", "About to get SensorType");
-                    m_SensorType = camera.SensorType;
+                    m_SensorType = (ASCOM.DeviceInterface.SensorType)camera.SensorType;
                     m_CanReadSensorType = true; // Set a flag to indicate that we have got a valid SensorType value
                                                 // Successfully retrieved a value
                     LogOK("SensorType Read", m_SensorType.ToString());
@@ -1071,7 +1069,7 @@ namespace ConformU
                 // BayerOffset Read
                 if (m_CanReadSensorType)
                 {
-                    if (m_SensorType == SensorType.Monochrome)
+                    if (m_SensorType == ASCOM.DeviceInterface.SensorType.Monochrome)
                     {
                         // Monochrome so both BayerOffset properties should throw not implemented exceptions
                         CameraPropertyMustNotImplemented(CamPropertyType.BayerOffsetX, "BayerOffsetX Read");
@@ -2566,32 +2564,6 @@ namespace ConformU
             }
         }
 
-        /// <summary>
-        /// Initiates an exposure and validates the returned image
-        /// </summary>
-        /// <param name="testName"></param>
-        /// <param name="testDescription"></param>
-        /// <param name="requiredBinX"></param>
-        /// <param name="requiredBinY"></param>
-        /// <param name="requiredStartX"></param>
-        /// <param name="requiredStartY"></param>
-        /// <param name="requiredNumX"></param>
-        /// <param name="requiredNumY"></param>
-        /// <param name="requiredDuration"></param>
-        /// <param name="expectedErrorMessage"></param>
-        /// <remarks>
-        /// High level process:
-        /// Validate supplied parameters - End if any are not valid
-        /// Initiate Exposure
-        /// Wait for exposing state to start
-        /// Wait for exposing state to end
-        /// Wait for camera to enter Idle state
-        /// Wait for image to be reported as ready for retrieval (ImageReady == true)
-        /// Check exposure outcome
-        /// Check returned ImageArray
-        /// Check returned ImageArrayVariant
-        /// 
-        /// </remarks>
         private void CameraExposure(string testName, string testDescription, int requiredBinX, int requiredBinY, int requiredStartX, int requiredStartY, int requiredNumX, int requiredNumY, double requiredDuration, string expectedErrorMessage)
         {
             string numPlanes, variantType;
@@ -2599,19 +2571,42 @@ namespace ConformU
             DateTime startTime, startTimeUTC, endTime;
             short percentCompleted;
 
+            // Start off by assuming the worst case, this will be set true if the exposure completes OK
+            exposedOK = false;
+
+            LogDebug(testName,$"Entered CameraExposure");
+
+            // Log test name for happy path tests
             if (testName.ToUpperInvariant() == "STARTEXPOSURE")
             {
                 LogNewLine(); // Blank Line
                 LogTestOnly(testDescription);
             }
 
+            #region Validate camera state and input parameters
+
             // Set camera exposure parameters
             bool parametersSetOk = true; // Flag indicating whether the BinX, BinY, StartX, StartY, NumX and NumY parameters were set correctly
 
-            // Start off by assuming the worst case, this will be set true if the exposure completes OK
-            exposedOK = false;
+            // Make sure the camera is in idle state before proceeding further
+            try
+            {
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("ConformanceCheck", "About to get CameraState");
+                CameraState cameraState = camera.CameraState;
 
-            #region Validate input parameters
+                if (cameraState != CameraState.Idle) // Camera is not in idle state ready for an exposure
+                {
+                    LogIssue(testName, $"Test abandoned because the camera is in state: {cameraState} rather than the expected: {CameraState.Idle}.");
+                    parametersSetOk = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                parametersSetOk = false;
+                LogIssue(testName, $"Unable to read camera state: {ex.Message}");
+                LogDebug(testName, $"CameraState exception detail:\r\n {ex}");
+            }
 
             // Set BinX value
             try
@@ -2697,718 +2692,845 @@ namespace ConformU
                 LogDebug(testName, $"NumY exception detail:\r\n {ex}");
             }
 
+            // Exit if parameters were not set properly
+            if (!parametersSetOk)
+            {
+                // At least one of BinX, BinY, StartX, StartY, NumX or NumY could not be set
+                LogInfo(testName, "Exposure test abandoned because the camera is not idle or at least one of BinX, BinY, NumX, NumY, StartX or StartY could not be set.");
+                ClearStatus();
+            }
+
             #endregion
 
-            // Start exposure if all parameters have been set
-            if (parametersSetOk) // All parameters were successfully set so try to initiate the exposure
+            #region Initiate exposure
+
+            // Start exposure because all parameters were set OK
+
+            startTime = DateTime.Now;
+            startTimeUTC = DateTime.UtcNow;
+            bool initiatedOk = false; // Flag indicating whether the StarteExposure task completed OK
+            try
             {
+                bool ranToCompletion;
 
-                #region Initiate exposure and test outcome
+                SetAction($"Exposing for {requiredDuration} seconds");
 
-                bool initiatedOk = false; // Flag indicating whether the StarteExposure task completed OK
+
+                // Start  a UI update task to display timing information
+                CancellationTokenSource exposeUiTaskTokenSource = new();
+                CancellationToken exposeUiTaskCancellationToken = exposeUiTaskTokenSource.Token;
+
+                // Start a task to update the UI while initiating the exposure
+                Task.Run(() =>
+                {
+                    UpdateUI(exposeUiTaskCancellationToken);
+                }, exposeUiTaskCancellationToken);
+
+                // Initiate the exposure
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("ConformanceCheck", "About to call StartExposure");
+
+                // Create a cancellation token that we can set if the task times out
+                CancellationTokenSource cancellationTokenSource = new();
+                CancellationToken cancellationToken = cancellationTokenSource.Token;
+
+                // Create and start the StartExposure task
+                Task startExposureTask = Task.Run(() =>
+                {
+                    try
+                    {
+                        camera.StartExposure(requiredDuration, true);
+
+                        // Do not respond if the task has been cancelled
+                        if (!cancellationToken.IsCancellationRequested) // Task is live and has not been cancelled
+                        {
+                            LogDebug(testName, "Exposure initiated OK");
+
+                            if (string.IsNullOrEmpty(expectedErrorMessage))
+                            {
+                                // Flag that the exposure was successfully initiated
+                                initiatedOk = true;
+                            }
+                            else
+                            {
+                                LogTestAndMessage(testName, $"No error was returned when {char.ToLowerInvariant(expectedErrorMessage[0])}{expectedErrorMessage[1..]}");
+                                LogIssue(testName, "Expected an error and didn't get one - BinX:" + requiredBinX + " BinY:" + requiredBinY + " StartX:" + requiredStartX + " StartY:" + requiredStartY + " NumX:" + requiredNumX + " NumY:" + requiredNumY);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Ignore exceptions and do not respond if the task has been cancelled
+                        if (!cancellationToken.IsCancellationRequested) // Task is live and has not been cancelled
+                        {
+                            // Record the error
+                            if (expectedErrorMessage != "")
+                                LogOK(testName, $"Received error: {ex.Message}");
+                            else
+                            {
+                                LogIssue(testName, $"Error initiating exposure: {ex.Message}");
+                                LogDebug(testName, $"Exception detail:\r\n {ex}");
+                            }
+                        }
+                    }
+                }, cancellationToken);
+
+                // Wait for the start exposure task to complete or be cancelled
                 try
                 {
+                    ranToCompletion = startExposureTask.Wait(TimeSpan.FromSeconds(settings.CameraWaitTimeout), applicationCancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    // The user cancelled the operation
+                    LogNewLine();
+                    LogError("CONFORMU", "START EXPOSURE WAS INTERRUPTTED LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                    LogNewLine();
+                    ClearStatus();
+                    return;
+                }
+                finally
+                {
+                    // Stop the UI update task
+                    exposeUiTaskTokenSource.Cancel();
+                    ClearStatus();
+                }
 
-                    #region Initiate exposure
+                // Test the outcome from the task
+                if (ranToCompletion) // Completed within the task timeout
+                {
+                    // Handle the three possible task end states
+                    switch (startExposureTask.Status)
+                    {
+                        case TaskStatus.Canceled: // The application cancel button was pushed
+                            initiatedOk = false;
+                            LogIssue(testName, "StartExposure was cancelled.");
+                            break;
 
-                    bool ranToCompletion;
+                        case TaskStatus.Faulted: // The StartExposure call failed
+                            initiatedOk = false;
+                            LogIssue(testName, $"Error initiating exposure: {startExposureTask.Exception?.InnerException.Message}");
+                            LogDebug(testName, $"Exception detail:\r\n {startExposureTask.Exception?.InnerException}");
+                            break;
 
-                    SetAction($"Exposing for {requiredDuration} seconds");
+                        default: // Some other unexpected state
+                            initiatedOk = false;
+                            LogError(testName, $"Unexpected task end state from camera.StartExposure: {startExposureTask.Status}");
 
-                    startTime = DateTime.Now;
-                    startTimeUTC = DateTime.UtcNow;
+                            break;
 
-                    // Initiate the exposure
+                        case TaskStatus.RanToCompletion: // The StartExposure method completed OK within the specified timeout period.
+                                                         // No action here because the initiatedOk flag is set by the code within the task
+                            break;
+                    }
+                }
+                else // The task timed out
+                {
+                    // Cancel the task so that it does not try to write to the log
+                    cancellationTokenSource.Cancel();
+
+                    // Log an issue because of the timeout
+                    LogIssue(testName, $"StartExposure {(expectedErrorMessage == "" ? "" : $"{expectedErrorMessage} ")}did not return within the timeout period: {requiredDuration + WAITWHILE_EXTRA_WAIT_TIME} seconds.");
+
+                    // Provide a warning about possible application corruption
+                    LogNewLine();
+                    LogError("CONFORMU", "START EXPOSURE TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                    LogNewLine();
+
+                    // Cancel the task
+                    ConformanceTestManager.ConformCancellationTokenSource.Cancel();
+
+                    ClearStatus();
+                    return;
+                }
+            }
+            catch (Exception ex) // Something else went wrong...
+            {
+                initiatedOk = false;
+                LogIssue(testName, $"Received error when exposing: {ex.Message}");
+                LogDebug(testName, $"Exception: {ex}");
+            }
+
+            // Exit if the task did not initiate OK or failed to generate an error when expected to do so
+            if (!initiatedOk)
+            {
+                ClearStatus();
+                return;
+            }
+
+            #endregion
+
+            #region Wait for the synchronous or asynchronous exposure to complete
+
+            try
+            {
+                endTime = DateTime.Now;
+
+                // Test whether we have a synchronous or asynchronous camera
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("ConformanceCheck", "About to get ImageReady and CameraState");
+                if (camera.ImageReady & (camera.CameraState == CameraState.Idle)) // Synchronous exposure
+                {
+                    #region Check synchronous exposure behaviour
+
+                    try
+                    {
+                        if (endTime.Subtract(startTime).TotalSeconds >= requiredDuration)
+                        {
+                            LogOK(testName, "Synchronous exposure found OK: " + requiredDuration + " seconds");
+                            CameraTestLast(requiredDuration, startTimeUTC);
+                        }
+                        else
+                            LogIssue(testName, "Synchronous exposure found but image was returned before exposure time was complete");
+                    }
+                    catch (Exception ex)
+                    {
+                        LogIssue(testName, $"Unexpected error while checking initiation: {ex.Message}");
+                        LogDebug(testName, $"Exception detail:\r\n{ex}");
+                        ClearStatus();
+                        return;
+                    }
+
+                    #endregion
+                }
+                else // Asynchronous exposure
+                {
+                    #region Wait for exposing state to start
+
+                    SetStatus("Waiting for exposure to start");
+
+                    // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
                     if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to call StartExposure");
+                        LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
+                    imageReadyTooEarly = camera.ImageReady;
+
+                    // Wait for exposing state
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
+                    Stopwatch sw = Stopwatch.StartNew();
+                    WaitWhile(GetAction(), () =>
+                    {
+                        // Wait while the camera is exposing and is not in an error state
+                        return (camera.CameraState != CameraState.Exposing) & (camera.CameraState != CameraState.Error);
+                    }, 500, settings.CameraWaitTimeout, () =>
+                    {
+                        return $"{sw.Elapsed.TotalSeconds:0.0} / {requiredDuration:0.0}";
+                    });
+
+                    if (applicationCancellationToken.IsCancellationRequested) // Exit if required
+                    {
+                        ClearStatus();
+                        return;
+                    }
+
+                    // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
+                    imageReadyTooEarly = camera.ImageReady;
+
+                    #endregion
+
+                    #region Wait for exposing state to end
+
+                    try
+                    {
+                        // Wait for the exposing state to finish
+                        startTime = DateTime.Now;
+                        startTimeUTC = DateTime.UtcNow;
+                        if (settings.DisplayMethodCalls)
+                            LogTestAndMessage("ConformanceCheck", "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
+
+                        // Start the loop timing stopwatch
+                        sw.Restart();
+                        Stopwatch swOverall = Stopwatch.StartNew();
+
+                        WaitWhile($"Waiting for exposure to complete", () =>
+                        {
+                            // Wait for the camera state to be something other than CamerraStates.Exposing
+                            return camera.CameraState == CameraState.Exposing;
+                        }, 500, settings.CameraWaitTimeout, () =>
+                        {
+                            // Create a progress status message
+                            bool reportedError = false;
+                            string percentCompletedMessage = "Not present in a V1 driver"; // Initialise PercentCompleted message
+
+                            if (camera.InterfaceVersion > 1)
+                            {
+                                try
+                                {
+                                    percentCompleted = camera.PercentCompleted;
+                                    percentCompletedMessage = $"{percentCompleted}%"; // Operation completed OK
+                                }
+                                catch (Exception ex)
+                                {
+                                    if (IsPropertyNotImplementedException(ex))
+                                    {
+                                        percentCompletedMessage = "Not implemented"; // Not implemented
+                                    }
+                                    else if (IsInvalidOperationException(testName, ex))
+                                    {
+                                        percentCompletedMessage = $"Invalid operation: {ex.Message}"; // Not valid at this time
+                                    }
+                                    else
+                                    {
+                                        percentCompletedMessage = $"Error: {ex.Message}"; // Something bad happened!
+
+                                        // Only log the error once to avoid unnecessarily filling the log
+                                        if (!reportedError)
+                                        {
+                                            LogDebug("PercentCompleted", $"Exception detail: {ex}");
+                                            reportedError = true;
+                                        }
+                                    }
+                                }
+                            }
+
+                            return $"Percent complete: {percentCompletedMessage}";
+                        });
+
+                        endTime = DateTime.Now;
+
+                        if (applicationCancellationToken.IsCancellationRequested) // Exit if required
+                        {
+                            ClearStatus();
+                            return;
+                        }
+                    }
+                    catch (TimeoutException)
+                    {
+                        LogIssue(testName, $"Test abandoned, timed out waiting for exposure to complete.");
+                        ClearStatus();
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogIssue(testName, $"Unexpected error while waiting for exposure to complete: {ex.Message}");
+                        LogDebug(testName, $"Exception detail:\r\n{ex}");
+                        ClearStatus();
+                        return;
+                    }
+
+                    #endregion
+
+                    #region Wait for camera to become idle
+
+                    try
+                    {
+                        // Wait for camera to become idle
+                        if (settings.DisplayMethodCalls)
+                            LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
+
+                        WaitWhile("Waiting for camera idle state, reading/downloading image", () =>
+                        {
+                            // Wait until the camera state is idle or error
+                            return (camera.CameraState != CameraState.Idle) & (camera.CameraState != CameraState.Error);
+                        }, 500, settings.CameraWaitTimeout);
+
+                        if (applicationCancellationToken.IsCancellationRequested) // Exit if required
+                        {
+                            ClearStatus();
+                            return;
+                        }
+                    }
+                    catch (TimeoutException)
+                    {
+                        LogIssue(testName, $"Test abandoned, timed out waiting for camera to become idle.");
+                        ClearStatus();
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogIssue(testName, $"Unexpected error while waiting for camera to become idle: {ex.Message}");
+                        LogDebug(testName, $"Exception detail:\r\n{ex}");
+                        ClearStatus();
+                        return;
+                    }
+
+                    #endregion
+
+                    #region Wait for image to be ready for retrieval
+
+                    try
+                    {
+                        // Wait for image to become ready
+                        if (settings.DisplayMethodCalls)
+                            LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
+
+                        // Wait until ImageReady is true or the camera is in the error state
+                        WaitWhile("Waiting for image ready", () =>
+                        {
+                            return !camera.ImageReady & (camera.CameraState != CameraState.Error);
+                        }, 500, settings.CameraWaitTimeout);
+                    }
+                    catch (TimeoutException)
+                    {
+                        LogIssue(testName, $"Test abandoned, timed out waiting for ImageReady to become true.");
+                        ClearStatus();
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogIssue(testName, $"Unexpected error while waiting for ImageReady to become true: {ex.Message}");
+                        LogDebug(testName, $"Exception detail:\r\n{ex}");
+                        ClearStatus();
+                        return;
+                    }
+
+                    #endregion
+                }
+            }
+            catch (Exception ex)
+            {
+                LogIssue(testName, $"Unexpected error while waiting for exposure to complete: {ex.Message}");
+                LogDebug(testName, $"Exception detail:\r\n{ex}");
+                ClearStatus();
+                return;
+            }
+
+            #endregion
+
+            #region Check exposure outcome
+
+            try
+            {
+                if (applicationCancellationToken.IsCancellationRequested) // Exit if required
+                {
+                    ClearStatus();
+                    return;
+                }
+
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
+                if (camera.ImageReady)
+                {
+                    LogOK(testName, "Asynchronous exposure found OK: " + requiredDuration + " seconds");
+                    CameraTestLast(requiredDuration, startTimeUTC);
+                }
+                else
+                {
+                    // Give up because the exposure was not successful
+                    LogIssue(testName, "Test abandoned because the camera state is CameraError.");
+                    ClearStatus();
+                    return;
+                }
+
+                // Display a warning if ImageReady was set too early
+                if (imageReadyTooEarly)
+                {
+                    LogIssue(testName, "Test abandoned because ImageReady was set True before the camera completed its exposure.");
+                    ClearStatus();
+                    return;
+                }
+
+                // Camera exposed OK and didn't generate an exception
+                else
+                {
+                    exposedOK = true;
+                }
+                LogDebug(testName, $"Camera exposed image OK: {exposedOK}");
+            }
+            catch (Exception ex)
+            {
+                LogIssue(testName, $"Unexpected error while checking returned image: {ex.Message}");
+                LogDebug(testName, $"Exception detail:\r\n{ex}");
+                ClearStatus();
+                return;
+            }
+
+            #endregion
+
+            #region Check ImageArray
+
+            // Check image array dimensions
+            try
+            {
+                // Release memory currently consumed by images
+                ReleaseMemory();
+
+                // Retrieve the image array
+                SetAction("Retrieving ImageArray");
+
+                // Create a cancellation token that we can set if the task times out
+                CancellationTokenSource iaTokenSource = new();
+                CancellationToken iaToken = iaTokenSource.Token;
+
+                Task iaTask = Task.Factory.StartNew(() =>
+                {
+                    try
+                    {
+                        if (settings.DisplayMethodCalls)
+                            LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
+                        sw.Restart();
+                        m_ImageArray = (Array)camera.ImageArray;
+                        sw.Stop();
+                        // Do not respond if the task has been cancelled
+                        if (!cancellationToken.IsCancellationRequested) // Task is live and has not been cancelled
+                        {
+                            LogDebug("ImageArray", "Got image array OK");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Ignore exceptions and do not respond if the task has been cancelled
+                        if (!cancellationToken.IsCancellationRequested) // Task is live and has not been cancelled
+                        {
+                            // Record the error
+                            LogIssue("ImageArray", $"Error getting ImageArray: {ex.Message}");
+                            LogDebug("ImageArray", $"Exception detail:\r\n {ex}");
+                        }
+                    }
+                }, iaToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+                // Start  a UI update task
+                CancellationTokenSource iaUiTaskTokenSource = new();
+                CancellationToken iaUiTaskCancellationToken = iaUiTaskTokenSource.Token;
+
+                Task.Run(() =>
+                {
+                    UpdateUI(iaUiTaskCancellationToken);
+                }, iaUiTaskCancellationToken);
+                bool ranToCompletion=false;
+                try
+                {
+                    // Wait for the ImageArray task to complete or be cancelled
+                    ranToCompletion = iaTask.Wait(TimeSpan.FromSeconds(settings.CameraWaitTimeout), applicationCancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    LogNewLine();
+                    LogError("CONFORMU", "GET IMAGEARRAY WAS INTERRUPTTED LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                    LogNewLine();
+                    ClearStatus();
+                    return;
+                }
+                finally
+                {
+                    // Stop the UI update task
+                    iaUiTaskTokenSource.Cancel();
+                    ClearStatus();
+                }
+
+                // Test the outcome from the task
+                if (ranToCompletion) // Completed within the cancellation timeout
+                {
+                    // Handle the three possible task end states
+                    switch (iaTask.Status)
+                    {
+                        case TaskStatus.Canceled: // The application cancel button was pushed
+                            LogIssue("ImageArray", "Retrieve image array was cancelled.");
+                            break;
+
+                        case TaskStatus.Faulted: // The StartExposure call failed
+                            LogIssue("ImageArray", $"Error getting image array: {iaTask.Exception?.InnerException.Message}");
+                            LogDebug("ImageArray", $"Exception detail:\r\n {iaTask.Exception?.InnerException}");
+                            break;
+
+                        default: // Some other unexpected state
+                            LogError("ImageArray", $"Unexpected task end state from camera.ImageArray: {iaTask.Status}");
+
+                            break;
+
+                        case TaskStatus.RanToCompletion: // The ImageArray method completed OK within the specified timeout period.
+                                                         // No action here because the gotImageArrayOk flag is set by the code within the task
+                            break;
+                    }
+                }
+                else // Timed out
+                {
+                    // Cancel the task so that it does not try to write to the log
+                    iaTokenSource.Cancel();
+
+                    // Log an issue because of the timeout
+                    LogIssue("ImageArray", $"ImageArray did not return within the timeout period: {settings.CameraWaitTimeout} seconds.");
+
+                    // Provide a warning about possible application corruption
+                    LogNewLine();
+                    LogError("CONFORMU", "IMAGEARRAY TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                    LogNewLine();
+
+                    // Cancel the task
+                    ConformanceTestManager.ConformCancellationTokenSource.Cancel();
+
+                    ClearStatus();
+
+                    return;
+                }
+
+                // Exit if cancelled
+                if (applicationCancellationToken.IsCancellationRequested) // Exit if required
+                {
+                    ClearStatus();
+                    return;
+                }
+
+                // Test image array variant array for conformity
+                if ((m_ImageArray.GetLength(0) == requiredNumX) & (m_ImageArray.GetLength(1) == requiredNumY))
+                {
+                    if (m_ImageArray.GetType().ToString() == "System.Int32[,]" | m_ImageArray.GetType().ToString() == "System.Int32[,,]")
+                    {
+                        if (m_ImageArray.Rank == 2)
+                            numPlanes = "1 plane";
+                        else
+                        {
+                            numPlanes = "1 plane";
+                            if (m_ImageArray.GetUpperBound(2) > 0)
+                                numPlanes = System.Convert.ToString(m_ImageArray.GetUpperBound(2) + 1) + " planes";
+                        }
+                        LogOK("ImageArray", $"Successfully read 32 bit integer array ({numPlanes}) {m_ImageArray.GetLength(0)} x {m_ImageArray.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
+                    }
+                    else
+                        LogIssue("ImageArray", "Expected 32 bit integer array, actually got: " + m_ImageArray.GetType().ToString());
+                }
+                else if ((m_ImageArray.GetLength(0) == requiredNumY) & (m_ImageArray.GetLength(1) == requiredNumX))
+                    LogIssue("ImageArray", "Camera image dimensions swapped, expected values: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
+                else
+                    LogIssue("ImageArray", "Camera image does not have the expected dimensions of: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
+            }
+            catch (OutOfMemoryException ex)
+            {
+                // Log an error
+                LogError("ImageArray", $"OutOfMemoryException - Conform Universal or the device ran out of memory: {ex.Message}");
+                LogDebug("ImageArray", $"Exception detail: {ex}");
+                ClearStatus();
+                return;
+            }
+            catch (Exception ex)
+            {
+                LogIssue("ImageArray", $"Error when reading ImageArray: {ex.Message}");
+                LogDebug("ImageArray", $"Exception detail: {ex}");
+                ClearStatus();
+                return;
+            }
+
+            // Release memory currently consumed by images
+            ReleaseMemory();
+
+            #endregion
+
+            #region Check ImageArrayVariant
+
+            try
+            {
+                // Check image array variant dimensions
+                if (settings.CameraTestImageArrayVariant) // Test if configured to do so. No need to report an issue because it's already been reported when the ImageArrayVariant property was tested
+                {
+                    // Release memory currently consumed by images
+                    ReleaseMemory();
+
+                    SetAction("Retrieving ImageArrayVariant");
+
+                    // Start  a UI update task
+                    CancellationTokenSource iavUiTaskTokenSource = new();
+                    CancellationToken iavUiTaskCancellationToken = iavUiTaskTokenSource.Token;
+
+                    Task.Run(() =>
+                    {
+                        UpdateUI(iavUiTaskCancellationToken);
+                    }, iavUiTaskCancellationToken);
 
                     // Create a cancellation token that we can set if the task times out
-                    CancellationTokenSource cancellationTokenSource = new();
-                    CancellationToken cancellationToken = cancellationTokenSource.Token;
+                    CancellationTokenSource iavTokenSource = new();
+                    CancellationToken iavToken = iavTokenSource.Token;
 
-                    Task startExposureTask = Task.Run(() =>
+                    Task iavTask = Task.Factory.StartNew<bool>(() =>
                     {
+                        bool gotImageOk = false;
                         try
                         {
-                            camera.StartExposure(requiredDuration, true);
+                            // Get the variant array image 
+                            if (settings.DisplayMethodCalls)
+                                LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
+                            sw.Restart();
+                            object imageObject = camera.ImageArrayVariant;
+                            sw.Stop();
 
-                            // Do not respond if the task has been cancelled
-                            if (!cancellationToken.IsCancellationRequested) // Task is live and has not been cancelled
+                            LogInfo("ImageArrayVariant", $"Received image OK");
+
+                            // Assign the array to the application variable if the task is not cancelled
+                            if (!cancellationToken.IsCancellationRequested) // Completed successfully
                             {
-                                LogDebug(testName, "Exposure initiated OK");
-                                initiatedOk = true; // Flag that the exposure was successfully initiated
+                                m_ImageArrayVariant = (Array)imageObject;
+                                gotImageOk = true;
+                            }
+                            else // Operation cancelled
+                            {
+                                // Release the image memory
+                                imageObject = null;
+
+                                // Clean up released memory
+                                GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                                GC.Collect(2, GCCollectionMode.Forced, true, true);
+                            }
+                        }
+                        catch (OutOfMemoryException ex)
+                        {
+                            if (!cancellationToken.IsCancellationRequested) // Only log the error if the task has not been cancelled
+                            {
+                                // Log an error
+                                LogError("ImageArrayVariant", $"OutOfMemoryException - Conform Universal or the device ran out of memory: {ex.Message}");
+                                LogDebug("ImageArrayVariant", $"Exception detail: {ex}");
                             }
                         }
                         catch (Exception ex)
                         {
-                            // Ignore exceptions and do not respond if the task has been cancelled
-                            if (!cancellationToken.IsCancellationRequested) // Task is live and has not been cancelled
+                            if (!cancellationToken.IsCancellationRequested) // Only log the error if the task has not been cancelled
                             {
-                                // Record the error
-                                if (expectedErrorMessage != "")
-                                    LogOK(testName, $"Received error: {ex.Message}");
-                                else
-                                {
-                                    LogIssue(testName, $"Error initiating exposure: {ex.Message}");
-                                    LogDebug(testName, $"Exception detail:\r\n {ex}");
-                                }
+                                LogIssue("ImageArrayVariant", $"Error when reading ImageArrayVariant: {ex.Message}");
+                                LogDebug("ImageArrayVariant", $"Exception detail: {ex}");
                             }
                         }
-                    }, cancellationToken);
 
-                    // Start  a UI update task to display timing information
-                    CancellationTokenSource exposeUiTaskTokenSource = new();
-                    CancellationToken exposeUiTaskCancellationToken = exposeUiTaskTokenSource.Token;
+                        // Return a result indicating whether we got the image OK
+                        return gotImageOk;
+                    }, iavToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
 
-                    Task.Run(() =>
-                    {
-                        UpdateUI(exposeUiTaskCancellationToken);
-                    }, exposeUiTaskCancellationToken);
-
+                    bool ranToCompletion=false;
+                    // Wait for the ImageArrayVariant task to complete or be cancelled
                     try
                     {
-                        // Wait for the start exposure task to complete or be cancelled
-                        ranToCompletion = startExposureTask.Wait(TimeSpan.FromSeconds(requiredDuration + WAITWHILE_EXTRA_WAIT_TIME), applicationCancellationToken);
+                        ranToCompletion = iavTask.Wait(TimeSpan.FromSeconds(settings.CameraWaitTimeout), applicationCancellationToken);
                     }
                     catch (OperationCanceledException)
                     {
                         LogNewLine();
-                        LogError("CONFORMU", "START EXPOSURE WAS INTERRUPTTED LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                        LogError("CONFORMU", "GET IMAGEARRAYVARIANT WAS INTERRUPTTED LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
                         LogNewLine();
-                        throw;
+                        ClearStatus();
+                        return;
                     }
                     finally
                     {
                         // Stop the UI update task
-                        exposeUiTaskTokenSource.Cancel();
+                        iavUiTaskTokenSource.Cancel();
+                        ClearStatus();
                     }
 
                     // Test the outcome from the task
-                    if (ranToCompletion) // Completed within the cancellation timeout
+                    if (ranToCompletion) // Completed within the task timeout
                     {
                         // Handle the three possible task end states
-                        switch (startExposureTask.Status)
+                        switch (iavTask.Status)
                         {
                             case TaskStatus.Canceled: // The application cancel button was pushed
-                                initiatedOk = false;
-                                LogIssue(testName, "StartExposure was cancelled.");
+                                LogIssue("ImageArrayVariant", "Retrieve image array was cancelled.");
                                 break;
 
                             case TaskStatus.Faulted: // The StartExposure call failed
-                                initiatedOk = false;
-                                LogIssue(testName, $"Error initiating exposure: {startExposureTask.Exception?.InnerException.Message}");
-                                LogDebug(testName, $"Exception detail:\r\n {startExposureTask.Exception?.InnerException}");
+                                LogIssue("ImageArrayVariant", $"Error getting image array: {iavTask.Exception?.InnerException.Message}");
+                                LogDebug("ImageArrayVariant", $"Exception detail:\r\n {iavTask.Exception?.InnerException}");
                                 break;
 
                             default: // Some other unexpected state
-                                initiatedOk = false;
-                                LogError(testName, $"Unexpected task end state from camera.StartExposure: {startExposureTask.Status}");
+                                LogError("ImageArrayVariant", $"Unexpected task end state from camera.ImageArray: {iavTask.Status}");
 
                                 break;
 
-                            case TaskStatus.RanToCompletion: // The StartExposure method completed OK within the specified timeout period.
-                                // No action here because the initiatedOk flag is set by the code within the task
+                            case TaskStatus.RanToCompletion: // The ImageArray method completed OK within the specified timeout period.
+                                                             // No action here because the gotImageArrayOk flag is set by the code within the task
                                 break;
                         }
                     }
                     else // Timed out
                     {
                         // Cancel the task so that it does not try to write to the log
-                        cancellationTokenSource.Cancel();
-
+                        iavTokenSource.Cancel();
                         // Log an issue because of the timeout
-                        LogIssue(testName, $"StartExposure {(expectedErrorMessage == "" ? "" : $"{expectedErrorMessage} ")}did not return within the timeout period: {requiredDuration + WAITWHILE_EXTRA_WAIT_TIME} seconds.");
+                        LogIssue("ImageArrayVariant", $"ImageArrayVariant did not return within the timeout period: {settings.CameraWaitTimeout} seconds.");
 
                         // Provide a warning about possible application corruption
                         LogNewLine();
-                        LogError("CONFORMU", "START EXPOSURE TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                        LogError("CONFORMU", "IMAGEARRAYVARIANT TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
                         LogNewLine();
 
+                        // Cancel the task
+                        ConformanceTestManager.ConformCancellationTokenSource.Cancel();
+
+                        ClearStatus();
                         return;
                     }
 
-                    #endregion
-
-                    #region Wait for image and test outcome
-
-                    // Wait for exposure to complete if the task initiated OK
-                    if (initiatedOk) // StartExposure initiated OK
+                    // Exit if cancelled
+                    if (applicationCancellationToken.IsCancellationRequested)
                     {
-                        if (expectedErrorMessage == "") // No initiation exception is expected for this operation
+                        ClearStatus();
+                        return;
+                    }
+
+                    // Test image array variant array for conformity
+                    if ((m_ImageArrayVariant.GetLength(0) == requiredNumX) & (m_ImageArrayVariant.GetLength(1) == requiredNumY))
+                    {
+                        if (m_ImageArrayVariant.GetType().ToString() == "System.Object[,]" | m_ImageArrayVariant.GetType().ToString() == "System.Object[,,]")
                         {
-                            #region Handle both synchronous and asynchronous exposure behaviour
-
-                            endTime = DateTime.Now;
-
-                            // Test whether we have a synchronous or asynchronous camera
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get ImageReady and CameraState");
-                            if (camera.ImageReady & (camera.CameraState == CameraState.Idle)) // Synchronous exposure
+                            if (m_ImageArrayVariant.Rank == 2)
                             {
-                                #region Check synchronous exposure behaviour
-
-                                if (endTime.Subtract(startTime).TotalSeconds >= requiredDuration)
-                                {
-                                    LogOK(testName, "Synchronous exposure found OK: " + requiredDuration + " seconds");
-                                    CameraTestLast(requiredDuration, startTimeUTC);
-                                }
-                                else
-                                    LogIssue(testName, "Synchronous exposure found but image was returned before exposure time was complete");
-
-                                #endregion
+                                numPlanes = "1 plane";
+                                variantType = ((object[,])m_ImageArrayVariant)[0, 0].GetType().ToString();
                             }
-                            else // Asynchronous exposure
-                            {
-                                #region Wait for exposing state to start
-
-                                SetStatus("Waiting for exposure to start");
-
-                                // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
-                                imageReadyTooEarly = Convert.ToBoolean(camera.ImageReady);
-
-                                // Wait for exposing state
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
-                                Stopwatch sw = Stopwatch.StartNew();
-                                WaitWhile(GetAction(), () =>
-                                {
-                                    // Wait while the camera is exposing and is not in an error state
-                                    return (camera.CameraState != CameraState.Exposing) & (camera.CameraState != CameraState.Error);
-                                }, 500, settings.CameraWaitTimeout, () =>
-                                {
-                                    return $"{sw.Elapsed.TotalSeconds:0.0} / {requiredDuration:0.0}";
-                                });
-
-                                if (applicationCancellationToken.IsCancellationRequested) // Exit if required
-                                    return;
-
-                                // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
-                                imageReadyTooEarly = camera.ImageReady;
-
-                                #endregion
-
-                                #region Wait for exposing state to end
-
-                                // Wait for the exposing state to finish
-                                startTime = DateTime.Now;
-                                startTimeUTC = DateTime.UtcNow;
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage("ConformanceCheck", "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
-
-                                // Start the loop timing stopwatch
-                                sw.Restart();
-                                Stopwatch swOverall = Stopwatch.StartNew();
-
-                                WaitWhile($"Waiting for exposure to complete", () =>
-                                {
-                                    // Wait for the camera state to be something other than CamerraStates.Exposing
-                                    return camera.CameraState == CameraState.Exposing;
-                                }, 500, settings.CameraWaitTimeout, () =>
-                                {
-                                    // Create a progress status message
-                                    bool reportedError = false;
-                                    string percentCompletedMessage = "Not present in a V1 driver"; // Initialise PercentCompleted message
-
-                                    if (camera.InterfaceVersion > 1)
-                                    {
-                                        try
-                                        {
-                                            percentCompleted = camera.PercentCompleted;
-                                            percentCompletedMessage = $"{percentCompleted}%"; // Operation completed OK
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            if (IsPropertyNotImplementedException(ex))
-                                            {
-                                                percentCompletedMessage = "Not implemented"; // Not implemented
-                                            }
-                                            else if (IsInvalidOperationException(testName, ex))
-                                            {
-                                                percentCompletedMessage = $"Invalid operation: {ex.Message}"; // Not valid at this time
-                                            }
-                                            else
-                                            {
-                                                percentCompletedMessage = $"Error: {ex.Message}"; // Something bad happened!
-
-                                                // Only log the error once to avoid unnecessarily filling the log
-                                                if (!reportedError)
-                                                {
-                                                    LogDebug("PercentCompleted", $"Exception detail: {ex}");
-                                                    reportedError = true;
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    return $"Percent complete: {percentCompletedMessage}";
-                                });
-
-                                endTime = DateTime.Now;
-
-                                if (applicationCancellationToken.IsCancellationRequested) // Exit if required
-                                    return;
-
-                                #endregion
-
-                                #region Wait for camera to become idle
-
-                                // Wait for camera to become idle
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
-
-                                WaitWhile("Waiting for camera idle state, reading/downloading image", () =>
-                                {
-                                    // Wait until the camera state is idle or error
-                                    return (camera.CameraState != CameraState.Idle) & (camera.CameraState != CameraState.Error);
-                                }, 500, settings.CameraWaitTimeout);
-
-                                if (applicationCancellationToken.IsCancellationRequested) // Exit if required
-                                    return;
-
-                                #endregion
-
-                                #region Wait for image to be ready for retrieval
-
-                                // Wait for image to become ready
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
-
-                                WaitWhile("Waiting for image ready", () =>
-                                {
-                                    // Wait until ImageReady is true or the camera is in the error state
-                                    return !camera.ImageReady & (camera.CameraState != CameraState.Error);
-                                }, 500, settings.CameraWaitTimeout);
-
-                                if (applicationCancellationToken.IsCancellationRequested) // Exit if required
-                                    return;
-
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
-                                if (camera.ImageReady)
-                                {
-                                    LogOK(testName, "Asynchronous exposure found OK: " + requiredDuration + " seconds");
-                                    CameraTestLast(requiredDuration, startTimeUTC);
-                                }
-                                else
-                                    LogIssue(testName, "Camera state is CameraError");
-
-                                #endregion
-                            }
-
-                            #endregion
-
-                            #region Check exposure outcome
-
-                            // Display a warning if ImageReady was set too early
-                            if (imageReadyTooEarly)
-                            {
-                                LogIssue(testName, "ImageReady was set True before the camera completed its exposure.");
-                            }
-
-                            // Camera exposed OK and didn't generate an exception
                             else
                             {
-                                exposedOK = true;
-                            }
-                            LogDebug(testName, $"Camera exposed image OK: {exposedOK}");
-
-                            #endregion
-
-                            #region Check ImageArray
-
-                            // Check image array dimensions
-                            try
-                            {
-                                // Release memory currently consumed by images
-                                SetAction("Releasing memory");
-                                ReleaseMemory();
-
-                                // Retrieve the image array
-                                SetAction("Retrieving ImageArray");
-
-                                // Create a cancellation token that we can set if the task times out
-                                CancellationTokenSource iaTokenSource = new();
-                                CancellationToken iaToken = iaTokenSource.Token;
-
-                                Task iaTask = Task.Factory.StartNew(() =>
+                                numPlanes = "1 plane";
+                                if (m_ImageArrayVariant.GetUpperBound(2) > 0)
                                 {
-                                    try
-                                    {
-                                        if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
-                                        sw.Restart();
-                                        m_ImageArray = (Array)camera.ImageArray;
-                                        sw.Stop();
-                                        // Do not respond if the task has been cancelled
-                                        if (!cancellationToken.IsCancellationRequested) // Task is live and has not been cancelled
-                                        {
-                                            LogDebug(testName, "Got image array OK");
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        // Ignore exceptions and do not respond if the task has been cancelled
-                                        if (!cancellationToken.IsCancellationRequested) // Task is live and has not been cancelled
-                                        {
-                                            // Record the error
-                                            LogIssue(testName, $"Error getting ImageArray: {ex.Message}");
-                                            LogDebug(testName, $"Exception detail:\r\n {ex}");
-                                        }
-                                    }
-                                }, iaToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-
-                                // Start  a UI update task
-                                CancellationTokenSource iaUiTaskTokenSource = new();
-                                CancellationToken iaUiTaskCancellationToken = iaUiTaskTokenSource.Token;
-
-                                Task.Run(() =>
-                                {
-                                    UpdateUI(iaUiTaskCancellationToken);
-                                }, iaUiTaskCancellationToken);
-
-                                try
-                                {
-                                    // Wait for the ImageArray task to complete or be cancelled
-                                    ranToCompletion = iaTask.Wait(TimeSpan.FromSeconds(settings.CameraWaitTimeout), applicationCancellationToken);
+                                    numPlanes = System.Convert.ToString(m_ImageArrayVariant.GetUpperBound(2) + 1) + " planes";
+                                    variantType = ((object[,,])m_ImageArrayVariant)[0, 0, 0].GetType().ToString();
                                 }
-                                catch (OperationCanceledException)
-                                {
-                                    LogNewLine();
-                                    LogError("CONFORMU", "GET IMAGEARRAY WAS INTERRUPTTED LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
-                                    LogNewLine();
-                                    throw;
-                                }
-                                finally
-                                {
-                                    // Stop the UI update task
-                                    iaUiTaskTokenSource.Cancel();
-                                }
-
-                                // Test the outcome from the task
-                                if (ranToCompletion) // Completed within the cancellation timeout
-                                {
-                                    // Handle the three possible task end states
-                                    switch (iaTask.Status)
-                                    {
-                                        case TaskStatus.Canceled: // The application cancel button was pushed
-                                            LogIssue(testName, "Retrieve image array was cancelled.");
-                                            break;
-
-                                        case TaskStatus.Faulted: // The StartExposure call failed
-                                            LogIssue(testName, $"Error getting image array: {iaTask.Exception?.InnerException.Message}");
-                                            LogDebug(testName, $"Exception detail:\r\n {iaTask.Exception?.InnerException}");
-                                            break;
-
-                                        default: // Some other unexpected state
-                                            LogError(testName, $"Unexpected task end state from camera.ImageArray: {iaTask.Status}");
-
-                                            break;
-
-                                        case TaskStatus.RanToCompletion: // The ImageArray method completed OK within the specified timeout period.
-                                                                         // No action here because the gotImageArrayOk flag is set by the code within the task
-                                            break;
-                                    }
-                                }
-                                else // Timed out
-                                {
-                                    // Cancel the task so that it does not try to write to the log
-                                    iaTokenSource.Cancel();
-
-                                    // Log an issue because of the timeout
-                                    LogIssue(testName, $"ImageArray did not return within the timeout period: {settings.CameraWaitTimeout} seconds.");
-
-                                    // Provide a warning about possible application corruption
-                                    LogNewLine();
-                                    LogError("CONFORMU", "IMAGEARRAY TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
-                                    LogNewLine();
-
-                                    return;
-                                }
-
-                                if (applicationCancellationToken.IsCancellationRequested) // Exit if required
-                                    return;
-
-                                // Examine the returned array
-                                if ((m_ImageArray.GetLength(0) == requiredNumX) & (m_ImageArray.GetLength(1) == requiredNumY))
-                                {
-                                    if (m_ImageArray.GetType().ToString() == "System.Int32[,]" | m_ImageArray.GetType().ToString() == "System.Int32[,,]")
-                                    {
-                                        if (m_ImageArray.Rank == 2)
-                                            numPlanes = "1 plane";
-                                        else
-                                        {
-                                            numPlanes = "1 plane";
-                                            if (m_ImageArray.GetUpperBound(2) > 0)
-                                                numPlanes = System.Convert.ToString(m_ImageArray.GetUpperBound(2) + 1) + " planes";
-                                        }
-                                        LogOK("ImageArray", $"Successfully read 32 bit integer array ({numPlanes}) {m_ImageArray.GetLength(0)} x {m_ImageArray.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
-                                    }
-                                    else
-                                        LogIssue("ImageArray", "Expected 32 bit integer array, actually got: " + m_ImageArray.GetType().ToString());
-                                }
-                                else if ((m_ImageArray.GetLength(0) == requiredNumY) & (m_ImageArray.GetLength(1) == requiredNumX))
-                                    LogIssue("ImageArray", "Camera image dimensions swapped, expected values: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
                                 else
-                                    LogIssue("ImageArray", "Camera image does not have the expected dimensions of: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
+                                    variantType = ((object[,])m_ImageArrayVariant)[0, 0].GetType().ToString();
                             }
-                            catch (OutOfMemoryException ex)
-                            {
-                                // Log an error
-                                LogError("ImageArray", $"OutOfMemoryException - Conform Universal or the device ran out of memory: {ex.Message}");
-                                LogDebug("ImageArray", $"Exception detail: {ex}");
-                            }
-                            catch (Exception ex)
-                            {
-                                LogIssue("ImageArray", $"Error when reading ImageArray: {ex.Message}");
-                                LogDebug("ImageArray", $"Exception detail: {ex}");
-                            }
-
-                            // Release memory currently consumed by images
-                            SetAction("Releasing memory");
-                            ReleaseMemory();
-
-                            #endregion
-
-                            #region Check ImageArrayVariant
-
-                            // Check image array variant dimensions
-
-                            if (settings.CameraTestImageArrayVariant) // Test if configured to do so. No need to report an issue because it's already been reported when the ImageArrayVariant property was tested
-                            {
-                                // Release memory currently consumed by images
-                                SetAction("Releasing memory");
-                                ReleaseMemory();
-
-                                SetAction("Retrieving ImageArrayVariant");
-
-                                // Create a cancellation token that we can set if the task times out
-                                CancellationTokenSource iavTokenSource = new();
-                                CancellationToken iavToken = iavTokenSource.Token;
-
-                                Task iavTask = Task.Factory.StartNew(() =>
-                                {
-                                    try
-                                    {
-                                        // Get the variant array image 
-                                        if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
-                                        sw.Restart();
-                                        object imageObject = camera.ImageArrayVariant;
-                                        sw.Stop();
-
-                                        LogInfo("ImageArrayVariant", $"Received image OK");
-
-                                        // Assign the array to the application variable if the task is not cancelled
-                                        if (!cancellationToken.IsCancellationRequested) // Completed successfully
-                                        {
-                                            m_ImageArrayVariant = (Array)imageObject;
-                                        }
-                                        else // Operation cancelled
-                                        {
-                                            // Release the image memory
-                                            imageObject = null;
-
-                                            // Clean up released memory
-                                            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
-                                            GC.Collect(2, GCCollectionMode.Forced, true, true);
-                                        }
-                                    }
-                                    catch (OutOfMemoryException ex)
-                                    {
-                                        if (!cancellationToken.IsCancellationRequested) // Only log the error if the task has not been cancelled
-                                        {
-                                            // Log an error
-                                            LogError("ImageArrayVariant", $"OutOfMemoryException - Conform Universal or the device ran out of memory: {ex.Message}");
-                                            LogDebug("ImageArrayVariant", $"Exception detail: {ex}");
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        if (!cancellationToken.IsCancellationRequested) // Only log the error if the task has not been cancelled
-                                        {
-                                            LogIssue("ImageArrayVariant", $"Error when reading ImageArrayVariant: {ex.Message}");
-                                            LogDebug("ImageArrayVariant", $"Exception detail: {ex}");
-                                        }
-                                    }
-                                }, iavToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
-
-                                // Start  a UI update task
-                                CancellationTokenSource iavUiTaskTokenSource = new();
-                                CancellationToken iavUiTaskCancellationToken = iavUiTaskTokenSource.Token;
-
-                                Task.Run(() =>
-                                {
-                                    UpdateUI(iavUiTaskCancellationToken);
-                                }, iavUiTaskCancellationToken);
-
-                                try
-                                {
-                                    // Wait for the ImageArrayVariant task to complete or be cancelled
-                                    ranToCompletion = iavTask.Wait(TimeSpan.FromSeconds(settings.CameraWaitTimeout), applicationCancellationToken);
-                                }
-                                catch (OperationCanceledException)
-                                {
-                                    LogNewLine();
-                                    LogError("CONFORMU", "GET IMAGEARRAYVARIANT WAS INTERRUPTTED LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
-                                    LogNewLine();
-                                    throw;
-                                }
-                                finally
-                                {
-                                    // Stop the UI update task
-                                    iavUiTaskTokenSource.Cancel();
-                                }
-
-                                // Test the outcome from the task
-                                if (ranToCompletion) // Completed within the cancellation timeout
-                                {
-                                    // Handle the three possible task end states
-                                    switch (iavTask.Status)
-                                    {
-                                        case TaskStatus.Canceled: // The application cancel button was pushed
-                                            LogIssue(testName, "Retrieve image array was cancelled.");
-                                            break;
-
-                                        case TaskStatus.Faulted: // The StartExposure call failed
-                                            LogIssue(testName, $"Error getting image array: {iavTask.Exception?.InnerException.Message}");
-                                            LogDebug(testName, $"Exception detail:\r\n {iavTask.Exception?.InnerException}");
-                                            break;
-
-                                        default: // Some other unexpected state
-                                            LogError(testName, $"Unexpected task end state from camera.ImageArray: {iavTask.Status}");
-
-                                            break;
-
-                                        case TaskStatus.RanToCompletion: // The ImageArray method completed OK within the specified timeout period.
-                                                                         // No action here because the gotImageArrayOk flag is set by the code within the task
-                                            break;
-                                    }
-                                }
-                                else // Timed out
-                                {
-                                    // Cancel the task so that it does not try to write to the log
-                                    iavTokenSource.Cancel();
-                                    // Log an issue because of the timeout
-                                    LogIssue(testName, $"ImageArrayVariant did not return within the timeout period: {settings.CameraWaitTimeout} seconds.");
-
-                                    // Provide a warning about possible application corruption
-                                    LogNewLine();
-                                    LogError("CONFORMU", "IMAGEARRAYVARIANT TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
-                                    LogNewLine();
-
-                                    return;
-                                }
-
-                                // Exit if cancelled
-                                if (applicationCancellationToken.IsCancellationRequested)
-                                    return;
-
-                                if ((m_ImageArrayVariant.GetLength(0) == requiredNumX) & (m_ImageArrayVariant.GetLength(1) == requiredNumY))
-                                {
-                                    if (m_ImageArrayVariant.GetType().ToString() == "System.Object[,]" | m_ImageArrayVariant.GetType().ToString() == "System.Object[,,]")
-                                    {
-                                        if (m_ImageArrayVariant.Rank == 2)
-                                        {
-                                            numPlanes = "1 plane";
-                                            variantType = ((object[,])m_ImageArrayVariant)[0, 0].GetType().ToString();
-                                        }
-                                        else
-                                        {
-                                            numPlanes = "1 plane";
-                                            if (m_ImageArrayVariant.GetUpperBound(2) > 0)
-                                            {
-                                                numPlanes = System.Convert.ToString(m_ImageArrayVariant.GetUpperBound(2) + 1) + " planes";
-                                                variantType = ((object[,,])m_ImageArrayVariant)[0, 0, 0].GetType().ToString();
-                                            }
-                                            else
-                                                variantType = ((object[,])m_ImageArrayVariant)[0, 0].GetType().ToString();
-                                        }
-                                        LogOK("ImageArrayVariant", $"Successfully read variant array ({numPlanes}) with {variantType} elements {m_ImageArrayVariant.GetLength(0)} x {m_ImageArrayVariant.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
-                                    }
-                                    else
-                                        LogIssue("ImageArrayVariant", "Expected variant array, actually got: " + m_ImageArrayVariant.GetType().ToString());
-                                }
-                                else if ((m_ImageArrayVariant.GetLength(0) == requiredNumY) & (m_ImageArrayVariant.GetLength(1) == requiredNumX))
-                                    LogIssue("ImageArrayVariant", "Camera image dimensions swapped, expected values: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
-                                else
-                                    LogIssue("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
-                                // Release memory currently consumed by images
-                                SetAction("Releasing memory");
-                                ReleaseMemory();
-
-                                #endregion
-                            }
-                            else // An exception is expected from StartExposure for this operation but we did not get one
-                            {
-                                #region Handle cases where expected errors were not received
-
-                                LogTestAndMessage(testName, "Test: " + expectedErrorMessage);
-                                LogIssue(testName, "Expected an error and didn't get one - BinX:" + requiredBinX + " BinY:" + requiredBinY + " StartX:" + requiredStartX + " StartY:" + requiredStartY + " NumX:" + requiredNumX + " NumY:" + requiredNumY);
-
-                                // Try and do some clean up
-                                try
-                                {
-                                    if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage("ConformanceCheck", "About to call StopExposure");
-                                    camera.StopExposure();
-                                }
-                                catch (Exception) { }
-
-                                try
-                                {
-                                    if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage("ConformanceCheck", "About to call AbortExposure");
-                                    camera.AbortExposure();
-                                }
-                                catch (Exception) { }
-
-                                #endregion
-                            }
+                            LogOK("ImageArrayVariant", $"Successfully read variant array ({numPlanes}) with {variantType} elements {m_ImageArrayVariant.GetLength(0)} x {m_ImageArrayVariant.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
                         }
-                        else // Initiation did not complete successfully
-                        {
-                            // The StartExposure did not complete successfully and has already been handled within the start exposure task so not action required here
-                        }
-
-                        #endregion
+                        else
+                            LogIssue("ImageArrayVariant", "Expected variant array, actually got: " + m_ImageArrayVariant.GetType().ToString());
                     }
+                    else if ((m_ImageArrayVariant.GetLength(0) == requiredNumY) & (m_ImageArrayVariant.GetLength(1) == requiredNumX))
+                        LogIssue("ImageArrayVariant", "Camera image dimensions swapped, expected values: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
+                    else
+                        LogIssue("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
+                    
+                    // Release memory currently consumed by images
+                    ReleaseMemory();
                 }
-                catch (AggregateException ex) // Unexpected exception when initiating the exposure. Should not happen because of the try:catch in the task, but you never know...
-                {
-                    initiatedOk = false;
-                    LogError(testName, $"Unexpected exception initiating exposure: {ex.InnerException.Message}");
-                    LogDebug(testName, $"Unexpected exception detail:\r\n {ex.InnerException}");
-                }
-                catch (TimeoutException ex) // StartExposure timed out
-                {
-                    LogIssue(testName, $"The {requiredNumX} x {requiredNumY} (Bin {requiredBinX} x {requiredBinY}) exposure timed out: {ex.Message}");
-                    LogDebug(testName, $"Exception detail:\r\n {ex}");
-
-                    // Provide a warning about possible application corruption
-                    LogNewLine();
-                    LogError("CONFORMU", "EXPOSURE TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
-                    LogNewLine();
-                }
-                catch (Exception ex) // Something else went wrong...
-                {
-                    LogIssue(testName, $"Received error when exposing: {ex.Message}");
-                    LogDebug(testName, $"Exception: {ex}");
-                }
-
-                #endregion
-
             }
-            else // At least one of BinX, BinY, StartX, StartY, NumX or NumY could not be set
+            catch (OutOfMemoryException ex)
             {
-                LogInfo(testName, "Exposure test abandoned because at least one of BinX, BinY, NumX, NumY, StartX or StartY could not be set.");
-                // No action required
+                // Log an error
+                LogError("ImageArrayVariant", $"OutOfMemoryException - Conform Universal or the device ran out of memory: {ex.Message}");
+                LogDebug("ImageArrayVariant", $"Exception detail: {ex}");
+                ClearStatus();
+            }
+            catch (Exception ex)
+            {
+                LogIssue("ImageArrayVariant", $"Unexpected error while processing ImageArrayVariant: {ex.Message}");
+                LogDebug("ImageArrayVariant", $"Exception detail:\r\n{ex}");
             }
 
-            SetAction("");
+            // Release memory currently consumed by images
+            ReleaseMemory();
+
+            #endregion
+
+            #region Clean up
+
+            // Try and do some clean up
+            try
+            {
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("ConformanceCheck", "About to call StopExposure");
+                camera.StopExposure();
+            }
+            catch (Exception) { }
+
+            try
+            {
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("ConformanceCheck", "About to call AbortExposure");
+                camera.AbortExposure();
+            }
+            catch (Exception) { }
+
+            ClearStatus();
+
+            #endregion  
         }
 
         /// <summary>
@@ -3742,7 +3864,6 @@ namespace ConformU
                         case CameraPerformance.ImageArray:
                             {
                                 // Release memory currently consumed by images
-                                SetAction("Releasing memory");
                                 ReleaseMemory();
 
                                 m_ImageArray = (Array)camera.ImageArray;
@@ -3752,7 +3873,6 @@ namespace ConformU
                         case CameraPerformance.ImageArrayVariant:
                             {
                                 // Release memory currently consumed by images
-                                SetAction("Releasing memory");
                                 ReleaseMemory();
 
                                 m_ImageArrayVariant = (Array)camera.ImageArrayVariant;
@@ -3876,6 +3996,8 @@ namespace ConformU
         /// </summary>
         private void ReleaseMemory()
         {
+            SetAction("Releasing memory");
+
             // Clear out any previous memory allocations
             m_ImageArray = null;
             m_ImageArrayVariant = null;

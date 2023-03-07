@@ -18,11 +18,12 @@ namespace ConformU
         private readonly ConformLogger TL;
         private readonly Settings settings;
         DeviceTesterBaseClass testDevice = null; // Variable to hold the device tester class
-
-        public ConformanceTestManager(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken)
+        public static CancellationTokenSource ConformCancellationTokenSource;
+        public ConformanceTestManager(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationTokenSource conformCancellationTokenSource, CancellationToken conformCancellationToken)
         {
             configuration = conformConfiguration;
             cancellationToken = conformCancellationToken;
+            ConformCancellationTokenSource = conformCancellationTokenSource;
             TL = logger;
             settings = conformConfiguration.Settings;
         }
@@ -270,7 +271,7 @@ namespace ConformU
                                 TL.LogMessage("Conformance test interrupted by STOP button or to protect the device.", MessageLevel.TestOnly, "");
 
                                 // Add an issue if the test was interrupted and is therefore incomplete
-                                conformResults.Issues.Add(new KeyValuePair<string, string>("StopKey", "The conformance test is incomplete because it was interrupted by the stop key"));
+                                conformResults.Issues.Add(new KeyValuePair<string, string>("StopKey", "The conformance test is incomplete because it was interrupted by the stop key or to protect the device being tested."));
                             }
 
                         }

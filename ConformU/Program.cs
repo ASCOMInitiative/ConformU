@@ -265,7 +265,7 @@ namespace ConformU
                 CancellationToken cancelConformToken = cancellationTokenSource.Token;
 
                 // Create a test manager instance to oversee the test
-                ConformanceTestManager tester = new(conformConfiguration, conformLogger, cancelConformToken);
+                ConformanceTestManager tester = new(conformConfiguration, conformLogger, cancellationTokenSource, cancelConformToken);
                 try
                 {
                     tester.TestDevice();

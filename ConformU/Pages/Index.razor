@@ -187,7 +187,7 @@
                 cancelConformToken = cancellationTokenSource.Token;
 
                 // Create a test manager instance to oversee the test
-                using (tester = new ConformanceTestManager(configuration, conformLogger, cancelConformToken))
+                using (tester = new ConformanceTestManager(configuration, conformLogger, cancellationTokenSource, cancelConformToken))
                 {
                     try
                     {

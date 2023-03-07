@@ -783,8 +783,8 @@ namespace ConformU
 
         public void SetAction(string action)
         {
-            this.testAction = action;
-            this.testStatus = "";
+            testAction = action;
+            testStatus = "";
             SetFullStatus(testName, action, testStatus);
         }
 
@@ -800,6 +800,9 @@ namespace ConformU
         ///<remarks></remarks>
         public void ClearStatus()
         {
+            testName = "";
+            testAction = "";
+            testStatus = "";
             TL?.SetStatusMessage($"");
         }
 
