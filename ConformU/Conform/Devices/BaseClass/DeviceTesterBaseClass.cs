@@ -770,10 +770,7 @@ namespace ConformU
 
         public void SetTest(string test)
         {
-            testName = test;
-            testAction = "";
-            testStatus = "";
-            SetFullStatus(test, testAction, testStatus);
+            SetFullStatus(test, "", "");
         }
 
         public string GetAction()
@@ -783,14 +780,11 @@ namespace ConformU
 
         public void SetAction(string action)
         {
-            testAction = action;
-            testStatus = "";
-            SetFullStatus(testName, action, testStatus);
+            SetFullStatus(testName, action, "");
         }
 
         public void SetStatus(string status)
         {
-            this.testStatus = status;
             SetFullStatus(testName, testAction, status);
         }
 
@@ -800,10 +794,12 @@ namespace ConformU
         ///<remarks></remarks>
         public void ClearStatus()
         {
-            testName = "";
-            testAction = "";
-            testStatus = "";
-            TL?.SetStatusMessage($"");
+            SetFullStatus(testName, testAction, "");
+        }
+
+        public void ResetTestActionStatus()
+        {
+            SetFullStatus("", "", "");
         }
 
         /// <summary>
@@ -819,8 +815,12 @@ namespace ConformU
                 // Ensure that we don't wait more than the expected duration
                 if (updateInterval > waitDuration) updateInterval = waitDuration;
 
-                // Initialise the status message status field 
-                SetStatus($"0.0 / {Convert.ToDouble(waitDuration) / 1000.0:0.0} seconds");
+                // Only update the status field if the application is not cancelled
+                if (!applicationCancellationToken.IsCancellationRequested)
+                {
+                    // Initialise the status message status field 
+                    SetStatus($"0.0 / {Convert.ToDouble(waitDuration) / 1000.0:0.0} seconds");
+                }
 
                 // Start the loop timing stopwatch
                 Stopwatch sw = Stopwatch.StartNew();
@@ -842,8 +842,12 @@ namespace ConformU
                     // Sleep until it is time for the next completion function poll
                     Thread.Sleep(sleeptime);
 
-                    // Set the status message status field to the elapsed time
-                    SetStatus($"{Math.Round(Convert.ToDouble(currentLoopNumber + 1) * updateInterval / 1000.0, 1):0.0} / {Convert.ToDouble(waitDuration) / 1000.0:0.0} seconds");
+                    // Only update the status field if the application is not cancelled
+                    if (!applicationCancellationToken.IsCancellationRequested)
+                    {
+                        // Set the status message status field to the elapsed time
+                        SetStatus($"{Math.Round(Convert.ToDouble(currentLoopNumber + 1) * updateInterval / 1000.0, 1):0.0} / {Convert.ToDouble(waitDuration) / 1000.0:0.0} seconds");
+                    }
                 }
                 while ((sw.ElapsedMilliseconds <= waitDuration) & !applicationCancellationToken.IsCancellationRequested);
             }
@@ -865,17 +869,21 @@ namespace ConformU
             // Validate the supplied poll interval
             if (pollInterval < 100) throw new InvalidValueException($"The poll interval must be >=100ms: {pollInterval}");
 
-            // Set the status message action field to the supplied action name if it has not already been set
-            if ((!string.IsNullOrEmpty(actionName)) & (actionName != GetAction()))
+            // Only update the status if the task has not been cancelled
+            if (!applicationCancellationToken.IsCancellationRequested)
             {
-                SetAction(actionName);
-            }
+                // Set the status message action field to the supplied action name if it has not already been set
+                if ((!string.IsNullOrEmpty(actionName)) & (actionName != GetAction()))
+                {
+                    SetAction(actionName);
+                }
 
-            // Initialise the status message
-            if (statusString is null)
-                SetStatus($"0.0 / {timeoutSeconds:0.0} seconds");
-            else
-                SetStatus(statusString());
+                // Initialise the status message
+                if (statusString is null)
+                    SetStatus($"0.0 / {timeoutSeconds:0.0} seconds");
+                else
+                    SetStatus(statusString());
+            }
 
             // Create a timeout cancellation token source that times out after the required timeout period
             CancellationTokenSource timeoutCts = new();
@@ -897,15 +905,19 @@ namespace ConformU
                 // Sleep until it is time for the next completion function poll
                 Thread.Sleep(sleeptime);
 
-                // Set the status message status field
-                if (statusString is null) // No status string function was provided so display an elapsed time message
+                // Only update the status field if not cancelled
+                if (!combinedCts.IsCancellationRequested)
                 {
-                    double elapsedTime = Math.Min(Math.Round(Convert.ToDouble(currentLoopNumber + 1) * pollInterval / 1000.0, 1), timeoutSeconds);
-                    SetStatus($"{elapsedTime:0.0} / {timeoutSeconds:0.0} seconds");
-                }
-                else // Display the supplied message instead of the elapsed time message
-                    SetStatus(statusString());
+                    // Set the status message status field
+                    if (statusString is null) // No status string function was provided so display an elapsed time message
+                    {
+                        double elapsedTime = Math.Min(Math.Round(Convert.ToDouble(currentLoopNumber + 1) * pollInterval / 1000.0, 1), timeoutSeconds);
+                        SetStatus($"{elapsedTime:0.0} / {timeoutSeconds:0.0} seconds");
+                    }
+                    else // Display the supplied message instead of the elapsed time message
+                        SetStatus(statusString());
 
+                }
             } while (waitFunction() & !combinedCts.Token.IsCancellationRequested);
 
             // Test whether the operation timed out

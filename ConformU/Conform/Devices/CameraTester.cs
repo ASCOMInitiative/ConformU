@@ -198,7 +198,11 @@ namespace ConformU
                     camera = null;
                     LogDebug("CameraTester.Dispose", "Camera set to null");
                     LogDebug("CameraTester.Dispose", "About to release memory...");
-                    try { ReleaseMemory(); } catch { }
+                    m_ImageArray = null;
+                    m_ImageArrayVariant = null;
+
+                    //SetTest("Cleaning up");
+                    //try { ReleaseMemory(); } catch { }
                     LogDebug("CameraTester.Dispose", "Memory released");
                 }
             }
@@ -331,8 +335,10 @@ namespace ConformU
             {
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("ConformanceCheck", "About to set Connected");
+                SetTest("Connected");
+                SetAction("Waiting for Connected to become 'true'");
                 camera.Connected = value;
-
+                ResetTestActionStatus();
             }
         }
         public override void ReadCanProperties()
@@ -1816,7 +1822,7 @@ namespace ConformU
                         {
                             if (settings.DisplayMethodCalls)
                                 LogTestAndMessage("ConformanceCheck", "About to get BinX");
-                            returnValue = camera.BinX;
+                            returnValue = Convert.ToInt32(camera.BinX);
                             break;
                         }
 
@@ -1824,7 +1830,7 @@ namespace ConformU
                         {
                             if (settings.DisplayMethodCalls)
                                 LogTestAndMessage("ConformanceCheck", "About to get BinY");
-                            returnValue = camera.BinY;
+                            returnValue = Convert.ToInt32(camera.BinY);
                             break;
                         }
 
@@ -1914,50 +1920,40 @@ namespace ConformU
                             break;
                         }
                 }
-                // Successfully retrieved a value
-                switch (returnValue)
+
+                // Successfully retrieved a value so test it
+                if (returnValue < p_Min)
                 {
-                    case object _ when returnValue < p_Min // Lower than minimum value
-                   :
-                        {
-                            LogIssue(p_Name, "Invalid value: " + returnValue.ToString());
-                            break;
-                        }
-
-                    case object _ when returnValue > p_Max // Higher than maximum value
-             :
-                        {
-                            switch (p_Type) // Provide the required message depending on the property being tested
+                    LogIssue(p_Name, $"Invalid value below expected minimum ({p_Min}): " + returnValue.ToString());
+                }
+                else if (returnValue > p_Max)
+                {
+                    switch (p_Type) // Provide the required message depending on the property being tested
+                    {
+                        case CamPropertyType.MaxBinX // Informational message for MaxBinX
+                       :
                             {
-                                case CamPropertyType.MaxBinX // Informational message for MaxBinX
-                               :
-                                    {
-                                        LogInfo(p_Name, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_X}. Is this intended?");
-                                        break;
-                                    }
-
-                                case CamPropertyType.MaxBinY // Informational message for MaxBinY
-                         :
-                                    {
-                                        LogInfo(p_Name, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_Y}. Is this intended?");
-                                        break;
-                                    }
-
-                                default:
-                                    {
-                                        LogIssue(p_Name, "Invalid value: " + returnValue.ToString());
-                                        break;
-                                    }
+                                LogInfo(p_Name, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_X}. Is this intended?");
+                                break;
                             }
 
-                            break;
-                        }
+                        case CamPropertyType.MaxBinY // Informational message for MaxBinY
+                 :
+                            {
+                                LogInfo(p_Name, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_Y}. Is this intended?");
+                                break;
+                            }
 
-                    default:
-                        {
-                            LogOK(p_Name, returnValue.ToString());
-                            break;
-                        }
+                        default:
+                            {
+                                LogIssue(p_Name, $"Invalid value (expected range: {p_Min} - {p_Max}): {returnValue}");
+                                break;
+                            }
+                    }
+                }
+                else
+                {
+                    LogOK(p_Name, returnValue.ToString());
                 }
             }
             catch (Exception ex)
@@ -2574,7 +2570,10 @@ namespace ConformU
             // Start off by assuming the worst case, this will be set true if the exposure completes OK
             exposedOK = false;
 
-            LogDebug(testName,$"Entered CameraExposure");
+            LogDebug(testName, $"Entered CameraExposure");
+
+            // Set the name of this test for status update purposes
+            SetTest(testName);
 
             // Log test name for happy path tests
             if (testName.ToUpperInvariant() == "STARTEXPOSURE")
@@ -2697,7 +2696,8 @@ namespace ConformU
             {
                 // At least one of BinX, BinY, StartX, StartY, NumX or NumY could not be set
                 LogInfo(testName, "Exposure test abandoned because the camera is not idle or at least one of BinX, BinY, NumX, NumY, StartX or StartY could not be set.");
-                ClearStatus();
+                ResetTestActionStatus();
+                return;
             }
 
             #endregion
@@ -2714,7 +2714,6 @@ namespace ConformU
                 bool ranToCompletion;
 
                 SetAction($"Exposing for {requiredDuration} seconds");
-
 
                 // Start  a UI update task to display timing information
                 CancellationTokenSource exposeUiTaskTokenSource = new();
@@ -2784,9 +2783,9 @@ namespace ConformU
                 {
                     // The user cancelled the operation
                     LogNewLine();
-                    LogError("CONFORMU", "START EXPOSURE WAS INTERRUPTTED LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                    LogError("INSTABILITY WARNING", "Start exposure was interrupted, which may leave Conform Universal in a corrupted state. Please restart to ensure reliable operation");
                     LogNewLine();
-                    ClearStatus();
+                    ResetTestActionStatus();
                     return;
                 }
                 finally
@@ -2834,13 +2833,13 @@ namespace ConformU
 
                     // Provide a warning about possible application corruption
                     LogNewLine();
-                    LogError("CONFORMU", "START EXPOSURE TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                    LogError("INSTABILITY WARNING", "Start exposure timed out, which may leave Conform Universal in a corrupted state. Please restart to ensure reliable operation");
                     LogNewLine();
 
                     // Cancel the task
                     ConformanceTestManager.ConformCancellationTokenSource.Cancel();
 
-                    ClearStatus();
+                    ResetTestActionStatus();
                     return;
                 }
             }
@@ -2854,7 +2853,7 @@ namespace ConformU
             // Exit if the task did not initiate OK or failed to generate an error when expected to do so
             if (!initiatedOk)
             {
-                ClearStatus();
+                ResetTestActionStatus();
                 return;
             }
 
@@ -2887,7 +2886,7 @@ namespace ConformU
                     {
                         LogIssue(testName, $"Unexpected error while checking initiation: {ex.Message}");
                         LogDebug(testName, $"Exception detail:\r\n{ex}");
-                        ClearStatus();
+                        ResetTestActionStatus();
                         return;
                     }
 
@@ -2905,21 +2904,35 @@ namespace ConformU
                     imageReadyTooEarly = camera.ImageReady;
 
                     // Wait for exposing state
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
-                    Stopwatch sw = Stopwatch.StartNew();
-                    WaitWhile(GetAction(), () =>
+                    try
                     {
-                        // Wait while the camera is exposing and is not in an error state
-                        return (camera.CameraState != CameraState.Exposing) & (camera.CameraState != CameraState.Error);
-                    }, 500, settings.CameraWaitTimeout, () =>
+                        if (settings.DisplayMethodCalls)
+                            LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
+                        Stopwatch sw = Stopwatch.StartNew();
+                        WaitWhile(GetAction(), () =>
+                        {
+                            // Wait while the camera is exposing and is not in an error state
+                            return (camera.CameraState != CameraState.Exposing) & (camera.CameraState != CameraState.Error);
+                        }, 500, settings.CameraWaitTimeout);
+                    }
+                    catch (TimeoutException ex)
                     {
-                        return $"{sw.Elapsed.TotalSeconds:0.0} / {requiredDuration:0.0}";
-                    });
+                        LogIssue(testName, $"The expected exposure time was {requiredDuration} seconds but the camera did not enter the 'Exposing' state within the configured timeout of {settings.CameraWaitTimeout} seconds.");
+                        LogDebug(testName, $"Exception detail:\r\n{ex}");
+                        ResetTestActionStatus();
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogIssue(testName, $"Unexpected error while waiting for the camera to enter the 'Exposing' state: {ex.Message}");
+                        LogDebug(testName, $"Exception detail:\r\n{ex}");
+                        ResetTestActionStatus();
+                        return;
+                    }
 
                     if (applicationCancellationToken.IsCancellationRequested) // Exit if required
                     {
-                        ClearStatus();
+                        ResetTestActionStatus();
                         return;
                     }
 
@@ -2992,21 +3005,21 @@ namespace ConformU
 
                         if (applicationCancellationToken.IsCancellationRequested) // Exit if required
                         {
-                            ClearStatus();
+                            ResetTestActionStatus();
                             return;
                         }
                     }
                     catch (TimeoutException)
                     {
-                        LogIssue(testName, $"Test abandoned, timed out waiting for exposure to complete.");
-                        ClearStatus();
+                        LogIssue(testName, $"Test abandoned, timed out waiting for camera to leave the 'Exposing' state.");
+                        ResetTestActionStatus();
                         return;
                     }
                     catch (Exception ex)
                     {
                         LogIssue(testName, $"Unexpected error while waiting for exposure to complete: {ex.Message}");
                         LogDebug(testName, $"Exception detail:\r\n{ex}");
-                        ClearStatus();
+                        ResetTestActionStatus();
                         return;
                     }
 
@@ -3028,21 +3041,21 @@ namespace ConformU
 
                         if (applicationCancellationToken.IsCancellationRequested) // Exit if required
                         {
-                            ClearStatus();
+                            ResetTestActionStatus();
                             return;
                         }
                     }
                     catch (TimeoutException)
                     {
                         LogIssue(testName, $"Test abandoned, timed out waiting for camera to become idle.");
-                        ClearStatus();
+                        ResetTestActionStatus();
                         return;
                     }
                     catch (Exception ex)
                     {
                         LogIssue(testName, $"Unexpected error while waiting for camera to become idle: {ex.Message}");
                         LogDebug(testName, $"Exception detail:\r\n{ex}");
-                        ClearStatus();
+                        ResetTestActionStatus();
                         return;
                     }
 
@@ -3065,14 +3078,14 @@ namespace ConformU
                     catch (TimeoutException)
                     {
                         LogIssue(testName, $"Test abandoned, timed out waiting for ImageReady to become true.");
-                        ClearStatus();
+                        ResetTestActionStatus();
                         return;
                     }
                     catch (Exception ex)
                     {
                         LogIssue(testName, $"Unexpected error while waiting for ImageReady to become true: {ex.Message}");
                         LogDebug(testName, $"Exception detail:\r\n{ex}");
-                        ClearStatus();
+                        ResetTestActionStatus();
                         return;
                     }
 
@@ -3083,7 +3096,7 @@ namespace ConformU
             {
                 LogIssue(testName, $"Unexpected error while waiting for exposure to complete: {ex.Message}");
                 LogDebug(testName, $"Exception detail:\r\n{ex}");
-                ClearStatus();
+                ResetTestActionStatus();
                 return;
             }
 
@@ -3095,7 +3108,7 @@ namespace ConformU
             {
                 if (applicationCancellationToken.IsCancellationRequested) // Exit if required
                 {
-                    ClearStatus();
+                    ResetTestActionStatus();
                     return;
                 }
 
@@ -3110,7 +3123,7 @@ namespace ConformU
                 {
                     // Give up because the exposure was not successful
                     LogIssue(testName, "Test abandoned because the camera state is CameraError.");
-                    ClearStatus();
+                    ResetTestActionStatus();
                     return;
                 }
 
@@ -3118,7 +3131,7 @@ namespace ConformU
                 if (imageReadyTooEarly)
                 {
                     LogIssue(testName, "Test abandoned because ImageReady was set True before the camera completed its exposure.");
-                    ClearStatus();
+                    ResetTestActionStatus();
                     return;
                 }
 
@@ -3133,7 +3146,7 @@ namespace ConformU
             {
                 LogIssue(testName, $"Unexpected error while checking returned image: {ex.Message}");
                 LogDebug(testName, $"Exception detail:\r\n{ex}");
-                ClearStatus();
+                ResetTestActionStatus();
                 return;
             }
 
@@ -3150,10 +3163,19 @@ namespace ConformU
                 // Retrieve the image array
                 SetAction("Retrieving ImageArray");
 
+                // Start  a UI update task
+                CancellationTokenSource iaUiTaskTokenSource = new();
+                CancellationToken iaUiTaskCancellationToken = iaUiTaskTokenSource.Token;
+                Task.Run(() =>
+                {
+                    UpdateUI(iaUiTaskCancellationToken);
+                }, iaUiTaskCancellationToken);
+
                 // Create a cancellation token that we can set if the task times out
                 CancellationTokenSource iaTokenSource = new();
                 CancellationToken iaToken = iaTokenSource.Token;
 
+                // Start a task to retrieve the image array
                 Task iaTask = Task.Factory.StartNew(() =>
                 {
                     try
@@ -3181,26 +3203,19 @@ namespace ConformU
                     }
                 }, iaToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
-                // Start  a UI update task
-                CancellationTokenSource iaUiTaskTokenSource = new();
-                CancellationToken iaUiTaskCancellationToken = iaUiTaskTokenSource.Token;
 
-                Task.Run(() =>
-                {
-                    UpdateUI(iaUiTaskCancellationToken);
-                }, iaUiTaskCancellationToken);
-                bool ranToCompletion=false;
+                // Wait for the ImageArray task to complete or be cancelled
+                bool ranToCompletion = false;
                 try
                 {
-                    // Wait for the ImageArray task to complete or be cancelled
                     ranToCompletion = iaTask.Wait(TimeSpan.FromSeconds(settings.CameraWaitTimeout), applicationCancellationToken);
                 }
                 catch (OperationCanceledException)
                 {
                     LogNewLine();
-                    LogError("CONFORMU", "GET IMAGEARRAY WAS INTERRUPTTED LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                    LogError("INSTABILITY WARNING", "Get ImageArray was interrupted, which may leave Conform Universal in a corrupted state. Please restart to ensure reliable operation");
                     LogNewLine();
-                    ClearStatus();
+                    ResetTestActionStatus();
                     return;
                 }
                 finally
@@ -3245,13 +3260,13 @@ namespace ConformU
 
                     // Provide a warning about possible application corruption
                     LogNewLine();
-                    LogError("CONFORMU", "IMAGEARRAY TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                    LogError("INSTABILITY WARNING", "Get ImageArray timed out, which may leave Conform Universal in a corrupted state. Please restart to ensure reliable operation");
                     LogNewLine();
 
                     // Cancel the task
                     ConformanceTestManager.ConformCancellationTokenSource.Cancel();
 
-                    ClearStatus();
+                    ResetTestActionStatus();
 
                     return;
                 }
@@ -3259,7 +3274,7 @@ namespace ConformU
                 // Exit if cancelled
                 if (applicationCancellationToken.IsCancellationRequested) // Exit if required
                 {
-                    ClearStatus();
+                    ResetTestActionStatus();
                     return;
                 }
 
@@ -3291,14 +3306,14 @@ namespace ConformU
                 // Log an error
                 LogError("ImageArray", $"OutOfMemoryException - Conform Universal or the device ran out of memory: {ex.Message}");
                 LogDebug("ImageArray", $"Exception detail: {ex}");
-                ClearStatus();
+                ResetTestActionStatus();
                 return;
             }
             catch (Exception ex)
             {
                 LogIssue("ImageArray", $"Error when reading ImageArray: {ex.Message}");
                 LogDebug("ImageArray", $"Exception detail: {ex}");
-                ClearStatus();
+                ResetTestActionStatus();
                 return;
             }
 
@@ -3344,8 +3359,6 @@ namespace ConformU
                             object imageObject = camera.ImageArrayVariant;
                             sw.Stop();
 
-                            LogInfo("ImageArrayVariant", $"Received image OK");
-
                             // Assign the array to the application variable if the task is not cancelled
                             if (!cancellationToken.IsCancellationRequested) // Completed successfully
                             {
@@ -3384,7 +3397,7 @@ namespace ConformU
                         return gotImageOk;
                     }, iavToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
 
-                    bool ranToCompletion=false;
+                    bool ranToCompletion = false;
                     // Wait for the ImageArrayVariant task to complete or be cancelled
                     try
                     {
@@ -3393,9 +3406,9 @@ namespace ConformU
                     catch (OperationCanceledException)
                     {
                         LogNewLine();
-                        LogError("CONFORMU", "GET IMAGEARRAYVARIANT WAS INTERRUPTTED LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                        LogError("INSTABILITY WARNING", "Get ImageArrayVariant was interrupted, which may leave Conform Universal in a corrupted state. Please restart to ensure reliable operation");
                         LogNewLine();
-                        ClearStatus();
+                        ResetTestActionStatus();
                         return;
                     }
                     finally
@@ -3439,20 +3452,20 @@ namespace ConformU
 
                         // Provide a warning about possible application corruption
                         LogNewLine();
-                        LogError("CONFORMU", "IMAGEARRAYVARIANT TIMED OUT LEAVING CONFORMU IN A POTENTIALLY CORRUPTED STATE. RESTART CONFORMU TO ENSURE RELEIABLE OPERATION");
+                        LogError("INSTABILITY WARNING", "Get ImageArrayVariant timed out, which may leave Conform Universal in a corrupted state. Please restart to ensure reliable operation");
                         LogNewLine();
 
                         // Cancel the task
                         ConformanceTestManager.ConformCancellationTokenSource.Cancel();
 
-                        ClearStatus();
+                        ResetTestActionStatus();
                         return;
                     }
 
                     // Exit if cancelled
                     if (applicationCancellationToken.IsCancellationRequested)
                     {
-                        ClearStatus();
+                        ResetTestActionStatus();
                         return;
                     }
 
@@ -3486,7 +3499,7 @@ namespace ConformU
                         LogIssue("ImageArrayVariant", "Camera image dimensions swapped, expected values: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
                     else
                         LogIssue("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
-                    
+
                     // Release memory currently consumed by images
                     ReleaseMemory();
                 }
@@ -3528,7 +3541,7 @@ namespace ConformU
             }
             catch (Exception) { }
 
-            ClearStatus();
+            ResetTestActionStatus();
 
             #endregion  
         }
@@ -3554,8 +3567,11 @@ namespace ConformU
                 // Sleep until it is time for the next completion function poll
                 Thread.Sleep(sleeptime);
 
-                // Update the status message
-                SetStatus($"{sw.Elapsed.TotalSeconds:0.0} / {settings.CameraWaitTimeout:0.0}");
+                // Update the status message if the task has not been cancelled
+                if (!updateUiTaskCancellationToken.IsCancellationRequested)
+                {
+                    SetStatus($"{sw.Elapsed.TotalSeconds:0.0} / {settings.CameraWaitTimeout:0.0}");
+                }
 
                 // Wait for the start of the next loop
                 Thread.Sleep(sleeptime);
@@ -3934,30 +3950,20 @@ namespace ConformU
 
         public override void PostRunCheck()
         {
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to call AbortExposure");
             if (m_CanAbortExposure)
             {
-                try
-                {
-                    camera.AbortExposure();
-                }
-                catch
-                {
-                }
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("ConformanceCheck", "About to call AbortExposure");
+                try { camera.AbortExposure(); } catch { }
             }
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to call StopExposure");
+
             if (m_CanStopExposure)
             {
-                try
-                {
-                    camera.StopExposure();
-                }
-                catch
-                {
-                }
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("ConformanceCheck", "About to call StopExposure");
+                try { camera.StopExposure(); } catch { }
             }
+
             if (m_CanSetCCDTemperature)
             {
                 if (settings.DisplayMethodCalls)
@@ -3965,30 +3971,39 @@ namespace ConformU
                 try
                 {
                     camera.SetCCDTemperature = m_SetCCDTemperature;
+                    LogOK("PostRunCheck", "Camera returned to initial cooler temperature");
                 }
-                catch
-                {
-                }
+                catch { }
             }
+
             if (settings.DisplayMethodCalls)
                 LogTestAndMessage("ConformanceCheck", "About to set CoolerOn");
+            try { camera.CoolerOn = m_CoolerOn; } catch { }
 
             // Reset the camera image parameters to legal values
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage("ConformanceCheck", "About to set StartX");
             try { camera.StartX = 0; } catch { }
-            try { camera.StartY = 0; } catch { }
-            try { camera.BinX = 1; } catch { }
-            try { camera.BinY = 1; } catch { }
-            try { camera.NumX = 1; } catch { }
-            try { camera.NumY = 1; } catch { }
 
-            try
-            {
-                camera.CoolerOn = m_CoolerOn;
-            }
-            catch
-            {
-            }
-            LogOK("PostRunCheck", "Camera returned to initial cooler temperature");
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage("ConformanceCheck", "About to set StartY");
+            try { camera.StartY = 0; } catch { }
+
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage("ConformanceCheck", "About to set BinX");
+            try { camera.BinX = 1; } catch { }
+
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage("ConformanceCheck", "About to set BinY");
+            try { camera.BinY = 1; } catch { }
+
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage("ConformanceCheck", "About to set NumX");
+            try { camera.NumX = 1; } catch { }
+
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage("ConformanceCheck", "About to set NumY");
+            try { camera.NumY = 1; } catch { }
         }
 
         /// <summary>
