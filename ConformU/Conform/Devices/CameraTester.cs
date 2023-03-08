@@ -188,7 +188,7 @@ namespace ConformU
                     Task.Run(() =>
                     {
                         LogDebug("CameraTester.Dispose", "About to dispose of camera...");
-                        try { camera?.Dispose(); } catch { }
+                        try { camera?.Dispose(); } catch (Exception ex) { LogDebug("CameraTester.Dispose", $"Exception disposing of device:\r\n{ex}"); }
                         LogDebug("CameraTester.Dispose", "Camera disposed");
                     });
 
@@ -295,12 +295,12 @@ namespace ConformU
                                 break;
 
                             default:
-                                throw new ASCOM.InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComAccessMechanic}");
+                                throw new InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComAccessMechanic}");
                         }
                         break;
 
                     default:
-                        throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
+                        throw new InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
 
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
