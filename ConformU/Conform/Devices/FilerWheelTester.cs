@@ -204,9 +204,11 @@ namespace ConformU
         {
             int[] filterOffsets;
             int numberOfFilternames = 0, numberOfFilterOffsets = 0, filterNumber, startingFilterNumber;
-            string[] filterNames;
 
-            DateTime startTime, endTime;
+            int maxFilterNumber = 0; // The highest populated filter slot number (1 less than the number of filters)
+            int halfDistanceFilterNumber = 0; // A filter slot number close to the middle of the filter wheel
+
+            string[] filterNames;
 
             // FocusOffsets - Required - Read only
             try
@@ -217,7 +219,11 @@ namespace ConformU
                 if (numberOfFilterOffsets == 0)
                     LogIssue("FocusOffsets Get", "Found no offset values in the returned array");
                 else
+                {
                     LogOK("FocusOffsets Get", "Found " + numberOfFilterOffsets.ToString() + " filter offset values");
+                    maxFilterNumber = Convert.ToInt16(numberOfFilterOffsets - 1);
+                    halfDistanceFilterNumber = maxFilterNumber / 2;
+                }
 
                 filterNumber = 0;
                 foreach (var offset in filterOffsets)
@@ -266,7 +272,6 @@ namespace ConformU
             else
                 LogIssue("Names Get", "Number of filter offsets and number of names are different: " + numberOfFilterOffsets.ToString() + " " + numberOfFilternames.ToString());
 
-
             // Position - Required - Read
             try
             {
@@ -294,39 +299,80 @@ namespace ConformU
                 return;
             }
 
+            // Some filters are available so test movement
             try
             {
-                // Move to each position in turn
+                // Move sequentially upwards to each position in turn
+                LogNewLine();
+                LogTestOnly("Testing ascending sequential movement");
+
+                double upwardMovewentTime = 0.0;
                 for (short i = 0; i <= Convert.ToInt16(numberOfFilterOffsets - 1); i++)
                 {
-                    try
-                    {
-                        LogCallToDriver("Position Set", "About to set Position property");
-                        SetAction($"Setting position {i}");
-                        filterWheel.Position = i;
-
-                        startTime = DateTime.Now;
-                        LogCallToDriver("Position Set", "About to get Position property repeatedly");
-                        WaitWhile($"Moving to position {i}", () => { return filterWheel.Position != i; }, 500, settings.FilterWheelTimeout);
-
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-
-                        endTime = DateTime.Now;
-                        if (filterWheel.Position == i)
-                            LogOK("Position Set", "Reached position: " + i.ToString() + " in: " + endTime.Subtract(startTime).TotalSeconds.ToString("0.0") + " seconds");
-                        else
-                            LogIssue("Position Set", "Filter wheel did not reach specified position: " + i.ToString() + " within timeout of: " + settings.FilterWheelTimeout.ToString());
-                        //WaitFor(1000); // Pause to allow filter wheel to stabilise
-                        Stopwatch sw = Stopwatch.StartNew();
-                        WaitWhile($"Waiting for wheel to stabilise at position {i}", () => { return sw.ElapsedMilliseconds < 1000; }, 500, 1);
-
-                    }
-                    catch (Exception ex)
-                    {
-                        HandleException("Position Set", MemberType.Property, Required.Mandatory, ex, "");
-                    }
+                    upwardMovewentTime += MoveToPosition(i);
+                    if (cancellationToken.IsCancellationRequested)
+                        return;
                 }
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
+                // Move sequentially downwards to each position in turn
+                LogNewLine();
+                LogTestOnly("Testing descending sequential movement");
+
+                double downwardMovewentTime = 0.0;
+
+                for (short i = Convert.ToInt16(numberOfFilterOffsets - 1); i >= 0; i--)
+                {
+                    downwardMovewentTime += MoveToPosition(i);
+                    if (cancellationToken.IsCancellationRequested)
+                        return;
+                }
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
+                // Test long distance moves
+                LogNewLine();
+                LogTestOnly("Testing potentially long distance moves");
+
+                // Move to position 0
+                MoveToPosition(0);
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
+                // Move to highest position
+                MoveToPosition(maxFilterNumber);
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
+                // Move to one down from the highest position (uni-directional filter wheels will have to travel a long way)
+                if (maxFilterNumber > 0)
+                {
+                    MoveToPosition(maxFilterNumber - 1);
+                }
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
+                // Move back to position 0
+                MoveToPosition(0);
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
+                // Move to the half way position
+                if (halfDistanceFilterNumber > 0)
+                {
+                    MoveToPosition(halfDistanceFilterNumber);
+                }
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
+                // Move back to position 0
+                MoveToPosition(0);
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
+                LogNewLine();
+                LogTestOnly("Testing error conditions");
 
                 // Confirm that an error is correctly generated for outside range values
                 try
@@ -339,6 +385,8 @@ namespace ConformU
                 {
                     HandleInvalidValueExceptionAsOK("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to - 1", "Correctly rejected bad position: -1");
                 }
+                if (cancellationToken.IsCancellationRequested)
+                    return;
 
                 // Confirm that an error is correctly generated for outside range values
                 try
@@ -352,6 +400,28 @@ namespace ConformU
                     HandleInvalidValueExceptionAsOK("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to " + System.Convert.ToString(numberOfFilterOffsets), "Correctly rejected bad position: " + System.Convert.ToString(numberOfFilterOffsets));
                 }
 
+                // Report on the uni-directional and bi-directional behaviour.
+                LogNewLine();
+                LogTestOnly("Directionality assessment");
+
+                if (numberOfFilternames > 1) // 3 or more filters so there will be a difference between uni-directional and bi-directional filter wheels
+                {
+                    if (Math.Abs(upwardMovewentTime - downwardMovewentTime) < Math.Min(upwardMovewentTime, downwardMovewentTime) / numberOfFilterOffsets)
+                    {
+                        LogInfo("Directionality", $"The filter wheel is bi-directional.");
+                    }
+                    else
+                    {
+                        LogInfo("Directionality", $"The filter wheel is uni-directional.");
+                    }
+                }
+                else // 1 or less filters so cannot tell whether the filter wheel is bi-directional or uni-directional.
+                {
+                    LogInfo("Directionality", $"The filter wheel has 0 or 1 filters and it is not possible to differentiate between uni-directional and bi-directional behaviour.");
+                }
+
+                LogDebug("Directionality", $"Overall upward movement time: {upwardMovewentTime:0.0}, Overall downward movement time: {downwardMovewentTime:0.0}, " +
+                   $"Difference: {Math.Abs(upwardMovewentTime - downwardMovewentTime):0.0}, Smallest average movement time: {Math.Min(upwardMovewentTime, downwardMovewentTime) / numberOfFilterOffsets:0.0}.");
             }
             catch (Exception ex)
             {
@@ -453,6 +523,46 @@ namespace ConformU
             {
                 LogInfo(p_Name, "Unable to complete test: " + ex.Message);
             }
+        }
+
+        private double MoveToPosition(int position)
+        {
+            double duration = 0.0;
+
+            // Create a test name that incorporates the filter wheel position for use in log messages
+            string testName = $"Position Set {position}";
+
+            try
+            {
+
+                LogCallToDriver("Position Set", $"About to set Position property {position}");
+                SetAction($"Setting position {position}");
+                filterWheel.Position = Convert.ToInt16(position);
+
+                Stopwatch sw = Stopwatch.StartNew();
+
+                LogCallToDriver(testName, "About to get Position property repeatedly");
+                WaitWhile($"Moving to position {position}", () => { return filterWheel.Position != position; }, 100, settings.FilterWheelTimeout);
+                duration = sw.Elapsed.TotalSeconds;
+
+                if (cancellationToken.IsCancellationRequested)
+                    return 0.0;
+
+                if (filterWheel.Position == position)
+                    LogOK(testName, "Reached position: " + position.ToString() + " in: " + sw.Elapsed.TotalSeconds.ToString("0.0") + " seconds");
+                else
+                    LogIssue(testName, "Filter wheel did not reach specified position: " + position.ToString() + " within timeout of: " + settings.FilterWheelTimeout.ToString());
+
+                sw.Restart();
+                WaitWhile($"Waiting for wheel to stabilise at position {position}", () => { return sw.ElapsedMilliseconds < 1000; }, 500, 1);
+            }
+            catch (Exception ex)
+            {
+                HandleException(testName, MemberType.Property, Required.Mandatory, ex, "");
+            }
+
+            // Return the elapse time for the move ignoring the stabilisation time added at the end
+            return duration;
         }
     }
 }
