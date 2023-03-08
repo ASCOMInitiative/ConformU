@@ -534,25 +534,33 @@ namespace ConformU
 
             try
             {
-
+                // Set the required position
                 LogCallToDriver("Position Set", $"About to set Position property {position}");
                 SetAction($"Setting position {position}");
                 filterWheel.Position = Convert.ToInt16(position);
 
+                // Wait for the reported position to match the required position
                 Stopwatch sw = Stopwatch.StartNew();
-
                 LogCallToDriver(testName, "About to get Position property repeatedly");
                 WaitWhile($"Moving to position {position}", () => { return filterWheel.Position != position; }, 100, settings.FilterWheelTimeout);
+
+                // Record the duration of the wait
                 duration = sw.Elapsed.TotalSeconds;
 
+                // Exit if the STOP button has been pressed
                 if (cancellationToken.IsCancellationRequested)
                     return 0.0;
 
-                if (filterWheel.Position == position)
-                    LogOK(testName, "Reached position: " + position.ToString() + " in: " + sw.Elapsed.TotalSeconds.ToString("0.0") + " seconds");
-                else
-                    LogIssue(testName, "Filter wheel did not reach specified position: " + position.ToString() + " within timeout of: " + settings.FilterWheelTimeout.ToString());
+                // Get the reported position
+                short reportedPosition = filterWheel.Position;
 
+                // Test whether the reported position matches the required position
+                if (reportedPosition == position) // The filter wheel is at the required position
+                    LogOK(testName, $"Reached position: {position} in: {duration:0.0} seconds");
+                else // The filter wheel is not at the required position so must have timed out
+                    LogIssue(testName, $"The filter wheel did not reach specified position: {position} within the {settings.FilterWheelTimeout} second timeout. The reported position after {duration:0.0} seconds is: {reportedPosition}.");
+
+                // Add a 1 second wait so as not to push the filter wheel too hard
                 sw.Restart();
                 WaitWhile($"Waiting for wheel to stabilise at position {position}", () => { return sw.ElapsedMilliseconds < 1000; }, 500, 1);
             }
@@ -561,7 +569,7 @@ namespace ConformU
                 HandleException(testName, MemberType.Property, Required.Mandatory, ex, "");
             }
 
-            // Return the elapse time for the move ignoring the stabilisation time added at the end
+            // Return the elapsed time for the move ignoring the stabilisation time added at the end
             return duration;
         }
     }
