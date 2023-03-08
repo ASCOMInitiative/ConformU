@@ -126,15 +126,31 @@ namespace ConformU
                 {
                     testDevice.SetupDialog();
                 }, cancellationToken);
-                setupDialogTask.Start();
 
                 // Test whether we are being cancelled
-                Task waitForCancelTask = new(() => WaitForCancel(), cancellationToken);
-                waitForCancelTask.Start();
-                //Wait for either task finish or cancel
-                Task.WaitAny(setupDialogTask, waitForCancelTask);
+                Task waitForStopButtonTask = new Task(() =>
+                {
+                    do
+                    {
+                        Thread.Sleep(10);
+                    } while (!cancellationToken.IsCancellationRequested);
+                    Thread.Sleep(100);
+                }, cancellationToken);
 
-                TL.LogMessage("TestManager:SetupDialog", MessageLevel.Error, $"setup dialog status: {setupDialogTask.Status}, cancel task status: {waitForCancelTask.Status}");
+                // Start both tasks and wait for either the setup dialogue task or the STOP button task to finish
+                setupDialogTask.Start();
+                waitForStopButtonTask.Start();
+                Task.WaitAny(setupDialogTask, waitForStopButtonTask);
+
+                TL.LogMessage("TestManager:SetupDialog", MessageLevel.Info, $"Setup dialogue task status: {setupDialogTask.Status}, Stop button task status: {waitForStopButtonTask.Status}");
+
+                // Cancel the STOP button task if it is not already in the cancelled state
+                if (waitForStopButtonTask.Status==TaskStatus.Running)
+                {
+                    TL.LogMessage("TestManager:SetupDialog", MessageLevel.Info, $"Cancelling the STOP button task because the setup dialogue method has completed.");
+                    ConformCancellationTokenSource.Cancel();
+                }
+
             }
             catch (Exception ex)
             {
@@ -145,14 +161,6 @@ namespace ConformU
                 // Always dispose of the device
                 try { testDevice.Dispose(); } catch { }
             }
-        }
-
-        private void WaitForCancel()
-        {
-            do
-            {
-                Thread.Sleep(10);
-            } while (!cancellationToken.IsCancellationRequested);
         }
 
         public void TestDevice()
