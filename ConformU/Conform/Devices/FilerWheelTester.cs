@@ -23,7 +23,6 @@ namespace ConformU
         }
 
         // Helper variables
-        private ITelescopeV3 telescopeDevice;
         private readonly CancellationToken cancellationToken;
         private readonly Settings settings;
         private readonly ConformLogger logger;
@@ -47,8 +46,8 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    telescopeDevice?.Dispose();
-                    telescopeDevice = null;
+                    filterWheel?.Dispose();
+                    filterWheel = null;
                 }
             }
 
