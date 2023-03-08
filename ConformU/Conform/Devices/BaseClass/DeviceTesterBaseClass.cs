@@ -160,15 +160,15 @@ namespace ConformU
                 if (disposing)
                 {
                     TL.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, "Dispose called");
-                    try 
+                    try
                     {
                         TL.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, "Calling base class Dispose method...");
                         baseClassDevice.Dispose();
                         TL.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, "returned from base class Dispose method");
                     }
-                    catch (Exception ex) 
-                    { 
-                        TL.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, $"Exception\r\n{ex}"); 
+                    catch (Exception ex)
+                    {
+                        TL.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, $"Exception\r\n{ex}");
                     }
 
                     baseClassDevice = null;
@@ -904,7 +904,8 @@ namespace ConformU
 
             // Wait for the completion function to return false
             Stopwatch sw = Stopwatch.StartNew(); // Start the loop timing stopwatch
-            do
+                                                 //do
+            while (waitFunction() & !combinedCts.Token.IsCancellationRequested)
             {
                 // Calculate the current loop number (starts at 0 given that the timer's elapsed time will be zero or very low on the first loop)
                 int currentLoopNumber = ((int)(sw.ElapsedMilliseconds) + 50) / pollInterval; // Add a small positive offset (50) because integer division always rounds down
@@ -928,7 +929,7 @@ namespace ConformU
                         SetStatus(statusString());
 
                 }
-            } while (waitFunction() & !combinedCts.Token.IsCancellationRequested);
+            } //while (waitFunction() & !combinedCts.Token.IsCancellationRequested) ;
 
             // Test whether the operation timed out
             if (timeoutCts.IsCancellationRequested) // The operation did time out
