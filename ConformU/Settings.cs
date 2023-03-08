@@ -175,6 +175,9 @@ namespace ConformU
         public bool DomeOpenShutter { get; set; } = false;
         public double DomeSlewTolerance { get; set; } = 1.0; // Degrees
 
+        // Filter wheel test configuration
+        public int FilterWheelTimeout { get; set; } = 30;
+
         // Focuser test configuration
         public int FocuserTimeout { get; set; } = 60;
         public int FocuserMoveTolerance { get; set; } = 2;

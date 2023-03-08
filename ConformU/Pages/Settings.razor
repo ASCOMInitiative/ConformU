@@ -477,6 +477,17 @@
             </div>
         </RadzenTabsItem>
 
+        @*Filter wheel configuration*@
+        <RadzenTabsItem Text="Filter Wheel">
+            <h4 style="margin-top: 10px">Timeouts</h4>
+            <p>This setting controls how long Conform waits for movement to complete before reporting a timeout.</p>
+
+            <div style="margin-top:20px" class="row">
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="filterWheelTimeout" TValue="int" Min="1" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.FilterWheelTimeout)) />
+                <p style="margin-left: 20px;margin-top: 5px;">Filter wheel move completion timeout (seconds).</p>
+            </div>
+        </RadzenTabsItem>
+
         @*Focuser configuration*@
         <RadzenTabsItem Text="Focuser">
             <h4 style="margin-top: 10px">Timeouts</h4>
@@ -628,6 +639,9 @@
     private bool domeOpenShutter;
     private double domeSlewTolerance;
 
+    // Filter wheel configuration
+    private int filterWheelTimeout;
+
     // Focuser test configuration
     private int focuserTimeout;
     private int focuserMoveTolerance;
@@ -675,6 +689,7 @@
         DomeAltitudeTimeout,
         DomeSlewtolerance,
         DomeStabilisationWaitTime,
+        FilterWheelTimeout,
         FocuserTimeout,
         focuserMoveTolerance,
         ObservingConditionsRetryTime,
@@ -874,6 +889,10 @@
                 settings.CameraWaitTimeout = newValue;
                 break;
 
+            case NumericConfigurationItem.FilterWheelTimeout:
+                settings.FilterWheelTimeout = newValue;
+                break;
+
             default:
                 throw new InvalidValueException($"OnIntegerItemChange - Unknown numeric configuration item: {numericConfigurationItem}");
         }
@@ -977,6 +996,107 @@
         }
 
         SaveConfiguration();
+    }
+
+    private void SetConfiguration()
+    {
+        List<int> newScope = new();
+
+        // Set scope
+        if (settings.TestProperties) newScope.Add(0);
+        if (settings.TestMethods) newScope.Add(1);
+        if (settings.TestPerformance) newScope.Add(2);
+        conformanceTestScope = newScope;
+
+        // Operation settings
+        checkForUpdates = settings.UpdateCheck;
+        displayMethodCalls = settings.DisplayMethodCalls;
+        enableDebugLogging = settings.Debug;
+        goHomeOnDeviceSelection = settings.GoHomeOnDeviceSelected;
+        waitTimeBeforeConformApplicationExits = settings.ConnectionTimeout;
+        applicationPort = settings.ApplicationPort;
+        runAs32Bit = settings.RunAs32Bit;
+
+        // Trace settings
+        chkTraceDiscovery = settings.TraceDiscovery;
+        chkTraceAlpacaCalls = settings.TraceAlpacaCalls;
+
+        // COM Settings
+        comAccessMechanic = settings.ComConfiguration.ComAccessMechanic;
+
+        // Telescope tests
+        telescopeTests = new List<string>();
+        foreach (KeyValuePair<string, bool> item in settings.TelescopeTests)
+        {
+            if (item.Value) ((List<string>)telescopeTests).Add(item.Key);
+        }
+        telescopeFirstUseTests = settings.TelescopeFirstUseTests;
+        telescopeSlewTolerance = settings.TelescopeSlewTolerance;
+        telescopeMaximumSlewTime = settings.TelescopeMaximumSlewTime;
+        chkSideOfPierRead = settings.TestSideOfPierRead;
+        chkSidfeOfPierWrite = settings.TestSideOfPierWrite;
+
+        // Camera tests
+        cameraTestMaxBinX = settings.CameraMaxBinX;
+        cameraTestMaxBinY = settings.CameraMaxBinY;
+        cameraFirstUseTests = settings.CameraFirstUseTests;
+        cameraTestImageArrayVariant = settings.CameraTestImageArrayVariant;
+        cameraExposureDuration = settings.CameraExposureDuration;
+        cameraXMax = settings.CameraXMax;
+        cameraYMax = settings.CameraYMax;
+        cameraWaitTimeout = settings.CameraWaitTimeout;
+
+        // Dome tests
+        domeShutterTimeout = settings.DomeShutterMovementTimeout;
+        domeAzimuthTimeout = settings.DomeAzimuthMovementTimeout;
+        domeAltitudeTimeout = settings.DomeAltitudeMovementTimeout;
+        domeStabilisationWaitTime = settings.DomeStabilisationWaitTime;
+        domeOpenShutter = settings.DomeOpenShutter;
+        domeSlewTolerance = settings.DomeSlewTolerance;
+
+        // Filter wheel tests
+        filterWheelTimeout= settings.FilterWheelTimeout;
+
+        // Focuser tests
+        focuserTimeout = settings.FocuserTimeout;
+        focuserMoveTolerance = settings.FocuserMoveTolerance;
+
+        // ObservingConditions tests
+        observingConditionsMaxRetries = settings.ObservingConditionsMaxRetries;
+        observingConditionsRetryTime = settings.ObservingConditionsRetryTime;
+
+        // Rotator tests
+        rotatorTimeout = settings.RotatorTimeout;
+
+        // Switch tests
+        switchEnableSet = settings.SwitchEnableSet;
+        switchExtendedNumberTestRange = settings.SwitchExtendedNumberTestRange;
+        switchReadDelay = settings.SwitchReadDelay;
+        switchWriteDelay = settings.SwitchWriteDelay;
+
+        // Alpaca configuration
+        alpacaDiscoveryEnabled = settings.AlpacaConfiguration.DiscoveryEnabled;
+        alpacaDiscoveryDuration = settings.AlpacaConfiguration.DiscoveryDuration;
+        alpacaDiscoveryPollInterval = settings.AlpacaConfiguration.DiscoveryPollInterval;
+        alpacaDiscoveryPort = settings.AlpacaConfiguration.DiscoveryPort;
+        alpacaNumberOfDiscoveryPolls = settings.AlpacaConfiguration.NumberOfDiscoveryPolls;
+        alpacaDiscoveryResolveName = settings.AlpacaConfiguration.DiscoveryResolveName;
+        alpacaDiscoveryUseIpV4 = settings.AlpacaConfiguration.DiscoveryUseIpV4;
+        alpacaDiscoveryUseIpV6 = settings.AlpacaConfiguration.DiscoveryUseIpV6;
+        alpacaServiceType = settings.AlpacaConfiguration.AccessServiceType;
+        strictCasing = settings.AlpacaConfiguration.StrictCasing;
+        alpacaImageArrayTransferType = settings.AlpacaConfiguration.ImageArrayTransferType;
+        chkProtocolShowSuccessResponses = settings.AlpacaConfiguration.ProtocolShowSuccessResponses;
+        chkProtocolReportNotImplementedErrors = settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors;
+        chkProtocolTestPrimaryUrlStructure = settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure;
+        chkTrustUserGeneratedSslCertificates = settings.AlpacaConfiguration.TrustUserGeneratedSslCertificates;
+    }
+
+    private void SaveConfiguration()
+    {
+        configuration.Save();
+        status = configuration.Status;
+        StateHasChanged();
     }
 
     private async void ShowNotification(NotificationMessage message)
@@ -1091,104 +1211,6 @@
     private void OnTabChange(int index)
     {
         //console.Log($"Tab with index {index} was selected.");
-    }
-
-    private void SetConfiguration()
-    {
-        List<int> newScope = new();
-
-        // Set scope
-        if (settings.TestProperties) newScope.Add(0);
-        if (settings.TestMethods) newScope.Add(1);
-        if (settings.TestPerformance) newScope.Add(2);
-        conformanceTestScope = newScope;
-
-        // Operation settings
-        checkForUpdates = settings.UpdateCheck;
-        displayMethodCalls = settings.DisplayMethodCalls;
-        enableDebugLogging = settings.Debug;
-        goHomeOnDeviceSelection = settings.GoHomeOnDeviceSelected;
-        waitTimeBeforeConformApplicationExits = settings.ConnectionTimeout;
-        applicationPort = settings.ApplicationPort;
-        runAs32Bit = settings.RunAs32Bit;
-
-        // Trace settings
-        chkTraceDiscovery = settings.TraceDiscovery;
-        chkTraceAlpacaCalls = settings.TraceAlpacaCalls;
-
-        // COM Settings
-        comAccessMechanic = settings.ComConfiguration.ComAccessMechanic;
-
-        // Telescope tests
-        telescopeTests = new List<string>();
-        foreach (KeyValuePair<string, bool> item in settings.TelescopeTests)
-        {
-            if (item.Value) ((List<string>)telescopeTests).Add(item.Key);
-        }
-        telescopeFirstUseTests = settings.TelescopeFirstUseTests;
-        telescopeSlewTolerance = settings.TelescopeSlewTolerance;
-        telescopeMaximumSlewTime = settings.TelescopeMaximumSlewTime;
-        chkSideOfPierRead = settings.TestSideOfPierRead;
-        chkSidfeOfPierWrite = settings.TestSideOfPierWrite;
-
-        // Camera tests
-        cameraTestMaxBinX = settings.CameraMaxBinX;
-        cameraTestMaxBinY = settings.CameraMaxBinY;
-        cameraFirstUseTests = settings.CameraFirstUseTests;
-        cameraTestImageArrayVariant = settings.CameraTestImageArrayVariant;
-        cameraExposureDuration = settings.CameraExposureDuration;
-        cameraXMax = settings.CameraXMax;
-        cameraYMax = settings.CameraYMax;
-        cameraWaitTimeout = settings.CameraWaitTimeout;
-
-        // Dome tests
-        domeShutterTimeout = settings.DomeShutterMovementTimeout;
-        domeAzimuthTimeout = settings.DomeAzimuthMovementTimeout;
-        domeAltitudeTimeout = settings.DomeAltitudeMovementTimeout;
-        domeStabilisationWaitTime = settings.DomeStabilisationWaitTime;
-        domeOpenShutter = settings.DomeOpenShutter;
-        domeSlewTolerance = settings.DomeSlewTolerance;
-
-        // Focuser tests
-        focuserTimeout = settings.FocuserTimeout;
-        focuserMoveTolerance = settings.FocuserMoveTolerance;
-
-        // ObservingConditions tests
-        observingConditionsMaxRetries = settings.ObservingConditionsMaxRetries;
-        observingConditionsRetryTime = settings.ObservingConditionsRetryTime;
-
-        // Rotator tests
-        rotatorTimeout = settings.RotatorTimeout;
-
-        // Switch tests
-        switchEnableSet = settings.SwitchEnableSet;
-        switchExtendedNumberTestRange = settings.SwitchExtendedNumberTestRange;
-        switchReadDelay = settings.SwitchReadDelay;
-        switchWriteDelay = settings.SwitchWriteDelay;
-
-        // Alpaca configuration
-        alpacaDiscoveryEnabled = settings.AlpacaConfiguration.DiscoveryEnabled;
-        alpacaDiscoveryDuration = settings.AlpacaConfiguration.DiscoveryDuration;
-        alpacaDiscoveryPollInterval = settings.AlpacaConfiguration.DiscoveryPollInterval;
-        alpacaDiscoveryPort = settings.AlpacaConfiguration.DiscoveryPort;
-        alpacaNumberOfDiscoveryPolls = settings.AlpacaConfiguration.NumberOfDiscoveryPolls;
-        alpacaDiscoveryResolveName = settings.AlpacaConfiguration.DiscoveryResolveName;
-        alpacaDiscoveryUseIpV4 = settings.AlpacaConfiguration.DiscoveryUseIpV4;
-        alpacaDiscoveryUseIpV6 = settings.AlpacaConfiguration.DiscoveryUseIpV6;
-        alpacaServiceType = settings.AlpacaConfiguration.AccessServiceType;
-        strictCasing = settings.AlpacaConfiguration.StrictCasing;
-        alpacaImageArrayTransferType = settings.AlpacaConfiguration.ImageArrayTransferType;
-        chkProtocolShowSuccessResponses = settings.AlpacaConfiguration.ProtocolShowSuccessResponses;
-        chkProtocolReportNotImplementedErrors = settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors;
-        chkProtocolTestPrimaryUrlStructure = settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure;
-        chkTrustUserGeneratedSslCertificates = settings.AlpacaConfiguration.TrustUserGeneratedSslCertificates;
-    }
-
-    private void SaveConfiguration()
-    {
-        configuration.Save();
-        status = configuration.Status;
-        StateHasChanged();
     }
 
 }

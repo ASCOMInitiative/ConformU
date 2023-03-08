@@ -12,11 +12,9 @@ namespace ConformU
 {
     internal class FilterWheelTester : DeviceTesterBaseClass
     {
-        const int FILTER_WHEEL_TIME_OUT = 20; // Filter wheel command timeout (seconds)
         const int FWTEST_IS_MOVING = -1;
-        const int FWTEST_TIMEOUT = 30;
 
-        private IFilterWheelV2 m_FilterWheel;
+        private IFilterWheelV2 filterWheel;
         enum FilterWheelProperties
         {
             FocusOffsets,
@@ -49,7 +47,7 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    if (telescopeDevice is not null) telescopeDevice.Dispose();
+                    telescopeDevice?.Dispose();
                     telescopeDevice = null;
                 }
             }
@@ -91,7 +89,7 @@ namespace ConformU
                 {
                     case DeviceTechnology.Alpaca:
                         LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
-                        m_FilterWheel = new AlpacaFilterWheel(
+                        filterWheel = new AlpacaFilterWheel(
                                                     settings.AlpacaConfiguration.AccessServiceType,
                                                     settings.AlpacaDevice.IpAddress,
                                                     settings.AlpacaDevice.IpPort,
@@ -114,12 +112,12 @@ namespace ConformU
                         {
                             case ComAccessMechanic.Native:
                                 LogInfo("CreateDevice", $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
-                                m_FilterWheel = new FilterWheelFacade(settings, logger);
+                                filterWheel = new FilterWheelFacade(settings, logger);
                                 break;
 
                             case ComAccessMechanic.DriverAccess:
                                 LogInfo("CreateDevice", $"Creating DRIVERACCESS device: {settings.ComDevice.ProgId}");
-                                m_FilterWheel = new FilterWheel(settings.ComDevice.ProgId);
+                                filterWheel = new FilterWheel(settings.ComDevice.ProgId);
                                 break;
 
                             default:
@@ -132,7 +130,7 @@ namespace ConformU
                 }
 
                 LogInfo("CreateDevice", "Successfully created driver");
-                baseClassDevice = m_FilterWheel; // Assign the driver to the base class
+                baseClassDevice = filterWheel; // Assign the driver to the base class
 
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);
@@ -155,12 +153,12 @@ namespace ConformU
             get
             {
                 LogCallToDriver("Connected", "About to get Connected property");
-                return m_FilterWheel.Connected;
+                return filterWheel.Connected;
             }
             set
             {
                 LogCallToDriver("Connected", "About to set Connected property");
-                m_FilterWheel.Connected = value;
+                filterWheel.Connected = value;
             }
         }
         public override void PreRunCheck()
@@ -179,47 +177,54 @@ namespace ConformU
                     SetFullStatus("FilterWheel Pre-run Check", "Waiting for movement to stop", DateTime.Now.Subtract(StartTime).Seconds + " second(s)");
                     WaitFor(SLEEP_TIME);
                 }
-                while ((m_FilterWheel.Position == FWTEST_IS_MOVING) & (DateTime.Now.Subtract(StartTime).TotalSeconds <= FWTEST_TIMEOUT)); // Wait until movement has stopped or 30 seconds have passed
-                if (m_FilterWheel.Position != FWTEST_IS_MOVING)
+                while ((filterWheel.Position == FWTEST_IS_MOVING) & (DateTime.Now.Subtract(StartTime).TotalSeconds <= settings.FilterWheelTimeout)); // Wait until movement has stopped or 30 seconds have passed
+                if (filterWheel.Position != FWTEST_IS_MOVING)
                     LogOK("Pre-run Check", "Filter wheel is stationary, ready to start tests");
+                else
+                {
+                    LogIssue("Pre-run Check", $"The filter wheel is still moving after {settings.FilterWheelTimeout} seconds, further tests abandoned because the device is not in the expected stationary state.");
+                    ResetTestActionStatus();
+                    return;
+                }
             }
             catch (Exception ex)
             {
-                LogInfo("Pre-run Check", "Unable to determine that the Filter wheel is stationary");
-                LogIssue("Pre-run Check", "Exception: " + ex.ToString());
+                LogIssue("Pre-run Check", $"Unable to determine that the Filter wheel is stationary: {ex.Message}");
+                LogDebug("Pre-run Check", $"Exception detail: {ex}");
             }
-            ClearStatus();
+
+            ResetTestActionStatus();
         }
 
         public override void CheckCommonMethods()
         {
-            base.CheckCommonMethods(m_FilterWheel, DeviceTypes.FilterWheel);
+            base.CheckCommonMethods(filterWheel, DeviceTypes.FilterWheel);
         }
 
         public override void CheckProperties()
         {
-            int[] l_Offsets;
-            int l_NNames = 0, l_NOffsets = 0, l_FilterNumber, l_StartFilterNumber;
-            string[] l_Names;
+            int[] filterOffsets;
+            int numberOfFilternames = 0, numberOfFilterOffsets = 0, filterNumber, startingFilterNumber;
+            string[] filterNames;
 
-            DateTime l_StartTime, l_EndTime;
+            DateTime startTime, endTime;
 
             // FocusOffsets - Required - Read only
             try
             {
                 LogCallToDriver("FocusOffsets Get", "About to get FocusOffsets property");
-                l_Offsets = m_FilterWheel.FocusOffsets;
-                l_NOffsets = l_Offsets.Length;
-                if (l_NOffsets == 0)
+                filterOffsets = filterWheel.FocusOffsets;
+                numberOfFilterOffsets = filterOffsets.Length;
+                if (numberOfFilterOffsets == 0)
                     LogIssue("FocusOffsets Get", "Found no offset values in the returned array");
                 else
-                    LogOK("FocusOffsets Get", "Found " + l_NOffsets.ToString() + " filter offset values");
+                    LogOK("FocusOffsets Get", "Found " + numberOfFilterOffsets.ToString() + " filter offset values");
 
-                l_FilterNumber = 0;
-                foreach (var offset in l_Offsets)
+                filterNumber = 0;
+                foreach (var offset in filterOffsets)
                 {
-                    LogInfo("FocusOffsets Get", "Filter " + l_FilterNumber.ToString() + " Offset: " + offset.ToString());
-                    l_FilterNumber += 1;
+                    LogInfo("FocusOffsets Get", "Filter " + filterNumber.ToString() + " Offset: " + offset.ToString());
+                    filterNumber += 1;
                     if (cancellationToken.IsCancellationRequested)
                         break;
                 }
@@ -233,22 +238,22 @@ namespace ConformU
             try
             {
                 LogCallToDriver("Names Get", "About to get Names property");
-                l_Names = m_FilterWheel.Names;
-                l_NNames = l_Names.Length;
-                if (l_NNames == 0)
+                filterNames = filterWheel.Names;
+                numberOfFilternames = filterNames.Length;
+                if (numberOfFilternames == 0)
                     LogIssue("Names Get", "Did not find any names in the returned array");
                 else
-                    LogOK("Names Get", "Found " + l_NNames.ToString() + " filter names");
-                l_FilterNumber = 0;
-                foreach (var name in l_Names)
+                    LogOK("Names Get", "Found " + numberOfFilternames.ToString() + " filter names");
+                filterNumber = 0;
+                foreach (var name in filterNames)
                 {
                     if (name == null)
-                        LogIssue("Names Get", "Filter " + l_FilterNumber.ToString() + " has a value of nothing");
+                        LogIssue("Names Get", "Filter " + filterNumber.ToString() + " has a value of nothing");
                     else if (name == "")
-                        LogIssue("Names Get", "Filter " + l_FilterNumber.ToString() + " has a value of \"\"");
+                        LogIssue("Names Get", "Filter " + filterNumber.ToString() + " has a value of \"\"");
                     else
-                        LogInfo("Names Get", "Filter " + l_FilterNumber.ToString() + " Name: " + name);
-                    l_FilterNumber += 1;
+                        LogInfo("Names Get", "Filter " + filterNumber.ToString() + " Name: " + name);
+                    filterNumber += 1;
                 }
             }
             catch (Exception ex)
@@ -257,98 +262,104 @@ namespace ConformU
             }
 
             // Confirm number of array elements in filter names and filter offsets are the same
-            if (l_NNames == l_NOffsets)
-                LogOK("Names Get", "Number of filter offsets and number of names are the same: " + l_NNames.ToString());
+            if (numberOfFilternames == numberOfFilterOffsets)
+                LogOK("Names Get", "Number of filter offsets and number of names are the same: " + numberOfFilternames.ToString());
             else
-                LogIssue("Names Get", "Number of filter offsets and number of names are different: " + l_NOffsets.ToString() + " " + l_NNames.ToString());
+                LogIssue("Names Get", "Number of filter offsets and number of names are different: " + numberOfFilterOffsets.ToString() + " " + numberOfFilternames.ToString());
 
-            // Position - Required - Read / Write
-            switch (l_NOffsets)
+
+            // Position - Required - Read
+            try
             {
-                case object _ when l_NOffsets <= 0:
-                    {
-                        LogIssue("Position", "Filter position tests skipped as number of filters appears to be 0: " + l_NOffsets.ToString());
-                        break;
-                    }
-
-                default:
-                    {
-                        SetTest("Position Set");
-                        try
-                        {
-                            LogCallToDriver("Position Get", "About to get Position property");
-                            l_StartFilterNumber = m_FilterWheel.Position;
-                            if ((l_StartFilterNumber < 0) | (l_StartFilterNumber >= l_NOffsets))
-                                LogIssue("Position Get", "Illegal filter position returned: " + l_StartFilterNumber.ToString());
-                            else
-                            {
-                                LogOK("Position Get", "Currently at position: " + l_StartFilterNumber.ToString());
-
-                                // Move to each position in turn
-                                for (short i = 0; i <= Convert.ToInt16(l_NOffsets - 1); i++)
-                                {
-                                    try
-                                    {
-                                        LogCallToDriver("Position Set", "About to set Position property");
-                                        SetAction($"Setting position {i}");
-                                        m_FilterWheel.Position = i;
-                                        l_StartTime = DateTime.Now;
-                                        LogCallToDriver("Position Set", "About to get Position property repeatedly");
-                                        WaitWhile($"Moving to position {i}", () => { return m_FilterWheel.Position != i; }, 500, FILTER_WHEEL_TIME_OUT);
-
-                                        if (cancellationToken.IsCancellationRequested)
-                                            return;
-
-                                        l_EndTime = DateTime.Now;
-                                        if (m_FilterWheel.Position == i)
-                                            LogOK("Position Set", "Reached position: " + i.ToString() + " in: " + l_EndTime.Subtract(l_StartTime).TotalSeconds.ToString("0.0") + " seconds");
-                                        else
-                                            LogIssue("Position Set", "Filter wheel did not reach specified position: " + i.ToString() + " within timeout of: " + FILTER_WHEEL_TIME_OUT.ToString());
-                                        //WaitFor(1000); // Pause to allow filter wheel to stabilise
-                                        Stopwatch sw = Stopwatch.StartNew();
-                                        WaitWhile($"Waiting for wheel to stabilise at position {i}", () => { return sw.ElapsedMilliseconds < 1000; }, 500, 1);
-
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        HandleException("Position Set", MemberType.Property, Required.Mandatory, ex, "");
-                                    }
-                                }
-
-                                // Confirm that an error is correctly generated for outside range values
-                                try
-                                {
-                                    LogCallToDriver("Position Set", "About to set Position property");
-                                    m_FilterWheel.Position = -1; // Negative position, positions should never be negative
-                                    LogIssue("Position Set", "Failed to generate exception when selecting filter with negative filter number");
-                                }
-                                catch (Exception ex)
-                                {
-                                    HandleInvalidValueExceptionAsOK("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to - 1", "Correctly rejected bad position: -1");
-                                }
-
-                                // Confirm that an error is correctly generated for outside range values
-                                try
-                                {
-                                    LogCallToDriver("Position Set", "About to set Position property");
-                                    m_FilterWheel.Position = (short)l_NOffsets; // This should be 1 above the highest array element returned
-                                    LogIssue("Position Set", "Failed to generate exception when selecting filter outside expected range");
-                                }
-                                catch (Exception ex)
-                                {
-                                    HandleInvalidValueExceptionAsOK("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to " + System.Convert.ToString(l_NOffsets), "Correctly rejected bad position: " + System.Convert.ToString(l_NOffsets));
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            HandleException("Position Get", MemberType.Property, Required.Mandatory, ex, "");
-                        }
-
-                        break;
-                    }
+                SetTest("Position Get");
+                LogCallToDriver("Position Get", "About to get Position property");
+                startingFilterNumber = filterWheel.Position;
+                if ((startingFilterNumber < 0) | (startingFilterNumber >= numberOfFilterOffsets))
+                    LogIssue("Position Get", $"Illegal filter position returned: {startingFilterNumber}");
+                else
+                    LogOK("Position Get", $"Currently at position: {startingFilterNumber}");
             }
-            ClearStatus();
+            catch (Exception ex)
+            {
+                HandleException("Position", MemberType.Property, Required.Mandatory, ex, "");
+            }
+
+            // Position - Required - Write
+            SetTest("Position Set");
+
+            // Make sure some filter slots are available
+            if (numberOfFilterOffsets <= 0) // No filter slots available so exist
+            {
+                LogIssue("Position", "Filter position tests skipped as number of filters appears to be 0: " + numberOfFilterOffsets.ToString());
+                ResetTestActionStatus();
+                return;
+            }
+
+            try
+            {
+                // Move to each position in turn
+                for (short i = 0; i <= Convert.ToInt16(numberOfFilterOffsets - 1); i++)
+                {
+                    try
+                    {
+                        LogCallToDriver("Position Set", "About to set Position property");
+                        SetAction($"Setting position {i}");
+                        filterWheel.Position = i;
+
+                        startTime = DateTime.Now;
+                        LogCallToDriver("Position Set", "About to get Position property repeatedly");
+                        WaitWhile($"Moving to position {i}", () => { return filterWheel.Position != i; }, 500, settings.FilterWheelTimeout);
+
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
+                        endTime = DateTime.Now;
+                        if (filterWheel.Position == i)
+                            LogOK("Position Set", "Reached position: " + i.ToString() + " in: " + endTime.Subtract(startTime).TotalSeconds.ToString("0.0") + " seconds");
+                        else
+                            LogIssue("Position Set", "Filter wheel did not reach specified position: " + i.ToString() + " within timeout of: " + settings.FilterWheelTimeout.ToString());
+                        //WaitFor(1000); // Pause to allow filter wheel to stabilise
+                        Stopwatch sw = Stopwatch.StartNew();
+                        WaitWhile($"Waiting for wheel to stabilise at position {i}", () => { return sw.ElapsedMilliseconds < 1000; }, 500, 1);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleException("Position Set", MemberType.Property, Required.Mandatory, ex, "");
+                    }
+                }
+
+                // Confirm that an error is correctly generated for outside range values
+                try
+                {
+                    LogCallToDriver("Position Set", "About to set Position property");
+                    filterWheel.Position = -1; // Negative position, positions should never be negative
+                    LogIssue("Position Set", "Failed to generate exception when selecting filter with negative filter number");
+                }
+                catch (Exception ex)
+                {
+                    HandleInvalidValueExceptionAsOK("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to - 1", "Correctly rejected bad position: -1");
+                }
+
+                // Confirm that an error is correctly generated for outside range values
+                try
+                {
+                    LogCallToDriver("Position Set", "About to set Position property");
+                    filterWheel.Position = (short)numberOfFilterOffsets; // This should be 1 above the highest array element returned
+                    LogIssue("Position Set", "Failed to generate exception when selecting filter outside expected range");
+                }
+                catch (Exception ex)
+                {
+                    HandleInvalidValueExceptionAsOK("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to " + System.Convert.ToString(numberOfFilterOffsets), "Correctly rejected bad position: " + System.Convert.ToString(numberOfFilterOffsets));
+                }
+
+            }
+            catch (Exception ex)
+            {
+                HandleException("Position Get", MemberType.Property, Required.Mandatory, ex, "");
+            }
+
+            ResetTestActionStatus();
         }
         public override void CheckPerformance()
         {
@@ -378,19 +389,19 @@ namespace ConformU
                     {
                         case FilterWheelProperties.FocusOffsets:
                             {
-                                l_Offsets = m_FilterWheel.FocusOffsets;
+                                l_Offsets = filterWheel.FocusOffsets;
                                 break;
                             }
 
                         case FilterWheelProperties.Names:
                             {
-                                l_Names = m_FilterWheel.Names;
+                                l_Names = filterWheel.Names;
                                 break;
                             }
 
                         case FilterWheelProperties.Position:
                             {
-                                l_StartFilterNumber = m_FilterWheel.Position;
+                                l_StartFilterNumber = filterWheel.Position;
                                 break;
                             }
 
