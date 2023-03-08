@@ -525,6 +525,11 @@ namespace ConformU
             }
         }
 
+        /// <summary>
+        /// Move the filter wheel to the specified position and report the outcome
+        /// </summary>
+        /// <param name="position">Filter wheel position</param>
+        /// <returns>Operation duration (seconds).</returns>
         private double MoveToPosition(int position)
         {
             double duration = 0.0;
