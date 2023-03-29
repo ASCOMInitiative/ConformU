@@ -289,26 +289,30 @@ namespace ConformU
                     currentPosition = m_Rotator.Position;
                     LogOK("Post-run Check", $"Current position: {currentPosition}");
 
-                    // Restore the original sync offset, if possible 
-                    if (!Single.IsNaN(initialMechanicalPosiiton))
+                    // Restore the original sync offset, if possible, for IRotatorV3 and later devices
+                    if (g_InterfaceVersion >= 3)
                     {
-                        // Get the current mechanical position
-                        LogCallToDriver("Post-run Check", $"About to get MechanicalPosition property");
-                        currentMechanicalPosition = m_Rotator.MechanicalPosition;
-                        LogOK("Post-run Check", $"Current mechanical position: {currentMechanicalPosition}");
 
-                        syncPosition = (float)Utilities.Range((double)(currentMechanicalPosition + initialSyncOffset), 0.0, true, 360.0, false);
-                        LogOK("Post-run Check", $"New sync position: {syncPosition}");
+                        if (!Single.IsNaN(initialMechanicalPosiiton))
+                        {
+                            // Get the current mechanical position
+                            LogCallToDriver("Post-run Check", $"About to get MechanicalPosition property");
+                            currentMechanicalPosition = m_Rotator.MechanicalPosition;
+                            LogOK("Post-run Check", $"Current mechanical position: {currentMechanicalPosition}");
 
-                        LogCallToDriver("Post-run Check", $"About to call Sync method. Position: {syncPosition}");
-                        m_Rotator.Sync(syncPosition);
-                        LogOK("Post-run Check", $"Completed Sync ({initialSyncOffset} degrees) from position: {currentPosition} to {syncPosition}");
+                            syncPosition = (float)Utilities.Range((double)(currentMechanicalPosition + initialSyncOffset), 0.0, true, 360.0, false);
+                            LogOK("Post-run Check", $"New sync position: {syncPosition}");
+
+                            LogCallToDriver("Post-run Check", $"About to call Sync method. Position: {syncPosition}");
+                            m_Rotator.Sync(syncPosition);
+                            LogOK("Post-run Check", $"Completed Sync ({initialSyncOffset} degrees) from position: {currentPosition} to {syncPosition}");
+
+                            // Re-get the current position because the sync will have changed it
+                            LogCallToDriver("Post-run Check", $"About to get Position property");
+                            currentPosition = m_Rotator.Position;
+                            LogOK("Post-run Check", $"New current position: {currentPosition}");
+                        }
                     }
-
-                    // Re-get the current position because the sync will have changed it
-                    LogCallToDriver("Post-run Check", $"About to get Position property");
-                    currentPosition = m_Rotator.Position;
-                    LogOK("Post-run Check", $"New current position: {currentPosition}");
 
                     // Calculate the smallest relative movement required to get to the initial position
                     relativeMovement = (float)Utilities.Range((double)(initialPosiiton - currentPosition), -180.0, true, 180.0, true);
@@ -327,7 +331,8 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    LogError("Post-run Check", $"Exception: {ex}");
+                    LogError("Post-run Check", $"Exception: {ex.Message}");
+                    LogDebug("Post-run Check", $"Exception detail:\r\n{ex.Message}");
                 }
         }
 
