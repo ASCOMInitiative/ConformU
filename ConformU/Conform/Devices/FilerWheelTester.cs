@@ -436,6 +436,7 @@ namespace ConformU
             FilterWheelPerformanceTest(FilterWheelProperties.Names, "Names");
             FilterWheelPerformanceTest(FilterWheelProperties.Position, "Position");
         }
+
         private void FilterWheelPerformanceTest(FilterWheelProperties p_Type, string p_Name)
         {
             int[] l_Offsets;
