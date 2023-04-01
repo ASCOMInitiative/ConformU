@@ -15,7 +15,7 @@ echo *** Completed Build
 
 echo *** Publishing Windows 64bit
 dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r win-x64 --framework net7.0-windows --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=false -o ./publish/ConformU64
-echo ***Completed 64bit publish
+echo *** Completed 64bit publish
 
 echo *** Publishing Windows 32bit
 dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r win-x86 --framework net7.0-windows --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=false -o ./publish/ConformU86
