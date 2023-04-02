@@ -367,6 +367,18 @@
                                      Component="TELESIDEOFPIERWRITE"
                                      Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
                     </div>
+
+                    <div class="row">
+
+                        <RadzenCheckBox Name="TELESIDEOFPIERWRITE"
+                                        Style="margin-top:20px;margin-left:20px"
+                                        @bind-Value=@chkExtendedRateOffsetTests
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TelescopeExtendedRateOffsetTests)) />
+                        <RadzenLabel Text="Enable extended rate offset tests"
+                                     Component="TELESIDEOFPIERWRITE"
+                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
+                    </div>
                 </RadzenCard>
             </div>
         </RadzenTabsItem>
@@ -667,6 +679,7 @@
     private int telescopeMaximumSlewTime;
     private bool chkSideOfPierRead;
     private bool chkSidfeOfPierWrite;
+    private bool chkExtendedRateOffsetTests;
 
     #region Enums
 
@@ -725,7 +738,8 @@
         ProtocolTestPrimaryUrlStructure,
         SideOfPierRead,
         SideOfPierWrite,
-        TrustUserGeneratedSslCertificates
+        TrustUserGeneratedSslCertificates,
+        TelescopeExtendedRateOffsetTests
     }
 
     private enum BoolConfigurationItem
@@ -991,6 +1005,10 @@
                 settings.TestSideOfPierWrite = chkSidfeOfPierWrite;
                 break;
 
+            case CheckBoxConfigurationItem.TelescopeExtendedRateOffsetTests:
+                settings.TelescopeExtendedOffsetTests = chkExtendedRateOffsetTests;
+                break;
+
             default:
                 throw new InvalidValueException($"OnCheckboxChange - Unknown checkbox name: {name}");
         }
@@ -1035,6 +1053,7 @@
         telescopeMaximumSlewTime = settings.TelescopeMaximumSlewTime;
         chkSideOfPierRead = settings.TestSideOfPierRead;
         chkSidfeOfPierWrite = settings.TestSideOfPierWrite;
+        chkExtendedRateOffsetTests = settings.TelescopeExtendedOffsetTests;
 
         // Camera tests
         cameraTestMaxBinX = settings.CameraMaxBinX;

@@ -1,4 +1,5 @@
-﻿using Blazorise;
+﻿using ASCOM.Tools;
+using Blazorise;
 using System;
 
 namespace ConformU
@@ -57,5 +58,17 @@ namespace ConformU
             }
             return message;
         }
+
+        public static string ToHMS(this double rightascension)
+        {
+            return Utilities.HoursToHMS(rightascension, ":", ":", "", 3);
+        }
+
+        public static string ToDMS(this double declination)
+        {
+            return Utilities.DegreesToDMS(declination, ":", ":", "", 3);
+        }
+
+
     }
 }
