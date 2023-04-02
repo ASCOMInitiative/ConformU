@@ -18,7 +18,7 @@ namespace ConformU
         private readonly ConformLogger TL;
         private readonly Settings settings;
         DeviceTesterBaseClass testDevice = null; // Variable to hold the device tester class
-        public static CancellationTokenSource ConformCancellationTokenSource;
+        internal static CancellationTokenSource ConformCancellationTokenSource;
         public ConformanceTestManager(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationTokenSource conformCancellationTokenSource, CancellationToken conformCancellationToken)
         {
             configuration = conformConfiguration;
@@ -128,7 +128,7 @@ namespace ConformU
                 }, cancellationToken);
 
                 // Test whether we are being cancelled
-                Task waitForStopButtonTask = new Task(() =>
+                Task waitForStopButtonTask = new(() =>
                 {
                     do
                     {
@@ -145,7 +145,7 @@ namespace ConformU
                 TL.LogMessage("TestManager:SetupDialog", MessageLevel.Info, $"Setup dialogue task status: {setupDialogTask.Status}, Stop button task status: {waitForStopButtonTask.Status}");
 
                 // Cancel the STOP button task if it is not already in the cancelled state
-                if (waitForStopButtonTask.Status==TaskStatus.Running)
+                if (waitForStopButtonTask.Status == TaskStatus.Running)
                 {
                     TL.LogMessage("TestManager:SetupDialog", MessageLevel.Info, $"Cancelling the STOP button task because the setup dialogue method has completed.");
                     ConformCancellationTokenSource.Cancel();
@@ -269,6 +269,13 @@ namespace ConformU
                                 TL.LogMessage("", MessageLevel.TestOnly, ""); // Blank line
                             }
 
+                            // Carry out check on whether any tests were omitted due to Conform configuration
+                            if (!cancellationToken.IsCancellationRequested)
+                            {
+                                testStage = "CheckConfiguration";
+                                testDevice.CheckConfiguration();
+                            }
+
                             // Display completion or "test cancelled" message
                             if (!cancellationToken.IsCancellationRequested)
                             {
@@ -311,22 +318,20 @@ namespace ConformU
 
                 // Report the success or failure of conformance checking
                 TL.LogMessage("", MessageLevel.TestOnly, "");
-                if (conformResults.ErrorCount == 0 & conformResults.IssueCount == 0 & !cancellationToken.IsCancellationRequested) // No issues - device conforms as expected
+                if (conformResults.ErrorCount == 0 & conformResults.IssueCount == 0 & conformResults.ConfigurationAlertCount == 0 & !cancellationToken.IsCancellationRequested) // No issues - device conforms as expected
                 {
                     TL.LogMessage("No errors, warnings or issues found: your driver passes ASCOM validation!!", MessageLevel.TestOnly, "");
                 }
                 else // Some issues found, the device fails the conformance check
                 {
-                    l_Message = "Your driver had " + conformResults.ErrorCount + " error";
-                    if (conformResults.ErrorCount != 1)
-                        l_Message += "s";
-                    l_Message = l_Message + " and " + conformResults.IssueCount + " issue";
-                    if (conformResults.IssueCount != 1)
-                        l_Message += "s";
+                    l_Message = $"Your driver had {conformResults.ErrorCount} error{(conformResults.ErrorCount == 1 ? "" : "s")}, " +
+                        $"{conformResults.IssueCount} issue{(conformResults.IssueCount == 1 ? "" : "s")} and " +
+                        $"{conformResults.ConfigurationAlertCount} configuration alert{(conformResults.ConfigurationAlertCount == 1 ? "" : "s")}";
+
                     TL.LogMessage(l_Message, MessageLevel.TestOnly, "");
                 }
 
-                // List issues and errors
+                // List issues, errors and configuration alerts
                 if (conformResults.ErrorCount > 0)
                 {
                     TL.LogMessage("", MessageLevel.TestOnly, "");
@@ -344,6 +349,16 @@ namespace ConformU
                     foreach (KeyValuePair<string, string> kvp in conformResults.Issues)
                     {
                         TL.LogMessage(kvp.Key, MessageLevel.Issue, kvp.Value);
+                    }
+                }
+
+                if (conformResults.ConfigurationAlertCount > 0)
+                {
+                    TL.LogMessage("", MessageLevel.TestOnly, "");
+                    TL.LogMessage("Configuration Alert Summary", MessageLevel.TestOnly, "");
+                    foreach (KeyValuePair<string, string> kvp in conformResults.ConfigurationAlerts)
+                    {
+                        TL.LogMessage(kvp.Key, MessageLevel.TestAndMessage, kvp.Value);
                     }
                 }
 

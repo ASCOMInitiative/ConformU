@@ -8,6 +8,7 @@ namespace ConformU
         {
             Errors = new();
             Issues = new();
+            ConfigurationAlerts= new();
         }
 
         public int ErrorCount
@@ -26,8 +27,18 @@ namespace ConformU
             }
         }
 
-        // public int OkCount { get; set; }
+        public int ConfigurationAlertCount
+        {
+            get
+            {
+                return ConfigurationAlerts.Count;
+            }
+        }
+
         public List<KeyValuePair<string, string>> Errors { get; set; }
+
         public List<KeyValuePair<string, string>> Issues { get; set; }
+
+        public List<KeyValuePair<string, string>> ConfigurationAlerts { get; set; }
     }
 }

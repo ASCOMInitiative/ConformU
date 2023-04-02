@@ -3327,6 +3327,89 @@ namespace ConformU
             }
         }
 
+        public override void CheckConfiguration()
+        {
+            try
+            {
+                // Common configuration
+                if (!settings.TestMethods)
+                    LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
+                else
+                {
+                    // Method tests
+                    if (!telescopeTests[TELTEST_CAN_MOVE_AXIS])
+                        LogConfigurationAlert("Can move axis tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_PARK_UNPARK])
+                        LogConfigurationAlert("Park and Unpark tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_ABORT_SLEW])
+                        LogConfigurationAlert("Abort slew tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_AXIS_RATE])
+                        LogConfigurationAlert("Axis rate tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_FIND_HOME])
+                        LogConfigurationAlert("Find home tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_MOVE_AXIS])
+                        LogConfigurationAlert("Move axis tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_PULSE_GUIDE])
+                        LogConfigurationAlert("Pulse guide tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_SLEW_TO_COORDINATES])
+                        LogConfigurationAlert("Synchronous Slew to coordinates tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_SLEW_TO_COORDINATES_ASYNC])
+                        LogConfigurationAlert("Asynchronous slew to coordinates tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_SLEW_TO_TARGET])
+                        LogConfigurationAlert("Synchronous slew to target tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_SLEW_TO_TARGET_ASYNC])
+                        LogConfigurationAlert("Asynchronous slew to target tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_DESTINATION_SIDE_OF_PIER])
+                        LogConfigurationAlert("Destination side of pier tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_SLEW_TO_ALTAZ])
+                        LogConfigurationAlert("Synchronous slew to altitude / azimuth tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_SLEW_TO_ALTAZ_ASYNC])
+                        LogConfigurationAlert("Asynchronous slew to altitude / azimuth tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_SYNC_TO_COORDINATES])
+                        LogConfigurationAlert("Sync to coordinates tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_SYNC_TO_TARGET])
+                        LogConfigurationAlert("Sync to target tests were omitted due to Conform configuration.");
+
+                    if (!telescopeTests[TELTEST_SYNC_TO_ALTAZ])
+                        LogConfigurationAlert("Sync to altitude / azimuth tests were omitted due to Conform configuration.");
+                }
+
+                // Miscellaneous configuration
+                if (!settings.TelescopeFirstUseTests)
+                    LogConfigurationAlert("First time use tests were omitted due to Conform configuration.");
+
+                if (!settings.TestSideOfPierRead)
+                    LogConfigurationAlert("Extended side of pier read tests were omitted due to Conform configuration.");
+
+                if (!settings.TestSideOfPierWrite)
+                    LogConfigurationAlert("Extended side of pier write tests were omitted due to Conform configuration.");
+
+                if (!settings.TelescopeExtendedOffsetTests)
+                    LogConfigurationAlert("Extended rate offset tests were omitted due to Conform configuration.");
+
+            }
+            catch (Exception ex)
+            {
+                LogError("CheckConfiguration", $"Exception when checking Conform configuration: {ex.Message}");
+                LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
+            }
+        }
+
         private void TelescopeSyncTest(SlewSyncType testType, string testName, bool driverSupportsMethod, string canDoItName)
         {
             bool showOutcome = false;
@@ -7188,37 +7271,37 @@ namespace ConformU
                                 // Now test the actual amount of movement
                                 if (axis == Axis.RA)
                                 {
-                                    TestOffsetRate("RightAscensionRate Write", -9.0, rate, 0.0);
+                                    TestOffsetRate(testName, -9.0, rate, 0.0);
                                     if (cancellationToken.IsCancellationRequested)
                                         return success;
 
-                                    TestOffsetRate("RightAscensionRate Write", +3.0, rate, 0.0);
+                                    TestOffsetRate(testName, +3.0, rate, 0.0);
                                     if (cancellationToken.IsCancellationRequested)
                                         return success;
 
-                                    TestOffsetRate("RightAscensionRate Write", +9.0, rate, 0.0);
+                                    TestOffsetRate(testName, +9.0, rate, 0.0);
                                     if (cancellationToken.IsCancellationRequested)
                                         return success;
 
-                                    TestOffsetRate("RightAscensionRate Write", -3.0, rate, 0.0);
+                                    TestOffsetRate(testName, -3.0, rate, 0.0);
                                     if (cancellationToken.IsCancellationRequested)
                                         return success;
                                 }
                                 else
                                 {
-                                    TestOffsetRate("DeclinationRate Write", -9.0, 0.0, rate);
+                                    TestOffsetRate(testName, -9.0, 0.0, rate);
                                     if (cancellationToken.IsCancellationRequested)
                                         return success;
 
-                                    TestOffsetRate("DeclinationRate Write", +3.0, 0.0, rate);
+                                    TestOffsetRate(testName, +3.0, 0.0, rate);
                                     if (cancellationToken.IsCancellationRequested)
                                         return success;
 
-                                    TestOffsetRate("DeclinationRate Write", +9.0, 0.0, rate);
+                                    TestOffsetRate(testName, +9.0, 0.0, rate);
                                     if (cancellationToken.IsCancellationRequested)
                                         return success;
 
-                                    TestOffsetRate("DeclinationRate Write", -3.0, 0.0, rate);
+                                    TestOffsetRate(testName, -3.0, 0.0, rate);
                                 }
                             }
                         }
@@ -7259,7 +7342,7 @@ namespace ConformU
         /// </summary>
         /// <param name="axis">RA or Declination axis</param>
         /// <returns>RightAscensionRate or DeclinationRate string</returns>
-        private string RateOffsetName(Axis axis)
+        private static string RateOffsetName(Axis axis)
         {
             if (axis == Axis.RA)
                 return "RightAscensionRate";
@@ -7278,7 +7361,7 @@ namespace ConformU
             testName = $"{testName} {testHa:+0.0;-0.0;+0.0}";
 
             // Find a test declination that yields an elevation that is as high as possible but under 65 degrees
-            using (Transform transform = new Transform())
+            using (Transform transform = new())
             {
                 // Initialise transform with site parameters
                 transform.SiteLatitude = telescopeDevice.SiteLatitude;
@@ -7287,7 +7370,7 @@ namespace ConformU
                 transform.SitePressure = 0.0;
                 transform.SiteTemperature = 10.0;
                 transform.Refraction = false;
-                LogTestAndMessage(testName, $"TRANSFORM: Site: Latitude: {transform.SiteLatitude.ToDMS()}, Longitude: {transform.SiteLongitude.ToDMS()}, elevation: {transform.SiteElevation}, Pressure: {transform.SitePressure}, Temperature: {transform.SiteTemperature}, Refraction: {transform.Refraction}");
+                LogDebug(testName, $"TRANSFORM: Site: Latitude: {transform.SiteLatitude.ToDMS()}, Longitude: {transform.SiteLongitude.ToDMS()}, elevation: {transform.SiteElevation}, Pressure: {transform.SitePressure}, Temperature: {transform.SiteTemperature}, Refraction: {transform.Refraction}");
                 // Iterate from declination -80 to +80 in steps of 10 degrees
                 for (double declination = -80.0; declination < 90.0; declination += 10.0)
                 {
@@ -7297,7 +7380,7 @@ namespace ConformU
                     // Retrieve the corresponding elevation
                     double elevation = transform.ElevationTopocentric;
 
-                    LogTestAndMessage(testName, $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
+                    LogDebug(testName, $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
 
                     // Update the test declination if the new elevation is less that 65 degrees and also greater than the current highest elevation 
                     if ((elevation < 65.0) & (elevation > testElevation))

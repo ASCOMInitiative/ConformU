@@ -749,6 +749,11 @@ namespace ConformU
             LogIssue("CheckPerformance", "DeviceTester base Class warning message, you should not see this message!");
         }
 
+        public virtual void CheckConfiguration()
+        {
+            LogIssue("CheckConfiguration", "DeviceTester base Class warning message, you should not see this message!");
+        }
+
         public virtual void PostRunCheck()
         {
             LogIssue("PostSafetyCheck", "DeviceTester base Class warning message, you should not see this message!");
@@ -989,6 +994,11 @@ namespace ConformU
         internal void LogMsg(string testName, MessageLevel messageLevel, string message)
         {
             TL?.LogMessage(testName, messageLevel, message);
+        }
+
+        internal static void LogConfigurationAlert(string message)
+        {
+            conformResults.ConfigurationAlerts.Add(new System.Collections.Generic.KeyValuePair<string, string>("Conform configuration", message));
         }
 
         /// <summary>
