@@ -360,7 +360,7 @@
 
                         <RadzenCheckBox Name="TELESIDEOFPIERWRITE"
                                         Style="margin-top:20px;margin-left:20px"
-                                        @bind-Value=@chkSidfeOfPierWrite
+                                        @bind-Value=@chkSideOfPierWrite
                                         TValue="bool"
                                         Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.SideOfPierWrite)) />
                         <RadzenLabel Text="Enable extended side of pier write tests"
@@ -370,13 +370,13 @@
 
                     <div class="row">
 
-                        <RadzenCheckBox Name="TELESIDEOFPIERWRITE"
+                        <RadzenCheckBox Name="EXTENDEDRATEOFFSETTESTS"
                                         Style="margin-top:20px;margin-left:20px"
                                         @bind-Value=@chkExtendedRateOffsetTests
                                         TValue="bool"
                                         Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TelescopeExtendedRateOffsetTests)) />
                         <RadzenLabel Text="Enable extended rate offset tests"
-                                     Component="TELESIDEOFPIERWRITE"
+                                     Component="EXTENDEDRATEOFFSETTESTS"
                                      Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
                     </div>
                 </RadzenCard>
@@ -678,7 +678,7 @@
     private double telescopeSlewTolerance;
     private int telescopeMaximumSlewTime;
     private bool chkSideOfPierRead;
-    private bool chkSidfeOfPierWrite;
+    private bool chkSideOfPierWrite;
     private bool chkExtendedRateOffsetTests;
 
     #region Enums
@@ -1002,11 +1002,11 @@
                 break;
 
             case CheckBoxConfigurationItem.SideOfPierWrite:
-                settings.TestSideOfPierWrite = chkSidfeOfPierWrite;
+                settings.TestSideOfPierWrite = chkSideOfPierWrite;
                 break;
 
             case CheckBoxConfigurationItem.TelescopeExtendedRateOffsetTests:
-                settings.TelescopeExtendedOffsetTests = chkExtendedRateOffsetTests;
+                settings.TelescopeExtendedRateOffsetTests = chkExtendedRateOffsetTests;
                 break;
 
             default:
@@ -1052,8 +1052,8 @@
         telescopeSlewTolerance = settings.TelescopeSlewTolerance;
         telescopeMaximumSlewTime = settings.TelescopeMaximumSlewTime;
         chkSideOfPierRead = settings.TestSideOfPierRead;
-        chkSidfeOfPierWrite = settings.TestSideOfPierWrite;
-        chkExtendedRateOffsetTests = settings.TelescopeExtendedOffsetTests;
+        chkSideOfPierWrite = settings.TestSideOfPierWrite;
+        chkExtendedRateOffsetTests = settings.TelescopeExtendedRateOffsetTests;
 
         // Camera tests
         cameraTestMaxBinX = settings.CameraMaxBinX;

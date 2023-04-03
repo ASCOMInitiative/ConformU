@@ -3399,7 +3399,7 @@ namespace ConformU
                 if (!settings.TestSideOfPierWrite)
                     LogConfigurationAlert("Extended side of pier write tests were omitted due to Conform configuration.");
 
-                if (!settings.TelescopeExtendedOffsetTests)
+                if (!settings.TelescopeExtendedRateOffsetTests)
                     LogConfigurationAlert("Extended rate offset tests were omitted due to Conform configuration.");
 
             }
@@ -7263,7 +7263,7 @@ namespace ConformU
                         success = true;
 
                         // Run the extended rate offset tests if configured to do so.
-                        if (settings.TelescopeExtendedOffsetTests)
+                        if (settings.TelescopeExtendedRateOffsetTests)
                         {
                             // Only test movement when the requested rate is not 0.0
                             if (rate != 0.0)
@@ -7349,30 +7349,41 @@ namespace ConformU
             return "DeclinationRate";
         }
 
-        internal void TestOffsetRate(string testName, double testHa, double expectedRaRate, double expectedDeclinationRate)
+        /// <summary>
+        /// Return the declination which provides the highest elevation that is less than 65 degrees at the given RA.
+        /// </summary>
+        /// <param name="testRa">RA to use when determining the optimum declination.</param>
+        /// <returns>Declination in the range -80.0 to +80.0</returns>
+        /// <remarks>The returned declination will correspond to an elevation in the range 0 to 65 degrees.</remarks>
+        internal double GetTestDeclination(string testName, double testRa)
         {
-            const double DURATION = 5.0; // Seconds
-
-            double testRa = Utilities.ConditionRA(telescopeDevice.SiderealTime - testHa);
-            double testDeclination = 0.0; // = telescopeDevice.SiteLatitude >= 0.0 ? +40.0 : -40.0;
-            double testElevation = double.MinValue; // Initialise to a very low number
-
-            // Update the test name with the test hour angle
-            testName = $"{testName} {testHa:+0.0;-0.0;+0.0}";
+            double testDeclination = 0.0;
+            double testElevation = double.MinValue;
 
             // Find a test declination that yields an elevation that is as high as possible but under 65 degrees
             using (Transform transform = new())
             {
                 // Initialise transform with site parameters
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage(testName, $"About to get SiteLatitude property");
                 transform.SiteLatitude = telescopeDevice.SiteLatitude;
+
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage(testName, $"About to get SiteLongitude property");
                 transform.SiteLongitude = telescopeDevice.SiteLongitude;
+
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage(testName, $"About to get SiteElevation property");
                 transform.SiteElevation = telescopeDevice.SiteElevation;
-                transform.SitePressure = 0.0;
-                transform.SiteTemperature = 10.0;
+
+                // Set remaining transform parameters
+                transform.SitePressure = 1010.0;
                 transform.Refraction = false;
-                LogDebug(testName, $"TRANSFORM: Site: Latitude: {transform.SiteLatitude.ToDMS()}, Longitude: {transform.SiteLongitude.ToDMS()}, elevation: {transform.SiteElevation}, Pressure: {transform.SitePressure}, Temperature: {transform.SiteTemperature}, Refraction: {transform.Refraction}");
+
+                LogDebug("GetTestDeclination", $"TRANSFORM: Site: Latitude: {transform.SiteLatitude.ToDMS()}, Longitude: {transform.SiteLongitude.ToDMS()}, Elevation: {transform.SiteElevation}, Pressure: {transform.SitePressure}, Temperature: {transform.SiteTemperature}, Refraction: {transform.Refraction}");
+
                 // Iterate from declination -80 to +80 in steps of 10 degrees
-                for (double declination = -80.0; declination < 90.0; declination += 10.0)
+                for (double declination = -85.0; declination < 90.0; declination += 10.0)
                 {
                     // Set transform's topocentric coordinates
                     transform.SetTopocentric(testRa, declination);
@@ -7380,7 +7391,7 @@ namespace ConformU
                     // Retrieve the corresponding elevation
                     double elevation = transform.ElevationTopocentric;
 
-                    LogDebug(testName, $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
+                    LogDebug("GetTestDeclination", $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
 
                     // Update the test declination if the new elevation is less that 65 degrees and also greater than the current highest elevation 
                     if ((elevation < 65.0) & (elevation > testElevation))
@@ -7391,7 +7402,38 @@ namespace ConformU
                 }
             }
 
-            LogDebug(testName, $"Test hour angle: {testHa:+0.0;-0.0;+0.0}, RightAscension: {testRa.ToHMS()}, Declination: {testDeclination.ToDMS()}, Elevation: {testElevation.ToDMS()}");
+            LogDebug("GetTestDeclination", $"Test RightAscension: {testRa.ToHMS()}, Test Declination: {testDeclination.ToDMS()}, Elevation: {testElevation.ToDMS()}");
+
+            // Throw an exception if the test elevation is below 0 degrees
+            if (testElevation < 0.0)
+            {
+                throw new ASCOM.InvalidOperationException($"The highest elevation available: {testElevation.ToDMS()} is below the horizon");
+            }
+            // Return the test declination
+            return testDeclination;
+        }
+
+        internal void TestOffsetRate(string testName, double testHa, double expectedRaRate, double expectedDeclinationRate)
+        {
+            const double DURATION = 5.0; // Seconds
+            double testDeclination;
+
+            // Update the test name with the test hour angle
+            testName = $"{testName} {testHa:+0.0;-0.0;+0.0}";
+
+            // Create the test RA and declination
+            double testRa = Utilities.ConditionRA(telescopeDevice.SiderealTime - testHa);
+            try
+            {
+                testDeclination = GetTestDeclination(testName, testRa); // Get the test declination for the test RA
+            }
+            catch (ASCOM.InvalidOperationException ex)
+            {
+                LogInfo(testName,$"Test omitted because {ex.Message.ToLowerInvariant()}. This is an expected condition at latitudes close to the equator.");
+                return;
+            }
+
+            /// Slew the scope to the test position
             SlewScope(testRa, testDeclination, $"Hour angle {testHa:0.00}");
 
             if (telescopeDevice.InterfaceVersion <= 2)

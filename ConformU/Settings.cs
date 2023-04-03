@@ -149,10 +149,10 @@ namespace ConformU
             { TelescopeTester.TELTEST_SYNC_TO_TARGET, true },
             { TelescopeTester.TELTEST_SYNC_TO_ALTAZ, true }
         };
-        public bool TelescopeFirstUseTests { get; set; } = true;
+        public bool TelescopeExtendedRateOffsetTests { get; set; } = true;
         public double TelescopeSlewTolerance { get; set; } = 10.0; // Arc-seconds
         public int TelescopeMaximumSlewTime { get; set; } = 300; // Seconds
-        public bool TelescopeExtendedOffsetTests { get; set; } = true;
+        public bool TelescopeFirstUseTests { get; set; } = true;
 
         // Camera test configuration
         public int CameraMaxBinX { get; set; } = 0;
