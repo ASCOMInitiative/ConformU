@@ -113,6 +113,8 @@ namespace ConformU
         private readonly Settings settings;
         private readonly ConformLogger logger;
 
+        private readonly Transform transform;
+
         #endregion
 
         #region Enums
@@ -227,6 +229,7 @@ namespace ConformU
             telescopeTests = settings.TelescopeTests;
             cancellationToken = conformCancellationToken;
             this.logger = logger;
+            transform = new Transform();
         }
 
         // IDisposable
@@ -241,6 +244,7 @@ namespace ConformU
                 {
                     telescopeDevice?.Dispose();
                     telescopeDevice = null;
+                    transform?.Dispose();
                 }
             }
 
@@ -7361,48 +7365,46 @@ namespace ConformU
             double testElevation = double.MinValue;
 
             // Find a test declination that yields an elevation that is as high as possible but under 65 degrees
-            using (Transform transform = new())
+            // Initialise transform with site parameters
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage(testName, $"About to get SiteLatitude property");
+            transform.SiteLatitude = telescopeDevice.SiteLatitude;
+
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage(testName, $"About to get SiteLongitude property");
+            transform.SiteLongitude = telescopeDevice.SiteLongitude;
+
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage(testName, $"About to get SiteElevation property");
+            transform.SiteElevation = telescopeDevice.SiteElevation;
+
+            // Set remaining transform parameters
+            transform.SitePressure = 1010.0;
+            transform.Refraction = false;
+
+            LogDebug("GetTestDeclination", $"TRANSFORM: Site: Latitude: {transform.SiteLatitude.ToDMS()}, Longitude: {transform.SiteLongitude.ToDMS()}, Elevation: {transform.SiteElevation}, Pressure: {transform.SitePressure}, Temperature: {transform.SiteTemperature}, Refraction: {transform.Refraction}");
+
+            // Iterate from declination -85 to +85 in steps of 10 degrees
+            Stopwatch sw = Stopwatch.StartNew();
+            for (double declination = -85.0; declination < 90.0; declination += 10.0)
             {
-                // Initialise transform with site parameters
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage(testName, $"About to get SiteLatitude property");
-                transform.SiteLatitude = telescopeDevice.SiteLatitude;
+                // Set transform's topocentric coordinates
+                transform.SetTopocentric(testRa, declination);
 
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage(testName, $"About to get SiteLongitude property");
-                transform.SiteLongitude = telescopeDevice.SiteLongitude;
+                // Retrieve the corresponding elevation
+                double elevation = transform.ElevationTopocentric;
 
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage(testName, $"About to get SiteElevation property");
-                transform.SiteElevation = telescopeDevice.SiteElevation;
+                LogDebug("GetTestDeclination", $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
 
-                // Set remaining transform parameters
-                transform.SitePressure = 1010.0;
-                transform.Refraction = false;
-
-                LogDebug("GetTestDeclination", $"TRANSFORM: Site: Latitude: {transform.SiteLatitude.ToDMS()}, Longitude: {transform.SiteLongitude.ToDMS()}, Elevation: {transform.SiteElevation}, Pressure: {transform.SitePressure}, Temperature: {transform.SiteTemperature}, Refraction: {transform.Refraction}");
-
-                // Iterate from declination -80 to +80 in steps of 10 degrees
-                for (double declination = -85.0; declination < 90.0; declination += 10.0)
+                // Update the test declination if the new elevation is less that 65 degrees and also greater than the current highest elevation 
+                if ((elevation < 65.0) & (elevation > testElevation))
                 {
-                    // Set transform's topocentric coordinates
-                    transform.SetTopocentric(testRa, declination);
-
-                    // Retrieve the corresponding elevation
-                    double elevation = transform.ElevationTopocentric;
-
-                    LogDebug("GetTestDeclination", $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
-
-                    // Update the test declination if the new elevation is less that 65 degrees and also greater than the current highest elevation 
-                    if ((elevation < 65.0) & (elevation > testElevation))
-                    {
-                        testDeclination = declination;
-                        testElevation = elevation;
-                    }
+                    testDeclination = declination;
+                    testElevation = elevation;
                 }
             }
-
-            LogDebug("GetTestDeclination", $"Test RightAscension: {testRa.ToHMS()}, Test Declination: {testDeclination.ToDMS()}, Elevation: {testElevation.ToDMS()}");
+            sw.Stop();
+            LogDebug("GetTestDeclination", $"Test RightAscension: {testRa.ToHMS()}, Test Declination: {testDeclination.ToDMS()} at Elevation: {testElevation.ToDMS()} found in {sw.Elapsed.TotalMilliseconds:0.0}ms.");
 
             // Throw an exception if the test elevation is below 0 degrees
             if (testElevation < 0.0)
@@ -7429,7 +7431,7 @@ namespace ConformU
             }
             catch (ASCOM.InvalidOperationException ex)
             {
-                LogInfo(testName,$"Test omitted because {ex.Message.ToLowerInvariant()}. This is an expected condition at latitudes close to the equator.");
+                LogInfo(testName, $"Test omitted because {ex.Message.ToLowerInvariant()}. This is an expected condition at latitudes close to the equator.");
                 return;
             }
 
