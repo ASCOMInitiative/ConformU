@@ -49,8 +49,6 @@ namespace ConformU
         public bool TestProperties { get; set; } = true;
         public bool TestMethods { get; set; } = true;
         public bool TestPerformance { get; set; } = false;
-        public bool TestSideOfPierRead { get; set; } = false;
-        public bool TestSideOfPierWrite { get; set; } = false;
 
         /// <summary>
         /// Details of the currently selected Alpaca device
@@ -153,6 +151,10 @@ namespace ConformU
         public double TelescopeSlewTolerance { get; set; } = 10.0; // Arc-seconds
         public int TelescopeMaximumSlewTime { get; set; } = 300; // Seconds
         public bool TelescopeFirstUseTests { get; set; } = true;
+        public bool TestSideOfPierRead { get; set; } = false;
+        public bool TestSideOfPierWrite { get; set; } = false;
+        public bool TelescopeExtendedPulseGuideTests { get; set; } = true;
+        public double TelescopePulseGuideTolerance { get; set; } = 1; // Arc-seconds
 
         // Camera test configuration
         public int CameraMaxBinX { get; set; } = 0;

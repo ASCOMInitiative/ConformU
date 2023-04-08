@@ -59,14 +59,14 @@ namespace ConformU
             return message;
         }
 
-        public static string ToHMS(this double rightascension)
+        public static string ToHMS(this double rightAscension)
         {
-            return Utilities.HoursToHMS(rightascension, ":", ":", "", 3);
+            return $"{(rightAscension >= 0.0 ? "+" : "")}{Utilities.HoursToHMS(rightAscension, ":", ":", "", 2)}";
         }
 
         public static string ToDMS(this double declination)
         {
-            return Utilities.DegreesToDMS(declination, ":", ":", "", 3);
+            return $"{(declination >= 0.0 ? "+" : "")}{Utilities.DegreesToDMS(declination, ":", ":", "", 1)}";
         }
 
 

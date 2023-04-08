@@ -325,7 +325,7 @@
                                        Min="0.0m"
                                        Step="0.1"
                                        Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.TelescopeSlewTolerance)) />
-                        <RadzenLabel Text="Telescope slew accuracy tolerance (arc-seconds))"
+                        <RadzenLabel Text="Telescope slew accuracy tolerance (Default 10 arc-seconds)"
                                      Component="TELESCOPESLEWTOLERANCE"
                                      Style="margin-left: 20px;margin-top:26px; margin-right: 20px" />
                     </div>
@@ -357,7 +357,6 @@
                     </div>
 
                     <div class="row">
-
                         <RadzenCheckBox Name="TELESIDEOFPIERWRITE"
                                         Style="margin-top:20px;margin-left:20px"
                                         @bind-Value=@chkSideOfPierWrite
@@ -369,7 +368,6 @@
                     </div>
 
                     <div class="row">
-
                         <RadzenCheckBox Name="EXTENDEDRATEOFFSETTESTS"
                                         Style="margin-top:20px;margin-left:20px"
                                         @bind-Value=@chkExtendedRateOffsetTests
@@ -379,6 +377,33 @@
                                      Component="EXTENDEDRATEOFFSETTESTS"
                                      Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
                     </div>
+
+                    <div class="row">
+                        <RadzenCheckBox Name="EXTENDEDPULSEGUIDETESTS"
+                                        Style="margin-top:20px;margin-left:20px"
+                                        @bind-Value=@chkExtendedPulseGuideTests
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TelescopeExtendedPulseGuideTests)) />
+                        <RadzenLabel Text="Enable extended guide rate tests"
+                                     Component="EXTENDEDPULSEGUIDETESTS"
+                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
+                    </div>
+
+                    <div class="row">
+                        <RadzenNumeric Name="TELESCOPEPULSEGUIDETOLERANCE"
+                                       Style="margin-top: 20px; margin-left:20px; width: 6em"
+                                       Format="0"
+                                       @bind-Value="@telescopePulseGuideTolerance"
+                                       TValue="double"
+                                       Min="1"
+                                       Max="10"
+                                       Step="1"
+                                       Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.TelescopePulseGuideTolerance)) />
+                        <RadzenLabel Text="Pulse guide movement tolerance (Default 1, Max 10 arc-seconds)."
+                                     Component="TELESCOPEPULSEGUIDETOLERANCE"
+                                     Style="margin-left: 20px;margin-top:26px; margin-right: 20px" />
+                    </div>
+
                 </RadzenCard>
             </div>
         </RadzenTabsItem>
@@ -680,6 +705,8 @@
     private bool chkSideOfPierRead;
     private bool chkSideOfPierWrite;
     private bool chkExtendedRateOffsetTests;
+    private bool chkExtendedPulseGuideTests;
+    private double telescopePulseGuideTolerance;
 
     #region Enums
 
@@ -711,6 +738,7 @@
         SwitchReadDelay,
         SwitchWriteDelay,
         SwitchExtendedNumberTestRange,
+        TelescopePulseGuideTolerance,
         TelescopeSlewTolerance,
         TelescopeMaximumSlewTime
     }
@@ -739,7 +767,8 @@
         SideOfPierRead,
         SideOfPierWrite,
         TrustUserGeneratedSslCertificates,
-        TelescopeExtendedRateOffsetTests
+        TelescopeExtendedRateOffsetTests,
+        TelescopeExtendedPulseGuideTests
     }
 
     private enum BoolConfigurationItem
@@ -807,6 +836,10 @@
 
             case NumericConfigurationItem.waitTimeBeforeConformApplicationExits:
                 settings.ConnectionTimeout = newValue;
+                break;
+
+            case NumericConfigurationItem.TelescopePulseGuideTolerance:
+                settings.TelescopePulseGuideTolerance = newValue;
                 break;
 
             default:
@@ -1009,6 +1042,10 @@
                 settings.TelescopeExtendedRateOffsetTests = chkExtendedRateOffsetTests;
                 break;
 
+            case CheckBoxConfigurationItem.TelescopeExtendedPulseGuideTests:
+                settings.TelescopeExtendedPulseGuideTests = chkExtendedPulseGuideTests;
+                break;
+
             default:
                 throw new InvalidValueException($"OnCheckboxChange - Unknown checkbox name: {name}");
         }
@@ -1054,6 +1091,8 @@
         chkSideOfPierRead = settings.TestSideOfPierRead;
         chkSideOfPierWrite = settings.TestSideOfPierWrite;
         chkExtendedRateOffsetTests = settings.TelescopeExtendedRateOffsetTests;
+        chkExtendedPulseGuideTests = settings.TelescopeExtendedPulseGuideTests;
+        telescopePulseGuideTolerance = settings.TelescopePulseGuideTolerance;
 
         // Camera tests
         cameraTestMaxBinX = settings.CameraMaxBinX;
@@ -1074,7 +1113,7 @@
         domeSlewTolerance = settings.DomeSlewTolerance;
 
         // Filter wheel tests
-        filterWheelTimeout= settings.FilterWheelTimeout;
+        filterWheelTimeout = settings.FilterWheelTimeout;
 
         // Focuser tests
         focuserTimeout = settings.FocuserTimeout;

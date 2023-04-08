@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Xml.Linq;
 
 namespace ConformU
 {
@@ -61,7 +62,7 @@ namespace ConformU
         private const double SLEW_SYNC_OK_TOLERANCE = 10.0d; // (Arc seconds) Upper limit of Slew or Sync error that will generate an OK output, otherwise generates an Info message detailing distance
         private const double SYNC_SIMULATED_ERROR = 60.0d; // (Arc minutes) Distance that the telescope will be told that it is in error  when the sync command is issued. The error is applied to both RA and DEC axes
         private const double SIDEREAL_SECONDS_TO_SI_SECONDS = 0.99726956631945; // Based on earth sidereal rotation period of 23 hours 56 minutes 4.09053 seconds
-
+        private const double SIDEREAL_RATE = 15.0 / SIDEREAL_SECONDS_TO_SI_SECONDS; //Arc-seconds per SI second
 
         private bool canFindHome, canPark, canPulseGuide, canSetDeclinationRate, canSetGuideRates, canSetPark, canSetPierside, canSetRightAscensionRate;
         private bool canSetTracking, canSlew, canSlewAltAz, canSlewAltAzAsync, canSlewAsync, canSync, canSyncAltAz, canUnpark;
@@ -1061,19 +1062,15 @@ namespace ConformU
                         if (settings.DisplayMethodCalls)
                             LogTestAndMessage("GuideRateDeclination Read", "About to get GuideRateDeclination property");
                         guideRateDeclination = telescopeDevice.GuideRateDeclination; // Read guiderateDEC
-                        switch (guideRateDeclination)
-                        {
-                            case var case10 when case10 < 0.0d:
-                                {
-                                    LogIssue("GuideRateDeclination Read", "GuideRateDeclination is < 0.0 " + guideRateDeclination.ToString("0.00"));
-                                    break;
-                                }
 
-                            default:
-                                {
-                                    LogOK("GuideRateDeclination Read", guideRateDeclination.ToString("0.00"));
-                                    break;
-                                }
+                        if (guideRateDeclination >= 0.0)
+                        {
+                            LogOK("GuideRateDeclination Read", $"{guideRateDeclination:0.000000} ({guideRateDeclination.ToDMS()})");
+
+                        }
+                        else
+                        {
+                            LogIssue("GuideRateDeclination Read", $"GuideRateDeclination is < 0.0: {guideRateDeclination:0.000000} ({guideRateDeclination.ToDMS()})");
                         }
                     }
                     catch (Exception ex) // Read failed
@@ -1151,19 +1148,14 @@ namespace ConformU
                         if (settings.DisplayMethodCalls)
                             LogTestAndMessage("GuideRateRightAscension Read", "About to get GuideRateRightAscension property");
                         guideRateRightAscension = telescopeDevice.GuideRateRightAscension; // Read guiderateRA
-                        switch (guideRateDeclination)
-                        {
-                            case var case12 when case12 < 0.0d:
-                                {
-                                    LogIssue("GuideRateRightAscension Read", "GuideRateRightAscension is < 0.0 " + guideRateRightAscension.ToString("0.00"));
-                                    break;
-                                }
 
-                            default:
-                                {
-                                    LogOK("GuideRateRightAscension Read", guideRateRightAscension.ToString("0.00"));
-                                    break;
-                                }
+                        if (guideRateRightAscension >= 0.0)
+                        {
+                            LogOK("guideRateRightAscension Read", $"{guideRateRightAscension:0.000000} ({guideRateRightAscension.ToDMS()})");
+                        }
+                        else
+                        {
+                            LogIssue("guideRateRightAscension Read", $"GuideRateRightAscension is < 0.0: {guideRateRightAscension:0.000000} ({guideRateRightAscension.ToDMS()})");
                         }
                     }
                     catch (Exception ex) // Read failed
@@ -2740,6 +2732,36 @@ namespace ConformU
                 TelescopeOptionalMethodsTest(OptionalMethodType.PulseGuide, "PulseGuide", canPulseGuide);
                 if (cancellationToken.IsCancellationRequested)
                     return;
+
+                // Check whether the extended pulse guide tests are enabled
+                if (settings.TelescopeExtendedPulseGuideTests)
+                {
+                    // Test whether this device can pulse guide
+                    if (canPulseGuide)
+                    {
+                        // Test whether positive, non-zero, values have been provided for both RA and declination axes.
+                        if ((guideRateRightAscension >= 0.0) & (guideRateDeclination >= 0.0))
+                        {
+                            TestPulseGuide(-9.0);
+                            if (applicationCancellationToken.IsCancellationRequested)
+                                return;
+
+                            TestPulseGuide(+9.0);
+                            if (applicationCancellationToken.IsCancellationRequested)
+                                return;
+
+                            TestPulseGuide(-3.0);
+                            if (applicationCancellationToken.IsCancellationRequested)
+                                return;
+
+                            TestPulseGuide(+3.0);
+                        }
+                        else
+                            LogIssue(TELTEST_PULSE_GUIDE, $"Extended pulse guide tests skipped because at least one of the GuideRateRightAscension or GuideRateDeclination properties was not implemented or returned a zero or negative value.");
+                    }
+                    else
+                        LogInfo(TELTEST_PULSE_GUIDE, $"Extended pulse guide tests skipped because the CanPulseGuide property returned False.");
+                }
             }
             else
             {
@@ -3336,6 +3358,9 @@ namespace ConformU
             try
             {
                 // Common configuration
+                if (!settings.TestProperties)
+                    LogConfigurationAlert("Property tests were omitted due to Conform configuration.");
+
                 if (!settings.TestMethods)
                     LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
                 else
@@ -3405,6 +3430,9 @@ namespace ConformU
 
                 if (!settings.TelescopeExtendedRateOffsetTests)
                     LogConfigurationAlert("Extended rate offset tests were omitted due to Conform configuration.");
+
+                if (!settings.TelescopeExtendedPulseGuideTests)
+                    LogConfigurationAlert("Extended pulse guide tests were omitted due to Conform configuration.");
 
             }
             catch (Exception ex)
@@ -7444,13 +7472,25 @@ namespace ConformU
             }
             else
             {
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage(testName, "About to get SideOfPier property");
                 LogDebug(testName, $"Testing Primary rate: {expectedRaRate}, Secondary rate: {expectedDeclinationRate}, SideofPier: {telescopeDevice.SideOfPier}");
             }
 
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage(testName, "About to get RightAscension property");
             double priStart = telescopeDevice.RightAscension;
+
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage(testName, "About to get Declination property");
             double secStart = telescopeDevice.Declination;
 
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage(testName, "About to set RightAscensionRate property");
             telescopeDevice.RightAscensionRate = expectedRaRate * SIDEREAL_SECONDS_TO_SI_SECONDS;
+
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage(testName, "About to set DeclinationRate property");
             telescopeDevice.DeclinationRate = expectedDeclinationRate;
 
             WaitFor(Convert.ToInt32(DURATION * 1000));
@@ -7459,7 +7499,12 @@ namespace ConformU
             double secEnd = telescopeDevice.Declination;
 
             // Restore previous state
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage(testName, "About to set RightAscensionRate property");
             telescopeDevice.RightAscensionRate = 0.0;
+
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage(testName, "About to set DeclinationRate property");
             telescopeDevice.DeclinationRate = 0.0;
 
             LogDebug(testName, $"Start      - : {priStart.ToHMS()}, {secStart.ToDMS()}");
@@ -7510,6 +7555,241 @@ namespace ConformU
                 {
                     LogIssue(testName, $"{name} is outside the expected tolerance. Expected: {expectedValue:+0.000;-0.000;+0.000}, Actual: {actualValue:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%, Tolerance:{tolerance * 100:N2}.");
                 }
+            }
+        }
+
+        /// <summary>
+        /// Slew to test coordinates and test all four guide directions
+        /// </summary>
+        /// <param name="ha">Hour angle at which to conduct test.</param>
+        private void TestPulseGuide(double ha)
+        {
+            // Slew to the test HA/RA and a sensible Declination
+            SlewToHa(ha);
+            if (applicationCancellationToken.IsCancellationRequested)
+                return;
+
+            // Test each of the four guide directions
+            TestPulseGuideDirection(ha, GuideDirection.North);
+            if (applicationCancellationToken.IsCancellationRequested)
+                return;
+
+            TestPulseGuideDirection(ha, GuideDirection.South);
+            if (applicationCancellationToken.IsCancellationRequested)
+                return;
+
+            TestPulseGuideDirection(ha, GuideDirection.East);
+            if (applicationCancellationToken.IsCancellationRequested)
+                return;
+
+            TestPulseGuideDirection(ha, GuideDirection.West);
+        }
+
+        /// <summary>
+        /// Ensure that the scope moves in the specified guide direction and for the expected distance.
+        /// </summary>
+        /// <param name="direction">Guide direction: North, South, East or West</param>
+        private void TestPulseGuideDirection(double ha, GuideDirection direction)
+        {
+            const int PULSE_GUIDE_DURATION = 5; // Pulse guide test duration (Seconds)
+
+            double expectedDecChange = guideRateDeclination * PULSE_GUIDE_DURATION; // Degrees
+            double expectedRaChange = guideRateRightAscension * PULSE_GUIDE_DURATION / (15.0 * SIDEREAL_SECONDS_TO_SI_SECONDS); // Hours - 15 converts from 360 degrees = 24 hours, SIDEREAL_RATE converts from change in SI hours to change in sidereal hours
+
+            // Handle direction reverse for south and west vs north and east
+            if (direction == GuideDirection.South)
+                expectedDecChange = -expectedDecChange;
+            if (direction == GuideDirection.West)
+                expectedRaChange = -expectedRaChange;
+
+            double changeToleranceDec = settings.TelescopePulseGuideTolerance / 3600.0; // Degrees
+            double changeToleranceRa = changeToleranceDec / (15.0 * SIDEREAL_SECONDS_TO_SI_SECONDS); // Sidereal hours
+
+            string actionName = $"Pulse guiding {direction} at {ha}";
+            string logName = $"PulseGuide {ha:+0.0;-0.0;+0.0} {direction}";
+
+            LogDebug(logName, $"Test guiding direction: {direction}, RA change tolerance: {changeToleranceRa} ({changeToleranceRa.ToHMS()}, {changeToleranceRa.ToDMS()}), Declination change tolerance: {changeToleranceDec} ({changeToleranceDec.ToDMS()}, {changeToleranceDec.ToHMS()})");
+
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage(logName, "About to get RightAscension property");
+            double initialRACoordinate = telescopeDevice.RightAscension;
+
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage(logName, "About to get Declination property");
+            double initialDecCoordinate = telescopeDevice.Declination;
+
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage(logName, $"About to call PulseGuide. Direction: {direction}, Duration: {PULSE_GUIDE_DURATION * 1000}ms.");
+            telescopeDevice.PulseGuide(direction, PULSE_GUIDE_DURATION * 1000);
+
+            WaitWhile($"Pulse guiding {direction} at HA {ha:+0.0;-0.0;+0.0}", () => { return telescopeDevice.IsPulseGuiding; }, SLEEP_TIME, PULSE_GUIDE_DURATION);
+
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage(logName, "About to get RightAscension property");
+            double finalRACoordinate = telescopeDevice.RightAscension;
+
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage(logName, "About to get Declination property");
+            double finalDecCoordinate = telescopeDevice.Declination;
+
+            double raChange = finalRACoordinate - initialRACoordinate;
+            double decChange = finalDecCoordinate - initialDecCoordinate;
+
+            double raDifference = Math.Abs(raChange - expectedRaChange);
+            double decDifference = Math.Abs(decChange - expectedDecChange);
+
+            switch (direction)
+            {
+                case GuideDirection.North:
+                    if ((decChange > 0.0) & (decDifference <= changeToleranceDec) & (Math.Abs(raChange) <= changeToleranceRa)) // Moved north by expected amount with no east-west movement
+                        LogOK(logName, $"Moved north with no east-west movement  - Declination change (DMS): {decChange.ToDMS()},  Expected: {expectedDecChange.ToDMS()},  Difference: {decDifference.ToDMS()},  Test tolerance: {changeToleranceDec.ToDMS()}.");
+                    else
+                    {
+                        switch (decChange)
+                        {
+                            case < 0.0: //Moved south
+                                LogIssue(logName, $"Moved south instead of north - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                                break;
+
+                            case 0.0: // No movement
+                                LogIssue(logName, $"The declination axis did not move.");
+                                break;
+
+                            default: // Moved north
+                                if (decDifference <= changeToleranceDec) // Moved north OK.
+                                    LogOK(logName, $"Moved north - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                                else // Moved north but by wrong amount.
+                                    LogIssue(logName, $"Moved north but outside test tolerance - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                                break;
+                        }
+                        if (Math.Abs(raChange) <= changeToleranceRa)
+                            LogOK(logName, $"No significant east-west movement as expected. RA change (HMS): {raChange.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                        else
+                            LogIssue(logName, $"East-West movement was outside test tolerance: RA change (HMS): {raChange.ToHMS()}, Expected: {0.0.ToHMS()}, Tolerance: {changeToleranceRa.ToHMS()}.");
+                    }
+                    break;
+
+                case GuideDirection.South:
+                    if ((decChange < 0.0) & (decDifference <= changeToleranceDec) & (Math.Abs(raChange) <= changeToleranceRa)) // Moved south by expected amount with no east-west movement
+                        LogOK(logName, $"Moved south with no east-west movement  - Declination change (DMS): {decChange.ToDMS()},  Expected: {expectedDecChange.ToDMS()},  Difference: {decDifference.ToDMS()},  Test tolerance: {changeToleranceDec.ToDMS()}.");
+                    else
+                    {
+                        switch (decChange)
+                        {
+                            case > 0.0: //Moved north
+                                LogIssue(logName, $"Moved north instead of south - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                                break;
+
+                            case 0.0: // No movement
+                                LogIssue(logName, $"The declination axis did not move.");
+                                break;
+
+                            default: // Moved south
+                                if (decDifference <= changeToleranceDec)// Moved south OK
+                                    LogOK(logName, $"Moved south - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                                else// Moved south but by wrong amount.
+                                    LogIssue(logName, $"Moved south but outside test tolerance - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                                break;
+                        }
+                        if (Math.Abs(raChange) <= changeToleranceRa)
+                            LogOK(logName, $"No significant east-west movement as expected. RA change (HMS): {raChange.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                        else
+                            LogIssue(logName, $"East-West movement was outside test tolerance: RA change (HMS): {raChange.ToHMS()}, Expected: {0.0.ToHMS()}, Tolerance: {changeToleranceRa.ToHMS()}.");
+                    }
+                    break;
+
+                case GuideDirection.East:
+                    if ((raChange > 0.0) & (raDifference <= changeToleranceRa) & (Math.Abs(decChange) <= changeToleranceDec)) // Moved east by expected amount with no north-south movement
+                        LogOK(logName, $"Moved east with no north-south movement - RA change (HMS):          {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                    else
+                    {
+                        switch (raChange)
+                        {
+                            case < 0.0: //Moved west
+                                LogIssue(logName, $"Moved west instead of east - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                                break;
+
+                            case 0.0: // No movement
+                                LogIssue(logName, $"The RA axis did not move.");
+                                break;
+
+                            default: // Moved east
+                                if (raDifference <= changeToleranceRa)  // Moved east OK
+                                    LogOK(logName, $"Moved east - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                                else // Moved east but by wrong amount.
+                                    LogIssue(logName, $"Moved east but outside test tolerance - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                                break;
+                        }
+                        if (Math.Abs(decChange) <= changeToleranceDec)
+                            LogOK(logName, $"No significant north-south movement as expected. Declination change (DMS): {decChange.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                        else
+                            LogIssue(logName, $"North-south movement was outside test tolerance: Declination change (DMS): {decChange.ToDMS()}, Expected: {0.0.ToDMS()}, Tolerance: {changeToleranceDec.ToDMS()}.");
+                    }
+                    break;
+
+                case GuideDirection.West:
+                    if ((raChange < 0.0) & (raDifference <= changeToleranceRa) & (Math.Abs(decChange) <= changeToleranceDec)) // Moved west by expected amount with no north-south movement
+                        LogOK(logName, $"Moved west with no north-south movement - RA change (HMS):          {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                    else
+                    {
+                        switch (raChange)
+                        {
+                            case > 0.0: //Moved east
+                                LogIssue(logName, $"Moved east instead of west - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                                break;
+
+                            case 0.0: // No movement
+                                LogIssue(logName, $"The RA axis did not move.");
+                                break;
+
+                            default: // Moved west
+                                if (raDifference <= changeToleranceRa) // Moved west OK
+                                    LogOK(logName, $"Moved west - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                                else// Moved west but by wrong amount.
+                                    LogIssue(logName, $"Moved west but outside test tolerance - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                                break;
+                        }
+                        if (Math.Abs(decChange) <= changeToleranceDec)
+                            LogOK(logName, $"No significant north-south movement as expected. Declination change (DMS): {decChange.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                        else
+                            LogIssue(logName, $"North-south movement was outside test tolerance: Declination change (DMS): {decChange.ToDMS()}, Expected: {0.0.ToDMS()}, Tolerance: {changeToleranceDec.ToDMS()}.");
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Slew to the target hour angle and to a declination that results in the highest elevation under 65 degrees.
+        /// </summary>
+        /// <param name="targetHa">Target hour angle (hours)</param>
+        private void SlewToHa(double targetHa)
+        {
+            // Calculate the target RA
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage("SlewToHa", "About to get SiderealTime property");
+            double targetRa = Utilities.ConditionRA(telescopeDevice.SiderealTime - targetHa);
+
+            // Calculate the target declination
+            double targetDeclination = GetTestDeclination("SlewToHa", targetRa);
+            LogDebug("SlewToHa", $"Slewing to HA: {targetHa.ToHMS()} (RA: {targetRa.ToHMS()}), Dec: {targetDeclination.ToDMS()}");
+
+            // Slew to the target coordinates
+            if (settings.DisplayMethodCalls)
+                LogTestAndMessage("SlewToHa", $"About to call SlewToCoordinatesAsync. RA: {targetRa.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+            telescopeDevice.SlewToCoordinatesAsync(targetRa, targetDeclination);
+            WaitForSlew("SlewToHa", $"Slewing to HA {targetHa:+0.0;-0.0;+0.0}");
+
+            // Report the outcome of the slew
+            if (telescopeDevice.InterfaceVersion <= 2)
+            {
+                LogDebug("SlewToHa", $"Slewed to RA:  {telescopeDevice.RightAscension.ToHMS()}, Dec: {telescopeDevice.Declination.ToDMS()}, Pointing state: {PointingState.Unknown}");
+            }
+            else
+            {
+                LogDebug("SlewToHa", $"Slewed to RA:  {telescopeDevice.RightAscension.ToHMS()}, Dec: {telescopeDevice.Declination.ToDMS()}, Pointing state: {telescopeDevice.SideOfPier}");
             }
         }
 
