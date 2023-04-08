@@ -324,8 +324,9 @@ namespace ConformU
                 }
                 else // Some issues found, the device fails the conformance check
                 {
-                    l_Message = $"Your driver had {conformResults.ErrorCount} error{(conformResults.ErrorCount == 1 ? "" : "s")}, " +
-                        $"{conformResults.IssueCount} issue{(conformResults.IssueCount == 1 ? "" : "s")} and " +
+                    l_Message = $"Your device had " +
+                        $"{conformResults.IssueCount} issue{(conformResults.IssueCount == 1 ? "" : "s")}, " +
+                        $"{conformResults.ErrorCount} error{(conformResults.ErrorCount == 1 ? "" : "s")} and " +
                         $"{conformResults.ConfigurationAlertCount} configuration alert{(conformResults.ConfigurationAlertCount == 1 ? "" : "s")}";
 
                     TL.LogMessage(l_Message, MessageLevel.TestOnly, "");
