@@ -1070,6 +1070,7 @@ namespace ConformU
             SetAction("");
             SetStatus("");
         }
+
         public override void CheckConfiguration()
         {
             try

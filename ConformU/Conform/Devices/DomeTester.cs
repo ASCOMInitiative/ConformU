@@ -457,6 +457,29 @@ namespace ConformU
                 LogInfo("DomeSafety", "CanPark is false - skipping dome parking");
         }
 
+        public override void CheckConfiguration()
+        {
+            try
+            {
+                // Common configuration
+                if (!settings.TestProperties)
+                    LogConfigurationAlert("Property tests were omitted due to Conform configuration.");
+
+                if (!settings.TestMethods)
+                    LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
+
+                // Miscellaneous configuration
+                if (!settings.DomeOpenShutter)
+                    LogConfigurationAlert("Shutter related tests were omitted due to Conform configuration.");
+
+            }
+            catch (Exception ex)
+            {
+                LogError("CheckConfiguration", $"Exception when checking Conform configuration: {ex.Message}");
+                LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
+            }
+        }
+
         private void DomeSlewToAltitude(string p_Name, double p_Altitude)
         {
             if (!settings.DomeOpenShutter) LogInfo("SlewToAltitude", "You have configured Conform not to open the shutter so the following slew may fail.");

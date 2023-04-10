@@ -4006,6 +4006,31 @@ namespace ConformU
             try { camera.NumY = 1; } catch { }
         }
 
+        public override void CheckConfiguration()
+        {
+            try
+            {
+                // Common configuration
+                if (!settings.TestProperties)
+                    LogConfigurationAlert("Property tests were omitted due to Conform configuration.");
+
+                if (!settings.TestMethods)
+                    LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
+
+                // Miscellaneous configuration
+                if (!settings.CameraFirstUseTests)
+                    LogConfigurationAlert("First use tests were omitted due to Conform configuration.");
+                if (!settings.CameraTestImageArrayVariant)
+                    LogConfigurationAlert("ImageArrayVariant tests were omitted due to Conform configuration.");
+
+            }
+            catch (Exception ex)
+            {
+                LogError("CheckConfiguration", $"Exception when checking Conform configuration: {ex.Message}");
+                LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
+            }
+        }
+
         /// <summary>
         /// Release memory allocated to the large arrays on the large object heap.
         /// </summary>
