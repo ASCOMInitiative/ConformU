@@ -404,6 +404,17 @@
                                      Style="margin-left: 20px;margin-top:26px; margin-right: 20px" />
                     </div>
 
+                    <div class="row">
+                        <RadzenCheckBox Name="EXTENDEDMOVEAXISTESTS"
+                                        Style="margin-top:20px;margin-left:20px"
+                                        @bind-Value=@chkExtendedMoveAxisTests
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TelescopeExtendedMoveAxisTests)) />
+                        <RadzenLabel Text="Enable extended move axis tests"
+                                     Component="EXTENDEDMOVEAXISTESTS"
+                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
+                    </div>
+
                 </RadzenCard>
             </div>
         </RadzenTabsItem>
@@ -707,6 +718,7 @@
     private bool chkExtendedRateOffsetTests;
     private bool chkExtendedPulseGuideTests;
     private double telescopePulseGuideTolerance;
+    private bool chkExtendedMoveAxisTests;
 
     #region Enums
 
@@ -768,7 +780,8 @@
         SideOfPierWrite,
         TrustUserGeneratedSslCertificates,
         TelescopeExtendedRateOffsetTests,
-        TelescopeExtendedPulseGuideTests
+        TelescopeExtendedPulseGuideTests,
+        TelescopeExtendedMoveAxisTests
     }
 
     private enum BoolConfigurationItem
@@ -1046,6 +1059,10 @@
                 settings.TelescopeExtendedPulseGuideTests = chkExtendedPulseGuideTests;
                 break;
 
+            case CheckBoxConfigurationItem.TelescopeExtendedMoveAxisTests:
+                settings.TelescopeExtendedMoveAxisTests = chkExtendedMoveAxisTests;
+                break;
+
             default:
                 throw new InvalidValueException($"OnCheckboxChange - Unknown checkbox name: {name}");
         }
@@ -1093,6 +1110,7 @@
         chkExtendedRateOffsetTests = settings.TelescopeExtendedRateOffsetTests;
         chkExtendedPulseGuideTests = settings.TelescopeExtendedPulseGuideTests;
         telescopePulseGuideTolerance = settings.TelescopePulseGuideTolerance;
+        chkExtendedMoveAxisTests = settings.TelescopeExtendedMoveAxisTests;
 
         // Camera tests
         cameraTestMaxBinX = settings.CameraMaxBinX;

@@ -6085,59 +6085,61 @@ namespace ConformU
             }
         }
 
-        private void TelescopeMoveAxisTest(string p_Name, TelescopeAxis p_Axis, IAxisRates p_AxisRates)
+        private void TelescopeMoveAxisTest(string testName, TelescopeAxis testAxis, IAxisRates axisRates)
         {
-            IRate l_Rate = null;
+            IRate rate = null;
 
-            double l_MoveRate = default, l_RateMinimum, l_RateMaximum;
-            bool l_TrackingStart, l_TrackingEnd, l_CanSetZero;
-            int l_RateCount;
+            double moveRate = default, rateMinimum, rateMaximum;
+            bool trackingStart, trackingEnd, canSetZero;
+            int rateCount;
 
-            SetTest(p_Name);
+            SetTest(testName);
 
             // Determine lowest and highest tracking rates
-            l_RateMinimum = double.PositiveInfinity; // Set to invalid values
-            l_RateMaximum = double.NegativeInfinity;
-            LogDebug(p_Name, $"Number of rates found: {p_AxisRates.Count}");
-            if (p_AxisRates.Count > 0)
+            rateMinimum = double.PositiveInfinity; // Set to invalid values
+            rateMaximum = double.NegativeInfinity;
+            LogDebug(testName, $"Number of rates found: {axisRates.Count}");
+
+            // Make sure that some axis rates are available
+            if (axisRates.Count > 0) // Some rates are available
             {
-                IAxisRates l_AxisRatesIRates = p_AxisRates;
-                l_RateCount = 0;
+                IAxisRates l_AxisRatesIRates = axisRates;
+                rateCount = 0;
                 foreach (IRate currentL_Rate in l_AxisRatesIRates)
                 {
-                    l_Rate = currentL_Rate;
-                    if (l_Rate.Minimum < l_RateMinimum) l_RateMinimum = l_Rate.Minimum;
-                    if (l_Rate.Maximum > l_RateMaximum) l_RateMaximum = l_Rate.Maximum;
-                    LogDebug(p_Name, $"Checking rates: {l_Rate.Minimum} {l_Rate.Maximum} Current rates: {l_RateMinimum} {l_RateMaximum}");
-                    l_RateCount += 1;
+                    rate = currentL_Rate;
+                    if (rate.Minimum < rateMinimum) rateMinimum = rate.Minimum;
+                    if (rate.Maximum > rateMaximum) rateMaximum = rate.Maximum;
+                    LogDebug(testName, $"Checking rates: {rate.Minimum} {rate.Maximum} Current rates: {rateMinimum} {rateMaximum}");
+                    rateCount += 1;
                 }
 
-                if (l_RateMinimum != double.PositiveInfinity & l_RateMaximum != double.NegativeInfinity) // Found valid rates
+                if (rateMinimum != double.PositiveInfinity & rateMaximum != double.NegativeInfinity) // Found valid rates
                 {
-                    LogDebug(p_Name, "Found minimum rate: " + l_RateMinimum + " found maximum rate: " + l_RateMaximum);
+                    LogDebug(testName, "Found minimum rate: " + rateMinimum + " found maximum rate: " + rateMaximum);
 
                     // Confirm setting a zero rate works
                     SetAction("Set zero rate");
-                    l_CanSetZero = false;
+                    canSetZero = false;
                     try
                     {
                         if (settings.DisplayMethodCalls)
-                            LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
-                        telescopeDevice.MoveAxis(p_Axis, 0.0d); // Set a value of zero
-                        LogOK(p_Name, "Can successfully set a movement rate of zero");
-                        l_CanSetZero = true;
+                            LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                        telescopeDevice.MoveAxis(testAxis, 0.0d); // Set a value of zero
+                        LogOK(testName, "Can successfully set a movement rate of zero");
+                        canSetZero = true;
                     }
                     catch (COMException ex)
                     {
-                        LogIssue(p_Name, "Unable to set a movement rate of zero - " + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
+                        LogIssue(testName, "Unable to set a movement rate of zero - " + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                     }
                     catch (DriverException ex)
                     {
-                        LogIssue(p_Name, "Unable to set a movement rate of zero - " + ex.Message + " " + ex.Number.ToString("X8"));
+                        LogIssue(testName, "Unable to set a movement rate of zero - " + ex.Message + " " + ex.Number.ToString("X8"));
                     }
                     catch (Exception ex)
                     {
-                        LogIssue(p_Name, "Unable to set a movement rate of zero - " + ex.Message);
+                        LogIssue(testName, "Unable to set a movement rate of zero - " + ex.Message);
                     }
 
                     SetAction("Set lower rate");
@@ -6145,50 +6147,50 @@ namespace ConformU
                     // Test that error is generated on attempt to set rate lower than minimum
                     try
                     {
-                        if (l_RateMinimum > 0d) // choose a value between the minimum and zero
+                        if (rateMinimum > 0d) // choose a value between the minimum and zero
                         {
-                            l_MoveRate = l_RateMinimum / 2.0d;
+                            moveRate = rateMinimum / 2.0d;
                         }
                         else // Choose a large negative value
                         {
-                            l_MoveRate = -l_RateMaximum - 1.0d;
+                            moveRate = -rateMaximum - 1.0d;
                         }
 
-                        LogDebug(p_Name, "Using minimum rate: " + l_MoveRate);
+                        LogDebug(testName, "Using minimum rate: " + moveRate);
                         if (settings.DisplayMethodCalls)
-                            LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_MoveRate);
-                        telescopeDevice.MoveAxis(p_Axis, l_MoveRate); // Set a value lower than the minimum
-                        LogIssue(p_Name, "No exception raised when move axis value < minimum rate: " + l_MoveRate);
+                            LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + moveRate);
+                        telescopeDevice.MoveAxis(testAxis, moveRate); // Set a value lower than the minimum
+                        LogIssue(testName, "No exception raised when move axis value < minimum rate: " + moveRate);
                         // Clean up and release each object after use
                         try
                         {
 #if WINDOWS
-                            Marshal.ReleaseComObject(l_Rate);
+                            Marshal.ReleaseComObject(rate);
 #endif
                         }
                         catch
                         {
                         }
 
-                        l_Rate = null;
+                        rate = null;
                     }
                     catch (Exception ex)
                     {
-                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "when move axis is set below lowest rate (" + l_MoveRate + ")", "Exception correctly generated when move axis is set below lowest rate (" + l_MoveRate + ")");
+                        HandleInvalidValueExceptionAsOK(testName, MemberType.Method, Required.MustBeImplemented, ex, "when move axis is set below lowest rate (" + moveRate + ")", "Exception correctly generated when move axis is set below lowest rate (" + moveRate + ")");
                     }
 
                     // Clean up and release each object after use
                     try
                     {
 #if WINDOWS
-                        Marshal.ReleaseComObject(l_Rate);
+                        Marshal.ReleaseComObject(rate);
 #endif
                     }
                     catch
                     {
                     }
 
-                    l_Rate = null;
+                    rate = null;
                     if (cancellationToken.IsCancellationRequested)
                         return;
 
@@ -6196,174 +6198,174 @@ namespace ConformU
                     SetAction("Set upper rate");
                     try
                     {
-                        l_MoveRate = l_RateMaximum + 1.0d;
-                        LogDebug(p_Name, "Using maximum rate: " + l_MoveRate);
+                        moveRate = rateMaximum + 1.0d;
+                        LogDebug(testName, "Using maximum rate: " + moveRate);
                         if (settings.DisplayMethodCalls)
-                            LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_MoveRate);
-                        telescopeDevice.MoveAxis(p_Axis, l_MoveRate); // Set a value higher than the maximum
-                        LogIssue(p_Name, "No exception raised when move axis value > maximum rate: " + l_MoveRate);
+                            LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + moveRate);
+                        telescopeDevice.MoveAxis(testAxis, moveRate); // Set a value higher than the maximum
+                        LogIssue(testName, "No exception raised when move axis value > maximum rate: " + moveRate);
                         // Clean up and release each object after use
                         try
                         {
 #if WINDOWS
-                            Marshal.ReleaseComObject(l_Rate);
+                            Marshal.ReleaseComObject(rate);
 #endif
                         }
                         catch
                         {
                         }
 
-                        l_Rate = null;
+                        rate = null;
                     }
                     catch (Exception ex)
                     {
-                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "when move axis is set above highest rate (" + l_MoveRate + ")", "Exception correctly generated when move axis is set above highest rate (" + l_MoveRate + ")");
+                        HandleInvalidValueExceptionAsOK(testName, MemberType.Method, Required.MustBeImplemented, ex, "when move axis is set above highest rate (" + moveRate + ")", "Exception correctly generated when move axis is set above highest rate (" + moveRate + ")");
                     }
                     // Clean up and release each object after use
                     try
                     {
 #if WINDOWS
-                        if (l_Rate is not null) Marshal.ReleaseComObject(l_Rate);
+                        if (rate is not null) Marshal.ReleaseComObject(rate);
 #endif
                     }
                     catch
                     {
                     }
 
-                    l_Rate = null;
+                    rate = null;
                     if (cancellationToken.IsCancellationRequested)
                         return;
-                    if (l_CanSetZero) // Can set a rate of zero so undertake these tests
+                    if (canSetZero) // Can set a rate of zero so undertake these tests
                     {
                         // Confirm that lowest tracking rate can be set
-                        if (l_RateMinimum != double.PositiveInfinity) // Valid value found so try and set it
+                        if (rateMinimum != double.PositiveInfinity) // Valid value found so try and set it
                         {
                             try
                             {
                                 SetAction("Moving forward at minimum rate");
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMinimum);
-                                telescopeDevice.MoveAxis(p_Axis, l_RateMinimum); // Set the minimum rate
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + rateMinimum);
+                                telescopeDevice.MoveAxis(testAxis, rateMinimum); // Set the minimum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
 
                                 SetAction("Stopping movement");
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
-                                telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
 
                                 SetAction("Moving back at minimum rate");
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMinimum);
-                                telescopeDevice.MoveAxis(p_Axis, -l_RateMinimum); // Set the minimum rate
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + -rateMinimum);
+                                telescopeDevice.MoveAxis(testAxis, -rateMinimum); // Set the minimum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
 
                                 SetAction("Stopping movement");
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
-                                telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
-                                LogOK(p_Name, "Successfully moved axis at minimum rate: " + l_RateMinimum);
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
+                                LogOK(testName, "Successfully moved axis at minimum rate: " + rateMinimum);
                             }
                             catch (Exception ex)
                             {
-                                HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "when setting rate: " + l_RateMinimum);
+                                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, "when setting rate: " + rateMinimum);
                             }
 
                             SetStatus(""); // Clear status flag
                         }
                         else // No valid rate was found so print an error
                         {
-                            LogIssue(p_Name, "Minimum rate test - unable to find lowest axis rate");
+                            LogIssue(testName, "Minimum rate test - unable to find lowest axis rate");
                         }
 
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
                         // Confirm that highest tracking rate can be set
-                        if (l_RateMaximum != double.NegativeInfinity) // Valid value found so try and set it
+                        if (rateMaximum != double.NegativeInfinity) // Valid value found so try and set it
                         {
                             try
                             {
                                 // Confirm not slewing first
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to get Slewing property");
+                                    LogTestAndMessage(testName, "About to get Slewing property");
                                 if (telescopeDevice.Slewing)
                                 {
-                                    LogIssue(p_Name, "Slewing was true before start of MoveAxis but should have been false, remaining tests skipped");
+                                    LogIssue(testName, "Slewing was true before start of MoveAxis but should have been false, remaining tests skipped");
                                     return;
                                 }
 
                                 SetStatus("Moving forward at highest rate");
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMaximum);
-                                telescopeDevice.MoveAxis(p_Axis, l_RateMaximum); // Set the maximum rate
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + rateMaximum);
+                                telescopeDevice.MoveAxis(testAxis, rateMaximum); // Set the maximum rate
 
                                 // Confirm that slewing is active when the move is underway
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to get Slewing property");
+                                    LogTestAndMessage(testName, "About to get Slewing property");
                                 if (!telescopeDevice.Slewing)
-                                    LogIssue(p_Name, "Slewing is not true immediately after axis starts moving in positive direction");
+                                    LogIssue(testName, "Slewing is not true immediately after axis starts moving in positive direction");
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to get Slewing property");
+                                    LogTestAndMessage(testName, "About to get Slewing property");
                                 if (!telescopeDevice.Slewing)
-                                    LogIssue(p_Name, "Slewing is not true after " + MOVE_AXIS_TIME / 1000d + " seconds moving in positive direction");
+                                    LogIssue(testName, "Slewing is not true after " + MOVE_AXIS_TIME / 1000d + " seconds moving in positive direction");
 
                                 SetStatus("Stopping movement");
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
-                                telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
                                                                         // Confirm that slewing is false when movement is stopped
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to get property");
+                                    LogTestAndMessage(testName, "About to get property");
                                 if (telescopeDevice.Slewing)
                                 {
-                                    LogIssue(p_Name, "Slewing incorrectly remains true after stopping positive axis movement, remaining test skipped");
+                                    LogIssue(testName, "Slewing incorrectly remains true after stopping positive axis movement, remaining test skipped");
                                     return;
                                 }
 
                                 SetStatus("Moving backward at highest rate");
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
-                                telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the minimum rate
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + -rateMaximum);
+                                telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the minimum rate
                                                                                   // Confirm that slewing is active when the move is underway
                                 if (!telescopeDevice.Slewing)
-                                    LogIssue(p_Name, "Slewing is not true immediately after axis starts moving in negative direction");
+                                    LogIssue(testName, "Slewing is not true immediately after axis starts moving in negative direction");
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 if (!telescopeDevice.Slewing)
-                                    LogIssue(p_Name, "Slewing is not true after " + MOVE_AXIS_TIME / 1000d + " seconds moving in negative direction");
+                                    LogIssue(testName, "Slewing is not true after " + MOVE_AXIS_TIME / 1000d + " seconds moving in negative direction");
                                 // Confirm that slewing is false when movement is stopped
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
-                                telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
                                                                         // Confirm that slewing is false when movement is stopped
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to get Slewing property");
+                                    LogTestAndMessage(testName, "About to get Slewing property");
                                 if (telescopeDevice.Slewing)
                                 {
-                                    LogIssue(p_Name, "Slewing incorrectly remains true after stopping negative axis movement, remaining test skipped");
+                                    LogIssue(testName, "Slewing incorrectly remains true after stopping negative axis movement, remaining test skipped");
                                     return;
                                 }
 
-                                LogOK(p_Name, "Successfully moved axis at maximum rate: " + l_RateMaximum);
+                                LogOK(testName, "Successfully moved axis at maximum rate: " + rateMaximum);
                             }
                             catch (Exception ex)
                             {
-                                HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "when setting rate: " + l_RateMaximum);
+                                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, "when setting rate: " + rateMaximum);
                             }
 
                             SetStatus(""); // Clear status flag
                         }
                         else // No valid rate was found so print an error
                         {
-                            LogIssue(p_Name, "Maximum rate test - unable to find lowest axis rate");
+                            LogIssue(testName, "Maximum rate test - unable to find lowest axis rate");
                         }
 
                         if (cancellationToken.IsCancellationRequested)
@@ -6376,78 +6378,78 @@ namespace ConformU
                             if (canSetTracking)
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to get Tracking property");
-                                l_TrackingStart = telescopeDevice.Tracking; // Save the start tracking state
+                                    LogTestAndMessage(testName, "About to get Tracking property");
+                                trackingStart = telescopeDevice.Tracking; // Save the start tracking state
                                 SetStatus("Moving forward");
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMaximum);
-                                telescopeDevice.MoveAxis(p_Axis, l_RateMaximum); // Set the maximum rate
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + rateMaximum);
+                                telescopeDevice.MoveAxis(testAxis, rateMaximum); // Set the maximum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 SetStatus("Stop movement");
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
-                                telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to get Tracking property");
-                                l_TrackingEnd = telescopeDevice.Tracking; // Save the final tracking state
-                                if (l_TrackingStart == l_TrackingEnd) // Successfully retained tracking state
+                                    LogTestAndMessage(testName, "About to get Tracking property");
+                                trackingEnd = telescopeDevice.Tracking; // Save the final tracking state
+                                if (trackingStart == trackingEnd) // Successfully retained tracking state
                                 {
-                                    if (l_TrackingStart) // Tracking is true so switch to false for return movement
+                                    if (trackingStart) // Tracking is true so switch to false for return movement
                                     {
                                         SetStatus("Set tracking off");
                                         if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage(p_Name, "About to set Tracking property false");
+                                            LogTestAndMessage(testName, "About to set Tracking property false");
                                         telescopeDevice.Tracking = false;
                                         SetStatus("Move back");
                                         if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
-                                        telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the maximum rate
+                                            LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + -rateMaximum);
+                                        telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the maximum rate
                                         WaitFor(MOVE_AXIS_TIME);
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                         if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
-                                        telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
+                                            LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                        telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
                                         SetStatus("");
                                         if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage(p_Name, "About to get Tracking property");
+                                            LogTestAndMessage(testName, "About to get Tracking property");
                                         if (telescopeDevice.Tracking == false) // tracking correctly retained in both states
                                         {
-                                            LogOK(p_Name, "Tracking state correctly retained for both tracking states");
+                                            LogOK(testName, "Tracking state correctly retained for both tracking states");
                                         }
                                         else
                                         {
-                                            LogIssue(p_Name, "Tracking state correctly retained when tracking is " + l_TrackingStart.ToString() + ", but not when tracking is false");
+                                            LogIssue(testName, "Tracking state correctly retained when tracking is " + trackingStart.ToString() + ", but not when tracking is false");
                                         }
                                     }
                                     else // Tracking false so switch to true for return movement
                                     {
                                         SetStatus("Set tracking on");
                                         if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage(p_Name, "About to set Tracking property true");
+                                            LogTestAndMessage(testName, "About to set Tracking property true");
                                         telescopeDevice.Tracking = true;
                                         SetStatus("Move back");
                                         if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
-                                        telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the maximum rate
+                                            LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + -rateMaximum);
+                                        telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the maximum rate
                                         WaitFor(MOVE_AXIS_TIME);
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                         if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
-                                        telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
+                                            LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                        telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
                                         SetStatus("");
                                         if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage(p_Name, "About to get Tracking property");
+                                            LogTestAndMessage(testName, "About to get Tracking property");
                                         if (telescopeDevice.Tracking == true) // tracking correctly retained in both states
                                         {
-                                            LogOK(p_Name, "Tracking state correctly retained for both tracking states");
+                                            LogOK(testName, "Tracking state correctly retained for both tracking states");
                                         }
                                         else
                                         {
-                                            LogIssue(p_Name, "Tracking state correctly retained when tracking is " + l_TrackingStart.ToString() + ", but not when tracking is true");
+                                            LogIssue(testName, "Tracking state correctly retained when tracking is " + trackingStart.ToString() + ", but not when tracking is true");
                                         }
                                     }
 
@@ -6457,61 +6459,61 @@ namespace ConformU
                                 {
                                     SetStatus("Move back");
                                     if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
-                                    telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the maximum rate
+                                        LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + -rateMaximum);
+                                    telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the maximum rate
                                     WaitFor(MOVE_AXIS_TIME);
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
                                     SetStatus("");
                                     if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
-                                    telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
+                                        LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                    telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
                                     if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage(p_Name, "About to set Tracking property " + l_TrackingStart);
-                                    telescopeDevice.Tracking = l_TrackingStart; // Restore original value
-                                    LogIssue(p_Name, "Tracking state not correctly restored after MoveAxis when CanSetTracking is true");
+                                        LogTestAndMessage(testName, "About to set Tracking property " + trackingStart);
+                                    telescopeDevice.Tracking = trackingStart; // Restore original value
+                                    LogIssue(testName, "Tracking state not correctly restored after MoveAxis when CanSetTracking is true");
                                 }
                             }
                             else // Can't set tracking so just test the current state
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to get Tracking property");
-                                l_TrackingStart = telescopeDevice.Tracking;
+                                    LogTestAndMessage(testName, "About to get Tracking property");
+                                trackingStart = telescopeDevice.Tracking;
                                 SetStatus("Moving forward");
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed " + l_RateMaximum);
-                                telescopeDevice.MoveAxis(p_Axis, l_RateMaximum); // Set the maximum rate
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + rateMaximum);
+                                telescopeDevice.MoveAxis(testAxis, rateMaximum); // Set the maximum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 SetStatus("Stop movement");
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
-                                telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to get Tracking property");
-                                l_TrackingEnd = telescopeDevice.Tracking; // Save tracking state
+                                    LogTestAndMessage(testName, "About to get Tracking property");
+                                trackingEnd = telescopeDevice.Tracking; // Save tracking state
                                 SetStatus("Move back");
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call method MoveAxis for axis " + ((int)p_Axis).ToString() + " at speed " + -l_RateMaximum);
-                                telescopeDevice.MoveAxis(p_Axis, -l_RateMaximum); // Set the maximum rate
+                                    LogTestAndMessage(testName, "About to call method MoveAxis for axis " + ((int)testAxis).ToString() + " at speed " + -rateMaximum);
+                                telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the maximum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 // v1.0.12 next line added because movement wasn't stopped
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)p_Axis).ToString() + " at speed 0");
-                                telescopeDevice.MoveAxis(p_Axis, 0.0d); // Stop the movement on this axis
-                                if (l_TrackingStart == l_TrackingEnd)
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
+                                if (trackingStart == trackingEnd)
                                 {
-                                    LogOK(p_Name, "Tracking state correctly restored after MoveAxis when CanSetTracking is false");
+                                    LogOK(testName, "Tracking state correctly restored after MoveAxis when CanSetTracking is false");
                                 }
                                 else
                                 {
                                     if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage(p_Name, "About to set Tracking property to " + l_TrackingStart);
-                                    telescopeDevice.Tracking = l_TrackingStart; // Restore correct value
-                                    LogIssue(p_Name, "Tracking state not correctly restored after MoveAxis when CanSetTracking is false");
+                                        LogTestAndMessage(testName, "About to set Tracking property to " + trackingStart);
+                                    telescopeDevice.Tracking = trackingStart; // Restore correct value
+                                    LogIssue(testName, "Tracking state not correctly restored after MoveAxis when CanSetTracking is false");
                                 }
 
                                 SetStatus("");
@@ -6519,25 +6521,25 @@ namespace ConformU
                         }
                         catch (Exception ex)
                         {
-                            HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "");
+                            HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, "");
                         }
                     }
                     else // Cant set zero so tests skipped 
                     {
-                        LogInfo(p_Name, "Remaining MoveAxis tests skipped because unable to set a movement rate of zero");
+                        LogInfo(testName, "Remaining MoveAxis tests skipped because unable to set a movement rate of zero");
                     }
 
                     ClearStatus(); // Clear status
                 }
                 else // Some problem in finding rates inside the AxisRates object
                 {
-                    LogInfo(p_Name, "Found minimum rate: " + l_RateMinimum + " found maximum rate: " + l_RateMaximum);
-                    LogIssue(p_Name, $"Unable to determine lowest or highest rates, expected {p_AxisRates.Count} rates, found {l_RateCount}");
+                    LogInfo(testName, "Found minimum rate: " + rateMinimum + " found maximum rate: " + rateMaximum);
+                    LogIssue(testName, $"Unable to determine lowest or highest rates, expected {axisRates.Count} rates, found {rateCount}");
                 }
             }
             else
             {
-                LogIssue(p_Name, "MoveAxis tests skipped because there are no AxisRate values");
+                LogIssue(testName, "MoveAxis tests skipped because there are no AxisRate values");
             }
         }
 

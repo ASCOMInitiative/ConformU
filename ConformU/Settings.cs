@@ -155,6 +155,7 @@ namespace ConformU
         public bool TestSideOfPierWrite { get; set; } = false;
         public bool TelescopeExtendedPulseGuideTests { get; set; } = true;
         public double TelescopePulseGuideTolerance { get; set; } = 1; // Arc-seconds
+        public bool TelescopeExtendedMoveAxisTests { get; set; } = true;
 
         // Camera test configuration
         public int CameraMaxBinX { get; set; } = 0;
