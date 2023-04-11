@@ -1658,7 +1658,7 @@
                 {
                     foreach (CheckProtocolParameter parameter in parameters)
                     {
-                        transactionUri.Query = $"{transactionUri.Query}&{parameter.ParameterName}={parameter.ParameterValue}";
+                        transactionUri.Query = $"{transactionUri.Query}&{parameter.ParameterName}={parameter.ParameterValue}".TrimStart('&');
                     }
                 }
 
