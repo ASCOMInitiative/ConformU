@@ -516,12 +516,6 @@
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await GetNoParameters("SupportedActions");
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-
-        // Test ClientTransactionID round tripping
-        await TestClientTransactionID(ParamsOk, true); // Should succeed because the parameter name is correctly cased
-        await TestClientTransactionID(ParamsOkPlusExtraParameter, true); // Should succeed because the parameter name is correctly cased
-        await TestClientTransactionID(ParamClientIDLowerCase, true); // Should succeed because the parameter name is correctly cased
-        await TestClientTransactionID(ParamTransactionIdLowerCase, false); // Should fail because the parameter name is incorr3ectly cased and the device should ignore it
     }
 
     #endregion
@@ -761,7 +755,7 @@
             {
                 await PutNoParameters("OpenShutter", () =>
                     {
-                        WaitWhile("OpenShutter", () => { return dome.Slewing == true; }, 500, settings.DomeShutterMovementTimeout, null);
+                        WaitWhile("OpenShutter", () => { return dome.ShutterStatus == ShutterState.Opening; }, 500, settings.DomeShutterMovementTimeout, null);
                     });
                 WaitFor(settings.DomeStabilisationWaitTime * 1000, "open shutter delay");
                 if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
@@ -1899,12 +1893,6 @@
         {
             LogError(testName, $"{messagePrefix} - {ex}", null);
         }
-    }
-
-    private async Task TestClientTransactionID(List<CheckProtocolParameter> iDparameters, bool shouldRountTrip)
-    {
-        if (iDparameters is null || (iDparameters.Count == 0)) throw new ASCOM.InvalidValueException("TestClientTransactionID - The supplied parameter list is null or empty.");
-
     }
 
     static string InvertCasing(string s)
