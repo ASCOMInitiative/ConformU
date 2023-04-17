@@ -34,6 +34,10 @@
 <RadzenTextArea Id="ProtocolLog" Style="line-height: 18px; padding-bottom: 0px" Name="ProtocolLogName" @bind-Value=@screenLog Rows="@screenLogRows" @bind-Cols=@screenLogColumns ReadOnly=true />
 @code
 {
+    // Test values for ClientID and ClientTransactionID
+    const int testClientID = 123456;
+    const int testTransactionId = 67890;
+
     private bool disposedValue;
 
     // Cancellation management
@@ -51,7 +55,7 @@
 
     ConformU.Settings settings;
 
-    #region Pre-formed parameters that can be sent to clients
+    #region Pre-formed status lists
 
     // HTTP statuses used to assess the outcome of protocol tests
     List<HttpStatusCode> HttpStatusCodeAny = new() { };
@@ -59,42 +63,45 @@
     List<HttpStatusCode> HttpStatusCode400 = new() { HttpStatusCode.BadRequest };
     List<HttpStatusCode> HttpStatusCode4XX = new() { HttpStatusCode.BadRequest, HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized, HttpStatusCode.PaymentRequired, HttpStatusCode.Forbidden,
                                                      HttpStatusCode.NotFound, HttpStatusCode.MethodNotAllowed, HttpStatusCode.NotAcceptable, HttpStatusCode.ProxyAuthenticationRequired, HttpStatusCode.Conflict, HttpStatusCode.Gone };
-
     List<HttpStatusCode> HttpStatusCode200_400_404 = new() { HttpStatusCode.OK, HttpStatusCode.BadRequest, HttpStatusCode.NotFound };
 
+    #endregion
+
+    #region Pre-formed parameter lists that can be sent to clients
+
     // ClientID and ClientTransactionID OK
-    internal List<CheckProtocolParameter> ParamOk = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890") };
+    internal List<CheckProtocolParameter> ParamsOk = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()) };
 
     // ClientID and ClientTransactionID OK but with additional spurious parameter
-    internal List<CheckProtocolParameter> ParamOkPlus = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("ExtraParameter", "ExtraValue") };
+    internal List<CheckProtocolParameter> ParamsOkPlusExtraParameter = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()), new CheckProtocolParameter("ExtraParameter", "ExtraValue") };
 
     // ClientID and ClientTransactionID parameter names lower case
-    internal List<CheckProtocolParameter> ParamClientIdLowerCase = new() { new CheckProtocolParameter("clientid", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890") };
-    internal List<CheckProtocolParameter> ParamTransactionIdLowerCase = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("clienttransactionid", "67890") };
+    internal List<CheckProtocolParameter> ParamClientIDLowerCase = new() { new CheckProtocolParameter("clientid", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()) };
+    internal List<CheckProtocolParameter> ParamTransactionIdLowerCase = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("clienttransactionid", testTransactionId.ToString()) };
 
     // ClientID and ClientTransactionID values empty
-    internal List<CheckProtocolParameter> ParamClientIdEmpty = new() { new CheckProtocolParameter("ClientID", ""), new CheckProtocolParameter("ClientTransactionID", "67890") };
-    internal List<CheckProtocolParameter> ParamTransactionIdEmpty = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "") };
+    internal List<CheckProtocolParameter> ParamClientIDEmpty = new() { new CheckProtocolParameter("ClientID", ""), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()) };
+    internal List<CheckProtocolParameter> ParamTransactionIdEmpty = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", "") };
 
     // ClientID and ClientTransactionID values white space
-    internal List<CheckProtocolParameter> ParamClientIdWhiteSpace = new() { new CheckProtocolParameter("ClientID", "     "), new CheckProtocolParameter("ClientTransactionID", "67890") };
-    internal List<CheckProtocolParameter> ParamTransactionIdWhiteSpace = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "     ") };
+    internal List<CheckProtocolParameter> ParamClientIDWhiteSpace = new() { new CheckProtocolParameter("ClientID", "     "), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()) };
+    internal List<CheckProtocolParameter> ParamTransactionIdWhiteSpace = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", "     ") };
 
     // ClientID and ClientTransactionID values negative number
-    internal List<CheckProtocolParameter> ParamClientIdNegative = new() { new CheckProtocolParameter("ClientID", "-12345"), new CheckProtocolParameter("ClientTransactionID", "67890") };
-    internal List<CheckProtocolParameter> ParamTransactionIdNegative = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "-67890") };
+    internal List<CheckProtocolParameter> ParamClientIDNegative = new() { new CheckProtocolParameter("ClientID", "-12345"), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()) };
+    internal List<CheckProtocolParameter> ParamTransactionIdNegative = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", "-67890") };
 
     // ClientID and ClientTransactionID values non-numeric string
-    internal List<CheckProtocolParameter> ParamClientIdString = new() { new CheckProtocolParameter("ClientID", "asdasd"), new CheckProtocolParameter("ClientTransactionID", "67890") };
-    internal List<CheckProtocolParameter> ParamTransactionIdString = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "qweqwe") };
+    internal List<CheckProtocolParameter> ParamClientIDString = new() { new CheckProtocolParameter("ClientID", "asdasd"), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()) };
+    internal List<CheckProtocolParameter> ParamTransactionIdString = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", "qweqwe") };
 
     // Set Connected True and False
-    internal List<CheckProtocolParameter> ParamConnectedTrue = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "True") };
-    internal List<CheckProtocolParameter> ParamConnectedFalse = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "False") };
+    internal List<CheckProtocolParameter> ParamConnectedTrue = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()), new CheckProtocolParameter("Connected", "True") };
+    internal List<CheckProtocolParameter> ParamConnectedFalse = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()), new CheckProtocolParameter("Connected", "False") };
 
     // Set Telescope.Tracking True and False
-    internal List<CheckProtocolParameter> ParamTrackingTrue = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Tracking", "True") };
-    internal List<CheckProtocolParameter> ParamTrackingFalse = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Tracking", "False") };
+    internal List<CheckProtocolParameter> ParamTrackingTrue = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()), new CheckProtocolParameter("Tracking", "True") };
+    internal List<CheckProtocolParameter> ParamTrackingFalse = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()), new CheckProtocolParameter("Tracking", "False") };
 
     #endregion
 
@@ -290,7 +297,7 @@
             try
             {
                 // Set Connected true to start the test
-                await SendApi("True", "Connected", HttpMethod.Put, ParamConnectedTrue, HttpStatusCode200);
+                await CallApi("True", "Connected", HttpMethod.Put, ParamConnectedTrue, HttpStatusCode200);
                 LogBlankLine();
                 if (applicationCancellationToken.IsCancellationRequested) goto EndOfTest; // Exit if user has pushed the STOP button
 
@@ -348,7 +355,7 @@
             EndOfTest:
                 // Finally set Connected false
                 LogBlankLine();
-                await SendApi("False", "Connected", HttpMethod.Put, ParamConnectedFalse, HttpStatusCode200, true);
+                await CallApi("False", "Connected", HttpMethod.Put, ParamConnectedFalse, HttpStatusCode200, true);
             }
             catch (Exception ex)
             {
@@ -434,54 +441,54 @@
 
     private async Task TestCommon()
     {
-        List<CheckProtocolParameter> ParamConnectedEmpty = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "") };
-        List<CheckProtocolParameter> ParamConnectedNumeric = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "12345") };
-        List<CheckProtocolParameter> ParamConnectedString = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "asdqwe") };
-        List<CheckProtocolParameter> ParamConnectedNegative = new() { new CheckProtocolParameter("ClientID", "12345"), new CheckProtocolParameter("ClientTransactionID", "67890"), new CheckProtocolParameter("Connected", "-32890") };
+        List<CheckProtocolParameter> ParamConnectedEmpty = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()), new CheckProtocolParameter("Connected", "") };
+        List<CheckProtocolParameter> ParamConnectedNumeric = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()), new CheckProtocolParameter("Connected", testClientID.ToString()) };
+        List<CheckProtocolParameter> ParamConnectedString = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()), new CheckProtocolParameter("Connected", "asdqwe") };
+        List<CheckProtocolParameter> ParamConnectedNegative = new() { new CheckProtocolParameter("ClientID", testClientID.ToString()), new CheckProtocolParameter("ClientTransactionID", testTransactionId.ToString()), new CheckProtocolParameter("Connected", "-32890") };
 
         // Test primary URL structure: /api/v1/ if configured to do so
         if (settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure)
         {
-            await Send("GET Description", $"Bad Alpaca URL base element (api = apx)\"", $"/apx/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCodeAny);
+            await SendToDevice("GET Description", $"Bad Alpaca URL base element (api = apx)\"", $"/apx/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await Send("GET Description", $"Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCodeAny);
+            await SendToDevice("GET Description", $"Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await Send("GET Description", $"Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCodeAny);
+            await SendToDevice("GET Description", $"Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await Send("GET Description", $"Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCodeAny);
+            await SendToDevice("GET Description", $"Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await Send("GET Description", $"Bad Alpaca URL version element (v2)", $"/api/v2/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCodeAny);
+            await SendToDevice("GET Description", $"Bad Alpaca URL version element (v2)", $"/api/v2/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
 
             // Test bad POST HTTP methods
-            await SendApi("True", "Connected", HttpMethod.Post, ParamConnectedTrue, HttpStatusCodeAny);
+            await CallApi("True", "Connected", HttpMethod.Post, ParamConnectedTrue, HttpStatusCodeAny);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendApi("Value empty", "Connected", HttpMethod.Post, ParamConnectedEmpty, HttpStatusCodeAny);
+            await CallApi("Value empty", "Connected", HttpMethod.Post, ParamConnectedEmpty, HttpStatusCodeAny);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendApi("Number", "Connected", HttpMethod.Post, ParamConnectedNumeric, HttpStatusCodeAny);
+            await CallApi("Number", "Connected", HttpMethod.Post, ParamConnectedNumeric, HttpStatusCodeAny);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
 
             // Test bad DELETE HTTP methods
-            await SendApi("True", "Connected", HttpMethod.Delete, ParamConnectedTrue, HttpStatusCodeAny);
+            await CallApi("True", "Connected", HttpMethod.Delete, ParamConnectedTrue, HttpStatusCodeAny);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendApi("Empty", "Connected", HttpMethod.Delete, ParamConnectedEmpty, HttpStatusCodeAny);
+            await CallApi("Empty", "Connected", HttpMethod.Delete, ParamConnectedEmpty, HttpStatusCodeAny);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendApi("Number", "Connected", HttpMethod.Delete, ParamConnectedNumeric, HttpStatusCodeAny);
+            await CallApi("Number", "Connected", HttpMethod.Delete, ParamConnectedNumeric, HttpStatusCodeAny);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         }
 
         // Test remaining Alpaca URL structure /devicetype/devicenumber and accept any 4XX status as a correct rejection
-        await Send("GET Description", $"Bad Alpaca URL device type (capitalised {settings.DeviceType.ToString().ToUpper()})", $"/api/v1/{settings.DeviceType.ToString().ToUpper()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamOk, HttpStatusCode4XX);
+        await SendToDevice("GET Description", $"Bad Alpaca URL device type (capitalised {settings.DeviceType.ToString().ToUpper()})", $"/api/v1/{settings.DeviceType.ToString().ToUpper()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-        await Send("GET Description", $"Bad Alpaca URL device type (baddevicetype)", $"/api/v1/baddevicetype/0/description", HttpMethod.Get, ParamOk, HttpStatusCode4XX);
+        await SendToDevice("GET Description", $"Bad Alpaca URL device type (baddevicetype)", $"/api/v1/baddevicetype/0/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-        await Send("GET Description", $"Bad Alpaca URL device number (-1)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/-1/description", HttpMethod.Get, ParamOk, HttpStatusCode4XX);
+        await SendToDevice("GET Description", $"Bad Alpaca URL device number (-1)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/-1/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-        await Send("GET Description", $"Bad Alpaca URL device number (99999)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/99999/description", HttpMethod.Get, ParamOk, HttpStatusCode4XX);
+        await SendToDevice("GET Description", $"Bad Alpaca URL device number (99999)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/99999/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-        await Send("GET Description", $"Bad Alpaca URL device number (A)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/A/description", HttpMethod.Get, ParamOk, HttpStatusCode4XX);
+        await SendToDevice("GET Description", $"Bad Alpaca URL device number (A)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/A/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-        await Send("GET Description", $"Bad Alpaca URL method name (descrip)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/descrip", HttpMethod.Get, ParamOk, HttpStatusCode4XX);
+        await SendToDevice("GET Description", $"Bad Alpaca URL method name (descrip)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/descrip", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
 
         // Test GET Connected
@@ -489,11 +496,11 @@
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
 
         // Test bad PUT Connected values
-        await SendApi("Ids Empty", "Connected", HttpMethod.Put, ParamConnectedEmpty, HttpStatusCode400);
+        await CallApi("Ids Empty", "Connected", HttpMethod.Put, ParamConnectedEmpty, HttpStatusCode400);
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-        await SendApi("Ids numeric", "Connected", HttpMethod.Put, ParamConnectedNumeric, HttpStatusCode400);
+        await CallApi("Ids numeric", "Connected", HttpMethod.Put, ParamConnectedNumeric, HttpStatusCode400);
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-        await SendApi("Ids string", "Connected", HttpMethod.Put, ParamConnectedNumeric, HttpStatusCode400);
+        await CallApi("Ids string", "Connected", HttpMethod.Put, ParamConnectedNumeric, HttpStatusCode400);
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
 
         // Test GET remaining common members
@@ -508,6 +515,13 @@
         await GetNoParameters("Name");
         if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         await GetNoParameters("SupportedActions");
+        if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+
+        // Test ClientTransactionID round tripping
+        await TestClientTransactionID(ParamsOk, true); // Should succeed because the parameter name is correctly cased
+        await TestClientTransactionID(ParamsOkPlusExtraParameter, true); // Should succeed because the parameter name is correctly cased
+        await TestClientTransactionID(ParamClientIDLowerCase, true); // Should succeed because the parameter name is correctly cased
+        await TestClientTransactionID(ParamTransactionIdLowerCase, false); // Should fail because the parameter name is incorr3ectly cased and the device should ignore it
     }
 
     #endregion
@@ -1213,7 +1227,7 @@
             }
 
             // Set tracking to TRUE for RA/Dec slews
-            await SendApi("True", "Tracking", HttpMethod.Put, ParamTrackingTrue, HttpStatusCode200);
+            await CallApi("True", "Tracking", HttpMethod.Put, ParamTrackingTrue, HttpStatusCode200);
 
             if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_ABORT_SLEW]) // Test enabled
@@ -1337,7 +1351,7 @@
             }
 
             // Set tracking to FALSE for Alt/Az slews
-            await SendApi("False", "Tracking", HttpMethod.Put, ParamTrackingFalse, HttpStatusCode200);
+            await CallApi("False", "Tracking", HttpMethod.Put, ParamTrackingFalse, HttpStatusCode200);
 
             if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
             if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_ALTAZ_ASYNC]) // Test enabled
@@ -1384,7 +1398,7 @@
 
         TelescopeEnd:
             // Set tracking to FALSE
-            await SendApi("False", "Tracking", HttpMethod.Put, ParamTrackingFalse, HttpStatusCode200);
+            await CallApi("False", "Tracking", HttpMethod.Put, ParamTrackingFalse, HttpStatusCode200);
 
             try { telescope.Connected = false; } catch { }
         }
@@ -1396,245 +1410,286 @@
 
     private async Task GetNoParameters(string method)
     {
-        // Test good GET
-        await SendApi("OK", method, HttpMethod.Get, ParamOk, HttpStatusCode200);
-        await SendApi("Correct IDs plus additional parameter", method, HttpMethod.Get, ParamOkPlus, HttpStatusCode200);
-        await SendApi("Different ClientId case", method, HttpMethod.Get, ParamClientIdLowerCase, HttpStatusCode200);
-        await SendApi("Different ClientTransactionId case", method, HttpMethod.Get, ParamTransactionIdLowerCase, HttpStatusCode200);
+        // Test good ClientXXId name casing
+        await CallApi("Good ClientID and ClientTransactionID casing", method, HttpMethod.Get, ParamsOk, HttpStatusCode200);
 
+        // Test good ClientXXId name casing with extra parameter
+        await CallApi("Good ClientID and ClientTransactionID casing with additional parameter", method, HttpMethod.Get, ParamsOkPlusExtraParameter, HttpStatusCode200);
+
+        // Test incorrect ClientID casing
+        await CallApi("Different ClientID casing", method, HttpMethod.Get, ParamClientIDLowerCase, HttpStatusCode200);
+
+        // Test incorrect ClientTransactionID casing
+        await CallApi("Different ClientTransactionID casing", method, HttpMethod.Get, ParamTransactionIdLowerCase, HttpStatusCode200);
+
+        // Test bad client and transaction Ids
         await TestBadIds(method, HttpMethod.Get, null, null, null, null);
     }
 
     private async Task GetOneParameter(string method, string parameterName, string parameterValue)
     {
-        // Test bad client and transaction Ids
-        await TestBadIds(method, HttpMethod.Get, parameterName, parameterValue, null, null);
-
         // Test good parameter name casing
-        List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamOk);
-        clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+        List<CheckProtocolParameter> goodParamCasing = new List<CheckProtocolParameter>(ParamsOk);
+        goodParamCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+        await CallApi($"Parameter {parameterName} (Good casing)", method, HttpMethod.Get, goodParamCasing, HttpStatusCode200);
 
-        List<CheckProtocolParameter> differentClientIdCasing = new List<CheckProtocolParameter>(ParamClientIdLowerCase);
-        differentClientIdCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+        // Test good parameter name casing with extra parameter
+        List<CheckProtocolParameter> goodParamCasingPlusExtraParameter = new List<CheckProtocolParameter>(ParamsOkPlusExtraParameter);
+        goodParamCasingPlusExtraParameter.Add(new CheckProtocolParameter(parameterName, parameterValue));
+        await CallApi($"Parameter {parameterName} (Good casing with extra parameter)", method, HttpMethod.Get, goodParamCasingPlusExtraParameter, HttpStatusCode200);
 
+        // Test incorrect parameter name casing
+        List<CheckProtocolParameter> badParamCasing = new List<CheckProtocolParameter>(ParamsOk);
+        badParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName), parameterValue));
+        await CallApi($"Parameter {parameterName} (Inverted casing)", method, HttpMethod.Get, badParamCasing, HttpStatusCode200);
+
+        // Test incorrect ClientID casing
+        List<CheckProtocolParameter> differentClientIDCasing = new List<CheckProtocolParameter>(ParamClientIDLowerCase);
+        differentClientIDCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+        await CallApi("Different ClientID casing", method, HttpMethod.Get, differentClientIDCasing, HttpStatusCode200);
+
+        // Test incorrect ClientTransactionID casing
         List<CheckProtocolParameter> differentTransactionIdCasing = new List<CheckProtocolParameter>(ParamTransactionIdLowerCase);
         differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+        await CallApi("Different ClientTransactionID casing", method, HttpMethod.Get, differentTransactionIdCasing, HttpStatusCode200);
 
-        await SendApi($"Parameter {parameterName} (Good casing)", method, HttpMethod.Get, clientIdGoodParamCasing, HttpStatusCode200);
-        await SendApi("Different ClientId case", method, HttpMethod.Get, differentClientIdCasing, HttpStatusCode200);
-        await SendApi("Different ClientTransactionId case", method, HttpMethod.Get, differentTransactionIdCasing, HttpStatusCode200);
-
-        // Test bad parameter name casing
-        List<CheckProtocolParameter> clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamOk);
-        clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName), parameterValue));
-        await SendApi($"Parameter {parameterName} (Inverted casing)", method, HttpMethod.Get, clientIdBadParamCasing, HttpStatusCode200);
+        // Test bad client and transaction Ids
+        await TestBadIds(method, HttpMethod.Get, parameterName, parameterValue, null, null);
     }
 
     private async Task GetTwoParameters(string method, string parameterName1, string parameterValue1, string parameterName2, string parameterValue2)
     {
-        // Test bad client and transaction Ids
-        await TestBadIds(method, HttpMethod.Get, parameterName1, parameterValue1, parameterName2, parameterValue2);
-
         // Test good parameter name casing
-        List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamOk);
-        clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-        clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        List<CheckProtocolParameter> goodParamCasing = new List<CheckProtocolParameter>(ParamsOk);
+        goodParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        goodParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        await CallApi($"Parameter {parameterName1} and {parameterName2} (Good casing)", method, HttpMethod.Get, goodParamCasing, HttpStatusCode200);
 
-        List<CheckProtocolParameter> differentClientIdCasing = new List<CheckProtocolParameter>(ParamClientIdLowerCase);
-        differentClientIdCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-        differentClientIdCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        // Test good parameter name casing with extra parameter
+        List<CheckProtocolParameter> goodParamCasingPlusExtraParameter = new List<CheckProtocolParameter>(ParamsOkPlusExtraParameter);
+        goodParamCasingPlusExtraParameter.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        goodParamCasingPlusExtraParameter.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        await CallApi($"Parameter {parameterName1} and {parameterName2} (Good casing with extra parameter)", method, HttpMethod.Get, goodParamCasingPlusExtraParameter, HttpStatusCode200);
 
+        // Test bad parameter 1 name casing
+        List<CheckProtocolParameter> badParamCasing = new List<CheckProtocolParameter>(ParamsOk);
+        badParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName1), parameterValue1));
+        badParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        await CallApi($"Parameter {parameterName1} (Inverted casing)", method, HttpMethod.Get, badParamCasing, HttpStatusCode200);
+
+        // Test bad parameter 2 name casing
+        badParamCasing = new List<CheckProtocolParameter>(ParamsOk);
+        badParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        badParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName2), parameterValue2));
+        await CallApi($"Parameter {parameterName2} (Inverted casing)", method, HttpMethod.Get, badParamCasing, HttpStatusCode200);
+
+        // Test incorrect ClientID casing
+        List<CheckProtocolParameter> differentClientIDCasing = new List<CheckProtocolParameter>(ParamClientIDLowerCase);
+        differentClientIDCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        differentClientIDCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        await CallApi("Different ClientID casing", method, HttpMethod.Get, differentClientIDCasing, HttpStatusCode200);
+
+        // Test incorrect ClientTransactionID casing
         List<CheckProtocolParameter> differentTransactionIdCasing = new List<CheckProtocolParameter>(ParamTransactionIdLowerCase);
         differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
         differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        await CallApi("Different ClientTransactionID casing", method, HttpMethod.Get, differentTransactionIdCasing, HttpStatusCode200);
 
-        await SendApi($"Parameter {parameterName1} (Good casing)", method, HttpMethod.Get, clientIdGoodParamCasing, HttpStatusCode200);
-        await SendApi("Different ClientId case", method, HttpMethod.Get, differentClientIdCasing, HttpStatusCode200);
-        await SendApi("Different ClientTransactionId case", method, HttpMethod.Get, differentTransactionIdCasing, HttpStatusCode200);
-
-        // Test bad parameter 1 name casing
-        List<CheckProtocolParameter> clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamOk);
-        clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName1), parameterValue1));
-        clientIdBadParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-        await SendApi($"Parameter {parameterName1} (Inverted casing)", method, HttpMethod.Get, clientIdBadParamCasing, HttpStatusCode200);
-
-        // Test bad parameter 2 name casing
-        clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamOk);
-        clientIdBadParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-        clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName2), parameterValue2));
-        await SendApi($"Parameter {parameterName2} (Inverted casing)", method, HttpMethod.Get, clientIdBadParamCasing, HttpStatusCode200);
+        // Test bad client and transaction Ids
+        await TestBadIds(method, HttpMethod.Get, parameterName1, parameterValue1, parameterName2, parameterValue2);
     }
 
     private async Task PutNoParameters(string method, Action waitForCompletion)
     {
+        // Test good ClientXXId name casing
+        await CallApi("Good ID name casing", method, HttpMethod.Put, ParamsOk, HttpStatusCode200);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
+
+        // Test good ClientXXId name casing with extra parameter
+        await CallApi("Good ID casing + extra parameter", method, HttpMethod.Put, ParamsOkPlusExtraParameter, HttpStatusCode200);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
+
+        // Test incorrect ClientID casing
+        await CallApi("Bad ClientID casing", method, HttpMethod.Put, ParamClientIDLowerCase, HttpStatusCode200); // Must be 200 because the device should ignore the parameter if incorrectly cased
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
+
+        // Test incorrect ClientTransactionID casing
+        await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, ParamTransactionIdLowerCase, HttpStatusCode200); // Must be 200 because the device should ignore the parameter if incorrectly cased
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
+
         // Test bad client and transaction Ids
         await TestBadIds(method, HttpMethod.Put, null, null, null, null);
-        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
-
-        // Test Good call
-        List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamOk);
-        await SendApi("Good parameter name casing", method, HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
-        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
-
-        // Add an additional parameter
-        clientIdGoodParamCasing.Add(new CheckProtocolParameter("ExtraParameter", "ExtraValue"));
-        await SendApi("Good parameter casing + extra parameter", method, HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
-        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
-
-        await SendApi("Different ClientId case", method, HttpMethod.Put, ParamClientIdLowerCase, HttpStatusCode400);
-        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
-        await SendApi("Different ClientTransactionId case", method, HttpMethod.Put, ParamTransactionIdLowerCase, HttpStatusCode400);
         if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
     }
 
     private async Task PutOneParameter(string method, string parameterName, string parameterValue, Action waitForCompletion)
     {
+        // Test good parameter name casing
+        List<CheckProtocolParameter> goodParamCasing = new List<CheckProtocolParameter>(ParamsOk);
+        goodParamCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+        await CallApi($"Parameter {parameterName} (Good casing)", method, HttpMethod.Put, goodParamCasing, HttpStatusCode200);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
+
+        // Test good parameter name casing with an extra parameter
+        List<CheckProtocolParameter> goodParamCasingPlusExtraParameter = new List<CheckProtocolParameter>(ParamsOkPlusExtraParameter);
+        goodParamCasingPlusExtraParameter.Add(new CheckProtocolParameter(parameterName, parameterValue));
+        await CallApi($"Parameter {parameterName} (Good casing + extra parameter)", method, HttpMethod.Put, goodParamCasingPlusExtraParameter, HttpStatusCode200);
+        if (waitForCompletion is not null) waitForCompletion();  // Wait for completion if required
+
+        // Test bad parameter name casing
+        List<CheckProtocolParameter> badParamCasing = new List<CheckProtocolParameter>(ParamsOk);
+        badParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName), parameterValue));
+        await CallApi($"Parameter {parameterName} (Bad casing)", method, HttpMethod.Put, badParamCasing, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion();  // Wait for completion if required
+
+        // Test different ClientID casing
+        List<CheckProtocolParameter> differentClientIDCasing = new List<CheckProtocolParameter>(ParamClientIDLowerCase);
+        differentClientIDCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+        await CallApi("Bad ClientID casing", method, HttpMethod.Put, differentClientIDCasing, HttpStatusCode200); // Must be 200 because the device should ignore the parameter if incorrectly cased
+        if (waitForCompletion is not null) waitForCompletion();  // Wait for completion if required
+
+        // Test different ClientTransactionID casing
+        List<CheckProtocolParameter> differentTransactionIdCasing = new List<CheckProtocolParameter>(ParamTransactionIdLowerCase);
+        differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+        await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, differentTransactionIdCasing, HttpStatusCode200); // Must be 200 because the device should ignore the parameter if incorrectly cased
+        if (waitForCompletion is not null) waitForCompletion();  // Wait for completion if required
+
         // Test bad client and transaction Ids
         await TestBadIds(method, HttpMethod.Put, parameterName, parameterValue, null, null);
         if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
-
-        // Test good parameter name casing
-        List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamOk);
-        clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
-
-        List<CheckProtocolParameter> differentClientIdCasing = new List<CheckProtocolParameter>(ParamClientIdLowerCase);
-        differentClientIdCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
-
-        List<CheckProtocolParameter> differentTransactionIdCasing = new List<CheckProtocolParameter>(ParamTransactionIdLowerCase);
-        differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
-
-        await SendApi($"Parameter {parameterName} (Good casing)", method, HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
-        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
-
-        // Add an additional parameter
-        //clientIdGoodParamCasing.Add(new CheckProtocolParameter("ExtraParameter", "ExtraValue"));
-        //await SendApi($"Good {parameterName} casing + extra parameter", method, HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
-        //if (waitForCompletion is not null) waitForCompletion();  Wait for completion if required
-
-        //await SendApi("Different ClientId case", method, HttpMethod.Put, differentClientIdCasing, HttpStatusCode400);
-        //if (waitForCompletion is not null) waitForCompletion();  Wait for completion if required
-        //await SendApi("Different ClientTransactionId case", method, HttpMethod.Put, differentTransactionIdCasing, HttpStatusCode400);
-        //if (waitForCompletion is not null) waitForCompletion();  Wait for completion if required
-
-        // Test bad parameter name casing
-        //List<CheckProtocolParameter> clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamOk);
-        //clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName), parameterValue));
-        //await SendApi($"Parameter {parameterName} (Bad casing)", method, HttpMethod.Put, clientIdBadParamCasing, HttpStatusCode400);
-        //if (waitForCompletion is not null) waitForCompletion();  Wait for completion if required
     }
 
 #nullable enable
     private async Task PutTwoParameters(string method, string parameterName1, string parameterValue1, string parameterName2, string parameterValue2, Action waitForCompletion)
     {
-        // Test bad client and transaction Ids
-        await TestBadIds(method, HttpMethod.Put, parameterName1, parameterValue1, parameterName2, parameterValue2);
+        // Test good parameter name casing
+        List<CheckProtocolParameter> goodParamCasing = new List<CheckProtocolParameter>(ParamsOk);
+        goodParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        goodParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        await CallApi($"Parameters {parameterName1} and {parameterName2} (Good casing)", method, HttpMethod.Put, goodParamCasing, HttpStatusCode200);
         if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
-        // Test good parameter name casing
-        List<CheckProtocolParameter> clientIdGoodParamCasing = new List<CheckProtocolParameter>(ParamOk);
-        clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-        clientIdGoodParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        // Test good parameter name casing with an additional parameter
+        List<CheckProtocolParameter> goodParamCasingPlusExtraParameter = new List<CheckProtocolParameter>(ParamsOkPlusExtraParameter);
+        goodParamCasingPlusExtraParameter.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        goodParamCasingPlusExtraParameter.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        await CallApi($"Parameters {parameterName1} and {parameterName2} (Good casing with extra parameter)", method, HttpMethod.Put, goodParamCasingPlusExtraParameter, HttpStatusCode200);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
-        List<CheckProtocolParameter> differentClientIdCasing = new List<CheckProtocolParameter>(ParamClientIdLowerCase);
-        differentClientIdCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-        differentClientIdCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        // Test bad parameter 1 name casing
+        List<CheckProtocolParameter> badParam1Casing = new List<CheckProtocolParameter>(ParamsOk);
+        badParam1Casing.Add(new CheckProtocolParameter(InvertCasing(parameterName1), parameterValue1));
+        badParam1Casing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        await CallApi($"Parameter {parameterName1} (Bad casing)", method, HttpMethod.Put, badParam1Casing, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
+
+        // Test bad parameter 2 name casing
+        List<CheckProtocolParameter> badParam2Casing = new List<CheckProtocolParameter>(ParamsOk);
+        badParam2Casing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        badParam2Casing.Add(new CheckProtocolParameter(InvertCasing(parameterName2), parameterValue2));
+        await CallApi($"Parameter {parameterName2} (Bad casing)", method, HttpMethod.Put, badParam2Casing, HttpStatusCode400);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
+
+        // Test incorrect ID casing
+        List<CheckProtocolParameter> differentClientIDCasing = new List<CheckProtocolParameter>(ParamClientIDLowerCase);
+        differentClientIDCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
+        differentClientIDCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+        await CallApi("Bad ClientID casing", method, HttpMethod.Put, differentClientIDCasing, HttpStatusCode200);
+        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
         List<CheckProtocolParameter> differentTransactionIdCasing = new List<CheckProtocolParameter>(ParamTransactionIdLowerCase);
         differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
         differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-
-        // Send a good command
-        await SendApi($"Good {parameterName1}, {parameterName2} casing", method, HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
+        await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, differentTransactionIdCasing, HttpStatusCode200);
         if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
-        // Good command with an additional parameter
-        clientIdGoodParamCasing.Add(new CheckProtocolParameter("ExtraParameter", "ExtraValue"));
-        await SendApi($"Good {parameterName1}, {parameterName2} casing + extra parameter", method, HttpMethod.Put, clientIdGoodParamCasing, HttpStatusCode200);
-        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
-
-        // Test incorrect ID casing
-        await SendApi("Different ClientId case", method, HttpMethod.Put, differentClientIdCasing, HttpStatusCode400);
-        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
-        await SendApi("Different ClientTransactionId case", method, HttpMethod.Put, differentTransactionIdCasing, HttpStatusCode400);
-        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
-
-        // Test bad parameter 1 name casing
-        List<CheckProtocolParameter> clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamOk);
-        clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName1), parameterValue1));
-        clientIdBadParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-        await SendApi($"Parameter {parameterName1} (Bad casing)", method, HttpMethod.Put, clientIdBadParamCasing, HttpStatusCode400);
-        if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
-
-        // Test bad parameter 2 name casing
-        clientIdBadParamCasing = new List<CheckProtocolParameter>(ParamOk);
-        clientIdBadParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-        clientIdBadParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName2), parameterValue2));
-        await SendApi($"Parameter {parameterName2} (Bad casing)", method, HttpMethod.Put, clientIdBadParamCasing, HttpStatusCode400);
+        // Test bad client and transaction Ids
+        await TestBadIds(method, HttpMethod.Put, parameterName1, parameterValue1, parameterName2, parameterValue2);
         if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
     }
 #nullable disable
 
+    /// <summary>
+    /// Test correctly cased ClientID and ClientTransactionID parameters that have varying types of bad values
+    /// </summary>
+    /// <param name="method"></param>
+    /// <param name="httpMethod"></param>
+    /// <param name="parameterName1"></param>
+    /// <param name="parameterValue1"></param>
+    /// <param name="parameterName2"></param>
+    /// <param name="parameterValue2"></param>
+    /// <returns></returns>
+    /// <remarks>These shoul all fail.</remarks>
     private async Task TestBadIds(string method, HttpMethod httpMethod, string parameterName1, string parameterValue1, string parameterName2, string parameterValue2)
     {
         string methodLowerCase = method.ToLowerInvariant();
         string httpmethodString = httpMethod.ToString().ToUpper();
         List<CheckProtocolParameter> parameters;
 
-        // Test bad GETs - These should always fail
-        parameters = new List<CheckProtocolParameter>(ParamClientIdEmpty);
+        // Test empty ClientID value
+        parameters = new List<CheckProtocolParameter>(ParamClientIDEmpty);
         if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
         if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-        await SendApi("Client Id empty", method, httpMethod, parameters, HttpStatusCode400);
+        await CallApi("ClientID is empty", method, httpMethod, parameters, HttpStatusCode400);
 
-        parameters = new List<CheckProtocolParameter>(ParamClientIdWhiteSpace);
+        // Test white space ClientID value
+        parameters = new List<CheckProtocolParameter>(ParamClientIDWhiteSpace);
         if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
         if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-        await SendApi("Client Id white space", method, httpMethod, parameters, HttpStatusCode400);
+        await CallApi("ClientID is white space", method, httpMethod, parameters, HttpStatusCode400);
 
-        parameters = new List<CheckProtocolParameter>(ParamClientIdNegative);
+        // Test negative ClientID value
+        parameters = new List<CheckProtocolParameter>(ParamClientIDNegative);
         if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
         if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-        await SendApi("Client Id negative", method, httpMethod, parameters, HttpStatusCode400);
+        await CallApi("ClientID is negative", method, httpMethod, parameters, HttpStatusCode400);
 
-        parameters = new List<CheckProtocolParameter>(ParamClientIdString);
+        // Test text ClientID value
+        parameters = new List<CheckProtocolParameter>(ParamClientIDString);
         if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
         if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-        await SendApi("Client Id string", method, httpMethod, parameters, HttpStatusCode400);
+        await CallApi("ClientID is a string", method, httpMethod, parameters, HttpStatusCode400);
 
+        // Test empty ClientTransactionID value
         parameters = new List<CheckProtocolParameter>(ParamTransactionIdEmpty);
         if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
         if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-        await SendApi("Transaction Id empty", method, httpMethod, parameters, HttpStatusCode400);
+        await CallApi("ClientTransactionID is empty", method, httpMethod, parameters, HttpStatusCode400);
 
+        // Test white space ClientTransactionID value
         parameters = new List<CheckProtocolParameter>(ParamTransactionIdWhiteSpace);
         if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
         if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-        await SendApi("Transaction Id white space", method, httpMethod, parameters, HttpStatusCode400);
+        await CallApi("ClientTransactionID is white space", method, httpMethod, parameters, HttpStatusCode400);
 
+        // Test negative ClientTransactionID value
         parameters = new List<CheckProtocolParameter>(ParamTransactionIdNegative);
         if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
         if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-        await SendApi("Transaction Id negative", method, httpMethod, parameters, HttpStatusCode400);
+        await CallApi("ClientTransactionID is negative", method, httpMethod, parameters, HttpStatusCode400);
 
+        // Test text ClienClientTransactionIDtId value
         parameters = new List<CheckProtocolParameter>(ParamTransactionIdString);
         if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
         if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-        await SendApi("Transaction Id string", method, httpMethod, parameters, HttpStatusCode400);
+        await CallApi("ClientTransactionID is a string", method, httpMethod, parameters, HttpStatusCode400);
     }
 
-    private async Task SendApi(string messagePrefix, string method, HttpMethod httpMethod, List<CheckProtocolParameter> parameters, List<HttpStatusCode> expectedCodes, bool ignoreApplicationCancellation = false)
+    private async Task CallApi(string messagePrefix, string method, HttpMethod httpMethod, List<CheckProtocolParameter> parameters, List<HttpStatusCode> expectedCodes, bool ignoreApplicationCancellation = false)
     {
         string methodLowerCase = method.ToLowerInvariant();
         string httpMethodUpperCase = httpMethod.ToString().ToUpperInvariant();
 
         string url = $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}";
-        await Send($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation);
+        await SendToDevice($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation);
     }
 
-    private async Task Send(string testName, string messagePrefix, string url, HttpMethod httpMethod, List<CheckProtocolParameter> parameters, List<HttpStatusCode> expectedCodes, bool ignoreApplicationCancellation = false)
+    private async Task SendToDevice(string testName, string messagePrefix, string url, HttpMethod httpMethod, List<CheckProtocolParameter> parameters, List<HttpStatusCode> expectedCodes, bool ignoreApplicationCancellation = false)
     {
         string ascomOutcome = null;
         CancellationTokenSource requestCancellationTokenSource;
+        bool hasClientTransactionID = false;
+        uint expectedClientTransactionID = 0; // The expected ClientTransactionID round trip value
 
         if (expectedCodes is null)
         {
@@ -1659,6 +1714,17 @@
                     foreach (CheckProtocolParameter parameter in parameters)
                     {
                         transactionUri.Query = $"{transactionUri.Query}&{parameter.ParameterName}={parameter.ParameterValue}".TrimStart('&');
+
+                        // Test whether we have a correctly cased ClientTransactionID parameter and if so flag this because the value should round-trip OK
+                        if (parameter.ParameterName.ToUpperInvariant() == "ClientTransactionID".ToUpperInvariant())
+                        {
+                            // Record that we have a valid ClientTransactionID parameter name
+                            hasClientTransactionID = true;
+
+                            // Extract the expected value if possible. 0 indicates no value or an invalid value which is not expected to round trip
+                            UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionID);
+                            logger.LogMessage(testName, MessageLevel.Debug, $"{messagePrefix} - Input ClientTransactionID value: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionID}");
+                        }
                     }
                 }
 
@@ -1678,8 +1744,28 @@
                     foreach (CheckProtocolParameter parameter in parameters)
                     {
                         formParameters.Add(parameter.ParameterName, parameter.ParameterValue);
-                    }
 
+                        // Test whether we have a correctly cased ClientTransactionID parameter and if so flag this because the value should round-trip OK
+                        if (parameter.ParameterName.ToUpperInvariant() == "ClientTransactionID".ToUpperInvariant())
+                        {
+                            // Record that we have a ClientTransactionID parameter name, which may or may not be correctly cased
+                            hasClientTransactionID = true;
+
+                            // Test whether the parameter name is correctly cased
+                            if (parameter.ParameterName == "ClientTransactionID") // It is correctly cased
+                            {
+                                // Extract the expected value if possible. 0 indicates no value or an invalid value which is not expected to round trip
+                                UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionID);
+                                logger.LogMessage(testName, MessageLevel.Debug, $"{messagePrefix} - Input ClientTransactionID name is correctly cased: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionID}");
+
+                            }
+                            else // It is not correctly cased.
+                            {
+                                expectedClientTransactionID = 0;
+                                logger.LogMessage(testName, MessageLevel.Debug, $"{messagePrefix} - Input ClientTransactionID name is NOT correctly cased: {parameter.ParameterValue}, Expected value: {expectedClientTransactionID}");
+                            }
+                        }
+                    }
 
                     FormUrlEncodedContent formUrlParameters = new FormUrlEncodedContent(formParameters);
                     request.Content = formUrlParameters;
@@ -1714,6 +1800,21 @@
                 {
                     // Parse the common httpResponse values from the JSON response
                     Response deviceesponse = JsonSerializer.Deserialize<ASCOM.Common.Alpaca.Response>(responseString);
+
+                    // Test whether the ClientTransactionID round tripped OK
+                    if (hasClientTransactionID) // A client transaction ID parameter was supplied
+                    {
+                        // Test whether the expected value was returned
+                        if (deviceesponse.ClientTransactionID == expectedClientTransactionID)
+                        {
+                            LogOk(testName, $"{messagePrefix} - The expected ClientTransactionID was returned: {deviceesponse.ClientTransactionID}", null);
+                        }
+                        else
+                        {
+                            LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {deviceesponse.ClientTransactionID}, Expected: {expectedClientTransactionID}", null);
+                        }
+                    }
+
                     if ((deviceesponse.ErrorNumber != 0) | (deviceesponse.ErrorMessage != ""))
                     {
                         // Create a message indicating what went wrong.
@@ -1798,6 +1899,12 @@
         {
             LogError(testName, $"{messagePrefix} - {ex}", null);
         }
+    }
+
+    private async Task TestClientTransactionID(List<CheckProtocolParameter> iDparameters, bool shouldRountTrip)
+    {
+        if (iDparameters is null || (iDparameters.Count == 0)) throw new ASCOM.InvalidValueException("TestClientTransactionID - The supplied parameter list is null or empty.");
+
     }
 
     static string InvertCasing(string s)
