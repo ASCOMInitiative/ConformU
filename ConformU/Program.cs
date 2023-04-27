@@ -37,7 +37,11 @@ namespace ConformU
         {
             try
             {
-                Console.WriteLine($"Current folder: {Directory.GetCurrentDirectory()}");
+#if WINDOWS
+                // Minimise the console window
+                ShowWindow(GetConsoleWindow(), SW_SHOWMINIMIZED);
+#endif
+
                 // Save the command line arguments so they can be reused if a 32bit application is required
                 commandLineArguments = args;
 
