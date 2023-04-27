@@ -37,11 +37,7 @@ namespace ConformU
         {
             try
             {
-#if WINDOWS
-                // Minimise the console window
-                ShowWindow(GetConsoleWindow(), SW_SHOWMINIMIZED);
-#endif
-
+                Console.WriteLine($"Current folder: {Directory.GetCurrentDirectory()}");
                 // Save the command line arguments so they can be reused if a 32bit application is required
                 commandLineArguments = args;
 
@@ -302,6 +298,12 @@ namespace ConformU
 
                 try
                 {
+
+#if WINDOWS
+                // Minimise the console window
+                ShowWindow(GetConsoleWindow(), SW_SHOWMINIMIZED);
+#endif
+
                     Console.WriteLine($"Starting web server.");
                     Task t = CreateHostBuilder(conformLogger, conformStateManager, conformConfiguration, argList.ToArray()) // Use the revised argument list because the command line parser is fussy about prefixes and won't accept / 
                          .Build()
