@@ -283,16 +283,9 @@
             // Add default headers for JSON
             httpClient.DefaultRequestHeaders.Accept.Clear();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(AlpacaConstants.APPLICATION_JSON_MIME_TYPE));
-            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(AlpacaConstants.TEXT_JSON_MIME_TYPE));
             httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(userproductName, productVersion));
             httpClient.DefaultRequestHeaders.Connection.Add("keep-alive");
             httpClient.DefaultRequestHeaders.ConnectionClose = false;
-
-            // Add a base 64 hand-off header, if configured to do, so because this will speed up the JSON transfer by avoiding transmission of the entire image as JSON.
-            if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.Base64HandOff) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
-            {
-                httpClient.DefaultRequestHeaders.Add(AlpacaConstants.BASE64_HANDOFF_HEADER, new string[] { AlpacaConstants.BASE64_HANDOFF_SUPPORTED });
-            }
 
             try
             {
@@ -636,12 +629,37 @@
             if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
 
             // Test properties that require an image to have been taken first
+
+            // Add a base 64 hand-off header, if configured to do, so because this will speed up the JSON transfer by avoiding transmission of the entire image as JSON.
+            if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.Base64HandOff) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
+            {
+                httpClient.DefaultRequestHeaders.Add(AlpacaConstants.BASE64_HANDOFF_HEADER, new string[] { AlpacaConstants.BASE64_HANDOFF_SUPPORTED });
+            }
+
+            // Add an ImageBytes header, if configured to do, so because this will speed up the JSON transfer by avoiding transmission of the entire image as JSON.
+            if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.ImageBytes) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
+            {
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(AlpacaConstants.IMAGE_BYTES_MIME_TYPE));
+            }
+
             SetStatus("Getting ImageArray...");
             await GetNoParameters("ImageArray");
             if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
 
             SetStatus("Getting ImageArrayVariant...");
             await GetNoParameters("ImageArrayVariant");
+
+            // Remove any aded fast image download headers
+            if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.Base64HandOff) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
+            {
+                httpClient.DefaultRequestHeaders.Remove(AlpacaConstants.BASE64_HANDOFF_HEADER);
+            }
+            if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.ImageBytes) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
+            {
+                httpClient.DefaultRequestHeaders.Accept.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(AlpacaConstants.APPLICATION_JSON_MIME_TYPE));
+            }
+
             SetStatus("");
             if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
 
@@ -1792,43 +1810,127 @@
             {
                 try
                 {
-                    // Parse the common httpResponse values from the JSON response
-                    Response deviceesponse = JsonSerializer.Deserialize<ASCOM.Common.Alpaca.Response>(responseString);
-
-                    // Test whether the ClientTransactionID round tripped OK
-                    if (hasClientTransactionID) // A client transaction ID parameter was supplied
+                    // Check the response if it is JSON but ignore it if it is an image bytes binary response
+                    if (!httpResponse.Content.Headers.ContentType.MediaType.Contains(AlpacaConstants.IMAGE_BYTES_MIME_TYPE, StringComparison.InvariantCultureIgnoreCase)) // Should be a JSON response
                     {
-                        // Test whether the expected value was returned
-                        if (deviceesponse.ClientTransactionID == expectedClientTransactionID)
-                        {
-                            LogOk(testName, $"{messagePrefix} - The expected ClientTransactionID was returned: {deviceesponse.ClientTransactionID}", null);
-                        }
-                        else
-                        {
-                            LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {deviceesponse.ClientTransactionID}, Expected: {expectedClientTransactionID}", null);
-                        }
-                    }
 
-                    if ((deviceesponse.ErrorNumber != 0) | (deviceesponse.ErrorMessage != ""))
-                    {
-                        // Create a message indicating what went wrong.
-                        try
+                        // Parse the common httpResponse values from the JSON response
+                        Response deviceesponse = JsonSerializer.Deserialize<ASCOM.Common.Alpaca.Response>(responseString);
+
+                        // Test whether the ClientTransactionID round tripped OK
+                        if (hasClientTransactionID) // A client transaction ID parameter was supplied
                         {
-                            // Only report not implemented errors if configured to do so
-                            if (((AlpacaErrors)deviceesponse.ErrorNumber == AlpacaErrors.NotImplemented) & !settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors)
+                            // Test whether the expected value was returned
+                            if (deviceesponse.ClientTransactionID == expectedClientTransactionID)
                             {
-                                // Do nothing because we are not reporting not implemented errors
+                                LogOk(testName, $"{messagePrefix} - The expected ClientTransactionID was returned: {deviceesponse.ClientTransactionID}", null);
                             }
                             else
                             {
-                                ascomOutcome = $"Device returned a {(AlpacaErrors)deviceesponse.ErrorNumber} exception (0x{deviceesponse.ErrorNumber:X}) for client transaction: {deviceesponse.ClientTransactionID}, server transaction: {deviceesponse.ServerTransactionID}. " +
+                                LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {deviceesponse.ClientTransactionID}, Expected: {expectedClientTransactionID}", null);
+                            }
+                        }
+
+                        // Test whether a valid ServerTransactionID value was returned
+                        if (deviceesponse.ServerTransactionID >= 1)
+                        {
+                            LogOk(testName, $"{messagePrefix} - The ServerTransactionID was 1 or greater: {deviceesponse.ServerTransactionID}", null);
+                        }
+                        else
+                        {
+                            LogIssue(testName, $"{messagePrefix} - An unexpected ServerTransactionID was returned: {deviceesponse.ClientTransactionID}, Expected: 1 or greater", null);
+                        }
+
+                        if ((deviceesponse.ErrorNumber != 0) | (deviceesponse.ErrorMessage != ""))
+                        {
+                            // Create a message indicating what went wrong.
+                            try
+                            {
+                                // Only report not implemented errors if configured to do so
+                                if (((AlpacaErrors)deviceesponse.ErrorNumber == AlpacaErrors.NotImplemented) & !settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors)
+                                {
+                                    // Do nothing because we are not reporting not implemented errors
+                                }
+                                else
+                                {
+                                    ascomOutcome = $"Device returned a {(AlpacaErrors)deviceesponse.ErrorNumber} exception (0x{deviceesponse.ErrorNumber:X}) for client transaction: {deviceesponse.ClientTransactionID}, server transaction: {deviceesponse.ServerTransactionID}. " +
+                                        $"Error message: {deviceesponse.ErrorMessage}";
+                                }
+                            }
+                            catch (Exception) // Handle possibility of a non-ASCOM error number
+                            {
+                                ascomOutcome = $"Device returned error number 0x{deviceesponse.ErrorNumber:X} for client transaction: {deviceesponse.ClientTransactionID}, server transaction: {deviceesponse.ServerTransactionID}. " +
                                     $"Error message: {deviceesponse.ErrorMessage}";
                             }
                         }
-                        catch (Exception) // Handle possibility of a non-ASCOM error number
+                    }
+                    else // Should be an ImageBytes binary response
+                    {
+                        // Convert the string response to a byte array
+                        byte[] bytes = Encoding.ASCII.GetBytes(responseString);
+
+                        // Get the metadata version
+                        int metadataVersion = bytes.GetMetadataVersion();
+
+                        // Handle version number possibilities
+                        switch (metadataVersion)
                         {
-                            ascomOutcome = $"Device returned error number 0x{deviceesponse.ErrorNumber:X} for client transaction: {deviceesponse.ClientTransactionID}, server transaction: {deviceesponse.ServerTransactionID}. " +
-                                $"Error message: {deviceesponse.ErrorMessage}";
+                            case 1: // The only valid version at present
+                                LogOk(testName, $"{messagePrefix} - The expected ImageBytes metadata version was returned: {metadataVersion}", null);
+                                break;
+
+                            default: // All other values
+                                LogIssue(testName, $"{messagePrefix} - An unexpected ImageBytes metadata version was returned: {metadataVersion}, Expected: 1", null);
+                                break;
+                        }
+
+                        ArrayMetadataV1 metadata = bytes.GetMetadataV1();
+
+                        // Test whether the ClientTransactionID round tripped OK
+                        if (hasClientTransactionID) // A client transaction ID parameter was supplied
+                        {
+                            // Test whether the expected value was returned
+                            if (metadata.ClientTransactionID == expectedClientTransactionID)
+                            {
+                                LogOk(testName, $"{messagePrefix} - The expected ClientTransactionID was returned: {metadata.ClientTransactionID}", null);
+                            }
+                            else
+                            {
+                                LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {metadata.ClientTransactionID}, Expected: {expectedClientTransactionID}", null);
+                            }
+                        }
+
+                        // Test whether a valid ServerTransactionID value was returned
+                        if (metadata.ServerTransactionID >= 1)
+                        {
+                            LogOk(testName, $"{messagePrefix} - The ServerTransactionID was 1 or greater: {metadata.ServerTransactionID}", null);
+                        }
+                        else
+                        {
+                            LogIssue(testName, $"{messagePrefix} - An unexpected ServerTransactionID was returned: {metadata.ClientTransactionID}, Expected: 1 or greater", null);
+                        }
+
+                        if (metadata.ErrorNumber != 0)
+                        {
+                            // Create a message indicating what went wrong.
+                            try
+                            {
+                                // Only report not implemented errors if configured to do so
+                                if (((AlpacaErrors)metadata.ErrorNumber == AlpacaErrors.NotImplemented) & !settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors)
+                                {
+                                    // Do nothing because we are not reporting not implemented errors
+                                }
+                                else
+                                {
+                                    ascomOutcome = $"Device returned a {(AlpacaErrors)metadata.ErrorNumber} error (0x{metadata.ErrorNumber:X}) for client transaction: {metadata.ClientTransactionID}, server transaction: {metadata.ServerTransactionID}. " +
+                                        $"Error message: {bytes.GetErrrorMessage()}";
+                                }
+                            }
+                            catch (Exception) // Handle possibility of a non-ASCOM error number
+                            {
+                                ascomOutcome = $"Device returned error number 0x{metadata.ErrorNumber:X} for client transaction: {metadata.ClientTransactionID}, server transaction: {metadata.ServerTransactionID}. " +
+                                    $"Error message: {bytes.GetErrrorMessage()}";
+                            }
                         }
                     }
                 }
