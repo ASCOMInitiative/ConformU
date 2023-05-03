@@ -81,6 +81,17 @@ namespace ConformU
         {
             List<string> argList = new();
 
+            int returnCode = 0;
+
+            // Display the applicati0on version
+            if (commandLineOptions.Run)
+            {
+                Console.WriteLine($"Conform Universal {Update.ConformuVersionDisplayString}");
+                Console.WriteLine($"Copyright (c) 2023-{DateTime.Now.Year} Peter Simpson");
+                Console.WriteLine($"\r\nThe '--commandline' parameter has been withdrawn, please use '--conformancecheck' instead.");
+                return -98;
+            }
+
             // Display the applicati0on version
             if (commandLineOptions.Version)
             {
@@ -239,7 +250,7 @@ namespace ConformU
             #endregion
 
             // Run from command line if requested
-            if (commandLineOptions.Run)
+            if (commandLineOptions.ConformancCheck)
             {
                 foreach (string s in argList)
                 { Console.WriteLine($"ARG = '{s}'"); }
@@ -252,7 +263,7 @@ namespace ConformU
                 if (!string.IsNullOrEmpty(validationMessage)) // There is a configuration issue so present an error message
                 {
                     Console.WriteLine($"Cannot start test:\r\n{validationMessage}");
-                    return 99;
+                    return -99;
                 }
 
                 // Setting have validated OK so start the test
@@ -263,7 +274,7 @@ namespace ConformU
                 ConformanceTestManager tester = new(conformConfiguration, conformLogger, cancellationTokenSource, cancelConformToken);
                 try
                 {
-                    tester.TestDevice();
+                    returnCode = tester.TestDevice();
                 }
                 catch (Exception ex)
                 {
@@ -317,7 +328,7 @@ namespace ConformU
                 return 0;
             }
 
-            return 0;
+            return returnCode; ;
         }
 
         public static IHostBuilder CreateHostBuilder(ConformLogger conformLogger, ConformStateManager conformStateManager, ConformConfiguration conformConfiguration, string[] args)

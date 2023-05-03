@@ -39,7 +39,7 @@
     private bool disposedValue;
 
     AlpacaTestManager tester;
-    Task conformanceTestTask;
+    Task<int> conformanceTestTask;
 
     object screenLogLockObject = new object();
     object statusLockObject = new object();
@@ -102,14 +102,10 @@
         });
     }
 
-    private async void ShowNotification(NotificationMessage message)
-    {
-        notificationService.Notify(message);
-        await InvokeAsync(() => { StateHasChanged(); });
-    }
-
     async void StartCheckAlpacaProtocol()
     {
+        int numberOfErrosAndIssue = -99990;
+
         try
         {
             // Set the operation in progress flag and refresh state throughout the page and navigation menu.
@@ -153,19 +149,21 @@
                         screenLog = "";
 
                         // Create a task to run the conformance test
-                        conformanceTestTask = new Task(() =>
+                        conformanceTestTask = new Task<int>(() =>
                         {
+                            int returnCode = -99997;
                             try
                             {
                                 logger.LogMessage("StartTest", MessageLevel.Debug, "Before TestAlpacaProtocol method");
-                                tester.TestAlpacaProtocol().Wait();
-                                logger.LogMessage("StartTest", MessageLevel.Debug, "After TestAlpacaProtocol method");
+                                returnCode = tester.TestAlpacaProtocol().Result;
+                                logger.LogMessage("StartTest", MessageLevel.Debug, $"After TestAlpacaProtocol method - Return code: {returnCode}");
                             }
                             catch (Exception ex)
                             {
                                 logger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
+                                returnCode= -99998;
                             }
-
+                            return returnCode;
                         }, applicationCancellationToken);
 
                         // Start the conformance test task
@@ -176,7 +174,8 @@
                         // Wait for the task to complete.
                         logger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting conformance task completion");
                         await conformanceTestTask;
-                        logger.LogMessage("StartTest", MessageLevel.Debug, "Conformance task completed");
+                        numberOfErrosAndIssue= conformanceTestTask.Result;
+                        logger.LogMessage("StartTest", MessageLevel.Debug, $"Conformance task completed. Number of issues and errors: {numberOfErrosAndIssue}");
 
                         tester.Dispose();
                     }
@@ -187,7 +186,7 @@
                     }
                 }
             }
-            await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
+            await JS.InvokeVoidAsync("ScrollToBottom", "ProtocolLog");
             logger.LogMessage("StartTest", MessageLevel.Debug, "Scroll to bottom completed");
 
             GC.Collect();
@@ -204,13 +203,12 @@
             StateHasChanged();
             try
             {
-                await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
+                await JS.InvokeVoidAsync("ScrollToBottom", "ProtocolLog");
 
             }
             catch { }
         }
     }
-
 
     /// <summary>
     /// Start an Alpaca protocol check
@@ -300,13 +298,12 @@
         if (contextMessage is not null) logger?.LogMessage("", contextMessage);
 
         // Reformat the text across multiple screen lines if the message does not contain HTML code. If it does contain HTML display as-is.
-        screenLog = screenLog + $"\r\n{methodString}{message.Trim(' ', '\r', '\n')}";
+        screenLog = screenLog + $"\r\n{methodString}{message.Trim(new char[] { ' ', '\r', '\n' })}";
 
         // Add the context message if present
         if (contextMessage is not null)
         {
             screenLog = screenLog + $"\r\n{new string(' ', ExtensionMethods.COLUMN_WIDTH + ExtensionMethods.OUTCOME_WIDTH)}  Response: {contextMessage}".TrimEnd(new char[] { '\r', '\n' });
-            logger?.LogMessage(methodString, $"  {contextMessage}");
         }
 
         try
@@ -456,7 +453,7 @@
                 screenLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
             }
             await InvokeAsync(StateHasChanged);
-            await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
+            await JS.InvokeVoidAsync("ScrollToBottom", "ProtocolLog");
         }
         catch { }
     }
@@ -476,8 +473,11 @@
         }
     }
 
-
-
+    private async void ShowNotification(NotificationMessage message)
+    {
+        notificationService.Notify(message);
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
 
     #endregion
 
