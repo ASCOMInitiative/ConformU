@@ -163,8 +163,10 @@ namespace ConformU
             }
         }
 
-        public void TestDevice()
+        public int TestDevice()
         {
+            int returnCode = -99999;
+
             string testStage;
 
             // Initialise error recorder
@@ -387,11 +389,15 @@ namespace ConformU
                     TL.LogMessage("WriteResultsFile", MessageLevel.Debug, $"Log file path: {TL.LogFilePath}, Report file name: {reportFileName}");
                     File.WriteAllText(reportFileName, json); // Write the file to disk
 
+                    // Create a return code equal to the number of errors + issues
+                    returnCode = conformResults.ErrorCount + conformResults.IssueCount + conformResults.ConfigurationAlertCount;
+
                 }
                 catch (Exception ex)
                 {
 
                     TL.LogMessage("WriteResultsFile", MessageLevel.Error, ex.ToString());
+                    returnCode = -99998;
                 }
 
                 TL.SetStatusMessage("Conformance test has finished");
@@ -399,6 +405,7 @@ namespace ConformU
             catch (Exception ex)
             {
                 TL.LogMessage("ConformanceTestManager", MessageLevel.Error, $"Exception running conformance test:\r\n{ex}");
+                returnCode = -99997;
             }
 
             // Dispose of the test device
@@ -416,6 +423,8 @@ namespace ConformU
             {
             }
 
+            TL.LogMessage("TestDevice", MessageLevel.Debug, $"Return code: {returnCode}");
+            return returnCode;
         }
 
         #region Dispose Support

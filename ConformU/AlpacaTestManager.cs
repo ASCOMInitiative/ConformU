@@ -1,22 +1,17 @@
 ﻿using ASCOM.Alpaca.Clients;
+using ASCOM.Common;
 using ASCOM.Common.Alpaca;
+using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
-using System.Net.NetworkInformation;
-using System.Threading;
-using System.Threading.Tasks;
-
-
-using ASCOM.Alpaca.Discovery;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Net.Sockets;
-using ASCOM.Common;
-using System.Net.Http.Headers;
-using System.Diagnostics;
-using ASCOM.Common.DeviceInterfaces;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ConformU
 {
@@ -70,7 +65,7 @@ namespace ConformU
 
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            // Do not change this code. Put clean-up code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
@@ -137,8 +132,10 @@ namespace ConformU
 
         #region Alpaca protocol test management
 
-        public async Task TestAlpacaProtocol()
+        public async Task<int> TestAlpacaProtocol()
         {
+            int returnCode = -99999;
+
             try
             {
                 TL.LogMessage("TestAlpacaProtocol", $"Task started");
@@ -304,7 +301,7 @@ namespace ConformU
                     if ((informationMessages.Count == 0) & (issueMessages.Count == 0) & (errorMessages.Count == 0))
                     {
                         SetStatus($"Congratulations, there were no errors, issues or information messages!");
-                        LogLine($"No errors, issues or information alerts found: Your device passes ASCOM Alpaca protocol validation!!");
+                        LogLine($"Congratulations there were no errors, issues or information alerts - Your device passes ASCOM Alpaca protocol validation!!");
                     }
                     else
                     {
@@ -346,11 +343,16 @@ namespace ConformU
                         LogLine(message);
                     }
                 }
+
+                // Set the return code to the number of errors + issues
+                returnCode = errorMessages.Count + issueMessages.Count+conf;
             }
             catch (Exception ex)
             {
                 LogMessage("TestAlpacaProtocol", TestOutcome.Error, $"Exception: {ex}");
             }
+
+            return returnCode;
         }
 
         #endregion
@@ -2270,12 +2272,11 @@ namespace ConformU
 
             // Write to the logger
             TL?.LogMessage(methodString, message);
-            if (contextMessage is not null) TL?.LogMessage("", contextMessage);
 
             // Add the context message if present
             if (contextMessage is not null)
             {
-                TL?.LogMessage(methodString, $"  {contextMessage}");
+                TL?.LogMessage(methodString, $"  Response: {contextMessage}");
             }
         }
 
@@ -2354,7 +2355,7 @@ namespace ConformU
         ///    </summary>
         private void LogBlankLine()
         {
-            TL?.BlankLine();
+            TL?.LogMessage("","");
         }
 
         /// <summary>
