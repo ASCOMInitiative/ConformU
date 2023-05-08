@@ -345,7 +345,7 @@ namespace ConformU
                 }
 
                 // Set the return code to the number of errors + issues
-                returnCode = errorMessages.Count + issueMessages.Count+conf;
+                returnCode = errorMessages.Count + issueMessages.Count;
             }
             catch (Exception ex)
             {
@@ -1877,13 +1877,13 @@ namespace ConformU
                                 try
                                 {
                                     // Only report not implemented errors if configured to do so
-                                    if (((AlpacaErrors)deviceResponse.ErrorNumber == AlpacaErrors.NotImplemented) & !settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors)
+                                    if ((deviceResponse.ErrorNumber == AlpacaErrors.NotImplemented) & !settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors)
                                     {
                                         // Do nothing because we are not reporting not implemented errors
                                     }
                                     else
                                     {
-                                        ascomOutcome = $"Device returned a {(AlpacaErrors)deviceResponse.ErrorNumber} exception (0x{deviceResponse.ErrorNumber:X}) for client transaction: {deviceResponse.ClientTransactionID}, server transaction: {deviceResponse.ServerTransactionID}. " +
+                                        ascomOutcome = $"Device returned a {deviceResponse.ErrorNumber} exception (0x{deviceResponse.ErrorNumber:X}) for client transaction: {deviceResponse.ClientTransactionID}, server transaction: {deviceResponse.ServerTransactionID}. " +
                                             $"Error message: {deviceResponse.ErrorMessage}";
                                     }
                                 }
@@ -1998,14 +1998,7 @@ namespace ConformU
                         // Test for 400 response from the OmniSim when a "normal" device would return a 200 status i.e. for mis-cased FORM ID parameters in PUT requests.
                         if ((httpResponse.StatusCode == HttpStatusCode.BadRequest) & ignoreOmnisim400Errors & isOmniSim)
                         {
-                            if (string.IsNullOrEmpty(ascomOutcome))
-                            {
-                                LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected from the Omni-simulator device.", responseString);
-                            }
-                            else
-                            {
-                                LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected from the Omni-simulator device but the device reported an ASCOM error:", ascomOutcome);
-                            }
+                            LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) from the device.", responseString);
                         }
                         // Test whether we got an InvalidValue error and are going to accept that
                         else if ((httpResponse.StatusCode == HttpStatusCode.OK) & acceptInvalidValueError & (deviceResponse.ErrorNumber == AlpacaErrors.InvalidValue))
@@ -2022,7 +2015,7 @@ namespace ConformU
                             }
                             expectedCodeList = expectedCodeList.TrimEnd(' ', ',');
 
-                            LogIssue(testName, $"{messagePrefix} - Expected HTTP status {(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: " +
+                            LogIssue(testName, $"{messagePrefix} - Expected HTTP status{(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: " +
                                 $"{(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString);
 
                             LogBlankLine();
@@ -2355,7 +2348,7 @@ namespace ConformU
         ///    </summary>
         private void LogBlankLine()
         {
-            TL?.LogMessage("","");
+            TL?.LogMessage("", "");
         }
 
         /// <summary>

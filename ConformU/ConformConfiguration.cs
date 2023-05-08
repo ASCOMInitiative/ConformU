@@ -1,4 +1,7 @@
-﻿using System;
+﻿using ASCOM.Common;
+using ASCOM.Common.Alpaca;
+using Blazorise;
+using System;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
@@ -312,6 +315,85 @@ namespace ConformU
             issueList = issueList.Trim();
 
             return issueList;
+        }
+
+        /// <summary>
+        /// Sets data values to test a COM device
+        /// </summary>
+        /// <param name="progId"></param>
+        /// <param name="deviceType"></param>
+        public void SetComDevice(string progId, DeviceTypes deviceType)
+        {
+            settings.DeviceTechnology = DeviceTechnology.COM;
+
+            settings.ComDevice.ProgId = progId;
+            settings.DeviceType = deviceType;
+        }
+
+        /// <summary>
+        /// Sets data values to test an Alpaca device
+        /// </summary>
+        /// <param name="serviceType"></param>
+        /// <param name="address"></param>
+        /// <param name="port"></param>
+        /// <param name="deviceType"></param>
+        /// <param name="deviceNumber"></param>
+        public void SetAlpacaDevice(ServiceType serviceType, string address, int port, DeviceTypes deviceType, int deviceNumber)
+        {
+            settings.DeviceTechnology = DeviceTechnology.Alpaca;
+
+            settings.AlpacaDevice.ServiceType = serviceType;
+            settings.AlpacaDevice.ServerName = address;
+            settings.AlpacaDevice.IpAddress = address;
+            settings.AlpacaDevice.IpPort = port;
+            settings.AlpacaDevice.AscomDeviceType = deviceType;
+            settings.AlpacaDevice.AlpacaDeviceNumber = deviceNumber;
+            settings.DeviceType = deviceType;
+        }
+
+        /// <summary>
+        /// Sets configuration to run a complete test without debug or trace
+        /// </summary>
+        public void SetFullTest()
+        {
+            settings.DisplayMethodCalls = false;
+            settings.Debug = false;
+            settings.TraceDiscovery = false;
+            settings.TraceAlpacaCalls = false;
+            settings.TestProperties = true;
+            settings.TestMethods = true;
+            settings.TestPerformance = false;
+            settings.AlpacaConfiguration.ProtocolShowSuccessResponses = false;
+            settings.TelescopeTests = new()
+            {
+                { "CanMoveAxis", true },
+                { "Park/Unpark", true },
+                { "AbortSlew", true },
+                { "AxisRate", true },
+                { "FindHome", true },
+                { "MoveAxis", true },
+                { "PulseGuide", true },
+                { "SlewToCoordinates", true },
+                { "SlewToCoordinatesAsync", true },
+                { "SlewToTarget", true },
+                { "SlewToTargetAsync", true },
+                { "DestinationSideOfPier", true },
+                { "SlewToAltAz", true },
+                { "SlewToAltAzAsync", true },
+                { "SyncToCoordinates", true },
+                { "SyncToTarget", true },
+                { "SyncToAltAz", true }
+            };
+            settings.TelescopeExtendedMoveAxisTests = true;
+            settings.TelescopeExtendedPulseGuideTests = true;
+            settings.TelescopeExtendedRateOffsetTests = true;
+            settings.TelescopeFirstUseTests = true;
+            settings.TestSideOfPierRead = true;
+            settings.TestSideOfPierWrite = true;
+            settings.CameraFirstUseTests = true;
+            settings.CameraTestImageArrayVariant = true;
+            settings.DomeOpenShutter = true;
+            settings.SwitchEnableSet = true;
         }
 
         #endregion

@@ -160,11 +160,11 @@
 		<PackageReference Include="Blazorise.Bootstrap" Version="1.2.2" />
 		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.2.2" />
 		<PackageReference Include="Blazorise.TreeView" Version="1.2.2" />
-		<PackageReference Include="CommandLineParser" Version="2.9.1" />
 		<PackageReference Include="jQuery" Version="3.6.4" />
 		<PackageReference Include="Octokit" Version="5.1.0" />
 		<PackageReference Include="Radzen.Blazor" Version="4.10.1" />
 		<PackageReference Include="Semver" Version="2.3.0" />
+		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
 	</ItemGroup>
 
 	<!-- Include the correct SOFA library depending on the targeted runtime OS -->
