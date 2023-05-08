@@ -1151,11 +1151,11 @@ namespace ConformU
 
                         if (guideRateRightAscension >= 0.0)
                         {
-                            LogOK("guideRateRightAscension Read", $"{guideRateRightAscension:0.000000} ({guideRateRightAscension.ToDMS()})");
+                            LogOK("GuideRateRightAscension Read", $"{guideRateRightAscension:0.000000} ({guideRateRightAscension.ToDMS()})");
                         }
                         else
                         {
-                            LogIssue("guideRateRightAscension Read", $"GuideRateRightAscension is < 0.0: {guideRateRightAscension:0.000000} ({guideRateRightAscension.ToDMS()})");
+                            LogIssue("GuideRateRightAscension Read", $"GuideRateRightAscension is < 0.0: {guideRateRightAscension:0.000000} ({guideRateRightAscension.ToDMS()})");
                         }
                     }
                     catch (Exception ex) // Read failed
@@ -7769,6 +7769,12 @@ namespace ConformU
         /// <param name="targetHa">Target hour angle (hours)</param>
         private void SlewToHa(double targetHa)
         {
+            if (canSetTracking)
+            {
+                if (settings.DisplayMethodCalls) LogTestAndMessage("SlewToHA", "About to set Tracking property to true");
+                telescopeDevice.Tracking = true; // Enable tracking for these tests
+            }
+
             // Calculate the target RA
             if (settings.DisplayMethodCalls)
                 LogTestAndMessage("SlewToHa", "About to get SiderealTime property");
