@@ -32,9 +32,11 @@ namespace ConformU
         {
             try
             {
-                BrowserWindowSize browserWindowSize = new();
-                browserWindowSize.Width = jsBrowserWidth;
-                browserWindowSize.Height = jsBrowserHeight;
+                BrowserWindowSize browserWindowSize = new()
+                {
+                    Width = jsBrowserWidth,
+                    Height = jsBrowserHeight
+                };
                 // For simplicity, we're just using the new width
                 this.OnResize?.Invoke(this, browserWindowSize);
             }

@@ -1,4 +1,6 @@
-﻿using ASCOM.Alpaca.Clients;
+﻿// Ignore Spelling: Cts Obs XX
+
+using ASCOM.Alpaca.Clients;
 using ASCOM.Common;
 using ASCOM.Common.Alpaca;
 using ASCOM.Common.DeviceInterfaces;
@@ -15,31 +17,28 @@ using System.Threading.Tasks;
 
 namespace ConformU
 {
-    public class AlpacaTestManager : IDisposable
+    public class AlpacaProtocolTestManager : IDisposable
     {
         // Test values for ClientID and ClientTransactionID
         const int TEST_CLIENT_ID = 123456;
         const int TEST_TRANSACTION_ID = 67890;
         const string BAD_PARAMETER_VALUE = "asduio6fghZZ";
 
-        readonly ConformConfiguration configuration;
-        readonly private CancellationToken applicationCancellationToken;
+        private readonly CancellationToken applicationCancellationToken;
         private bool disposedValue;
         private readonly ConformLogger TL;
         private readonly Settings settings;
         readonly internal CancellationTokenSource applicationCancellationTokenSource;
 
         HttpClient httpClient;
-        List<string> issueMessages;
-        List<string> informationMessages;
-        List<string> errorMessages;
-        bool isOmniSim;
+        readonly List<string> issueMessages;
+        readonly List<string> informationMessages;
+        readonly List<string> errorMessages;
 
         #region New and Dispose
 
-        public AlpacaTestManager(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationTokenSource conformCancellationTokenSource, CancellationToken conformCancellationToken)
+        public AlpacaProtocolTestManager(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationTokenSource conformCancellationTokenSource, CancellationToken conformCancellationToken)
         {
-            configuration = conformConfiguration;
             TL = logger;
             applicationCancellationToken = conformCancellationToken;
             applicationCancellationTokenSource = conformCancellationTokenSource;
@@ -75,12 +74,12 @@ namespace ConformU
         #region Pre-formed status lists
 
         // HTTP statuses used to assess the outcome of protocol tests
-        List<HttpStatusCode> HttpStatusCodeAny = new() { };
-        List<HttpStatusCode> HttpStatusCode200 = new() { HttpStatusCode.OK };
-        List<HttpStatusCode> HttpStatusCode400 = new() { HttpStatusCode.BadRequest };
-        List<HttpStatusCode> HttpStatusCode4XX = new() { HttpStatusCode.BadRequest, HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized, HttpStatusCode.PaymentRequired, HttpStatusCode.Forbidden,
+        readonly List<HttpStatusCode> HttpStatusCodeAny = new() { };
+        readonly List<HttpStatusCode> HttpStatusCode200 = new() { HttpStatusCode.OK };
+        readonly List<HttpStatusCode> HttpStatusCode400 = new() { HttpStatusCode.BadRequest };
+        readonly List<HttpStatusCode> HttpStatusCode4XX = new() { HttpStatusCode.BadRequest, HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized, HttpStatusCode.PaymentRequired, HttpStatusCode.Forbidden,
                                                      HttpStatusCode.NotFound, HttpStatusCode.MethodNotAllowed, HttpStatusCode.NotAcceptable, HttpStatusCode.ProxyAuthenticationRequired, HttpStatusCode.Conflict, HttpStatusCode.Gone };
-        List<HttpStatusCode> HttpStatusCode200_400_404 = new() { HttpStatusCode.OK, HttpStatusCode.BadRequest, HttpStatusCode.NotFound };
+        readonly List<HttpStatusCode> HttpStatusCode200_400 = new() { HttpStatusCode.OK, HttpStatusCode.BadRequest };
 
         #endregion
 
@@ -145,10 +144,7 @@ namespace ConformU
                 LogText("", $"Connecting to device: {settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} through URL: {clientHostAddress}");
                 LogBlankLine();
                 // Remove any old client, if present
-                if (httpClient != null)
-                {
-                    httpClient.Dispose();
-                }
+                httpClient?.Dispose();
 
                 // Convert from the Alpaca decompression enum to the HttpClient decompression enum
                 DecompressionMethods decompressionMethods;
@@ -175,7 +171,7 @@ namespace ConformU
                 }
 
                 // Create a new http handler to control authentication and automatic decompression
-                HttpClientHandler httpClientHandler = new HttpClientHandler()
+                HttpClientHandler httpClientHandler = new()
                 {
                     PreAuthenticate = true,
                     AutomaticDecompression = decompressionMethods
@@ -207,13 +203,13 @@ namespace ConformU
                 // Set the base URI for the device
                 httpClient.BaseAddress = new Uri(clientHostAddress);
 
-                string userproductName = Globals.USER_AGENT_PRODUCT_NAME;
+                string userProductName = Globals.USER_AGENT_PRODUCT_NAME;
                 string productVersion = Update.ConformuVersion;
 
                 // Add default headers for JSON
                 httpClient.DefaultRequestHeaders.Accept.Clear();
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(AlpacaConstants.APPLICATION_JSON_MIME_TYPE));
-                httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(userproductName, productVersion));
+                httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(userProductName, productVersion));
                 httpClient.DefaultRequestHeaders.Connection.Add("keep-alive");
                 httpClient.DefaultRequestHeaders.ConnectionClose = false;
 
@@ -450,9 +446,6 @@ namespace ConformU
                 // Connect to the selected camera to ensure we get correct values
                 try { camera.Connected = true; } catch { }
 
-                // Test whether this device is the Omni simulator and update the isOmnisim field appropriately.
-                TestForOmnisim(camera);
-
                 // Test properties that don't require an image to have been taken
                 await GetNoParameters("BayerOffsetX");
                 await GetNoParameters("BayerOffsetY");
@@ -609,48 +602,45 @@ namespace ConformU
             {
                 try { coverCalibrator.Connected = true; } catch { }
 
-                // Test whether this device is the Omni simulator and update the isOmnisim field appropriately.
-                TestForOmnisim(coverCalibrator);
-
                 // Test properties
                 await GetNoParameters("Brightness");
                 await GetNoParameters("CalibratorState");
                 await GetNoParameters("CoverState");
                 await GetNoParameters("MaxBrightness");
-                if (applicationCancellationToken.IsCancellationRequested) goto CovewrEnd; // Exit early if required
+                if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
 
                 // Test Methods
                 await PutNoParameters("CalibratorOff", () =>
                 {
                     WaitWhile("CalibratorOff", () => { return coverCalibrator.CalibratorState == CalibratorStatus.NotReady; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
-                if (applicationCancellationToken.IsCancellationRequested) goto CovewrEnd; // Exit early if required
+                if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
 
                 try { parameter1 = (coverCalibrator.MaxBrightness / 2).ToString(); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("CalibratorOn", "Brightness", parameter1, () =>
                 {
                     WaitWhile("CalibratorOn", () => { return coverCalibrator.CalibratorState == CalibratorStatus.NotReady; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
-                if (applicationCancellationToken.IsCancellationRequested) goto CovewrEnd; // Exit early if required
+                if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
 
                 await PutNoParameters("OpenCover", () =>
                 {
                     WaitWhile("OpenCover", () => { return coverCalibrator.CoverState == CoverStatus.Moving; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
-                if (applicationCancellationToken.IsCancellationRequested) goto CovewrEnd; // Exit early if required
+                if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
 
                 await PutNoParameters("HaltCover", () =>
                 {
                     WaitWhile("HaltCover", () => { return coverCalibrator.CoverState == CoverStatus.Moving; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
-                if (applicationCancellationToken.IsCancellationRequested) goto CovewrEnd; // Exit early if required
+                if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
 
                 await PutNoParameters("CloseCover", () =>
                 {
                     WaitWhile("CloseCover", () => { return coverCalibrator.CoverState == CoverStatus.Moving; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
 
-            CovewrEnd:
+            CoverEnd:
                 try { coverCalibrator.Connected = false; } catch { }
             }
         }
@@ -662,9 +652,6 @@ namespace ConformU
             using (AlpacaDome dome = AlpacaClient.GetDevice<AlpacaDome>(settings.AlpacaDevice))
             {
                 try { dome.Connected = true; } catch { }
-
-                // Test whether this device is the Omni simulator and update the isOmnisim field appropriately.
-                TestForOmnisim(dome);
 
                 // Test properties
                 await GetNoParameters("AtHome");
@@ -787,9 +774,6 @@ namespace ConformU
             {
                 try { filterWheel.Connected = true; } catch { }
 
-                // Test whether this device is the Omni simulator and update the isOmnisim field appropriately.
-                TestForOmnisim(filterWheel);
-
                 // Test properties
                 await GetNoParameters("FocusOffsets");
                 await GetNoParameters("Names");
@@ -814,9 +798,6 @@ namespace ConformU
             using (AlpacaFocuser focuser = AlpacaClient.GetDevice<AlpacaFocuser>(settings.AlpacaDevice))
             {
                 try { focuser.Connected = true; } catch { }
-
-                // Test whether this device is the Omni simulator and update the isOmnisim field appropriately.
-                TestForOmnisim(focuser);
 
                 // Test properties
                 await GetNoParameters("Absolute");
@@ -854,18 +835,15 @@ namespace ConformU
 
         private async Task TestObservingConditions()
         {
-            string parameter1 = "";
+            string parameter1 = "0.0";
 
             using (AlpacaObservingConditions observingConditions = AlpacaClient.GetDevice<AlpacaObservingConditions>(settings.AlpacaDevice))
             {
                 try { observingConditions.Connected = true; } catch { }
 
-                // Test whether this device is the Omni simulator and update the isOmnisim field appropriately.
-                TestForOmnisim(observingConditions);
-
                 // Test properties
                 await GetNoParameters("AveragePeriod");
-                try { parameter1 = observingConditions.AveragePeriod.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+                try { parameter1 = observingConditions.AveragePeriod.ToString(); } catch { }
                 await PutOneParameter("AveragePeriod", "AveragePeriod", parameter1, null);
                 await GetNoParameters("CloudCover");
                 await GetNoParameters("DewPoint");
@@ -905,9 +883,6 @@ namespace ConformU
             using (AlpacaRotator rotator = AlpacaClient.GetDevice<AlpacaRotator>(settings.AlpacaDevice))
             {
                 try { rotator.Connected = true; } catch { }
-
-                // Test whether this device is the Omni simulator and update the isOmnisim field appropriately.
-                TestForOmnisim(rotator);
 
                 // Test properties
                 await GetNoParameters("CanReverse");
@@ -963,32 +938,24 @@ namespace ConformU
 
         private async Task TestSafetyMonitor()
         {
-            using (AlpacaSafetyMonitor safetyMonitor = AlpacaClient.GetDevice<AlpacaSafetyMonitor>(settings.AlpacaDevice))
-            {
-                try { safetyMonitor.Connected = true; } catch { }
+            using AlpacaSafetyMonitor safetyMonitor = AlpacaClient.GetDevice<AlpacaSafetyMonitor>(settings.AlpacaDevice);
 
-                // Test whether this device is the Omni simulator and update the isOmnisim field appropriately.
-                TestForOmnisim(safetyMonitor);
+            try { safetyMonitor.Connected = true; } catch { }
 
-                // Test properties
-                await GetNoParameters("IsSafe");
+            // Test properties
+            await GetNoParameters("IsSafe");
 
-                // Disconnect
-                try { safetyMonitor.Connected = false; } catch { }
-
-            }
+            // Disconnect
+            try { safetyMonitor.Connected = false; } catch { }
         }
 
         private async Task TestSwitch()
         {
-            string parameter1 = "";
+            string parameter1;
 
             using (AlpacaSwitch switchDevice = AlpacaClient.GetDevice<AlpacaSwitch>(settings.AlpacaDevice))
             {
                 try { switchDevice.Connected = true; } catch { }
-
-                // Test whether this device is the Omni simulator and update the isOmnisim field appropriately.
-                TestForOmnisim(switchDevice);
 
                 // Test properties
                 await GetNoParameters("MaxSwitch");
@@ -1058,9 +1025,6 @@ namespace ConformU
             using (AlpacaTelescope telescope = AlpacaClient.GetDevice<AlpacaTelescope>(settings.AlpacaDevice))
             {
                 try { telescope.Connected = true; } catch { }
-
-                // Test whether this device is the Omni simulator and update the isOmnisim field appropriately.
-                TestForOmnisim(telescope);
 
                 // Test properties
                 await GetNoParameters("AlignmentMode");
@@ -1406,36 +1370,48 @@ namespace ConformU
         private async Task GetOneParameter(string method, string parameterName, string parameterValue, bool testParameterBadValue = true)
         {
             // Test good parameter name casing
-            List<CheckProtocolParameter> goodParamCasing = new List<CheckProtocolParameter>(ParamsOk);
-            goodParamCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+            List<CheckProtocolParameter> goodParamCasing = new(ParamsOk)
+            {
+                new CheckProtocolParameter(parameterName, parameterValue)
+            };
             await CallApi($"Parameter {parameterName} (Good casing)", method, HttpMethod.Get, goodParamCasing, HttpStatusCode200);
 
             // Test good parameter name casing with extra parameter
-            List<CheckProtocolParameter> goodParamCasingPlusExtraParameter = new List<CheckProtocolParameter>(ParamsOkPlusExtraParameter);
-            goodParamCasingPlusExtraParameter.Add(new CheckProtocolParameter(parameterName, parameterValue));
+            List<CheckProtocolParameter> goodParamCasingPlusExtraParameter = new(ParamsOkPlusExtraParameter)
+            {
+                new CheckProtocolParameter(parameterName, parameterValue)
+            };
             await CallApi($"Parameter {parameterName} (Good casing with extra parameter)", method, HttpMethod.Get, goodParamCasingPlusExtraParameter, HttpStatusCode200);
 
             // Test bad parameter value
             if (testParameterBadValue)
             {
-                List<CheckProtocolParameter> badParamValue = new List<CheckProtocolParameter>(ParamsOk);
-                badParamValue.Add(new CheckProtocolParameter(parameterName, BAD_PARAMETER_VALUE));
+                List<CheckProtocolParameter> badParamValue = new(ParamsOk)
+                {
+                    new CheckProtocolParameter(parameterName, BAD_PARAMETER_VALUE)
+                };
                 await CallApi($"Parameter {parameterName} (Bad value)", method, HttpMethod.Get, badParamValue, HttpStatusCode400, acceptInvalidValueError: true);
             }
 
             // Test incorrect parameter name casing
-            List<CheckProtocolParameter> badParamCasing = new List<CheckProtocolParameter>(ParamsOk);
-            badParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName), parameterValue));
+            List<CheckProtocolParameter> badParamCasing = new(ParamsOk)
+            {
+                new CheckProtocolParameter(InvertCasing(parameterName), parameterValue)
+            };
             await CallApi($"Parameter {parameterName} (Inverted casing)", method, HttpMethod.Get, badParamCasing, HttpStatusCode200);
 
             // Test incorrect ClientID casing
-            List<CheckProtocolParameter> differentClientIDCasing = new List<CheckProtocolParameter>(ParamClientIDLowerCase);
-            differentClientIDCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+            List<CheckProtocolParameter> differentClientIDCasing = new(ParamClientIDLowerCase)
+            {
+                new CheckProtocolParameter(parameterName, parameterValue)
+            };
             await CallApi("Different ClientID casing", method, HttpMethod.Get, differentClientIDCasing, HttpStatusCode200);
 
             // Test incorrect ClientTransactionID casing
-            List<CheckProtocolParameter> differentTransactionIdCasing = new List<CheckProtocolParameter>(ParamTransactionIdLowerCase);
-            differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+            List<CheckProtocolParameter> differentTransactionIdCasing = new(ParamTransactionIdLowerCase)
+            {
+                new CheckProtocolParameter(parameterName, parameterValue)
+            };
             await CallApi("Different ClientTransactionID casing", method, HttpMethod.Get, differentTransactionIdCasing, HttpStatusCode200);
 
             // Test bad client and transaction Id values
@@ -1445,57 +1421,73 @@ namespace ConformU
         private async Task GetTwoParameters(string method, string parameterName1, string parameterValue1, string parameterName2, string parameterValue2, bool testParameter1BadValue = true, bool testParameter2BadValue = true)
         {
             // Test good parameter name casing
-            List<CheckProtocolParameter> goodParamCasing = new List<CheckProtocolParameter>(ParamsOk);
-            goodParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-            goodParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+            List<CheckProtocolParameter> goodParamCasing = new(ParamsOk)
+            {
+                new CheckProtocolParameter(parameterName1, parameterValue1),
+                new CheckProtocolParameter(parameterName2, parameterValue2)
+            };
             await CallApi($"Parameter {parameterName1} and {parameterName2} (Good casing)", method, HttpMethod.Get, goodParamCasing, HttpStatusCode200);
 
             // Test good parameter name casing with extra parameter
-            List<CheckProtocolParameter> goodParamCasingPlusExtraParameter = new List<CheckProtocolParameter>(ParamsOkPlusExtraParameter);
-            goodParamCasingPlusExtraParameter.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-            goodParamCasingPlusExtraParameter.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+            List<CheckProtocolParameter> goodParamCasingPlusExtraParameter = new(ParamsOkPlusExtraParameter)
+            {
+                new CheckProtocolParameter(parameterName1, parameterValue1),
+                new CheckProtocolParameter(parameterName2, parameterValue2)
+            };
             await CallApi($"Parameter {parameterName1} and {parameterName2} (Good casing with extra parameter)", method, HttpMethod.Get, goodParamCasingPlusExtraParameter, HttpStatusCode200);
 
             // Test bad parameter 1 value
             if (testParameter1BadValue)
             {
-                List<CheckProtocolParameter> badParam1Value = new List<CheckProtocolParameter>(ParamsOk);
-                badParam1Value.Add(new CheckProtocolParameter(parameterName1, BAD_PARAMETER_VALUE));
-                badParam1Value.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+                List<CheckProtocolParameter> badParam1Value = new(ParamsOk)
+                {
+                    new CheckProtocolParameter(parameterName1, BAD_PARAMETER_VALUE),
+                    new CheckProtocolParameter(parameterName2, parameterValue2)
+                };
                 await CallApi($"Parameter {parameterName1} (Bad value)", method, HttpMethod.Get, badParam1Value, HttpStatusCode400, acceptInvalidValueError: true);
             }
 
             // Test bad parameter 2 value
             if (testParameter2BadValue)
             {
-                List<CheckProtocolParameter> badParam2Value = new List<CheckProtocolParameter>(ParamsOk);
-                badParam2Value.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-                badParam2Value.Add(new CheckProtocolParameter(parameterName2, BAD_PARAMETER_VALUE));
+                List<CheckProtocolParameter> badParam2Value = new(ParamsOk)
+                {
+                    new CheckProtocolParameter(parameterName1, parameterValue1),
+                    new CheckProtocolParameter(parameterName2, BAD_PARAMETER_VALUE)
+                };
                 await CallApi($"Parameter {parameterName2} (Bad value)", method, HttpMethod.Get, badParam2Value, HttpStatusCode400, acceptInvalidValueError: true);
             }
 
             // Test bad parameter 1 name casing
-            List<CheckProtocolParameter> badParamCasing = new List<CheckProtocolParameter>(ParamsOk);
-            badParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName1), parameterValue1));
-            badParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+            List<CheckProtocolParameter> badParamCasing = new(ParamsOk)
+            {
+                new CheckProtocolParameter(InvertCasing(parameterName1), parameterValue1),
+                new CheckProtocolParameter(parameterName2, parameterValue2)
+            };
             await CallApi($"Parameter {parameterName1} (Inverted casing)", method, HttpMethod.Get, badParamCasing, HttpStatusCode200);
 
             // Test bad parameter 2 name casing
-            badParamCasing = new List<CheckProtocolParameter>(ParamsOk);
-            badParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-            badParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName2), parameterValue2));
+            badParamCasing = new List<CheckProtocolParameter>(ParamsOk)
+            {
+                new CheckProtocolParameter(parameterName1, parameterValue1),
+                new CheckProtocolParameter(InvertCasing(parameterName2), parameterValue2)
+            };
             await CallApi($"Parameter {parameterName2} (Inverted casing)", method, HttpMethod.Get, badParamCasing, HttpStatusCode200);
 
             // Test incorrect ClientID casing
-            List<CheckProtocolParameter> differentClientIDCasing = new List<CheckProtocolParameter>(ParamClientIDLowerCase);
-            differentClientIDCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-            differentClientIDCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+            List<CheckProtocolParameter> differentClientIDCasing = new(ParamClientIDLowerCase)
+            {
+                new CheckProtocolParameter(parameterName1, parameterValue1),
+                new CheckProtocolParameter(parameterName2, parameterValue2)
+            };
             await CallApi("Different ClientID casing", method, HttpMethod.Get, differentClientIDCasing, HttpStatusCode200);
 
             // Test incorrect ClientTransactionID casing
-            List<CheckProtocolParameter> differentTransactionIdCasing = new List<CheckProtocolParameter>(ParamTransactionIdLowerCase);
-            differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-            differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+            List<CheckProtocolParameter> differentTransactionIdCasing = new(ParamTransactionIdLowerCase)
+            {
+                new CheckProtocolParameter(parameterName1, parameterValue1),
+                new CheckProtocolParameter(parameterName2, parameterValue2)
+            };
             await CallApi("Different ClientTransactionID casing", method, HttpMethod.Get, differentTransactionIdCasing, HttpStatusCode200);
 
             // Test bad client and transaction Id values
@@ -1513,11 +1505,11 @@ namespace ConformU
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
             // Test incorrect ClientID casing
-            await CallApi("Bad ClientID casing", method, HttpMethod.Put, ParamClientIDLowerCase, HttpStatusCode200, ignoreOmnisim400Errors: true); // Must be 200 because the device should ignore the parameter if incorrectly cased
+            await CallApi("Bad ClientID casing", method, HttpMethod.Put, ParamClientIDLowerCase, HttpStatusCode200, optionalMethod: true); // Must be 200 because the device should ignore the parameter if incorrectly cased
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
             // Test incorrect ClientTransactionID casing
-            await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, ParamTransactionIdLowerCase, HttpStatusCode200, ignoreOmnisim400Errors: true); // Must be 200 because the device should ignore the parameter if incorrectly cased
+            await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, ParamTransactionIdLowerCase, HttpStatusCode200, optionalMethod: true); // Must be 200 because the device should ignore the parameter if incorrectly cased
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
             // Test bad client and transaction Id values
@@ -1528,41 +1520,53 @@ namespace ConformU
         private async Task PutOneParameter(string method, string parameterName, string parameterValue, Action waitForCompletion, bool testParameterBadValue = true)
         {
             // Test good parameter name casing
-            List<CheckProtocolParameter> goodParamCasing = new List<CheckProtocolParameter>(ParamsOk);
-            goodParamCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
+            List<CheckProtocolParameter> goodParamCasing = new(ParamsOk)
+            {
+                new CheckProtocolParameter(parameterName, parameterValue)
+            };
             await CallApi($"Parameter {parameterName} (Good casing)", method, HttpMethod.Put, goodParamCasing, HttpStatusCode200);
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
             // Test good parameter name casing with an extra parameter
-            List<CheckProtocolParameter> goodParamCasingPlusExtraParameter = new List<CheckProtocolParameter>(ParamsOkPlusExtraParameter);
-            goodParamCasingPlusExtraParameter.Add(new CheckProtocolParameter(parameterName, parameterValue));
+            List<CheckProtocolParameter> goodParamCasingPlusExtraParameter = new(ParamsOkPlusExtraParameter)
+            {
+                new CheckProtocolParameter(parameterName, parameterValue)
+            };
             await CallApi($"Parameter {parameterName} (Good casing + extra parameter)", method, HttpMethod.Put, goodParamCasingPlusExtraParameter, HttpStatusCode200);
             if (waitForCompletion is not null) waitForCompletion();  // Wait for completion if required
 
             // Test bad parameter value
             if (testParameterBadValue)
             {
-                List<CheckProtocolParameter> badParamValue = new List<CheckProtocolParameter>(ParamsOk);
-                badParamValue.Add(new CheckProtocolParameter(parameterName, BAD_PARAMETER_VALUE));
+                List<CheckProtocolParameter> badParamValue = new(ParamsOk)
+                {
+                    new CheckProtocolParameter(parameterName, BAD_PARAMETER_VALUE)
+                };
                 await CallApi($"Parameter {parameterName} (Bad value)", method, HttpMethod.Put, badParamValue, HttpStatusCode400, acceptInvalidValueError: true);
             }
 
             // Test bad parameter name casing
-            List<CheckProtocolParameter> badParamCasing = new List<CheckProtocolParameter>(ParamsOk);
-            badParamCasing.Add(new CheckProtocolParameter(InvertCasing(parameterName), parameterValue));
+            List<CheckProtocolParameter> badParamCasing = new(ParamsOk)
+            {
+                new CheckProtocolParameter(InvertCasing(parameterName), parameterValue)
+            };
             await CallApi($"Parameter {parameterName} (Bad casing)", method, HttpMethod.Put, badParamCasing, HttpStatusCode400);
             if (waitForCompletion is not null) waitForCompletion();  // Wait for completion if required
 
             // Test different ClientID casing
-            List<CheckProtocolParameter> differentClientIDCasing = new List<CheckProtocolParameter>(ParamClientIDLowerCase);
-            differentClientIDCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
-            await CallApi("Bad ClientID casing", method, HttpMethod.Put, differentClientIDCasing, HttpStatusCode200, ignoreOmnisim400Errors: true); // Must be 200 because the device should ignore the parameter if incorrectly cased
+            List<CheckProtocolParameter> differentClientIDCasing = new(ParamClientIDLowerCase)
+            {
+                new CheckProtocolParameter(parameterName, parameterValue)
+            };
+            await CallApi("Bad ClientID casing", method, HttpMethod.Put, differentClientIDCasing, HttpStatusCode200, optionalMethod: true); // Must be 200 because the device should ignore the parameter if incorrectly cased
             if (waitForCompletion is not null) waitForCompletion();  // Wait for completion if required
 
             // Test different ClientTransactionID casing
-            List<CheckProtocolParameter> differentTransactionIdCasing = new List<CheckProtocolParameter>(ParamTransactionIdLowerCase);
-            differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName, parameterValue));
-            await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, differentTransactionIdCasing, HttpStatusCode200, ignoreOmnisim400Errors: true); // Must be 200 because the device should ignore the parameter if incorrectly cased
+            List<CheckProtocolParameter> differentTransactionIdCasing = new(ParamTransactionIdLowerCase)
+            {
+                new CheckProtocolParameter(parameterName, parameterValue)
+            };
+            await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, differentTransactionIdCasing, HttpStatusCode200, optionalMethod: true); // Must be 200 because the device should ignore the parameter if incorrectly cased
             if (waitForCompletion is not null) waitForCompletion();  // Wait for completion if required
 
             // Test bad client and transaction Id values
@@ -1573,61 +1577,77 @@ namespace ConformU
         private async Task PutTwoParameters(string method, string parameterName1, string parameterValue1, string parameterName2, string parameterValue2, Action waitForCompletion, bool testParameter1BadValue = true, bool testParameter2BadValue = true)
         {
             // Test good parameter name casing
-            List<CheckProtocolParameter> goodParamCasing = new List<CheckProtocolParameter>(ParamsOk);
-            goodParamCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-            goodParamCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+            List<CheckProtocolParameter> goodParamCasing = new(ParamsOk)
+            {
+                new CheckProtocolParameter(parameterName1, parameterValue1),
+                new CheckProtocolParameter(parameterName2, parameterValue2)
+            };
             await CallApi($"Parameters {parameterName1} and {parameterName2} (Good casing)", method, HttpMethod.Put, goodParamCasing, HttpStatusCode200);
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
             // Test good parameter name casing with an additional parameter
-            List<CheckProtocolParameter> goodParamCasingPlusExtraParameter = new List<CheckProtocolParameter>(ParamsOkPlusExtraParameter);
-            goodParamCasingPlusExtraParameter.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-            goodParamCasingPlusExtraParameter.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+            List<CheckProtocolParameter> goodParamCasingPlusExtraParameter = new(ParamsOkPlusExtraParameter)
+            {
+                new CheckProtocolParameter(parameterName1, parameterValue1),
+                new CheckProtocolParameter(parameterName2, parameterValue2)
+            };
             await CallApi($"Parameters {parameterName1} and {parameterName2} (Good casing with extra parameter)", method, HttpMethod.Put, goodParamCasingPlusExtraParameter, HttpStatusCode200);
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
             // Test bad parameter 1 value
             if (testParameter1BadValue)
             {
-                List<CheckProtocolParameter> badParam1Value = new List<CheckProtocolParameter>(ParamsOk);
-                badParam1Value.Add(new CheckProtocolParameter(parameterName1, BAD_PARAMETER_VALUE));
-                badParam1Value.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+                List<CheckProtocolParameter> badParam1Value = new(ParamsOk)
+                {
+                    new CheckProtocolParameter(parameterName1, BAD_PARAMETER_VALUE),
+                    new CheckProtocolParameter(parameterName2, parameterValue2)
+                };
                 await CallApi($"Parameter {parameterName1} (Bad value)", method, HttpMethod.Put, badParam1Value, HttpStatusCode400, acceptInvalidValueError: true);
             }
 
             // Test bad parameter 2 value
             if (testParameter2BadValue)
             {
-                List<CheckProtocolParameter> badParam2Value = new List<CheckProtocolParameter>(ParamsOk);
-                badParam2Value.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-                badParam2Value.Add(new CheckProtocolParameter(parameterName2, BAD_PARAMETER_VALUE));
+                List<CheckProtocolParameter> badParam2Value = new(ParamsOk)
+                {
+                    new CheckProtocolParameter(parameterName1, parameterValue1),
+                    new CheckProtocolParameter(parameterName2, BAD_PARAMETER_VALUE)
+                };
                 await CallApi($"Parameter {parameterName2} (Bad value)", method, HttpMethod.Put, badParam2Value, HttpStatusCode400, acceptInvalidValueError: true);
             }
             // Test bad parameter 1 name casing
-            List<CheckProtocolParameter> badParam1Casing = new List<CheckProtocolParameter>(ParamsOk);
-            badParam1Casing.Add(new CheckProtocolParameter(InvertCasing(parameterName1), parameterValue1));
-            badParam1Casing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
+            List<CheckProtocolParameter> badParam1Casing = new(ParamsOk)
+            {
+                new CheckProtocolParameter(InvertCasing(parameterName1), parameterValue1),
+                new CheckProtocolParameter(parameterName2, parameterValue2)
+            };
             await CallApi($"Parameter {parameterName1} (Bad casing)", method, HttpMethod.Put, badParam1Casing, HttpStatusCode400);
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
             // Test bad parameter 2 name casing
-            List<CheckProtocolParameter> badParam2Casing = new List<CheckProtocolParameter>(ParamsOk);
-            badParam2Casing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-            badParam2Casing.Add(new CheckProtocolParameter(InvertCasing(parameterName2), parameterValue2));
+            List<CheckProtocolParameter> badParam2Casing = new(ParamsOk)
+            {
+                new CheckProtocolParameter(parameterName1, parameterValue1),
+                new CheckProtocolParameter(InvertCasing(parameterName2), parameterValue2)
+            };
             await CallApi($"Parameter {parameterName2} (Bad casing)", method, HttpMethod.Put, badParam2Casing, HttpStatusCode400);
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
             // Test incorrect ID casing
-            List<CheckProtocolParameter> differentClientIDCasing = new List<CheckProtocolParameter>(ParamClientIDLowerCase);
-            differentClientIDCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-            differentClientIDCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-            await CallApi("Bad ClientID casing", method, HttpMethod.Put, differentClientIDCasing, HttpStatusCode200, ignoreOmnisim400Errors: true);
+            List<CheckProtocolParameter> differentClientIDCasing = new(ParamClientIDLowerCase)
+            {
+                new CheckProtocolParameter(parameterName1, parameterValue1),
+                new CheckProtocolParameter(parameterName2, parameterValue2)
+            };
+            await CallApi("Bad ClientID casing", method, HttpMethod.Put, differentClientIDCasing, HttpStatusCode200, optionalMethod: true);
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
-            List<CheckProtocolParameter> differentTransactionIdCasing = new List<CheckProtocolParameter>(ParamTransactionIdLowerCase);
-            differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
-            differentTransactionIdCasing.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-            await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, differentTransactionIdCasing, HttpStatusCode200, ignoreOmnisim400Errors: true);
+            List<CheckProtocolParameter> differentTransactionIdCasing = new(ParamTransactionIdLowerCase)
+            {
+                new CheckProtocolParameter(parameterName1, parameterValue1),
+                new CheckProtocolParameter(parameterName2, parameterValue2)
+            };
+            await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, differentTransactionIdCasing, HttpStatusCode200, optionalMethod: true);
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
             // Test bad client and transaction Id values
@@ -1648,8 +1668,6 @@ namespace ConformU
         /// <remarks>These shoul all fail.</remarks>
         private async Task TestBadIdValues(string method, HttpMethod httpMethod, string parameterName1, string parameterValue1, string parameterName2, string parameterValue2)
         {
-            string methodLowerCase = method.ToLowerInvariant();
-            string httpmethodString = httpMethod.ToString().ToUpper();
             List<CheckProtocolParameter> parameters;
 
             // Test empty ClientID value
@@ -1707,14 +1725,14 @@ namespace ConformU
                                    List<CheckProtocolParameter> parameters,
                                    List<HttpStatusCode> expectedCodes,
                                    bool ignoreApplicationCancellation = false,
-                                   bool ignoreOmnisim400Errors = false,
+                                   bool optionalMethod = false,
                                    bool acceptInvalidValueError = false)
         {
             string methodLowerCase = method.ToLowerInvariant();
             string httpMethodUpperCase = httpMethod.ToString().ToUpperInvariant();
 
             string url = $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}";
-            await SendToDevice($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation, ignoreOmnisim400Errors, acceptInvalidValueError);
+            await SendToDevice($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation, optionalMethod, acceptInvalidValueError);
         }
 
         private async Task SendToDevice(string testName,
@@ -1724,14 +1742,19 @@ namespace ConformU
                                         List<CheckProtocolParameter> parameters,
                                         List<HttpStatusCode> expectedCodes,
                                         bool ignoreApplicationCancellation = false,
-                                        bool ignoreOmnisim400Errors = false,
+                                        bool optionalMethod = false,
                                         bool acceptInvalidValueError = false)
         {
             string ascomOutcome = null;
             CancellationTokenSource requestCancellationTokenSource;
-            bool hasClientTransactionID = false;
-            uint expectedClientTransactionID = 0; // The expected ClientTransactionID round trip value
             Response deviceResponse = new(); // Parsed JSON response
+
+            bool hasClientTransactionID = false;
+            uint returnedClientTransactionID = 0;
+            uint expectedClientTransactionID = 0; // The expected ClientTransactionID round trip value
+            uint returnedServerTransactionID = 0;
+            AlpacaErrors returnedErrorNumber = AlpacaErrors.AlpacaNoError;
+            string returnedErrorMessage = "";
 
             if (expectedCodes is null)
             {
@@ -1743,9 +1766,11 @@ namespace ConformU
                 string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString().ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
 
                 // Create the URI for this transaction and apply it to the request, adding "client id" and "transaction number" query parameters
-                UriBuilder transactionUri = new UriBuilder($"{clientHostAddress}{url}");
+                UriBuilder transactionUri = new($"{clientHostAddress}{url}");
 
                 HttpRequestMessage request;
+
+                #region Prepare and send request
 
                 // Prepare HTTP GET and PUT requests
                 if (httpMethod == HttpMethod.Get) // HTTP GET methods
@@ -1764,7 +1789,7 @@ namespace ConformU
                                 hasClientTransactionID = true;
 
                                 // Extract the expected value if possible. 0 indicates no value or an invalid value which is not expected to round trip
-                                UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionID);
+                                _ = UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionID);
                                 TL.LogMessage(testName, MessageLevel.Debug, $"{messagePrefix} - Input ClientTransactionID value: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionID}");
                             }
                         }
@@ -1774,7 +1799,7 @@ namespace ConformU
                     request = new HttpRequestMessage(httpMethod, transactionUri.Uri);
 
                 } // Prepare GET requests
-                else // All other HTTP methods
+                else // Prepare PUT and all other HTTP method requests
                 {
                     // Create a new request based on the transaction Uri
                     request = new HttpRequestMessage(httpMethod, transactionUri.Uri);
@@ -1797,7 +1822,7 @@ namespace ConformU
                                 if (parameter.ParameterName == "ClientTransactionID") // It is correctly cased
                                 {
                                     // Extract the expected value if possible. 0 indicates no value or an invalid value which is not expected to round trip
-                                    UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionID);
+                                    _ = UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionID);
                                     TL.LogMessage(testName, MessageLevel.Debug, $"{messagePrefix} - Input ClientTransactionID name is correctly cased: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionID}");
 
                                 }
@@ -1809,7 +1834,7 @@ namespace ConformU
                             }
                         }
 
-                        FormUrlEncodedContent formUrlParameters = new FormUrlEncodedContent(formParameters);
+                        FormUrlEncodedContent formUrlParameters = new(formParameters);
                         request.Content = formUrlParameters;
                     }
                 } // Prepare PUT requests
@@ -1833,66 +1858,31 @@ namespace ConformU
 
                 // Send the request to the remote device and wait for the response
                 HttpResponseMessage httpResponse = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, requestCancellationTokenSource.Token);
+
+                #endregion
+
+                // Get the device response
                 string responseString = await httpResponse.Content.ReadAsStringAsync();
+
+                #region Process successful HTTP status = 200 responses
 
                 // If the call was successful at an HTTP level (Status = 200) check whether there was an ASCOM error reported in the returned JSON
                 if ((httpResponse.StatusCode == HttpStatusCode.OK) & (!responseString.Contains("<!DOCTYPE")))
                 {
+                    // Response should be either a JSON or an ImageBytes response
                     try
                     {
-                        // Handle both JSON and ImageBytes responses
+                        // Handle the response
                         if (!httpResponse.Content.Headers.ContentType.MediaType.Contains(AlpacaConstants.IMAGE_BYTES_MIME_TYPE, StringComparison.InvariantCultureIgnoreCase)) // Should be a JSON response
                         {
 
-                            // Parse the common httpResponse values from the JSON response
-                            deviceResponse = JsonSerializer.Deserialize<ASCOM.Common.Alpaca.Response>(responseString);
+                            // Parse the common device values from the JSON response
+                            deviceResponse = JsonSerializer.Deserialize<Response>(responseString);
+                            returnedClientTransactionID = deviceResponse.ClientTransactionID;
+                            returnedServerTransactionID = deviceResponse.ServerTransactionID;
+                            returnedErrorNumber = deviceResponse.ErrorNumber;
+                            returnedErrorMessage = deviceResponse.ErrorMessage;
 
-                            // Test whether the ClientTransactionID round tripped OK
-                            if (hasClientTransactionID) // A client transaction ID parameter was supplied
-                            {
-                                // Test whether the expected value was returned
-                                if (deviceResponse.ClientTransactionID == expectedClientTransactionID)
-                                {
-                                    LogOk(testName, $"{messagePrefix} - The expected ClientTransactionID was returned: {deviceResponse.ClientTransactionID}", null);
-                                }
-                                else
-                                {
-                                    LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {deviceResponse.ClientTransactionID}, Expected: {expectedClientTransactionID}", null);
-                                }
-                            }
-
-                            // Test whether a valid ServerTransactionID value was returned
-                            if (deviceResponse.ServerTransactionID >= 1)
-                            {
-                                LogOk(testName, $"{messagePrefix} - The ServerTransactionID was 1 or greater: {deviceResponse.ServerTransactionID}", null);
-                            }
-                            else
-                            {
-                                LogIssue(testName, $"{messagePrefix} - An unexpected ServerTransactionID was returned: {deviceResponse.ClientTransactionID}, Expected: 1 or greater", null);
-                            }
-
-                            if ((deviceResponse.ErrorNumber != 0) | (deviceResponse.ErrorMessage != ""))
-                            {
-                                // Create a message indicating what went wrong.
-                                try
-                                {
-                                    // Only report not implemented errors if configured to do so
-                                    if ((deviceResponse.ErrorNumber == AlpacaErrors.NotImplemented) & !settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors)
-                                    {
-                                        // Do nothing because we are not reporting not implemented errors
-                                    }
-                                    else
-                                    {
-                                        ascomOutcome = $"Device returned a {deviceResponse.ErrorNumber} exception (0x{deviceResponse.ErrorNumber:X}) for client transaction: {deviceResponse.ClientTransactionID}, server transaction: {deviceResponse.ServerTransactionID}. " +
-                                            $"Error message: {deviceResponse.ErrorMessage}";
-                                    }
-                                }
-                                catch (Exception) // Handle possibility of a non-ASCOM error number
-                                {
-                                    ascomOutcome = $"Device returned error number 0x{deviceResponse.ErrorNumber:X} for client transaction: {deviceResponse.ClientTransactionID}, server transaction: {deviceResponse.ServerTransactionID}. " +
-                                        $"Error message: {deviceResponse.ErrorMessage}";
-                                }
-                            }
                         } // Handle a JSON response
                         else // Should be an ImageBytes binary response
                         {
@@ -1916,52 +1906,18 @@ namespace ConformU
 
                             ArrayMetadataV1 metadata = bytes.GetMetadataV1();
 
-                            // Test whether the ClientTransactionID round tripped OK
-                            if (hasClientTransactionID) // A client transaction ID parameter was supplied
+                            returnedClientTransactionID = metadata.ClientTransactionID;
+                            returnedServerTransactionID = metadata.ServerTransactionID;
+                            returnedErrorNumber = metadata.ErrorNumber;
+                            if (returnedErrorNumber == 0)
                             {
-                                // Test whether the expected value was returned
-                                if (metadata.ClientTransactionID == expectedClientTransactionID)
-                                {
-                                    LogOk(testName, $"{messagePrefix} - The expected ClientTransactionID was returned: {metadata.ClientTransactionID}", null);
-                                }
-                                else
-                                {
-                                    LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {metadata.ClientTransactionID}, Expected: {expectedClientTransactionID}", null);
-                                }
-                            }
-
-                            // Test whether a valid ServerTransactionID value was returned
-                            if (metadata.ServerTransactionID >= 1)
-                            {
-                                LogOk(testName, $"{messagePrefix} - The ServerTransactionID was 1 or greater: {metadata.ServerTransactionID}", null);
+                                returnedErrorMessage = bytes.GetErrrorMessage();
                             }
                             else
                             {
-                                LogIssue(testName, $"{messagePrefix} - An unexpected ServerTransactionID was returned: {metadata.ClientTransactionID}, Expected: 1 or greater", null);
+                                returnedErrorMessage = "";
                             }
 
-                            if (metadata.ErrorNumber != 0)
-                            {
-                                // Create a message indicating what went wrong.
-                                try
-                                {
-                                    // Only report not implemented errors if configured to do so
-                                    if (((AlpacaErrors)metadata.ErrorNumber == AlpacaErrors.NotImplemented) & !settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors)
-                                    {
-                                        // Do nothing because we are not reporting not implemented errors
-                                    }
-                                    else
-                                    {
-                                        ascomOutcome = $"Device returned a {(AlpacaErrors)metadata.ErrorNumber} error (0x{metadata.ErrorNumber:X}) for client transaction: {metadata.ClientTransactionID}, server transaction: {metadata.ServerTransactionID}. " +
-                                            $"Error message: {bytes.GetErrrorMessage()}";
-                                    }
-                                }
-                                catch (Exception) // Handle possibility of a non-ASCOM error number
-                                {
-                                    ascomOutcome = $"Device returned error number 0x{metadata.ErrorNumber:X} for client transaction: {metadata.ClientTransactionID}, server transaction: {metadata.ServerTransactionID}. " +
-                                        $"Error message: {bytes.GetErrrorMessage()}";
-                                }
-                            }
                         } // Handle an ImageBytes response
                     }
                     catch (Exception ex)
@@ -1972,7 +1928,58 @@ namespace ConformU
                     }
                 }
 
-                // Report the outcome
+                #endregion
+
+                #region Determine success or failure of the test
+
+                // Test whether the ClientTransactionID round tripped OK
+                if (hasClientTransactionID) // A client transaction ID parameter was supplied
+                {
+                    // Test whether the expected value was returned
+                    if (returnedClientTransactionID == expectedClientTransactionID) // Round tripped OK
+                    {
+                        LogOk(testName, $"{messagePrefix} - The expected ClientTransactionID was returned: {returnedClientTransactionID}", null);
+                    }
+                    else // Did not round trip OK
+                    {
+                        LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {returnedClientTransactionID}, Expected: {expectedClientTransactionID}", null);
+                    }
+                }
+
+                // Test whether a valid ServerTransactionID value was returned
+                if (returnedServerTransactionID >= 1) // Valid ServerTransactionID
+                {
+                    LogOk(testName, $"{messagePrefix} - The ServerTransactionID was 1 or greater: {returnedServerTransactionID}", null);
+                }
+                else // Invalid ServerTransactionID
+                {
+                    LogIssue(testName, $"{messagePrefix} - An unexpected ServerTransactionID was returned: {returnedServerTransactionID}, Expected: 1 or greater", null);
+                }
+
+                // Test whether the device reported an error
+                if ((returnedErrorNumber != 0) | (returnedErrorMessage != "")) // An error was returned
+                {
+                    // Create a message indicating what went wrong.
+                    try
+                    {
+                        // Only report not implemented errors if configured to do so
+                        if ((returnedErrorNumber == AlpacaErrors.NotImplemented) & !settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors)
+                        {
+                            // Do nothing because we are not reporting not implemented errors
+                        }
+                        else
+                        {
+                            ascomOutcome = $"Device returned a {returnedErrorNumber} exception (0x{returnedErrorNumber:X}) for client transaction: {returnedClientTransactionID}, server transaction: {returnedServerTransactionID}. " +
+                                $"Error message: {returnedErrorMessage}";
+                        }
+                    }
+                    catch (Exception) // Handle possibility of a non-ASCOM error number
+                    {
+                        ascomOutcome = $"Device returned error number 0x{returnedErrorNumber:X} for client transaction: {returnedClientTransactionID}, server transaction: {returnedServerTransactionID}. " +
+                            $"Error message: {returnedErrorMessage}";
+                    }
+                }
+
                 if (expectedCodes.Count > 0) // One or more codes that indicate a successful test are expected
                 {
                     if (expectedCodes.Contains(httpResponse.StatusCode)) // We got the expected outcome
@@ -1996,7 +2003,7 @@ namespace ConformU
                     else // Unexpected outcome
                     {
                         // Test for 400 response from the OmniSim when a "normal" device would return a 200 status i.e. for mis-cased FORM ID parameters in PUT requests.
-                        if ((httpResponse.StatusCode == HttpStatusCode.BadRequest) & ignoreOmnisim400Errors & isOmniSim)
+                        if ((httpResponse.StatusCode == HttpStatusCode.BadRequest) & optionalMethod)
                         {
                             LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) from the device.", responseString);
                         }
@@ -2026,6 +2033,9 @@ namespace ConformU
                 {
                     LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode})", responseString);
                 }
+
+                #endregion
+
             }
             catch (TaskCanceledException)
             {
@@ -2101,10 +2111,10 @@ namespace ConformU
                 int currentLoopNumber = ((int)(sw.ElapsedMilliseconds) + 50) / pollInterval; // Add a small positive offset (50) because integer division always rounds down
 
                 // Calculate the sleep time required to start the next loop at a multiple of the poll interval
-                int sleeptime = pollInterval * (currentLoopNumber + 1) - (int)sw.ElapsedMilliseconds;
+                int sleepTime = pollInterval * (currentLoopNumber + 1) - (int)sw.ElapsedMilliseconds;
 
                 // Sleep until it is time for the next completion function poll
-                Thread.Sleep(sleeptime);
+                Thread.Sleep(sleepTime);
 
                 // Set the status message status field
                 if (statusString is null) // No status string function was provided so display an elapsed time message
@@ -2150,15 +2160,15 @@ namespace ConformU
                     int currentLoopNumber = ((int)sw.ElapsedMilliseconds + 50) / updateInterval;
 
                     // Calculate the sleep time required to start the next loop at a multiple of the poll interval
-                    int sleeptime = updateInterval * (currentLoopNumber + 1) - (int)sw.ElapsedMilliseconds;
+                    int sleepTime = updateInterval * (currentLoopNumber + 1) - (int)sw.ElapsedMilliseconds;
 
                     // Ensure that we don't over-wait on the last cycle
                     int remainingWaitTime = waitDuration - (int)sw.ElapsedMilliseconds;
                     if (remainingWaitTime < 0) remainingWaitTime = 0;
-                    if (remainingWaitTime < updateInterval) sleeptime = remainingWaitTime;
+                    if (remainingWaitTime < updateInterval) sleepTime = remainingWaitTime;
 
                     // Sleep until it is time for the next completion function poll
-                    Thread.Sleep(sleeptime);
+                    Thread.Sleep(sleepTime);
 
                     // Set the status message status field to the elapsed time
                     SetStatus($"Waiting for {purpose} - {Math.Round(Convert.ToDouble(currentLoopNumber + 1) * updateInterval / 1000.0, 1):0.0} / {Convert.ToDouble(waitDuration) / 1000.0:0.0} seconds");
@@ -2170,62 +2180,62 @@ namespace ConformU
         /// <summary>
         /// Set the isOmniSim flag if this device is the Alpaca Omni-simulator.
         /// </summary>
-        internal void TestForOmnisim(IAscomDevice device)
-        {
-            string prefix = "";
-            string deviceType = "";
-            string postFix = "";
-            bool hasRequiredParts = false;
+        //internal void TestForOmnisim(IAscomDevice device)
+        //{
+        //    string prefix = "";
+        //    string deviceType = "";
+        //    string postFix = "";
+        //    bool hasRequiredParts = false;
 
-            // Get the device name
-            string deviceName = device.Name;
+        //    // Get the device name
+        //    string deviceName = device.Name;
 
-            // Default to false
-            isOmniSim = false;
+        //    // Default to false
+        //    isOmniSim = false;
 
-            // Split the returned name into its space separated parts
-            string[] nameParts = deviceName.Split(' ');
+        //    // Split the returned name into its space separated parts
+        //    string[] nameParts = deviceName.Split(' ');
 
-            // The Omni-simulator has a 3 part name: "Alpaca DeviceType Simulator" or a 4 part name: "Alpaca Device Type Simulator" so test for these
-            //                                        111111 2222222222 333333333                     111111 222222 3333 444444444
+        //    // The Omni-simulator has a 3 part name: "Alpaca DeviceType Simulator" or a 4 part name: "Alpaca Device Type Simulator" so test for these
+        //    //                                        111111 2222222222 333333333                     111111 222222 3333 444444444
 
-            // Parse out the prefix, device type and postfix from 3 and 4 part device names
-            // Device type names that are supplied in 2 parts, such as "Filter Wheel", are concatenated to a deviceType single value e.g. "Filter Wheel" becomes "FilterWheel"
-            switch (nameParts.Length)
-            {
-                case 3:
-                    prefix = nameParts[0];
-                    deviceType = nameParts[1];
-                    postFix = nameParts[2];
-                    hasRequiredParts = true;
-                    break;
+        //    // Parse out the prefix, device type and postfix from 3 and 4 part device names
+        //    // Device type names that are supplied in 2 parts, such as "Filter Wheel", are concatenated to a deviceType single value e.g. "Filter Wheel" becomes "FilterWheel"
+        //    switch (nameParts.Length)
+        //    {
+        //        case 3:
+        //            prefix = nameParts[0];
+        //            deviceType = nameParts[1];
+        //            postFix = nameParts[2];
+        //            hasRequiredParts = true;
+        //            break;
 
-                case 4:
-                    prefix = nameParts[0];
-                    deviceType = nameParts[1] + nameParts[2];
-                    postFix = nameParts[3];
-                    hasRequiredParts = true;
-                    break;
+        //        case 4:
+        //            prefix = nameParts[0];
+        //            deviceType = nameParts[1] + nameParts[2];
+        //            postFix = nameParts[3];
+        //            hasRequiredParts = true;
+        //            break;
 
-                default:
-                    break;
-            }
+        //        default:
+        //            break;
+        //    }
 
-            // Test whether the name has number of parts
-            if (hasRequiredParts) // Has the required parts to undertake the comparison
-            {
-                // Test whether the prefix is "Alpaca", the device type is a valid device type and the postfix 3 is "Simulator".
-                if ((prefix == "Alpaca") & (Devices.IsValidDeviceTypeName(deviceType)) & (postFix == "Simulator")) // The value returned by the device matches the value expected from the OmniSim
-                {
-                    // Set the OmniSim flag because we are testing an OmniSim device.
-                    isOmniSim = true;
-                }
-                else // The value returned by the device does not match the value expected from the OmniSim
-                {
-                    // No action required because the default state is false
-                }
-            }
-        }
+        //    // Test whether the name has number of parts
+        //    if (hasRequiredParts) // Has the required parts to undertake the comparison
+        //    {
+        //        // Test whether the prefix is "Alpaca", the device type is a valid device type and the postfix 3 is "Simulator".
+        //        if ((prefix == "Alpaca") & (Devices.IsValidDeviceTypeName(deviceType)) & (postFix == "Simulator")) // The value returned by the device matches the value expected from the OmniSim
+        //        {
+        //            // Set the OmniSim flag because we are testing an OmniSim device.
+        //            isOmniSim = true;
+        //        }
+        //        else // The value returned by the device does not match the value expected from the OmniSim
+        //        {
+        //            // No action required because the default state is false
+        //        }
+        //    }
+        //}
 
         #endregion
 
@@ -2261,7 +2271,7 @@ namespace ConformU
                 default:
                     throw new Exception($"Unknown test outcome type: {outcome}");
             }
-            methodString = $"{method.PadRight(ExtensionMethods.COLUMN_WIDTH)}{outcomeString.PadRight(ExtensionMethods.OUTCOME_WIDTH)}";
+            methodString = $"{method,-ExtensionMethods.COLUMN_WIDTH}{outcomeString,-ExtensionMethods.OUTCOME_WIDTH}";
 
             // Write to the logger
             TL?.LogMessage(methodString, message);

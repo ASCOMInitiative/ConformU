@@ -38,7 +38,7 @@
 {
     private bool disposedValue;
 
-    AlpacaTestManager tester;
+    AlpacaProtocolTestManager tester;
     Task<int> conformanceTestTask;
 
     object screenLogLockObject = new object();
@@ -137,7 +137,7 @@
                 applicationCancellationToken = applicationCancellationTokenSource.Token;
 
                 // Create a test manager instance to oversee the test
-                using (tester = new AlpacaTestManager(configuration, logger, applicationCancellationTokenSource, applicationCancellationToken))
+                using (tester = new AlpacaProtocolTestManager(configuration, logger, applicationCancellationTokenSource, applicationCancellationToken))
                 {
                     try
                     {

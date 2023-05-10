@@ -34,8 +34,10 @@ namespace ConformU
         {
             // Create the sandbox host form
             if (LOG_ENABLED) logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"About to create driver host form");
-            driverHostForm = new DriverHostForm(logger); // Create the form
-            driverHostForm.ShowInTaskbar = false;
+            driverHostForm = new DriverHostForm(logger)
+            {
+                ShowInTaskbar = false
+            }; // Create the form
             if (LOG_ENABLED) logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Created driver host form, starting driver host environment for {settings.ComDevice.ProgId} on thread {Environment.CurrentManagedThreadId}");
 
             // Start the message loop on this thread to bring the form to life

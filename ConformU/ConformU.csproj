@@ -82,6 +82,7 @@
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<StartupObject>ConformU.Program</StartupObject>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|$(TargetFramework)|AnyCPU'">
 		<Optimize>True</Optimize>
@@ -146,6 +147,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Include="..\.editorconfig" Link=".editorconfig" />
 		<None Include="Conform\Devices\Facades\BaseClass\DriverHostForm.resx" />
 		<None Include="Properties\PublishProfiles\Linux-Arm.pubxml.user" />
 		<None Include="Properties\PublishProfiles\Linux-X64.pubxml.user" />
