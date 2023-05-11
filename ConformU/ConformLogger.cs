@@ -11,7 +11,6 @@ namespace ConformU
         private bool debug;
         public ConformLogger(string logFileName, string logFilePath, string loggerName, bool enabled) : base(logFileName, logFilePath, loggerName, enabled)
         {
-            Console.WriteLine($"ConformLogger - Creating log file - Name: {logFileName}, Path: {logFilePath}, Type: {loggerName}");
             base.IdentifierWidth = TEST_NAME_WIDTH;
         }
 

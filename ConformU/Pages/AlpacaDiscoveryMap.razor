@@ -146,7 +146,6 @@
                                     {
                                         // Provide appropriate descriptions for ASCOM and non-ASCOM device types
 
-                                        //Console.WriteLine($"ASCOMDevice - Devicetype isd null: {ascomDevice.AscomDeviceType is null}, non-standard device type: {ascomDevice.NonAscomDeviceType}");
                                         if (ascomDevice.AscomDeviceType is null) // This is not an ASCOM device type
                                         {
                                             nonStandardDevices.Add(new BlazoriseTreeItem() { Text = $"{ascomDevice.NonAscomDeviceType} Device: {ascomDevice.AscomDeviceName} - Alpaca device number: {ascomDevice.AlpacaDeviceNumber} - Alpaca Unique ID: {ascomDevice.UniqueId}" });
@@ -268,7 +267,6 @@
         {
             if (disposing)
             {
-                Console.WriteLine("AlpacaMap.Razor.Dispose() has been called...");
             }
 
             disposedValue = true;

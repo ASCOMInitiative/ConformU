@@ -79,7 +79,6 @@ namespace ConformU
         readonly List<HttpStatusCode> HttpStatusCode400 = new() { HttpStatusCode.BadRequest };
         readonly List<HttpStatusCode> HttpStatusCode4XX = new() { HttpStatusCode.BadRequest, HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized, HttpStatusCode.PaymentRequired, HttpStatusCode.Forbidden,
                                                      HttpStatusCode.NotFound, HttpStatusCode.MethodNotAllowed, HttpStatusCode.NotAcceptable, HttpStatusCode.ProxyAuthenticationRequired, HttpStatusCode.Conflict, HttpStatusCode.Gone };
-        readonly List<HttpStatusCode> HttpStatusCode200_400 = new() { HttpStatusCode.OK, HttpStatusCode.BadRequest };
 
         #endregion
 
@@ -1505,11 +1504,11 @@ namespace ConformU
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
             // Test incorrect ClientID casing
-            await CallApi("Bad ClientID casing", method, HttpMethod.Put, ParamClientIDLowerCase, HttpStatusCode200, optionalMethod: true); // Must be 200 because the device should ignore the parameter if incorrectly cased
+            await CallApi("Bad ClientID casing", method, HttpMethod.Put, ParamClientIDLowerCase, HttpStatusCode200); // Must be 200 because the device should ignore the parameter if incorrectly cased
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
             // Test incorrect ClientTransactionID casing
-            await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, ParamTransactionIdLowerCase, HttpStatusCode200, optionalMethod: true); // Must be 200 because the device should ignore the parameter if incorrectly cased
+            await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, ParamTransactionIdLowerCase, HttpStatusCode200, badlyCasedTransactionIdName: true); // Must be 200 because the device should ignore the parameter if incorrectly cased
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
             // Test bad client and transaction Id values
@@ -1553,20 +1552,20 @@ namespace ConformU
             await CallApi($"Parameter {parameterName} (Bad casing)", method, HttpMethod.Put, badParamCasing, HttpStatusCode400);
             if (waitForCompletion is not null) waitForCompletion();  // Wait for completion if required
 
-            // Test different ClientID casing
-            List<CheckProtocolParameter> differentClientIDCasing = new(ParamClientIDLowerCase)
+            // Test bad ClientID casing
+            List<CheckProtocolParameter> badClientIDCasing = new(ParamClientIDLowerCase)
             {
                 new CheckProtocolParameter(parameterName, parameterValue)
             };
-            await CallApi("Bad ClientID casing", method, HttpMethod.Put, differentClientIDCasing, HttpStatusCode200, optionalMethod: true); // Must be 200 because the device should ignore the parameter if incorrectly cased
+            await CallApi("Bad ClientID casing", method, HttpMethod.Put, badClientIDCasing, HttpStatusCode200); // Must be 200 because the device should ignore the parameter if incorrectly cased
             if (waitForCompletion is not null) waitForCompletion();  // Wait for completion if required
 
-            // Test different ClientTransactionID casing
-            List<CheckProtocolParameter> differentTransactionIdCasing = new(ParamTransactionIdLowerCase)
+            // Test bad ClientTransactionID casing
+            List<CheckProtocolParameter> badTransactionIdCasing = new(ParamTransactionIdLowerCase)
             {
                 new CheckProtocolParameter(parameterName, parameterValue)
             };
-            await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, differentTransactionIdCasing, HttpStatusCode200, optionalMethod: true); // Must be 200 because the device should ignore the parameter if incorrectly cased
+            await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, badTransactionIdCasing, HttpStatusCode200, badlyCasedTransactionIdName: true); // Must be 200 because the device should ignore the parameter if incorrectly cased
             if (waitForCompletion is not null) waitForCompletion();  // Wait for completion if required
 
             // Test bad client and transaction Id values
@@ -1615,6 +1614,7 @@ namespace ConformU
                 };
                 await CallApi($"Parameter {parameterName2} (Bad value)", method, HttpMethod.Put, badParam2Value, HttpStatusCode400, acceptInvalidValueError: true);
             }
+
             // Test bad parameter 1 name casing
             List<CheckProtocolParameter> badParam1Casing = new(ParamsOk)
             {
@@ -1633,21 +1633,22 @@ namespace ConformU
             await CallApi($"Parameter {parameterName2} (Bad casing)", method, HttpMethod.Put, badParam2Casing, HttpStatusCode400);
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
-            // Test incorrect ID casing
-            List<CheckProtocolParameter> differentClientIDCasing = new(ParamClientIDLowerCase)
+            // Test bad ClientID casing
+            List<CheckProtocolParameter> badClientIDCasing = new(ParamClientIDLowerCase)
             {
                 new CheckProtocolParameter(parameterName1, parameterValue1),
                 new CheckProtocolParameter(parameterName2, parameterValue2)
             };
-            await CallApi("Bad ClientID casing", method, HttpMethod.Put, differentClientIDCasing, HttpStatusCode200, optionalMethod: true);
+            await CallApi("Bad ClientID casing", method, HttpMethod.Put, badClientIDCasing, HttpStatusCode200);
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
-            List<CheckProtocolParameter> differentTransactionIdCasing = new(ParamTransactionIdLowerCase)
+            // Test bad ClientTransactionID casing
+            List<CheckProtocolParameter> badTransactionIdCasing = new(ParamTransactionIdLowerCase)
             {
                 new CheckProtocolParameter(parameterName1, parameterValue1),
                 new CheckProtocolParameter(parameterName2, parameterValue2)
             };
-            await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, differentTransactionIdCasing, HttpStatusCode200, optionalMethod: true);
+            await CallApi("Bad ClientTransactionID casing", method, HttpMethod.Put, badTransactionIdCasing, HttpStatusCode200, badlyCasedTransactionIdName: true);
             if (waitForCompletion is not null) waitForCompletion(); // Wait for completion if required
 
             // Test bad client and transaction Id values
@@ -1725,14 +1726,14 @@ namespace ConformU
                                    List<CheckProtocolParameter> parameters,
                                    List<HttpStatusCode> expectedCodes,
                                    bool ignoreApplicationCancellation = false,
-                                   bool optionalMethod = false,
+                                   bool badlyCasedTransactionIdName = false,
                                    bool acceptInvalidValueError = false)
         {
             string methodLowerCase = method.ToLowerInvariant();
             string httpMethodUpperCase = httpMethod.ToString().ToUpperInvariant();
 
             string url = $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}";
-            await SendToDevice($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation, optionalMethod, acceptInvalidValueError);
+            await SendToDevice($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation, badlyCasedTransactionIdName, acceptInvalidValueError);
         }
 
         private async Task SendToDevice(string testName,
@@ -1742,7 +1743,7 @@ namespace ConformU
                                         List<CheckProtocolParameter> parameters,
                                         List<HttpStatusCode> expectedCodes,
                                         bool ignoreApplicationCancellation = false,
-                                        bool optionalMethod = false,
+                                        bool badlyCasedTransactionIdName = false,
                                         bool acceptInvalidValueError = false)
         {
             string ascomOutcome = null;
@@ -1872,12 +1873,14 @@ namespace ConformU
                     // Response should be either a JSON or an ImageBytes response
                     try
                     {
-                        // Handle the response
+                        // Handle the response, which will be either JSON or ImageBytes
                         if (!httpResponse.Content.Headers.ContentType.MediaType.Contains(AlpacaConstants.IMAGE_BYTES_MIME_TYPE, StringComparison.InvariantCultureIgnoreCase)) // Should be a JSON response
                         {
 
-                            // Parse the common device values from the JSON response
+                            // Parse the common device values from the JSON response into a Response class
                             deviceResponse = JsonSerializer.Deserialize<Response>(responseString);
+
+                            // Save the parsed response values
                             returnedClientTransactionID = deviceResponse.ClientTransactionID;
                             returnedServerTransactionID = deviceResponse.ServerTransactionID;
                             returnedErrorNumber = deviceResponse.ErrorNumber;
@@ -1904,19 +1907,22 @@ namespace ConformU
                                     break;
                             }
 
+                            // Get the metadata from the response bytes
                             ArrayMetadataV1 metadata = bytes.GetMetadataV1();
 
+                            // Save the response values in the returned metadata
                             returnedClientTransactionID = metadata.ClientTransactionID;
                             returnedServerTransactionID = metadata.ServerTransactionID;
                             returnedErrorNumber = metadata.ErrorNumber;
-                            if (returnedErrorNumber == 0)
+
+                            // Get the error message if required
+                            if (returnedErrorNumber != AlpacaErrors.AlpacaNoError)
                             {
                                 returnedErrorMessage = bytes.GetErrrorMessage();
                             }
-                            else
-                            {
-                                returnedErrorMessage = "";
-                            }
+
+                            // Set a useful response string because otherwise we will get the enormous number of AlpacaBytes binary values encoded as a string
+                            responseString = $"ClientTransactionID: {returnedClientTransactionID}, ServerTransactionID: {returnedServerTransactionID}, ErrorNumber: {returnedErrorNumber}, ErrorMessage: '{returnedErrorMessage}'";
 
                         } // Handle an ImageBytes response
                     }
@@ -1933,7 +1939,7 @@ namespace ConformU
                 #region Determine success or failure of the test
 
                 // Test whether the ClientTransactionID round tripped OK
-                if (hasClientTransactionID) // A client transaction ID parameter was supplied
+                if (hasClientTransactionID & (httpResponse.StatusCode == HttpStatusCode.OK)) // A client transaction ID parameter was sent and the transaction was processed OK
                 {
                     // Test whether the expected value was returned
                     if (returnedClientTransactionID == expectedClientTransactionID) // Round tripped OK
@@ -1942,18 +1948,37 @@ namespace ConformU
                     }
                     else // Did not round trip OK
                     {
-                        LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {returnedClientTransactionID}, Expected: {expectedClientTransactionID}", null);
+                        // Handle responses to a badly cased ClientTransactionID FORM parameter
+                        if (badlyCasedTransactionIdName) // This transaction does contain a badly cased ClientTransactionID FORM parameter
+                        {
+                            // Check whether the expected value of 0 was returned. 
+                            if (returnedClientTransactionID == 0) // Got the expected value of 0
+                            {
+                                LogOk(testName, $"{messagePrefix} - The ClientTransactionID was round-tripped as expected. Sent value: {expectedClientTransactionID}, Returned value: {returnedClientTransactionID}", null);
+                            }
+                            else // Got some value other than expected value of 0
+                            {
+                                LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {returnedClientTransactionID}, Expected: {expectedClientTransactionID}", null);
+                            }
+                        }
+                        else // This transaction does not contain a badly cased ClientTransactionID FORM parameter so report an issue
+                        {
+                            LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {returnedClientTransactionID}, Expected: {expectedClientTransactionID}", null);
+                        }
                     }
                 }
 
                 // Test whether a valid ServerTransactionID value was returned
-                if (returnedServerTransactionID >= 1) // Valid ServerTransactionID
+                if (httpResponse.StatusCode == HttpStatusCode.OK) // We got an HTTP 200 OK status
                 {
-                    LogOk(testName, $"{messagePrefix} - The ServerTransactionID was 1 or greater: {returnedServerTransactionID}", null);
-                }
-                else // Invalid ServerTransactionID
-                {
-                    LogIssue(testName, $"{messagePrefix} - An unexpected ServerTransactionID was returned: {returnedServerTransactionID}, Expected: 1 or greater", null);
+                    if (returnedServerTransactionID >= 1)  // Valid ServerTransactionID
+                    {
+                        LogOk(testName, $"{messagePrefix} - The ServerTransactionID was 1 or greater: {returnedServerTransactionID}", null);
+                    }
+                    else // Invalid ServerTransactionID
+                    {
+                        LogIssue(testName, $"{messagePrefix} - An unexpected ServerTransactionID was returned: {returnedServerTransactionID}, Expected: 1 or greater", null);
+                    }
                 }
 
                 // Test whether the device reported an error
@@ -1969,7 +1994,8 @@ namespace ConformU
                         }
                         else
                         {
-                            ascomOutcome = $"Device returned a {returnedErrorNumber} exception (0x{returnedErrorNumber:X}) for client transaction: {returnedClientTransactionID}, server transaction: {returnedServerTransactionID}. " +
+                            ascomOutcome = $"Device returned a {returnedErrorNumber} error (0x{returnedErrorNumber:X}) for client transaction: {returnedClientTransactionID}, " +
+                                $"server transaction: {returnedServerTransactionID}. " +
                                 $"Error message: {returnedErrorMessage}";
                         }
                     }
@@ -1980,40 +2006,38 @@ namespace ConformU
                     }
                 }
 
+                // Check whether any specific HTTP status codes are expected
                 if (expectedCodes.Count > 0) // One or more codes that indicate a successful test are expected
                 {
-                    if (expectedCodes.Contains(httpResponse.StatusCode)) // We got the expected outcome
+                    // Check whether we got an expected or unexpected status code
+                    if (expectedCodes.Contains(httpResponse.StatusCode)) // We got one of the expected outcomes
                     {
-                        if (httpResponse.StatusCode == HttpStatusCode.OK)
+                        // Check whether we got a 200 OK status or something else
+                        if (httpResponse.StatusCode == HttpStatusCode.OK) // Received a 200 OK status
                         {
-                            if (string.IsNullOrEmpty(ascomOutcome))
+                            // Log an OK outcome if there was no contextual message or an Information if there was
+                            if (string.IsNullOrEmpty(ascomOutcome)) // No contextual message
                             {
                                 LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
                             }
-                            else
+                            else // Does have a contextual message
                             {
                                 LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected but the device reported an ASCOM error:", ascomOutcome);
                             }
                         }
-                        else
+                        else // Received a status code other than 200 OK
                         {
                             LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
                         }
                     }
                     else // Unexpected outcome
                     {
-                        // Test for 400 response from the OmniSim when a "normal" device would return a 200 status i.e. for mis-cased FORM ID parameters in PUT requests.
-                        if ((httpResponse.StatusCode == HttpStatusCode.BadRequest) & optionalMethod)
-                        {
-                            LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) from the device.", responseString);
-                        }
                         // Test whether we got an InvalidValue error and are going to accept that
-                        else if ((httpResponse.StatusCode == HttpStatusCode.OK) & acceptInvalidValueError & (deviceResponse.ErrorNumber == AlpacaErrors.InvalidValue))
+                        if ((httpResponse.StatusCode == HttpStatusCode.OK) & acceptInvalidValueError & (deviceResponse.ErrorNumber == AlpacaErrors.InvalidValue)) // We are going to accept an InvalidValue error
                         {
                             LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) and an invalid value error: {deviceResponse.ErrorMessage}", responseString);
                         }
-                        // Did not get the expected response so log this as an issue
-                        else
+                        else // Did not get the expected response so log this as an issue
                         {
                             string expectedCodeList = "";
                             foreach (HttpStatusCode statusCode in expectedCodes)

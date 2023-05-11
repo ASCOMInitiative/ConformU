@@ -30,7 +30,8 @@ namespace ConformU
         private static ConformLogger conformLogger;
         private static ConformStateManager conformStateManager;
         private static ConformConfiguration conformConfiguration;
-        private static int returnCode = 0;
+
+        #region Windows DLL imports
 
 #if WINDOWS
         [LibraryImport("kernel32.dll")]
@@ -43,6 +44,13 @@ namespace ConformU
         const int SW_SHOWMINIMIZED = 2;
 #endif
 
+        #endregion
+
+        /// <summary>
+        /// Entry point for the application
+        /// </summary>
+        /// <param name="args">COmmand line arguments supplied by the user</param>
+        /// <returns>Integer 0 for success, negative values for errors and positive values indicating the number of Conformance or Alpaca Protocol check errors and issues</returns>
         public static async Task<int> Main(string[] args)
         {
             try
@@ -59,11 +67,11 @@ namespace ConformU
                 // Define other commands
                 var conformanceCommand = new Command("conformance", "Check the specified device for ASCOM device interface conformance");
 
-                var alpacaCommand = new Command("alpaca", "Check the specified device for Alpaca protocol conformance");
+                var alpacaProtocolCommand = new Command("alpacaprotocol", "Check the specified device for Alpaca protocol conformance");
 
-                var conformanceSettingsCommand = new Command("conformance-settings", "Check the device configured in the settings file for ASCOM device interface conformance");
+                var conformanceUsingSettingsCommand = new Command("conformance-settings", "Check the device configured in the settings file for ASCOM device interface conformance");
 
-                var alpacaSettingsCommand = new Command("alpaca-settings", "Check the device configured in the settings file for Alpaca protocol conformance");
+                var alpacaUsingSettingsCommand = new Command("alpacaprotocol-settings", "Check the device configured in the settings file for Alpaca protocol conformance");
 
                 var guiCommand = new Command("gui", "Start Conform Universal as an interactive GUI application with options to change the log file, results file and settings file locations");
 
@@ -71,7 +79,7 @@ namespace ConformU
 
                 #region Argument definitions
 
-                // Define arguments that can be applied to commands
+                // Define an argument to represent a CXOM ProgID or an Alpaca URI
                 Argument<string> deviceArgument = new(
                     name: "COM_ProgID_or_Alpaca_URI",
                     description: "The device's COM ProgID (e.g. ASCOM.Simulator.Telescope) or its Alpaca URI (e.g. http://[host]:[port]/api/v1/[DeviceType]/[DeviceNumber]).\r\n" +
@@ -79,8 +87,6 @@ namespace ConformU
 
                 deviceArgument.AddValidator((commandResult) =>
                 {
-                    Console.WriteLine($"Validator called - Children.Count: {commandResult.Children.Count}, Symbol: {commandResult.GetValueForArgument(deviceArgument)}");
-
                     DeviceTechnology technology = GetDeviceTechnology(commandResult.GetValueForArgument(deviceArgument), out _, out _, out _, out _, out _);
 
                     if (technology == DeviceTechnology.NotSelected)
@@ -89,11 +95,10 @@ namespace ConformU
                     }
                     else
                     {
-                        Console.WriteLine($"Validated {technology} device successfully!");
                     }
                 });
 
-                // Define arguments that can be applied to commands
+                // Define an argument to represent an Alpaca URI
                 Argument<string> alpacaDeviceArgument = new(
                     name: "Alpaca_URI",
                     description: "The device's Alpaca URI (e.g. http://host:port/api/v1/[DeviceType]/[DeviceNumber]).\r\n" +
@@ -101,8 +106,6 @@ namespace ConformU
 
                 alpacaDeviceArgument.AddValidator((commandResult) =>
                 {
-                    Console.WriteLine($"Validator called - Children.Count: {commandResult.Children.Count}, Symbol: {commandResult.GetValueForArgument(alpacaDeviceArgument)}");
-
                     DeviceTechnology technology = GetDeviceTechnology(commandResult.GetValueForArgument(alpacaDeviceArgument), out _, out _, out _, out _, out _);
 
                     if (technology == DeviceTechnology.NotSelected)
@@ -111,7 +114,6 @@ namespace ConformU
                     }
                     else
                     {
-                        Console.WriteLine($"Validated {technology} device successfully!");
                     }
                 });
 
@@ -176,35 +178,11 @@ namespace ConformU
 
                 // Add commands and options to the root command
                 rootCommand.AddCommand(conformanceCommand);
-                rootCommand.AddCommand(alpacaCommand);
-                rootCommand.AddCommand(conformanceSettingsCommand);
-                rootCommand.AddCommand(alpacaSettingsCommand);
+                rootCommand.AddCommand(alpacaProtocolCommand);
+                rootCommand.AddCommand(conformanceUsingSettingsCommand);
+                rootCommand.AddCommand(alpacaUsingSettingsCommand);
                 rootCommand.AddCommand(guiCommand);
                 rootCommand.AddOption(versionOption);
-
-                // Add options to the start ConformU with an interactive GUI command
-                guiCommand.AddOption(logFileNameOption);
-                guiCommand.AddOption(logFilePathOption);
-                guiCommand.AddOption(debugDiscoveryOption);
-                guiCommand.AddOption(debugStartUpOption);
-                guiCommand.AddOption(resultsFileOption);
-                guiCommand.AddOption(settingsFileOption);
-
-                // Add options to the check Alpaca protocol settings command
-                alpacaSettingsCommand.AddOption(settingsFileOption);
-                alpacaSettingsCommand.AddOption(logFileNameOption);
-                alpacaSettingsCommand.AddOption(logFilePathOption);
-                alpacaSettingsCommand.AddOption(resultsFileOption);
-                alpacaSettingsCommand.AddOption(debugDiscoveryOption);
-                alpacaSettingsCommand.AddOption(debugStartUpOption);
-
-                // Add options to the check conformance settings command
-                conformanceSettingsCommand.AddOption(settingsFileOption);
-                conformanceSettingsCommand.AddOption(logFileNameOption);
-                conformanceSettingsCommand.AddOption(logFilePathOption);
-                conformanceSettingsCommand.AddOption(resultsFileOption);
-                conformanceSettingsCommand.AddOption(debugDiscoveryOption);
-                conformanceSettingsCommand.AddOption(debugStartUpOption);
 
                 // Add arguments and options to the conformance command
                 conformanceCommand.AddArgument(deviceArgument);
@@ -216,17 +194,41 @@ namespace ConformU
                 conformanceCommand.AddOption(debugStartUpOption);
 
                 // Add arguments and options to the alpaca command
-                alpacaCommand.AddArgument(alpacaDeviceArgument);
-                alpacaCommand.AddOption(settingsFileOption);
-                alpacaCommand.AddOption(logFileNameOption);
-                alpacaCommand.AddOption(logFilePathOption);
-                alpacaCommand.AddOption(resultsFileOption);
-                alpacaCommand.AddOption(debugDiscoveryOption);
-                alpacaCommand.AddOption(debugStartUpOption);
+                alpacaProtocolCommand.AddArgument(alpacaDeviceArgument);
+                alpacaProtocolCommand.AddOption(settingsFileOption);
+                alpacaProtocolCommand.AddOption(logFileNameOption);
+                alpacaProtocolCommand.AddOption(logFilePathOption);
+                alpacaProtocolCommand.AddOption(resultsFileOption);
+                alpacaProtocolCommand.AddOption(debugDiscoveryOption);
+                alpacaProtocolCommand.AddOption(debugStartUpOption);
+
+                // Add options to the check Alpaca protocol settings command
+                alpacaUsingSettingsCommand.AddOption(settingsFileOption);
+                alpacaUsingSettingsCommand.AddOption(logFileNameOption);
+                alpacaUsingSettingsCommand.AddOption(logFilePathOption);
+                alpacaUsingSettingsCommand.AddOption(resultsFileOption);
+                alpacaUsingSettingsCommand.AddOption(debugDiscoveryOption);
+                alpacaUsingSettingsCommand.AddOption(debugStartUpOption);
+
+                // Add options to the check conformance settings command
+                conformanceUsingSettingsCommand.AddOption(settingsFileOption);
+                conformanceUsingSettingsCommand.AddOption(logFileNameOption);
+                conformanceUsingSettingsCommand.AddOption(logFilePathOption);
+                conformanceUsingSettingsCommand.AddOption(resultsFileOption);
+                conformanceUsingSettingsCommand.AddOption(debugDiscoveryOption);
+                conformanceUsingSettingsCommand.AddOption(debugStartUpOption);
+
+                // Add options to the start ConformU with an interactive GUI command
+                guiCommand.AddOption(logFileNameOption);
+                guiCommand.AddOption(logFilePathOption);
+                guiCommand.AddOption(debugDiscoveryOption);
+                guiCommand.AddOption(debugStartUpOption);
+                guiCommand.AddOption(resultsFileOption);
+                guiCommand.AddOption(settingsFileOption);
 
                 #endregion
 
-                // Create a custom parser what does not present the default version description
+                // Create a custom parser that does not present the default version description
                 Parser parser = new CommandLineBuilder(rootCommand)
                        //.UseDefaults()
                        //.UseVersionOption()
@@ -241,15 +243,15 @@ namespace ConformU
                        .CancelOnProcessTermination()
                        .Build();
 
-                // Add the root command handler to start the GUI and display version information
+                // Add the root command handler to start the GUI or display version information
                 rootCommand.SetHandler((bool version) =>
                 {
                     // Return a task with the required return code
-                    return Task.FromResult(RunRootCommand(version));
+                    return Task.FromResult(RootCommands(version));
                 }, versionOption);
 
                 // Add the conformance settings command handler
-                conformanceSettingsCommand.SetHandler((file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
+                conformanceUsingSettingsCommand.SetHandler((file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
                 {
                     int returnCode = -8888;
 
@@ -257,7 +259,7 @@ namespace ConformU
                     InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
 
                     // Run the conformance test
-                    returnCode = RunConformanceSettings();
+                    returnCode = RunConformanceTest();
 
                     // Return the return code
                     return Task.FromResult(returnCode);
@@ -267,8 +269,7 @@ namespace ConformU
                 // Add the conformance command handler
                 conformanceCommand.SetHandler((device, file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
                 {
-                    int returnCode = -8888;
-                    Console.WriteLine($"SetHandler called with argument {device}");
+                    int returnCode = 0;
 
                     DeviceTechnology technology = GetDeviceTechnology(device, out ServiceType? serviceType, out string address, out int port, out DeviceTypes? deviceType, out int deviceNumber);
 
@@ -279,8 +280,6 @@ namespace ConformU
                             break;
 
                         case DeviceTechnology.Alpaca:
-                            Console.WriteLine($"Alpaca Device: {device}, Device type: {deviceType.Value}");
-
                             // Initialise required variables required by several commands
                             InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
 
@@ -291,12 +290,10 @@ namespace ConformU
                             conformConfiguration.SetAlpacaDevice(serviceType.Value, address, port, deviceType.Value, deviceNumber);
 
                             // Run the conformance test
-                            returnCode = RunConformanceSettings();
+                            returnCode = RunConformanceTest();
                             break;
 
                         case DeviceTechnology.COM:
-                            Console.WriteLine($"COM Device: {device}, Device type: {deviceType.Value}");
-
                             // Initialise required variables required by several commands
                             InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
 
@@ -307,7 +304,7 @@ namespace ConformU
                             conformConfiguration.SetComDevice(device, deviceType.Value);
 
                             // Run the conformance test
-                            returnCode = RunConformanceSettings();
+                            returnCode = RunConformanceTest();
                             break;
 
                         default:
@@ -321,10 +318,9 @@ namespace ConformU
                 }, deviceArgument, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption);
 
                 // Add the alpaca command handler
-                alpacaCommand.SetHandler((alpacaDevice, file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
+                alpacaProtocolCommand.SetHandler((alpacaDevice, file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
                 {
-                    int returnCode = -8888;
-                    Console.WriteLine($"SetHandler called with argument: '{alpacaDevice}'");
+                    int returnCode = 0;
 
                     DeviceTechnology technology = GetDeviceTechnology(alpacaDevice, out ServiceType? serviceType, out string address, out int port, out DeviceTypes? deviceType, out int deviceNumber);
 
@@ -335,8 +331,6 @@ namespace ConformU
                             break;
 
                         case DeviceTechnology.Alpaca:
-                            Console.WriteLine($"Alpaca Device: {alpacaDevice}, Device type: {deviceType.Value}");
-
                             // Initialise required variables required by several commands
                             InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
 
@@ -347,7 +341,7 @@ namespace ConformU
                             conformConfiguration.SetAlpacaDevice(serviceType.Value, address, port, deviceType.Value, deviceNumber);
 
                             // Run the conformance test
-                            returnCode = RunAlpacaSettings();
+                            returnCode = RunAlpacaProtocolTest();
                             break;
 
                         case DeviceTechnology.COM:
@@ -365,11 +359,11 @@ namespace ConformU
                 }, alpacaDeviceArgument, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption);
 
                 // Add the command line Alpaca protocol check handler
-                alpacaSettingsCommand.SetHandler((file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
+                alpacaUsingSettingsCommand.SetHandler((file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
                 {
                     InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
                     // Return a task with the required return code
-                    return Task.FromResult(RunAlpacaSettings());
+                    return Task.FromResult(RunAlpacaProtocolTest());
 
                 }, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption);
 
@@ -377,7 +371,7 @@ namespace ConformU
                 guiCommand.SetHandler((file, path, results, settings, debugDiscovery, debugStartUp) =>
                 {
                     // Return a task with the required return code
-                    return Task.FromResult(RunGuiCommand(file, path, debugStartUp, debugDiscovery, results, settings));
+                    return Task.FromResult(StartGui(file, path, debugStartUp, debugDiscovery, results, settings));
                 }, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption);
 
                 // Parse the command line and invoke actions as determined by supplied parameters
@@ -401,7 +395,7 @@ namespace ConformU
         /// <param name="debugDiscovery"></param>
         /// <param name="resultsFile"></param>
         /// <param name="settingsFile"></param>
-        static int RunRootCommand(bool version)
+        static int RootCommands(bool version)
         {
             if (version)
             {
@@ -412,7 +406,6 @@ namespace ConformU
                 // Initialise required variables required by several commands
                 InitialiseVariables(null, null, false, false, null, null);
 
-                Console.WriteLine($"Running Conform Universal as a GUI application.");
                 // Start a task to check whether any updates are available, if configured to do so.
                 // The update check is started here to give the maximum time to get a result before the UI is first displayed
                 if (conformConfiguration.Settings.UpdateCheck)
@@ -467,12 +460,11 @@ namespace ConformU
         /// <param name="debugDiscovery"></param>
         /// <param name="resultsFile"></param>
         /// <param name="settingsFile"></param>
-        static int RunGuiCommand(FileInfo file, string path, bool debugStartUp, bool debugDiscovery, FileInfo resultsFile, FileInfo settingsFile)
+        static int StartGui(FileInfo file, string path, bool debugStartUp, bool debugDiscovery, FileInfo resultsFile, FileInfo settingsFile)
         {
             // Initialise required variables required by several commands
             InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
 
-            Console.WriteLine($"Running Conform Universal as a GUI application.");
             // Start a task to check whether any updates are available, if configured to do so.
             // The update check is started here to give the maximum time to get a result before the UI is first displayed
             if (conformConfiguration.Settings.UpdateCheck)
@@ -516,12 +508,9 @@ namespace ConformU
             return 0;
         }
 
-        static int RunConformanceSettings()
+        static int RunConformanceTest()
         {
-            Console.WriteLine($"Running Conform Universal as a Console application.");
-
-            foreach (string s in argList)
-            { Console.WriteLine($"ARG = '{s}'"); }
+            int returnCode;
 
             // Validate the supplied configuration and only start if there are no settings issues
             string validationMessage = conformConfiguration.Validate();
@@ -544,7 +533,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"StartTest - Exception: \r\n {ex}");
+                    Console.WriteLine($"RunConformanceTest - Exception: \r\n {ex}");
                     returnCode = ex.HResult;
                 }
             }
@@ -554,15 +543,9 @@ namespace ConformU
             return returnCode;
         }
 
-        static int RunAlpacaSettings()
+        static int RunAlpacaProtocolTest()
         {
-            // Initialise required variables required by several commands
-            //InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
-
-            Console.WriteLine($"Running Conform Universal as a Console application.");
-
-            foreach (string s in argList)
-            { Console.WriteLine($"ARG = '{s}'"); }
+            int returnCode;
 
             // Validate the supplied configuration and only start if there are no settings issues
             string validationMessage = conformConfiguration.Validate();
@@ -577,18 +560,18 @@ namespace ConformU
             CancellationToken cancelConformToken = cancellationTokenSource.Token;
 
             // Create a test manager instance to oversee the test
-
-            AlpacaProtocolTestManager alpacaTestManager = new(conformConfiguration, conformLogger, cancellationTokenSource, cancelConformToken);
-
-            int returnCode = -99997;
-            try
+            using (AlpacaProtocolTestManager alpacaTestManager = new(conformConfiguration, conformLogger, cancellationTokenSource, cancelConformToken))
             {
-                returnCode = alpacaTestManager.TestAlpacaProtocol().Result;
-            }
-            catch (Exception ex)
-            {
-                returnCode = -99998;
-                Console.WriteLine($"Error running the Alpaca protocol test:\r\n{ex}");
+
+                try
+                {
+                    returnCode = alpacaTestManager.TestAlpacaProtocol().Result;
+                }
+                catch (Exception ex)
+                {
+                    returnCode = ex.HResult;
+                    Console.WriteLine($"Error running the Alpaca protocol test:\r\n{ex}");
+                }
             }
 
             GC.Collect();
@@ -656,7 +639,6 @@ namespace ConformU
             if (!string.IsNullOrEmpty(resultsFileInfo?.FullName)) conformConfiguration.Settings.ResultsFileName = resultsFileInfo.FullName;
 
             // Pass in the blazor server connection timeout
-            Console.WriteLine($"Server connection timeout: {conformConfiguration.Settings.ConnectionTimeout}");
             argList.Add($"--{COMMAND_OPTION_CONNECTION_TIMEOUT}");
             argList.Add(conformConfiguration.Settings.ConnectionTimeout.ToString());
 
@@ -675,7 +657,6 @@ namespace ConformU
 
                         string baseFolder64 = AppContext.BaseDirectory;
                         string executable32 = Path.Join(baseFolder64.Replace("64", "32"), "conformu.exe");
-                        Console.WriteLine($"Base directory: {AppContext.BaseDirectory}, EXE32: {executable32}");
 
                         // Don't try to run the 32bit application in the development environment!
                         if (!baseFolder64.Contains("\\bin\\"))
@@ -707,6 +688,7 @@ namespace ConformU
 
             #endregion
         }
+
         public static IHostBuilder CreateHostBuilder(ConformLogger conformLogger, ConformStateManager conformStateManager, ConformConfiguration conformConfiguration, string[] args)
         {
             IHostBuilder builder = null;
@@ -784,12 +766,10 @@ namespace ConformU
 
             // Test whether the device is an Alpaca device by testing whether the device description matches the expected pattern using a regex expression
             string alpacaPattern = @"^(?i)(?<Protocol>https?):\/\/(?<Address>[a-zA-Z0-9.]*|\[?[0-9A-F:]*\]?):?(?<Port>[0-9]{0,5})(?-i)\/api\/v1\/(?<DeviceType>" + deviceList + @")\/(?<DeviceNumber>[0-9])\/?(?<Remainder>[0-9a-zA-Z]*)";
-            Console.WriteLine($"Alpaca pattern:\r\n{alpacaPattern}");
 
             Match alpacaMatch = Regex.Match(progIdOrUri, alpacaPattern, RegexOptions.CultureInvariant);
             if (alpacaMatch.Success) // This is an Alpaca URI
             {
-                Console.WriteLine($"Alpaca match succeeded for '{progIdOrUri}'");
                 serviceType = alpacaMatch.Groups["Protocol"].Value.ToLowerInvariant() == "http" ? ServiceType.Http : ServiceType.Https;
                 address = alpacaMatch.Groups["Address"].Value;
                 port = Convert.ToInt32(alpacaMatch.Groups["Port"].Value);
@@ -797,19 +777,15 @@ namespace ConformU
 
                 deviceType = Devices.StringToDeviceType(alpacaMatch.Groups["DeviceType"].Value);
 
-                Console.WriteLine($"  Protocol: {serviceType}, Address: {address}, Port: {port}, Device type: {deviceType}, Device number: {deviceNumber}");
                 returnValue = DeviceTechnology.Alpaca;
             }
             else // Not an Alpaca device so test for a COM ProgID
             {
-                Console.WriteLine($"Alpaca device match failed for '{progIdOrUri}', testing for COM ProgID");
                 string progIdPattern = @"^(?i)(?<DeviceName>[a-z0-9.]*)\.(?<DeviceType>" + deviceList + @")";
                 Match comMatch = Regex.Match(progIdOrUri, progIdPattern, RegexOptions.CultureInvariant);
                 if (comMatch.Success) // This is an COM ProgID
                 {
-                    Console.WriteLine($"ProgID match succeeded for '{progIdOrUri}'");
                     deviceType = Devices.StringToDeviceType(comMatch.Groups["DeviceType"].Value);
-                    Console.WriteLine($"  Device type: {deviceType}");
                     returnValue = DeviceTechnology.COM;
                 }
                 else
@@ -819,8 +795,6 @@ namespace ConformU
                 }
 
             }
-
-
 
             return returnValue;
         }

@@ -32,10 +32,6 @@ namespace ConformU
                     {
                         // Trim white space from the message before we start
                         string messageMultiLines = "";
-
-                        //Console.WriteLine("012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789 Length > maxLineLength");
-                        //Console.WriteLine(messageTrimmed);
-
                         int thisBreakPosition = 0;
                         int lastBreakPosition = 0;
                         while (messageTrimmed.Length > lastBreakPosition + maxLineLength)
@@ -43,15 +39,9 @@ namespace ConformU
                             thisBreakPosition = messageTrimmed.LastIndexOf(" ", lastBreakPosition + maxLineLength);
                             string thisLine = messageTrimmed.Substring(lastBreakPosition, thisBreakPosition - lastBreakPosition).Trim();
                             messageMultiLines = $"{messageMultiLines}\r\n{padString}{thisLine}";
-                            //Console.WriteLine("012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789 Loop");
-                            //Console.WriteLine(messageTrimmed.Substring(lastBreakPosition, thisBreakPosition - lastBreakPosition));
-                            //Console.WriteLine($"Screen log columns: {screenLogColumns}, Max line length: {maxLineLength}, This break position: {thisBreakPosition}, Last break position: {lastBreakPosition}, Message length: {message.Length}");
-                            //Console.WriteLine("012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789 Loop");
-                            //Console.WriteLine(messageMultiLines);
                             lastBreakPosition = thisBreakPosition;
                         }
 
-                        //Console.WriteLine("012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789 Final");
                         message = $"{messageMultiLines}\r\n{padString}{messageTrimmed.Substring(thisBreakPosition + 1)}"; // Add the remaining characters
                     }
                 }
