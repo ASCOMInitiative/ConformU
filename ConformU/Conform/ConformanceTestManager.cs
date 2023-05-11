@@ -431,7 +431,6 @@ namespace ConformU
 
         protected virtual void Dispose(bool disposing)
         {
-            Console.WriteLine($"ConformanceTestManager.Dispose() {disposing}");
             if (!disposedValue)
             {
                 if (disposing)
@@ -443,8 +442,6 @@ namespace ConformU
                     }
                 }
 
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
                 disposedValue = true;
             }
         }
