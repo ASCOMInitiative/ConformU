@@ -777,7 +777,7 @@ namespace ConformU
                 TimeSpan duration = DateTime.Now.Subtract(startTime);
 
                 // Test whether the Move will be treated as synchronous or asynchronous
-                if (duration.TotalMilliseconds <= MOVE_SYNC_TEST_TIME) // The Move command duration was more than the configured time, so assume a synchronous call
+                if (duration.TotalMilliseconds > MOVE_SYNC_TEST_TIME) // The Move command duration was more than the configured time, so assume a synchronous call
                 {
                     LogDebug(testName, $"Synchronous call behaviour - the call returned in {duration.TotalSeconds} seconds.");
 
