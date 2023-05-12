@@ -12,6 +12,9 @@ namespace ConformU
 {
     internal class FocuserTester : DeviceTesterBaseClass
     {
+        // Focuser moves can be synchronous or asynchronous and the duration of the Move command is used to differentiate the two behaviours.
+        // If the Move completes within the SYNC_TEST_TIME the move is considered to be asynchronous and it takes longer it will be assumed to be synchronous
+        private const int  MOVE_SYNC_TEST_TIME = 1000; // Duration of a Move command beyond which the move is considered synchronous (Seconds)
 
         enum FocuserPropertyMethod
         {
@@ -745,7 +748,7 @@ namespace ConformU
 
         public void MoveFocuserToPosition(string testName, int newPosition)
         {
-            DateTime l_StartTime, l_EndTime;
+            DateTime startTime, endTime;
 
             LogDebug(testName, $"New position: {newPosition}");
 
@@ -768,19 +771,22 @@ namespace ConformU
                 }
 
                 SetAction(testName);
-                l_StartTime = DateTime.Now;
+                startTime = DateTime.Now;
                 LogCallToDriver(testName, "About to call Move method");
                 focuser.Move(newPosition); // Move the focuser
-                l_EndTime = DateTime.Now;
+                TimeSpan duration = DateTime.Now.Subtract(startTime);
 
-                if (l_EndTime.Subtract(l_StartTime).TotalMilliseconds > 1000) // Move took more than 1 second so assume a synchronous call
+                // Test whether the Move will be treated as synchronous or asynchronous
+                if (duration.TotalMilliseconds <= MOVE_SYNC_TEST_TIME) // The Move command duration was more than the configured time, so assume a synchronous call
                 {
-                    LogDebug(testName, $"Synchronous call behaviour");
+                    LogDebug(testName, $"Synchronous call behaviour - the call returned in {duration.TotalSeconds} seconds.");
+
                     // Confirm that IsMoving is false
                     LogCallToDriver(testName, "About to get IsMoving property");
                     if (focuser.IsMoving)
                     {
-                        LogIssue(testName, "Synchronous move expected but focuser is moving after return from Focuser.Move");
+                        LogIssue(testName, $"The Move method took {duration.TotalSeconds:0.000} seconds to complete and was assumed to be synchronous, but the IsMoving property returned TRUE after the Move completed.");
+                        LogInfo(testName, $"The move was assumed to be synchronous because the Move method duration exceeded Conform's built-in sync/async test time of {MOVE_SYNC_TEST_TIME/1000:0.000} seconds.");
                         if (m_Absolute)
                         {
                             WaitWhile($"Moving focuser", () => { return focuser.IsMoving; }, 500, settings.FocuserTimeout, () => { return $"{focuser.Position} / {newPosition}"; }); // Wait for move to complete
