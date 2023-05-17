@@ -167,21 +167,22 @@ namespace ConformU
         {
             get
             {
-                LogCallToDriver("Connected", "About to get Connected property");
+                LogCallToDriver("ConformanceCheck", "About to get Connected");
                 return focuser.Connected;
             }
             set
             {
-                try
+                LogCallToDriver("ConformanceCheck", "About to set Connected");
+                SetTest("Connected");
+                SetAction("Waiting for Connected to become 'true'");
+                focuser.Connected = value;
+                ResetTestActionStatus();
+
+                // Make sure that the value set is reflected in Connected GET
+                bool connectedState = Connected;
+                if (connectedState != value)
                 {
-                    LogDebug("Connected", "Setting connected state to: " + value.ToString());
-                    LogCallToDriver("Connected", "About to set Link property");
-                    focuser.Connected = value;
-                    LogDebug("AccessChecks", "Successfully changed connected state");
-                }
-                catch (Exception ex)
-                {
-                    LogIssue("Connected", "Error changing focuser connected state: " + ex.ToString());
+                    throw new ASCOM.InvalidOperationException($"Connected was set to {value} but Connected Get returned {connectedState}.");
                 }
             }
         }

@@ -81,22 +81,22 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 ; 64bit OS - Install the 64bit app
-Source: "J:\ConformU\publish\ConformU64\*.exe"; DestDir: "{app}\64bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
-Source: "J:\ConformU\publish\ConformU64\*.dll"; DestDir: "{app}\64bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
-Source: "J:\ConformU\publish\ConformU64\*"; DestDir: "{app}\64bit"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode
-Source: "J:\ConformU\publish\ConformU64\wwwroot\*"; DestDir: "{app}\64bit\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
+Source: "..\publish\ConformU64\*.exe"; DestDir: "{app}\64bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
+Source: "..\publish\ConformU64\*.dll"; DestDir: "{app}\64bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
+Source: "..\publish\ConformU64\*"; DestDir: "{app}\64bit"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode
+Source: "..\publish\ConformU64\wwwroot\*"; DestDir: "{app}\64bit\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
 
 ; 64bit OS - Install the 32bit app
-Source: "J:\ConformU\publish\ConformU86\*.exe"; DestDir: "{app}\32bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
-Source: "J:\ConformU\publish\ConformU86\*.dll"; DestDir: "{app}\32bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
-Source: "J:\ConformU\publish\ConformU86\*"; DestDir: "{app}\32bit"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode
-Source: "J:\ConformU\publish\ConformU86\wwwroot\*"; DestDir: "{app}\32bit\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
+Source: "..\publish\ConformU86\*.exe"; DestDir: "{app}\32bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
+Source: "..\publish\ConformU86\*.dll"; DestDir: "{app}\32bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
+Source: "..\publish\ConformU86\*"; DestDir: "{app}\32bit"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode
+Source: "..\publish\ConformU86\wwwroot\*"; DestDir: "{app}\32bit\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
 
 ; 32bit OS - Install the 32bit app
-Source: "J:\ConformU\publish\ConformU86\*.exe"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: not Is64BitInstallMode
-Source: "J:\ConformU\publish\ConformU86\*.dll"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: not Is64BitInstallMode
-Source: "J:\ConformU\publish\ConformU86\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: not Is64BitInstallMode
-Source: "J:\ConformU\publish\ConformU86\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: not Is64BitInstallMode
+Source: "..\publish\ConformU86\*.exe"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: not Is64BitInstallMode
+Source: "..\publish\ConformU86\*.dll"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: not Is64BitInstallMode
+Source: "..\publish\ConformU86\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: not Is64BitInstallMode
+Source: "..\publish\ConformU86\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: not Is64BitInstallMode
 
 [Icons]
 ; 64bit OS

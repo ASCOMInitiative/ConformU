@@ -8,9 +8,9 @@ cd
 cd J:\ConformU
 
 echo *** Build application
-MSBuild "J:\ConformU\ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Restore 
+MSBuild "ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Restore 
 cd
-MSBuild "J:\ConformU\ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Rebuild
+MSBuild "ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Rebuild
 echo *** Completed Build
 
 echo *** Publishing Windows 64bit
@@ -26,7 +26,7 @@ echo *** Completed setting large address aware flag on 32bit EXE
 
 echo *** Creating Windows installer
 cd WindowsInstaller
-"C:\Program Files (x86)\Inno Script Studio\isstudio.exe" -compile "J:\ConformU\WindowsInstaller\conformu.iss"
+"C:\Program Files (x86)\Inno Script Studio\isstudio.exe" -compile "conformu.iss"
 cd ..
 
 echo *** Builds complete

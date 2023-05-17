@@ -443,17 +443,23 @@ namespace ConformU
         {
             get
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to get Connected property");
-                bool ConnectedRet = telescopeDevice.Connected;
-                return ConnectedRet;
+                LogCallToDriver("ConformanceCheck", "About to get Connected");
+                return telescopeDevice.Connected;
             }
-
             set
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set Connected property " + value.ToString());
+                LogCallToDriver("ConformanceCheck", "About to set Connected");
+                SetTest("Connected");
+                SetAction("Waiting for Connected to become 'true'");
                 telescopeDevice.Connected = value;
+                ResetTestActionStatus();
+
+                // Make sure that the value set is reflected in Connected GET
+                bool connectedState = Connected;
+                if (connectedState != value)
+                {
+                    throw new ASCOM.InvalidOperationException($"Connected was set to {value} but Connected Get returned {connectedState}.");
+                }
             }
         }
 

@@ -235,13 +235,23 @@ namespace ConformU
         {
             get
             {
-                LogCallToDriver("Absolute", "About to get Connected property");
+                LogCallToDriver("ConformanceCheck", "About to get Connected");
                 return m_ObservingConditions.Connected;
             }
             set
             {
-                LogCallToDriver("Absolute", "About to set Connected property");
+                LogCallToDriver("ConformanceCheck", "About to set Connected");
+                SetTest("Connected");
+                SetAction("Waiting for Connected to become 'true'");
                 m_ObservingConditions.Connected = value;
+                ResetTestActionStatus();
+
+                // Make sure that the value set is reflected in Connected GET
+                bool connectedState = Connected;
+                if (connectedState != value)
+                {
+                    throw new ASCOM.InvalidOperationException($"Connected was set to {value} but Connected Get returned {connectedState}.");
+                }
             }
         }
 

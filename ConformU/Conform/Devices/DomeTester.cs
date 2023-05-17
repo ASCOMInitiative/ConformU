@@ -200,14 +200,23 @@ namespace ConformU
         {
             get
             {
-                LogCallToDriver("Connected", "About to get Connected property");
+                LogCallToDriver("ConformanceCheck", "About to get Connected");
                 return domeDevice.Connected;
             }
             set
             {
-                LogCallToDriver("Connected", "About to set Connected property");
+                LogCallToDriver("ConformanceCheck", "About to set Connected");
+                SetTest("Connected");
+                SetAction("Waiting for Connected to become 'true'");
                 domeDevice.Connected = value;
+                ResetTestActionStatus();
 
+                // Make sure that the value set is reflected in Connected GET
+                bool connectedState = Connected;
+                if (connectedState != value)
+                {
+                    throw new ASCOM.InvalidOperationException($"Connected was set to {value} but Connected Get returned {connectedState}.");
+                }
             }
         }
         public override void CheckCommonMethods()
