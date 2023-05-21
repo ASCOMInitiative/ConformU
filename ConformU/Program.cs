@@ -656,7 +656,7 @@ namespace ConformU
                         // Restart ConformU using the 32bit executable
 
                         string baseFolder64 = AppContext.BaseDirectory;
-                        string executable32 = Path.Join(baseFolder64.Replace("64", "32"), "conformu.exe");
+                        string executable32 = Path.Join(baseFolder64,"32Bit", "conformu.exe");
 
                         // Don't try to run the 32bit application in the development environment!
                         if (!baseFolder64.Contains("\\bin\\"))

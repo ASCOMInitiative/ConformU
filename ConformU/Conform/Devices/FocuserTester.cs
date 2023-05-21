@@ -749,7 +749,7 @@ namespace ConformU
 
         public void MoveFocuserToPosition(string testName, int newPosition)
         {
-            DateTime startTime, endTime;
+            DateTime startTime;
 
             LogDebug(testName, $"New position: {newPosition}");
 

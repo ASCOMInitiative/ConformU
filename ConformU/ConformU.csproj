@@ -10,6 +10,17 @@
 	</PropertyGroup>
 	<Target Name="Test" AfterTargets="AfterBuild">
 		<Message Importance="High" Text=" Version: $(ProductMajor).$(ProductMinor).$(ProductPatch).$(BuildNumber)" />
+		<Message Importance="High" Text=" InformationalVersion: $(InformationalVersion)" />
+	</Target>
+	<Target Name="WriteInformationVersion" AfterTargets="CopyFilesToOutputDirectory">
+		<PropertyGroup>
+			<InfoVersion>$(InformationalVersion)</InfoVersion>
+		</PropertyGroup>
+
+		<WriteLinesToFile
+		  File="$(PublishDir)..\InformationVersion.txt"
+		  Overwrite="true"
+		  Lines="$(InfoVersion)" />
 	</Target>
 	<PropertyGroup>
 		<!-- Set version numbers -->
