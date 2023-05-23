@@ -116,6 +116,7 @@ Source: "..\publish\ConformU86\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: igno
 
 [Icons]
 Name: "{autoprograms}\ASCOM Conform Universal"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\ASCOM.ico"
+Name: "{autodesktop}\Conform Universal"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\ASCOM.ico"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
