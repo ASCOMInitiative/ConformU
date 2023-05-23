@@ -3205,6 +3205,7 @@ namespace ConformU
                             // Record the error
                             LogIssue("ImageArray", $"Error getting ImageArray: {ex.Message}");
                             LogDebug("ImageArray", $"Exception detail:\r\n {ex}");
+                            throw;
                         }
                     }
                 }, iaToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -3252,7 +3253,28 @@ namespace ConformU
                             break;
 
                         case TaskStatus.RanToCompletion: // The ImageArray method completed OK within the specified timeout period.
-                                                         // No action here because the gotImageArrayOk flag is set by the code within the task
+                            // Test image array variant array for conformity
+                            if ((m_ImageArray.GetLength(0) == requiredNumX) & (m_ImageArray.GetLength(1) == requiredNumY))
+                            {
+                                if (m_ImageArray.GetType().ToString() == "System.Int32[,]" | m_ImageArray.GetType().ToString() == "System.Int32[,,]")
+                                {
+                                    if (m_ImageArray.Rank == 2)
+                                        numPlanes = "1 plane";
+                                    else
+                                    {
+                                        numPlanes = "1 plane";
+                                        if (m_ImageArray.GetUpperBound(2) > 0)
+                                            numPlanes = System.Convert.ToString(m_ImageArray.GetUpperBound(2) + 1) + " planes";
+                                    }
+                                    LogOK("ImageArray", $"Successfully read 32 bit integer array ({numPlanes}) {m_ImageArray.GetLength(0)} x {m_ImageArray.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
+                                }
+                                else
+                                    LogIssue("ImageArray", "Expected 32 bit integer array, actually got: " + m_ImageArray.GetType().ToString());
+                            }
+                            else if ((m_ImageArray.GetLength(0) == requiredNumY) & (m_ImageArray.GetLength(1) == requiredNumX))
+                                LogIssue("ImageArray", "Camera image dimensions swapped, expected values: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
+                            else
+                                LogIssue("ImageArray", "Camera image does not have the expected dimensions of: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
                             break;
                     }
                 }
@@ -3284,28 +3306,6 @@ namespace ConformU
                     return;
                 }
 
-                // Test image array variant array for conformity
-                if ((m_ImageArray.GetLength(0) == requiredNumX) & (m_ImageArray.GetLength(1) == requiredNumY))
-                {
-                    if (m_ImageArray.GetType().ToString() == "System.Int32[,]" | m_ImageArray.GetType().ToString() == "System.Int32[,,]")
-                    {
-                        if (m_ImageArray.Rank == 2)
-                            numPlanes = "1 plane";
-                        else
-                        {
-                            numPlanes = "1 plane";
-                            if (m_ImageArray.GetUpperBound(2) > 0)
-                                numPlanes = System.Convert.ToString(m_ImageArray.GetUpperBound(2) + 1) + " planes";
-                        }
-                        LogOK("ImageArray", $"Successfully read 32 bit integer array ({numPlanes}) {m_ImageArray.GetLength(0)} x {m_ImageArray.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
-                    }
-                    else
-                        LogIssue("ImageArray", "Expected 32 bit integer array, actually got: " + m_ImageArray.GetType().ToString());
-                }
-                else if ((m_ImageArray.GetLength(0) == requiredNumY) & (m_ImageArray.GetLength(1) == requiredNumX))
-                    LogIssue("ImageArray", "Camera image dimensions swapped, expected values: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
-                else
-                    LogIssue("ImageArray", "Camera image does not have the expected dimensions of: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
             }
             catch (OutOfMemoryException ex)
             {
