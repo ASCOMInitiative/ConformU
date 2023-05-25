@@ -12,6 +12,7 @@
 <div class="sidebar">
     <NavMenu />
 </div>
+
 <div class="main">
     <div class="top-row px-4">
         <span>Current device -&nbsp;</span><span><b style="color: #0366d6">@deviceName &nbsp;</b></span><span>(@deviceTechnology @deviceType @((deviceTechnology == DeviceTechnology.Alpaca) ? alpacaDeviceNumber : ""))</span>
@@ -22,9 +23,12 @@
         @Body
     </div>
 </div>
-<div>
-    <RadzenNotification />
-</div>
+
+<RadzenDialog />
+<RadzenNotification />
+<RadzenContextMenu />
+<RadzenTooltip />
+
 @code
 {
     bool disposedValue;

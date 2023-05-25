@@ -49,6 +49,9 @@ namespace ConformU
 
             // Radzen services
             services.AddScoped<NotificationService>();
+            services.AddScoped<DialogService>();
+            services.AddScoped<TooltipService>();
+            services.AddScoped<ContextMenuService>();
 
             // Add event handler to detect when the browser closes
             services.AddSingleton<CircuitHandler, CircuitHandlerService>();

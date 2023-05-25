@@ -1,27 +1,28 @@
 ﻿@page "/"
+@inherits MethodsCommonToAllPages
 @implements IDisposable
 @using System.Threading
-@inject BrowserResizeService listener
-@inject ConformLogger conformLogger
-@inject ConformConfiguration configuration
-@inject ConformStateManager state
-@inject IJSRuntime JS
 @using ASCOM.Common
 @using Microsoft.Extensions.Configuration
 @using System.Reflection;
 @using Semver;
 @using System.Security.Principal;
-@inject IConfiguration Configuration
-@* Radzen notification service to enable pop-up alerts *@
-@inject NotificationService notificationService
-@inject NavigationManager UriHelper
+@inject BrowserResizeService _listener
+@inject ConformLogger _conformLogger
+@inject ConformConfiguration _configuration
+@inject ConformStateManager _state
+@inject NavigationManager _uriHelper
+@inject IJSRuntime JS
+@* Radzen services to enable pop-up alerts  and dialogues *@
+@inject NotificationService _notificationService
+@inject DialogService _dialogService
 
 <h2 style="display: @statusVisible">Welcome to Conform Universal!</h2>
 
 <div>
-    <RadzenButton Id="StartButton" Click=@(args => StartTest("Starting test")) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 130px" IsBusy=@configuration.Settings.OperationInProgress />
-    <RadzenButton Id="StopButton" Click=@(args => StopTest("Stopping test")) Text="Stop" Style="margin-bottom: 20px; margin-right: 20px; width: 130px" Disabled=@(!configuration.Settings.OperationInProgress) />
-    <RadzenButton Id="ConfigureButton" ButtonStyle="ButtonStyle.Info" Shade="Shade.Dark" Click=@(args => GoToSelectionPage("ConfigureButton")) Text="Select Device" Style="margin-bottom: 10px; margin-right: 10px; width: 130px;" Disabled=@configuration.Settings.OperationInProgress />
+    <RadzenButton Id="StartButton" Click=@(args => StartTest()) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 130px" IsBusy=@_configuration.Settings.OperationInProgress />
+    <RadzenButton Id="StopButton" Click=@(args => StopTest()) Text="Stop" Style="margin-bottom: 20px; margin-right: 20px; width: 130px" Disabled=@(!_configuration.Settings.OperationInProgress) />
+    <RadzenButton Id="ConfigureButton" ButtonStyle="ButtonStyle.Info" Shade="Shade.Dark" Click=@(args => GoToSelectionPage("ConfigureButton")) Text="Select Device" Style="margin-bottom: 10px; margin-right: 10px; width: 130px;" Disabled=@_configuration.Settings.OperationInProgress />
 </div>
 
 <h4>Conform Log</h4>
@@ -30,6 +31,7 @@
 <div style="display :@statusVisible">
     <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:20px; margin-right:20px; margin-top:8px" @bind-Value=@statusMessage />
 </div>
+
 
 @code {
     private string statusVisible = "initial";
@@ -48,37 +50,37 @@
     CancellationTokenSource cancellationTokenSource;
     CancellationToken cancelConformToken;
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
-        conformLogger.Debug = configuration.Settings.Debug;
-        state.UiHasChanged += OnUiHasChanged;
-        conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"Before Task.Run");
+        _conformLogger.Debug = _configuration.Settings.Debug;
+        _state.UiHasChanged += OnUiHasChanged;
+        _conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"Before Task.Run");
 
-        if (configuration.Settings.DeviceTechnology == DeviceTechnology.Alpaca)
+        if (_configuration.Settings.DeviceTechnology == DeviceTechnology.Alpaca)
         {
-            deviceDescription = $"Alpaca {configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope)}: {configuration.Settings.DeviceName} ({configuration.Settings.AlpacaDevice.HostName}:{configuration.Settings.AlpacaDevice.IpPort} - Device {configuration.Settings.AlpacaDevice.AlpacaDeviceNumber})";
+            deviceDescription = $"Alpaca {_configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope)}: {_configuration.Settings.DeviceName} ({_configuration.Settings.AlpacaDevice.HostName}:{_configuration.Settings.AlpacaDevice.IpPort} - Device {_configuration.Settings.AlpacaDevice.AlpacaDeviceNumber})";
         }
         else
         {
-            deviceDescription = $"COM {configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope)}: {configuration.Settings.DeviceName}";
+            deviceDescription = $"COM {_configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope)}: {_configuration.Settings.DeviceName}";
         }
 
-        screenLog = configuration.Status;
+        screenLog = _configuration.Status;
 
-        switch (configuration.Settings.DeviceType)
+        switch (_configuration.Settings.DeviceType)
         {
             case DeviceTypes.Dome:
                 screenLog += $"\r\n\r\nTo protect your equipment and the dome that is controlled by this driver:";
-                screenLog += $"\r\n1. The shutter will not open until enabled on the Dome tab in the Settings page. (Currently {(configuration.Settings.DomeOpenShutter ? "ENABLED" : "DISABLED")}.)";
-                screenLog += $"\r\n1. A stabilisation delay is added after each movement. (Currently {configuration.Settings.DomeStabilisationWaitTime} seconds.)";
+                screenLog += $"\r\n1. The shutter will not open until enabled on the Dome tab in the Settings page. (Currently {(_configuration.Settings.DomeOpenShutter ? "ENABLED" : "DISABLED")}.)";
+                screenLog += $"\r\n1. A stabilisation delay is added after each movement. (Currently {_configuration.Settings.DomeStabilisationWaitTime} seconds.)";
                 screenLog += $"\r\n   The delay can also be changed on the Dome tab in the Settings page.";
                 break;
 
             case DeviceTypes.Switch:
                 screenLog += $"\r\n\r\nTo protect the equipment that is controlled by this Switch driver:";
-                screenLog += $"\r\n1. Write tests are disabled until enabled on the Switch tab in the Settings page. (Currently {(configuration.Settings.SwitchEnableSet ? "ENABLED" : "DISABLED")}.)";
-                string readDelay = $"{Convert.ToDouble(configuration.Settings.SwitchReadDelay) / 1000.0:0.0}";
-                string writeDelay = $"{Convert.ToDouble(configuration.Settings.SwitchWriteDelay) / 1000.0:0.0}";
+                screenLog += $"\r\n1. Write tests are disabled until enabled on the Switch tab in the Settings page. (Currently {(_configuration.Settings.SwitchEnableSet ? "ENABLED" : "DISABLED")}.)";
+                string readDelay = $"{Convert.ToDouble(_configuration.Settings.SwitchReadDelay) / 1000.0:0.0}";
+                string writeDelay = $"{Convert.ToDouble(_configuration.Settings.SwitchWriteDelay) / 1000.0:0.0}";
                 screenLog += $"\r\n2. Delays of {readDelay} second{(readDelay == "1.0" ? "" : "s")} (read) and {writeDelay} second{(writeDelay == "1.0" ? "" : "s")} (write) will be added after each operation.";
                 screenLog += $"\r\n   The delays can also be changed on the Switch tab in the Settings page.";
                 break;
@@ -100,33 +102,48 @@
             screenLog += $"\r\n\r\nINVALID PRODUCT VERSION: {Update.ConformuVersion}";
         }
 
+
 #if WINDOWS
 
     // Give warning message if running as ADMIN
     using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
     {
-        // Determine whether the user is running as admin
-        WindowsPrincipal principal = new WindowsPrincipal(identity);
-        if (principal.IsInRole(WindowsBuiltInRole.Administrator))
-        {
-            // Running as admin so show a warning message on the screen
-
-            // Display message
-                screenLog += ("\r\n\r\n***** CONFORM UNIVERSAL IS RUNNING WITH ADMIN PRIVILEGE!");
-                screenLog += ("\r\n\r\n***** This increases the risk that malicious individuals will target you and cause havoc in your life.");
-                screenLog += ("\r\n***** There is no need to run Conform Universal with Admin privilege, the application is fully functional in normal user mode.");
-                screenLog += ("\r\n***** Please close the application and re-open it in normal user mode.\r\n");
-        }
+    // Determine whether the user is running as admin
+    WindowsPrincipal principal = new WindowsPrincipal(identity);
+    if (principal.IsInRole(WindowsBuiltInRole.Administrator))
+    {
+    // Running as admin so show a warning message on the screen
+    screenLog += ("\r\n\r\n***** CONFORM UNIVERSAL IS RUNNING WITH ADMIN PRIVILEGE!");
+    screenLog += ("\r\n\r\n***** This increases the risk that malicious individuals will target you and cause havoc in your life.");
+    screenLog += ("\r\n***** There is no need to run Conform Universal with Admin privilege, the application is fully functional in normal user mode.");
+    screenLog += ("\r\n***** Please close the application and re-open it in normal user mode.\r\n");
+    }
     }
 
 #endif
 
-        conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"End");
+        // Check whether the risk has already been accepted
+        if (!_configuration.Settings.RiskAcknowledged) // Risk has NOT yet been accepted
+        {
+            // Display the risk acceptance dialogue and retrieve a bool indicating whether the risk was accepted.
+            bool accceptsRisk = await Task.Run(AcceptRisk);
+
+            // Exit the application if the risk was not accepted or update the risk flag if it was.
+            if (!accceptsRisk) // Risk not accepted so exit the application
+                Environment.Exit(0);
+            else // Risk accepted so update the acceptance flag.
+            {
+                _configuration.Settings.RiskAcknowledged = true;
+                _configuration.Save();
+            }
+        }
+
+        _conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"End");
     }
 
     void GoToSelectionPage(string buttonName)
     {
-        UriHelper.NavigateTo("/DeviceSelection");
+        _uriHelper.NavigateTo("/DeviceSelection");
     }
 
     public async void OnUiHasChanged(object sender, EventArgs e)
@@ -137,7 +154,7 @@
         }
         catch (Exception ex)
         {
-            conformLogger.LogMessage("Index.OnUiHasChanged", MessageLevel.Error, $"Exception: {ex}.");
+            _conformLogger.LogMessage("Index.OnUiHasChanged", MessageLevel.Error, $"Exception: {ex}.");
             throw;
         }
     }
@@ -148,24 +165,24 @@
         if (firstRender)
         {
             // Subscribe to the OnResized event. This will do work when the browser is resized.
-            listener.Init(JS);
-            listener.OnResize += WindowResized;
+            _listener.Init(JS);
+            _listener.OnResize += WindowResized;
             await ResizeLogWindow();
         }
     }
 
-    async void StartTest(string buttonName)
+    async void StartTest()
     {
         try
         {
-            // Set the operation in progress flag and refresh state throughout the page and navigation menu.
-            configuration.Settings.OperationInProgress = true;
-            state.RaiseUiHasChangedEvent();
+            // Set the operation in progress flag and refresh _state throughout the page and navigation menu.
+            _configuration.Settings.OperationInProgress = true;
+            _state.RaiseUiHasChangedEvent();
             StateHasChanged();
 
-            // Validate the supplied configuration and only start if there are no settings issues
-            string validationMessage = configuration.Validate();
-            if (!string.IsNullOrEmpty(validationMessage)) // There is a configuration issue so present an error message
+            // Validate the supplied _configuration and only start if there are no settings issues
+            string validationMessage = _configuration.Validate();
+            if (!string.IsNullOrEmpty(validationMessage)) // There is a _configuration issue so present an error message
             {
                 // Find the current position of the start button in the viewport
                 BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "StartButton");
@@ -187,64 +204,64 @@
                 cancelConformToken = cancellationTokenSource.Token;
 
                 // Create a test manager instance to oversee the test
-                using (tester = new ConformanceTestManager(configuration, conformLogger, cancellationTokenSource, cancelConformToken))
+                using (tester = new ConformanceTestManager(_configuration, _conformLogger, cancellationTokenSource, cancelConformToken))
                 {
                     try
                     {
-                        conformLogger.MessageLogChanged += OutputChanged;
-                        conformLogger.StatusChanged += StatusChanged;
-                        conformLogger.Debug = configuration.Settings.Debug;
+                        _conformLogger.MessageLogChanged += OutputChanged;
+                        _conformLogger.StatusChanged += StatusChanged;
+                        _conformLogger.Debug = _configuration.Settings.Debug;
 
                         // Clear the screen log
                         screenLog = "";
 
                         // Create a task to run the conformance test
                         conformanceTestTask = new Task(() =>
-                        {
-                            try
-                            {
-                                tester.TestDevice();
-                            }
-                            catch (Exception ex)
-                            {
-                                conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
-                            }
+    {
+        try
+        {
+            tester.TestDevice();
+        }
+        catch (Exception ex)
+        {
+            _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
+        }
 
-                        }, cancelConformToken);
+    }, cancelConformToken);
 
                         // Start the conformance test task
-                        conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
+                        _conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
                         conformanceTestTask.Start();
-                        conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance test started OK");
+                        _conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance test started OK");
 
                         // Wait for the task to complete.
-                        conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting conformance task completion");
+                        _conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting conformance task completion");
                         await conformanceTestTask;
-                        conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance task completed");
+                        _conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance task completed");
 
                         tester.Dispose();
                     }
                     finally
                     {
-                        conformLogger.MessageLogChanged -= OutputChanged;
-                        conformLogger.StatusChanged -= StatusChanged;
+                        _conformLogger.MessageLogChanged -= OutputChanged;
+                        _conformLogger.StatusChanged -= StatusChanged;
                     }
                 }
             }
             await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
-            conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Scroll to bottom completed");
+            _conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Scroll to bottom completed");
 
             GC.Collect();
         }
         catch (Exception ex)
         {
-            try { conformLogger.LogMessage("INDEX.RAZOR-StartTest", MessageLevel.Error, $"{ex}"); } catch (Exception) { throw; }
+            try { _conformLogger.LogMessage("INDEX.RAZOR-StartTest", MessageLevel.Error, $"{ex}"); } catch (Exception) { throw; }
             try { Console.WriteLine($"INDEX.RAZOR-StartTest Exception: {ex}"); } catch (Exception) { throw; }
         }
         finally
         {
-            configuration.Settings.OperationInProgress = false;
-            state.RaiseUiHasChangedEvent();
+            _configuration.Settings.OperationInProgress = false;
+            _state.RaiseUiHasChangedEvent();
             StateHasChanged();
             try
             {
@@ -255,11 +272,11 @@
         }
     }
 
-    void StopTest(string buttonName)
+    void StopTest()
     {
         if (tester is not null)
         {
-            conformLogger.LogMessage("StopClick", MessageLevel.Info, $"STOPPING TESTER");
+            _conformLogger.LogMessage("StopClick", MessageLevel.Info, $"STOPPING TESTER");
             cancellationTokenSource.Cancel(); // Cancel the Conform run
         }
     }
@@ -309,9 +326,9 @@
             blazorProWindowSize.Width = (int)browserWindowSize.Width;
             blazorProWindowSize.Height = (int)browserWindowSize.Height;
 
-            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
+            //_conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
             WindowResized(new object(), blazorProWindowSize);
-            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
+            //_conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
         }
         catch { }
     }
@@ -345,18 +362,18 @@
 
                 if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
 
-                //conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
+                //_conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
                 await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
             }
 
             else
             {
-                conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"BoundingClientRectangle is NULL - No action taken.");
+                _conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"BoundingClientRectangle is NULL - No action taken.");
             }
         }
         catch
         {
-            // conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
+            // _conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
         }
     }
 
@@ -370,8 +387,8 @@
         {
             if (disposing)
             {
-                listener.OnResize -= WindowResized;
-                state.UiHasChanged -= OnUiHasChanged;
+                _listener.OnResize -= WindowResized;
+                _state.UiHasChanged -= OnUiHasChanged;
             }
 
             disposedValue = true;
@@ -389,8 +406,58 @@
 
     private async void ShowNotification(NotificationMessage message)
     {
-        notificationService.Notify(message);
+        _notificationService.Notify(message);
         await InvokeAsync(() => { StateHasChanged(); });
     }
+
+    private async Task<bool> AcceptRisk()
+    {
+        bool? result = await _dialogService.OpenAsync("Conform Universal Safety Warning", (ds) =>
+
+    @<RadzenStack Gap="1.5rem">
+        <p style="color:red; text-align:center;font-size:x-large">
+            <b>
+                WARNING
+            </b>
+        </p>
+        <p style="color:red; text-align:center;margin-top:-20px">
+            <b>
+                Conform will excercise your Astronomy equipment!
+            </b>
+        </p>
+        <p style="color:red; text-align:center;margin-top:-30px">
+            <b>
+                You are responsible for making sure that this happpens safely and doesn't damage the equipment, its environment or bystanders!
+            </b>
+        </p>
+        <p style="color:red; text-align:center;margin-top:-30px">
+            <b>
+                Do not run Conform unless you are confident that you can do so safely and are able to stop the tests if necessary.
+            </b>
+        </p>
+        <p style="text-align:center">
+            <b>
+                TELESCOPE and DOME: Conform assumes that telescope and dome devices can move safely to any position in the visible sky. If this is not the case you must not use Conform to test
+                these devices.
+            </b>
+        </p>
+        <RadzenStack Orientation="Orientation.Horizontal">
+            <RadzenButton Text="Agree" Click="() => ds.Close(true)" Style="width: 80px;" />
+            <RadzenButton Text="Close" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+        </RadzenStack>
+    </RadzenStack>
+    );
+
+        if (result.HasValue)
+        {
+            return result.Value;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
 
 }

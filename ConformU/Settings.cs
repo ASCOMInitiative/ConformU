@@ -30,6 +30,7 @@ namespace ConformU
         public bool GoHomeOnDeviceSelected { get; set; } = true;
         public double ConnectionTimeout { get; set; } = 2.0;
         public bool RunAs32Bit { get; set; } = false;
+        public bool RiskAcknowledged { get; set; } = false;
 
         #endregion
 
