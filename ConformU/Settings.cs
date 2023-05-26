@@ -37,18 +37,29 @@ namespace ConformU
         #region Conform test configuration
 
         // Conform application configuration 
+        [FullTestValue(false)]
         public bool DisplayMethodCalls { get; set; } = false;
+
         public bool UpdateCheck { get; set; } = true;
         public int ApplicationPort { get; set; } = 0;
 
         // Debug output switches
+        [FullTestValue(false)]
         public bool Debug { get; set; } = false;
+
+        [FullTestValue(false)]
         public bool TraceDiscovery { get; set; } = false;
+
+        [FullTestValue(false)]
         public bool TraceAlpacaCalls { get; set; } = false;
 
         // Conformance test configuration 
+        [FullTestValue(true)]
         public bool TestProperties { get; set; } = true;
+
+        [FullTestValue(true)]
         public bool TestMethods { get; set; } = true;
+
         public bool TestPerformance { get; set; } = false;
 
         /// <summary>
@@ -148,20 +159,38 @@ namespace ConformU
             { TelescopeTester.TELTEST_SYNC_TO_TARGET, true },
             { TelescopeTester.TELTEST_SYNC_TO_ALTAZ, true }
         };
+
+        [FullTestValue(true)]
         public bool TelescopeExtendedRateOffsetTests { get; set; } = true;
+
+        [FullTestValue(true)]
+        public bool TelescopeFirstUseTests { get; set; } = true;
+
+        [FullTestValue(true)]
+        public bool TestSideOfPierRead { get; set; } = false;
+
+        [FullTestValue(true)]
+        public bool TestSideOfPierWrite { get; set; } = false;
+
+        [FullTestValue(true)]
+        public bool TelescopeExtendedPulseGuideTests { get; set; } = true;
+
+        [FullTestValue(true)]
+        public bool TelescopeExtendedMoveAxisTests { get; set; } = true;
+
+        [FullTestValue(true)]
+        public bool TelescopeExtendedSiteTests { get; set; } = true;
+
+        public double TelescopePulseGuideTolerance { get; set; } = 1; // Arc-seconds
         public double TelescopeSlewTolerance { get; set; } = 10.0; // Arc-seconds
         public int TelescopeMaximumSlewTime { get; set; } = 300; // Seconds
-        public bool TelescopeFirstUseTests { get; set; } = true;
-        public bool TestSideOfPierRead { get; set; } = false;
-        public bool TestSideOfPierWrite { get; set; } = false;
-        public bool TelescopeExtendedPulseGuideTests { get; set; } = true;
-        public double TelescopePulseGuideTolerance { get; set; } = 1; // Arc-seconds
-        public bool TelescopeExtendedMoveAxisTests { get; set; } = true;
 
         // Camera test configuration
         public int CameraMaxBinX { get; set; } = 0;
         public int CameraMaxBinY { get; set; } = 0;
+        [FullTestValue(true)]
         public bool CameraFirstUseTests { get; set; } = true;
+        [FullTestValue(true)]
         public bool CameraTestImageArrayVariant { get; set; } = true;
         public double CameraExposureDuration { get; set; } = 2.0;
         public int CameraXMax { get; set; } = 0;
@@ -177,6 +206,7 @@ namespace ConformU
         /// Dome stabilisation time (seconds)
         /// </summary>
         public int DomeStabilisationWaitTime { get; set; } = 10;
+        [FullTestValue(true)]
         public bool DomeOpenShutter { get; set; } = false;
         public double DomeSlewTolerance { get; set; } = 1.0; // Degrees
 
@@ -195,6 +225,7 @@ namespace ConformU
         public int RotatorTimeout { get; set; } = 60;
 
         // Switch test configuration
+        [FullTestValue(true)]
         public bool SwitchEnableSet { get; set; } = false;
         public int SwitchReadDelay { get; set; } = 500; // Milliseconds
         public int SwitchWriteDelay { get; set; } = 3000; // Milliseconds

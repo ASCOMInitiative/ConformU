@@ -31,7 +31,6 @@
     <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:20px; margin-right:20px; margin-top:8px" @bind-Value=@statusMessage />
 </div>
 
-
 @code {
     private string statusVisible = "initial";
     private bool disposedValue;
@@ -101,7 +100,6 @@
             screenLog += $"\r\n\r\nINVALID PRODUCT VERSION: {Update.ConformuVersion}";
         }
 
-
 #if WINDOWS
 
     // Give warning message if running as ADMIN
@@ -170,7 +168,7 @@
         }
     }
 
-    async void StartTest()
+    private async void StartTest()
     {
         try
         {
@@ -277,6 +275,60 @@
         {
             _conformLogger.LogMessage("StopClick", MessageLevel.Info, $"STOPPING TESTER");
             cancellationTokenSource.Cancel(); // Cancel the Conform run
+        }
+    }
+
+    private async void ShowNotification(NotificationMessage message)
+    {
+        _notificationService.Notify(message);
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private async Task<bool> AcceptRisk()
+    {
+        bool? result = await _dialogService.OpenAsync("Conform Universal Safety Warning", (ds) =>
+
+    @<RadzenStack Gap="1.5rem">
+        <p style="color:red; text-align:center;font-size:x-large">
+            <b>
+                WARNING
+            </b>
+        </p>
+        <p style="color:red; text-align:center;margin-top:-20px">
+            <b>
+                Conform will excercise your Astronomy equipment!
+            </b>
+        </p>
+        <p style="color:red; text-align:center;margin-top:-30px">
+            <b>
+                You are responsible for making sure that this happpens safely and doesn't damage the equipment, its environment or bystanders!
+            </b>
+        </p>
+        <p style="color:red; text-align:center;margin-top:-30px">
+            <b>
+                Do not run Conform unless you are confident that you can do so safely and are able to stop the tests if necessary.
+            </b>
+        </p>
+        <p style="text-align:center">
+            <b>
+                TELESCOPE and DOME: Conform assumes that telescope and dome devices can move safely to any position in the visible sky. If this is not the case you must not use Conform to test
+                these devices.
+            </b>
+        </p>
+        <RadzenStack Orientation="Orientation.Horizontal">
+            <RadzenButton Text="Agree" Click="() => ds.Close(true)" Style="width: 80px;" />
+            <RadzenButton Text="Close" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+        </RadzenStack>
+    </RadzenStack>
+    );
+
+        if (result.HasValue)
+        {
+            return result.Value;
+        }
+        else
+        {
+            return false;
         }
     }
 
@@ -402,61 +454,5 @@
     }
 
     #endregion
-
-    private async void ShowNotification(NotificationMessage message)
-    {
-        _notificationService.Notify(message);
-        await InvokeAsync(() => { StateHasChanged(); });
-    }
-
-    private async Task<bool> AcceptRisk()
-    {
-        bool? result = await _dialogService.OpenAsync("Conform Universal Safety Warning", (ds) =>
-
-    @<RadzenStack Gap="1.5rem">
-        <p style="color:red; text-align:center;font-size:x-large">
-            <b>
-                WARNING
-            </b>
-        </p>
-        <p style="color:red; text-align:center;margin-top:-20px">
-            <b>
-                Conform will excercise your Astronomy equipment!
-            </b>
-        </p>
-        <p style="color:red; text-align:center;margin-top:-30px">
-            <b>
-                You are responsible for making sure that this happpens safely and doesn't damage the equipment, its environment or bystanders!
-            </b>
-        </p>
-        <p style="color:red; text-align:center;margin-top:-30px">
-            <b>
-                Do not run Conform unless you are confident that you can do so safely and are able to stop the tests if necessary.
-            </b>
-        </p>
-        <p style="text-align:center">
-            <b>
-                TELESCOPE and DOME: Conform assumes that telescope and dome devices can move safely to any position in the visible sky. If this is not the case you must not use Conform to test
-                these devices.
-            </b>
-        </p>
-        <RadzenStack Orientation="Orientation.Horizontal">
-            <RadzenButton Text="Agree" Click="() => ds.Close(true)" Style="width: 80px;" />
-            <RadzenButton Text="Close" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
-        </RadzenStack>
-    </RadzenStack>
-    );
-
-        if (result.HasValue)
-        {
-            return result.Value;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-
 
 }

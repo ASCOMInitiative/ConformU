@@ -1,7 +1,11 @@
-﻿using ASCOM.Common;
+﻿using ASCOM.Alpaca.Discovery;
+using ASCOM.Common;
 using ASCOM.Common.Alpaca;
 using Blazorise;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Formats.Asn1;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
@@ -354,16 +358,54 @@ namespace ConformU
         /// <summary>
         /// Sets configuration to run a complete test without debug or trace
         /// </summary>
+        /// <remarks>Uses reflection to iterate over settings properties looking for IncludeInFullTest attributes. The default values supplied in the attributes are then applied to the properties.</remarks>
         public void SetFullTest()
         {
-            settings.DisplayMethodCalls = false;
-            settings.Debug = false;
-            settings.TraceDiscovery = false;
-            settings.TraceAlpacaCalls = false;
-            settings.TestProperties = true;
-            settings.TestMethods = true;
-            settings.TestPerformance = false;
-            settings.AlpacaConfiguration.ProtocolShowSuccessResponses = false;
+            // Get all Settings class properties
+            var settingsProperties = typeof(Settings).GetProperties();
+
+            // Iterate over the Settings class properties
+            foreach (var property in settingsProperties)
+            {
+                // Extract the IncludeInFullTest attribute if present
+                FullTestValueAttribute attribute = property.GetCustomAttribute<FullTestValueAttribute>();
+
+                // If present set the property to its "full settings" value contained in the attribute
+                if (attribute != null)
+                {
+                    TL.LogMessage("SetFullTest", MessageLevel.Debug, $"Found property Settings.{property.Name}, Default value: {attribute.FullSettingsValue}");
+
+                    // Get a PropertyInfor for the property
+                    PropertyInfo propertyInfo = Settings.GetType().GetProperty(property.Name);
+
+                    // Set the property's value to the configured full settings value 
+                    propertyInfo.SetValue(Settings, attribute.FullSettingsValue, null);
+                }
+            }
+
+            // Get all AlpacaConfiguration class properties
+            var alpacaConfigurationProperties = typeof(AlpacaConfiguration).GetProperties();
+
+            // Iterate over the AlpacaConfiguration class properties
+            foreach (var property in alpacaConfigurationProperties)
+            {
+                // Extract the IncludeInFullTest attribute if present
+                FullTestValueAttribute attribute = property.GetCustomAttribute<FullTestValueAttribute>();
+
+                // If present set the property to its "full settings" value contained in the attribute
+                if (attribute != null)
+                {
+                    TL.LogMessage("SetFullTest", MessageLevel.Debug, $"Found property Settings.AlpacaConfiguration.{property.Name}, Default value: {attribute.FullSettingsValue}");
+
+                    // Get a PropertyInfor for the property
+                    PropertyInfo propertyInfo = Settings.AlpacaConfiguration.GetType().GetProperty(property.Name);
+
+                    // Set the property's value to the configured full settings value 
+                    propertyInfo.SetValue(Settings.AlpacaConfiguration, attribute.FullSettingsValue, null);
+                }
+            }
+
+            // Enable all Telescope method tests
             settings.TelescopeTests = new()
             {
                 { "CanMoveAxis", true },
@@ -384,16 +426,6 @@ namespace ConformU
                 { "SyncToTarget", true },
                 { "SyncToAltAz", true }
             };
-            settings.TelescopeExtendedMoveAxisTests = true;
-            settings.TelescopeExtendedPulseGuideTests = true;
-            settings.TelescopeExtendedRateOffsetTests = true;
-            settings.TelescopeFirstUseTests = true;
-            settings.TestSideOfPierRead = true;
-            settings.TestSideOfPierWrite = true;
-            settings.CameraFirstUseTests = true;
-            settings.CameraTestImageArrayVariant = true;
-            settings.DomeOpenShutter = true;
-            settings.SwitchEnableSet = true;
         }
 
         #endregion

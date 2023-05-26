@@ -63,6 +63,7 @@ namespace ConformU
         private const double SYNC_SIMULATED_ERROR = 60.0d; // (Arc minutes) Distance that the telescope will be told that it is in error  when the sync command is issued. The error is applied to both RA and DEC axes
         private const double SIDEREAL_SECONDS_TO_SI_SECONDS = 0.99726956631945; // Based on earth sidereal rotation period of 23 hours 56 minutes 4.09053 seconds
         private const double SIDEREAL_RATE = 15.0 / SIDEREAL_SECONDS_TO_SI_SECONDS; //Arc-seconds per SI second
+        private const double SITE_ELEVATION_TEST_VALUE = 2385.0; //Arbitrary site elevation write test value
 
         private bool canFindHome, canPark, canPulseGuide, canSetDeclinationRate, canSetGuideRates, canSetPark, canSetPierside, canSetRightAscensionRate;
         private bool canSetTracking, canSlew, canSlewAltAz, canSlewAltAzAsync, canSlewAsync, canSync, canSyncAltAz, canUnpark;
@@ -1396,7 +1397,10 @@ namespace ConformU
             if (cancellationToken.IsCancellationRequested)
                 return;
 
+            #region Site Elevation Tests
+
             // SiteElevation Read - Optional
+            bool canReadSiteElevation = true;
             try
             {
                 if (settings.DisplayMethodCalls)
@@ -1407,12 +1411,14 @@ namespace ConformU
                     case var case17 when case17 < -300.0d:
                         {
                             LogIssue("SiteElevation Read", "SiteElevation is <-300m");
+                            canReadSiteElevation = false;
                             break;
                         }
 
                     case var case18 when case18 > 10000.0d:
                         {
                             LogIssue("SiteElevation Read", "SiteElevation is >10,000m");
+                            canReadSiteElevation = false;
                             break;
                         }
 
@@ -1425,13 +1431,12 @@ namespace ConformU
             }
             catch (Exception ex)
             {
+                canReadSiteElevation = false;
                 HandleException("SiteElevation Read", MemberType.Property, Required.Optional, ex, "");
             }
 
-            if (cancellationToken.IsCancellationRequested)
-                return;
-
-            // SiteElevation Write - Optional
+            // SiteElevation Write - Invalid low value
+            bool canWriteSiteElevation = true;
             try
             {
                 if (settings.DisplayMethodCalls)
@@ -1444,6 +1449,7 @@ namespace ConformU
                 HandleInvalidValueExceptionAsOK("SiteElevation Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site elevation < -300m");
             }
 
+            // SiteElevation Write - Invalid high value
             try
             {
                 if (settings.DisplayMethodCalls)
@@ -1456,6 +1462,7 @@ namespace ConformU
                 HandleInvalidValueExceptionAsOK("SiteElevation Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site elevation > 10,000m");
             }
 
+            //SiteElevation Write - Current device value 
             try
             {
                 if (siteElevation < -300.0d | siteElevation > 10000.0d)
@@ -1463,17 +1470,66 @@ namespace ConformU
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("SiteElevation Write", "About to set SiteElevation property to " + siteElevation);
                 telescopeDevice.SiteElevation = siteElevation; // Restore original value
-                LogOK("SiteElevation Write", "Legal value " + siteElevation.ToString() + "m written successfully");
+                LogOK("SiteElevation Write", $"Current value {siteElevation}m written successfully");
             }
             catch (Exception ex)
             {
+                canWriteSiteElevation = false;
                 HandleException("SiteElevation Write", MemberType.Property, Required.Optional, ex, "");
             }
 
-            if (cancellationToken.IsCancellationRequested)
-                return;
+            // Change the site elevation value
+            if (canReadSiteElevation & canWriteSiteElevation & settings.TelescopeExtendedSiteTests)
+            {
+                try
+                {
+                    // Set the test value
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("SiteElevation Write", $"About to set SiteElevation property to arbitrary value:{SITE_ELEVATION_TEST_VALUE}");
+                    telescopeDevice.SiteElevation = SITE_ELEVATION_TEST_VALUE;
+
+                    // Read the value back
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("SiteElevation Write", "About to get SiteElevation property");
+                    double newElevation = telescopeDevice.SiteElevation;
+
+                    // Compare with the expected value
+                    if (newElevation == SITE_ELEVATION_TEST_VALUE)
+                    {
+                        LogOK("SiteElevation Write", $"Test value {SITE_ELEVATION_TEST_VALUE} set and read correctly");
+                    }
+                    else
+                    {
+                        LogIssue("SiteElevation Write", $"Test value {SITE_ELEVATION_TEST_VALUE} did not round trip correctly. GET SiteElevations returned: {newElevation} instead of {SITE_ELEVATION_TEST_VALUE}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    HandleException("SiteElevation Write", MemberType.Property, Required.MustBeImplemented, ex, "A valid value could not be set");
+                }
+
+                // Attempt to restore the original value
+                try
+                {
+                    // Set the original value
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("SiteElevation Write", $"About to restore original SiteElevation property :{siteElevation}");
+                    telescopeDevice.SiteElevation = siteElevation;
+                    LogOK("SiteElevation Write", $"Successfully restored original site elevation: {siteElevation}.");
+                }
+                catch (Exception ex)
+                {
+                    HandleException("SiteElevation Write", MemberType.Property, Required.MustBeImplemented, ex, "The original value could not be restored");
+                }
+            }
+            if (cancellationToken.IsCancellationRequested) return;
+
+            #endregion
+
+            #region Site Latitude Tests
 
             // SiteLatitude Read - Optional
+            bool canReadSiteLatitude = true;
             try
             {
                 if (settings.DisplayMethodCalls)
@@ -1484,12 +1540,14 @@ namespace ConformU
                     case var case19 when case19 < -90.0d:
                         {
                             LogIssue("SiteLatitude Read", "SiteLatitude is < -90 degrees");
+                            canReadSiteLatitude = false;
                             break;
                         }
 
                     case var case20 when case20 > 90.0d:
                         {
                             LogIssue("SiteLatitude Read", "SiteLatitude is > 90 degrees");
+                            canReadSiteLatitude = false;
                             break;
                         }
 
@@ -1502,14 +1560,12 @@ namespace ConformU
             }
             catch (Exception ex)
             {
+                canReadSiteLatitude = false;
                 HandleException("SiteLatitude Read", MemberType.Property, Required.Optional, ex, "");
             }
 
-            if (cancellationToken.IsCancellationRequested)
-                return;
-
-            // SiteLatitude Write - Optional
-            try // Invalid low value
+            // SiteLatitude Write - Invalid low value
+            try
             {
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("SiteLatitude Write", "About to set SiteLatitude property to -91.0");
@@ -1521,7 +1577,8 @@ namespace ConformU
                 HandleInvalidValueExceptionAsOK("SiteLatitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site latitude < -90 degrees");
             }
 
-            try // Invalid high value
+            // SiteLatitude Write - Invalid high value
+            try
             {
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("SiteLatitude Write", "About to set SiteLatitude property to 91.0");
@@ -1533,24 +1590,101 @@ namespace ConformU
                 HandleInvalidValueExceptionAsOK("SiteLatitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site latitude > 90 degrees");
             }
 
-            try // Valid value
+            // SiteLatitude Write - Valid value
+            bool canWriteSiteLatitude = true;
+            try
             {
                 if (siteLatitude < -90.0d | siteLatitude > 90.0d)
                     siteLatitude = 45.0d;
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("SiteLatitude Write", "About to set SiteLatitude property to " + siteLatitude);
                 telescopeDevice.SiteLatitude = siteLatitude; // Restore original value
-                LogOK("SiteLatitude Write", "Legal value " + FormatDec(siteLatitude) + " degrees written successfully");
+                LogOK("SiteLatitude Write", $"Current value: {siteLatitude.ToDMS()} degrees written successfully");
             }
             catch (Exception ex)
             {
+                canWriteSiteLatitude = false;
                 HandleException("SiteLatitude Write", MemberType.Property, Required.Optional, ex, "");
             }
 
-            if (cancellationToken.IsCancellationRequested)
-                return;
+            // Change the site latitude value
+            if (canReadSiteLatitude & canWriteSiteLatitude & settings.TelescopeExtendedSiteTests)
+            {
+                try
+                {
+                    // Calculate the new test latitude
+                    double testLatitude;
+
+                    switch (siteLatitude)
+                    {
+                        // Latitude -90 to 70
+                        case double d when d <= -70.0:
+                            testLatitude = siteLatitude + 10.0;
+                            break;
+
+                        // Latitude -70 to 0
+                        case double d when d > -70.0 & d <= 0.0:
+                            testLatitude = siteLatitude - 10.0;
+                            break;
+
+                        // Latitude 0 to 70
+                        case double d when d > 0.0 & d <= 70.0:
+                            testLatitude = siteLatitude + 10.0;
+                            break;
+
+                        // Latitude 70 upwards
+                        default:
+                            testLatitude = siteLatitude - 10.0;
+                            break;
+                    }
+
+                    // Set the test value
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("SiteLatitude Write", $"About to set SiteLatitude property to arbitrary value:{testLatitude.ToDMS()}");
+                    telescopeDevice.SiteLatitude = testLatitude;
+
+                    // Read the value back
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("SiteLatitude Write", "About to get SiteLatitude property");
+                    double newLatitude = telescopeDevice.SiteLatitude;
+
+                    // Compare with the expected value
+                    if (newLatitude == testLatitude)
+                    {
+                        LogOK("SiteLatitude Write", $"Test value {testLatitude.ToDMS()} set and read correctly");
+                    }
+                    else
+                    {
+                        LogIssue("SiteLatitude Write", $"Test value {testLatitude.ToDMS()} did not round trip correctly. GET SiteLatitude returned: {newLatitude.ToDMS()} instead of {testLatitude.ToDMS()}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    HandleException("SiteLatitude Write", MemberType.Property, Required.MustBeImplemented, ex, "A valid value could not be set");
+                }
+
+                // Attempt to restore the original value
+                try
+                {
+                    // Set the original value
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("SiteLatitude Write", $"About to restore original SiteLatitude property :{siteLatitude.ToDMS()}");
+                    telescopeDevice.SiteLatitude = siteLatitude;
+                    LogOK("SiteLatitude Write", $"Successfully restored original site latitude: {siteLatitude.ToDMS()}.");
+                }
+                catch (Exception ex)
+                {
+                    HandleException("SiteLatitude Write", MemberType.Property, Required.MustBeImplemented, ex, "The original value could not be restored");
+                }
+            }
+            if (cancellationToken.IsCancellationRequested) return;
+
+            #endregion
+
+            #region Site Longitude Tests
 
             // SiteLongitude Read - Optional
+            bool canReadSiteLongitude = true;
             try
             {
                 if (settings.DisplayMethodCalls)
@@ -1560,12 +1694,14 @@ namespace ConformU
                 {
                     case var case21 when case21 < -180.0d:
                         {
+                            canReadSiteLongitude = false;
                             LogIssue("SiteLongitude Read", "SiteLongitude is < -180 degrees");
                             break;
                         }
 
                     case var case22 when case22 > 180.0d:
                         {
+                            canReadSiteLongitude = false;
                             LogIssue("SiteLongitude Read", "SiteLongitude is > 180 degrees");
                             break;
                         }
@@ -1579,14 +1715,12 @@ namespace ConformU
             }
             catch (Exception ex)
             {
+                canReadSiteLongitude = false;
                 HandleException("SiteLongitude Read", MemberType.Property, Required.Optional, ex, "");
             }
 
-            if (cancellationToken.IsCancellationRequested)
-                return;
-
-            // SiteLongitude Write - Optional
-            try // Invalid low value
+            // SiteLongitude Write - Invalid low value
+            try
             {
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("SiteLongitude Write", "About to set SiteLongitude property to -181.0");
@@ -1598,7 +1732,8 @@ namespace ConformU
                 HandleInvalidValueExceptionAsOK("SiteLongitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site longitude < -180 degrees");
             }
 
-            try // Invalid high value
+            // SiteLongitude Write - Invalid high value
+            try
             {
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("SiteLongitude Write", "About to set SiteLongitude property to 181.0");
@@ -1610,6 +1745,8 @@ namespace ConformU
                 HandleInvalidValueExceptionAsOK("SiteLongitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site longitude > 180 degrees");
             }
 
+            // SiteLongitude Write - Valid value
+            bool canWriteSiteLongitude = true;
             try // Valid value
             {
                 if (siteLongitude < -180.0d | siteLongitude > 180.0d)
@@ -1617,15 +1754,87 @@ namespace ConformU
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("SiteLongitude Write", "About to set SiteLongitude property to " + siteLongitude);
                 telescopeDevice.SiteLongitude = siteLongitude; // Restore original value
-                LogOK("SiteLongitude Write", "Legal value " + FormatDec(siteLongitude) + " degrees written successfully");
+                LogOK("SiteLongitude Write", $"Current value {siteLongitude.ToDMS()} degrees written successfully");
             }
             catch (Exception ex)
             {
+                canWriteSiteLongitude = false;
                 HandleException("SiteLongitude Write", MemberType.Property, Required.Optional, ex, "");
             }
 
-            if (cancellationToken.IsCancellationRequested)
-                return;
+            // Change the site longitude value
+            if (canReadSiteLongitude & canWriteSiteLongitude & settings.TelescopeExtendedSiteTests)
+            {
+                try
+                {
+                    // Calculate the new test longitude
+                    double testLongitude;
+
+                    switch (siteLongitude)
+                    {
+                        // Longitude -180 to -150
+                        case double d when d <= -150.0:
+                            testLongitude = siteLongitude + 10.0;
+                            break;
+
+                        // Longitude -150 to 0
+                        case double d when d > -150.0 & d <= 0.0:
+                            testLongitude = siteLongitude - 10.0;
+                            break;
+
+                        // Longitude 0 to 150
+                        case double d when d > 0.0 & d <= 150.0:
+                            testLongitude = siteLongitude + 10.0;
+                            break;
+
+                        // Longitude 150 -180
+                        default:
+                            testLongitude = siteLongitude - 10.0;
+                            break;
+                    }
+
+                    // Set the test value
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("SiteLongitude Write", $"About to set SiteLongitude property to arbitrary value:{testLongitude.ToDMS()}");
+                    telescopeDevice.SiteLongitude = testLongitude;
+
+                    // Read the value back
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("SiteLongitude Write", "About to get SiteLongitude property");
+                    double newLongitude = telescopeDevice.SiteLongitude;
+
+                    // Compare with the expected value
+                    if (newLongitude == testLongitude)
+                    {
+                        LogOK("SiteLongitude Write", $"Test value {testLongitude.ToDMS()} set and read correctly");
+                    }
+                    else
+                    {
+                        LogIssue("SiteLongitude Write", $"Test value {testLongitude.ToDMS()} did not round trip correctly. GET SiteLongitude returned: {newLongitude.ToDMS()} instead of {testLongitude.ToDMS()}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    HandleException("SiteLongitude Write", MemberType.Property, Required.MustBeImplemented, ex, "A valid value could not be set");
+                }
+
+                // Attempt to restore the original value
+                try
+                {
+                    // Set the original value
+                    if (settings.DisplayMethodCalls)
+                        LogTestAndMessage("SiteLongitude Write", $"About to restore original SiteLongitude property :{siteLongitude.ToDMS()}");
+                    telescopeDevice.SiteLongitude = siteLongitude;
+                    LogOK("SiteLongitude Write", $"Successfully restored original site longitude: {siteLongitude.ToDMS()}.");
+                }
+                catch (Exception ex)
+                {
+                    HandleException("SiteLongitude Write", MemberType.Property, Required.MustBeImplemented, ex, "The original value could not be restored");
+                }
+            }
+            if (cancellationToken.IsCancellationRequested) return;
+
+            #endregion
 
             // Slewing - Optional
             try
@@ -2345,15 +2554,20 @@ namespace ConformU
                     LogTestAndMessage("UTCDate Read", "About to get UTCDate property");
                 utcDate = telescopeDevice.UTCDate; // Save starting value
                 LogOK("UTCDate Read", utcDate.ToString("dd-MMM-yyyy HH:mm:ss.fff"));
+
                 try // UTCDate Write is optional since if you are using the PC time as UTCTime then you should not write to the PC clock!
                 {
+                    // Try to write a new UTCDate  1 hour in the future
                     if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("UTCDate Write", "About to set UTCDate property to " + utcDate.AddHours(1.0d).ToString());
-                    telescopeDevice.UTCDate = utcDate.AddHours(1.0d); // Try and write a new UTCDate in the future
-                    LogOK("UTCDate Write", "New UTCDate written successfully: " + utcDate.AddHours(1.0d).ToString());
+                        LogTestAndMessage("UTCDate Write", $"About to set UTCDate property to {utcDate.AddHours(1.0d)}");
+                    telescopeDevice.UTCDate = utcDate.AddHours(1.0d);
+                    LogOK("UTCDate Write", $"New UTCDate written successfully: {utcDate.AddHours(1.0d)}");
+
+                    // Restore original value
                     if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("UTCDate Write", "About to set UTCDate property to " + utcDate.ToString());
-                    telescopeDevice.UTCDate = utcDate; // Restore original value
+                        LogTestAndMessage("UTCDate Write", $"About to set UTCDate property to {utcDate}");
+                    telescopeDevice.UTCDate = utcDate;
+                    LogOK("UTCDate Write", $"Original UTCDate restored successfully: {utcDate}");
                 }
                 catch (Exception ex)
                 {
@@ -3439,6 +3653,9 @@ namespace ConformU
 
                 if (!settings.TelescopeExtendedPulseGuideTests)
                     LogConfigurationAlert("Extended pulse guide tests were omitted due to Conform configuration.");
+
+                if (!settings.TelescopeExtendedSiteTests)
+                    LogConfigurationAlert("Extended Site property tests were omitted due to Conform configuration.");
 
             }
             catch (Exception ex)
@@ -6326,7 +6543,7 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
-                                                                        // Confirm that slewing is false when movement is stopped
+                                                                          // Confirm that slewing is false when movement is stopped
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(testName, "About to get property");
                                 if (telescopeDevice.Slewing)
@@ -6351,7 +6568,7 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
-                                                                        // Confirm that slewing is false when movement is stopped
+                                                                          // Confirm that slewing is false when movement is stopped
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage(testName, "About to get Slewing property");
                                 if (telescopeDevice.Slewing)
@@ -7155,7 +7372,7 @@ namespace ConformU
 
         private static string FormatDec(double Dec)
         {
-            return Utilities.DegreesToDMS(Dec, ":", ":", "", DISPLAY_DECIMAL_DIGITS).PadLeft(9 + ((DISPLAY_DECIMAL_DIGITS > 0) ? DISPLAY_DECIMAL_DIGITS + 1 : 0));
+            return Utilities.DegreesToDMS(Dec, ":", ":", "", 1).PadLeft(9 + ((1 > 0) ? 1 + 1 : 0));
         }
 
         private static dynamic FormatAltitude(double Alt)

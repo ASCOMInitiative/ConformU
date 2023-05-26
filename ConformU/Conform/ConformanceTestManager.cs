@@ -165,7 +165,7 @@ namespace ConformU
 
         public int TestDevice()
         {
-            int returnCode = -99999;
+            int returnCode;
 
             string testStage;
 
