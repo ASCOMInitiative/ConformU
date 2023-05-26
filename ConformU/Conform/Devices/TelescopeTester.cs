@@ -604,6 +604,36 @@ namespace ConformU
             ITrackingRates l_TrackingRates = null;
             dynamic l_TrackingRate;
 
+            // Test TargetDeclination and TargetRightAscension first because these tests will fail if the telescope has been slewed previously.
+            // Slews can happen in the extended guide rate tests for example.
+            // The test is made here but reported later so that the properties are tested in mostly alphabetical order.
+
+            // TargetDeclination Read - Optional
+            Exception targetDeclinationReadException = null;
+            try // First read should fail!
+            {
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("TargetDeclination Read", "About to get TargetDeclination property");
+                targetDeclination = telescopeDevice.TargetDeclination;
+            }
+            catch (Exception ex)
+            {
+                targetDeclinationReadException = ex;
+            }
+
+            // TargetRightAscension Read - Optional
+            Exception targetRightAscensionReadException = null;
+            try // First read should fail!
+            {
+                if (settings.DisplayMethodCalls)
+                    LogTestAndMessage("TargetRightAscension Read", "About to get TargetRightAscension property");
+                targetRightAscension = telescopeDevice.TargetRightAscension;
+            }
+            catch (Exception ex)
+            {
+                targetRightAscensionReadException = ex;
+            }
+
             // AlignmentMode - Optional
             try
             {
@@ -1154,7 +1184,7 @@ namespace ConformU
                     {
                         if (settings.DisplayMethodCalls)
                             LogTestAndMessage("GuideRateRightAscension Read", "About to get GuideRateRightAscension property");
-                        guideRateRightAscension = telescopeDevice.GuideRateRightAscension; // Read guiderateRA
+                        guideRateRightAscension = telescopeDevice.GuideRateRightAscension; // Read guide rate RA
 
                         if (guideRateRightAscension >= 0.0)
                         {
@@ -2055,9 +2085,9 @@ namespace ConformU
             // TargetDeclination Read - Optional
             try // First read should fail!
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("TargetDeclination Read", "About to get TargetDeclination property");
-                targetDeclination = telescopeDevice.TargetDeclination;
+                // Test whether the command, which was executed earlier threw an error. if so throw it here.
+                if (targetDeclinationReadException is not null)
+                    throw targetDeclinationReadException;
                 if (settings.TelescopeFirstUseTests)
                 {
                     LogIssue("TargetDeclination Read", "Read before write should generate an error and didn't");
@@ -2088,7 +2118,7 @@ namespace ConformU
             }
             catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == g_ExNotSet1 | ex.Number == g_ExNotSet2)
             {
-                LogOK("TargetDeclination Read", ".NET Not Set exception generated on read before write");
+                LogOK("TargetDeclination Read", "Not Set exception generated on read before write");
             }
             catch (Exception ex)
             {
@@ -2099,14 +2129,14 @@ namespace ConformU
                 return;
 
             // TargetDeclination Write - Optional
-            LogInfo("TargetDeclination Write", "Tests moved after the SlewToCoordinates tests so that Conform can check they properly set target coordinates.");
+            LogInfo("TargetDeclination Write", "Tests moved after the SlewToCoordinates tests so that Conform can confirm that target coordinates are set as expected.");
 
             // TargetRightAscension Read - Optional
             try // First read should fail!
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("TargetRightAscension Read", "About to get TargetRightAscension property");
-                targetRightAscension = telescopeDevice.TargetRightAscension;
+                // Test whether the command, which was executed earlier threw an error. if so throw it here.
+                if (targetRightAscensionReadException is not null)
+                    throw targetRightAscensionReadException;
                 if (settings.TelescopeFirstUseTests)
                 {
                     LogIssue("TargetRightAscension Read", "Read before write should generate an error and didn't");
@@ -2137,7 +2167,7 @@ namespace ConformU
             }
             catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == g_ExNotSet1 | ex.Number == g_ExNotSet2)
             {
-                LogOK("TargetRightAscension Read", ".NET Not Set exception generated on read before write");
+                LogOK("TargetRightAscension Read", "Not Set exception generated on read before write");
             }
             catch (Exception ex)
             {
@@ -2148,7 +2178,7 @@ namespace ConformU
                 return;
 
             // TargetRightAscension Write - Optional
-            LogInfo("TargetRightAscension Write", "Tests moved after the SlewToCoordinates tests so that Conform can check they properly set target coordinates.");
+            LogInfo("TargetRightAscension Write", "Tests moved after the SlewToCoordinates tests so that Conform can confirm that target coordinates are set as expected.");
 
             // Tracking Read - Required
             try
@@ -6927,13 +6957,13 @@ namespace ConformU
                         case var @case when @case == ErrorCodes.NotImplemented:
                             {
                                 l_Results.DestinationSideOfPier = PointingState.Unknown;
-                                LogDebug("SOPPierTest", "COM DestinationSideOfPier is not implemented setting result to: " + l_Results.DestinationSideOfPier.ToString());
+                                LogDebug("SOPPierTest", "DestinationSideOfPier is not implemented setting result to: " + l_Results.DestinationSideOfPier.ToString());
                                 break;
                             }
 
                         default:
                             {
-                                LogIssue("SOPPierTest", "COM DestinationSideOfPier Exception: " + ex.ToString());
+                                LogIssue("SOPPierTest", "DestinationSideOfPier Exception: " + ex.ToString());
                                 break;
                             }
                     }
@@ -6941,11 +6971,11 @@ namespace ConformU
                 catch (MethodNotImplementedException) // DestinationSideOfPier not available so mark as unknown
                 {
                     l_Results.DestinationSideOfPier = PointingState.Unknown;
-                    LogDebug("SOPPierTest", ".NET DestinationSideOfPier is not implemented setting result to: " + l_Results.DestinationSideOfPier.ToString());
+                    LogDebug("SOPPierTest", "DestinationSideOfPier is not implemented setting result to: " + l_Results.DestinationSideOfPier.ToString());
                 }
                 catch (Exception ex)
                 {
-                    LogIssue("SOPPierTest", ".NET DestinationSideOfPier Exception: " + ex.ToString());
+                    LogIssue("SOPPierTest", "DestinationSideOfPier Exception: " + ex.ToString());
                 }
 
                 // Now do an actual slew and record side of pier we actually get
