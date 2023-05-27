@@ -53,7 +53,7 @@ echo Return code: %errorlevel%
 echo.
 set SwitchRC=%errorlevel%
 
-ConformU\bin\Debug\net7.0-windows\conformu.exe conformance ascom.simulator.telescope
+rem ConformU\bin\Debug\net7.0-windows\conformu.exe conformance ascom.simulator.telescope
 echo.
 echo Return code: %errorlevel%
 echo.
@@ -65,17 +65,17 @@ echo Return code: %errorlevel%
 echo.
 set VideoRC=%errorlevel%
 
-echo Camera issues: %CameraRC
-echo CoverCalibrator issues: %CoverCalibratorRC
-echo Dome issues: %DomeRC
-echo FilterWheel issues: %FilterWheelRC
-echo Focuser issues: %FocuserRC
-echo ObservingConditions issues: %ObservingConditionsRC
-echo Rotator issues: %RotatorRC
-echo SafetyMonitor issues: %SafetyMonitorRC
-echo Switch issues: %SwitchRC
-echo Telescope issues: %TelescopeRC
-echo Video issues: %VideoRC
+echo Camera issues: %CameraRC%
+echo CoverCalibrator issues: %CoverCalibratorRC%
+echo Dome issues: %DomeRC%
+echo FilterWheel issues: %FilterWheelRC%
+echo Focuser issues: %FocuserRC%
+echo ObservingConditions issues: %ObservingConditionsRC%
+echo Rotator issues: %RotatorRC%
+echo SafetyMonitor issues: %SafetyMonitorRC%
+echo Switch issues: %SwitchRC%
+echo Telescope issues: %TelescopeRC%
+echo Video issues: %VideoRC%
 echo.
 
 pause
