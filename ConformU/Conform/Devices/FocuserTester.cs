@@ -14,7 +14,7 @@ namespace ConformU
     {
         // Focuser moves can be synchronous or asynchronous and the duration of the Move command is used to differentiate the two behaviours.
         // If the Move completes within the SYNC_TEST_TIME the move is considered to be asynchronous and it takes longer it will be assumed to be synchronous
-        private const int  MOVE_SYNC_TEST_TIME = 1000; // Duration of a Move command beyond which the move is considered synchronous (Seconds)
+        private const int MOVE_SYNC_TEST_TIME = 1000; // Duration of a Move command beyond which the move is considered synchronous (Seconds)
 
         enum FocuserPropertyMethod
         {
@@ -491,7 +491,7 @@ namespace ConformU
                     LogCallToDriver("Move - TempComp False", "About to set TempComp property");
                     focuser.TempComp = false;
                 }
-                MoveFocuser("Move - TempComp False");
+                MoveFocuser("Move - TempComp False", true); // Report any deviation from the expected position
             }
             catch (Exception ex)
             {
@@ -510,14 +510,13 @@ namespace ConformU
                 {
                     case 0:
                     case 1:
-                    case 2 // Original test method for IFocuserV2 and earlier devices
-                   :
+                    case 2: // Original test method for IFocuserV2 and earlier devices
                         {
                             try
                             {
                                 LogCallToDriver("Move - TempComp True", "About to set TempComp property");
                                 focuser.TempComp = true;
-                                MoveFocuser("Move - TempComp True");
+                                MoveFocuser("Move - TempComp True", true); // Report any deviation from the expected position
                                 LogIssue("Move - TempComp True", "TempComp is True but no exception is thrown by the Move Method - See Focuser.TempComp entry in Platform help file");
                             }
                             catch (Exception ex)
@@ -528,14 +527,13 @@ namespace ConformU
                             break;
                         }
 
-                    case 3 // Test method for revised IFocuserV3 behaviour introduced in Platform 6.4
-             :
+                    case 3: // Test method for revised IFocuserV3 behaviour introduced in Platform 6.4
                         {
                             try
                             {
                                 LogCallToDriver("Move - TempComp True V3", "About to set TempComp property");
                                 focuser.TempComp = true;
-                                MoveFocuser("Move - TempComp True V3");
+                                MoveFocuser("Move - TempComp True V3", false); // Ignore any focuser position movement because all bets are off when temperature compensation is enabled
                             }
                             catch (Exception ex)
                             {
@@ -684,7 +682,7 @@ namespace ConformU
             }
         }
 
-        private void MoveFocuser(string testName)
+        private void MoveFocuser(string testName, bool checkMoveAccuracy)
         {
             if (m_Absolute) // Absolute focuser
             {
@@ -715,17 +713,23 @@ namespace ConformU
             // Test outcome if absolute
             if (m_Absolute)
             {
-                LogCallToDriver(testName, "About to get Position property");
-                int focuserPosition = focuser.Position;
-
-                if (Math.Abs(m_Position - focuserPosition) <= focuserMoveTolerance) // Allow a small tolerance
+                // Test outcome if required
+                if (checkMoveAccuracy)
                 {
-                    LogOK(testName, "Absolute move OK");
+                    LogCallToDriver(testName, "About to get Position property");
+                    int focuserPosition = focuser.Position;
+
+                    if (Math.Abs(m_Position - focuserPosition) <= focuserMoveTolerance) // Allow a small tolerance
+                    {
+                        LogOK(testName, "Absolute move OK");
+                    }
+                    else
+                    {
+                        LogIssue(testName, $"Move ended at {focuserPosition}, which is {Math.Abs(focuserPosition - m_Position)} steps away from the expected position {m_Position}. This is outside Conform's configured move tolerance: {focuserMoveTolerance}.");
+                    }
                 }
                 else
-                {
-                    LogIssue(testName, $"Move ended at {focuserPosition}, which is {Math.Abs(focuserPosition - m_Position)} steps away from the expected position {m_Position}. This is outside Conform's configured move tolerance: {focuserMoveTolerance}.");
-                }
+                    LogOK(testName, "Absolute move OK");
             }
             else
                 LogOK(testName, "Relative move OK");
@@ -787,7 +791,7 @@ namespace ConformU
                     if (focuser.IsMoving)
                     {
                         LogIssue(testName, $"The Move method took {duration.TotalSeconds:0.000} seconds to complete and was assumed to be synchronous, but the IsMoving property returned TRUE after the Move completed.");
-                        LogInfo(testName, $"The move was assumed to be synchronous because the Move method duration exceeded Conform's built-in sync/async test time of {MOVE_SYNC_TEST_TIME/1000:0.000} seconds.");
+                        LogInfo(testName, $"The move was assumed to be synchronous because the Move method duration exceeded Conform's built-in sync/async test time of {MOVE_SYNC_TEST_TIME / 1000:0.000} seconds.");
                         if (m_Absolute)
                         {
                             WaitWhile($"Moving focuser", () => { return focuser.IsMoving; }, 500, settings.FocuserTimeout, () => { return $"{focuser.Position} / {newPosition}"; }); // Wait for move to complete
