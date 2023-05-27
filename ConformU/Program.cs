@@ -20,6 +20,8 @@ using System.Text.RegularExpressions;
 using ASCOM.Common;
 using ASCOM.Common.Alpaca;
 using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
+using System.Linq;
 
 namespace ConformU
 {
@@ -81,7 +83,7 @@ namespace ConformU
 
                 // Define an argument to represent a CXOM ProgID or an Alpaca URI
                 Argument<string> deviceArgument = new(
-                    name: "COM_ProgID_or_Alpaca_URI",
+                    name: "COM_PROGID_or_ALPACA_URI",
                     description: "The device's COM ProgID (e.g. ASCOM.Simulator.Telescope) or its Alpaca URI (e.g. http://[host]:[port]/api/v1/[DeviceType]/[DeviceNumber]).\r\n" +
                     "The device technology (COM or Alpaca) and the ASCOM device type will be inferred from the supplied ProgID or URI.");
 
@@ -143,13 +145,13 @@ namespace ConformU
                 Option<string> logFilePathOption = new(
                     aliases: new string[] { "-p", "--logfilepath" },
                     description: "Fully qualified path to the log file folder.\r\n" +
-                    "Overrides the default log file path used by the GUI application, but is ignored when a fully qualified name is specified in the --logfile option.")
+                    "Overrides the default log file path used by the GUI application, but is ignored when the --logfilename option is used.")
                 {
                     ArgumentHelpName = "PATH"
                 };
 
                 Option<FileInfo> logFileNameOption = new(
-                    aliases: new string[] { "-n", "--logfile" },
+                    aliases: new string[] { "-n", "--logfilename" },
                     description: "Filename of the log file (fully qualified or relative to the current directory).\r\n" +
                     "The default GUI log filename and location will be used if this option is omitted.")
                 {
@@ -171,6 +173,48 @@ namespace ConformU
                 {
                     ArgumentHelpName = "FILENAME"
                 };
+
+                #endregion
+
+                #region Option validators
+
+                logFilePathOption.AddValidator(result =>
+                {
+                    string filePath = (string)result.GetValueOrDefault();
+
+                    // Validate Windows paths
+                    if (OperatingSystem.IsWindows())
+                    {
+                        foreach (char invalidCharcater in Path.GetInvalidFileNameChars())
+                        {
+                            if (filePath.Contains(invalidCharcater))
+                            {
+                                //Console.WriteLine($"Found invalid character in path: {filePath}");
+                                result.ErrorMessage = $"\r\nLog file path contains invalid characters: {filePath}";
+                            }
+                        }
+
+                    }
+                });
+
+                logFileNameOption.AddValidator(result =>
+                {
+                    FileInfo filePath = (FileInfo)result.GetValueOrDefault();
+
+                    // Validate Windows paths
+                    if (OperatingSystem.IsWindows())
+                    {
+                        foreach (char invalidCharcater in Path.GetInvalidFileNameChars())
+                        {
+                            if (filePath.FullName.Contains(invalidCharcater))
+                            {
+                                //Console.WriteLine($"Found invalid character in path: {filePath}");
+                                result.ErrorMessage = $"\r\nLog file name contains invalid characters: {filePath}";
+                            }
+                        }
+
+                    }
+                });
 
                 #endregion
 
@@ -656,7 +700,7 @@ namespace ConformU
                         // Restart ConformU using the 32bit executable
 
                         string baseFolder64 = AppContext.BaseDirectory;
-                        string executable32 = Path.Join(baseFolder64,"32Bit", "conformu.exe");
+                        string executable32 = Path.Join(baseFolder64, "32Bit", "conformu.exe");
 
                         // Don't try to run the 32bit application in the development environment!
                         if (!baseFolder64.Contains("\\bin\\"))
@@ -765,40 +809,110 @@ namespace ConformU
             deviceList = deviceList.Trim('|');
 
             // Test whether the device is an Alpaca device by testing whether the device description matches the expected pattern using a regex expression
-            string alpacaPattern = @"^(?i)(?<Protocol>https?):\/\/(?<Address>[a-zA-Z0-9.]*|\[?[0-9A-F:]*\]?):?(?<Port>[0-9]{0,5})(?-i)\/api\/v1\/(?<DeviceType>" + deviceList + @")\/(?<DeviceNumber>[0-9])\/?(?<Remainder>[0-9a-zA-Z]*)";
+
+            // Alpaca Regex - Groups
+            // <Protocol Group> - http or https
+            // <Address Group> - IPV4 address OR IPV6 address e.g. 192.168.1.1, 127.0.0.1, [::1] and [fe80:3::1ff:fe23:4567:8901]
+            // <Port Group> - IP port number e.g. 32323
+            // <DeviceType Group> - Device type e.g. telescope, camera etc.
+            // <DeviceNumber Group> - Device number e.g.0, 1 etc.
+            string alpacaPattern = @"^" + // Start of URI
+                                          // Extract http or https prefix
+                @"(?i)(?<Protocol>https?)" +
+                // Ignore fixed :// text
+                @":\/\/" +
+                // Extract IPv4 address
+                @"(?<Address>(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|" +
+                @"(?:\[(?:(([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))" +
+                // OR
+                @"|" +
+                // Extract IPv6 address
+                @"(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:" +
+                @"[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]" +
+                @"{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(?:(?:[0-9A-Fa-f]{1,4}:){2}(?:(?:(?::[0-9A-Fa-f]" +
+                @"{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]" +
+                @"{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]" +
+                @"{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(?:%.+)?)\])" +
+                // Ignore fixed colon port number separator if present
+                @":?" +
+                // Extract port number if present
+                @"(?<Port>[0-9]{0,5})(?-i)" +
+                // Ignore fixed /api/v1/ text
+                @"\/api\/v1\/" +
+                // Extract the device type
+                @"(?<DeviceType>" + deviceList + @")" +
+                // Ignore fixed / text
+                @"\/" +
+                // Extract the device number
+                @"(?<DeviceNumber>[0-9]{1,3})" +
+                // Ignore fixed / text if present
+                @"\/?" +
+                // Ignore any remaining text at end of the device identifier
+                @"(?<Remainder>[0-9a-zA-Z]*)";
 
             Match alpacaMatch = Regex.Match(progIdOrUri, alpacaPattern, RegexOptions.CultureInvariant);
             if (alpacaMatch.Success) // This is an Alpaca URI
             {
-                serviceType = alpacaMatch.Groups["Protocol"].Value.ToLowerInvariant() == "http" ? ServiceType.Http : ServiceType.Https;
-                address = alpacaMatch.Groups["Address"].Value;
-                port = Convert.ToInt32(alpacaMatch.Groups["Port"].Value);
-                deviceNumber = Convert.ToInt32(alpacaMatch.Groups["DeviceNumber"].Value);
+                // Extract the match groups to convenience variables
+                string protocolParameter = alpacaMatch.Groups["Protocol"].Value;
+                string addressParameter = alpacaMatch.Groups["Address"].Value;
+                string portParameter = alpacaMatch.Groups["Port"].Value;
+                string deviceNumberParameter = alpacaMatch.Groups["DeviceNumber"].Value;
+                string deviceTypeParameter = alpacaMatch.Groups["DeviceType"].Value;
 
-                deviceType = Devices.StringToDeviceType(alpacaMatch.Groups["DeviceType"].Value);
+                Console.WriteLine($"Protocol: {protocolParameter}, Address: {addressParameter}, Port: {portParameter}, Device number: {deviceNumberParameter}, Device type: {deviceTypeParameter}");
+
+                serviceType = protocolParameter.ToLowerInvariant() == "http" ? ServiceType.Http : ServiceType.Https;
+
+                // Test whether the Alpaca host address is empty
+                if (string.IsNullOrEmpty(addressParameter))
+                {
+                    Console.WriteLine($"\r\nThe device identifier appears to be an Alpaca URI but the address cannot be parsed from it\r\n");
+                    return returnValue;
+                }
+                address = addressParameter;
+                if (string.IsNullOrEmpty(portParameter))
+                {
+                    Console.WriteLine($"\r\nNo Alpaca port number was supplied, assuming port 80.\r\n");
+                    portParameter = "80";
+                }
+                port = Convert.ToInt32(portParameter);
+                deviceNumber = Convert.ToInt32(deviceNumberParameter);
+
+                deviceType = Devices.StringToDeviceType(deviceTypeParameter);
 
                 returnValue = DeviceTechnology.Alpaca;
             }
             else // Not an Alpaca device so test for a COM ProgID
             {
-                string progIdPattern = @"^(?i)(?<DeviceName>[a-z0-9.]*)\.(?<DeviceType>" + deviceList + @")";
-                Match comMatch = Regex.Match(progIdOrUri, progIdPattern, RegexOptions.CultureInvariant);
+                string progIdPattern = @"^(?<DeviceName>[a-z0-9.]*)\.(?<DeviceType>" + deviceList + @")(?<Tail>.*)";
+                Match comMatch = Regex.Match(progIdOrUri, progIdPattern, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+
+
                 if (comMatch.Success) // This is an COM ProgID
                 {
-                    deviceType = Devices.StringToDeviceType(comMatch.Groups["DeviceType"].Value);
-                    returnValue = DeviceTechnology.COM;
+                    string comNameParameter = comMatch.Groups["DeviceName"].Value;
+                    string comDeviceTypeParameter = comMatch.Groups["DeviceType"].Value;
+                    string comTailParameter = comMatch.Groups["Tail"].Value;
+                    //Console.WriteLine($"COM name: {comNameParameter}, Device type: {comDeviceTypeParameter}, Tail parameter: {comTailParameter}.");
+
+                    if (string.IsNullOrEmpty(comTailParameter))
+                    {
+                        deviceType = Devices.StringToDeviceType(comDeviceTypeParameter);
+                        returnValue = DeviceTechnology.COM;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"\r\nThe device type given in the COM ProgID is not a valid device type.\r\n");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine($"ProgID match failed for '{progIdOrUri}'");
-
+                    Console.WriteLine($"\r\nUnable to identify the device identifier as either a COM ProgID or an Alpaca URI. Is there a typo in the device identifier?\r\n");
                 }
-
             }
 
             return returnValue;
         }
-
-
     }
 }
