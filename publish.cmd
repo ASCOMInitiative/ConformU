@@ -8,9 +8,9 @@ cd
 cd J:\ConformU
 
 echo *** Build application
-MSBuild "J:\ConformU\ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Restore 
+MSBuild ConformU.sln /p:Configuration=Debug /p:Platform="Any CPU" /t:Restore 
 cd
-MSBuild "J:\ConformU\ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Rebuild
+MSBuild ConformU.sln /p:Configuration=Debug /p:Platform="Any CPU" /t:Rebuild
 echo *** Completed Build
 
 echo *** Publishing MacOS Intel silicon
@@ -37,12 +37,6 @@ echo *** Publishing Linux X64
 dotnet publish -c Debug /p:Platform="Any CPU" -r linux-x64 --framework net7.0 --self-contained true /p:PublishSingleFile=true
 bsdtar -cJf publish/conformu.linux-x64.needsexec.tar.xz -C ConformU\bin\Debug\net7.0\linux-x64\publish\ *
 echo *** Completed Linux X64
-
-echo *** Build application
-MSBuild "ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Restore 
-cd
-MSBuild "ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Rebuild
-echo *** Completed Build
 
 echo *** Publishing Windows 64bit
 dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r win-x64 --framework net7.0-windows --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true -o ./publish/ConformU64/

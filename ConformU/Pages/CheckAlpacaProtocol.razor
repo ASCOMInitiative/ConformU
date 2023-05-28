@@ -148,6 +148,9 @@
                         // Clear the screen log
                         screenLog = "";
 
+                        // Add a blank line to the console log
+                        Console.WriteLine("");
+
                         // Create a task to run the conformance test
                         conformanceTestTask = new Task<int>(() =>
                         {

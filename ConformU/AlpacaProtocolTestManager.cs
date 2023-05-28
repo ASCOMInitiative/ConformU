@@ -136,7 +136,8 @@ namespace ConformU
 
             try
             {
-                TL.LogMessage("TestAlpacaProtocol", $"Task started");
+                // Create a blank line at the start of the console log
+                Console.WriteLine("");
 
                 string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString().ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
 
@@ -338,6 +339,9 @@ namespace ConformU
                         LogLine(message);
                     }
                 }
+
+                // Create a blank line in the console log
+                Console.WriteLine("");
 
                 // Set the return code to the number of errors + issues
                 returnCode = errorMessages.Count + issueMessages.Count;

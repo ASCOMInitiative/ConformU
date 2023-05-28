@@ -167,7 +167,7 @@ namespace ConformU
         public new void LogMessage(string method, string message)
         {
             // Write the message to the console
-            Console.WriteLine($"{method} {message}");
+            Console.WriteLine($"{method}{(string.IsNullOrEmpty(method)?"":" ")}{message}");
 
             // Write the message to the log file
             base.LogMessage(method,message);

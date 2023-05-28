@@ -66,13 +66,15 @@ namespace ConformU
 
                 // ROOT command
                 var rootCommand = new RootCommand($"Conform Universal {Update.ConformuVersionDisplayString}\r\nCopyright (c) 2021-{DateTime.Now.Year} Peter Simpson\r\n\r\n" +
-                    $"Use conformu [command] -h for information on options available in each command.");
+                    $"Enter conformu [command] -h for information on options available in each command.\r\n\r\n" +
+                    $"If no command or options are provided Conform Universal will start as a GUI application using default parameters."
+                    );
 
                 // CONFORMANCE command
-                var conformanceCommand = new Command("conformance", "Check the specified device for ASCOM device interface conformance");
+                var conformanceCommand = new Command("conformance", "Check the specified device for ASCOM device interface conformance with all tests enabled.");
 
                 // ALPACA PROTOCOL command
-                var alpacaProtocolCommand = new Command("alpacaprotocol", "Check the specified device for Alpaca protocol conformance");
+                var alpacaProtocolCommand = new Command("alpacaprotocol", "Check the specified Alpaca device for Alpaca protocol conformance");
 
                 // CONFORMANCE USING SETTINGS command
                 var conformanceUsingSettingsCommand = new Command("conformance-settings", "Check the device configured in the settings file for ASCOM device interface conformance");
@@ -81,7 +83,7 @@ namespace ConformU
                 var alpacaUsingSettingsCommand = new Command("alpacaprotocol-settings", "Check the device configured in the settings file for Alpaca protocol conformance");
 
                 // START AS GUI command
-                var startAsGuiCommand = new Command("gui", "Start Conform Universal as an interactive GUI application with options to change the log file, results file and settings file locations");
+                var startAsGuiCommand = new Command("gui", "Start Conform Universal as a GUI application with options to change the log file, results file and settings file locations");
 
                 #endregion
 
@@ -176,10 +178,10 @@ namespace ConformU
                 };
 
                 // LOG FILE PATH option 
-                Option<string> logFilePathOption = new(
+                Option<DirectoryInfo> logFilePathOption = new(
                     aliases: new string[] { "-p", "--logfilepath" },
-                    description: "Fully qualified path to the log file folder.\r\n" +
-                    "Overrides the default log file path used by the GUI application, but is ignored when the --logfilename option is used.")
+                    description: "Relative or fully qualified path to the log file folder.\r\n" +
+                    "Overrides the default GUI log file path, but is ignored when the --logfilename option is present.")
                 {
                     ArgumentHelpName = "PATH"
                 };
@@ -191,16 +193,16 @@ namespace ConformU
                     if (OperatingSystem.IsWindows())
                     {
                         // Get the log file path
-                        string logFilePath = (string)result.GetValueOrDefault();
+                        DirectoryInfo logFilePath = (DirectoryInfo)result.GetValueOrDefault();
 
                         // Check each character to see if it matches an invalid character
                         foreach (char invalidCharacter in Path.GetInvalidPathChars())
                         {
-                            if (logFilePath.Contains(invalidCharacter)) // Found an invalid character detected
+                            if (logFilePath.FullName.Contains(invalidCharacter)) // Found an invalid character detected
                             {
                                 // Set the error message
                                 Console.WriteLine($"\r\n{RED_TEXT}Found invalid log file path character: '{invalidCharacter}' ({(int)invalidCharacter:X2}){WHITE_TEXT}");
-                                result.ErrorMessage = $"\r\nLog file path contains invalid characters: {logFilePath}";
+                                result.ErrorMessage = $"\r\nLog file path contains invalid characters: {logFilePath.FullName}";
                             }
                         }
                     }
@@ -209,8 +211,8 @@ namespace ConformU
                 // LOG FILE NAME option
                 Option<FileInfo> logFileNameOption = new(
                     aliases: new string[] { "-n", "--logfilename" },
-                    description: "Filename of the log file (fully qualified or relative to the current directory).\r\n" +
-                    "The default GUI log filename and location will be used if this option is omitted.")
+                    description: "Relative or fully qualified name of the log file.\r\n" +
+                    "The default GUI log file name will be used if this option is omitted.")
                 {
                     ArgumentHelpName = "FILENAME"
                 };
@@ -245,20 +247,86 @@ namespace ConformU
                 // RESULTS FILE option
                 Option<FileInfo> resultsFileOption = new(
                     aliases: new string[] { "-r", "--resultsfile" },
-                    description: "Filename of the machine readable results file (fully qualified or relative to the current directory).\r\n" +
+                    description: "Relative or fully qualified name of the machine readable results file.\r\n" +
                     "The default GUI filename and location will be used if this option is omitted.")
                 {
                     ArgumentHelpName = "FILENAME"
                 };
 
+                // Add a validator for the results file name
+                resultsFileOption.AddValidator(result =>
+                {
+                    // Validate Windows file names
+                    if (OperatingSystem.IsWindows())
+                    {
+                        // Get the log file name as a FileInfo
+                        FileInfo resultsFileInfo = (FileInfo)result.GetValueOrDefault();
+
+                        // Check each character to see if it matches an invalid character
+                        foreach (char invalidCharacter in Path.GetInvalidFileNameChars())
+                        {
+                            //Console.WriteLine($"Invalid log file name character: '{invalidCharacter}' ({(int)invalidCharacter:X2})");
+                            // Ignore colon and backslash, which are marked as invalid in a file name
+                            if ((invalidCharacter != '\\') & (invalidCharacter != ':'))
+                            {
+                                if (resultsFileInfo.FullName.Contains(invalidCharacter)) // Found an invalid character detected
+                                {
+                                    // Set the error message
+                                    Console.WriteLine($"\r\n{RED_TEXT}Found invalid results file name character: '{invalidCharacter}' ({(int)invalidCharacter:X2}){WHITE_TEXT}");
+                                    result.ErrorMessage = $"\r\nResults file name contains invalid characters: {resultsFileInfo.FullName}";
+                                }
+                            }
+                        }
+                    }
+                });
+
                 // SETTINGS FILE option
                 Option<FileInfo> settingsFileOption = new(
                     aliases: new string[] { "-s", "--settingsfile" },
-                    description: "Filename of the settings file to use (fully qualified or relative to the current directory).\r\n" +
-                    "The GUI application settings file will be used if this option is omitted.")
+                    description: "Relative or fully qualified name of the settings file.\r\n" +
+                    "The default GUI application settings file will be used if this option is omitted.")
                 {
                     ArgumentHelpName = "FILENAME"
                 };
+
+                // Add a validator for the settings file name
+                settingsFileOption.AddValidator(result =>
+                {
+                    // Get the log file name as a FileInfo
+                    FileInfo settingsFileInfo = (FileInfo)result.GetValueOrDefault();
+
+                    // Validate Windows file names
+                    if (OperatingSystem.IsWindows())
+                    {
+                        bool fileNameOk = true;
+
+                        // Check each character to see if it matches an invalid character
+                        foreach (char invalidCharacter in Path.GetInvalidFileNameChars())
+                        {
+                            //Console.WriteLine($"Invalid log file name character: '{invalidCharacter}' ({(int)invalidCharacter:X2})");
+                            // Ignore colon and backslash, which are marked as invalid in a file name
+                            if ((invalidCharacter != '\\') & (invalidCharacter != ':'))
+                            {
+                                if (settingsFileInfo.FullName.Contains(invalidCharacter)) // Found an invalid character detected
+                                {
+                                    // Set the error message
+                                    Console.WriteLine($"\r\n{RED_TEXT}Found invalid settings file name character: '{invalidCharacter}' ({(int)invalidCharacter:X2}){WHITE_TEXT}");
+                                    result.ErrorMessage = $"\r\nSettings file name contains invalid characters: {settingsFileInfo.FullName}";
+                                    fileNameOk = false;
+                                }
+                            }
+                        }
+                        if (!fileNameOk)
+                            return;
+                    }
+
+                    // Validate that the file exists
+                    if (!File.Exists(settingsFileInfo.FullName))
+                    {
+                        //Console.WriteLine($"\r\n{RED_TEXT}Settings file '{settingsFileInfo.FullName}' does not exist.{WHITE_TEXT}");
+                        result.ErrorMessage = $"\r\nSettings file '{settingsFileInfo.FullName}' does not exist.";
+                    }
+                });
 
                 #endregion
 
@@ -274,45 +342,45 @@ namespace ConformU
 
                 // CONFORMANCE COMMAND - add arguments and options 
                 conformanceCommand.AddArgument(deviceArgument);
-                conformanceCommand.AddOption(settingsFileOption);
                 conformanceCommand.AddOption(logFileNameOption);
                 conformanceCommand.AddOption(logFilePathOption);
                 conformanceCommand.AddOption(resultsFileOption);
+                conformanceCommand.AddOption(settingsFileOption);
                 conformanceCommand.AddOption(debugDiscoveryOption);
                 conformanceCommand.AddOption(debugStartUpOption);
 
                 // ALPCA COMMAND - add arguments and options
                 alpacaProtocolCommand.AddArgument(alpacaDeviceArgument);
-                alpacaProtocolCommand.AddOption(settingsFileOption);
                 alpacaProtocolCommand.AddOption(logFileNameOption);
                 alpacaProtocolCommand.AddOption(logFilePathOption);
                 alpacaProtocolCommand.AddOption(resultsFileOption);
+                alpacaProtocolCommand.AddOption(settingsFileOption);
                 alpacaProtocolCommand.AddOption(debugDiscoveryOption);
                 alpacaProtocolCommand.AddOption(debugStartUpOption);
 
                 // ALPCA USING SETTINGS COMMAND - add options
-                alpacaUsingSettingsCommand.AddOption(settingsFileOption);
                 alpacaUsingSettingsCommand.AddOption(logFileNameOption);
                 alpacaUsingSettingsCommand.AddOption(logFilePathOption);
                 alpacaUsingSettingsCommand.AddOption(resultsFileOption);
+                alpacaUsingSettingsCommand.AddOption(settingsFileOption);
                 alpacaUsingSettingsCommand.AddOption(debugDiscoveryOption);
                 alpacaUsingSettingsCommand.AddOption(debugStartUpOption);
 
                 // CONFORMANCE USING SETTINGS COMMAND - add options
-                conformanceUsingSettingsCommand.AddOption(settingsFileOption);
                 conformanceUsingSettingsCommand.AddOption(logFileNameOption);
                 conformanceUsingSettingsCommand.AddOption(logFilePathOption);
                 conformanceUsingSettingsCommand.AddOption(resultsFileOption);
+                conformanceUsingSettingsCommand.AddOption(settingsFileOption);
                 conformanceUsingSettingsCommand.AddOption(debugDiscoveryOption);
                 conformanceUsingSettingsCommand.AddOption(debugStartUpOption);
 
                 // START AS GUI COMMAND  - add options
                 startAsGuiCommand.AddOption(logFileNameOption);
                 startAsGuiCommand.AddOption(logFilePathOption);
-                startAsGuiCommand.AddOption(debugDiscoveryOption);
-                startAsGuiCommand.AddOption(debugStartUpOption);
                 startAsGuiCommand.AddOption(resultsFileOption);
                 startAsGuiCommand.AddOption(settingsFileOption);
+                startAsGuiCommand.AddOption(debugDiscoveryOption);
+                startAsGuiCommand.AddOption(debugStartUpOption);
 
                 #endregion
 
@@ -559,7 +627,7 @@ namespace ConformU
         /// <param name="debugDiscovery"></param>
         /// <param name="resultsFile"></param>
         /// <param name="settingsFile"></param>
-        static int StartGuiHandler(FileInfo file, string path, bool debugStartUp, bool debugDiscovery, FileInfo resultsFile, FileInfo settingsFile)
+        static int StartGuiHandler(FileInfo file, DirectoryInfo path, bool debugStartUp, bool debugDiscovery, FileInfo resultsFile, FileInfo settingsFile)
         {
             // Initialise required variables required by several commands
             InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
@@ -745,7 +813,7 @@ namespace ConformU
         /// <param name="resultsFileInfo"></param>
         /// <param name="settingsFileInfo"></param>
 
-        private static void InitialiseVariables(FileInfo logFileInfo, string logFilePath, bool debugStartUp, bool debugDiscovery, FileInfo resultsFileInfo, FileInfo settingsFileInfo)
+        private static void InitialiseVariables(FileInfo logFileInfo, DirectoryInfo logPathInfo, bool debugStartUp, bool debugDiscovery, FileInfo resultsFileInfo, FileInfo settingsFileInfo)
         {
             argList = new();
 
@@ -763,8 +831,7 @@ namespace ConformU
             }
 
             string logFileName = logFileInfo?.FullName ?? "";
-            if (string.IsNullOrEmpty(logFilePath))
-                logFilePath = "";
+            string logFilePath = logPathInfo?.FullName ?? "";
 
             // Use fully qualified file name if present, otherwise use log file path and relative file name
             if (Path.IsPathFullyQualified(logFileName)) // Full file name and path provided so split into path and filename and ignore any supplied log file path
