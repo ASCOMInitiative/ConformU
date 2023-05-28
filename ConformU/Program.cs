@@ -27,6 +27,8 @@ namespace ConformU
 {
     public partial class Program
     {
+        private const string RED_TEXT = "\u001b[91m";
+        private const string WHITE_TEXT = "\u001b[0m";
         private static string[] commandLineArguments;
         private static List<string> argList;
         private static ConformLogger conformLogger;
@@ -192,11 +194,12 @@ namespace ConformU
                         string logFilePath = (string)result.GetValueOrDefault();
 
                         // Check each character to see if it matches an invalid character
-                        foreach (char invalidCharacter in Path.GetInvalidFileNameChars())
+                        foreach (char invalidCharacter in Path.GetInvalidPathChars())
                         {
                             if (logFilePath.Contains(invalidCharacter)) // Found an invalid character detected
                             {
                                 // Set the error message
+                                Console.WriteLine($"\r\n{RED_TEXT}Found invalid log file path character: '{invalidCharacter}' ({(int)invalidCharacter:X2}){WHITE_TEXT}");
                                 result.ErrorMessage = $"\r\nLog file path contains invalid characters: {logFilePath}";
                             }
                         }
@@ -224,10 +227,16 @@ namespace ConformU
                         // Check each character to see if it matches an invalid character
                         foreach (char invalidCharacter in Path.GetInvalidFileNameChars())
                         {
-                            if (logFileInfo.FullName.Contains(invalidCharacter)) // Found an invalid character detected
+                            //Console.WriteLine($"Invalid log file name character: '{invalidCharacter}' ({(int)invalidCharacter:X2})");
+                            // Ignore colon and backslash, which are marked as invalid in a file name
+                            if ((invalidCharacter != '\\') & (invalidCharacter != ':'))
                             {
-                                // Set the error message
-                                result.ErrorMessage = $"\r\nLog file name contains invalid characters: {logFileInfo}";
+                                if (logFileInfo.FullName.Contains(invalidCharacter)) // Found an invalid character detected
+                                {
+                                    // Set the error message
+                                    Console.WriteLine($"\r\n{RED_TEXT}Found invalid log file name character: '{invalidCharacter}' ({(int)invalidCharacter:X2}){WHITE_TEXT}");
+                                    result.ErrorMessage = $"\r\nLog file name contains invalid characters: {logFileInfo.FullName}";
+                                }
                             }
                         }
                     }
@@ -342,7 +351,7 @@ namespace ConformU
                     switch (technology)
                     {
                         case DeviceTechnology.NotSelected:
-                            Console.WriteLine($"***** SHOULD NEVER SEE THIS MESSAGE BECAUSE THE VALIDATOR SHOLD HAVE STOPPED EXECUTION IF THE DEVICE PROGID/URI IS BAD *****\r\nArgument: {device}");
+                            Console.WriteLine($"\r\n{RED_TEXT}***** SHOULD NEVER SEE THIS MESSAGE BECAUSE THE VALIDATOR SHOLD HAVE STOPPED EXECUTION IF THE DEVICE PROGID/URI IS BAD *****\r\nArgument: {device}{WHITE_TEXT}");
                             break;
 
                         case DeviceTechnology.Alpaca:
@@ -360,21 +369,28 @@ namespace ConformU
                             break;
 
                         case DeviceTechnology.COM:
-                            // Initialise required variables required by several commands
-                            InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
+                            if (OperatingSystem.IsWindows()) // OK because COM is valid on WindowsOS
+                            {
+                                // Initialise required variables required by several commands
+                                InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
 
-                            // Set options to conduct a full conformance test
-                            conformConfiguration.SetFullTest();
+                                // Set options to conduct a full conformance test
+                                conformConfiguration.SetFullTest();
 
-                            // Set the COM device parameters
-                            conformConfiguration.SetComDevice(device, deviceType.Value);
+                                // Set the COM device parameters
+                                conformConfiguration.SetComDevice(device, deviceType.Value);
 
-                            // Run the conformance test
-                            returnCode = RunConformanceTest();
+                                // Run the conformance test
+                                returnCode = RunConformanceTest();
+                            }
+                            else // Not valid because COM is only valid on Windows OS
+                            {
+                                Console.WriteLine($"\r\n{RED_TEXT}Checking COM devices on this operating system is not supported.{WHITE_TEXT}");
+                            }
                             break;
 
                         default:
-                            Console.WriteLine($"***** SHOULD NEVER SEE THIS MESSAGE BECAUSE ONLY COM AND ALPACA TECHNOLOGY TYPES ARE SUPPORTED *****\r\nArgument: {device}");
+                            Console.WriteLine($"\r\n{RED_TEXT}SHOULD NEVER SEE THIS MESSAGE BECAUSE ONLY COM AND ALPACA TECHNOLOGY TYPES ARE SUPPORTED *****\r\nArgument: {device}{WHITE_TEXT}");
                             break;
                     }
 
@@ -393,7 +409,7 @@ namespace ConformU
                     switch (technology)
                     {
                         case DeviceTechnology.NotSelected:
-                            Console.WriteLine($"***** SHOULD NEVER SEE THIS MESSAGE BECAUSE THE VALIDATOR SHOLD HAVE STOPPED EXECUTION IF THE DEVICE PROGID/URI IS BAD *****\r\nArgument: {alpacaDevice}");
+                            Console.WriteLine($"\r\n{RED_TEXT}SHOULD NEVER SEE THIS MESSAGE BECAUSE THE VALIDATOR SHOLD HAVE STOPPED EXECUTION IF THE DEVICE PROGID/URI IS BAD{WHITE_TEXT}\r\nArgument: {alpacaDevice}");
                             break;
 
                         case DeviceTechnology.Alpaca:
@@ -411,11 +427,11 @@ namespace ConformU
                             break;
 
                         case DeviceTechnology.COM:
-                            Console.WriteLine($"***** This command can only be used with Alpaca devices *****\r\nArgument: {alpacaDevice}");
+                            Console.WriteLine($"\r\n{RED_TEXT}This command can only be used with Alpaca devices. Argument: {alpacaDevice}{WHITE_TEXT}");
                             break;
 
                         default:
-                            Console.WriteLine($"***** SHOULD NEVER SEE THIS MESSAGE BECAUSE ONLY COM AND ALPACA TECHNOLOGY TYPES ARE SUPPORTED *****\r\nArgument: {alpacaDevice}");
+                            Console.WriteLine($"\r\n{RED_TEXT}SHOULD NEVER SEE THIS MESSAGE BECAUSE ONLY COM AND ALPACA TECHNOLOGY TYPES ARE SUPPORTED\r\nArgument: {alpacaDevice}{WHITE_TEXT}");
                             break;
                     }
 
@@ -463,7 +479,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Conform internal error - Exception reading command line or stating application:\r\n{ex}");
+                Console.WriteLine($"\r\n{RED_TEXT}Conform internal error - Exception reading command line or stating application:{WHITE_TEXT}\r\n{ex}");
                 return ex.HResult;
             }
         }
@@ -517,7 +533,7 @@ namespace ConformU
                     ShowWindow(GetConsoleWindow(), SW_SHOWMINIMIZED);
 #endif
 
-                    Console.WriteLine($"Starting web server.");
+                    Console.WriteLine($"\r\nStarting web server.");
                     Task t = CreateHostBuilder(conformLogger, conformStateManager, conformConfiguration, argList.ToArray()) // Use the revised argument list because the command line parser is fussy about prefixes and won't accept the / prefix
                          .Build()
                          .RunAsync();
@@ -526,7 +542,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Exception stating application: {ex.Message}");
+                    Console.WriteLine($"\r\n{RED_TEXT}Exception stating application: {ex.Message}{WHITE_TEXT}");
                     return ex.HResult;
                 }
             }
@@ -576,7 +592,7 @@ namespace ConformU
                 ShowWindow(GetConsoleWindow(), SW_SHOWMINIMIZED);
 #endif
 
-                Console.WriteLine($"Starting web server.");
+                Console.WriteLine($"\r\nStarting web server.");
                 Task t = CreateHostBuilder(conformLogger, conformStateManager, conformConfiguration, argList.ToArray()) // Use the revised argument list because the command line parser is fussy about prefixes and won't accept the / prefix
                      .Build()
                      .RunAsync();
@@ -585,7 +601,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception stating application: {ex.Message}");
+                Console.WriteLine($"\r\n{RED_TEXT}Exception stating application: {ex.Message} {WHITE_TEXT}");
                 return ex.HResult;
             }
             return 0;
@@ -657,7 +673,7 @@ namespace ConformU
             string validationMessage = conformConfiguration.Validate();
             if (!string.IsNullOrEmpty(validationMessage)) // There is a configuration issue so present an error message
             {
-                Console.WriteLine($"Cannot start test:\r\n{validationMessage}");
+                Console.WriteLine($"\r\n{RED_TEXT}Cannot start test:{WHITE_TEXT}\r\n{validationMessage}");
                 return -99;
             }
 
@@ -674,7 +690,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"RunConformanceTest - Exception: \r\n {ex}");
+                    Console.WriteLine($"\r\n{RED_TEXT}RunConformanceTest - Exception:{WHITE_TEXT}\r\n {ex}");
                     returnCode = ex.HResult;
                 }
             }
@@ -692,7 +708,7 @@ namespace ConformU
             string validationMessage = conformConfiguration.Validate();
             if (!string.IsNullOrEmpty(validationMessage)) // There is a configuration issue so present an error message
             {
-                Console.WriteLine($"Cannot start test:\r\n{validationMessage}");
+                Console.WriteLine($"\r\n{RED_TEXT}Cannot start test:{WHITE_TEXT}\r\n{validationMessage}");
                 return -99;
             }
 
@@ -711,7 +727,7 @@ namespace ConformU
                 catch (Exception ex)
                 {
                     returnCode = ex.HResult;
-                    Console.WriteLine($"Error running the Alpaca protocol test:\r\n{ex}");
+                    Console.WriteLine($"\r\n{RED_TEXT}Error running the Alpaca protocol test:{WHITE_TEXT}\r\n{ex}");
                 }
             }
 
@@ -812,13 +828,13 @@ namespace ConformU
                                     Arguments = $"/c \"{executable32}\" {string.Join(" ", commandLineArguments)}"
                                 };
 
-                                Console.WriteLine($"Starting 32bit process");
+                                Console.WriteLine($"\r\nStarting 32bit process");
                                 Process.Start(processStartInfo);
                                 Console.WriteLine($"32bit Process started");
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine($"Exception: {ex}");
+                                Console.WriteLine($"\r\n{RED_TEXT}Exception:{WHITE_TEXT}\r\n{ex}");
                             }
 
                             return;
@@ -901,14 +917,14 @@ namespace ConformU
                 string deviceNumberParameter = alpacaMatch.Groups["DeviceNumber"].Value;
                 string deviceTypeParameter = alpacaMatch.Groups["DeviceType"].Value;
 
-                Console.WriteLine($"Protocol: {protocolParameter}, Address: {addressParameter}, Port: {portParameter}, Device number: {deviceNumberParameter}, Device type: {deviceTypeParameter}");
+                //Console.WriteLine($"Protocol: {protocolParameter}, Address: {addressParameter}, Port: {portParameter}, Device number: {deviceNumberParameter}, Device type: {deviceTypeParameter}");
 
                 serviceType = protocolParameter.ToLowerInvariant() == "http" ? ServiceType.Http : ServiceType.Https;
 
                 // Test whether the Alpaca host address is empty
                 if (string.IsNullOrEmpty(addressParameter))
                 {
-                    Console.WriteLine($"\r\nThe device identifier appears to be an Alpaca URI but the address cannot be parsed from it\r\n");
+                    Console.WriteLine($"\r\n{RED_TEXT}The device identifier appears to be an Alpaca URI but the address cannot be parsed from it.{WHITE_TEXT}\r\n");
                     return returnValue;
                 }
                 address = addressParameter;
@@ -944,12 +960,12 @@ namespace ConformU
                     }
                     else
                     {
-                        Console.WriteLine($"\r\nThe device type given in the COM ProgID is not a valid device type.\r\n");
+                        Console.WriteLine($"\r\n{RED_TEXT}The device type given in the COM ProgID is not a valid device type.{WHITE_TEXT}\r\n");
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"\r\nUnable to identify the device identifier as either a COM ProgID or an Alpaca URI. Is there a typo in the device identifier?\r\n");
+                    Console.WriteLine($"\r\n{RED_TEXT}Unable to identify the device identifier as either a COM ProgID or an Alpaca URI. Is there a typo in the device identifier?{WHITE_TEXT}\r\n");
                 }
             }
 
