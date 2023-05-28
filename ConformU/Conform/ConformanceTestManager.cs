@@ -169,6 +169,9 @@ namespace ConformU
 
             string testStage;
 
+            // Start with a blank line to the console log
+            Console.WriteLine("");
+
             // Initialise error recorder
             conformResults = new();
 
@@ -187,26 +190,28 @@ namespace ConformU
                     testStage = "CreateDevice";
                     testDevice.CreateDevice();
                     TL.LogMessage("ConformanceCheck", MessageLevel.OK, "Driver instance created successfully");
+                    TL.LogMessage("", MessageLevel.TestOnly, "");
 
                     // Run pre-connect checks if required
                     if (!cancellationToken.IsCancellationRequested & testDevice.HasPreConnectCheck)
                     {
+                        TL.LogMessage("Pre-connect checks", MessageLevel.TestOnly, "");
+                        testDevice.PreConnectChecks();
                         TL.LogMessage("", MessageLevel.TestOnly, "");
-                        TL.LogMessage("Pre-connect checks", MessageLevel.TestOnly, ""); testDevice.PreConnectChecks();
-                        TL.LogMessage("", MessageLevel.TestOnly, "");
-                        TL.LogMessage("Connect", MessageLevel.TestOnly, "");
                     }
 
                     // Try to set Connected to True
                     try
                     {
                         // Test setting Connected to True
-                        if (settings.DisplayMethodCalls) TL.LogMessage("ConformanceCheck", MessageLevel.TestAndMessage, "About to set Connected property");
-                        testStage = "Connected";
+                        TL.LogMessage("Connect to device", MessageLevel.TestOnly, "");
+                        testStage = "Connect";
 
+                        if (settings.DisplayMethodCalls) TL.LogMessage("ConformanceCheck", MessageLevel.TestAndMessage, "About to set Connected property");
                         testDevice.Connected = true;
-                        TL.LogMessage("ConformanceCheck", MessageLevel.OK, "Connected OK");
+                        TL.LogMessage("Connected", MessageLevel.OK, "True");
                         TL.LogMessage("", MessageLevel.TestOnly, "");
+
                         try
                         {
                             // Test common methods
@@ -269,6 +274,24 @@ namespace ConformU
                                 testStage = "PostRunCheck";
                                 testDevice.PostRunCheck();
                                 TL.LogMessage("", MessageLevel.TestOnly, ""); // Blank line
+                            }
+
+                            try
+                            {
+                                TL.LogMessage("Disconnect from device", MessageLevel.TestOnly, "");
+                                if (settings.DisplayMethodCalls) TL.LogMessage("ConformanceCheck", MessageLevel.TestAndMessage, "About to set Connected property false");
+                                testStage = "Disconnect";
+
+                                testDevice.Connected = false;
+                                TL.LogMessage("Connected", MessageLevel.OK, "False");
+                                TL.LogMessage("", MessageLevel.TestOnly, "");
+                            }
+                            catch (Exception ex)
+                            {
+                                conformResults.Issues.Add(new KeyValuePair<string, string>("Connected", $"Exception when setting Connected to false: {ex.Message}"));
+                                TL.LogMessage("Connected", MessageLevel.Issue, $"Exception when setting Connected to False: {ex.Message}");
+                                TL.LogMessage("Connected", MessageLevel.Debug, $"{ex}");
+                                TL.LogMessage("", MessageLevel.TestOnly, "");
                             }
 
                             // Carry out check on whether any tests were omitted due to Conform configuration
@@ -364,6 +387,8 @@ namespace ConformU
                         TL.LogMessage(kvp.Key, MessageLevel.TestAndMessage, kvp.Value);
                     }
                 }
+                // Add a blank line to the console output
+                Console.WriteLine("");
 
                 try
                 {
