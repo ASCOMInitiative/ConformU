@@ -62,60 +62,89 @@ namespace ConformU
 
                 #region Command definitions
 
-                // Define the root command
+                // ROOT command
                 var rootCommand = new RootCommand($"Conform Universal {Update.ConformuVersionDisplayString}\r\nCopyright (c) 2021-{DateTime.Now.Year} Peter Simpson\r\n\r\n" +
                     $"Use conformu [command] -h for information on options available in each command.");
 
-                // Define other commands
+                // CONFORMANCE command
                 var conformanceCommand = new Command("conformance", "Check the specified device for ASCOM device interface conformance");
 
+                // ALPACA PROTOCOL command
                 var alpacaProtocolCommand = new Command("alpacaprotocol", "Check the specified device for Alpaca protocol conformance");
 
+                // CONFORMANCE USING SETTINGS command
                 var conformanceUsingSettingsCommand = new Command("conformance-settings", "Check the device configured in the settings file for ASCOM device interface conformance");
 
+                // ALPACA PROTOCOL USING SETTINGS command
                 var alpacaUsingSettingsCommand = new Command("alpacaprotocol-settings", "Check the device configured in the settings file for Alpaca protocol conformance");
 
-                var guiCommand = new Command("gui", "Start Conform Universal as an interactive GUI application with options to change the log file, results file and settings file locations");
+                // START AS GUI command
+                var startAsGuiCommand = new Command("gui", "Start Conform Universal as an interactive GUI application with options to change the log file, results file and settings file locations");
 
                 #endregion
 
                 #region Argument definitions
 
-                // Define an argument to represent a CXOM ProgID or an Alpaca URI
+                // COM_PROGID or ALPACA_URI argument 
                 Argument<string> deviceArgument = new(
                     name: "COM_PROGID_or_ALPACA_URI",
                     description: "The device's COM ProgID (e.g. ASCOM.Simulator.Telescope) or its Alpaca URI (e.g. http://[host]:[port]/api/v1/[DeviceType]/[DeviceNumber]).\r\n" +
                     "The device technology (COM or Alpaca) and the ASCOM device type will be inferred from the supplied ProgID or URI.");
 
+                // Add a validator to handle both COM ProgIds and Alpaca URIs
                 deviceArgument.AddValidator((commandResult) =>
                 {
                     DeviceTechnology technology = GetDeviceTechnology(commandResult.GetValueForArgument(deviceArgument), out _, out _, out _, out _, out _);
 
-                    if (technology == DeviceTechnology.NotSelected)
+                    switch (technology)
                     {
-                        commandResult.ErrorMessage = $"The COM ProgID or Alpaca URI argument is invalid: {commandResult.GetValueForArgument(deviceArgument)}";
+                        case DeviceTechnology.NotSelected:
+                            commandResult.ErrorMessage = $"The COM ProgID or Alpaca URI argument is invalid: {commandResult.GetValueForArgument(deviceArgument)}";
+                            break;
+
+                        case DeviceTechnology.Alpaca:
+                            // No action required because Alpaca technology is supported
+                            break;
+
+                        case DeviceTechnology.COM:
+                            // No action required because COM technology is supported
+                            break;
+
+                        default:
+                            commandResult.ErrorMessage = $"***** Conform Universal internal error - Unexpected technology type returned: {technology}.";
+                            break;
                     }
-                    else
-                    {
-                    }
+
                 });
 
-                // Define an argument to represent an Alpaca URI
+                // ALPACA URI argument
                 Argument<string> alpacaDeviceArgument = new(
                     name: "Alpaca_URI",
                     description: "The device's Alpaca URI (e.g. http://host:port/api/v1/[DeviceType]/[DeviceNumber]).\r\n" +
                     "The ASCOM device type will be inferred from the supplied URI.");
 
+                //Add a validator to handle Alpaca URIs
                 alpacaDeviceArgument.AddValidator((commandResult) =>
                 {
                     DeviceTechnology technology = GetDeviceTechnology(commandResult.GetValueForArgument(alpacaDeviceArgument), out _, out _, out _, out _, out _);
 
-                    if (technology == DeviceTechnology.NotSelected)
+                    switch (technology)
                     {
-                        commandResult.ErrorMessage = $"The COM ProgID or Alpaca URI argument is invalid: {commandResult.GetValueForArgument(alpacaDeviceArgument)}";
-                    }
-                    else
-                    {
+                        case DeviceTechnology.NotSelected:
+                            commandResult.ErrorMessage = $"The Alpaca URI argument is invalid: {commandResult.GetValueForArgument(deviceArgument)}";
+                            break;
+
+                        case DeviceTechnology.Alpaca:
+                            // No action required because Alpaca technology is supported
+                            break;
+
+                        case DeviceTechnology.COM:
+                            commandResult.ErrorMessage = $"COM ProgIDs are not supported by this command: {commandResult.GetValueForArgument(alpacaDeviceArgument)}";
+                            break;
+
+                        default:
+                            commandResult.ErrorMessage = $"***** Conform Universal internal error - Unexpected technology type returned: {technology}.";
+                            break;
                     }
                 });
 
@@ -123,11 +152,12 @@ namespace ConformU
 
                 #region Option definitions
 
-                // Define options that can be added to commands
+                // VERSION option
                 Option<bool> versionOption = new(
                     aliases: new string[] { "-v", "--version" },
                     description: "Show the Conform Universal version number");
 
+                // DEBUG DISCOVERY option
                 Option<bool> debugDiscoveryOption = new(
                     aliases: new string[] { "-d", "--debugdiscovery" },
                     description: "Write discovery debug information to the log.")
@@ -135,13 +165,15 @@ namespace ConformU
                     IsHidden = true
                 };
 
+                // DEBUG STARTUP option
                 Option<bool> debugStartUpOption = new(
-                    aliases: new string[] { "-t", "--debugstratup" },
+                    aliases: new string[] { "-t", "--debugstartup" },
                     description: "Write start-up debug information to the log.")
                 {
                     IsHidden = true
                 };
 
+                // LOG FILE PATH option 
                 Option<string> logFilePathOption = new(
                     aliases: new string[] { "-p", "--logfilepath" },
                     description: "Fully qualified path to the log file folder.\r\n" +
@@ -150,6 +182,28 @@ namespace ConformU
                     ArgumentHelpName = "PATH"
                 };
 
+                // Add a validator for the log file path
+                logFilePathOption.AddValidator(result =>
+                {
+                    // Validate Windows paths
+                    if (OperatingSystem.IsWindows())
+                    {
+                        // Get the log file path
+                        string logFilePath = (string)result.GetValueOrDefault();
+
+                        // Check each character to see if it matches an invalid character
+                        foreach (char invalidCharacter in Path.GetInvalidFileNameChars())
+                        {
+                            if (logFilePath.Contains(invalidCharacter)) // Found an invalid character detected
+                            {
+                                // Set the error message
+                                result.ErrorMessage = $"\r\nLog file path contains invalid characters: {logFilePath}";
+                            }
+                        }
+                    }
+                });
+
+                // LOG FILE NAME option
                 Option<FileInfo> logFileNameOption = new(
                     aliases: new string[] { "-n", "--logfilename" },
                     description: "Filename of the log file (fully qualified or relative to the current directory).\r\n" +
@@ -158,6 +212,28 @@ namespace ConformU
                     ArgumentHelpName = "FILENAME"
                 };
 
+                // Add a validator for the log file name
+                logFileNameOption.AddValidator(result =>
+                {
+                    // Validate Windows file names
+                    if (OperatingSystem.IsWindows())
+                    {
+                        // Get the log file name as a FileInfo
+                        FileInfo logFileInfo = (FileInfo)result.GetValueOrDefault();
+
+                        // Check each character to see if it matches an invalid character
+                        foreach (char invalidCharacter in Path.GetInvalidFileNameChars())
+                        {
+                            if (logFileInfo.FullName.Contains(invalidCharacter)) // Found an invalid character detected
+                            {
+                                // Set the error message
+                                result.ErrorMessage = $"\r\nLog file name contains invalid characters: {logFileInfo}";
+                            }
+                        }
+                    }
+                });
+
+                // RESULTS FILE option
                 Option<FileInfo> resultsFileOption = new(
                     aliases: new string[] { "-r", "--resultsfile" },
                     description: "Filename of the machine readable results file (fully qualified or relative to the current directory).\r\n" +
@@ -166,6 +242,7 @@ namespace ConformU
                     ArgumentHelpName = "FILENAME"
                 };
 
+                // SETTINGS FILE option
                 Option<FileInfo> settingsFileOption = new(
                     aliases: new string[] { "-s", "--settingsfile" },
                     description: "Filename of the settings file to use (fully qualified or relative to the current directory).\r\n" +
@@ -176,59 +253,17 @@ namespace ConformU
 
                 #endregion
 
-                #region Option validators
-
-                logFilePathOption.AddValidator(result =>
-                {
-                    string filePath = (string)result.GetValueOrDefault();
-
-                    // Validate Windows paths
-                    if (OperatingSystem.IsWindows())
-                    {
-                        foreach (char invalidCharcater in Path.GetInvalidFileNameChars())
-                        {
-                            if (filePath.Contains(invalidCharcater))
-                            {
-                                //Console.WriteLine($"Found invalid character in path: {filePath}");
-                                result.ErrorMessage = $"\r\nLog file path contains invalid characters: {filePath}";
-                            }
-                        }
-
-                    }
-                });
-
-                logFileNameOption.AddValidator(result =>
-                {
-                    FileInfo filePath = (FileInfo)result.GetValueOrDefault();
-
-                    // Validate Windows paths
-                    if (OperatingSystem.IsWindows())
-                    {
-                        foreach (char invalidCharcater in Path.GetInvalidFileNameChars())
-                        {
-                            if (filePath.FullName.Contains(invalidCharcater))
-                            {
-                                //Console.WriteLine($"Found invalid character in path: {filePath}");
-                                result.ErrorMessage = $"\r\nLog file name contains invalid characters: {filePath}";
-                            }
-                        }
-
-                    }
-                });
-
-                #endregion
-
                 #region Associate arguments and options with commands
 
-                // Add commands and options to the root command
+                // ROOT COMMAND - add commands and options 
                 rootCommand.AddCommand(conformanceCommand);
                 rootCommand.AddCommand(alpacaProtocolCommand);
                 rootCommand.AddCommand(conformanceUsingSettingsCommand);
                 rootCommand.AddCommand(alpacaUsingSettingsCommand);
-                rootCommand.AddCommand(guiCommand);
+                rootCommand.AddCommand(startAsGuiCommand);
                 rootCommand.AddOption(versionOption);
 
-                // Add arguments and options to the conformance command
+                // CONFORMANCE COMMAND - add arguments and options 
                 conformanceCommand.AddArgument(deviceArgument);
                 conformanceCommand.AddOption(settingsFileOption);
                 conformanceCommand.AddOption(logFileNameOption);
@@ -237,7 +272,7 @@ namespace ConformU
                 conformanceCommand.AddOption(debugDiscoveryOption);
                 conformanceCommand.AddOption(debugStartUpOption);
 
-                // Add arguments and options to the alpaca command
+                // ALPCA COMMAND - add arguments and options
                 alpacaProtocolCommand.AddArgument(alpacaDeviceArgument);
                 alpacaProtocolCommand.AddOption(settingsFileOption);
                 alpacaProtocolCommand.AddOption(logFileNameOption);
@@ -246,7 +281,7 @@ namespace ConformU
                 alpacaProtocolCommand.AddOption(debugDiscoveryOption);
                 alpacaProtocolCommand.AddOption(debugStartUpOption);
 
-                // Add options to the check Alpaca protocol settings command
+                // ALPCA USING SETTINGS COMMAND - add options
                 alpacaUsingSettingsCommand.AddOption(settingsFileOption);
                 alpacaUsingSettingsCommand.AddOption(logFileNameOption);
                 alpacaUsingSettingsCommand.AddOption(logFilePathOption);
@@ -254,7 +289,7 @@ namespace ConformU
                 alpacaUsingSettingsCommand.AddOption(debugDiscoveryOption);
                 alpacaUsingSettingsCommand.AddOption(debugStartUpOption);
 
-                // Add options to the check conformance settings command
+                // CONFORMANCE USING SETTINGS COMMAND - add options
                 conformanceUsingSettingsCommand.AddOption(settingsFileOption);
                 conformanceUsingSettingsCommand.AddOption(logFileNameOption);
                 conformanceUsingSettingsCommand.AddOption(logFilePathOption);
@@ -262,39 +297,26 @@ namespace ConformU
                 conformanceUsingSettingsCommand.AddOption(debugDiscoveryOption);
                 conformanceUsingSettingsCommand.AddOption(debugStartUpOption);
 
-                // Add options to the start ConformU with an interactive GUI command
-                guiCommand.AddOption(logFileNameOption);
-                guiCommand.AddOption(logFilePathOption);
-                guiCommand.AddOption(debugDiscoveryOption);
-                guiCommand.AddOption(debugStartUpOption);
-                guiCommand.AddOption(resultsFileOption);
-                guiCommand.AddOption(settingsFileOption);
+                // START AS GUI COMMAND  - add options
+                startAsGuiCommand.AddOption(logFileNameOption);
+                startAsGuiCommand.AddOption(logFilePathOption);
+                startAsGuiCommand.AddOption(debugDiscoveryOption);
+                startAsGuiCommand.AddOption(debugStartUpOption);
+                startAsGuiCommand.AddOption(resultsFileOption);
+                startAsGuiCommand.AddOption(settingsFileOption);
 
                 #endregion
 
-                // Create a custom parser that does not present the default version description
-                Parser parser = new CommandLineBuilder(rootCommand)
-                       //.UseDefaults()
-                       //.UseVersionOption()
-                       .UseHelp()
-                       .UseEnvironmentVariableDirective()
-                       .UseParseDirective()
-                       .UseSuggestDirective()
-                       .RegisterWithDotnetSuggest()
-                       .UseTypoCorrections()
-                       .UseParseErrorReporting()
-                       .UseExceptionHandler()
-                       .CancelOnProcessTermination()
-                       .Build();
+                #region Command handlers
 
-                // Add the root command handler to start the GUI or display version information
+                // ROOT COPMMAND handler - Starts the GUI or displays version information
                 rootCommand.SetHandler((bool version) =>
                 {
                     // Return a task with the required return code
-                    return Task.FromResult(RootCommands(version));
+                    return Task.FromResult(RootCommandHandler(version));
                 }, versionOption);
 
-                // Add the conformance settings command handler
+                // CONFORMANCE USING SETTINGS COPMMAND handler
                 conformanceUsingSettingsCommand.SetHandler((file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
                 {
                     int returnCode = -8888;
@@ -310,7 +332,7 @@ namespace ConformU
 
                 }, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption);
 
-                // Add the conformance command handler
+                // CONFORMANCE COMMAND handler
                 conformanceCommand.SetHandler((device, file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
                 {
                     int returnCode = 0;
@@ -361,7 +383,7 @@ namespace ConformU
 
                 }, deviceArgument, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption);
 
-                // Add the alpaca command handler
+                // ALPACA PROTOCOL COMMAND handler
                 alpacaProtocolCommand.SetHandler((alpacaDevice, file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
                 {
                     int returnCode = 0;
@@ -402,7 +424,7 @@ namespace ConformU
 
                 }, alpacaDeviceArgument, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption);
 
-                // Add the command line Alpaca protocol check handler
+                // ALPACA USING SETTINGS COMMAND handler
                 alpacaUsingSettingsCommand.SetHandler((file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
                 {
                     InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
@@ -411,12 +433,29 @@ namespace ConformU
 
                 }, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption);
 
-                // Add the GUI command handler
-                guiCommand.SetHandler((file, path, results, settings, debugDiscovery, debugStartUp) =>
+                // START AS GUI COMMAND handler
+                startAsGuiCommand.SetHandler((file, path, results, settings, debugDiscovery, debugStartUp) =>
                 {
                     // Return a task with the required return code
-                    return Task.FromResult(StartGui(file, path, debugStartUp, debugDiscovery, results, settings));
+                    return Task.FromResult(StartGuiHandler(file, path, debugStartUp, debugDiscovery, results, settings));
                 }, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption);
+
+                #endregion
+
+                // Create a custom parser that does not present the default version description
+                Parser parser = new CommandLineBuilder(rootCommand)
+                       //.UseDefaults()
+                       //.UseVersionOption()
+                       .UseHelp()
+                       .UseEnvironmentVariableDirective()
+                       .UseParseDirective()
+                       .UseSuggestDirective()
+                       .RegisterWithDotnetSuggest()
+                       .UseTypoCorrections()
+                       .UseParseErrorReporting()
+                       .UseExceptionHandler()
+                       .CancelOnProcessTermination()
+                       .Build();
 
                 // Parse the command line and invoke actions as determined by supplied parameters
                 return await parser.InvokeAsync(args);
@@ -424,7 +463,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception reading command line or stating application:\r\n{ex}");
+                Console.WriteLine($"Conform internal error - Exception reading command line or stating application:\r\n{ex}");
                 return ex.HResult;
             }
         }
@@ -439,7 +478,7 @@ namespace ConformU
         /// <param name="debugDiscovery"></param>
         /// <param name="resultsFile"></param>
         /// <param name="settingsFile"></param>
-        static int RootCommands(bool version)
+        static int RootCommandHandler(bool version)
         {
             if (version)
             {
@@ -504,7 +543,7 @@ namespace ConformU
         /// <param name="debugDiscovery"></param>
         /// <param name="resultsFile"></param>
         /// <param name="settingsFile"></param>
-        static int StartGui(FileInfo file, string path, bool debugStartUp, bool debugDiscovery, FileInfo resultsFile, FileInfo settingsFile)
+        static int StartGuiHandler(FileInfo file, string path, bool debugStartUp, bool debugDiscovery, FileInfo resultsFile, FileInfo settingsFile)
         {
             // Initialise required variables required by several commands
             InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
@@ -551,6 +590,64 @@ namespace ConformU
             }
             return 0;
         }
+
+        public static IHostBuilder CreateHostBuilder(ConformLogger conformLogger, ConformStateManager conformStateManager, ConformConfiguration conformConfiguration, string[] args)
+        {
+            IHostBuilder builder = null;
+
+            builder = Host.CreateDefaultBuilder(args)
+
+                 .ConfigureLogging(logging =>
+                 {
+                     logging.ClearProviders();
+                     logging.AddSimpleConsole(options =>
+                     {
+                         options.SingleLine = true;
+                         options.IncludeScopes = false;
+                         options.TimestampFormat = "HH:mm:ss.fff - ";
+                     });
+                     logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Information);
+                     logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Information);
+                     logging.AddDebug();
+                 })
+
+                 .ConfigureServices(servicesCollection =>
+                 {
+                     // Add the logger component to the list of injectable services
+                     servicesCollection.AddSingleton(conformLogger);
+
+                     // Add the state management component to the list of injectable services
+                     servicesCollection.AddSingleton(conformStateManager);
+
+                     // Add the configuration component to the list of injectable services
+                     servicesCollection.AddSingleton(conformConfiguration);
+                 })
+
+                 .ConfigureWebHostDefaults(webBuilder =>
+                    {
+                        webBuilder.UseStartup<Startup>();
+
+#if RELEASE
+#if BUNDLED
+                       .UseContentRoot(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location))
+#endif
+#endif
+                        ;
+
+                        // Start Kestrel on localhost:ConfiguredIpPort if not running under Visual Studio
+                        webBuilder.UseKestrel(opts =>
+                        {
+                            if (!Debugger.IsAttached)
+                            {
+                                opts.Listen(IPAddress.Loopback, conformConfiguration.Settings.ApplicationPort);
+                            }
+                        });
+
+                    });
+            return builder;
+        }
+
+        #region Support code
 
         static int RunConformanceTest()
         {
@@ -733,62 +830,6 @@ namespace ConformU
             #endregion
         }
 
-        public static IHostBuilder CreateHostBuilder(ConformLogger conformLogger, ConformStateManager conformStateManager, ConformConfiguration conformConfiguration, string[] args)
-        {
-            IHostBuilder builder = null;
-
-            builder = Host.CreateDefaultBuilder(args)
-
-                 .ConfigureLogging(logging =>
-                 {
-                     logging.ClearProviders();
-                     logging.AddSimpleConsole(options =>
-                     {
-                         options.SingleLine = true;
-                         options.IncludeScopes = false;
-                         options.TimestampFormat = "HH:mm:ss.fff - ";
-                     });
-                     logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Information);
-                     logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Information);
-                     logging.AddDebug();
-                 })
-
-                 .ConfigureServices(servicesCollection =>
-                 {
-                     // Add the logger component to the list of injectable services
-                     servicesCollection.AddSingleton(conformLogger);
-
-                     // Add the state management component to the list of injectable services
-                     servicesCollection.AddSingleton(conformStateManager);
-
-                     // Add the configuration component to the list of injectable services
-                     servicesCollection.AddSingleton(conformConfiguration);
-                 })
-
-                 .ConfigureWebHostDefaults(webBuilder =>
-                    {
-                        webBuilder.UseStartup<Startup>();
-
-#if RELEASE
-#if BUNDLED
-                       .UseContentRoot(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location))
-#endif
-#endif
-                        ;
-
-                        // Start Kestrel on localhost:ConfiguredIpPort if not running under Visual Studio
-                        webBuilder.UseKestrel(opts =>
-                        {
-                            if (!Debugger.IsAttached)
-                            {
-                                opts.Listen(IPAddress.Loopback, conformConfiguration.Settings.ApplicationPort);
-                            }
-                        });
-
-                    });
-            return builder;
-        }
-
         private static DeviceTechnology GetDeviceTechnology(string progIdOrUri, out ServiceType? serviceType, out string address, out int port, out DeviceTypes? deviceType, out int deviceNumber)
         {
             // Initialise return values
@@ -914,5 +955,7 @@ namespace ConformU
 
             return returnValue;
         }
+
+        #endregion
     }
 }

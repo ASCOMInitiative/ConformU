@@ -12,7 +12,7 @@
 
 <h4 style="margin-top: 40px">ASCOM Interface Conformance</h4>
 <p>
-    Conform Universal is a client application for both Windows COM drivers and Alpaca devices that assesses their behaviour for conformance with requirements given in the relevant ASCOM Interface specification. 
+    Conform Universal is a client application for both Windows COM drivers and Alpaca devices that assesses their behaviour for conformance with requirements given in the relevant ASCOM Interface specification.
     Responses to both expected (happy path) and unexpected (unhappy path) inputs are assessed.
 </p>
 <h5>How to check ASCOM Interface Conformance</h5>
@@ -23,12 +23,12 @@
 <h4 style="margin-top: 40px">Alpaca Protocol Conformance</h4>
 <p>
     The Alpaca protocol uses HTTP and REST to communicate with a device that implements one of the ASCOM device interfaces. The protocol specifies command and
-    parameter names, together with correct casing, which are required for proper execution. The <b>Check Alpaca Protocol</b> test confirms that an Alpaca device is compliant with Alpaca requirements, 
+    parameter names, together with correct casing, which are required for proper execution. The <b>Check Alpaca Protocol</b> test confirms that an Alpaca device is compliant with Alpaca requirements,
     including correct reporting of missing parameters and handling of commands and parameters that are incorrectly cased..
 </p>
 <p>
-    The Alpaca protocol check does not attempt to confirm that a device is conformant with ASCOM interface specification requirements, you can use the Home page check for this. Instead, its purpose is to confirm that 
-    Alpaca command reception and happy / unhappy Alpaca path responses are as expected. 
+    The Alpaca protocol check does not attempt to confirm that a device is conformant with ASCOM interface specification requirements, use the conformance test on the Home page for this. The purpose 
+    of the Alpaca Protocol Check is to confirm that Alpaca specific command handling and happy / unhappy Alpaca path responses are as expected.
 </p>
 <p>
     Unlike the <b>Home</b> page ASCOM device conformance check, the Alpaca check is designed to change device state as little as possible e.g. telescope
@@ -40,60 +40,64 @@
     First select a device through the <b>Select Device</b> page and then use the <b>Check Alpaca Protocol</b> page to test compliance.
 </p>
 
-<h4 style="margin-top: 40px">Command line parameters</h4>
+<h4 style="margin-top: 40px">Command Line Operation</h4>
 <p>
-    The following command line parameters are supported to override application default behaviour. If you wish to use Conform Universal as a command line tool, without a GUI,
-    use the <b>--commandline</b> parameter together with any other override parameters that you need
+    In addition to operating as a GUI application, Conform Universal can be used as a command line application to support automated device testing in build processes. In command line mode
+    output appears in the console window and the exit code can be used as a success / fail indicator.
 </p>
 <p>
-    <table id="commandline">
+    <b>Command line interface changes:</b> Please note that the command line interface has changed in Conform Universal version 2 so that multiple test capabilities can be accessed in a consistent way that
+    provides for future expansion. <i>Test scripts that use the version 1 command line interface will need to be revised to work with the new interface.</i>
+</p>
+<p>
+    The new command line format is: <b>conformu</b> [COMMAND] [OPTIONS] and the primary commands are:
+    <table id="CommandOptions">
         <tr>
-            <th style="width:390px">Parameter</th>
+            <th style="width:390px">Command</th>
             <th>Description</th>
         </tr>
         <tr>
-            <td><tt>--commandline</tt></td>
-            <td>Run as a command line application with no graphical interface using the same settings as the GUI application.</td>
+            <td><tt><b>conformance</b> DEVICE_IDENTIFIER</tt></td>
+            <td>Run a full conformance check on the specified COM driver or Alpaca device.</td>
         </tr>
         <tr>
-            <td><tt>--settings FullyQualifiedFilename</tt></td>
-            <td>Fully qualified file name of the application settings file to use. Omit or leave blank to use the settings configured through the GUI.</td>
+            <td><tt><b>alpacaprotocol</b> ALPACA_URI</tt></td>
+            <td>Run an Alpaca protocol check on the specified Alpaca device.</td>
+        </tr>
+    </table>
+</p>
+<p>
+    <b>DEVICE_IDENTIFIER</b> can either be a COM ProgID such as ASCOM.Simulator.Camera or an Alpaca URI such as http://192.168.1.42:11111/api/v1/telescope/0. The application will
+    automatically determine the technology type and device type from the device identifier.
+</p>
+<p>
+    Full details of all commands and command options are available by entering <b>conformu --help</b> at a command prompt.
+</p>
+
+<h4 style="margin-top: 40px">Command Line Exit Codes</h4>
+<p>
+    The conformu command exit codes behave as follows:
+    <table id="commandline">
+        <tr>
+            <th style="width:390px">Value Range</th>
+            <th>Meaning</th>
         </tr>
         <tr>
-            <td><tt>--logfilepath FullyQualifiedLogfilePath</tt></td>
-            <td>Fully qualified path to the log file folder. Omit or leave blank to use the default logging settings, which create a new folder each day.</td>
+            <td><tt>Exit code = 0</tt></td>
+            <td>Successful test run with no issues or configuration alerts.</td>
         </tr>
         <tr>
-            <td><tt>--logfile filename </tt></td>
-            <td>
-                If filename has no directory/folder component it will be appended to the log file path to create the fully qualified log file name. If filename is fully qualified, any logfilepath parameter will be ignored.
-                Omit or leave blank to use automatic file naming, where the file name will be based on the file creation time.
-            </td>
+            <td><tt>Exit code &gt; 0</tt></td>
+            <td>The test revealed one or more issues or configuration alerts, the exit code indicates the number of issues  and alerts.</td>
         </tr>
         <tr>
-            <td><tt>--resultsfile FullyQualifiedFilename</tt></td>
-            <td>Fully qualified file name of the machine readable JSON results file. Omit or leave blank to use the default GUI behaviour.</td>
-        </tr>
-        <tr>
-            <td><tt>--debugdiscovery</tt></td>
-            <td>Write discovery debug information to the log.</td>
-        </tr>
-        <tr>
-            <td><tt>--debugstartup</tt></td>
-            <td>Write start-up debug information to the log.</td>
-        </tr>
-        <tr>
-            <td><tt>--help</tt></td>
-            <td>Display a help screen</td>
-        </tr>
-        <tr>
-            <td><tt>--version</tt></td>
-            <td>Display version information</td>
+            <td><tt>Exit code &lt; 0</tt></td>
+            <td>Conform Universal experienced an unexpected error while conducting the test.</td>
         </tr>
     </table>
 </p>
 
-<h4 style="margin-top: 40px">Settings file enum values</h4>
+<h4 style="margin-top: 40px">Enum values in the settings file</h4>
 <p>
     When manually editing the settings file please be aware that the settings listed below are converted to enum values within the application and must have one of the values in the <b>Possible Values</b> list.
     Any casing is accepted but misspelling will result in the file being reported as corrupt.
