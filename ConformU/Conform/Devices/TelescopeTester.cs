@@ -99,7 +99,7 @@ namespace ConformU
         private PointingState destinationSideOfPier, destinationSideOfPierEast, destinationSideOfPierWest;
         private double siderealTimeASCOM;
         private DateTime startTime, endTime;
-        private bool canReadSideOfPier;
+        private bool? canReadSideOfPier = null; // Start out in the "not read" state
         private double targetAltitude, targetAzimuth;
         private bool canReadAltitide, canReadAzimuth, canReadSiderealTime;
 
@@ -1961,7 +1961,6 @@ namespace ConformU
                 return;
 
             // SideOfPier Read - Optional
-            canReadSideOfPier = false; // Start out assuming that we actually can't read side of pier so the performance test can be omitted
             if (g_InterfaceVersion > 1)
             {
                 try
@@ -3423,7 +3422,7 @@ namespace ConformU
                 if (g_InterfaceVersion > 1)
                 {
                     // 3.0.0.14 - Skip these tests if unable to read SideOfPier
-                    if (canReadSideOfPier)
+                    if (CanReadSideOfPier("SideOfPier Model Tests"))
                     {
 
                         // Further side of pier tests
@@ -3541,7 +3540,7 @@ namespace ConformU
             {
                 if (alignmentMode == AlignmentMode.GermanPolar)
                 {
-                    if (canReadSideOfPier)
+                    if (CanReadSideOfPier("Performance - SideOfPier"))
                     {
                         TelescopePerformanceTest(PerformanceType.tstPerfSideOfPier, "SideOfPier");
                         if (cancellationToken.IsCancellationRequested)
@@ -7178,7 +7177,7 @@ namespace ConformU
                     telescopeDevice.SlewToCoordinates(p_RA, p_DEC);
                 }
 
-                if (canReadSideOfPier)
+                if (CanReadSideOfPier("SlewScope"))
                 {
                     if (settings.DisplayMethodCalls)
                         LogTestAndMessage("SlewScope", "About to get SideOfPier property");
@@ -7721,14 +7720,13 @@ namespace ConformU
             /// Slew the scope to the test position
             SlewScope(testRa, testDeclination, $"Hour angle {testHa:0.00}");
 
-            if (telescopeDevice.InterfaceVersion <= 2)
+            if (telescopeDevice.InterfaceVersion <= 2 | !CanReadSideOfPier(testName))
             {
                 LogDebug(testName, $"Testing Primary rate: {expectedRaRate}, Secondary rate: {expectedDeclinationRate}, SideofPier: {PointingState.Unknown}");
             }
             else
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage(testName, "About to get SideOfPier property");
+                LogCallToDriver(testName, "About to get SideOfPier property");
                 LogDebug(testName, $"Testing Primary rate: {expectedRaRate}, Secondary rate: {expectedDeclinationRate}, SideofPier: {telescopeDevice.SideOfPier}");
             }
 
@@ -8052,6 +8050,37 @@ namespace ConformU
             {
                 LogDebug("SlewToHa", $"Slewed to RA:  {telescopeDevice.RightAscension.ToHMS()}, Dec: {telescopeDevice.Declination.ToDMS()}, Pointing state: {telescopeDevice.SideOfPier}");
             }
+        }
+
+        /// <summary>
+        /// Determine whether the SideofPier property can be successfully read.
+        /// </summary>
+        /// <param name="testName">Name of the current test</param>
+        /// <returns>True if SideOfPier can be read successfully, otherwise returns False.</returns>
+        /// <remarks>If the test has been run before, the previous answer is returned without calling SideOfPier again.</remarks>
+        private bool CanReadSideOfPier(string testName)
+        {
+            // test whether a value has already been determined
+            if (!canReadSideOfPier.HasValue) // This is the first time the function has been called so test whther reading is possible
+            {
+                try
+                {
+                    LogCallToDriver(testName, "About to get SideOfPier");
+                    PointingState pointingState = telescopeDevice.SideOfPier;
+
+                    // If we get here the read was successful so flag this
+                    canReadSideOfPier = true;
+                }
+                catch
+                {
+                    // If we get here the read was unsuccessful so flag this.
+                    // We ignore exceptions because we are only interested in whenther SideOfPier can be read successfully
+                    canReadSideOfPier = false;
+                }
+            }
+
+            // Return the outcome
+            return canReadSideOfPier.Value;
         }
 
         #endregion
