@@ -7720,7 +7720,7 @@ namespace ConformU
             /// Slew the scope to the test position
             SlewScope(testRa, testDeclination, $"Hour angle {testHa:0.00}");
 
-            if (telescopeDevice.InterfaceVersion <= 2 | !CanReadSideOfPier(testName))
+            if ((telescopeDevice.InterfaceVersion <= 2) | !CanReadSideOfPier(testName))
             {
                 LogDebug(testName, $"Testing Primary rate: {expectedRaRate}, Secondary rate: {expectedDeclinationRate}, SideofPier: {PointingState.Unknown}");
             }
@@ -8042,7 +8042,7 @@ namespace ConformU
             WaitForSlew("SlewToHa", $"Slewing to HA {targetHa:+0.0;-0.0;+0.0}");
 
             // Report the outcome of the slew
-            if (telescopeDevice.InterfaceVersion <= 2)
+            if ((telescopeDevice.InterfaceVersion <= 2) | !CanReadSideOfPier("SlewToHa"))
             {
                 LogDebug("SlewToHa", $"Slewed to RA:  {telescopeDevice.RightAscension.ToHMS()}, Dec: {telescopeDevice.Declination.ToDMS()}, Pointing state: {PointingState.Unknown}");
             }
