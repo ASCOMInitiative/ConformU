@@ -931,7 +931,9 @@ namespace ConformU
                     if (TestRADecRate("DeclinationRate Write", "Set rate to 0.0", Axis.Dec, 0.0d, true))
                     {
                         TestRADecRate("DeclinationRate Write", "Set rate to 1.5", Axis.Dec, 1.5d, true);
-                        TestRADecRate("DeclinationRate Write", "Set rate to 15.0", Axis.Dec, 15.0d, true);
+                        TestRADecRate("DeclinationRate Write", "Set rate to -1.5", Axis.Dec, -1.5d, true);
+                        TestRADecRate("DeclinationRate Write", "Set rate to 7.5", Axis.Dec, 7.5d, true);
+                        TestRADecRate("DeclinationRate Write", "Set rate to -7.5", Axis.Dec, -7.5d, true);
                         TestRADecRate("DeclinationRate Write", "Reset rate to 0.0", Axis.Dec, 0.0d, false); // Reset the rate to zero, skipping the slewing test
                     }
                 }
@@ -1390,7 +1392,9 @@ namespace ConformU
                     if (TestRADecRate("RightAscensionRate Write", "Set rate to 0.0", Axis.RA, 0.0d, true))
                     {
                         TestRADecRate("RightAscensionRate Write", "Set rate to 0.1", Axis.RA, 0.1d, true);
-                        TestRADecRate("RightAscensionRate Write", "Set rate to 1.0", Axis.RA, 1.0d, true);
+                        TestRADecRate("RightAscensionRate Write", "Set rate to -0.1", Axis.RA, -0.1d, true);
+                        TestRADecRate("RightAscensionRate Write", "Set rate to 0.5", Axis.RA, 0.5d, true);
+                        TestRADecRate("RightAscensionRate Write", "Set rate to -0.5", Axis.RA, -0.5d, true);
                         TestRADecRate("RightAscensionRate Write", "Reset rate to 0.0", Axis.RA, 0.0d, false); // Reset the rate to zero, skipping the slewing test
                     }
                 }
