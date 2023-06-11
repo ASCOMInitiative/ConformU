@@ -930,8 +930,8 @@ namespace ConformU
                     SetTest("DeclinationRate Write");
                     if (TestRADecRate("DeclinationRate Write", "Set rate to 0.0", Axis.Dec, 0.0d, true))
                     {
-                        TestRADecRate("DeclinationRate Write", "Set rate to 0.1", Axis.Dec, 0.1d, true);
-                        TestRADecRate("DeclinationRate Write", "Set rate to 1.0", Axis.Dec, 1.0d, true);
+                        TestRADecRate("DeclinationRate Write", "Set rate to 1.5", Axis.Dec, 1.5d, true);
+                        TestRADecRate("DeclinationRate Write", "Set rate to 15.0", Axis.Dec, 15.0d, true);
                         TestRADecRate("DeclinationRate Write", "Reset rate to 0.0", Axis.Dec, 0.0d, false); // Reset the rate to zero, skipping the slewing test
                     }
                 }
@@ -7699,7 +7699,7 @@ namespace ConformU
 
         internal void TestOffsetRate(string testName, double testHa, double expectedRaRate, double expectedDeclinationRate)
         {
-            const double DURATION = 5.0; // Seconds
+            double testDuration = settings.TelescopeRateOffsetTestDuration; // Seconds
             double testDeclination;
 
             // Update the test name with the test hour angle
@@ -7746,7 +7746,7 @@ namespace ConformU
                 LogTestAndMessage(testName, "About to set DeclinationRate property");
             telescopeDevice.DeclinationRate = expectedDeclinationRate;
 
-            WaitFor(Convert.ToInt32(DURATION * 1000));
+            WaitFor(Convert.ToInt32(testDuration * 1000));
 
             double priEnd = telescopeDevice.RightAscension;
             double secEnd = telescopeDevice.Declination;
@@ -7765,10 +7765,10 @@ namespace ConformU
             LogDebug(testName, $"Difference - : {(priEnd - priStart).ToHMS()}, {(secEnd - secStart).ToDMS()}, {priEnd - priStart:N10}, {secEnd - secStart:N10}");
 
             // Condition results
-            double actualPriRate = (priEnd - priStart) / DURATION; // Calculate offset rate in RA hours per SI second
+            double actualPriRate = (priEnd - priStart) / testDuration; // Calculate offset rate in RA hours per SI second
             actualPriRate = actualPriRate * 60.0 * 60.0; // Convert rate in RA hours per SI second to RA seconds per SI second
 
-            double actualSecRate = (secEnd - secStart) / DURATION * 60.0 * 60.0;
+            double actualSecRate = (secEnd - secStart) / testDuration * 60.0 * 60.0;
 
             LogDebug(testName, $"Actual primary rate: {actualPriRate}, Expected rate: {expectedRaRate}, Ratio: {actualPriRate / expectedRaRate}, Actual secondary rate: {actualSecRate}, Expected rate: {expectedDeclinationRate}, Ratio: {actualSecRate / expectedDeclinationRate}");
             TestDouble(testName, "RightAscensionRate", actualPriRate, expectedRaRate);
