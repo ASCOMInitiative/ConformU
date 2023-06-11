@@ -7734,6 +7734,7 @@ namespace ConformU
                 LogDebug(testName, $"Testing Primary rate: {expectedRaRate}, Secondary rate: {expectedDeclinationRate}, SideofPier: {telescopeDevice.SideOfPier}");
             }
 
+            // Start of test
             if (settings.DisplayMethodCalls)
                 LogTestAndMessage(testName, "About to get RightAscension property");
             double priStart = telescopeDevice.RightAscension;
