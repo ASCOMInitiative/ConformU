@@ -5739,7 +5739,9 @@ namespace ConformU
                             {
                                 if (g_InterfaceVersion > 1)
                                 {
-                                    SetAction("Homing mount synchronously...");
+                                    startTime = DateTime.Now;
+
+                                    SetAction("Homing mount...");
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage(p_Name, "About to call FindHome method");
                                     telescopeDevice.FindHome();
