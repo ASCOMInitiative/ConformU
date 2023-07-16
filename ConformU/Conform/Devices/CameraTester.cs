@@ -368,8 +368,7 @@ namespace ConformU
                 {
                     case CanType.tstCanAbortExposure:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get CanAbortExposure");
+                            LogCallToDriver("ConformanceCheck", "About to get CanAbortExposure");
                             m_CanAbortExposure = camera.CanAbortExposure;
                             LogOK(p_Name, m_CanAbortExposure.ToString());
                             break;
@@ -377,8 +376,7 @@ namespace ConformU
 
                     case CanType.tstCanAsymmetricBin:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get CanAsymmetricBin");
+                            LogCallToDriver("ConformanceCheck", "About to get CanAsymmetricBin");
                             m_CanAsymmetricBin = camera.CanAsymmetricBin;
                             LogOK(p_Name, m_CanAsymmetricBin.ToString());
                             break;
@@ -386,8 +384,7 @@ namespace ConformU
 
                     case CanType.tstCanGetCoolerPower:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get CanGetCoolerPower");
+                            LogCallToDriver("ConformanceCheck", "About to get CanGetCoolerPower");
                             m_CanGetCoolerPower = camera.CanGetCoolerPower;
                             LogOK(p_Name, m_CanGetCoolerPower.ToString());
                             break;
@@ -395,8 +392,7 @@ namespace ConformU
 
                     case CanType.tstCanPulseGuide:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get CanPulseGuide");
+                            LogCallToDriver("ConformanceCheck", "About to get CanPulseGuide");
                             m_CanPulseGuide = camera.CanPulseGuide;
                             LogOK(p_Name, m_CanPulseGuide.ToString());
                             break;
@@ -404,8 +400,7 @@ namespace ConformU
 
                     case CanType.tstCanSetCCDTemperature:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get CanSetCCDTemperature");
+                            LogCallToDriver("ConformanceCheck", "About to get CanSetCCDTemperature");
                             m_CanSetCCDTemperature = camera.CanSetCCDTemperature;
                             LogOK(p_Name, m_CanSetCCDTemperature.ToString());
                             break;
@@ -413,8 +408,7 @@ namespace ConformU
 
                     case CanType.tstCanStopExposure:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get CanStopExposure");
+                            LogCallToDriver("ConformanceCheck", "About to get CanStopExposure");
                             m_CanStopExposure = camera.CanStopExposure;
                             LogOK(p_Name, m_CanStopExposure.ToString());
                             break;
@@ -422,8 +416,7 @@ namespace ConformU
 
                     case CanType.tstCanFastReadout:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get CanFastReadout");
+                            LogCallToDriver("ConformanceCheck", "About to get CanFastReadout");
                             m_CanFastReadout = camera.CanFastReadout;
                             LogOK(p_Name, m_CanFastReadout.ToString());
                             break;
@@ -449,13 +442,11 @@ namespace ConformU
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get Description");
+                    LogCallToDriver("ConformanceCheck", "About to get Description");
                     l_VStringPtr = camera.Description.ToUpper().IndexOf("VERSION "); // Point at the start of the version string
                     if (l_VStringPtr >= 0)
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to get Description");
+                        LogCallToDriver("ConformanceCheck", "About to get Description");
                         string l_VString = camera.Description.ToUpper().Substring(l_VStringPtr, 8);
                         l_VStringPtr = l_VString.IndexOf(".");
                         if (l_VStringPtr > 0)
@@ -503,8 +494,7 @@ namespace ConformU
                     // Check LastExposureDuration
                     LogTestOnly("Last Tests"); try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to get LastExposureDuration");
+                        LogCallToDriver("ConformanceCheck", "About to get LastExposureDuration");
                         m_LastExposureDuration = camera.LastExposureDuration;
                         LogIssue("LastExposureDuration", "LastExposureDuration did not return an error when called before an exposure was made");
                     }
@@ -516,8 +506,7 @@ namespace ConformU
                     // Check LastExposureStartTime
                     try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to get LastExposureStartTime");
+                        LogCallToDriver("ConformanceCheck", "About to get LastExposureStartTime");
                         m_LastExposureStartTime = camera.LastExposureStartTime;
                         LogIssue("LastExposureStartTime", "LastExposureStartTime did not return an error when called before an exposure was made");
                     }
@@ -562,8 +551,7 @@ namespace ConformU
             // Test writing low and high Bin values outside maximum range
             try // Invalid low value
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set BinX");
+                LogCallToDriver("ConformanceCheck", "About to set BinX");
                 camera.BinX = 0;
                 LogIssue("BinX Write", "Invalid value 0 written but no error returned");
             }
@@ -574,8 +562,7 @@ namespace ConformU
 
             try // Invalid high value
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set BinX");
+                LogCallToDriver("ConformanceCheck", "About to set BinX");
                 camera.BinX = (short)(m_MaxBinX + 1);
                 LogIssue("BinX Write", "Invalid value " + m_MaxBinX + 1 + " written but no error returned");
             }
@@ -586,8 +573,7 @@ namespace ConformU
 
             try // Invalid low value
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set BinY");
+                LogCallToDriver("ConformanceCheck", "About to set BinY");
                 camera.BinY = 0;
                 LogIssue("BinY Write", "Invalid value 0 written but no error returned");
             }
@@ -598,8 +584,7 @@ namespace ConformU
 
             try // Invalid high value
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set BinY");
+                LogCallToDriver("ConformanceCheck", "About to set BinY");
                 camera.BinY = (short)(m_MaxBinY + 1);
                 LogIssue("BinY Write", "Invalid value " + m_MaxBinY + 1 + " written but no error returned");
             }
@@ -650,8 +635,7 @@ namespace ConformU
                         bool binXSetOk = false;
                         try
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to set BinX");
+                            LogCallToDriver("ConformanceCheck", "About to set BinX");
                             camera.BinX = (short)l_BinX;
                             binXSetOk = true;
                         }
@@ -662,8 +646,7 @@ namespace ConformU
 
                         try
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to set BinY");
+                            LogCallToDriver("ConformanceCheck", "About to set BinY");
                             camera.BinY = (short)l_BinY;
 
                             if (binXSetOk)
@@ -685,8 +668,7 @@ namespace ConformU
 
                     try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to set BinX");
+                        LogCallToDriver("ConformanceCheck", "About to set BinX");
                         camera.BinX = (short)l_BinX;
                         binXSetOk = true;
                     }
@@ -697,8 +679,7 @@ namespace ConformU
 
                     try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to set BinY");
+                        LogCallToDriver("ConformanceCheck", "About to set BinY");
                         camera.BinY = (short)l_BinX;
                         if (binXSetOk)
                             LogOK("BinXY Write", "Successfully set symmetric XY binning: " + l_BinX + " x " + l_BinX);
@@ -714,16 +695,13 @@ namespace ConformU
             // Reset X and Y binning to 1x1 state
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set BinX");
+                LogCallToDriver("ConformanceCheck", "About to set BinX");
                 camera.BinX = 1;
             }
             catch (Exception)
             {
             }
-
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set BinY");
+            LogCallToDriver("ConformanceCheck", "About to set BinY");
             try
             {
                 camera.BinY = 1;
@@ -744,8 +722,7 @@ namespace ConformU
             string l_TargetCoolerState;
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set CoolerOn");
+                LogCallToDriver("ConformanceCheck", "About to set CoolerOn");
                 l_OriginalCoolerState = camera.CoolerOn;
                 if (l_OriginalCoolerState)
                     l_TargetCoolerState = "off";
@@ -755,14 +732,12 @@ namespace ConformU
                 {
                     if (l_OriginalCoolerState)
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to set CoolerOn");
+                        LogCallToDriver("ConformanceCheck", "About to set CoolerOn");
                         camera.CoolerOn = false;
                     }
                     else
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to set CoolerOn");
+                        LogCallToDriver("ConformanceCheck", "About to set CoolerOn");
                         camera.CoolerOn = true;
                     }
                     LogOK("CoolerOn Write", "Successfully changed CoolerOn state");
@@ -775,8 +750,7 @@ namespace ConformU
                 // Restore Cooler state
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to set CoolerOn");
+                    LogCallToDriver("ConformanceCheck", "About to set CoolerOn");
                     camera.CoolerOn = l_OriginalCoolerState;
                 }
                 catch
@@ -809,8 +783,7 @@ namespace ConformU
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
+                    LogCallToDriver("ConformanceCheck", "About to get ImageArray");
                     m_ImageArray = (Array)camera.ImageArray;
                     if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
                     {
@@ -839,8 +812,7 @@ namespace ConformU
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
+                    LogCallToDriver("ConformanceCheck", "About to get ImageArray");
                     m_ImageArray = (Array)camera.ImageArray;
                     LogIssue("ImageArray", "ImageReady is false and no image has been taken but ImageArray has not returned an error");
                 }
@@ -865,8 +837,7 @@ namespace ConformU
                 {
                     try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
+                        LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                         m_ImageArrayVariant = (Array)camera.ImageArrayVariant;
 
                         if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
@@ -895,8 +866,7 @@ namespace ConformU
                 {
                     try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
+                        LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                         m_ImageArrayVariant = (Array)camera.ImageArrayVariant;
                         LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not returned an error");
                     }
@@ -937,8 +907,7 @@ namespace ConformU
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to set SetCCDTemperature");
+                    LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                     camera.SetCCDTemperature = 0.0; // Try an acceptable value
                     LogOK("SetCCDTemperature Write", "Successfully wrote 0.0");
 
@@ -948,10 +917,7 @@ namespace ConformU
 
                     // Find low set-point at which an exception is generated, stop at CAMERA_SETPOINT_UNPHYSICAL_TEMPERATURE because this is unphysical
                     exceptionGenerated = false;
-                    setPoint = CAMERA_LOW_SETPOINT_START_TEMPERATURE;
-
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to set SetCCDTemperature multiple times...");
+                    setPoint = CAMERA_LOW_SETPOINT_START_TEMPERATURE; LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature multiple times...");
 
                     // Loop downward in CAMERA_SETPOINT_INCREMENT degree temperature steps to find the maximum temperature that can be set
                     do
@@ -997,8 +963,7 @@ namespace ConformU
                     setPoint = CAMERA_HIGH_SETPOINT_START_TEMPERATURE; // Start at 0.0C
 
                     // Loop upward in CAMERA_SETPOINT_INCREMENT degree temperature steps to find the maximum temperature that can be set
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to set SetCCDTemperature multiple times...");
+LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature multiple times...");
                     do
                     {
                         try
@@ -1030,8 +995,7 @@ namespace ConformU
                 }
 
                 // Restore original value
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set SetCCDTemperature");
+LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                 try
                 {
                     camera.SetCCDTemperature = m_SetCCDTemperature;
@@ -1043,8 +1007,7 @@ namespace ConformU
             else
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to set SetCCDTemperature");
+                    LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                     camera.SetCCDTemperature = 0;
                     LogIssue("SetCCDTemperature Write", "CanSetCCDTemperature is false but No error returned on write");
                 }
@@ -1056,18 +1019,14 @@ namespace ConformU
             CameraPropertyTestInteger(CamPropertyType.StartX, "StartX Read", 0, cameraXSize - 1); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyWriteTest(CamPropertyType.StartX, "StartX", System.Convert.ToInt32(cameraXSize / (double)2));
             CameraPropertyTestInteger(CamPropertyType.StartY, "StartY Read", 0, cameraYSize - 1); if (cancellationToken.IsCancellationRequested) return;
-            CameraPropertyWriteTest(CamPropertyType.StartY, "StartY", System.Convert.ToInt32(cameraYSize / (double)2));
-
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to get InterfaceVersion");
+            CameraPropertyWriteTest(CamPropertyType.StartY, "StartY", System.Convert.ToInt32(cameraYSize / (double)2)); LogCallToDriver("ConformanceCheck", "About to get InterfaceVersion");
             if (camera.InterfaceVersion > 1)
             {
                 // SensorType - Mandatory
                 // This must be tested before BayerOffset because BayerOffset is mandatory for colour and optional for monochrome cameras
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get SensorType");
+                    LogCallToDriver("ConformanceCheck", "About to get SensorType");
                     m_SensorType = (ASCOM.DeviceInterface.SensorType)camera.SensorType;
                     m_CanReadSensorType = true; // Set a flag to indicate that we have got a valid SensorType value
                                                 // Successfully retrieved a value
@@ -1122,8 +1081,7 @@ namespace ConformU
                 else
                     try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to get FastReadout");
+                        LogCallToDriver("ConformanceCheck", "About to get FastReadout");
                         m_FastReadout = camera.FastReadout;
                         LogIssue("FastReadout Read", "CanFastReadout is False but a PropertyNotImplemented error was not returned.");
                     }
@@ -1137,11 +1095,8 @@ namespace ConformU
                 {
                     try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to set FastReadout");
-                        camera.FastReadout = !m_FastReadout;
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to set FastReadout");
+                        LogCallToDriver("ConformanceCheck", "About to set FastReadout");
+                        camera.FastReadout = !m_FastReadout; LogCallToDriver("ConformanceCheck", "About to set FastReadout");
                         camera.FastReadout = m_FastReadout;
                         LogOK("FastReadout Write", "Able to change the FastReadout state OK");
                     }
@@ -1153,8 +1108,7 @@ namespace ConformU
                 else
                     try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to set FastReadout");
+                        LogCallToDriver("ConformanceCheck", "About to set FastReadout");
                         camera.FastReadout = true;
                         LogIssue("FastReadout Write", "CanFastReadout is False but a PropertyNotImplemented error was not returned.");
                     }
@@ -1166,9 +1120,7 @@ namespace ConformU
                 // GainMin Read - Optional
                 try
                 {
-                    m_CanReadGainMin = false;
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get GainMin");
+                    m_CanReadGainMin = false; LogCallToDriver("ConformanceCheck", "About to get GainMin");
                     m_GainMin = camera.GainMin;
                     // Successfully retrieved a value
                     m_CanReadGainMin = true;
@@ -1182,9 +1134,7 @@ namespace ConformU
                 // GainMax Read - Optional
                 try
                 {
-                    m_CanReadGainMax = false;
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get GainMax");
+                    m_CanReadGainMax = false; LogCallToDriver("ConformanceCheck", "About to get GainMax");
                     m_GainMax = camera.GainMax;
                     // Successfully retrieved a value
                     m_CanReadGainMax = true;
@@ -1198,9 +1148,7 @@ namespace ConformU
                 // Gains Read - Optional
                 try
                 {
-                    m_CanReadGains = false;
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get Gains");
+                    m_CanReadGains = false; LogCallToDriver("ConformanceCheck", "About to get Gains");
                     m_Gains = camera.Gains;
                     // Successfully retrieved a value
                     m_CanReadGains = true;
@@ -1222,8 +1170,7 @@ namespace ConformU
                 try
                 {
                     m_CanReadGain = false; // Set default value to indicate can't read gain
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get Gain");
+LogCallToDriver("ConformanceCheck", "About to get Gain");
                     m_Gain = camera.Gain;
                     m_CanReadGain = true; // Flag that we can read Gain OK
                     if (m_CanReadGains)
@@ -1274,8 +1221,7 @@ namespace ConformU
                 {
                     try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to set Gain");
+                        LogCallToDriver("ConformanceCheck", "About to set Gain");
                         camera.Gain = 0;
                         LogIssue("Gain Write", "Writing to Gain did not return a PropertyNotImplemented error whereas this was the case for reading Gain.");
                     }
@@ -1304,8 +1250,7 @@ namespace ConformU
                                 // Test writing the minimum valid value
                                 try
                                 {
-                                    if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage("ConformanceCheck", "About to set Gain");
+                                    LogCallToDriver("ConformanceCheck", "About to set Gain");
                                     camera.Gain = m_GainMin;
                                     LogOK("Gain Write", $"Successfully set gain minimum value {m_GainMin}.");
                                 }
@@ -1317,8 +1262,7 @@ namespace ConformU
                                 // Test writing the maximum valid value
                                 try
                                 {
-                                    if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage("ConformanceCheck", "About to set Gain");
+                                    LogCallToDriver("ConformanceCheck", "About to set Gain");
                                     camera.Gain = m_GainMax;
                                     LogOK("Gain Write", $"Successfully set gain maximum value {m_GainMax}.");
                                 }
@@ -1330,8 +1274,7 @@ namespace ConformU
                                 // Test writing a lower than minimum value - this should result in am invalid value exception
                                 try
                                 {
-                                    if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage("ConformanceCheck", "About to set Gain");
+                                    LogCallToDriver("ConformanceCheck", "About to set Gain");
                                     camera.Gain = (short)(m_GainMin - 1);
                                     LogIssue("Gain Write", $"Successfully set an gain below the minimum value ({m_GainMin - 1}), this should have resulted in an InvalidValue error.");
                                 }
@@ -1343,8 +1286,7 @@ namespace ConformU
                                 // Test writing a lower than minimum value - this should result in am invalid value exception
                                 try
                                 {
-                                    if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage("ConformanceCheck", "About to set Gain");
+                                    LogCallToDriver("ConformanceCheck", "About to set Gain");
                                     camera.Gain = (short)(m_GainMax + 1);
                                     LogIssue("Gain Write", $"Successfully set a gain above the maximum value({m_GainMax + 1}), this should have resulted in an InvalidValue error.");
                                 }
@@ -1368,8 +1310,7 @@ namespace ConformU
                 // PercentCompleted Read - Optional - corrected to match the specification
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get PercentCompleted");
+                    LogCallToDriver("ConformanceCheck", "About to get PercentCompleted");
                     m_PercentCompleted = camera.PercentCompleted;
                     switch (m_PercentCompleted)
                     {
@@ -1402,9 +1343,7 @@ namespace ConformU
                 // ReadoutModes - Mandatory
                 try
                 {
-                    m_CanReadReadoutModes = false;
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get ReadoutModes");
+                    m_CanReadReadoutModes = false; LogCallToDriver("ConformanceCheck", "About to get ReadoutModes");
                     m_ReadoutModes = camera.ReadoutModes;
                     // Successfully retrieved a value
                     m_CanReadReadoutModes = true;
@@ -1443,17 +1382,13 @@ namespace ConformU
                 // SensorName
                 CameraPropertyTestString(CamPropertyType.SensorName, "SensorName Read", 250, true);
             }
-
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to get InterfaceVersion");
+            LogCallToDriver("ConformanceCheck", "About to get InterfaceVersion");
             if (camera.InterfaceVersion > 2)
             {
                 // OffsetMin Read - Optional
                 try
                 {
-                    m_CanReadOffsetMin = false;
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get OffsetMin");
+                    m_CanReadOffsetMin = false; LogCallToDriver("ConformanceCheck", "About to get OffsetMin");
                     m_OffsetMin = camera.OffsetMin;
                     // Successfully retrieved a value
                     m_CanReadOffsetMin = true;
@@ -1467,9 +1402,7 @@ namespace ConformU
                 // OffsetMax Read - Optional
                 try
                 {
-                    m_CanReadOffsetMax = false;
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get OffsetMax");
+                    m_CanReadOffsetMax = false; LogCallToDriver("ConformanceCheck", "About to get OffsetMax");
                     m_OffsetMax = camera.OffsetMax;
                     // Successfully retrieved a value
                     m_CanReadOffsetMax = true;
@@ -1483,9 +1416,7 @@ namespace ConformU
                 // Offsets Read - Optional
                 try
                 {
-                    m_CanReadOffsets = false;
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get Offsets");
+                    m_CanReadOffsets = false; LogCallToDriver("ConformanceCheck", "About to get Offsets");
                     m_Offsets = camera.Offsets;
                     // Successfully retrieved a value
                     m_CanReadOffsets = true;
@@ -1508,8 +1439,7 @@ namespace ConformU
                 try
                 {
                     m_CanReadOffset = false; // Set default value to indicate can't read offset
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get Offset");
+LogCallToDriver("ConformanceCheck", "About to get Offset");
                     m_Offset = camera.Offset;
                     m_CanReadOffset = true; // Flag that we can read Offset OK
                     if (m_CanReadOffsets)
@@ -1561,8 +1491,7 @@ namespace ConformU
                 {
                     try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to set Offset");
+                        LogCallToDriver("ConformanceCheck", "About to set Offset");
                         camera.Offset = 0;
                         LogIssue("Offset Write", "Writing to Offset did not throw a PropertyNotImplemented error when reading Offset did.");
                     }
@@ -1590,8 +1519,7 @@ namespace ConformU
                                 // Test writing the minimum valid value
                                 try
                                 {
-                                    if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage("ConformanceCheck", "About to set Offset");
+                                    LogCallToDriver("ConformanceCheck", "About to set Offset");
                                     camera.Offset = m_OffsetMin;
                                     LogOK("Offset Write", $"Successfully set offset minimum value {m_OffsetMin}.");
                                 }
@@ -1603,8 +1531,7 @@ namespace ConformU
                                 // Test writing the maximum valid value
                                 try
                                 {
-                                    if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage("ConformanceCheck", "About to set Offset");
+                                    LogCallToDriver("ConformanceCheck", "About to set Offset");
                                     camera.Offset = m_OffsetMax;
                                     LogOK("Offset Write", $"Successfully set offset maximum value {m_OffsetMax}.");
                                 }
@@ -1616,8 +1543,7 @@ namespace ConformU
                                 // Test writing a lower than minimum value - this should result in am invalid value exception
                                 try
                                 {
-                                    if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage("ConformanceCheck", "About to set Offset");
+                                    LogCallToDriver("ConformanceCheck", "About to set Offset");
                                     camera.Offset = m_OffsetMin - 1;
                                     LogIssue("Offset Write", $"Successfully set an offset below the minimum value ({m_OffsetMin - 1}), this should have resulted in an InvalidValue error.");
                                 }
@@ -1629,8 +1555,7 @@ namespace ConformU
                                 // Test writing a lower than minimum value - this should result in am invalid value exception
                                 try
                                 {
-                                    if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage("ConformanceCheck", "About to set Offset");
+                                    LogCallToDriver("ConformanceCheck", "About to set Offset");
                                     camera.Offset = m_OffsetMax + 1;
                                     LogIssue("Offset Write", $"Successfully set an offset above the maximum value({m_OffsetMax + 1}), this should have resulted in an InvalidValueerror.");
                                 }
@@ -1655,8 +1580,7 @@ namespace ConformU
                 // SubExposureDuration Write - Optional 
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to set SubExposureDuration");
+                    LogCallToDriver("ConformanceCheck", "About to set SubExposureDuration");
                     camera.SubExposureDuration = m_SubExposureDuration;
                     LogOK("SubExposureDuration write", $"Successfully wrote {m_SubExposureDuration}");
                 }
@@ -1676,8 +1600,7 @@ namespace ConformU
                 {
                     case CamPropertyType.CameraState:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get CameraState");
+                            LogCallToDriver("ConformanceCheck", "About to get CameraState");
                             returnValue = camera.CameraState;
                             break;
                         }
@@ -1707,32 +1630,28 @@ namespace ConformU
                 {
                     case CamPropertyType.BayerOffsetX:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get BayerOffsetX");
+                            LogCallToDriver("ConformanceCheck", "About to get BayerOffsetX");
                             returnValue = camera.BayerOffsetX;
                             break;
                         }
 
                     case CamPropertyType.BayerOffsetY:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get BayerOffsetY");
+                            LogCallToDriver("ConformanceCheck", "About to get BayerOffsetY");
                             returnValue = camera.BayerOffsetY;
                             break;
                         }
 
                     case CamPropertyType.PercentCompleted:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get PercentCompleted");
+                            LogCallToDriver("ConformanceCheck", "About to get PercentCompleted");
                             returnValue = camera.PercentCompleted;
                             break;
                         }
 
                     case CamPropertyType.ReadoutMode:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get ReadoutMode");
+                            LogCallToDriver("ConformanceCheck", "About to get ReadoutMode");
                             returnValue = camera.ReadoutMode;
                             break;
                         }
@@ -1785,8 +1704,7 @@ namespace ConformU
                 {
                     case CamPropertyType.BayerOffsetX:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get BayerOffsetX");
+                            LogCallToDriver("ConformanceCheck", "About to get BayerOffsetX");
                             TestShort = camera.BayerOffsetX;
                             returnValue = false; // Property should throw an exception but did not so record that fact
                             LogIssue(p_Name, "Sensor type is Monochrome so this property must throw a PropertyNotImplemented error; it must not return a value");
@@ -1795,8 +1713,7 @@ namespace ConformU
 
                     case CamPropertyType.BayerOffsetY:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get BayerOffsetY");
+                            LogCallToDriver("ConformanceCheck", "About to get BayerOffsetY");
                             TestShort = camera.BayerOffsetY;
                             returnValue = false; // Property should throw an exception but did not so record that fact
                             LogIssue(p_Name, "Sensor type is Monochrome so this property must throw a PropertyNotImplemented error; it must not return a value");
@@ -1826,96 +1743,84 @@ namespace ConformU
                 {
                     case CamPropertyType.BinX:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get BinX");
+                            LogCallToDriver("ConformanceCheck", "About to get BinX");
                             returnValue = Convert.ToInt32(camera.BinX);
                             break;
                         }
 
                     case CamPropertyType.BinY:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get BinY");
+                            LogCallToDriver("ConformanceCheck", "About to get BinY");
                             returnValue = Convert.ToInt32(camera.BinY);
                             break;
                         }
 
                     case CamPropertyType.CameraState:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get CameraState");
+                            LogCallToDriver("ConformanceCheck", "About to get CameraState");
                             returnValue = (int)camera.CameraState;
                             break;
                         }
 
                     case CamPropertyType.CameraXSize:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get CameraXSize");
+                            LogCallToDriver("ConformanceCheck", "About to get CameraXSize");
                             returnValue = camera.CameraXSize;
                             break;
                         }
 
                     case CamPropertyType.CameraYSize:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get CameraYSize");
+                            LogCallToDriver("ConformanceCheck", "About to get CameraYSize");
                             returnValue = camera.CameraYSize;
                             break;
                         }
 
                     case CamPropertyType.MaxADU:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get MaxADU");
+                            LogCallToDriver("ConformanceCheck", "About to get MaxADU");
                             returnValue = camera.MaxADU;
                             break;
                         }
 
                     case CamPropertyType.MaxBinX:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get MaxBinX");
+                            LogCallToDriver("ConformanceCheck", "About to get MaxBinX");
                             returnValue = camera.MaxBinX;
                             break;
                         }
 
                     case CamPropertyType.MaxBinY:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get MaxBinY");
+                            LogCallToDriver("ConformanceCheck", "About to get MaxBinY");
                             returnValue = camera.MaxBinY;
                             break;
                         }
 
                     case CamPropertyType.NumX:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get NumX");
+                            LogCallToDriver("ConformanceCheck", "About to get NumX");
                             returnValue = camera.NumX;
                             break;
                         }
 
                     case CamPropertyType.NumY:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get NumY");
+                            LogCallToDriver("ConformanceCheck", "About to get NumY");
                             returnValue = camera.NumY;
                             break;
                         }
 
                     case CamPropertyType.StartX:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get StartX");
+                            LogCallToDriver("ConformanceCheck", "About to get StartX");
                             returnValue = camera.StartX;
                             break;
                         }
 
                     case CamPropertyType.StartY:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get StartY");
+                            LogCallToDriver("ConformanceCheck", "About to get StartY");
                             returnValue = camera.StartY;
                             break;
                         }
@@ -1978,96 +1883,84 @@ namespace ConformU
                 {
                     case CamPropertyType.CCDTemperature:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get CCDTemperature");
+                            LogCallToDriver("ConformanceCheck", "About to get CCDTemperature");
                             returnValue = camera.CCDTemperature;
                             break;
                         }
 
                     case CamPropertyType.CoolerPower:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get CoolerPower");
+                            LogCallToDriver("ConformanceCheck", "About to get CoolerPower");
                             returnValue = camera.CoolerPower;
                             break;
                         }
 
                     case CamPropertyType.ElectronsPerADU:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get ElectronsPerADU");
+                            LogCallToDriver("ConformanceCheck", "About to get ElectronsPerADU");
                             returnValue = camera.ElectronsPerADU;
                             break;
                         }
 
                     case CamPropertyType.FullWellCapacity:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get FullWellCapacity");
+                            LogCallToDriver("ConformanceCheck", "About to get FullWellCapacity");
                             returnValue = camera.FullWellCapacity;
                             break;
                         }
 
                     case CamPropertyType.HeatSinkTemperature:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get HeatSinkTemperature");
+                            LogCallToDriver("ConformanceCheck", "About to get HeatSinkTemperature");
                             returnValue = camera.HeatSinkTemperature;
                             break;
                         }
 
                     case CamPropertyType.PixelSizeX:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get PixelSizeX");
+                            LogCallToDriver("ConformanceCheck", "About to get PixelSizeX");
                             returnValue = camera.PixelSizeX;
                             break;
                         }
 
                     case CamPropertyType.PixelSizeY:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get PixelSizeY");
+                            LogCallToDriver("ConformanceCheck", "About to get PixelSizeY");
                             returnValue = camera.PixelSizeY;
                             break;
                         }
 
                     case CamPropertyType.SetCCDTemperature:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get SetCCDTemperature");
+                            LogCallToDriver("ConformanceCheck", "About to get SetCCDTemperature");
                             returnValue = camera.SetCCDTemperature;
                             break;
                         }
 
                     case CamPropertyType.ExposureMax:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get ExposureMax");
+                            LogCallToDriver("ConformanceCheck", "About to get ExposureMax");
                             returnValue = camera.ExposureMax;
                             break;
                         }
 
                     case CamPropertyType.ExposureMin:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get ExposureMin");
+                            LogCallToDriver("ConformanceCheck", "About to get ExposureMin");
                             returnValue = camera.ExposureMin;
                             break;
                         }
 
                     case CamPropertyType.ExposureResolution:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get ExposureResolution");
+                            LogCallToDriver("ConformanceCheck", "About to get ExposureResolution");
                             returnValue = camera.ExposureResolution;
                             break;
                         }
 
                     case CamPropertyType.SubExposureDuration:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get SubExposureDuration");
+                            LogCallToDriver("ConformanceCheck", "About to get SubExposureDuration");
                             returnValue = camera.SubExposureDuration;
                             break;
                         }
@@ -2119,33 +2012,28 @@ namespace ConformU
                 {
                     case CamPropertyType.CoolerOn:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get CoolerOn");
+                            LogCallToDriver("ConformanceCheck", "About to get CoolerOn");
                             returnValue = camera.CoolerOn;
                             break;
                         }
 
                     case CamPropertyType.HasShutter:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get HasShutter");
+                            LogCallToDriver("ConformanceCheck", "About to get HasShutter");
                             returnValue = camera.HasShutter;
                             break;
                         }
 
                     case CamPropertyType.ImageReady:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
+                            LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                             returnValue = camera.ImageReady;
                             break;
                         }
 
                     case CamPropertyType.IsPulseGuiding:
                         {
-                            m_IsPulseGuidingSupported = false;
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get IsPulseGuiding");
+                            m_IsPulseGuidingSupported = false; LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
                             returnValue = camera.IsPulseGuiding;
                             m_IsPulseGuidingSupported = true; // Command works properly and doesn't cause a not implemented exception
                             break;
@@ -2153,8 +2041,7 @@ namespace ConformU
 
                     case CamPropertyType.FastReadout:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get FastReadout");
+                            LogCallToDriver("ConformanceCheck", "About to get FastReadout");
                             returnValue = camera.FastReadout;
                             break;
                         }
@@ -2184,16 +2071,14 @@ namespace ConformU
                 {
                     case CamPropertyType.Description:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get Description");
+                            LogCallToDriver("ConformanceCheck", "About to get Description");
                             returnValue = camera.Description;
                             break;
                         }
 
                     case CamPropertyType.SensorName:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get SensorName");
+                            LogCallToDriver("ConformanceCheck", "About to get SensorName");
                             returnValue = camera.SensorName;
                             break;
                         }
@@ -2241,32 +2126,28 @@ namespace ConformU
                 {
                     case CamPropertyType.NumX:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to set NumX");
+                            LogCallToDriver("ConformanceCheck", "About to set NumX");
                             camera.NumX = p_TestOK;
                             break;
                         }
 
                     case CamPropertyType.NumY:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to set NumY");
+                            LogCallToDriver("ConformanceCheck", "About to set NumY");
                             camera.NumY = p_TestOK;
                             break;
                         }
 
                     case CamPropertyType.StartX:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to set StartX");
+                            LogCallToDriver("ConformanceCheck", "About to set StartX");
                             camera.StartX = p_TestOK;
                             break;
                         }
 
                     case CamPropertyType.StartY:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to set StartY");
+                            LogCallToDriver("ConformanceCheck", "About to set StartY");
                             camera.StartY = p_TestOK;
                             break;
                         }
@@ -2286,8 +2167,7 @@ namespace ConformU
             SetTest("AbortExposure");
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to get CameraState");
+                LogCallToDriver("ConformanceCheck", "About to get CameraState");
                 m_CameraState = camera.CameraState;
 
                 // Test whether the camera is idle, which it should be in a well behaved device
@@ -2298,8 +2178,7 @@ namespace ConformU
 
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to call AbortExposure");
+                    LogCallToDriver("ConformanceCheck", "About to call AbortExposure");
                     camera.AbortExposure();
                     if (m_CanAbortExposure)
                         LogOK("AbortExposure", "No error returned when camera is already idle");
@@ -2347,8 +2226,7 @@ namespace ConformU
             else // Can not pulse guide so should return an error
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to call PulseGuide - North");
+                    LogCallToDriver("ConformanceCheck", "About to call PulseGuide - North");
                     camera.PulseGuide(GuideDirection.North, 0);
                     LogIssue("PulseGuide", "CanPulseGuide is false but no error was returned when calling the method");
                 }
@@ -2368,8 +2246,7 @@ namespace ConformU
             SetTest("StopExposure");
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to get CameraState");
+                LogCallToDriver("ConformanceCheck", "About to get CameraState");
                 m_CameraState = camera.CameraState;
 
                 // Test whether the camera is idle, which it should be in a well behaved device
@@ -2380,8 +2257,7 @@ namespace ConformU
 
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to call StopExposure");
+                    LogCallToDriver("ConformanceCheck", "About to call StopExposure");
                     SetAction("Calling StopExposure()");
                     camera.StopExposure();
                     if (m_CanStopExposure)
@@ -2596,8 +2472,7 @@ namespace ConformU
             // Make sure the camera is in idle state before proceeding further
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to get CameraState");
+                LogCallToDriver("ConformanceCheck", "About to get CameraState");
                 CameraState cameraState = camera.CameraState;
 
                 if (cameraState != CameraState.Idle) // Camera is not in idle state ready for an exposure
@@ -2616,8 +2491,7 @@ namespace ConformU
             // Set BinX value
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set BinX");
+                LogCallToDriver("ConformanceCheck", "About to set BinX");
                 camera.BinX = (short)requiredBinX;
             }
             catch (Exception ex)
@@ -2630,8 +2504,7 @@ namespace ConformU
             // Set BinY value
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set BinY");
+                LogCallToDriver("ConformanceCheck", "About to set BinY");
                 camera.BinY = (short)requiredBinY;
             }
             catch (Exception ex)
@@ -2644,8 +2517,7 @@ namespace ConformU
             // Set StartX value
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set StartX");
+                LogCallToDriver("ConformanceCheck", "About to set StartX");
                 camera.StartX = requiredStartX;
             }
             catch (Exception ex)
@@ -2658,8 +2530,7 @@ namespace ConformU
             // Set StartY value
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set StartY");
+                LogCallToDriver("ConformanceCheck", "About to set StartY");
                 camera.StartY = requiredStartY;
             }
             catch (Exception ex)
@@ -2672,8 +2543,7 @@ namespace ConformU
             // Set NumX value
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set NumX");
+                LogCallToDriver("ConformanceCheck", "About to set NumX");
                 camera.NumX = requiredNumX;
             }
             catch (Exception ex)
@@ -2686,8 +2556,7 @@ namespace ConformU
             // Set NumY value
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set NumY");
+                LogCallToDriver("ConformanceCheck", "About to set NumY");
                 camera.NumY = requiredNumY;
             }
             catch (Exception ex)
@@ -2732,8 +2601,7 @@ namespace ConformU
                 }, exposeUiTaskCancellationToken);
 
                 // Initiate the exposure
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to call StartExposure");
+LogCallToDriver("ConformanceCheck", "About to call StartExposure");
 
                 // Create a cancellation token that we can set if the task times out
                 CancellationTokenSource cancellationTokenSource = new();
@@ -2872,8 +2740,7 @@ namespace ConformU
                 endTime = DateTime.Now;
 
                 // Test whether we have a synchronous or asynchronous camera
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to get ImageReady and CameraState");
+LogCallToDriver("ConformanceCheck", "About to get ImageReady and CameraState");
                 if (camera.ImageReady & (camera.CameraState == CameraState.Idle)) // Synchronous exposure
                 {
                     #region Check synchronous exposure behaviour
@@ -2905,15 +2772,13 @@ namespace ConformU
                     SetStatus("Waiting for exposure to start");
 
                     // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
+LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                     imageReadyTooEarly = camera.ImageReady;
 
                     // Wait for exposing state
                     try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
+                        LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
                         Stopwatch sw = Stopwatch.StartNew();
                         WaitWhile(GetAction(), () =>
                         {
@@ -2943,8 +2808,7 @@ namespace ConformU
                     }
 
                     // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
+LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                     imageReadyTooEarly = camera.ImageReady;
 
                     #endregion
@@ -2955,9 +2819,7 @@ namespace ConformU
                     {
                         // Wait for the exposing state to finish
                         startTime = DateTime.Now;
-                        startTimeUTC = DateTime.UtcNow;
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
+                        startTimeUTC = DateTime.UtcNow; LogCallToDriver("ConformanceCheck", "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
 
                         // Start the loop timing stopwatch
                         sw.Restart();
@@ -3036,8 +2898,7 @@ namespace ConformU
                     try
                     {
                         // Wait for camera to become idle
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
+LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
 
                         WaitWhile("Waiting for camera idle state, reading/downloading image", () =>
                         {
@@ -3072,8 +2933,7 @@ namespace ConformU
                     try
                     {
                         // Wait for image to become ready
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to get CameraState multiple times");
+LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
 
                         // Wait until ImageReady is true or the camera is in the error state
                         WaitWhile("Waiting for image ready", () =>
@@ -3117,9 +2977,7 @@ namespace ConformU
                     ResetTestActionStatus();
                     return;
                 }
-
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to get ImageReady");
+                LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                 if (camera.ImageReady)
                 {
                     LogOK(testName, "Asynchronous exposure found OK: " + requiredDuration + " seconds");
@@ -3186,8 +3044,7 @@ namespace ConformU
                 {
                     try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to get ImageArray");
+                        LogCallToDriver("ConformanceCheck", "About to get ImageArray");
                         sw.Restart();
                         m_ImageArray = (Array)camera.ImageArray;
                         sw.Stop();
@@ -3358,9 +3215,8 @@ namespace ConformU
                         bool gotImageOk = false;
                         try
                         {
-                            // Get the variant array image 
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get ImageArrayVariant");
+                            // Get the variant array image
+LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                             sw.Restart();
                             object imageObject = camera.ImageArrayVariant;
                             sw.Stop();
@@ -3533,16 +3389,14 @@ namespace ConformU
             // Try and do some clean up
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to call StopExposure");
+                LogCallToDriver("ConformanceCheck", "About to call StopExposure");
                 camera.StopExposure();
             }
             catch (Exception) { }
 
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to call AbortExposure");
+                LogCallToDriver("ConformanceCheck", "About to call AbortExposure");
                 camera.AbortExposure();
             }
             catch (Exception) { }
@@ -3591,8 +3445,7 @@ namespace ConformU
             // LastExposureDuration
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to get LastExposureDuration");
+                LogCallToDriver("ConformanceCheck", "About to get LastExposureDuration");
                 m_LastExposureDuration = camera.LastExposureDuration;
                 if ((Math.Abs(m_LastExposureDuration - p_Duration) / p_Duration) < 0.02)
                     LogOK("LastExposureDuration", $"Last exposure duration is: {m_LastExposureDuration:0.000} seconds");
@@ -3607,8 +3460,7 @@ namespace ConformU
             // LastExposurestartTime
             try // Confirm that it can be read
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to get LastExposureStartTime");
+                LogCallToDriver("ConformanceCheck", "About to get LastExposureStartTime");
                 m_LastExposureStartTime = camera.LastExposureStartTime;
                 int l_i;
                 // Confirm that the format is as expected
@@ -3718,8 +3570,7 @@ namespace ConformU
 
             l_StartTime = DateTime.Now;
             //SetAction("Start " + CAMERA_PULSE_DURATION / (double)1000 + " second pulse guide " + p_Direction.ToString());
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", $"About to call PulseGuide - {p_Direction}");
+LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {p_Direction}");
             camera.PulseGuide(p_Direction, CAMERA_PULSE_DURATION); // Start a 2 second pulse
             l_EndTime = DateTime.Now;
             try
@@ -3728,17 +3579,12 @@ namespace ConformU
                 {
                     if (l_EndTime.Subtract(l_StartTime).TotalMilliseconds < (CAMERA_PULSE_DURATION - 500))
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to get IsPulseGuiding");
+                        LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
                         if (camera.IsPulseGuiding)
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get IsPulseGuiding multiple times");
+                            LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding multiple times");
                             Stopwatch sw = Stopwatch.StartNew();
-                            WaitWhile($"Guiding {p_Direction}", () => { return camera.IsPulseGuiding; }, 500, 3, () => { return $"{sw.Elapsed.TotalSeconds:0.0} / {CAMERA_PULSE_DURATION / 1000:0.0} seconds"; });
-
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("ConformanceCheck", "About to get IsPulseGuiding");
+                            WaitWhile($"Guiding {p_Direction}", () => { return camera.IsPulseGuiding; }, 500, 3, () => { return $"{sw.Elapsed.TotalSeconds:0.0} / {CAMERA_PULSE_DURATION / 1000:0.0} seconds"; }); LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
                             if (!camera.IsPulseGuiding)
                                 LogOK("PulseGuide " + p_Direction.ToString(), "Asynchronous pulse guide found OK");
                             else
@@ -3749,8 +3595,7 @@ namespace ConformU
                     }
                     else
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("ConformanceCheck", "About to get IsPulseGuiding");
+                        LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
                         if (!camera.IsPulseGuiding)
                             LogOK("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide found OK");
                         else
@@ -3800,31 +3645,15 @@ namespace ConformU
             if (m_CanPulseGuide)
                 CameraPerformanceTest(CameraPerformance.IsPulseGuiding, "IsPulseGuiding");
             SetAction("Exposure for ImageArray Test");
-            SetStatus("Start");
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set BinX");
-            camera.BinX = 1;
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set BinY");
-            camera.BinY = 1;
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set StartX");
-            camera.StartX = 0;
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set StartY");
-            camera.StartY = 0;
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set MaxBinX");
-            camera.NumX = camera.MaxBinX;
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set MaxBinY");
-            camera.NumY = camera.MaxBinY;
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to call StartExposure");
+            SetStatus("Start"); LogCallToDriver("ConformanceCheck", "About to set BinX");
+            camera.BinX = 1; LogCallToDriver("ConformanceCheck", "About to set BinY");
+            camera.BinY = 1; LogCallToDriver("ConformanceCheck", "About to set StartX");
+            camera.StartX = 0; LogCallToDriver("ConformanceCheck", "About to set StartY");
+            camera.StartY = 0; LogCallToDriver("ConformanceCheck", "About to set MaxBinX");
+            camera.NumX = camera.MaxBinX; LogCallToDriver("ConformanceCheck", "About to set MaxBinY");
+            camera.NumY = camera.MaxBinY; LogCallToDriver("ConformanceCheck", "About to call StartExposure");
             camera.StartExposure(1, true); // 1 second exposure
-
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to call ImageReady multiple times");
+LogCallToDriver("ConformanceCheck", "About to call ImageReady multiple times");
             do
                 SetStatus("Waiting for ImageReady");
             while (!camera.ImageReady);
@@ -3958,22 +3787,19 @@ namespace ConformU
         {
             if (m_CanAbortExposure)
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to call AbortExposure");
+                LogCallToDriver("ConformanceCheck", "About to call AbortExposure");
                 try { camera.AbortExposure(); } catch { }
             }
 
             if (m_CanStopExposure)
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to call StopExposure");
+                LogCallToDriver("ConformanceCheck", "About to call StopExposure");
                 try { camera.StopExposure(); } catch { }
             }
 
             if (m_CanSetCCDTemperature)
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("ConformanceCheck", "About to set SetCCDTemperature");
+                LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                 try
                 {
                     camera.SetCCDTemperature = m_SetCCDTemperature;
@@ -3981,34 +3807,21 @@ namespace ConformU
                 }
                 catch { }
             }
-
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set CoolerOn");
+            LogCallToDriver("ConformanceCheck", "About to set CoolerOn");
             try { camera.CoolerOn = m_CoolerOn; } catch { }
 
             // Reset the camera image parameters to legal values
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set StartX");
+LogCallToDriver("ConformanceCheck", "About to set StartX");
             try { camera.StartX = 0; } catch { }
-
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set StartY");
+            LogCallToDriver("ConformanceCheck", "About to set StartY");
             try { camera.StartY = 0; } catch { }
-
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set BinX");
+            LogCallToDriver("ConformanceCheck", "About to set BinX");
             try { camera.BinX = 1; } catch { }
-
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set BinY");
+            LogCallToDriver("ConformanceCheck", "About to set BinY");
             try { camera.BinY = 1; } catch { }
-
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set NumX");
+            LogCallToDriver("ConformanceCheck", "About to set NumX");
             try { camera.NumX = 1; } catch { }
-
-            if (settings.DisplayMethodCalls)
-                LogTestAndMessage("ConformanceCheck", "About to set NumY");
+            LogCallToDriver("ConformanceCheck", "About to set NumY");
             try { camera.NumY = 1; } catch { }
         }
 

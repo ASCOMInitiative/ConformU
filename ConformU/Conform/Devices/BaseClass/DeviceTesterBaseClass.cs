@@ -209,8 +209,7 @@ namespace ConformU
             // InterfaceVersion - Required
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("InterfaceVersion", "About to get property InterfaceVersion");
+                LogCallToDriver("InterfaceVersion", "About to get property InterfaceVersion");
                 interfaceVersion = baseClassDevice.InterfaceVersion;
                 switch (interfaceVersion)
                 {
@@ -241,8 +240,7 @@ namespace ConformU
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("Connected", "About to get property Connected");
+                    LogCallToDriver("Connected", "About to get property Connected");
                     m_Connected = baseClassDevice.Connected;
                     LogOK("Connected", m_Connected.ToString());
                 }
@@ -260,8 +258,7 @@ namespace ConformU
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("Description", "About to get property Description");
+                    LogCallToDriver("Description", "About to get property Description");
                     m_Description = baseClassDevice.Description;
                     switch (m_Description ?? "")
                     {
@@ -300,8 +297,7 @@ namespace ConformU
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("DriverInfo", "About to get property DriverInfo");
+                    LogCallToDriver("DriverInfo", "About to get property DriverInfo");
                     m_DriverInfo = baseClassDevice.DriverInfo;
                     switch (m_DriverInfo ?? "")
                     {
@@ -332,8 +328,7 @@ namespace ConformU
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("DriverVersion", "About to get property DriverVersion");
+                    LogCallToDriver("DriverVersion", "About to get property DriverVersion");
                     m_DriverVersion = baseClassDevice.DriverVersion;
                     switch (m_DriverVersion ?? "")
                     {
@@ -368,8 +363,7 @@ namespace ConformU
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("Name", "About to get property Name");
+                    LogCallToDriver("Name", "About to get property Name");
                     m_Name = baseClassDevice.Name;
                     switch (m_Name ?? "")
                     {
@@ -430,8 +424,7 @@ namespace ConformU
             // Supported actions - Optional but Required through DriverAccess
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage("SupportedActions", "About to call method SupportedActions");
+                LogCallToDriver("SupportedActions", "About to call method SupportedActions");
                 SA = (IList)baseClassDevice.SupportedActions;
                 if (SA.Count == 0)
                 {
@@ -467,8 +460,7 @@ namespace ConformU
                                             {
                                                 try
                                                 {
-                                                    if (settings.DisplayMethodCalls)
-                                                        LogTestAndMessage("SupportedActions", "About to call method Action");
+                                                    LogCallToDriver("SupportedActions", "About to call method Action");
                                                     result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
                                                     LogOK("SupportedActions", string.Format("OC simulator action {0} gave result: {1}", ActionString, result));
                                                 }
@@ -481,8 +473,7 @@ namespace ConformU
                                             {
                                                 try
                                                 {
-                                                    if (settings.DisplayMethodCalls)
-                                                        LogTestAndMessage("SupportedActions", "About to call method Action");
+                                                    LogCallToDriver("SupportedActions", "About to call method Action");
                                                     result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
                                                     LogOK("SupportedActions", string.Format("OC simulator action {0} gave result: {1}", ActionString, result));
                                                 }
@@ -495,8 +486,7 @@ namespace ConformU
                                             {
                                                 try
                                                 {
-                                                    if (settings.DisplayMethodCalls)
-                                                        LogTestAndMessage("SupportedActions", "About to call method Action");
+                                                    LogCallToDriver("SupportedActions", "About to call method Action");
                                                     result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
                                                     LogOK("SupportedActions", string.Format("Switch simulator action {0} gave result: {1}", ActionString, result));
                                                 }
@@ -509,8 +499,7 @@ namespace ConformU
                                             {
                                                 try
                                                 {
-                                                    if (settings.DisplayMethodCalls)
-                                                        LogTestAndMessage("SupportedActions", "About to call method Action");
+                                                    LogCallToDriver("SupportedActions", "About to call method Action");
                                                     result = baseClassDevice.Action(ActionString, TEST_PARAMETERS);
                                                     LogOK("SupportedActions", string.Format("Switch simulator action {0} gave result: {1}", ActionString, result));
                                                 }
@@ -1398,6 +1387,52 @@ namespace ConformU
             if (settings.DisplayMethodCalls)
                 LogTestAndMessage(test, memberName);
         }
+
+        /// <summary>
+        /// Determine whether progress of an async operation should be tested using OperationComplete or the appropriate historic polled variable.
+        /// </summary>
+        /// <param name="interfaceVersion">This device's interface number</param>
+        /// <returns>True if completion should be tested using OperationComplete</returns>
+        protected bool TestAsOperation()
+        {
+            // Initialise requiredInterfaceVersion to a large value so that the function result will be False when values are omitted from the switch statement below.
+            int requiredInterfaceVersion = int.MaxValue;
+
+            // Enter required minimum interface version numbers that support OperationComplete
+            switch (settings.DeviceType)
+            {
+                case DeviceTypes.Camera:
+                    break;
+                case DeviceTypes.CoverCalibrator:
+                    break;
+                case DeviceTypes.Dome:
+                    break;
+                case DeviceTypes.FilterWheel:
+                    break;
+                case DeviceTypes.Focuser:
+                    break;
+                case DeviceTypes.ObservingConditions:
+                    break;
+                case DeviceTypes.Rotator:
+                    break;
+                case DeviceTypes.SafetyMonitor:
+                    break;
+                case DeviceTypes.Switch:
+                    break;
+                case DeviceTypes.Telescope:
+                    requiredInterfaceVersion = 4;
+                    break;
+                case DeviceTypes.Video:
+                    break;
+            }
+
+            if (interfaceVersion >= requiredInterfaceVersion)
+                return true;
+
+            return false;
+        }
+
+
 
         #endregion
 

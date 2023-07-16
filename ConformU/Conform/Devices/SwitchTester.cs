@@ -342,8 +342,7 @@ namespace ConformU
 
                                 try
                                 {
-                                    if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage("GetSwitchName " + i, string.Format("About to get switch name {0}", i));
+                                    LogCallToDriver("GetSwitchName " + i, string.Format("About to get switch name {0}", i));
                                     l_SwitchName = m_Switch.GetSwitchName(i);
                                     if (l_GetSwitchOK | l_SetSwitchOK)
                                     {
@@ -405,8 +404,7 @@ namespace ConformU
 
                                 try // Read switch name to determine whether this is a valid switch
                                 {
-                                    if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage("GetSwitchName", string.Format("About to get switch {0} name", i));
+                                    LogCallToDriver("GetSwitchName", string.Format("About to get switch {0} name", i));
                                     l_SwitchName = m_Switch.GetSwitchName(i);
                                     LogOK("GetSwitchName ", "Found switch " + i);
                                     SetTest($"Testing switch {i}");
@@ -423,9 +421,7 @@ namespace ConformU
 
                                     try // Read switch description
                                     {
-                                        SetAction("Getting switch description");
-                                        if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage("GetSwitchDescription", string.Format("  About to get switch {0} description", i));
+                                        SetAction("Getting switch description"); LogCallToDriver("GetSwitchDescription", string.Format("  About to get switch {0} description", i));
                                         l_SwitchDescription = m_Switch.GetSwitchDescription(i);
                                         LogOK("GetSwitchDescription ", "  Description: " + l_SwitchDescription);
                                     }
@@ -436,10 +432,7 @@ namespace ConformU
 
                                     try // Read switch minimum value
                                     {
-                                        SetAction("Getting switch minimum value");
-
-                                        if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage("MinSwitchValue", string.Format("  About to get switch {0} minimum value", i));
+                                        SetAction("Getting switch minimum value"); LogCallToDriver("MinSwitchValue", string.Format("  About to get switch {0} minimum value", i));
                                         l_SwitchMinimum = m_Switch.MinSwitchValue(i);
                                         LogOK("MinSwitchValue ", "  Minimum: " + l_SwitchMinimum.ToString());
                                     }
@@ -451,9 +444,7 @@ namespace ConformU
 
                                     try // Read switch maximum value
                                     {
-                                        SetAction("Getting switch maximum value");
-                                        if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage("MaxSwitchValue", string.Format("  About to get switch {0} maximum value", i));
+                                        SetAction("Getting switch maximum value"); LogCallToDriver("MaxSwitchValue", string.Format("  About to get switch {0} maximum value", i));
                                         l_SwitchMaximum = m_Switch.MaxSwitchValue(i);
 
                                         if (IsGoodValue(l_SwitchMinimum))
@@ -487,9 +478,7 @@ namespace ConformU
 
                                     try // Read switch step value
                                     {
-                                        SetAction("Getting switch step size");
-                                        if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage("SwitchStep", string.Format("  About to get switch {0} step size", i));
+                                        SetAction("Getting switch step size"); LogCallToDriver("SwitchStep", string.Format("  About to get switch {0} step size", i));
                                         l_SwitchStep = m_Switch.SwitchStep(i);
                                         LogOK("SwitchStep ", "  Step size: " + l_SwitchStep.ToString());
 
@@ -568,8 +557,7 @@ namespace ConformU
 
                                     try // Read CanWrite 
                                     {
-                                        if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage("CanWrite", string.Format("  About to get switch {0} CanWrite status", i));
+                                        LogCallToDriver("CanWrite", string.Format("  About to get switch {0} CanWrite status", i));
                                         l_SwitchCanWrite = m_Switch.CanWrite(i);
                                         LogOK("CanWrite ", "  CanWrite: " + l_SwitchCanWrite);
                                     }
@@ -583,9 +571,7 @@ namespace ConformU
                                     // Access the Get Methods and record the outcomes
                                     try
                                     {
-                                        SetAction($"GetSwitch");
-                                        if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage("GetSwitch", string.Format("  About to call GetSwitch({0}) method", i));
+                                        SetAction($"GetSwitch"); LogCallToDriver("GetSwitch", string.Format("  About to call GetSwitch({0}) method", i));
                                         l_GetSwitchOriginal = m_Switch.GetSwitch(i);
                                         WaitForReadDelay("GetSwitch");
 
@@ -601,9 +587,7 @@ namespace ConformU
 
                                     try
                                     {
-                                        SetAction($"GetSwitchValue");
-                                        if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage("GetSwitchValue", string.Format("  About to call GetSwitchValue({0}) method", i));
+                                        SetAction($"GetSwitchValue"); LogCallToDriver("GetSwitchValue", string.Format("  About to call GetSwitchValue({0}) method", i));
                                         l_GetSwitchValueOriginal = m_Switch.GetSwitchValue(i);
                                         WaitForReadDelay("GetSwitchValue");
                                         l_GetSwitchValueOK = true;
@@ -624,9 +608,7 @@ namespace ConformU
                                         try
                                         {
                                             // Try SetSwitch(False)
-                                            SetAction($"SetSwitch {i} False");
-                                            if (settings.DisplayMethodCalls)
-                                                LogTestAndMessage("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, false));
+                                            SetAction($"SetSwitch {i} False"); LogCallToDriver("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, false));
                                             SetAction("SetSwitch false");
                                             m_Switch.SetSwitch(i, false); // Set switch false
                                             WaitForWriteDelay($"SetSwitch False");
@@ -634,8 +616,7 @@ namespace ConformU
                                             // Check GetSwitch
                                             if (l_GetSwitchOK)
                                             {
-                                                if (settings.DisplayMethodCalls)
-                                                    LogTestAndMessage("SetSwitch", string.Format("  About to call GetSwitch({0}) method", i));
+                                                LogCallToDriver("SetSwitch", string.Format("  About to call GetSwitch({0}) method", i));
 
                                                 SetAction($"GetSwitch");
                                                 if (m_Switch.GetSwitch(i) == false)
@@ -650,8 +631,7 @@ namespace ConformU
                                             // Check GetSwitchValue returns the switch minimum value
                                             if (l_GetSwitchValueOK & IsGoodValue(l_SwitchMinimum))
                                             {
-                                                if (settings.DisplayMethodCalls)
-                                                    LogTestAndMessage("SetSwitch", string.Format("  About to call GetSwitchValue({0}) method", i));
+                                                LogCallToDriver("SetSwitch", string.Format("  About to call GetSwitchValue({0}) method", i));
                                                 SetAction($"GetSwitchValue");
                                                 l_GetSwitchValue = m_Switch.GetSwitchValue(i);
                                                 WaitForReadDelay("GetSwitchValue");
@@ -681,9 +661,7 @@ namespace ConformU
                                             if (cancellationToken.IsCancellationRequested) return;
 
                                             // Try SetSwitch(True)
-                                            SetAction($"SetSwitch {i} True");
-                                            if (settings.DisplayMethodCalls)
-                                                LogTestAndMessage("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, true));
+                                            SetAction($"SetSwitch {i} True"); LogCallToDriver("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, true));
                                             SetAction($"SetSwitch true");
                                             m_Switch.SetSwitch(i, true); // Set switch true
                                             WaitForWriteDelay("SetSwitch true");
@@ -691,8 +669,7 @@ namespace ConformU
                                             // Check GetSwitch
                                             if (l_GetSwitchOK)
                                             {
-                                                if (settings.DisplayMethodCalls)
-                                                    LogTestAndMessage("SetSwitch", string.Format("  About to call GetSwitch({0}) method", i));
+                                                LogCallToDriver("SetSwitch", string.Format("  About to call GetSwitch({0}) method", i));
                                                 SetAction($"GetSwitch");
                                                 if (m_Switch.GetSwitch(i) == true)
                                                     LogOK("SetSwitch ", "  GetSwitch read True after SetSwitch(True)");
@@ -706,8 +683,7 @@ namespace ConformU
                                             // Check GetSwitchValue returns the switch maximum value
                                             if (l_GetSwitchValueOK & IsGoodValue(l_SwitchMaximum))
                                             {
-                                                if (settings.DisplayMethodCalls)
-                                                    LogTestAndMessage("SetSwitch", string.Format("  About to call GetSwitchValue({0}) method", i));
+                                                LogCallToDriver("SetSwitch", string.Format("  About to call GetSwitchValue({0}) method", i));
                                                 SetAction($"GetSwitchValue");
                                                 l_GetSwitchValue = m_Switch.GetSwitchValue(i);
                                                 WaitForReadDelay("GetSwitchValue");
@@ -739,16 +715,14 @@ namespace ConformU
                                             // Return to original state if possible,otherwise set to false
                                             if (l_GetSwitchOK)
                                             {
-                                                if (settings.DisplayMethodCalls)
-                                                    LogTestAndMessage("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, l_GetSwitch));
+                                                LogCallToDriver("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, l_GetSwitch));
                                                 SetAction($"SetSwitch {l_GetSwitch} to its original value");
                                                 m_Switch.SetSwitch(i, l_GetSwitch); // Return to the original state
                                                 WaitForWriteDelay($"SetSwitch {l_GetSwitch} to its original value");
                                             }
                                             else
                                             {
-                                                if (settings.DisplayMethodCalls)
-                                                    LogTestAndMessage("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, false));
+                                                LogCallToDriver("SetSwitch", string.Format("  About to call SetSwitch({0}, {1}) method", i, false));
                                                 SetAction("SeSwitch false");
                                                 m_Switch.SetSwitch(i, false); // Set to false
                                                 WaitForWriteDelay("SetSwitch false");
@@ -794,8 +768,7 @@ namespace ConformU
                                         {
                                             if (IsGoodValue(l_SwitchMinimum))
                                             {
-                                                if (settings.DisplayMethodCalls)
-                                                    LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set the minimum permissible value", i, l_SwitchMinimum));
+                                                LogCallToDriver("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set the minimum permissible value", i, l_SwitchMinimum));
                                                 SetAction($"SetSwitchValue {l_SwitchMinimum}");
                                                 m_Switch.SetSwitchValue(i, l_SwitchMinimum); // Set switch to minimum
                                                 WaitForWriteDelay($"SetSwitchValue {l_SwitchMinimum}");
@@ -803,8 +776,7 @@ namespace ConformU
                                                 // Check GetSwitch
                                                 if (l_GetSwitchOK)
                                                 {
-                                                    if (settings.DisplayMethodCalls)
-                                                        LogTestAndMessage("SetSwitchValue", string.Format("  About to call GetSwitch({0}) method", i));
+                                                    LogCallToDriver("SetSwitchValue", string.Format("  About to call GetSwitch({0}) method", i));
                                                     SetAction("GetSwitch");
                                                     if (m_Switch.GetSwitch(i) == false)
                                                         LogOK("SetSwitchValue", "  GetSwitch returned False after SetSwitchValue(MINIMUM_VALUE)");
@@ -818,8 +790,7 @@ namespace ConformU
                                                 // Check GetSwitchValue returns the switch minimum value
                                                 if (l_GetSwitchValueOK)
                                                 {
-                                                    if (settings.DisplayMethodCalls)
-                                                        LogTestAndMessage("SetSwitchValue", string.Format("  About to call GetSwitchValue({0}) method", i));
+                                                    LogCallToDriver("SetSwitchValue", string.Format("  About to call GetSwitchValue({0}) method", i));
                                                     SetAction("GetSwitchValue");
                                                     l_GetSwitchValue = m_Switch.GetSwitchValue(i);
                                                     WaitForReadDelay("GetSwitchValue");
@@ -860,8 +831,7 @@ namespace ConformU
                                                 // Now try a value below minimum
                                                 try
                                                 {
-                                                    if (settings.DisplayMethodCalls)
-                                                        LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set an invalid low value", i, l_SwitchMinimum - 1.0));
+                                                    LogCallToDriver("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set an invalid low value", i, l_SwitchMinimum - 1.0));
                                                     SetAction($"SetSwitchValue {l_SwitchMinimum - 1.0}");
                                                     m_Switch.SetSwitchValue(i, l_SwitchMinimum - 1.0);
                                                     WaitForWriteDelay($"SetSwitchValue {l_SwitchMinimum - 1.0}");
@@ -879,8 +849,7 @@ namespace ConformU
                                             // Try SetSwitchValue(MAXIMUM_VALUE)
                                             if (IsGoodValue(l_SwitchMaximum))
                                             {
-                                                if (settings.DisplayMethodCalls)
-                                                    LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set the maximum permissible value", i, l_SwitchMaximum));
+                                                LogCallToDriver("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set the maximum permissible value", i, l_SwitchMaximum));
                                                 SetAction($"SetSwitchValue maximum {l_SwitchMaximum}");
                                                 m_Switch.SetSwitchValue(i, l_SwitchMaximum); // Set switch to maximum
                                                 WaitForWriteDelay($"SetSwitchValue maximum {l_SwitchMaximum}");
@@ -888,8 +857,7 @@ namespace ConformU
                                                 // Check GetSwitch
                                                 if (l_GetSwitchOK)
                                                 {
-                                                    if (settings.DisplayMethodCalls)
-                                                        LogTestAndMessage("SetSwitchValue", string.Format("  About to call GetSwitch({0}) method", i));
+                                                    LogCallToDriver("SetSwitchValue", string.Format("  About to call GetSwitch({0}) method", i));
                                                     SetAction("GetSwitch");
                                                     if (m_Switch.GetSwitch(i) == true)
                                                         LogOK("SetSwitchValue ", "  GetSwitch returned True after SetSwitchValue(MAXIMUM_VALUE)");
@@ -904,8 +872,7 @@ namespace ConformU
                                                 // Check GetSwitchValue returns the switch maximum value
                                                 if (l_GetSwitchValueOK)
                                                 {
-                                                    if (settings.DisplayMethodCalls)
-                                                        LogTestAndMessage("SetSwitchValue", string.Format("  About to call GetSwitchValue({0}) method", i));
+                                                    LogCallToDriver("SetSwitchValue", string.Format("  About to call GetSwitchValue({0}) method", i));
                                                     SetAction("GetSwitchValue");
                                                     l_GetSwitchValue = m_Switch.GetSwitchValue(i);
                                                     WaitForReadDelay("GetSwitchValue");
@@ -944,8 +911,7 @@ namespace ConformU
                                                 // Now try a value above maximum
                                                 try
                                                 {
-                                                    if (settings.DisplayMethodCalls)
-                                                        LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set an invalid high value", i, l_SwitchMaximum + 1.0));
+                                                    LogCallToDriver("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set an invalid high value", i, l_SwitchMaximum + 1.0));
                                                     SetAction($"SetSwitchValue {l_SwitchMaximum + 1.0}");
                                                     m_Switch.SetSwitchValue(i, l_SwitchMaximum + 1.0);
                                                     WaitForWriteDelay($"SetSwitchValue {l_SwitchMaximum + 1.0}");
@@ -982,8 +948,7 @@ namespace ConformU
                                             // Return to original state if possible,otherwise set to false
                                             if (l_GetSwitchValueOK)
                                             {
-                                                if (settings.DisplayMethodCalls)
-                                                    LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to restore pre-test value", i, l_GetSwitchValueOriginal));
+                                                LogCallToDriver("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to restore pre-test value", i, l_GetSwitchValueOriginal));
                                                 SetAction($"SetSwitchValue to initial value {l_GetSwitchValueOriginal}");
                                                 m_Switch.SetSwitchValue(i, l_GetSwitchValueOriginal); // Return to the original state
                                                 LogOK("SetSwitchValue ", "  Switch has been reset to its original state");
@@ -991,8 +956,7 @@ namespace ConformU
                                             }
                                             else if (IsGoodValue(l_SwitchMinimum) & IsGoodValue(l_SwitchMaximum))
                                             {
-                                                if (settings.DisplayMethodCalls)
-                                                    LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set the value to its mid-point", i, (l_SwitchMaximum - l_SwitchMinimum) / 2.0));
+                                                LogCallToDriver("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set the value to its mid-point", i, (l_SwitchMaximum - l_SwitchMinimum) / 2.0));
                                                 SetAction($"SetSwitchValue to midpoint {(l_SwitchMaximum - l_SwitchMinimum) / 2.0}");
                                                 m_Switch.SetSwitchValue(i, (l_SwitchMaximum - l_SwitchMinimum) / 2.0); // Return to the half way state
                                                 LogOK("SetSwitchValue ", "  Switch has been reset to half its range");
@@ -1110,8 +1074,7 @@ namespace ConformU
 
             try
             {
-                if (settings.DisplayMethodCalls)
-                    LogTestAndMessage(p_Name, string.Format("About to get property {0}", p_Name));
+                LogCallToDriver(p_Name, string.Format("About to get property {0}", p_Name));
                 returnValue = 0;
                 switch (p_Type)
                 {
@@ -1317,14 +1280,10 @@ namespace ConformU
 
                     if (TestValue2 <= SwitchMaximum)
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set an intermediate value", i, TestValue2));
+                        LogCallToDriver("SetSwitchValue", string.Format("  About to call SetSwitchValue({0}, {1}), attempting to set an intermediate value", i, TestValue2));
                         SetAction($"SetSwitchValue {TestValue2}");
                         m_Switch.SetSwitchValue((short)i, TestValue2); // Set the required switch value
-                        WaitForWriteDelay($"SetSwitchValue {TestValue2}");
-
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("SetSwitchValue", string.Format("  About to call GetSwitchValue({0})", i));
+                        WaitForWriteDelay($"SetSwitchValue {TestValue2}"); LogCallToDriver("SetSwitchValue", string.Format("  About to call GetSwitchValue({0})", i));
                         SetAction("GetSwitchValue");
                         l_SwitchValue = m_Switch.GetSwitchValue((short)i); // Read back the switch value 
                         WaitForReadDelay("GetSwitchValue");
@@ -1438,8 +1397,7 @@ namespace ConformU
                 // Try a value below 0
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage(method.ToString(), string.Format("About to call {0} with invalid low value for switch number: {1} for ", method.ToString(), LOW_TEST_VALUE));
+                    LogCallToDriver(method.ToString(), string.Format("About to call {0} with invalid low value for switch number: {1} for ", method.ToString(), LOW_TEST_VALUE));
                     switch (method)
                     {
                         case SwitchMethod.CanWrite:
@@ -1523,8 +1481,7 @@ namespace ConformU
                 // Try a value above MaxSwitch
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage(method.ToString(), string.Format("About to call {0} with invalid high value for switch number: {1} for ", method.ToString(), m_MaxSwitch + HIGH_TEST_VALUE));
+                    LogCallToDriver(method.ToString(), string.Format("About to call {0} with invalid high value for switch number: {1} for ", method.ToString(), m_MaxSwitch + HIGH_TEST_VALUE));
                     switch (method)
                     {
                         case SwitchMethod.CanWrite:

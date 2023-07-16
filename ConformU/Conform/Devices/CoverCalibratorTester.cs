@@ -214,8 +214,7 @@ namespace ConformU
                 try
                 {
                     maxBrightness = 0; // Initialise to a 'bad' value
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("MaxBrightness", "About to call MaxBrightness property");
+LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
                     maxBrightness = coverCalibratorDevice.MaxBrightness;
 
                     if (!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotPresent))
@@ -251,8 +250,7 @@ namespace ConformU
 
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("Brightness", "About to call Brightness property");
+                    LogCallToDriver("Brightness", "About to call Brightness property");
                     brightness = coverCalibratorDevice.Brightness;
                     brightnessOk = true;
 
@@ -308,8 +306,7 @@ namespace ConformU
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("OpenCover", "About to call OpenCover method");
+                    LogCallToDriver("OpenCover", "About to call OpenCover method");
                     startTime = DateTime.Now;
 
                     coverCalibratorDevice.OpenCover();
@@ -365,8 +362,7 @@ namespace ConformU
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("CloseCover", "About to call CloseCover method");
+                    LogCallToDriver("CloseCover", "About to call CloseCover method");
                     startTime = DateTime.Now;
                     asynchronousCloseTime = 0.0;
 
@@ -427,8 +423,7 @@ namespace ConformU
                         {
 
                             // Initiate a cover open first
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("HaltCover", "About to call OpenCover method");
+LogCallToDriver("HaltCover", "About to call OpenCover method");
                             SetAction("Opening cover so that it can be halted");
                             coverCalibratorDevice.OpenCover();
 
@@ -441,8 +436,7 @@ namespace ConformU
                                 try
                                 {
                                     // Issue a halt command
-                                    if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage("HaltCover", "About to call HaltCover method");
+LogCallToDriver("HaltCover", "About to call HaltCover method");
                                     SetAction("Halting cover");
                                     SetStatus("Waiting for Halt to complete");
                                     coverCalibratorDevice.HaltCover();
@@ -469,8 +463,7 @@ namespace ConformU
                         try
                         {
                             // Since the cover opens synchronously the HaltCover method should return a MethodNotImplementedException
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("HaltCover", "About to call HaltCover method");
+LogCallToDriver("HaltCover", "About to call HaltCover method");
                             coverCalibratorDevice.HaltCover();
                             LogIssue("HaltCover", "The cover operates synchronously but did not throw a MethodNotImplementedException in response to the HaltCover command");
                         }
@@ -485,8 +478,7 @@ namespace ConformU
                 else // Cover not present
                     try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("HaltCover", "About to call HaltCover method");
+                        LogCallToDriver("HaltCover", "About to call HaltCover method");
                         coverCalibratorDevice.HaltCover();
                         // Should never get here...
                         LogIssue("HaltCover", "CoverStatus is 'NotPresent' but HaltCover did not throw a MethodNotImplementedException");
@@ -631,10 +623,7 @@ namespace ConformU
                 {
                     try
                     {
-                        startTime = DateTime.Now;
-
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("CalibratorOff", "About to call CalibratorOff method");
+                        startTime = DateTime.Now; LogCallToDriver("CalibratorOff", "About to call CalibratorOff method");
                         coverCalibratorDevice.CalibratorOff();
 
                         if (!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady)) // Synchronous call
@@ -644,8 +633,7 @@ namespace ConformU
                                 LogOK("CalibratorOff", $"CalibratorOff was successful. The synchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
 
                                 // Confirm that Brightness returns to zero when calibrator is turned off
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage("CalibratorOff", "About to call Brightness property");
+LogCallToDriver("CalibratorOff", "About to call Brightness property");
                                 if (coverCalibratorDevice.Brightness == 0)
                                     LogOK("CalibratorOff", $"Brightness is set to zero when the calibrator is turned off");
                                 else
@@ -666,8 +654,7 @@ namespace ConformU
                                 LogOK("CalibratorOff", $"CalibratorOff was successful. The asynchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
 
                                 // Confirm that Brightness returns to zero when calibrator is turned off
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage("CalibratorOff", "About to call Brightness property");
+LogCallToDriver("CalibratorOff", "About to call Brightness property");
                                 if (coverCalibratorDevice.Brightness == 0)
                                     LogOK("CalibratorOff", $"Brightness is set to zero when the calibrator is turned off");
                                 else
@@ -685,8 +672,7 @@ namespace ConformU
                 else
                     try
                     {
-                        if (settings.DisplayMethodCalls)
-                            LogTestAndMessage("CalibratorOff", "About to call CalibratorOff method");
+                        LogCallToDriver("CalibratorOff", "About to call CalibratorOff method");
                         coverCalibratorDevice.CalibratorOff();
                         // Should never get here...
                         LogIssue("CalibratorOff", $"CalibratorStatus is 'NotPresent'but CalibratorOff did not throw a MethodNotImplementedException.");
@@ -711,10 +697,7 @@ namespace ConformU
             {
                 try
                 {
-                    startTime = DateTime.Now;
-
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("CalibratorOn", $"About to call CalibratorOn method with brightness: {requestedBrightness}");
+                    startTime = DateTime.Now; LogCallToDriver("CalibratorOn", $"About to call CalibratorOn method with brightness: {requestedBrightness}");
                     SetAction($"Setting calibrator to brightness {requestedBrightness}");
                     coverCalibratorDevice.CalibratorOn(requestedBrightness);
 
@@ -727,8 +710,7 @@ namespace ConformU
                             LogOK("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was successful. The synchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
 
                             // Confirm that the brightness value is what was set
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("CalibratorOn", $"About to call Brightness property.");
+LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
                             returnedBrightness = coverCalibratorDevice.Brightness;
 
                             if (returnedBrightness == requestedBrightness)
@@ -770,8 +752,7 @@ namespace ConformU
             else
                 try
                 {
-                    if (settings.DisplayMethodCalls)
-                        LogTestAndMessage("CalibratorOn", $"About to call CalibratorOn method with brightness: {requestedBrightness}");
+                    LogCallToDriver("CalibratorOn", $"About to call CalibratorOn method with brightness: {requestedBrightness}");
                     coverCalibratorDevice.CalibratorOn(requestedBrightness);
                     // Should never get here...
                     LogIssue("CalibratorOn", $"CalibratorStatus is 'NotPresent'but CalibratorOn did not throw a MethodNotImplementedException.");
@@ -825,8 +806,7 @@ namespace ConformU
                 {
                     case RequiredProperty.CalibratorState:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("CalibratorState", "About to call CalibratorState property");
+                            LogCallToDriver("CalibratorState", "About to call CalibratorState property");
                             calibratorState = coverCalibratorDevice.CalibratorState;
                             LogOK(propertyName, calibratorState.ToString());
                             break;
@@ -834,8 +814,7 @@ namespace ConformU
 
                     case RequiredProperty.CoverState:
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("CoverState", "About to call CoverState property");
+                            LogCallToDriver("CoverState", "About to call CoverState property");
                             coverState = coverCalibratorDevice.CoverState;
                             LogOK(propertyName, coverState.ToString());
                             break;
