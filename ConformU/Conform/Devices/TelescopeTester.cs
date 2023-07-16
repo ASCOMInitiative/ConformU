@@ -471,14 +471,14 @@ namespace ConformU
             {
                 try
                 {
-                    if (settings.DisplayMethodCalls) LogTestAndMessage("Mount Safety", "About to get AtPark property");
+                    LogCallToDriver("Mount Safety", "About to get AtPark property");
                     if (telescopeDevice.AtPark)
                     {
                         if (canUnpark)
                         {
                             try
                             {
-                                if (settings.DisplayMethodCalls) LogTestAndMessage("Mount Safety", "About to call Unpark method");
+                                LogCallToDriver("Mount Safety", "About to call Unpark method");
                                 telescopeDevice.Unpark();
                                 LogCallToDriver("Mount Safety", "About to get AtPark property repeatedly");
                                 WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -512,7 +512,7 @@ namespace ConformU
                 {
                     if (canUnpark)
                     {
-                        if (settings.DisplayMethodCalls) LogTestAndMessage("Mount Safety", "About to call Unpark method");
+                        LogCallToDriver("Mount Safety", "About to call Unpark method");
                         telescopeDevice.Unpark();
                         LogCallToDriver("Mount Safety", "About to get AtPark property repeatedly");
                         WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -532,7 +532,7 @@ namespace ConformU
 
             if (!cancellationToken.IsCancellationRequested & canSetTracking)
             {
-                if (settings.DisplayMethodCalls) LogTestAndMessage("Mount Safety", "About to set Tracking property true");
+                LogCallToDriver("Mount Safety", "About to set Tracking property true");
                 try
                 {
                     telescopeDevice.Tracking = true;
@@ -559,7 +559,7 @@ namespace ConformU
                 // v1.0.12.0 Added catch logic for any UTCDate issues
                 try
                 {
-                    if (settings.DisplayMethodCalls) LogTestAndMessage("TimeCheck", "About to get UTCDate property");
+                    LogCallToDriver("TimeCheck", "About to get UTCDate property");
                     DateTime mountTime = telescopeDevice.UTCDate;
                     LogDebug("TimeCheck", $"Mount UTCDate Unformatted: {telescopeDevice.UTCDate}");
                     LogInfo("TimeCheck", $"Mount UTCDate: {telescopeDevice.UTCDate:dd-MMM-yyyy HH:mm:ss.fff}");
@@ -1307,6 +1307,29 @@ namespace ConformU
 
             if (cancellationToken.IsCancellationRequested)
                 return;
+
+            // OperationComplete
+            if (interfaceVersion >= 4)
+            {
+                try
+                {
+                    LogCallToDriver("OperationComplete", "About to get OperationComplete property");
+                    bool operationComplete = telescopeDevice.OperationComplete;
+
+                    if (operationComplete)
+                    {
+                        LogOK("OperationComplete", $"OperationComplete is True as expected with no operation running.");
+                    }
+                    else
+                    {
+                        LogIssue("OperationComplete", $"OperationComplete is False even though no operation has been started.");
+                    }
+                }
+                catch (Exception ex) // Read failed
+                {
+                    HandleException("OperationComplete", MemberType.Property, Required.MustBeImplemented, ex, "Interface is ITelescopeV4 or later");
+                }
+            }
 
             // RightAscension - Required
             try
@@ -2656,7 +2679,7 @@ namespace ConformU
                     {
                         try
                         {
-                            if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get AtPark property");
+                            LogCallToDriver("Park", "About to get AtPark property");
                             if (!telescopeDevice.AtPark) // OK We are unparked so check that no error is generated
                             {
                                 SetTest("Park");
@@ -2664,9 +2687,9 @@ namespace ConformU
                                 {
                                     SetAction("Parking scope...");
                                     LogTestAndMessage("Park", "Parking scope...");
-                                    if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to call Park method");
+                                    LogCallToDriver("Park", "About to call Park method");
                                     telescopeDevice.Park();
-                                    if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get AtPark property repeatedly...");
+                                    LogCallToDriver("Park", "About to get AtPark property repeatedly...");
 
                                     // Wait for the park to complete
                                     WaitWhile("Waiting for scope to park", () => { return !telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -2678,11 +2701,11 @@ namespace ConformU
                                     // Scope Parked OK
                                     try // Confirm second park is harmless
                                     {
-                                        if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to Park call method");
+                                        LogCallToDriver("Park", "About to Park call method");
                                         telescopeDevice.Park();
                                         LogOK("Park", "Success if already parked");
 
-                                        if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get AtPark property repeatedly...");
+                                        LogCallToDriver("Park", "About to get AtPark property repeatedly...");
 
                                         // Wait for the park to complete
                                         WaitWhile("Waiting for scope to park", () => { return !telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -2708,7 +2731,7 @@ namespace ConformU
                                             // Prepare the mount to be parked again
                                             LogCallToDriver("Park", "Unpark");
                                             telescopeDevice.Unpark();
-                                            if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get AtPark property repeatedly");
+                                            LogCallToDriver("Park", "About to get AtPark property repeatedly");
                                             WaitWhile("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                             LogCallToDriver("Park", "Tracking");
@@ -2720,12 +2743,19 @@ namespace ConformU
                                             // Park the scope
                                             SetAction("Parking scope for OperationComplete test...");
                                             LogTestAndMessage("Park", "Parking scope for OperationComplete test...");
-                                            if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to call Park method");
+                                            LogCallToDriver("Park", "About to call Park method");
+
+                                            // Validate OperationComplete state
+                                            ValidateOperationComplete("Park", true);
+
                                             telescopeDevice.Park();
 
                                             // Wait for the park to complete
-                                            if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get OperationComplete property repeatedly...");
+                                            LogCallToDriver("Park", "About to get OperationComplete property repeatedly...");
                                             WaitWhile("Waiting for scope to park for OperationComplete test", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+ 
+                                            // Validate OperationComplete state
+                                            ValidateOperationComplete("Park", true);
 
                                             if (telescopeDevice.AtPark)
                                             {
@@ -2734,7 +2764,7 @@ namespace ConformU
                                             }
                                             else
                                             {
-                                                LogIssue("Park", $"Failed to Find home within {settings.TelescopeMaximumSlewTime} seconds while using OperationComplete");
+                                                LogIssue("Park", $"Failed to park within {settings.TelescopeMaximumSlewTime} seconds while using OperationComplete");
                                             }
 
                                             if (cancellationToken.IsCancellationRequested) return;
@@ -2839,7 +2869,7 @@ namespace ConformU
                                             if (settings.DisplayMethodCalls)
                                                 LogTestAndMessage("Unpark", "About to call Unpark method");
                                             telescopeDevice.Unpark();
-                                            if (settings.DisplayMethodCalls) LogTestAndMessage("Unpark", "About to get AtPark property repeatedly");
+                                            LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
                                             WaitWhile("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                             if (cancellationToken.IsCancellationRequested)
@@ -2864,7 +2894,7 @@ namespace ConformU
                                                 if (settings.DisplayMethodCalls)
                                                     LogTestAndMessage("Unpark", "About to call Unpark method");
                                                 telescopeDevice.Unpark();
-                                                if (settings.DisplayMethodCalls) LogTestAndMessage("Unpark", "About to get AtPark property repeatedly");
+                                                LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
                                                 WaitWhile("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                                 LogOK("Unpark", "Success when already unparked");
@@ -2891,11 +2921,18 @@ namespace ConformU
                                                 SetStatus("Scope parked");
                                                 if (cancellationToken.IsCancellationRequested) return;
 
+                                                // Validate OperationComplete state
+                                                ValidateOperationComplete("Unpark", true);
+
                                                 // Now unpark as an operation
+
                                                 LogCallToDriver("Unpark", "About to call Unpark method");
                                                 telescopeDevice.Unpark();
                                                 LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
                                                 WaitWhile("Waiting for scope to unpark when parked", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+
+                                                // Validate OperationComplete state
+                                                ValidateOperationComplete("Unpark", true);
 
                                                 if (telescopeDevice.OperationComplete)
                                                 {
@@ -2920,7 +2957,7 @@ namespace ConformU
                                             if (settings.DisplayMethodCalls)
                                                 LogTestAndMessage("Unpark", "About to call Unpark method");
                                             telescopeDevice.Unpark();
-                                            if (settings.DisplayMethodCalls) LogTestAndMessage("Unpark", "About to get AtPark property repeatedly");
+                                            LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
                                             WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                             LogIssue("Unpark", "No exception thrown by Unpark when CanUnpark is false");
@@ -2952,11 +2989,11 @@ namespace ConformU
                     {
                         try
                         {
-                            if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to Park call method");
+                            LogCallToDriver("Park", "About to Park call method");
                             telescopeDevice.Park();
                             LogOK("Park", "Success if already parked");
 
-                            if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get AtPark property repeatedly...");
+                            LogCallToDriver("Park", "About to get AtPark property repeatedly...");
 
                             // Wait for the park to complete
                             WaitWhile("Waiting for scope to park", () => { return !telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -2978,7 +3015,7 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage("UnPark", "About to call UnPark method");
                                 telescopeDevice.Unpark();
-                                if (settings.DisplayMethodCalls) LogTestAndMessage("Unpark", "About to get AtPark property repeatedly");
+                                LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
                                 WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                 LogOK("UnPark", "CanPark is false and CanUnPark is true; no exception generated as expected");
@@ -2995,7 +3032,7 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage("UnPark", "About to call UnPark method");
                                 telescopeDevice.Unpark();
-                                if (settings.DisplayMethodCalls) LogTestAndMessage("Unpark", "About to get AtPark property repeatedly");
+                                LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
                                 WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                 LogIssue("UnPark", "CanPark and CanUnPark are false but no exception was generated on use");
@@ -4221,7 +4258,7 @@ namespace ConformU
             SetTest(p_Name);
             if (canSetTracking)
             {
-                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set Tracking property to true");
+                LogCallToDriver(p_Name, "About to set Tracking property to true");
                 telescopeDevice.Tracking = true; // Enable tracking for these tests
             }
 
@@ -4231,10 +4268,10 @@ namespace ConformU
                 {
                     case SlewSyncType.SlewToCoordinates:
                         {
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
+                            LogCallToDriver(p_Name, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
-                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set Tracking property to true");
+                                LogCallToDriver(p_Name, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
@@ -4242,7 +4279,7 @@ namespace ConformU
                             targetDeclination = 1.0d;
                             SetAction("Slewing synchronously...");
 
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
+                            LogCallToDriver(p_Name, "About to call SlewToCoordinates method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
                             telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination);
                             LogDebug(p_Name, "Returned from SlewToCoordinates method");
                             break;
@@ -4250,17 +4287,17 @@ namespace ConformU
 
                     case SlewSyncType.SlewToCoordinatesAsync:
                         {
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
+                            LogCallToDriver(p_Name, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
-                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set Tracking property to true");
+                                LogCallToDriver(p_Name, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
                             targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
                             targetDeclination = 2.0d;
 
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
+                            LogCallToDriver(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(targetDeclination));
                             telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
                             if (settings.DisplayMethodCalls) LogDebug(p_Name, $"Asynchronous slew initiated");
 
@@ -4271,10 +4308,10 @@ namespace ConformU
 
                     case SlewSyncType.SlewToTarget:
                         {
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
+                            LogCallToDriver(p_Name, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
-                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set Tracking property to true");
+                                LogCallToDriver(p_Name, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
@@ -4282,7 +4319,7 @@ namespace ConformU
                             targetDeclination = 3.0d;
                             try
                             {
-                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(targetRightAscension));
+                                LogCallToDriver(p_Name, "About to set TargetRightAscension property to " + FormatRA(targetRightAscension));
                                 telescopeDevice.TargetRightAscension = targetRightAscension;
                             }
                             catch (Exception ex)
@@ -4299,7 +4336,7 @@ namespace ConformU
 
                             try
                             {
-                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(targetDeclination));
+                                LogCallToDriver(p_Name, "About to set TargetDeclination property to " + FormatDec(targetDeclination));
                                 telescopeDevice.TargetDeclination = targetDeclination;
                             }
                             catch (Exception ex)
@@ -4315,17 +4352,17 @@ namespace ConformU
                             }
 
                             SetAction("Slewing synchronously...");
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToTarget method");
+                            LogCallToDriver(p_Name, "About to call SlewToTarget method");
                             telescopeDevice.SlewToTarget();
                             break;
                         }
 
                     case SlewSyncType.SlewToTargetAsync: // SlewToTargetAsync
                         {
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
+                            LogCallToDriver(p_Name, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
-                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set Tracking property to true");
+                                LogCallToDriver(p_Name, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
@@ -4333,7 +4370,7 @@ namespace ConformU
                             targetDeclination = 4.0d;
                             try
                             {
-                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set TargetRightAscension property to " + FormatRA(targetRightAscension));
+                                LogCallToDriver(p_Name, "About to set TargetRightAscension property to " + FormatRA(targetRightAscension));
                                 telescopeDevice.TargetRightAscension = targetRightAscension;
                             }
                             catch (Exception ex)
@@ -4350,7 +4387,7 @@ namespace ConformU
 
                             try
                             {
-                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set TargetDeclination property to " + FormatDec(targetDeclination));
+                                LogCallToDriver(p_Name, "About to set TargetDeclination property to " + FormatDec(targetDeclination));
                                 telescopeDevice.TargetDeclination = targetDeclination;
                             }
                             catch (Exception ex)
@@ -4365,7 +4402,7 @@ namespace ConformU
                                 }
                             }
 
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToTargetAsync method");
+                            LogCallToDriver(p_Name, "About to call SlewToTargetAsync method");
                             telescopeDevice.SlewToTargetAsync();
 
                             WaitForSlew(p_Name, $"Slewing to target asynchronously");
@@ -4375,53 +4412,53 @@ namespace ConformU
                     case SlewSyncType.SlewToAltAz:
                         {
                             LogDebug(p_Name, $"Tracking 1: {telescopeDevice.Tracking}");
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
+                            LogCallToDriver(p_Name, "About to get Tracking property");
                             if (canSetTracking & telescopeDevice.Tracking)
                             {
-                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set property Tracking to false");
+                                LogCallToDriver(p_Name, "About to set property Tracking to false");
                                 telescopeDevice.Tracking = false;
                                 LogDebug(p_Name, "Tracking turned off");
                             }
 
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
+                            LogCallToDriver(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 2: {telescopeDevice.Tracking}");
                             targetAltitude = 50.0d;
                             targetAzimuth = 150.0d;
                             SetAction("Slewing to Alt/Az synchronously...");
 
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
+                            LogCallToDriver(p_Name, "About to call SlewToAltAz method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
                             telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
 
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
+                            LogCallToDriver(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 3: {telescopeDevice.Tracking}");
                             break;
                         }
 
                     case SlewSyncType.SlewToAltAzAsync:
                         {
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
+                            LogCallToDriver(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 1: {telescopeDevice.Tracking}");
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
+                            LogCallToDriver(p_Name, "About to get Tracking property");
                             if (canSetTracking & telescopeDevice.Tracking)
                             {
-                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to set Tracking property false");
+                                LogCallToDriver(p_Name, "About to set Tracking property false");
                                 telescopeDevice.Tracking = false;
                                 LogDebug(p_Name, "Tracking turned off");
                             }
 
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
+                            LogCallToDriver(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 2: {telescopeDevice.Tracking}");
                             targetAltitude = 55.0d;
                             targetAzimuth = 155.0d;
 
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to call SlewToAltAzAsync method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
+                            LogCallToDriver(p_Name, "About to call SlewToAltAzAsync method, Altitude: " + FormatDec(targetAltitude) + ", Azimuth: " + FormatDec(targetAzimuth));
                             telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
 
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
+                            LogCallToDriver(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 3: {telescopeDevice.Tracking}");
 
                             WaitForSlew(p_Name, $"Slewing to Alt/Az asynchronously");
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Tracking property");
+                            LogCallToDriver(p_Name, "About to get Tracking property");
                             LogDebug(p_Name, $"Tracking 4: {telescopeDevice.Tracking}");
                             break;
                         }
@@ -4520,10 +4557,10 @@ namespace ConformU
                         case SlewSyncType.SlewToAltAzAsync:
                             {
                                 // Test how close the slew was to the required coordinates
-                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Azimuth property");
+                                LogCallToDriver(p_Name, "About to get Azimuth property");
                                 double actualAzimuth = telescopeDevice.Azimuth;
 
-                                if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to get Altitude property");
+                                LogCallToDriver(p_Name, "About to get Altitude property");
                                 double actualAltitude = telescopeDevice.Altitude;
 
                                 double azimuthDifference = Math.Abs(actualAzimuth - targetAzimuth);
@@ -5879,7 +5916,7 @@ namespace ConformU
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage(testName, "About to call UnPark method");
                                         telescopeDevice.Unpark(); // Unpark it ready for further tests
-                                        if (settings.DisplayMethodCalls) LogTestAndMessage("Unpark", "About to get AtPark property repeatedly");
+                                        LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
 
                                         WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
                                     }
@@ -5892,6 +5929,10 @@ namespace ConformU
                                         startTime = DateTime.Now;
 
                                         SetAction("Homing mount using operations...");
+
+                                        // Validate OperationComplete state
+                                        ValidateOperationComplete("Park", true);
+
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage(testName, "About to call FindHome method");
 
@@ -5899,6 +5940,9 @@ namespace ConformU
 
                                         // Wait for mount to find home
                                         WaitWhile("Waiting for mount to home using operations...", () => { return !telescopeDevice.OperationComplete & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
+
+                                        // Validate OperationComplete state
+                                        ValidateOperationComplete("Park", true);
 
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage(testName, "About to get AtHome property");
@@ -5926,7 +5970,7 @@ namespace ConformU
                                     if (settings.DisplayMethodCalls)
                                         LogTestAndMessage(testName, "About to call Unpark method");
                                     telescopeDevice.Unpark();
-                                    if (settings.DisplayMethodCalls) LogTestAndMessage("Unpark", "About to get AtPark property repeatedly");
+                                    LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
                                     WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
                                 } // Make sure we are still  unparked!
 
@@ -6170,7 +6214,7 @@ namespace ConformU
                     {
                         try
                         {
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to dispose of AxisRates object");
+                            LogCallToDriver(testName, "About to dispose of AxisRates object");
                             l_AxisRates.Dispose();
 
                             LogOK(testName, "AxisRates object successfully disposed");
@@ -7186,11 +7230,11 @@ namespace ConformU
         {
             double actualRA, actualDec, difference;
 
-            if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to get RightAscension property");
+            LogCallToDriver(testName, "About to get RightAscension property");
             actualRA = telescopeDevice.RightAscension;
             LogDebug(testName, "Read RightAscension: " + FormatRA(actualRA));
 
-            if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to get Declination property");
+            LogCallToDriver(testName, "About to get Declination property");
             actualDec = telescopeDevice.Declination;
             LogDebug(testName, "Read Declination: " + FormatDec(actualDec));
 
@@ -7352,7 +7396,7 @@ namespace ConformU
         {
             Stopwatch sw = Stopwatch.StartNew();
 
-            if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to get Slewing property multiple times");
+            LogCallToDriver(testName, "About to get Slewing property multiple times");
             WaitWhile(actionMessage, () => { return telescopeDevice.Slewing | (sw.Elapsed.TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION); }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
         }
 
@@ -8179,7 +8223,7 @@ namespace ConformU
         {
             if (canSetTracking)
             {
-                if (settings.DisplayMethodCalls) LogTestAndMessage("SlewToHA", "About to set Tracking property to true");
+                LogCallToDriver("SlewToHA", "About to set Tracking property to true");
                 telescopeDevice.Tracking = true; // Enable tracking for these tests
             }
 
@@ -8240,7 +8284,30 @@ namespace ConformU
             return canReadSideOfPier.Value;
         }
 
-        #endregion
+        private void ValidateOperationComplete(string test, bool expectedState)
+        {
+            try
+            {
+                LogCallToDriver(test, "About to call OperationComplete method");
+                bool operationComplete = telescopeDevice.OperationComplete;
 
+                if (operationComplete = expectedState)
+                {
+                    // Got expected outcome so no action
+                }
+                else
+                {
+                    LogIssue(test, $"OperationComplete did not have the executed state: {expectedState}, it was: {operationComplete}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogIssue(test, $"Unexpected exception from OperationComplete: {ex.Message}");
+                LogDebug(test, ex.ToString());
+            }
+
+            #endregion
+
+        }
     }
 }
