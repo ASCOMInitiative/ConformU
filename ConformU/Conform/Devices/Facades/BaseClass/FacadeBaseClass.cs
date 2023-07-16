@@ -1,7 +1,9 @@
-﻿using System;
+﻿using ASCOM.Common.DeviceInterfaces;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -11,7 +13,7 @@ using System.Windows.Forms;
 
 namespace ConformU
 {
-    public class FacadeBaseClass : IDisposable
+    public class FacadeBaseClass : IAscomDeviceV2, IDisposable
     {
         const int DRIVER_LOAD_TIMEOUT = 5; // Seconds to wait for the driver to load
         private readonly bool LOG_ENABLED = false; // Enable debug logging of this class
@@ -352,7 +354,7 @@ namespace ConformU
 
         #endregion
 
-        #region Common Members
+        #region IAscomDevice Members
 
         public bool Connected
         {
@@ -376,18 +378,7 @@ namespace ConformU
 
         public string Name => (string)FunctionNoParameters(() => driver.Name);
 
-        public IList<string> SupportedActions
-        {
-            get
-            {
-                List<string> supportedActions = new();
-                foreach (string action in (IEnumerable)FunctionNoParameters(() => driver.SupportedActions))
-                {
-                    supportedActions.Add(action);
-                }
-                return supportedActions;
-            }
-        }
+        public IList<string> SupportedActions => ((IEnumerable)FunctionNoParameters(() => driver.SupportedActions)).Cast<string>().ToList();
 
         public string Action(string ActionName, string ActionParameters)
         {
@@ -413,6 +404,18 @@ namespace ConformU
         {
             MethodNoParameters(() => driver.SetupDialog());
         }
+
+        #endregion
+
+        #region IAscomDeviceV2 members
+
+        public void Connect() => MethodNoParameters(() => driver.Connect());
+
+        public void Disconnect() => MethodNoParameters(() => driver.Disconnect());
+
+        public bool Connecting => (bool)FunctionNoParameters(() => driver.Connecting);
+
+        public IList<IStateValue> DeviceState => ((IEnumerable)FunctionNoParameters(() => driver.DeviceState)).Cast<IStateValue>().ToList();
 
         #endregion
 

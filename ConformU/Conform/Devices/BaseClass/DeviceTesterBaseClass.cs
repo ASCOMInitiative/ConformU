@@ -37,7 +37,7 @@ namespace ConformU
 
         #endregion
 
-        internal int g_InterfaceVersion; // Variable to held interface version of the current device
+        internal int interfaceVersion; // Variable to held interface version of the current device
 
         private bool l_Connected, l_HasProperties, l_HasCanProperties, l_HasMethods, l_HasPreRunCheck, l_HasPostRunCheck, l_HasPerformanceCheck;
         private bool l_HasPreConnectCheck;
@@ -211,18 +211,18 @@ namespace ConformU
             {
                 if (settings.DisplayMethodCalls)
                     LogTestAndMessage("InterfaceVersion", "About to get property InterfaceVersion");
-                g_InterfaceVersion = baseClassDevice.InterfaceVersion;
-                switch (g_InterfaceVersion)
+                interfaceVersion = baseClassDevice.InterfaceVersion;
+                switch (interfaceVersion)
                 {
                     case var @case when @case < 1:
                         {
-                            LogIssue("InterfaceVersion", "InterfaceVersion must be 1 or greater but driver returned: " + g_InterfaceVersion.ToString());
+                            LogIssue("InterfaceVersion", "InterfaceVersion must be 1 or greater but driver returned: " + interfaceVersion.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogOK("InterfaceVersion", g_InterfaceVersion.ToString());
+                            LogOK("InterfaceVersion", interfaceVersion.ToString());
                             break;
                         }
                 }
@@ -237,7 +237,7 @@ namespace ConformU
                 return;
 
             // Connected - Required
-            if (IncludeMethod(MandatoryMethod.Connected, p_DeviceType, g_InterfaceVersion))
+            if (IncludeMethod(MandatoryMethod.Connected, p_DeviceType, interfaceVersion))
             {
                 try
                 {
@@ -256,7 +256,7 @@ namespace ConformU
             }
 
             // Description - Required
-            if (IncludeMethod(MandatoryMethod.Description, p_DeviceType, g_InterfaceVersion))
+            if (IncludeMethod(MandatoryMethod.Description, p_DeviceType, interfaceVersion))
             {
                 try
                 {
@@ -296,7 +296,7 @@ namespace ConformU
             }
 
             // DriverInfo - Required
-            if (IncludeMethod(MandatoryMethod.DriverInfo, p_DeviceType, g_InterfaceVersion))
+            if (IncludeMethod(MandatoryMethod.DriverInfo, p_DeviceType, interfaceVersion))
             {
                 try
                 {
@@ -328,7 +328,7 @@ namespace ConformU
             }
 
             // DriverVersion - Required
-            if (IncludeMethod(MandatoryMethod.DriverVersion, p_DeviceType, g_InterfaceVersion))
+            if (IncludeMethod(MandatoryMethod.DriverVersion, p_DeviceType, interfaceVersion))
             {
                 try
                 {
@@ -360,11 +360,11 @@ namespace ConformU
             }
             else
             {
-                LogInfo("DriverVersion", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("DriverVersion", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             // Name - Required
-            if (IncludeMethod(MandatoryMethod.Name, p_DeviceType, g_InterfaceVersion))
+            if (IncludeMethod(MandatoryMethod.Name, p_DeviceType, interfaceVersion))
             {
                 try
                 {

@@ -212,7 +212,7 @@ namespace ConformU
         public override void CheckProperties()
         {
             // MaxSwitch - Mandatory
-            switch (g_InterfaceVersion)
+            switch (interfaceVersion)
             {
                 case 1:
                 case 2 // Original Platform 5 switch interface and ISwitchV2 have the same property
@@ -225,7 +225,7 @@ namespace ConformU
 
                 default:
                     {
-                        LogIssue("Switches", "Unknown switch interface version: " + g_InterfaceVersion);
+                        LogIssue("Switches", "Unknown switch interface version: " + interfaceVersion);
                         break;
                     }
             }
@@ -259,7 +259,7 @@ namespace ConformU
             double l_GetSwitchValue, l_GetSwitchValueOriginal = 0.0, l_SwitchMinimum, l_SwitchMaximum, l_SwitchStep, l_SwitchRange;
             string l_SwitchName, l_SwitchDescription;
 
-            switch (g_InterfaceVersion)
+            switch (interfaceVersion)
             {
                 case 1 // Platform 5 interface v1
                :

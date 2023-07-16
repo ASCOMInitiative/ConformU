@@ -506,7 +506,7 @@ namespace ConformU
             SetTest("Focuser Move");
             if (m_TempCompTrueOK)
             {
-                switch (g_InterfaceVersion)
+                switch (interfaceVersion)
                 {
                     case 0:
                     case 1:
@@ -545,7 +545,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue("Move - TempComp True", string.Format("Unknown interface version returned {0}, Move test with temperature compensation enabled skipped.", g_InterfaceVersion));
+                            LogIssue("Move - TempComp True", string.Format("Unknown interface version returned {0}, Move test with temperature compensation enabled skipped.", interfaceVersion));
                             break;
                         }
                 }

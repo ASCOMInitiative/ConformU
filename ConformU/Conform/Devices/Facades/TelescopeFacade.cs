@@ -11,13 +11,13 @@ using System.Runtime.InteropServices;
 
 namespace ConformU
 {
-    public class TelescopeFacade : FacadeBaseClass, ITelescopeV3, IDisposable
+    public class TelescopeFacade : FacadeBaseClass, ITelescopeV4, IDisposable
     {
 
         // Create the test device in the facade base class
         public TelescopeFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }
 
-        #region Interface implementation
+        #region ITelescopeV3 interface implementation
 
         public AlignmentMode AlignmentMode => (AlignmentMode)FunctionNoParameters(() => driver.AlignmentMode);
 
@@ -204,5 +204,12 @@ namespace ConformU
         }
 
         #endregion
+
+        #region ITelescopeV4 interface implementation
+
+        public bool OperationComplete => (bool)FunctionNoParameters(() => driver.OperationComplete);
+
+        #endregion
+
     }
 }

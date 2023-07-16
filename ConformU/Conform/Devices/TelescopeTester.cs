@@ -110,7 +110,7 @@ namespace ConformU
         private readonly double[,] axisRatesArray = new double[1001, 2];
 
         // Helper variables
-        private ITelescopeV3 telescopeDevice;
+        private ITelescopeV4 telescopeDevice;
         private readonly CancellationToken cancellationToken;
         private readonly Settings settings;
         private readonly ConformLogger logger;
@@ -467,7 +467,7 @@ namespace ConformU
         public override void PreRunCheck()
         {
             // Get into a consistent state
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 try
                 {
@@ -480,7 +480,10 @@ namespace ConformU
                             {
                                 if (settings.DisplayMethodCalls) LogTestAndMessage("Mount Safety", "About to call Unpark method");
                                 telescopeDevice.Unpark();
-                                LogInfo("Mount Safety", "Scope is parked, so it has been unparked for testing");
+                                LogCallToDriver("Mount Safety", "About to get AtPark property repeatedly");
+                                WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+
+                                LogInfo("Mount Safety", "Scope was parked, so it has been unparked for testing");
                             }
                             catch (Exception ex)
                             {
@@ -504,13 +507,16 @@ namespace ConformU
             }
             else
             {
-                LogInfo("Mount Safety", "Skipping AtPark test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("Mount Safety", "Skipping AtPark test as this method is not supported in interface V" + interfaceVersion);
                 try
                 {
                     if (canUnpark)
                     {
                         if (settings.DisplayMethodCalls) LogTestAndMessage("Mount Safety", "About to call Unpark method");
                         telescopeDevice.Unpark();
+                        LogCallToDriver("Mount Safety", "About to get AtPark property repeatedly");
+                        WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+
                         LogOK("Mount Safety", "Scope has been unparked for testing");
                     }
                     else
@@ -758,7 +764,7 @@ namespace ConformU
                 return;
 
             // AtHome - Required
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 try
                 {
@@ -774,14 +780,14 @@ namespace ConformU
             }
             else
             {
-                LogInfo("AtHome", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("AtHome", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // AtPark - Required
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 try
                 {
@@ -797,7 +803,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("AtPark", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("AtPark", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -923,7 +929,7 @@ namespace ConformU
                 return;
 
             // DeclinationRate Write - Optional
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (canSetDeclinationRate) // Any value is acceptable
                 {
@@ -971,7 +977,7 @@ namespace ConformU
                 return;
 
             // DoesRefraction Read - Optional
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 try
                 {
@@ -990,11 +996,11 @@ namespace ConformU
             }
             else
             {
-                LogInfo("DoesRefraction Read", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("DoesRefraction Read", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             // DoesRefraction Write - Optional
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (doesRefraction) // Try opposite value
                 {
@@ -1027,14 +1033,14 @@ namespace ConformU
             }
             else
             {
-                LogInfo("DoesRefraction Write", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("DoesRefraction Write", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // EquatorialSystem - Required
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 try
                 {
@@ -1050,7 +1056,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("EquatorialSystem", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("EquatorialSystem", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -1092,7 +1098,7 @@ namespace ConformU
                 return;
 
             // GuideRateDeclination - Optional
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (canSetGuideRates) // Can set guide rates so read and write are mandatory
                 {
@@ -1171,14 +1177,14 @@ namespace ConformU
             }
             else
             {
-                LogInfo("GuideRateDeclination", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("GuideRateDeclination", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // GuideRateRightAscension - Optional
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (canSetGuideRates)
                 {
@@ -1256,14 +1262,14 @@ namespace ConformU
             }
             else
             {
-                LogInfo("GuideRateRightAscension", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("GuideRateRightAscension", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // IsPulseGuiding - Optional
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (canPulseGuide) // Can pulse guide so test if we can successfully read IsPulseGuiding
                 {
@@ -1296,7 +1302,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("IsPulseGuiding", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("IsPulseGuiding", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -1385,7 +1391,7 @@ namespace ConformU
                 return;
 
             // RightAscensionRate Write - Optional
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (canSetRightAscensionRate) // Perform several tests starting with proving we can set a rate of 0.0
                 {
@@ -1965,7 +1971,7 @@ namespace ConformU
                 return;
 
             // SideOfPier Read - Optional
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 try
                 {
@@ -1982,7 +1988,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("SideOfPier Read", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("SideOfPier Read", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             // SideOfPier Write - Optional
@@ -2277,7 +2283,7 @@ namespace ConformU
                 return;
 
             // TrackingRates - Required
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 int l_Count = 0;
                 try
@@ -2574,7 +2580,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("TrackingRate", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("TrackingRate", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -2620,7 +2626,7 @@ namespace ConformU
         {
 
             // CanMoveAxis - Required - This must be first test as Parked tests use its results
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (telescopeTests[TELTEST_CAN_MOVE_AXIS] | telescopeTests[TELTEST_MOVE_AXIS] | telescopeTests[TELTEST_PARK_UNPARK])
                 {
@@ -2638,11 +2644,11 @@ namespace ConformU
             }
             else
             {
-                LogInfo("CanMoveAxis", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("CanMoveAxis", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             // Test Park, Unpark - Optional
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (telescopeTests[TELTEST_PARK_UNPARK])
                 {
@@ -2675,6 +2681,15 @@ namespace ConformU
                                         if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to Park call method");
                                         telescopeDevice.Park();
                                         LogOK("Park", "Success if already parked");
+
+                                        if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get AtPark property repeatedly...");
+
+                                        // Wait for the park to complete
+                                        WaitWhile("Waiting for scope to park", () => { return !telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                        if (cancellationToken.IsCancellationRequested) return;
+
+                                        SetStatus("Scope parked");
+                                        LogOK("Park", "Success if already parked");
                                     }
                                     catch (COMException ex)
                                     {
@@ -2683,6 +2698,52 @@ namespace ConformU
                                     catch (Exception ex)
                                     {
                                         LogIssue("Park", "Exception when calling Park two times in succession: " + ex.Message);
+                                    }
+
+                                    // Check if the operation properties are implemented
+                                    if (interfaceVersion >= 4) // Operations are supported
+                                    {
+                                        try
+                                        {
+                                            // Prepare the mount to be parked again
+                                            LogCallToDriver("Park", "Unpark");
+                                            telescopeDevice.Unpark();
+                                            if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get AtPark property repeatedly");
+                                            WaitWhile("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+
+                                            LogCallToDriver("Park", "Tracking");
+                                            telescopeDevice.Tracking = true;
+
+                                            // Slew to an arbitrary test HA
+                                            SlewToHa(1.0);
+
+                                            // Park the scope
+                                            SetAction("Parking scope for OperationComplete test...");
+                                            LogTestAndMessage("Park", "Parking scope for OperationComplete test...");
+                                            if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to call Park method");
+                                            telescopeDevice.Park();
+
+                                            // Wait for the park to complete
+                                            if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get OperationComplete property repeatedly...");
+                                            WaitWhile("Waiting for scope to park for OperationComplete test", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+
+                                            if (telescopeDevice.AtPark)
+                                            {
+                                                SetStatus("Scope parked for OperationComplete test");
+                                                LogOK("Park", "Success for OperationComplete test");
+                                            }
+                                            else
+                                            {
+                                                LogIssue("Park", $"Failed to Find home within {settings.TelescopeMaximumSlewTime} seconds while using OperationComplete");
+                                            }
+
+                                            if (cancellationToken.IsCancellationRequested) return;
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            LogIssue("Park", $"Exception trying to test Park operation: {ex.Message}");
+                                            LogDebug("Park", ex.ToString());
+                                        }
                                     }
 
                                     // Confirm that methods do raise exceptions when scope is parked
@@ -2776,10 +2837,9 @@ namespace ConformU
                                         try
                                         {
                                             if (settings.DisplayMethodCalls)
-                                                LogTestAndMessage("UnPark", "About to call UnPark method");
+                                                LogTestAndMessage("Unpark", "About to call Unpark method");
                                             telescopeDevice.Unpark();
-                                            if (settings.DisplayMethodCalls) LogTestAndMessage("UnPark", "About to get AtPark property repeatedly");
-
+                                            if (settings.DisplayMethodCalls) LogTestAndMessage("Unpark", "About to get AtPark property repeatedly");
                                             WaitWhile("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                             if (cancellationToken.IsCancellationRequested)
@@ -2788,31 +2848,63 @@ namespace ConformU
                                             try // Make sure tracking doesn't generate an error if it is not implemented
                                             {
                                                 if (settings.DisplayMethodCalls)
-                                                    LogTestAndMessage("UnPark", "About to set Tracking property true");
+                                                    LogTestAndMessage("Unpark", "About to set Tracking property true");
                                                 telescopeDevice.Tracking = true;
                                             }
                                             catch (Exception)
                                             {
                                             }
 
-                                            SetStatus("Scope UnParked OK");
-                                            LogOK("UnPark", "Success");
+                                            SetStatus("Scope Unparked OK");
+                                            LogOK("Unpark", "Success");
 
                                             // Scope unparked
-                                            try // Confirm UnPark is harmless if already unparked
+                                            try // Confirm Unpark is harmless if already unparked
                                             {
                                                 if (settings.DisplayMethodCalls)
-                                                    LogTestAndMessage("UnPark", "About to call UnPark method");
+                                                    LogTestAndMessage("Unpark", "About to call Unpark method");
                                                 telescopeDevice.Unpark();
-                                                LogOK("UnPark", "Success when already unparked");
+                                                if (settings.DisplayMethodCalls) LogTestAndMessage("Unpark", "About to get AtPark property repeatedly");
+                                                WaitWhile("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+
+                                                LogOK("Unpark", "Success when already unparked");
                                             }
                                             catch (COMException ex)
                                             {
-                                                LogIssue("UnPark", "Exception when calling UnPark two times in succession: " + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
+                                                LogIssue("Unpark", "Exception when calling Unpark two times in succession: " + ex.Message + " " + ((int)ex.ErrorCode).ToString("X8"));
                                             }
                                             catch (Exception ex)
                                             {
-                                                LogIssue("UnPark", "Exception when calling UnPark two times in succession: " + ex.Message);
+                                                LogIssue("Unpark", "Exception when calling Unpark two times in succession: " + ex.Message);
+                                            }
+
+                                            // Test OperationComplete if appropriate.
+                                            if (interfaceVersion >= 4)
+                                            {
+                                                // Park the scope 
+                                                SetAction("Parking scope...");
+                                                LogTestAndMessage("Unpark", "Parking scope for Unpark OperationComplete test...");
+                                                LogCallToDriver("Unpark", "About to call Park method");
+                                                telescopeDevice.Park();
+                                                LogCallToDriver("Unpark", "About to get AtPark property repeatedly...");
+                                                WaitWhile("Waiting for scope to park", () => { return !telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                                SetStatus("Scope parked");
+                                                if (cancellationToken.IsCancellationRequested) return;
+
+                                                // Now unpark as an operation
+                                                LogCallToDriver("Unpark", "About to call Unpark method");
+                                                telescopeDevice.Unpark();
+                                                LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
+                                                WaitWhile("Waiting for scope to unpark when parked", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+
+                                                if (telescopeDevice.OperationComplete)
+                                                {
+                                                    LogOK("Unpark", "Success when using OperationComplete");
+                                                }
+                                                else
+                                                {
+                                                    LogIssue("Unpark", $"Failed to unpark after {settings.TelescopeMaximumSlewTime} seconds when using waiting for OperationComplete");
+                                                }
                                             }
                                         }
                                         catch (Exception ex)
@@ -2820,22 +2912,25 @@ namespace ConformU
                                             HandleException("Unpark", MemberType.Method, Required.MustBeImplemented, ex, "CanUnpark is true");
                                         }
                                     }
-                                    else // Can't UnPark
+                                    else // Can't Unpark
                                     {
-                                        // Confirm that UnPark generates an error
+                                        // Confirm that Unpark generates an error
                                         try
                                         {
                                             if (settings.DisplayMethodCalls)
-                                                LogTestAndMessage("UnPark", "About to call UnPark method");
+                                                LogTestAndMessage("Unpark", "About to call Unpark method");
                                             telescopeDevice.Unpark();
-                                            LogIssue("UnPark", "No exception thrown by UnPark when CanUnPark is false");
+                                            if (settings.DisplayMethodCalls) LogTestAndMessage("Unpark", "About to get AtPark property repeatedly");
+                                            WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+
+                                            LogIssue("Unpark", "No exception thrown by Unpark when CanUnpark is false");
                                         }
                                         catch (Exception ex)
                                         {
                                             HandleException("Unpark", MemberType.Method, Required.MustNotBeImplemented, ex, "CanUnpark is false");
                                         }
-                                        // Create user interface message asking for manual scope UnPark
-                                        LogTestAndMessage("UnPark", "CanUnPark is false so you need to unpark manually");
+                                        // Create user interface message asking for manual scope Unpark
+                                        LogTestAndMessage("Unpark", "CanUnpark is false so you need to unpark manually");
                                     }
                                 }
                                 catch (Exception ex)
@@ -2853,13 +2948,21 @@ namespace ConformU
                             HandleException("Park", MemberType.Method, Required.MustBeImplemented, ex, "CanPark is True");
                         }
                     }
-                    else // Can't park
+                    else // Can't park so Park() should fail
                     {
                         try
                         {
-                            if (settings.DisplayMethodCalls)
-                                LogTestAndMessage("UnPark", "About to call Park method");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to Park call method");
                             telescopeDevice.Park();
+                            LogOK("Park", "Success if already parked");
+
+                            if (settings.DisplayMethodCalls) LogTestAndMessage("Park", "About to get AtPark property repeatedly...");
+
+                            // Wait for the park to complete
+                            WaitWhile("Waiting for scope to park", () => { return !telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                            if (cancellationToken.IsCancellationRequested) return;
+
+                            SetStatus("Scope parked");
                             LogIssue("Park", "CanPark is false but no exception was generated on use");
                         }
                         catch (Exception ex)
@@ -2875,6 +2978,9 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage("UnPark", "About to call UnPark method");
                                 telescopeDevice.Unpark();
+                                if (settings.DisplayMethodCalls) LogTestAndMessage("Unpark", "About to get AtPark property repeatedly");
+                                WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+
                                 LogOK("UnPark", "CanPark is false and CanUnPark is true; no exception generated as expected");
                             }
                             catch (Exception ex)
@@ -2889,6 +2995,9 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage("UnPark", "About to call UnPark method");
                                 telescopeDevice.Unpark();
+                                if (settings.DisplayMethodCalls) LogTestAndMessage("Unpark", "About to get AtPark property repeatedly");
+                                WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+
                                 LogIssue("UnPark", "CanPark and CanUnPark are false but no exception was generated on use");
                             }
                             catch (Exception ex)
@@ -2908,7 +3017,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("Park", "Skipping tests since behaviour of this method is not well defined in interface V" + g_InterfaceVersion);
+                LogInfo("Park", "Skipping tests since behaviour of this method is not well defined in interface V" + interfaceVersion);
             }
 
             // AbortSlew - Optional
@@ -2924,7 +3033,7 @@ namespace ConformU
             }
 
             // AxisRates - Required
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (telescopeTests[TELTEST_AXIS_RATE] | telescopeTests[TELTEST_MOVE_AXIS])
                 {
@@ -2939,7 +3048,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("AxisRate", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("AxisRate", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             // FindHome - Optional
@@ -2955,7 +3064,7 @@ namespace ConformU
             }
 
             // MoveAxis - Optional
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (telescopeTests[TELTEST_MOVE_AXIS])
                 {
@@ -2976,7 +3085,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("MoveAxis", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("MoveAxis", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             // PulseGuide - Optional
@@ -3289,7 +3398,7 @@ namespace ConformU
             }
 
             // DestinationSideOfPier - Optional
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (telescopeTests[TELTEST_DESTINATION_SIDE_OF_PIER])
                 {
@@ -3311,11 +3420,11 @@ namespace ConformU
             }
             else
             {
-                LogInfo("DestinationSideOfPier", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("DestinationSideOfPier", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             // Test AltAz Slewing - Optional
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (telescopeTests[TELTEST_SLEW_TO_ALTAZ])
                 {
@@ -3339,11 +3448,11 @@ namespace ConformU
             }
             else
             {
-                LogInfo("SlewToAltAz", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("SlewToAltAz", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             // Test AltAz Slewing asynchronous - Optional
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (telescopeTests[TELTEST_SLEW_TO_ALTAZ_ASYNC])
                 {
@@ -3367,7 +3476,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("SlewToAltAzAsync", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("SlewToAltAzAsync", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             // Equatorial Sync to Target - Optional
@@ -3392,7 +3501,7 @@ namespace ConformU
             }
 
             // AltAz Sync - Optional
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (telescopeTests[TELTEST_SYNC_TO_ALTAZ])
                 {
@@ -3416,14 +3525,14 @@ namespace ConformU
             }
             else
             {
-                LogInfo("SyncToAltAz", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("SyncToAltAz", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             if (settings.TestSideOfPierRead)
             {
                 LogNewLine();
                 LogTestOnly("SideOfPier Model Tests"); LogDebug("SideOfPier Model Tests", "Starting tests");
-                if (g_InterfaceVersion > 1)
+                if (interfaceVersion > 1)
                 {
                     // 3.0.0.14 - Skip these tests if unable to read SideOfPier
                     if (CanReadSideOfPier("SideOfPier Model Tests"))
@@ -3479,7 +3588,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogInfo("SideOfPier Model Tests", "Skipping test as this method Is Not supported in interface V" + g_InterfaceVersion);
+                    LogInfo("SideOfPier Model Tests", "Skipping test as this method Is Not supported in interface V" + interfaceVersion);
                 }
             }
 
@@ -3491,7 +3600,7 @@ namespace ConformU
             TelescopePerformanceTest(PerformanceType.tstPerfAltitude, "Altitude");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 TelescopePerformanceTest(PerformanceType.tstPerfAtHome, "AtHome");
                 if (cancellationToken.IsCancellationRequested)
@@ -3499,10 +3608,10 @@ namespace ConformU
             }
             else
             {
-                LogInfo("Performance: AtHome", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("Performance: AtHome", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 TelescopePerformanceTest(PerformanceType.tstPerfAtPark, "AtPark");
                 if (cancellationToken.IsCancellationRequested)
@@ -3510,7 +3619,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("Performance: AtPark", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                LogInfo("Performance: AtPark", "Skipping test as this method is not supported in interface V" + interfaceVersion);
             }
 
             TelescopePerformanceTest(PerformanceType.tstPerfAzimuth, "Azimuth");
@@ -3519,7 +3628,7 @@ namespace ConformU
             TelescopePerformanceTest(PerformanceType.tstPerfDeclination, "Declination");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (canPulseGuide)
                 {
@@ -3534,13 +3643,13 @@ namespace ConformU
             }
             else
             {
-                LogInfo("Performance: IsPulseGuiding", "Skipping test as this method is not supported in interface v1" + g_InterfaceVersion);
+                LogInfo("Performance: IsPulseGuiding", "Skipping test as this method is not supported in interface v1" + interfaceVersion);
             }
 
             TelescopePerformanceTest(PerformanceType.tstPerfRightAscension, "RightAscension");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            if (g_InterfaceVersion > 1)
+            if (interfaceVersion > 1)
             {
                 if (alignmentMode == AlignmentMode.GermanPolar)
                 {
@@ -3562,7 +3671,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("Performance: SideOfPier", "Skipping test as this method is not supported in interface v1" + g_InterfaceVersion);
+                LogInfo("Performance: SideOfPier", "Skipping test as this method is not supported in interface v1" + interfaceVersion);
             }
 
             if (canReadSiderealTime)
@@ -5136,6 +5245,8 @@ namespace ConformU
                                 if (settings.DisplayMethodCalls)
                                     LogTestAndMessage("Parked:" + p_Name, "About to call FindHome method");
                                 telescopeDevice.FindHome();
+                                // Wait for mount to find home
+                                WaitWhile("Waiting for mount to home...", () => { return !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
                                 break;
                             }
 
@@ -5668,14 +5779,14 @@ namespace ConformU
             // m_Rate = Nothing
         }
 
-        private void TelescopeOptionalMethodsTest(OptionalMethodType p_Type, string p_Name, bool p_CanTest)
+        private void TelescopeOptionalMethodsTest(OptionalMethodType testType, string testName, bool canTest)
         {
             double l_TestDec, l_TestRAOffset;
             IAxisRates l_AxisRates = null;
 
-            SetTest(p_Name);
-            LogDebug("TelescopeOptionalMethodsTest", p_Type.ToString() + " " + p_Name + " " + p_CanTest.ToString());
-            if (p_CanTest) // Confirm that an error is raised if the optional command is not implemented
+            SetTest(testName);
+            LogDebug("TelescopeOptionalMethodsTest", testType.ToString() + " " + testName + " " + canTest.ToString());
+            if (canTest) // Confirm that an error is raised if the optional command is not implemented
             {
                 try
                 {
@@ -5690,13 +5801,13 @@ namespace ConformU
                     } // Negative for the southern hemisphere
 
                     l_TestRAOffset = 3.0d; // Set the test RA offset as 3 hours from local sider5eal time
-                    LogDebug(p_Name, string.Format("Test RA offset: {0}, Test declination: {1}", l_TestRAOffset, l_TestDec));
-                    switch (p_Type)
+                    LogDebug(testName, string.Format("Test RA offset: {0}, Test declination: {1}", l_TestRAOffset, l_TestDec));
+                    switch (testType)
                     {
                         case OptionalMethodType.AbortSlew:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call AbortSlew method");
+                                    LogTestAndMessage(testName, "About to call AbortSlew method");
                                 telescopeDevice.AbortSlew();
                                 LogOK("AbortSlew", "AbortSlew OK when not slewing");
                                 break;
@@ -5705,31 +5816,31 @@ namespace ConformU
                         case OptionalMethodType.DestinationSideOfPier:
                             {
                                 // Get the DestinationSideOfPier for a target in the West i.e. for a German mount when the tube is on the East side of the pier
-                                targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -l_TestRAOffset);
+                                targetRightAscension = TelescopeRAFromSiderealTime(testName, -l_TestRAOffset);
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(l_TestDec));
+                                    LogTestAndMessage(testName, "About to call DestinationSideOfPier method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(l_TestDec));
                                 destinationSideOfPierEast = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, l_TestDec);
-                                LogDebug(p_Name, "German mount - scope on the pier's East side, target in the West : " + FormatRA(targetRightAscension) + " " + FormatDec(l_TestDec) + " " + destinationSideOfPierEast.ToString());
+                                LogDebug(testName, "German mount - scope on the pier's East side, target in the West : " + FormatRA(targetRightAscension) + " " + FormatDec(l_TestDec) + " " + destinationSideOfPierEast.ToString());
 
                                 // Get the DestinationSideOfPier for a target in the East i.e. for a German mount when the tube is on the West side of the pier
-                                targetRightAscension = TelescopeRAFromSiderealTime(p_Name, l_TestRAOffset);
+                                targetRightAscension = TelescopeRAFromSiderealTime(testName, l_TestRAOffset);
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(l_TestDec));
+                                    LogTestAndMessage(testName, "About to call DestinationSideOfPier method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(l_TestDec));
                                 destinationSideOfPierWest = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, l_TestDec);
-                                LogDebug(p_Name, "German mount - scope on the pier's West side, target in the East: " + FormatRA(targetRightAscension) + " " + FormatDec(l_TestDec) + " " + destinationSideOfPierWest.ToString());
+                                LogDebug(testName, "German mount - scope on the pier's West side, target in the East: " + FormatRA(targetRightAscension) + " " + FormatDec(l_TestDec) + " " + destinationSideOfPierWest.ToString());
 
                                 // Make sure that we received two valid values i.e. that neither side returned PierSide.Unknown and that the two valid returned values are not the same i.e. we got one PointingState.Normal and one PointingState.ThroughThePole
                                 if (destinationSideOfPierEast == PointingState.Unknown | destinationSideOfPierWest == PointingState.Unknown)
                                 {
-                                    LogIssue(p_Name, "Invalid SideOfPier value received, Target in West: " + destinationSideOfPierEast.ToString() + ", Target in East: " + destinationSideOfPierWest.ToString());
+                                    LogIssue(testName, "Invalid SideOfPier value received, Target in West: " + destinationSideOfPierEast.ToString() + ", Target in East: " + destinationSideOfPierWest.ToString());
                                 }
                                 else if (destinationSideOfPierEast == destinationSideOfPierWest)
                                 {
-                                    LogIssue(p_Name, "Same value for DestinationSideOfPier received on both sides of the meridian: " + ((int)destinationSideOfPierEast).ToString());
+                                    LogIssue(testName, "Same value for DestinationSideOfPier received on both sides of the meridian: " + ((int)destinationSideOfPierEast).ToString());
                                 }
                                 else
                                 {
-                                    LogOK(p_Name, "DestinationSideOfPier is different on either side of the meridian");
+                                    LogOK(testName, "DestinationSideOfPier is different on either side of the meridian");
                                 }
 
                                 break;
@@ -5737,49 +5848,86 @@ namespace ConformU
 
                         case OptionalMethodType.FindHome:
                             {
-                                if (g_InterfaceVersion > 1)
+                                if (interfaceVersion > 1)
                                 {
                                     startTime = DateTime.Now;
 
                                     SetAction("Homing mount...");
                                     if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage(p_Name, "About to call FindHome method");
+                                        LogTestAndMessage(testName, "About to call FindHome method");
                                     telescopeDevice.FindHome();
 
                                     // Wait for mount to find home
                                     WaitWhile("Waiting for mount to home...", () => { return !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
 
                                     if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage(p_Name, "About to get AtHome property");
+                                        LogTestAndMessage(testName, "About to get AtHome property");
                                     if (telescopeDevice.AtHome)
                                     {
-                                        LogOK(p_Name, "Found home OK.");
+                                        LogOK(testName, "Found home OK.");
                                     }
                                     else
                                     {
-                                        LogInfo(p_Name, "Failed to Find home within 1 minute");
+                                        LogInfo(testName, "Failed to Find home within 1 minute");
                                     }
 
                                     if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage(p_Name, "About to get AtPark property");
+                                        LogTestAndMessage(testName, "About to get AtPark property");
                                     if (telescopeDevice.AtPark)
                                     {
-                                        LogIssue(p_Name, "FindHome has parked the scope as well as finding home");
+                                        LogIssue(testName, "FindHome has parked the scope as well as finding home");
                                         if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage(p_Name, "About to call UnPark method");
+                                            LogTestAndMessage(testName, "About to call UnPark method");
                                         telescopeDevice.Unpark(); // Unpark it ready for further tests
+                                        if (settings.DisplayMethodCalls) LogTestAndMessage("Unpark", "About to get AtPark property repeatedly");
+
+                                        WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                    }
+
+                                    // Check if the operation properties are implemented
+                                    if (interfaceVersion >= 4) // Operations are supported
+                                    {
+                                        SlewToHa(1.0);
+
+                                        startTime = DateTime.Now;
+
+                                        SetAction("Homing mount using operations...");
+                                        if (settings.DisplayMethodCalls)
+                                            LogTestAndMessage(testName, "About to call FindHome method");
+
+                                        telescopeDevice.FindHome();
+
+                                        // Wait for mount to find home
+                                        WaitWhile("Waiting for mount to home using operations...", () => { return !telescopeDevice.OperationComplete & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
+
+                                        if (settings.DisplayMethodCalls)
+                                            LogTestAndMessage(testName, "About to get AtHome property");
+                                        if (telescopeDevice.AtHome)
+                                        {
+                                            LogOK(testName, "Found home OK using operations.");
+                                        }
+                                        else
+                                        {
+                                            LogInfo(testName, "Failed to Find home within 1 minute using operations");
+                                        }
+
                                     }
                                 }
                                 else
                                 {
                                     SetAction("Waiting for mount to home");
                                     if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage(p_Name, "About to call FindHome method");
+                                        LogTestAndMessage(testName, "About to call FindHome method");
                                     telescopeDevice.FindHome();
-                                    LogOK(p_Name, "Found home OK.");
+                                    // Wait for mount to find home
+                                    WaitWhile("Waiting for mount to home...", () => { return !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
+
+                                    LogOK(testName, "Found home OK.");
                                     if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage(p_Name, "About to call Unpark method");
+                                        LogTestAndMessage(testName, "About to call Unpark method");
                                     telescopeDevice.Unpark();
+                                    if (settings.DisplayMethodCalls) LogTestAndMessage("Unpark", "About to get AtPark property repeatedly");
+                                    WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
                                 } // Make sure we are still  unparked!
 
                                 break;
@@ -5789,9 +5937,9 @@ namespace ConformU
                             {
                                 // Get axis rates for primary axis
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call AxisRates method for axis " + ((int)TelescopeAxis.Primary).ToString());
+                                    LogTestAndMessage(testName, "About to call AxisRates method for axis " + ((int)TelescopeAxis.Primary).ToString());
                                 l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary);
-                                TelescopeMoveAxisTest(p_Name, TelescopeAxis.Primary, l_AxisRates);
+                                TelescopeMoveAxisTest(testName, TelescopeAxis.Primary, l_AxisRates);
                                 break;
                             }
 
@@ -5799,7 +5947,7 @@ namespace ConformU
                             {
                                 // Get axis rates for secondary axis
                                 l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary);
-                                TelescopeMoveAxisTest(p_Name, TelescopeAxis.Secondary, l_AxisRates);
+                                TelescopeMoveAxisTest(testName, TelescopeAxis.Secondary, l_AxisRates);
                                 break;
                             }
 
@@ -5807,65 +5955,65 @@ namespace ConformU
                             {
                                 // Get axis rates for tertiary axis
                                 l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary);
-                                TelescopeMoveAxisTest(p_Name, TelescopeAxis.Tertiary, l_AxisRates);
+                                TelescopeMoveAxisTest(testName, TelescopeAxis.Tertiary, l_AxisRates);
                                 break;
                             }
 
                         case OptionalMethodType.PulseGuide:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to get IsPulseGuiding property");
+                                    LogTestAndMessage(testName, "About to get IsPulseGuiding property");
                                 if (telescopeDevice.IsPulseGuiding) // IsPulseGuiding is true before we've started so this is an error and voids a real test
                                 {
-                                    LogIssue(p_Name, "IsPulseGuiding is True when not pulse guiding - PulseGuide test omitted");
+                                    LogIssue(testName, "IsPulseGuiding is True when not pulse guiding - PulseGuide test omitted");
                                 }
                                 else // OK to test pulse guiding
                                 {
                                     SetAction("Calling PulseGuide east");
                                     startTime = DateTime.Now;
                                     if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage(p_Name, "About to call PulseGuide method, Direction: " + ((int)GuideDirection.East).ToString() + ", Duration: " + PULSEGUIDE_MOVEMENT_TIME * 1000 + "ms");
+                                        LogTestAndMessage(testName, "About to call PulseGuide method, Direction: " + ((int)GuideDirection.East).ToString() + ", Duration: " + PULSEGUIDE_MOVEMENT_TIME * 1000 + "ms");
                                     telescopeDevice.PulseGuide(GuideDirection.East, PULSEGUIDE_MOVEMENT_TIME * 1000); // Start a 2 second pulse
                                     endTime = DateTime.Now;
-                                    LogDebug(p_Name, "PulseGuide command time: " + PULSEGUIDE_MOVEMENT_TIME * 1000 + " milliseconds, PulseGuide call duration: " + endTime.Subtract(startTime).TotalMilliseconds + " milliseconds");
+                                    LogDebug(testName, "PulseGuide command time: " + PULSEGUIDE_MOVEMENT_TIME * 1000 + " milliseconds, PulseGuide call duration: " + endTime.Subtract(startTime).TotalMilliseconds + " milliseconds");
                                     if (endTime.Subtract(startTime).TotalMilliseconds < PULSEGUIDE_MOVEMENT_TIME * 0.75d * 1000d) // If less than three quarters of the expected duration then assume we have returned early
                                     {
                                         if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage(p_Name, "About to get IsPulseGuiding property");
+                                            LogTestAndMessage(testName, "About to get IsPulseGuiding property");
                                         if (telescopeDevice.IsPulseGuiding)
                                         {
                                             if (settings.DisplayMethodCalls)
-                                                LogTestAndMessage(p_Name, "About to get IsPulseGuiding property multiple times");
+                                                LogTestAndMessage(testName, "About to get IsPulseGuiding property multiple times");
                                             WaitWhile("Pulse guiding Eastwards", () => { return telescopeDevice.IsPulseGuiding; }, SLEEP_TIME, PULSEGUIDE_TIMEOUT_TIME);
 
                                             if (settings.DisplayMethodCalls)
-                                                LogTestAndMessage(p_Name, "About to get IsPulseGuiding property");
+                                                LogTestAndMessage(testName, "About to get IsPulseGuiding property");
                                             if (!telescopeDevice.IsPulseGuiding)
                                             {
-                                                LogOK(p_Name, "Asynchronous pulse guide found OK");
-                                                LogDebug(p_Name, "IsPulseGuiding = True duration: " + DateTime.Now.Subtract(startTime).TotalMilliseconds + " milliseconds");
+                                                LogOK(testName, "Asynchronous pulse guide found OK");
+                                                LogDebug(testName, "IsPulseGuiding = True duration: " + DateTime.Now.Subtract(startTime).TotalMilliseconds + " milliseconds");
                                             }
                                             else
                                             {
-                                                LogIssue(p_Name, "Asynchronous pulse guide expected but IsPulseGuiding is still TRUE " + PULSEGUIDE_TIMEOUT_TIME + " seconds beyond expected time");
+                                                LogIssue(testName, "Asynchronous pulse guide expected but IsPulseGuiding is still TRUE " + PULSEGUIDE_TIMEOUT_TIME + " seconds beyond expected time");
                                             }
                                         }
                                         else
                                         {
-                                            LogIssue(p_Name, "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE");
+                                            LogIssue(testName, "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE");
                                         }
                                     }
                                     else // Assume synchronous pulse guide and that IsPulseGuiding is false
                                     {
                                         if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage(p_Name, "About to get IsPulseGuiding property");
+                                            LogTestAndMessage(testName, "About to get IsPulseGuiding property");
                                         if (!telescopeDevice.IsPulseGuiding)
                                         {
-                                            LogOK(p_Name, "Synchronous pulse guide found OK");
+                                            LogOK(testName, "Synchronous pulse guide found OK");
                                         }
                                         else
                                         {
-                                            LogIssue(p_Name, "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE");
+                                            LogIssue(testName, "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE");
                                         }
                                     }
                                 }
@@ -5878,24 +6026,24 @@ namespace ConformU
                                 // SideOfPier Write
                                 if (canSetPierside) // Can set pier side so test if we can
                                 {
-                                    SlewScope(TelescopeRAFromHourAngle(p_Name, -3.0d), 0.0d, "far start point");
+                                    SlewScope(TelescopeRAFromHourAngle(testName, -3.0d), 0.0d, "far start point");
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
 
-                                    SlewScope(TelescopeRAFromHourAngle(p_Name, -0.03d), 0.0d, "near start point"); // 2 minutes from zenith
+                                    SlewScope(TelescopeRAFromHourAngle(testName, -0.03d), 0.0d, "near start point"); // 2 minutes from zenith
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
 
                                     // We are now 2 minutes from the meridian looking east so allow the mount to track for 7 minutes 
                                     // so it passes through the meridian and ends up 5 minutes past the meridian
-                                    LogInfo(p_Name, "This test will now wait for 7 minutes while the mount tracks through the Meridian");
+                                    LogInfo(testName, "This test will now wait for 7 minutes while the mount tracks through the Meridian");
 
                                     // Wait for mount to move
                                     startTime = DateTime.Now;
                                     do
                                     {
                                         Thread.Sleep(1000);
-                                        SetFullStatus(p_Name, "Waiting for transit through Meridian", $"{Convert.ToInt32(DateTime.Now.Subtract(startTime).TotalSeconds)}/{SIDEOFPIER_MERIDIAN_TRACKING_PERIOD / 1000d} seconds");
+                                        SetFullStatus(testName, "Waiting for transit through Meridian", $"{Convert.ToInt32(DateTime.Now.Subtract(startTime).TotalSeconds)}/{SIDEOFPIER_MERIDIAN_TRACKING_PERIOD / 1000d} seconds");
                                     }
                                     while ((DateTime.Now.Subtract(startTime).TotalMilliseconds <= SIDEOFPIER_MERIDIAN_TRACKING_PERIOD) & !cancellationToken.IsCancellationRequested);
 
@@ -5903,33 +6051,33 @@ namespace ConformU
                                         return;
 
                                     if (settings.DisplayMethodCalls)
-                                        LogTestAndMessage(p_Name, "About to get SideOfPier property");
+                                        LogTestAndMessage(testName, "About to get SideOfPier property");
                                     switch (telescopeDevice.SideOfPier)
                                     {
                                         case PointingState.Normal: // We are on pierEast so try pierWest
                                             {
                                                 try
                                                 {
-                                                    LogDebug(p_Name, "Scope is pierEast so flipping West");
+                                                    LogDebug(testName, "Scope is pierEast so flipping West");
                                                     SetAction("Flipping mount to pointing state pierWest");
                                                     if (settings.DisplayMethodCalls)
-                                                        LogTestAndMessage(p_Name, "About to set SideOfPier property to " + ((int)PointingState.ThroughThePole).ToString());
+                                                        LogTestAndMessage(testName, "About to set SideOfPier property to " + ((int)PointingState.ThroughThePole).ToString());
                                                     telescopeDevice.SideOfPier = PointingState.ThroughThePole;
-                                                    WaitForSlew(p_Name, $"Moving to the pierEast pointing state asynchronously");
+                                                    WaitForSlew(testName, $"Moving to the pierEast pointing state asynchronously");
 
                                                     if (cancellationToken.IsCancellationRequested)
                                                         return;
 
                                                     if (settings.DisplayMethodCalls)
-                                                        LogTestAndMessage(p_Name, "About to get SideOfPier property");
+                                                        LogTestAndMessage(testName, "About to get SideOfPier property");
                                                     sideOfPier = (PointingState)telescopeDevice.SideOfPier;
                                                     if (sideOfPier == PointingState.ThroughThePole)
                                                     {
-                                                        LogOK(p_Name, "Successfully flipped pierEast to pierWest");
+                                                        LogOK(testName, "Successfully flipped pierEast to pierWest");
                                                     }
                                                     else
                                                     {
-                                                        LogIssue(p_Name, "Failed to set SideOfPier to pierWest, got: " + sideOfPier.ToString());
+                                                        LogIssue(testName, "Failed to set SideOfPier to pierWest, got: " + sideOfPier.ToString());
                                                     }
                                                 }
                                                 catch (Exception ex)
@@ -5944,25 +6092,25 @@ namespace ConformU
                                             {
                                                 try
                                                 {
-                                                    LogDebug(p_Name, "Scope is pierWest so flipping East");
+                                                    LogDebug(testName, "Scope is pierWest so flipping East");
                                                     SetAction("Flipping mount to pointing state pierEast");
                                                     if (settings.DisplayMethodCalls)
-                                                        LogTestAndMessage(p_Name, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
+                                                        LogTestAndMessage(testName, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
                                                     telescopeDevice.SideOfPier = PointingState.Normal;
-                                                    WaitForSlew(p_Name, $"Moving to the pierWest pointing state asynchronously");
+                                                    WaitForSlew(testName, $"Moving to the pierWest pointing state asynchronously");
                                                     if (cancellationToken.IsCancellationRequested)
                                                         return;
 
                                                     if (settings.DisplayMethodCalls)
-                                                        LogTestAndMessage(p_Name, "About to get SideOfPier property");
+                                                        LogTestAndMessage(testName, "About to get SideOfPier property");
                                                     sideOfPier = (PointingState)telescopeDevice.SideOfPier;
                                                     if (sideOfPier == PointingState.Normal)
                                                     {
-                                                        LogOK(p_Name, "Successfully flipped pierWest to pierEast");
+                                                        LogOK(testName, "Successfully flipped pierWest to pierEast");
                                                     }
                                                     else
                                                     {
-                                                        LogIssue(p_Name, "Failed to set SideOfPier to pierEast, got: " + sideOfPier.ToString());
+                                                        LogIssue(testName, "Failed to set SideOfPier to pierEast, got: " + sideOfPier.ToString());
                                                     }
                                                 }
                                                 catch (Exception ex)
@@ -5975,7 +6123,7 @@ namespace ConformU
 
                                         default:
                                             {
-                                                LogIssue(p_Name, "Unknown PierSide: " + sideOfPier.ToString());
+                                                LogIssue(testName, "Unknown PierSide: " + sideOfPier.ToString());
                                                 break;
                                             }
                                     }
@@ -5984,26 +6132,26 @@ namespace ConformU
                                 {
                                     try
                                     {
-                                        LogDebug(p_Name, "Attempting to set SideOfPier");
+                                        LogDebug(testName, "Attempting to set SideOfPier");
                                         if (settings.DisplayMethodCalls)
-                                            LogTestAndMessage(p_Name, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
+                                            LogTestAndMessage(testName, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
                                         telescopeDevice.SideOfPier = PointingState.Normal;
-                                        LogDebug(p_Name, "SideOfPier set OK to pierEast but should have thrown an error");
-                                        WaitForSlew(p_Name, $"Moving to the pierWest pointing state asynchronously");
-                                        LogIssue(p_Name, "CanSetPierSide is false but no exception was generated when set was attempted");
+                                        LogDebug(testName, "SideOfPier set OK to pierEast but should have thrown an error");
+                                        WaitForSlew(testName, $"Moving to the pierWest pointing state asynchronously");
+                                        LogIssue(testName, "CanSetPierSide is false but no exception was generated when set was attempted");
                                     }
                                     catch (Exception ex)
                                     {
-                                        HandleException(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, "CanSetPierSide is False");
+                                        HandleException(testName, MemberType.Method, Required.MustNotBeImplemented, ex, "CanSetPierSide is False");
                                     }
                                     finally
                                     {
-                                        WaitForSlew(p_Name, $"Moving to the pierWest pointing state asynchronously");
+                                        WaitForSlew(testName, $"Moving to the pierWest pointing state asynchronously");
                                     } // Make sure slewing is stopped if an exception was thrown
                                 }
 
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set Tracking property to false");
+                                    LogTestAndMessage(testName, "About to set Tracking property to false");
                                 telescopeDevice.Tracking = false;
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
@@ -6012,7 +6160,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogIssue(p_Name, "Conform:OptionalMethodsTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(testName, "Conform:OptionalMethodsTest: Unknown test type " + testType.ToString());
                                 break;
                             }
                     }
@@ -6022,15 +6170,15 @@ namespace ConformU
                     {
                         try
                         {
-                            if (settings.DisplayMethodCalls) LogTestAndMessage(p_Name, "About to dispose of AxisRates object");
+                            if (settings.DisplayMethodCalls) LogTestAndMessage(testName, "About to dispose of AxisRates object");
                             l_AxisRates.Dispose();
 
-                            LogOK(p_Name, "AxisRates object successfully disposed");
+                            LogOK(testName, "AxisRates object successfully disposed");
                         }
                         catch (Exception ex)
                         {
-                            LogIssue(p_Name, "AxisRates.Dispose threw an exception but must not: " + ex.Message);
-                            LogDebug(p_Name, "Exception: " + ex.ToString());
+                            LogIssue(testName, "AxisRates.Dispose threw an exception but must not: " + ex.Message);
+                            LogDebug(testName, "Exception: " + ex.ToString());
                         }
 
                         try
@@ -6050,29 +6198,29 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    LogIssue(p_Name, $"MoveAxis Exception\r\n{ex}");
-                    HandleException(p_Name, MemberType.Method, Required.Optional, ex, "");
+                    LogIssue(testName, $"MoveAxis Exception\r\n{ex}");
+                    HandleException(testName, MemberType.Method, Required.Optional, ex, "");
                 }
             }
             else // Can property is false so confirm that an error is generated
             {
                 try
                 {
-                    switch (p_Type)
+                    switch (testType)
                     {
                         case OptionalMethodType.AbortSlew:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call AbortSlew method");
+                                    LogTestAndMessage(testName, "About to call AbortSlew method");
                                 telescopeDevice.AbortSlew();
                                 break;
                             }
 
                         case OptionalMethodType.DestinationSideOfPier:
                             {
-                                targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -1.0d);
+                                targetRightAscension = TelescopeRAFromSiderealTime(testName, -1.0d);
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call DestinationSideOfPier method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(0.0d));
+                                    LogTestAndMessage(testName, "About to call DestinationSideOfPier method, RA: " + FormatRA(targetRightAscension) + ", Declination: " + FormatDec(0.0d));
                                 destinationSideOfPier = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, 0.0d);
                                 break;
                             }
@@ -6080,15 +6228,17 @@ namespace ConformU
                         case OptionalMethodType.FindHome:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call FindHome method");
+                                    LogTestAndMessage(testName, "About to call FindHome method");
                                 telescopeDevice.FindHome();
+                                // Wait for mount to find home
+                                WaitWhile("Waiting for mount to home...", () => { return !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
                                 break;
                             }
 
                         case OptionalMethodType.MoveAxisPrimary:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)TelescopeAxis.Primary).ToString() + " at speed 0");
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)TelescopeAxis.Primary).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Primary, 0.0d);
                                 break;
                             }
@@ -6096,7 +6246,7 @@ namespace ConformU
                         case OptionalMethodType.MoveAxisSecondary:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)TelescopeAxis.Secondary).ToString() + " at speed 0");
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)TelescopeAxis.Secondary).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Secondary, 0.0d);
                                 break;
                             }
@@ -6104,7 +6254,7 @@ namespace ConformU
                         case OptionalMethodType.MoveAxisTertiary:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call MoveAxis method for axis " + ((int)TelescopeAxis.Tertiary).ToString() + " at speed 0");
+                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)TelescopeAxis.Tertiary).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Tertiary, 0.0d);
                                 break;
                             }
@@ -6112,7 +6262,7 @@ namespace ConformU
                         case OptionalMethodType.PulseGuide:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to call PulseGuide method, Direction: " + ((int)GuideDirection.East).ToString() + ", Duration: 0ms");
+                                    LogTestAndMessage(testName, "About to call PulseGuide method, Direction: " + ((int)GuideDirection.East).ToString() + ", Duration: 0ms");
                                 telescopeDevice.PulseGuide(GuideDirection.East, 0);
                                 break;
                             }
@@ -6120,33 +6270,33 @@ namespace ConformU
                         case OptionalMethodType.SideOfPierWrite:
                             {
                                 if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(p_Name, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
+                                    LogTestAndMessage(testName, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
                                 telescopeDevice.SideOfPier = PointingState.Normal;
                                 break;
                             }
 
                         default:
                             {
-                                LogIssue(p_Name, "Conform:OptionalMethodsTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(testName, "Conform:OptionalMethodsTest: Unknown test type " + testType.ToString());
                                 break;
                             }
                     }
 
-                    LogIssue(p_Name, "Can" + p_Name + " is false but no exception was generated on use");
+                    LogIssue(testName, "Can" + testName + " is false but no exception was generated on use");
                 }
                 catch (Exception ex)
                 {
-                    if (IsInvalidValueException(p_Name, ex))
+                    if (IsInvalidValueException(testName, ex))
                     {
-                        LogOK(p_Name, "Received an invalid value exception");
+                        LogOK(testName, "Received an invalid value exception");
                     }
-                    else if (p_Type == OptionalMethodType.SideOfPierWrite) // PierSide is actually a property even though I have it in the methods section!!
+                    else if (testType == OptionalMethodType.SideOfPierWrite) // PierSide is actually a property even though I have it in the methods section!!
                     {
-                        HandleException(p_Name, MemberType.Property, Required.MustNotBeImplemented, ex, "Can" + p_Name + " is False");
+                        HandleException(testName, MemberType.Property, Required.MustNotBeImplemented, ex, "Can" + testName + " is False");
                     }
                     else
                     {
-                        HandleException(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, "Can" + p_Name + " is False");
+                        HandleException(testName, MemberType.Method, Required.MustNotBeImplemented, ex, "Can" + testName + " is False");
                     }
                 }
             }
@@ -6185,14 +6335,14 @@ namespace ConformU
 
                     case CanType.CanSetDeclinationRate:
                         {
-                            if (g_InterfaceVersion > 1)
+                            if (interfaceVersion > 1)
                             {
                                 canSetDeclinationRate = telescopeDevice.CanSetDeclinationRate;
                                 LogOK(p_Name, canSetDeclinationRate.ToString());
                             }
                             else
                             {
-                                LogInfo("CanSetDeclinationRate", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                                LogInfo("CanSetDeclinationRate", "Skipping test as this method is not supported in interface V" + interfaceVersion);
                             }
 
                             break;
@@ -6200,14 +6350,14 @@ namespace ConformU
 
                     case CanType.CanSetGuideRates:
                         {
-                            if (g_InterfaceVersion > 1)
+                            if (interfaceVersion > 1)
                             {
                                 canSetGuideRates = telescopeDevice.CanSetGuideRates;
                                 LogOK(p_Name, canSetGuideRates.ToString());
                             }
                             else
                             {
-                                LogInfo("CanSetGuideRates", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                                LogInfo("CanSetGuideRates", "Skipping test as this method is not supported in interface V" + interfaceVersion);
                             }
 
                             break;
@@ -6222,14 +6372,14 @@ namespace ConformU
 
                     case CanType.CanSetPierSide:
                         {
-                            if (g_InterfaceVersion > 1)
+                            if (interfaceVersion > 1)
                             {
                                 canSetPierside = telescopeDevice.CanSetPierSide;
                                 LogOK(p_Name, canSetPierside.ToString());
                             }
                             else
                             {
-                                LogInfo("CanSetPierSide", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                                LogInfo("CanSetPierSide", "Skipping test as this method is not supported in interface V" + interfaceVersion);
                             }
 
                             break;
@@ -6237,14 +6387,14 @@ namespace ConformU
 
                     case CanType.CanSetRightAscensionRate:
                         {
-                            if (g_InterfaceVersion > 1)
+                            if (interfaceVersion > 1)
                             {
                                 canSetRightAscensionRate = telescopeDevice.CanSetRightAscensionRate;
                                 LogOK(p_Name, canSetRightAscensionRate.ToString());
                             }
                             else
                             {
-                                LogInfo("CanSetRightAscensionRate", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                                LogInfo("CanSetRightAscensionRate", "Skipping test as this method is not supported in interface V" + interfaceVersion);
                             }
 
                             break;
@@ -6266,14 +6416,14 @@ namespace ConformU
 
                     case CanType.CanSlewAltAz:
                         {
-                            if (g_InterfaceVersion > 1)
+                            if (interfaceVersion > 1)
                             {
                                 canSlewAltAz = telescopeDevice.CanSlewAltAz;
                                 LogOK(p_Name, canSlewAltAz.ToString());
                             }
                             else
                             {
-                                LogInfo("CanSlewAltAz", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                                LogInfo("CanSlewAltAz", "Skipping test as this method is not supported in interface V" + interfaceVersion);
                             }
 
                             break;
@@ -6281,14 +6431,14 @@ namespace ConformU
 
                     case CanType.CanSlewAltAzAsync:
                         {
-                            if (g_InterfaceVersion > 1)
+                            if (interfaceVersion > 1)
                             {
                                 canSlewAltAzAsync = telescopeDevice.CanSlewAltAzAsync;
                                 LogOK(p_Name, canSlewAltAzAsync.ToString());
                             }
                             else
                             {
-                                LogInfo("CanSlewAltAzAsync", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                                LogInfo("CanSlewAltAzAsync", "Skipping test as this method is not supported in interface V" + interfaceVersion);
                             }
 
                             break;
@@ -6310,14 +6460,14 @@ namespace ConformU
 
                     case CanType.CanSyncAltAz:
                         {
-                            if (g_InterfaceVersion > 1)
+                            if (interfaceVersion > 1)
                             {
                                 canSyncAltAz = telescopeDevice.CanSyncAltAz;
                                 LogOK(p_Name, canSyncAltAz.ToString());
                             }
                             else
                             {
-                                LogInfo("CanSyncAltAz", "Skipping test as this method is not supported in interface V" + g_InterfaceVersion);
+                                LogInfo("CanSyncAltAz", "Skipping test as this method is not supported in interface V" + interfaceVersion);
                             }
 
                             break;
