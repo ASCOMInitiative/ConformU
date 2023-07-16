@@ -103,6 +103,8 @@ namespace ConformU
         private double targetAltitude, targetAzimuth;
         private bool canReadAltitide, canReadAzimuth, canReadSiderealTime;
 
+        private double operationInitiationTime = 1.0; // Time within which an operation initiation must complete (seconds)
+
         private readonly Dictionary<string, bool> telescopeTests;
 
         // Axis rate checks
@@ -2748,12 +2750,12 @@ namespace ConformU
                                             // Validate OperationComplete state
                                             ValidateOperationComplete("Park", true);
 
-                                            telescopeDevice.Park();
+                                            TimeMethod("Park", () => telescopeDevice.Park());
 
                                             // Wait for the park to complete
                                             LogCallToDriver("Park", "About to get OperationComplete property repeatedly...");
                                             WaitWhile("Waiting for scope to park for OperationComplete test", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
- 
+
                                             // Validate OperationComplete state
                                             ValidateOperationComplete("Park", true);
 
@@ -2927,7 +2929,8 @@ namespace ConformU
                                                 // Now unpark as an operation
 
                                                 LogCallToDriver("Unpark", "About to call Unpark method");
-                                                telescopeDevice.Unpark();
+                                                TimeMethod("Unpark", () => telescopeDevice.Unpark());
+
                                                 LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
                                                 WaitWhile("Waiting for scope to unpark when parked", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
@@ -5936,7 +5939,7 @@ namespace ConformU
                                         if (settings.DisplayMethodCalls)
                                             LogTestAndMessage(testName, "About to call FindHome method");
 
-                                        telescopeDevice.FindHome();
+                                        TimeMethod("FindHome", () => telescopeDevice.FindHome());
 
                                         // Wait for mount to find home
                                         WaitWhile("Waiting for mount to home using operations...", () => { return !telescopeDevice.OperationComplete & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
@@ -6750,31 +6753,63 @@ namespace ConformU
                                     return;
                                 }
 
+                                // If ITelescopeV4 or later check OperationComplete state
+                                if (interfaceVersion >= 4)
+                                    ValidateOperationComplete(testName, true);
+
                                 SetStatus("Moving forward at highest rate");
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + rateMaximum);
-                                telescopeDevice.MoveAxis(testAxis, rateMaximum); // Set the maximum rate
+
+                                if (interfaceVersion >= 4)// If ITelescopeV4 or later check OperationComplete state
+                                {
+                                    ValidateOperationComplete(testName, true);
+                                    LogCallToDriver(testName, "About to call MoveAxis method (OperationComplete) for axis " + ((int)testAxis).ToString() + " at speed " + rateMaximum);
+                                    telescopeDevice.MoveAxis(testAxis, rateMaximum); // Set the maximum rate
+
+                                    // Wait for mount to get to speed
+                                    WaitWhile("Waiting for asynchronous move operation to start...", () => { return telescopeDevice.OperationComplete & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
+
+                                    ValidateOperationComplete(testName + " (Set Maximum)", false);
+                                }
+                                else // ITelescopeV3 or earlier
+                                {
+                                    LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + rateMaximum);
+                                    telescopeDevice.MoveAxis(testAxis, rateMaximum); // Set the maximum rate
+                                }
 
                                 // Confirm that slewing is active when the move is underway
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(testName, "About to get Slewing property");
+                                LogCallToDriver(testName, "About to get Slewing property");
                                 if (!telescopeDevice.Slewing)
                                     LogIssue(testName, "Slewing is not true immediately after axis starts moving in positive direction");
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(testName, "About to get Slewing property");
+                                LogCallToDriver(testName, "About to get Slewing property");
                                 if (!telescopeDevice.Slewing)
                                     LogIssue(testName, "Slewing is not true after " + MOVE_AXIS_TIME / 1000d + " seconds moving in positive direction");
 
                                 SetStatus("Stopping movement");
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+
+                                if (interfaceVersion >= 4)// If ITelescopeV4 or later check OperationComplete state
+                                {
+                                    ValidateOperationComplete(testName, false);
+                                    LogCallToDriver(testName, "About to call MoveAxis method (OperationComplete) for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                    telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
+
+                                    // Wait for mount to get to speed
+                                    WaitWhile("Waiting for asynchronous move operation to start...", () => { return !telescopeDevice.OperationComplete & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
+
+                                    ValidateOperationComplete(testName + " (Set 0.0)", true);
+                                }
+                                else // ITelescopeV3 or earlier
+                                {
+                                    LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                    telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
+                                }
+
+                                LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
                                 telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
                                                                           // Confirm that slewing is false when movement is stopped
-                                if (settings.DisplayMethodCalls)
-                                    LogTestAndMessage(testName, "About to get property");
+                                LogCallToDriver(testName, "About to get property");
                                 if (telescopeDevice.Slewing)
                                 {
                                     LogIssue(testName, "Slewing incorrectly remains true after stopping positive axis movement, remaining test skipped");
@@ -8291,7 +8326,7 @@ namespace ConformU
                 LogCallToDriver(test, "About to call OperationComplete method");
                 bool operationComplete = telescopeDevice.OperationComplete;
 
-                if (operationComplete = expectedState)
+                if (operationComplete == expectedState)
                 {
                     // Got expected outcome so no action
                 }
@@ -8306,8 +8341,17 @@ namespace ConformU
                 LogDebug(test, ex.ToString());
             }
 
-            #endregion
-
         }
+
+        private void TimeMethod(string methodName, Action method)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            method();
+            if (sw.ElapsedMilliseconds > operationInitiationTime)
+                LogIssue(methodName, $"Operation initiation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is more than the configured maximum: {operationInitiationTime:0.0} seconds.");
+        }
+
+        #endregion
+
     }
 }
