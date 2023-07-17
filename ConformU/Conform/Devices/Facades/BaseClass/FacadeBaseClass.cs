@@ -1,4 +1,6 @@
-﻿using ASCOM.Common.DeviceInterfaces;
+﻿// Ignore Spelling: Dialog
+
+using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Collections;
 using System.Collections.Generic;
