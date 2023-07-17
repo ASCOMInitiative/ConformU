@@ -1393,7 +1393,7 @@ namespace ConformU
         /// </summary>
         /// <param name="interfaceVersion">This device's interface number</param>
         /// <returns>True if completion should be tested using OperationComplete</returns>
-        protected bool TestAsOperation()
+        public bool UseOperations()
         {
             // Initialise requiredInterfaceVersion to a large value so that the function result will be False when values are omitted from the switch statement below.
             int requiredInterfaceVersion = int.MaxValue;
@@ -1432,7 +1432,19 @@ namespace ConformU
             return false;
         }
 
+        protected void GetInterfaceVersion()
+        {
 
+            try
+            {
+                interfaceVersion = baseClassDevice.InterfaceVersion;
+                LogDebug("GetInterfaceVersion", $"Device interface version: {interfaceVersion}");
+            }
+            catch (Exception ex)
+            {
+                LogDebug("GetInterfaceVersion", $"Exception getting interface version: {ex.Message}\r\n{ex}");
+            }
+        }
 
         #endregion
 

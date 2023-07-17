@@ -209,6 +209,9 @@ namespace ConformU
 
         public bool OperationComplete => (bool)FunctionNoParameters(() => driver.OperationComplete);
 
+        public bool InterruptionComplete => (bool)FunctionNoParameters(() => driver.InterruptionComplete); //InterruptionComplete
+                                                                                                           //InterruptionComplete
+
         #endregion
 
     }

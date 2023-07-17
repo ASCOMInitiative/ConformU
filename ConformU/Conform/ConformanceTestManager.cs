@@ -209,7 +209,11 @@ namespace ConformU
 
                         if (settings.DisplayMethodCalls) TL.LogMessage("ConformanceCheck", MessageLevel.TestAndMessage, "About to set Connected property");
                         testDevice.Connected = true;
-                        TL.LogMessage("Connected", MessageLevel.OK, "True");
+                        if (testDevice.UseOperations())
+                            TL.LogMessage("Connect", MessageLevel.OK, "Connected to device successfully using Connect()");
+                        else
+                            TL.LogMessage("Connected", MessageLevel.OK, "True");
+
                         TL.LogMessage("", MessageLevel.TestOnly, "");
 
                         try
@@ -283,7 +287,11 @@ namespace ConformU
                                 testStage = "Disconnect";
 
                                 testDevice.Connected = false;
-                                TL.LogMessage("Connected", MessageLevel.OK, "False");
+                                if (testDevice.UseOperations())
+                                    TL.LogMessage("Disconnect", MessageLevel.OK, "Disconnected from device successfully using Disconnect()");
+                                else
+                                    TL.LogMessage("Connected", MessageLevel.OK, "False");
+
                                 TL.LogMessage("", MessageLevel.TestOnly, "");
                             }
                             catch (Exception ex)
