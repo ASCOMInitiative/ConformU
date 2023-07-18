@@ -4,7 +4,9 @@ using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using ASCOM.Tools;
+using Octokit;
 using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -5679,9 +5681,74 @@ namespace ConformU
                     {
                         case OptionalMethodType.AbortSlew:
                             {
-                                LogDebug(testName, "ABout to call AbortSlew method.");
+                                LogDebug(testName, "TelescopeOptionalMethodsTest - ABout to call the ConformU AbortSlew method.");
                                 AbortSlew(testName);
                                 LogOK(testName, "AbortSlew OK when not slewing");
+
+                                // If we get here the AbortSlew method is available so start a slew and then try to halt it.
+
+                                // Start a slew to HA -3.0
+                                double targetHa = -3.0;
+
+                                if (canSetTracking)
+                                {
+                                    LogCallToDriver(testName, "About to set Tracking property to true");
+                                    telescopeDevice.Tracking = true; // Enable tracking for these tests
+                                }
+
+                                // Calculate the target RA
+                                LogCallToDriver(testName, "About to get SiderealTime property");
+                                double targetRa = Utilities.ConditionRA(telescopeDevice.SiderealTime - targetHa);
+
+                                // Calculate the target declination
+                                double targetDeclination = GetTestDeclination(testName, targetRa);
+                                LogDebug(testName, $"Slewing to HA: {targetHa.ToHMS()} (RA: {targetRa.ToHMS()}), Dec: {targetDeclination.ToDMS()}");
+
+                                // Slew to the target coordinates
+                                LogCallToDriver(testName, $"About to call SlewToCoordinatesAsync. RA: {targetRa.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+
+                                if (UseOperations())
+                                {
+                                    // Validate OperationComplete state
+                                    ValidateOperationComplete(testName, true);
+
+                                    LogCallToDriver(testName, "About to call SlewToCoordinatesAsync method, RA: " + targetRa.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
+                                    TimeMethod(testName, () => telescopeDevice.SlewToCoordinatesAsync(targetRa, targetDeclination));
+                                }
+                                else
+                                {
+                                    LogCallToDriver(testName, "About to call SlewToCoordinatesAsync method, RA: " + targetRa.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
+                                    telescopeDevice.SlewToCoordinatesAsync(targetRa, targetDeclination);
+                                }
+
+                                // Wait for 1.5 seconds
+                                WaitFor(1500, 100);
+
+                                // Validate that the slew is still going
+                                ValidateOperationComplete(testName, false);
+                                ValidateSlewing(testName, true);
+
+                                // Now try to end the slew
+                                AbortSlew(testName);
+
+                                // Give time for the mount to stop
+                                WaitFor(1500, 100);
+
+                                // Make sure that slewing is now  false
+                                LogCallToDriver(testName, "About to get Slewing property");
+                                bool afterAbortSlewing = telescopeDevice.Slewing;
+
+                                if (!afterAbortSlewing)
+                                {
+                                    LogOK(testName, "AbortSlew stopped the mount from slewing.");
+                                }
+                                else
+                                {
+                                    LogIssue(testName, "The mount is still slewing after AbortSlew.");
+                                    WaitForSlew(testName, $"AbortSlew did not stop the slew, waiting for it to finish on its own.");
+                                }
+
+                                // Wait for slew just in case it isn't stopped by AbortSlew...
                                 break;
                             }
 
@@ -8339,29 +8406,6 @@ namespace ConformU
             }
         }
 
-        private void ValidateInterruptionComplete(string test, bool expectedState)
-        {
-            try
-            {
-                LogCallToDriver(test, "About to get InterruptionComplete");
-                bool operationComplete = telescopeDevice.InterruptionComplete;
-
-                if (operationComplete == expectedState)
-                {
-                    // Got expected outcome so no action
-                }
-                else
-                {
-                    LogIssue(test, $"ValidateInterruptionComplete - InterruptionComplete did not have the expected state: {expectedState}, it was: {operationComplete}.");
-                }
-            }
-            catch (Exception ex)
-            {
-                LogIssue(test, $"ValidateInterruptionComplete - Unexpected exception from InterruptionComplete: {ex.Message}");
-                LogDebug(test, ex.ToString());
-            }
-        }
-
         private bool ValidateSlewing(string test, bool expectedState)
         {
             try
@@ -8398,15 +8442,82 @@ namespace ConformU
         {
             if (UseOperations())
             {
-                // Stop the slew and wait for the stop to complete
+                bool abortOutcome;
+
+                // Determine whether an operation is currently underway
+                LogCallToDriver(testName, "About to call OperationComplete property");
+                bool operationInProgress = !telescopeDevice.OperationComplete;
+
+                LogDebug(testName, $"Operation in progress: {operationInProgress}");
+
+                // Stop the slew
                 LogCallToDriver(testName, "About to call AbortSlew method");
                 telescopeDevice.AbortSlew();
 
-                LogCallToDriver(testName, "About to call InterruptionComplete multiple times");
-                WaitWhile("Waiting for slew to abort", () => { return !telescopeDevice.InterruptionComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                // Act depending on whether or not an operation was in progress
+                if (operationInProgress) // Operation was in progress
+                {
+                    // Make sure that an OperationCancelledException is thrown by OperationComplete
+                    try
+                    {
+                        LogCallToDriver(testName, "About to call OperationComplete property");
+                        abortOutcome = telescopeDevice.OperationComplete;
 
-                // Validate OperationComplete state
-                ValidateInterruptionComplete($"{testName} Wait 2", true);
+                        // If we get here no exception was thrown, which is not in compliance with the specification
+                        LogIssue(testName, $"OperationComplete did not throw the expected ASCOM.OperationCancelledException. It returned the state: {abortOutcome}.");
+                    }
+                    catch (COMException ex)
+                    {
+                        if (ex.HResult == ErrorCodes.OperationCancelledException)
+                        {
+                            LogOK(testName, $"OperationComplete threw an ASCOM.OperationCancelledException as expected: {ex.Message}");
+                        }
+                        else
+                        {
+                            LogIssue(testName, $"OperationComplete threw a COMException with HResult: 0x{ex.HResult:X8} instead of the expected ASCOM.OperationCancelledException or COMException with HReslt = 0x{ErrorCodes.OperationCancelledException}:X8: {ex.Message}");
+                            LogDebug(testName, ex.ToString());
+                        }
+                    }
+                    catch (System.OperationCanceledException ex)
+                    {
+                        LogIssue(testName, $"OperationComplete threw a System.OperationCanceledException instead of the expected ASCOM.OperationCancelledException: {ex.Message}");
+                        LogDebug(testName, ex.ToString());
+
+                    }
+                    catch (ASCOM.OperationCancelledException ex)
+                    {
+                        LogOK(testName, $"OperationComplete threw an ASCOM.OperationCancelledException as expected: {ex.Message}");
+
+                    }
+                    catch (Exception ex)
+                    {
+                        LogIssue(testName, $"OperationComplete threw a {ex.GetType().Name} exception instead of the expected ASCOM.OperationCancelledException: {ex.Message}");
+                        LogDebug(testName, ex.ToString());
+                    }
+                }
+                else // No operation in progress
+                {
+                    try
+                    {
+                        LogCallToDriver(testName, "About to call OperationComplete method");
+                        bool operationComplete = telescopeDevice.OperationComplete;
+
+                        if (operationComplete)
+                        {
+                            LogOK(testName, $"OperationComplete was true after AbortSlew() completed.");
+                        }
+                        else
+                        {
+                            LogIssue(testName, $"OperationComplete was False after AbortSlew() completed.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogIssue(testName, $"Unexpected exception from OperationComplete: {ex.Message}");
+                        LogDebug(testName, ex.ToString());
+                    }
+                }
+
             }
             else
             {
