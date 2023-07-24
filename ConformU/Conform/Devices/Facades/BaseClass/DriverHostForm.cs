@@ -200,53 +200,50 @@ namespace ConformU
             }
         }
 
-        internal object FuncNoParameters(Func<object> func)
+        internal T FuncNoParameters<T>(Func<T> func)
         {
             if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Method called on thread {Environment.CurrentManagedThreadId}, Message loop running: {Application.MessageLoop}");
             if (this.InvokeRequired)
             {
                 if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Invoke required for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
-                FuncNoParameterDelegate getValue = new(FuncNoParameters);
-                return this.Invoke(getValue, func);
+                return this.Invoke(func);
             }
             else
             {
                 if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"About to run Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
-                object returnValue = func();
+                T returnValue = func();
                 if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Returned from Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                 return returnValue;
             }
         }
 
-        internal object Func1Parameter(Func<object, object> func, object parameter1)
+        internal T Func1Parameter<T>(Func<object, T> func, object parameter1)
         {
             if (this.InvokeRequired)
             {
                 if (LOG_ENABLED) logger?.LogMessage("HostForm.Func1Parameter", MessageLevel.Debug, $"Invoke required for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
-                Func1ParameterDelegate getValue = new(Func1Parameter);
-                return this.Invoke(getValue, func, parameter1);
+                return this.Invoke(() => func(parameter1));
             }
             else
             {
                 if (LOG_ENABLED) logger?.LogMessage("HostForm.Func1Parameter", MessageLevel.Debug, $"About to run Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
-                object returnValue = func(parameter1);
+                T returnValue = func(parameter1);
                 if (LOG_ENABLED) logger?.LogMessage("HostForm.Func1Parameter", MessageLevel.Debug, $"Returned from Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                 return returnValue;
             }
         }
 
-        internal object Func2Parameters(Func<object, object, object> func, object parameter1, object parameter2)
+        internal T Func2Parameters<T>(Func<object, object, T> func, object parameter1, object parameter2)
         {
             if (this.InvokeRequired)
             {
                 if (LOG_ENABLED) logger?.LogMessage("HostForm.Func2Parameters", MessageLevel.Debug, $"Invoke required for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
-                Func2ParameterDelegate getValue = new(Func2Parameters);
-                return this.Invoke(getValue, func, parameter1, parameter2);
+                return this.Invoke(() => func(parameter1, parameter2));
             }
             else
             {
                 if (LOG_ENABLED) logger?.LogMessage("HostForm.Func2Parameters", MessageLevel.Debug, $"About to run Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
-                object returnValue = func(parameter1, parameter2);
+                T returnValue = func(parameter1, parameter2);
                 if (LOG_ENABLED) logger?.LogMessage("HostForm.Func2Parameters", MessageLevel.Debug, $"Returned from Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                 return returnValue;
             }

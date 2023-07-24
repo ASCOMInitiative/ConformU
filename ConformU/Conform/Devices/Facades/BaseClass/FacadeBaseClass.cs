@@ -282,12 +282,12 @@ namespace ConformU
             if (LOG_ENABLED) logger?.LogMessage("Method2Parameters", MessageLevel.Debug, $"Returned from driverHostForm.Action2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
         }
 
-        internal object FunctionNoParameters(Func<object> action)
+        internal T FunctionNoParameters<T>(Func<T> action)
         {
             if (LOG_ENABLED) logger?.LogMessage("FunctionNoParameters", MessageLevel.Debug, $"About to call driverHostForm.FuncNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
 
 #if WINDOWS
-            object returnValue;
+            T returnValue;
 
             if (driverHostForm.InvokeRequired)
             {
@@ -300,18 +300,18 @@ namespace ConformU
                 returnValue = driverHostForm.FuncNoParameters(action);
             }
 #else
-            object returnValue = action();
+            T returnValue = action();
 #endif
             if (LOG_ENABLED) logger?.LogMessage("FunctionNoParameters", MessageLevel.Debug, $"Returned from driverHostForm.FuncNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
             return returnValue;
         }
 
-        internal object Function1Parameter(Func<object, object> action, object parameter1)
+        internal T Function1Parameter<T>(Func<object, T> action, object parameter1)
         {
             if (LOG_ENABLED) logger?.LogMessage("Function1Parameter", MessageLevel.Debug, $"About to call driverHostForm.Func1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
 
 #if WINDOWS
-            object returnValue;
+            T returnValue;
 
             if (driverHostForm.InvokeRequired)
             {
@@ -324,18 +324,18 @@ namespace ConformU
                 returnValue = driverHostForm.Func1Parameter(action, parameter1);
             }
 #else
-            object returnValue = action(parameter1);
+            T returnValue = action(parameter1);
 #endif
             if (LOG_ENABLED) logger?.LogMessage("Function1Parameter", MessageLevel.Debug, $"Returned from driverHostForm.Func1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
             return returnValue;
         }
 
-        internal object Function2Parameters(Func<object, object, object> action, object parameter1, object parameter2)
+        internal T Function2Parameters<T>(Func<object, object, T> action, object parameter1, object parameter2)
         {
             if (LOG_ENABLED) logger?.LogMessage("Function2Parameters", MessageLevel.Debug, $"About to call driverHostForm.Func2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
 
 #if WINDOWS
-            object returnValue;
+            T returnValue;
 
             if (driverHostForm.InvokeRequired)
             {
@@ -345,10 +345,10 @@ namespace ConformU
             else
             {
                 if (LOG_ENABLED) logger?.LogMessage("Function2Parameters", MessageLevel.Debug, $"NO INVOKE REQUIRED to call driverHostForm.Function2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
-                returnValue = driverHostForm.Func2Parameters(action, parameter1, parameter2);
+                returnValue = driverHostForm.Func2Parameters<T>(action, parameter1, parameter2);
             }
 #else
-            object returnValue = action(parameter1, parameter2);
+            T returnValue = action(parameter1, parameter2);
 #endif
             if (LOG_ENABLED) logger?.LogMessage("Function2Parameters", MessageLevel.Debug, $"Returned from driverHostForm.Func2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
             return returnValue;
@@ -362,7 +362,7 @@ namespace ConformU
         {
             get
             {
-                return (bool)FunctionNoParameters(() => driver.Connected);
+                return FunctionNoParameters<bool>(() => driver.Connected);
             }
             set
             {
@@ -370,21 +370,57 @@ namespace ConformU
             }
         }
 
-        public string Description => (string)FunctionNoParameters(() => driver.Description);
+        public string Description
+        {
+            get
+            {
+                return FunctionNoParameters<string>(() => driver.Description);
+            }
+        }
 
-        public string DriverInfo => (string)FunctionNoParameters(() => driver.DriverInfo);
+        public string DriverInfo
+        {
+            get
+            {
+                return FunctionNoParameters<string>(() => driver.DriverInfo);
+            }
+        }
 
-        public string DriverVersion => (string)FunctionNoParameters(() => driver.DriverVersion);
+        public string DriverVersion
+        {
+            get
+            {
+                return FunctionNoParameters<string>(() => driver.DriverVersion);
+            }
+        }
 
-        public short InterfaceVersion => (short)FunctionNoParameters(() => driver.InterfaceVersion);
+        public short InterfaceVersion
+        {
+            get
+            {
+                return FunctionNoParameters<short>(() => driver.InterfaceVersion);
+            }
+        }
 
-        public string Name => (string)FunctionNoParameters(() => driver.Name);
+        public string Name
+        {
+            get
+            {
+                return FunctionNoParameters<string>(() => driver.Name);
+            }
+        }
 
-        public IList<string> SupportedActions => ((IEnumerable)FunctionNoParameters(() => driver.SupportedActions)).Cast<string>().ToList();
+        public IList<string> SupportedActions
+        {
+            get
+            {
+                return (FunctionNoParameters<IEnumerable>(() => driver.SupportedActions)).Cast<string>().ToList();
+            }
+        }
 
         public string Action(string ActionName, string ActionParameters)
         {
-            return (string)Function2Parameters((i, j) => driver.Action(i, j), ActionName, ActionParameters);
+            return Function2Parameters<string>((i, j) => driver.Action(i, j), ActionName, ActionParameters);
         }
 
         public void CommandBlind(string Command, bool Raw = false)
@@ -394,12 +430,12 @@ namespace ConformU
 
         public bool CommandBool(string Command, bool Raw = false)
         {
-            return (bool)Function2Parameters((i, j) => driver.CommandBool(i, j), Command, Raw);
+            return Function2Parameters<bool>((i, j) => driver.CommandBool(i, j), Command, Raw);
         }
 
         public string CommandString(string Command, bool Raw = false)
         {
-            return (string)Function2Parameters((i, j) => driver.CommandString(i, j), Command, Raw);
+            return Function2Parameters<string>((i, j) => driver.CommandString(i, j), Command, Raw);
         }
 
         public void SetupDialog()
@@ -415,9 +451,21 @@ namespace ConformU
 
         public void Disconnect() => MethodNoParameters(() => driver.Disconnect());
 
-        public bool Connecting => (bool)FunctionNoParameters(() => driver.Connecting);
+        public bool Connecting
+        {
+            get
+            {
+                return (bool)FunctionNoParameters(() => driver.Connecting);
+            }
+        }
 
-        public IList<IStateValue> DeviceState => ((IEnumerable)FunctionNoParameters(() => driver.DeviceState)).Cast<IStateValue>().ToList();
+        public IList<IStateValue> DeviceState
+        {
+            get
+            {
+                return ((IEnumerable)FunctionNoParameters(() => driver.DeviceState)).Cast<IStateValue>().ToList();
+            }
+        }
 
         #endregion
 

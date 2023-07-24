@@ -80,7 +80,13 @@ namespace ConformU
         /// </summary>
         internal static IReadOnlyList<Octokit.Release> Releases { get; set; } = new List<Octokit.Release>(); //null;
 
-        internal static string ConformuVersion => $"{Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}";
+        internal static string ConformuVersion
+        {
+            get
+            {
+                return $"{Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}";
+            }
+        }
 
         internal static string ConformuVersionDisplayString
         {

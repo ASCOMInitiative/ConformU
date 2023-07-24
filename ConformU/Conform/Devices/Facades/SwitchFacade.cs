@@ -9,41 +9,47 @@ namespace ConformU
 
         #region Interface implementation
 
-        public short MaxSwitch => (short)FunctionNoParameters(() => driver.MaxSwitch);
+        public short MaxSwitch
+        {
+            get
+            {
+                return (short)FunctionNoParameters(() => driver.MaxSwitch);
+            }
+        }
 
         public bool CanWrite(short id)
         {
-            return (bool)Function1Parameter((i) => driver.CanWrite(i), id);
+            return Function1Parameter<bool>((i) => driver.CanWrite(i), id);
         }
 
         public bool GetSwitch(short id)
         {
-            return (bool)Function1Parameter((i) => driver.GetSwitch(i), id);
+            return Function1Parameter<bool>((i) => driver.GetSwitch(i), id);
         }
 
         public string GetSwitchDescription(short id)
         {
-            return (string)Function1Parameter((i) => driver.GetSwitchDescription(i), id);
+            return Function1Parameter<string>((i) => driver.GetSwitchDescription(i), id);
         }
 
         public string GetSwitchName(short id)
         {
-            return (string)Function1Parameter((i) => driver.GetSwitchName(i), id);
+            return Function1Parameter<string>((i) => driver.GetSwitchName(i), id);
         }
 
         public double GetSwitchValue(short id)
         {
-            return (double)Function1Parameter((i) => driver.GetSwitchValue(i), id);
+            return Function1Parameter<double>((i) => driver.GetSwitchValue(i), id);
         }
 
         public double MaxSwitchValue(short id)
         {
-            return (double)Function1Parameter((i) => driver.MaxSwitchValue(i), id);
+            return Function1Parameter<double>((i) => driver.MaxSwitchValue(i), id);
         }
 
         public double MinSwitchValue(short id)
         {
-            return (double)Function1Parameter((i) => driver.MinSwitchValue(i), id);
+            return Function1Parameter<double>((i) => driver.MinSwitchValue(i), id);
         }
 
         public void SetSwitch(short id, bool state)
@@ -63,7 +69,7 @@ namespace ConformU
 
         public double SwitchStep(short id)
         {
-            return (double)Function1Parameter((i) => driver.SwitchStep(i), id);
+            return Function1Parameter<double>((i) => driver.SwitchStep(i), id);
         }
 
         #endregion

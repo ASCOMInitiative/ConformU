@@ -460,10 +460,10 @@ namespace ConformU
 
                 // Try to get the device's interface version
                 GetInterfaceVersion();
-                LogDebug("Connected", $"Using operations: {UseOperations()}");
+                LogDebug("Connected", $"Interface version: {interfaceVersion}");
 
                 // Use operations to connect if specified to do so 
-                if (UseOperations())
+                if (HasConnect())
                 {
                     if (value) // Connecting to device
                     {
@@ -965,12 +965,31 @@ namespace ConformU
                 if (canSetDeclinationRate) // Any value is acceptable
                 {
                     SetTest("DeclinationRate Write");
+
+                    // Log the test offset rate if extended tests are enabled
+                    if (settings.TelescopeExtendedRateOffsetTests)
+                    {
+                        LogInfo("DeclinationRate Write", $"Configured offset test duration: {settings.TelescopeRateOffsetTestDuration} seconds.");
+                    }
+
                     if (TestRADecRate("DeclinationRate Write", "Set rate to 0.0", Axis.Dec, 0.0d, true))
                     {
                         TestRADecRate("DeclinationRate Write", "Set rate to 1.5", Axis.Dec, 1.5d, true);
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
                         TestRADecRate("DeclinationRate Write", "Set rate to -1.5", Axis.Dec, -1.5d, true);
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
                         TestRADecRate("DeclinationRate Write", "Set rate to 7.5", Axis.Dec, 7.5d, true);
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
                         TestRADecRate("DeclinationRate Write", "Set rate to -7.5", Axis.Dec, -7.5d, true);
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
                         TestRADecRate("DeclinationRate Write", "Reset rate to 0.0", Axis.Dec, 0.0d, false); // Reset the rate to zero, skipping the slewing test
                     }
                 }
@@ -1322,29 +1341,6 @@ namespace ConformU
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            // OperationComplete
-            if (UseOperations())
-            {
-                try
-                {
-                    LogCallToDriver("OperationComplete", "About to get OperationComplete property");
-                    bool operationComplete = telescopeDevice.OperationComplete;
-
-                    if (operationComplete)
-                    {
-                        LogOK("OperationComplete", $"OperationComplete is True as expected with no operation running.");
-                    }
-                    else
-                    {
-                        LogIssue("OperationComplete", $"OperationComplete is False even though no operation has been started.");
-                    }
-                }
-                catch (Exception ex) // Read failed
-                {
-                    HandleException("OperationComplete", MemberType.Property, Required.MustBeImplemented, ex, "Interface is ITelescopeV4 or later");
-                }
-            }
-
             // RightAscension - Required
             try
             {
@@ -1430,12 +1426,30 @@ namespace ConformU
             {
                 if (canSetRightAscensionRate) // Perform several tests starting with proving we can set a rate of 0.0
                 {
+                    // Log the test offset rate if extended tests are enabled
+                    if (settings.TelescopeExtendedRateOffsetTests)
+                    {
+                        LogInfo("RightAscensionRate Write", $"Configured offset test duration: {settings.TelescopeRateOffsetTestDuration} seconds.");
+                    }
+
                     if (TestRADecRate("RightAscensionRate Write", "Set rate to 0.0", Axis.RA, 0.0d, true))
                     {
                         TestRADecRate("RightAscensionRate Write", "Set rate to 0.1", Axis.RA, 0.1d, true);
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
                         TestRADecRate("RightAscensionRate Write", "Set rate to -0.1", Axis.RA, -0.1d, true);
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
                         TestRADecRate("RightAscensionRate Write", "Set rate to 0.5", Axis.RA, 0.5d, true);
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
                         TestRADecRate("RightAscensionRate Write", "Set rate to -0.5", Axis.RA, -0.5d, true);
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
                         TestRADecRate("RightAscensionRate Write", "Reset rate to 0.0", Axis.RA, 0.0d, false); // Reset the rate to zero, skipping the slewing test
                     }
                 }
@@ -2645,28 +2659,11 @@ namespace ConformU
                                     LogTestAndMessage("Park", "Parking scope...");
                                     LogCallToDriver("Park", "About to call Park method");
 
-                                    if (UseOperations())
-                                    {
-                                        // Validate OperationComplete state
-                                        ValidateOperationComplete("Park", true);
+                                    telescopeDevice.Park();
 
-                                        TimeMethod("Park", () => telescopeDevice.Park());
-
-                                        // Wait for the park to complete
-                                        LogCallToDriver("Park", "About to get OperationComplete property repeatedly...");
-                                        WaitWhile("Waiting for scope to park for OperationComplete test", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-
-                                        // Validate OperationComplete state
-                                        ValidateOperationComplete("Park", true);
-                                    }
-                                    else
-                                    {
-                                        telescopeDevice.Park();
-
-                                        // Wait for the park to complete
-                                        LogCallToDriver("Park", "About to get AtPark property repeatedly...");
-                                        WaitWhile("Waiting for scope to park", () => { return !telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-                                    }
+                                    // Wait for the park to complete
+                                    LogCallToDriver("Park", "About to get AtPark property repeatedly...");
+                                    WaitWhile("Waiting for scope to park", () => { return !telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                     // Test outcome
                                     if (telescopeDevice.AtPark)
@@ -2679,28 +2676,11 @@ namespace ConformU
                                         // Scope Parked OK
                                         try // Confirm that second park is harmless
                                         {
-                                            if (UseOperations())
-                                            {
-                                                // Validate OperationComplete state
-                                                ValidateOperationComplete("Park", true);
+                                            telescopeDevice.Park();
 
-                                                TimeMethod("Park", () => telescopeDevice.Park());
-
-                                                // Wait for the park to complete
-                                                LogCallToDriver("Park", "About to get OperationComplete property repeatedly...");
-                                                WaitWhile("Waiting for scope to park for OperationComplete test", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-
-                                                // Validate OperationComplete state
-                                                ValidateOperationComplete("Park", true);
-                                            }
-                                            else
-                                            {
-                                                telescopeDevice.Park();
-
-                                                // Wait for the park to complete
-                                                LogCallToDriver("Park", "About to get AtPark property repeatedly...");
-                                                WaitWhile("Waiting for scope to park", () => { return !telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-                                            }
+                                            // Wait for the park to complete
+                                            LogCallToDriver("Park", "About to get AtPark property repeatedly...");
+                                            WaitWhile("Waiting for scope to park", () => { return !telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                             // Test outcome
                                             if (telescopeDevice.AtPark)
@@ -2822,29 +2802,10 @@ namespace ConformU
                                             LogCallToDriver("Unpark", "About to call Unpark method");
                                             SetStatus("Unparking scope");
 
-                                            if (UseOperations())
-                                            {
-                                                // Validate OperationComplete state
-                                                ValidateOperationComplete("Unpark", true);
-
-                                                // Now unpark as an operation
-
-                                                LogCallToDriver("Unpark", "About to call Unpark method");
-                                                TimeMethod("Unpark", () => telescopeDevice.Unpark());
-
-                                                LogCallToDriver("Unpark", "About to get OperationComplete property repeatedly");
-                                                WaitWhile("Waiting for scope to unpark when parked", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-
-                                                // Validate OperationComplete state
-                                                ValidateOperationComplete("Unpark", true);
-                                            }
-                                            else
-                                            {
-                                                LogCallToDriver("Unpark", "About to call Unpark method");
-                                                telescopeDevice.Unpark();
-                                                LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
-                                                WaitWhile("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-                                            }
+                                            LogCallToDriver("Unpark", "About to call Unpark method");
+                                            telescopeDevice.Unpark();
+                                            LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
+                                            WaitWhile("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                             // Validate unparking
                                             if (!telescopeDevice.AtPark) // Scope unparked OK
@@ -2865,29 +2826,10 @@ namespace ConformU
                                                 // Scope is unparked
                                                 try // Confirm Unpark is harmless if already unparked
                                                 {
-                                                    if (UseOperations())
-                                                    {
-                                                        // Validate OperationComplete state
-                                                        ValidateOperationComplete("Unpark", true);
-
-                                                        // Now unpark as an operation
-
-                                                        LogCallToDriver("Unpark", "About to call Unpark method");
-                                                        TimeMethod("Unpark", () => telescopeDevice.Unpark());
-
-                                                        LogCallToDriver("Unpark", "About to get OperationComplete property repeatedly");
-                                                        WaitWhile("Waiting for scope to unpark when parked", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-
-                                                        // Validate OperationComplete state
-                                                        ValidateOperationComplete("Unpark", true);
-                                                    }
-                                                    else
-                                                    {
-                                                        LogCallToDriver("Unpark", "About to call Unpark method");
-                                                        telescopeDevice.Unpark();
-                                                        LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
-                                                        WaitWhile("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-                                                    }
+                                                    LogCallToDriver("Unpark", "About to call Unpark method");
+                                                    telescopeDevice.Unpark();
+                                                    LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
+                                                    WaitWhile("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                                     // Validate unparking
                                                     if (!telescopeDevice.AtPark) // Scope remained unparked
@@ -4223,19 +4165,8 @@ namespace ConformU
                             targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
                             targetDeclination = 2.0d;
 
-                            if (UseOperations())
-                            {
-                                // Validate OperationComplete state
-                                ValidateOperationComplete(p_Name, true);
-
-                                LogCallToDriver(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
-                                TimeMethod(p_Name, () => telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination));  // Set the minimum rate
-                            }
-                            else
-                            {
-                                LogCallToDriver(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
-                                telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
-                            }
+                            LogCallToDriver(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
+                            telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
 
                             WaitForSlew(p_Name, $"Slewing to coordinates asynchronously");
                             break;
@@ -5707,25 +5638,13 @@ namespace ConformU
                                 // Slew to the target coordinates
                                 LogCallToDriver(testName, $"About to call SlewToCoordinatesAsync. RA: {targetRa.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
 
-                                if (UseOperations())
-                                {
-                                    // Validate OperationComplete state
-                                    ValidateOperationComplete(testName, true);
-
-                                    LogCallToDriver(testName, "About to call SlewToCoordinatesAsync method, RA: " + targetRa.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
-                                    TimeMethod(testName, () => telescopeDevice.SlewToCoordinatesAsync(targetRa, targetDeclination));
-                                }
-                                else
-                                {
-                                    LogCallToDriver(testName, "About to call SlewToCoordinatesAsync method, RA: " + targetRa.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
-                                    telescopeDevice.SlewToCoordinatesAsync(targetRa, targetDeclination);
-                                }
+                                LogCallToDriver(testName, "About to call SlewToCoordinatesAsync method, RA: " + targetRa.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
+                                telescopeDevice.SlewToCoordinatesAsync(targetRa, targetDeclination);
 
                                 // Wait for 1.5 seconds
                                 WaitFor(1500, 100);
 
                                 // Validate that the slew is still going
-                                ValidateOperationComplete(testName, false);
                                 ValidateSlewing(testName, true);
 
                                 // Now try to end the slew
@@ -5786,28 +5705,11 @@ namespace ConformU
                                 SetAction("Homing mount...");
                                 if (interfaceVersion > 1)
                                 {
-                                    if (UseOperations()) // ITelescopeV4 and later
-                                    {
-                                        // Validate OperationComplete state
-                                        ValidateOperationComplete("FindHome", true); LogCallToDriver(testName, "About to call FindHome method");
+                                    LogCallToDriver(testName, "About to call FindHome method");
+                                    telescopeDevice.FindHome();
 
-                                        LogCallToDriver(testName, "About to call FindHome method");
-                                        TimeMethod("FindHome", () => telescopeDevice.FindHome());
-
-                                        // Wait for mount to find home
-                                        WaitWhile("Waiting for mount to home...", () => { return !telescopeDevice.OperationComplete; }, 200, settings.TelescopeMaximumSlewTime);
-
-                                        // Validate OperationComplete state
-                                        ValidateOperationComplete("FindHome", true); LogCallToDriver(testName, "About to get AtHome property");
-                                    }
-                                    else // ITelescopeV3 and earlier
-                                    {
-                                        LogCallToDriver(testName, "About to call FindHome method");
-                                        telescopeDevice.FindHome();
-
-                                        // Wait for mount to find home
-                                        WaitWhile("Waiting for mount to home...", () => { return !telescopeDevice.AtHome; }, 200, settings.TelescopeMaximumSlewTime); LogCallToDriver(testName, "About to get AtHome property");
-                                    }
+                                    // Wait for mount to find home
+                                    WaitWhile("Waiting for mount to home...", () => { return !telescopeDevice.AtHome; }, 200, settings.TelescopeMaximumSlewTime); LogCallToDriver(testName, "About to get AtHome property");
 
                                     // Validate FindHome outcome
                                     if (telescopeDevice.AtHome)
@@ -5961,20 +5863,8 @@ namespace ConformU
                                                 {
                                                     LogDebug(testName, "Scope is pierEast so flipping West");
                                                     SetAction("Flipping mount to pointing state pierWest");
-
-                                                    if (UseOperations())
-                                                    {
-                                                        // Validate OperationComplete state
-                                                        ValidateOperationComplete(testName, true);
-
-                                                        LogCallToDriver(testName, $"About to set SideOfPier property to {PointingState.ThroughThePole}");
-                                                        TimeMethod(testName, () => telescopeDevice.SideOfPier = PointingState.ThroughThePole);  // Set the minimum rate
-                                                    }
-                                                    else
-                                                    {
-                                                        LogCallToDriver(testName, $"About to set SideOfPier property to {PointingState.ThroughThePole}");
-                                                        telescopeDevice.SideOfPier = PointingState.ThroughThePole;
-                                                    }
+                                                    LogCallToDriver(testName, $"About to set SideOfPier property to {PointingState.ThroughThePole}");
+                                                    telescopeDevice.SideOfPier = PointingState.ThroughThePole;
 
                                                     WaitForSlew(testName, $"Moving to the pierEast pointing state asynchronously");
 
@@ -6008,19 +5898,8 @@ namespace ConformU
                                                     LogDebug(testName, "Scope is pierWest so flipping East");
                                                     SetAction("Flipping mount to pointing state pierEast"); LogCallToDriver(testName, "About to set SideOfPier property to " + ((int)PointingState.Normal).ToString());
 
-                                                    if (UseOperations())
-                                                    {
-                                                        // Validate OperationComplete state
-                                                        ValidateOperationComplete(testName, true);
-
-                                                        LogCallToDriver(testName, $"About to set SideOfPier property to {PointingState.Normal}");
-                                                        TimeMethod(testName, () => telescopeDevice.SideOfPier = PointingState.Normal);  // Set the minimum rate
-                                                    }
-                                                    else
-                                                    {
-                                                        LogCallToDriver(testName, $"About to set SideOfPier property to {PointingState.Normal}");
-                                                        telescopeDevice.SideOfPier = PointingState.Normal;
-                                                    }
+                                                    LogCallToDriver(testName, $"About to set SideOfPier property to {PointingState.Normal}");
+                                                    telescopeDevice.SideOfPier = PointingState.Normal;
 
                                                     WaitForSlew(testName, $"Moving to the pierWest pointing state asynchronously");
 
@@ -6441,27 +6320,8 @@ namespace ConformU
                     canSetZero = false;
                     try
                     {
-                        if (UseOperations())
-                        {
-                            // Validate OperationComplete state
-                            ValidateOperationComplete(testName, true);
-
-                            LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
-                            TimeMethod(testName, () => telescopeDevice.MoveAxis(testAxis, 0.0d));  // Set a value of zero
-
-                            // Wait for the move to complete
-                            LogCallToDriver(testName, "About to get OperationComplete property repeatedly...");
-                            WaitWhile("Waiting for Move rate 0.0 to be set", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-
-                            // Validate OperationComplete state
-                            ValidateOperationComplete(testName, true);
-
-                        }
-                        else
-                        {
-                            LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
-                            telescopeDevice.MoveAxis(testAxis, 0.0d); // Set a value of zero
-                        }
+                        LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                        telescopeDevice.MoveAxis(testAxis, 0.0d); // Set a value of zero
 
                         if (ValidateSlewing(testName, false))
                         {
@@ -6573,35 +6433,8 @@ namespace ConformU
                             try
                             {
                                 SetAction("Moving forward at minimum rate");
-                                if (UseOperations())
-                                {
-                                    // Validate OperationComplete state
-                                    ValidateOperationComplete(testName + "1", true);
-
-                                    LogCallToDriver(testName, $"About to call MoveAxis method for axis {testAxis} at speed {rateMinimum}");
-                                    TimeMethod(testName, () => telescopeDevice.MoveAxis(testAxis, rateMinimum));  // Set the minimum rate
-
-                                    // Wait for the move to complete
-                                    LogCallToDriver(testName, "About to get OperationComplete property repeatedly...");
-
-                                    if (rateMinimum == 0.0) // No operation in progress because 0.0 = stop operation
-                                    {
-                                        WaitWhile($"Waiting for Move rate {rateMinimum} to be set", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-                                        // Validate OperationComplete state
-                                        ValidateOperationComplete(testName + "2", true);
-                                    }
-                                    else // Operation in progress because rate != 0.0
-                                    {
-                                        WaitWhile($"Waiting for Move rate {rateMinimum} to be set", () => { return telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-                                        // Validate OperationComplete state
-                                        ValidateOperationComplete(testName + "3", false);
-                                    }
-                                }
-                                else
-                                {
-                                    LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + rateMinimum);
-                                    telescopeDevice.MoveAxis(testAxis, rateMinimum); // Set the minimum rate
-                                }
+                                LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + rateMinimum);
+                                telescopeDevice.MoveAxis(testAxis, rateMinimum); // Set the minimum rate
 
                                 // Assess outcome depending on whether or not the minimum rate was 0.0
                                 if (rateMinimum == 0.0)
@@ -6635,26 +6468,8 @@ namespace ConformU
 
                                 // Stop movement at minimum rate
                                 SetAction("Stopping movement");
-                                if (UseOperations())
-                                {
-                                    // Validate OperationComplete state
-                                    ValidateOperationComplete(testName + "1", rateMinimum == 0.0 ? true : false);
-
-                                    LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
-                                    TimeMethod(testName, () => telescopeDevice.MoveAxis(testAxis, 0.0d));  // Stop the movement on this axis
-
-                                    // Wait for the move to complete
-                                    LogCallToDriver(testName, "About to get OperationComplete property repeatedly...");
-                                    WaitWhile($"Waiting for Move rate 0.0 to be set", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-
-                                    // Validate OperationComplete state
-                                    ValidateOperationComplete(testName + "2", true);
-                                }
-                                else
-                                {
-                                    LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
-                                    telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
-                                }
+                                LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
 
                                 // Assess outcome depending on whether or not the minimum rate was 0.0
                                 if (ValidateSlewing(testName, false))
@@ -6670,36 +6485,8 @@ namespace ConformU
                                 // Move back at minimum rate
                                 SetAction("Moving back at minimum rate");
 
-                                if (UseOperations())
-                                {
-                                    // Validate OperationComplete state
-                                    ValidateOperationComplete(testName + "1", true);
-
-                                    LogCallToDriver(testName, $"About to call MoveAxis method for axis {testAxis} at speed {-rateMinimum}");
-                                    TimeMethod(testName, () => telescopeDevice.MoveAxis(testAxis, -rateMinimum));  // Set the minimum rate
-
-                                    // Wait for the move to complete
-                                    LogCallToDriver(testName, "About to get OperationComplete property repeatedly...");
-
-                                    // Assess outcome
-                                    if (rateMinimum == 0.0) // No operation in progress because 0.0 = stop operation
-                                    {
-                                        WaitWhile($"Waiting for Move rate {-rateMaximum} to be set", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-                                        // Validate OperationComplete state
-                                        ValidateOperationComplete(testName + "2", true);
-                                    }
-                                    else // Operation in progress because rate != 0.0
-                                    {
-                                        WaitWhile($"Waiting for Move rate {-rateMaximum} to be set", () => { return telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-                                        // Validate OperationComplete state
-                                        ValidateOperationComplete(testName + "3", false);
-                                    }
-                                }
-                                else
-                                {
-                                    LogCallToDriver(testName, $"About to call MoveAxis method for axis {testAxis} at speed {-rateMinimum}");
-                                    telescopeDevice.MoveAxis(testAxis, -rateMinimum); // Set the minimum rate
-                                }
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {testAxis} at speed {-rateMinimum}");
+                                telescopeDevice.MoveAxis(testAxis, -rateMinimum); // Set the minimum rate
 
                                 // Assess outcome depending on whether or not the minimum rate was 0.0
                                 if (rateMinimum == 0.0)
@@ -6733,26 +6520,8 @@ namespace ConformU
 
                                 // Stop movement at -minimum rate
                                 SetAction("Stopping movement");
-                                if (UseOperations())
-                                {
-                                    // Validate OperationComplete state
-                                    ValidateOperationComplete(testName + "1", rateMinimum == 0.0 ? true : false);
-
-                                    LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
-                                    TimeMethod(testName, () => telescopeDevice.MoveAxis(testAxis, 0.0d));  // Stop the movement on this axis
-
-                                    // Wait for the move to complete
-                                    LogCallToDriver(testName, "About to get OperationComplete property repeatedly...");
-                                    WaitWhile($"Waiting for Move rate 0.0 to be set", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-
-                                    // Validate OperationComplete state
-                                    ValidateOperationComplete(testName + "2", true);
-                                }
-                                else
-                                {
-                                    LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
-                                    telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
-                                }
+                                LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
 
                                 // Assess outcome depending on whether or not the minimum rate was 0.0
                                 if (ValidateSlewing(testName, false))
@@ -6785,35 +6554,8 @@ namespace ConformU
                             try
                             {
                                 SetAction("Moving forward at maximum rate");
-                                if (UseOperations())
-                                {
-                                    // Validate OperationComplete state
-                                    ValidateOperationComplete(testName + "1", true);
-
-                                    LogCallToDriver(testName, $"About to call MoveAxis method for axis {testAxis} at speed {rate}");
-                                    TimeMethod(testName, () => telescopeDevice.MoveAxis(testAxis, rateMaximum));  // Set the maximum rate
-
-                                    // Wait for the move to complete
-                                    LogCallToDriver(testName, "About to get OperationComplete property repeatedly...");
-
-                                    if (rateMaximum == 0.0) // No operation in progress because 0.0 = stop operation
-                                    {
-                                        WaitWhile($"Waiting for Move rate {rateMaximum} to be set", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-                                        // Validate OperationComplete state
-                                        ValidateOperationComplete(testName + "2", true);
-                                    }
-                                    else // Operation in progress because rate != 0.0
-                                    {
-                                        WaitWhile($"Waiting for Move rate {rateMaximum} to be set", () => { return telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-                                        // Validate OperationComplete state
-                                        ValidateOperationComplete(testName + "3", false);
-                                    }
-                                }
-                                else
-                                {
-                                    LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + rateMaximum);
-                                    telescopeDevice.MoveAxis(testAxis, rateMaximum); // Set the maximum rate
-                                }
+                                LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed " + rateMaximum);
+                                telescopeDevice.MoveAxis(testAxis, rateMaximum); // Set the maximum rate
 
                                 // Assess outcome depending on whether or not the maximum rate was 0.0
                                 if (rateMaximum == 0.0)
@@ -6847,26 +6589,8 @@ namespace ConformU
 
                                 // Stop movement at maximum rate
                                 SetAction("Stopping movement");
-                                if (UseOperations())
-                                {
-                                    // Validate OperationComplete state
-                                    ValidateOperationComplete(testName + "1", rateMaximum == 0.0 ? true : false);
-
-                                    LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
-                                    TimeMethod(testName, () => telescopeDevice.MoveAxis(testAxis, 0.0d));  // Stop the movement on this axis
-
-                                    // Wait for the move to complete
-                                    LogCallToDriver(testName, "About to get OperationComplete property repeatedly...");
-                                    WaitWhile($"Waiting for Move rate 0.0 to be set", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-
-                                    // Validate OperationComplete state
-                                    ValidateOperationComplete(testName + "2", true);
-                                }
-                                else
-                                {
-                                    LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
-                                    telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
-                                }
+                                LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
 
                                 // Assess outcome depending on whether or not the maximum rate was 0.0
                                 if (ValidateSlewing(testName, false))
@@ -6881,36 +6605,8 @@ namespace ConformU
                                 // Move back at maximum rate
                                 SetAction("Moving back at maximum rate");
 
-                                if (UseOperations())
-                                {
-                                    // Validate OperationComplete state
-                                    ValidateOperationComplete(testName + "1", true);
-
-                                    LogCallToDriver(testName, $"About to call MoveAxis method for axis {testAxis} at speed {-rateMaximum}");
-                                    TimeMethod(testName, () => telescopeDevice.MoveAxis(testAxis, -rateMaximum));  // Set the maximum rate
-
-                                    // Wait for the move to complete
-                                    LogCallToDriver(testName, "About to get OperationComplete property repeatedly...");
-
-                                    // Assess outcome
-                                    if (rateMaximum == 0.0) // No operation in progress because 0.0 = stop operation
-                                    {
-                                        WaitWhile($"Waiting for Move rate {-rateMaximum} to be set", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-                                        // Validate OperationComplete state
-                                        ValidateOperationComplete(testName + "2", true);
-                                    }
-                                    else // Operation in progress because rate != 0.0
-                                    {
-                                        WaitWhile($"Waiting for Move rate {-rateMaximum} to be set", () => { return telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-                                        // Validate OperationComplete state
-                                        ValidateOperationComplete(testName + "3", false);
-                                    }
-                                }
-                                else
-                                {
-                                    LogCallToDriver(testName, $"About to call MoveAxis method for axis {testAxis} at speed {-rateMaximum}");
-                                    telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the maximum rate
-                                }
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {testAxis} at speed {-rateMaximum}");
+                                telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the maximum rate
 
                                 // Assess outcome depending on whether or not the maximum rate was 0.0
                                 if (rateMaximum == 0.0)
@@ -6944,26 +6640,8 @@ namespace ConformU
 
                                 // Stop movement at -maximum rate
                                 SetAction("Stopping movement");
-                                if (UseOperations())
-                                {
-                                    // Validate OperationComplete state
-                                    ValidateOperationComplete(testName + "1", rateMaximum == 0.0 ? true : false);
-
-                                    LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
-                                    TimeMethod(testName, () => telescopeDevice.MoveAxis(testAxis, 0.0d));  // Stop the movement on this axis
-
-                                    // Wait for the move to complete
-                                    LogCallToDriver(testName, "About to get OperationComplete property repeatedly...");
-                                    WaitWhile($"Waiting for Move rate 0.0 to be set", () => { return !telescopeDevice.OperationComplete; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-
-                                    // Validate OperationComplete state
-                                    ValidateOperationComplete(testName + "2", true);
-                                }
-                                else
-                                {
-                                    LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
-                                    telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
-                                }
+                                LogCallToDriver(testName, "About to call MoveAxis method for axis " + ((int)testAxis).ToString() + " at speed 0");
+                                telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
 
                                 // Assess outcome depending on whether or not the maximum rate was 0.0
                                 if (ValidateSlewing(testName, false))
@@ -7483,19 +7161,8 @@ namespace ConformU
                 {
                     LogDebug("SlewScope", $"Slewing asynchronously to {p_Msg} {p_RA.ToHMS()} {p_DEC.ToDMS()}");
 
-                    if (UseOperations())
-                    {
-                        // Validate OperationComplete state
-                        ValidateOperationComplete("SlewScope", true);
-
-                        LogCallToDriver("SlewScope", "About to call SlewToCoordinatesAsync method, RA: " + p_RA.ToHMS() + ", Declination: " + p_DEC.ToDMS());
-                        TimeMethod("SlewScope", () => telescopeDevice.SlewToCoordinatesAsync(p_RA, p_DEC));
-                    }
-                    else
-                    {
-                        LogCallToDriver("SlewScope", "About to call SlewToCoordinatesAsync method, RA: " + p_RA.ToHMS() + ", Declination: " + p_DEC.ToDMS());
-                        telescopeDevice.SlewToCoordinatesAsync(p_RA, p_DEC);
-                    }
+                    LogCallToDriver("SlewScope", "About to call SlewToCoordinatesAsync method, RA: " + p_RA.ToHMS() + ", Declination: " + p_DEC.ToDMS());
+                    telescopeDevice.SlewToCoordinatesAsync(p_RA, p_DEC);
 
                     WaitForSlew(p_Msg, $"Slewing asynchronously to {p_Msg}");
                 }
@@ -7526,23 +7193,8 @@ namespace ConformU
 
             LogDebug(testName, $"Starting wait for slew.");
 
-            if (UseOperations())
-            {
-                // Validate OperationComplete state
-                ValidateOperationComplete($"{testName} Wait 1", false);
-
-                // Wait for the slew to complete
-                LogCallToDriver(testName, "About to get OperationComplete property repeatedly...");
-                WaitWhile(actionMessage, () => { return !telescopeDevice.OperationComplete | (sw.Elapsed.TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION); }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-
-                // Validate OperationComplete state
-                ValidateOperationComplete($"{testName} Wait 2", true);
-            }
-            else
-            {
-                LogCallToDriver(testName, "About to get Slewing property multiple times");
-                WaitWhile(actionMessage, () => { return telescopeDevice.Slewing | (sw.Elapsed.TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION); }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
-            }
+            LogCallToDriver(testName, "About to get Slewing property multiple times");
+            WaitWhile(actionMessage, () => { return telescopeDevice.Slewing | (sw.Elapsed.TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION); }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
             LogDebug(testName, $"Completed wait for slew.");
         }
@@ -8322,22 +7974,8 @@ namespace ConformU
             // Slew to the target coordinates
             LogCallToDriver("SlewToHa", $"About to call SlewToCoordinatesAsync. RA: {targetRa.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
 
-            if (UseOperations())
-            {
-                // Validate OperationComplete state
-                ValidateOperationComplete("SlewToHa", true);
-
-                LogCallToDriver("SlewToHa", "About to call SlewToCoordinatesAsync method, RA: " + targetRa.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
-                TimeMethod("SlewToHa", () => telescopeDevice.SlewToCoordinatesAsync(targetRa, targetDeclination));
-            }
-            else
-            {
-                LogCallToDriver("SlewToHa", "About to call SlewToCoordinatesAsync method, RA: " + targetRa.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
-                telescopeDevice.SlewToCoordinatesAsync(targetRa, targetDeclination);
-            }
-
-
-
+            LogCallToDriver("SlewToHa", "About to call SlewToCoordinatesAsync method, RA: " + targetRa.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
+            telescopeDevice.SlewToCoordinatesAsync(targetRa, targetDeclination);
 
             WaitForSlew("SlewToHa", $"Slewing to HA {targetHa:+0.0;-0.0;+0.0}");
 
@@ -8383,29 +8021,6 @@ namespace ConformU
             return canReadSideOfPier.Value;
         }
 
-        private void ValidateOperationComplete(string test, bool expectedState)
-        {
-            try
-            {
-                LogCallToDriver(test, "About to call OperationComplete method");
-                bool operationComplete = telescopeDevice.OperationComplete;
-
-                if (operationComplete == expectedState)
-                {
-                    // Got expected outcome so no action
-                }
-                else
-                {
-                    LogIssue(test, $"ValidateOperationComplete - OperationComplete does not have the expected state: {expectedState}, it was: {operationComplete}.");
-                }
-            }
-            catch (Exception ex)
-            {
-                LogIssue(test, $"ValidateOperationComplete - Unexpected exception from OperationComplete: {ex.Message}");
-                LogDebug(test, ex.ToString());
-            }
-        }
-
         private bool ValidateSlewing(string test, bool expectedState)
         {
             try
@@ -8440,90 +8055,8 @@ namespace ConformU
 
         private void AbortSlew(string testName)
         {
-            if (UseOperations())
-            {
-                bool abortOutcome;
-
-                // Determine whether an operation is currently underway
-                LogCallToDriver(testName, "About to call OperationComplete property");
-                bool operationInProgress = !telescopeDevice.OperationComplete;
-
-                LogDebug(testName, $"Operation in progress: {operationInProgress}");
-
-                // Stop the slew
-                LogCallToDriver(testName, "About to call AbortSlew method");
-                telescopeDevice.AbortSlew();
-
-                // Act depending on whether or not an operation was in progress
-                if (operationInProgress) // Operation was in progress
-                {
-                    // Make sure that an OperationCancelledException is thrown by OperationComplete
-                    try
-                    {
-                        LogCallToDriver(testName, "About to call OperationComplete property");
-                        abortOutcome = telescopeDevice.OperationComplete;
-
-                        // If we get here no exception was thrown, which is not in compliance with the specification
-                        LogIssue(testName, $"OperationComplete did not throw the expected ASCOM.OperationCancelledException. It returned the state: {abortOutcome}.");
-                    }
-                    catch (COMException ex)
-                    {
-                        if (ex.HResult == ErrorCodes.OperationCancelledException)
-                        {
-                            LogOK(testName, $"OperationComplete threw an ASCOM.OperationCancelledException as expected: {ex.Message}");
-                        }
-                        else
-                        {
-                            LogIssue(testName, $"OperationComplete threw a COMException with HResult: 0x{ex.HResult:X8} instead of the expected ASCOM.OperationCancelledException or COMException with HReslt = 0x{ErrorCodes.OperationCancelledException}:X8: {ex.Message}");
-                            LogDebug(testName, ex.ToString());
-                        }
-                    }
-                    catch (System.OperationCanceledException ex)
-                    {
-                        LogIssue(testName, $"OperationComplete threw a System.OperationCanceledException instead of the expected ASCOM.OperationCancelledException: {ex.Message}");
-                        LogDebug(testName, ex.ToString());
-
-                    }
-                    catch (ASCOM.OperationCancelledException ex)
-                    {
-                        LogOK(testName, $"OperationComplete threw an ASCOM.OperationCancelledException as expected: {ex.Message}");
-
-                    }
-                    catch (Exception ex)
-                    {
-                        LogIssue(testName, $"OperationComplete threw a {ex.GetType().Name} exception instead of the expected ASCOM.OperationCancelledException: {ex.Message}");
-                        LogDebug(testName, ex.ToString());
-                    }
-                }
-                else // No operation in progress
-                {
-                    try
-                    {
-                        LogCallToDriver(testName, "About to call OperationComplete method");
-                        bool operationComplete = telescopeDevice.OperationComplete;
-
-                        if (operationComplete)
-                        {
-                            LogOK(testName, $"OperationComplete was true after AbortSlew() completed.");
-                        }
-                        else
-                        {
-                            LogIssue(testName, $"OperationComplete was False after AbortSlew() completed.");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogIssue(testName, $"Unexpected exception from OperationComplete: {ex.Message}");
-                        LogDebug(testName, ex.ToString());
-                    }
-                }
-
-            }
-            else
-            {
-                LogCallToDriver(testName, "About to call AbortSlew method");
-                telescopeDevice.AbortSlew();
-            }
+            LogCallToDriver(testName, "About to call AbortSlew method");
+            telescopeDevice.AbortSlew();
         }
 
         #endregion

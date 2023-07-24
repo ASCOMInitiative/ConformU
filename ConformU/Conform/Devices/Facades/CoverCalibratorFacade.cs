@@ -9,13 +9,37 @@ namespace ConformU
 
         #region Interface implementation
 
-        public CoverStatus CoverState => (CoverStatus)FunctionNoParameters(() => driver.CoverState);
+        public CoverStatus CoverState
+        {
+            get
+            {
+                return FunctionNoParameters<CoverStatus>(() => driver.CoverState);
+            }
+        }
 
-        public CalibratorStatus CalibratorState => (CalibratorStatus)FunctionNoParameters(() => driver.CalibratorState);
+        public CalibratorStatus CalibratorState
+        {
+            get
+            {
+                return FunctionNoParameters<CalibratorStatus>(() => driver.CalibratorState);
+            }
+        }
 
-        public int Brightness => (int)FunctionNoParameters(() => driver.Brightness);
+        public int Brightness
+        {
+            get
+            {
+                return FunctionNoParameters<int>(() => driver.Brightness);
+            }
+        }
 
-        public int MaxBrightness => (int)FunctionNoParameters(() => driver.MaxBrightness);
+        public int MaxBrightness
+        {
+            get
+            {
+                return FunctionNoParameters<int>(() => driver.MaxBrightness);
+            }
+        }
 
         public void CalibratorOff()
         {

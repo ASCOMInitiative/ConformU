@@ -9,33 +9,111 @@ namespace ConformU
 
         #region Interface implementation
 
-        public double AveragePeriod { get => (double)FunctionNoParameters(() => driver.AveragePeriod); set => Method1Parameter((i) => driver.AveragePeriod = i, value); }
+        public double AveragePeriod { get => FunctionNoParameters<double>(() => driver.AveragePeriod); set => Method1Parameter((i) => driver.AveragePeriod = i, value); }
 
-        public double CloudCover => (double)FunctionNoParameters(() => driver.CloudCover);
+        public double CloudCover
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.CloudCover);
+            }
+        }
 
-        public double DewPoint => (double)FunctionNoParameters(() => driver.DewPoint);
+        public double DewPoint
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.DewPoint);
+            }
+        }
 
-        public double Humidity => (double)FunctionNoParameters(() => driver.Humidity);
+        public double Humidity
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.Humidity);
+            }
+        }
 
-        public double Pressure => (double)FunctionNoParameters(() => driver.Pressure);
+        public double Pressure
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.Pressure);
+            }
+        }
 
-        public double RainRate => (double)FunctionNoParameters(() => driver.RainRate);
+        public double RainRate
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.RainRate);
+            }
+        }
 
-        public double SkyBrightness => (double)FunctionNoParameters(() => driver.SkyBrightness);
+        public double SkyBrightness
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.SkyBrightness);
+            }
+        }
 
-        public double SkyQuality => (double)FunctionNoParameters(() => driver.SkyQuality);
+        public double SkyQuality
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.SkyQuality);
+            }
+        }
 
-        public double StarFWHM => (double)FunctionNoParameters(() => driver.StarFWHM);
+        public double StarFWHM
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.StarFWHM);
+            }
+        }
 
-        public double SkyTemperature => (double)FunctionNoParameters(() => driver.SkyTemperature);
+        public double SkyTemperature
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.SkyTemperature);
+            }
+        }
 
-        public double Temperature => (double)FunctionNoParameters(() => driver.Temperature);
+        public double Temperature
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.Temperature);
+            }
+        }
 
-        public double WindDirection => (double)FunctionNoParameters(() => driver.WindDirection);
+        public double WindDirection
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.WindDirection);
+            }
+        }
 
-        public double WindGust => (double)FunctionNoParameters(() => driver.WindGust);
+        public double WindGust
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.WindGust);
+            }
+        }
 
-        public double WindSpeed => (double)FunctionNoParameters(() => driver.WindSpeed);
+        public double WindSpeed
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.WindSpeed);
+            }
+        }
 
         public void Refresh()
         {
@@ -44,12 +122,12 @@ namespace ConformU
 
         public string SensorDescription(string PropertyName)
         {
-            return (string)Function1Parameter((i) => driver.SensorDescription(i), PropertyName);
+            return Function1Parameter<string>((i) => driver.SensorDescription(i), PropertyName);
         }
 
         public double TimeSinceLastUpdate(string PropertyName)
         {
-            return (double)Function1Parameter((i) => driver.TimeSinceLastUpdate(i), PropertyName);
+            return Function1Parameter<double>((i) => driver.TimeSinceLastUpdate(i), PropertyName);
         }
 
         #endregion

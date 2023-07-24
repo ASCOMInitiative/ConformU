@@ -114,13 +114,19 @@ else
 
     private bool collapseNavMenu = true;
 
-    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+        private string NavMenuCssClass
+        {
+            get
+            {
+                return collapseNavMenu ? "collapse" : null;
+            }
+        }
 
-    /// <summary>
-    /// Event handler for page initialised event
-    /// </summary>
-    /// <remarks>Hook up an event handler to redisplay the page header whenever the configuraiton is changed. </remarks>
-    protected override async Task OnInitializedAsync()
+        /// <summary>
+        /// Event handler for page initialised event
+        /// </summary>
+        /// <remarks>Hook up an event handler to redisplay the page header whenever the configuraiton is changed. </remarks>
+        protected override async Task OnInitializedAsync()
     {
         state.UiHasChanged += OnUiChanged;
         try

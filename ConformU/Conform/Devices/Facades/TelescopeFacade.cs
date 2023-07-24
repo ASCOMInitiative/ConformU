@@ -19,83 +19,263 @@ namespace ConformU
 
         #region ITelescopeV3 interface implementation
 
-        public AlignmentMode AlignmentMode => (AlignmentMode)FunctionNoParameters(() => driver.AlignmentMode);
+        public AlignmentMode AlignmentMode
+        {
+            get
+            {
+                return (AlignmentMode)FunctionNoParameters(() => driver.AlignmentMode);
+            }
+        }
 
-        public double Altitude => (double)FunctionNoParameters(() => driver.Altitude);
+        public double Altitude
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.Altitude);
+            }
+        }
 
-        public double ApertureArea => (double)FunctionNoParameters(() => driver.ApertureArea);
+        public double ApertureArea
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.ApertureArea);
+            }
+        }
 
-        public double ApertureDiameter => (double)FunctionNoParameters(() => driver.ApertureDiameter);
+        public double ApertureDiameter
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.ApertureDiameter);
+            }
+        }
 
-        public bool AtHome => (bool)FunctionNoParameters(() => driver.AtHome);
+        public bool AtHome
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.AtHome);
+            }
+        }
 
-        public bool AtPark => (bool)FunctionNoParameters(() => driver.AtPark);
+        public bool AtPark
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.AtPark);
+            }
+        }
 
-        public double Azimuth => (double)FunctionNoParameters(() => driver.Azimuth);
+        public double Azimuth
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.Azimuth);
+            }
+        }
 
-        public bool CanFindHome => (bool)FunctionNoParameters(() => driver.CanFindHome);
+        public bool CanFindHome
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanFindHome);
+            }
+        }
 
-        public bool CanPark => (bool)FunctionNoParameters(() => driver.CanPark);
+        public bool CanPark
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanPark);
+            }
+        }
 
-        public bool CanPulseGuide => (bool)FunctionNoParameters(() => driver.CanPulseGuide);
+        public bool CanPulseGuide
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanPulseGuide);
+            }
+        }
 
-        public bool CanSetDeclinationRate => (bool)FunctionNoParameters(() => driver.CanSetDeclinationRate);
+        public bool CanSetDeclinationRate
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanSetDeclinationRate);
+            }
+        }
 
-        public bool CanSetGuideRates => (bool)FunctionNoParameters(() => driver.CanSetGuideRates);
+        public bool CanSetGuideRates
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanSetGuideRates);
+            }
+        }
 
-        public bool CanSetPark => (bool)FunctionNoParameters(() => driver.CanSetPark);
+        public bool CanSetPark
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanSetPark);
+            }
+        }
 
-        public bool CanSetPierSide => (bool)FunctionNoParameters(() => driver.CanSetPierSide);
+        public bool CanSetPierSide
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanSetPierSide);
+            }
+        }
 
-        public bool CanSetRightAscensionRate => (bool)FunctionNoParameters(() => driver.CanSetRightAscensionRate);
+        public bool CanSetRightAscensionRate
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanSetRightAscensionRate);
+            }
+        }
 
-        public bool CanSetTracking => (bool)FunctionNoParameters(() => driver.CanSetTracking);
+        public bool CanSetTracking
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanSetTracking);
+            }
+        }
 
-        public bool CanSlew => (bool)FunctionNoParameters(() => driver.CanSlew);
+        public bool CanSlew
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanSlew);
+            }
+        }
 
-        public bool CanSlewAltAz => (bool)FunctionNoParameters(() => driver.CanSlewAltAz);
+        public bool CanSlewAltAz
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanSlewAltAz);
+            }
+        }
 
-        public bool CanSlewAltAzAsync => (bool)FunctionNoParameters(() => driver.CanSlewAltAzAsync);
+        public bool CanSlewAltAzAsync
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanSlewAltAzAsync);
+            }
+        }
 
-        public bool CanSlewAsync => (bool)FunctionNoParameters(() => driver.CanSlewAsync);
+        public bool CanSlewAsync
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanSlewAsync);
+            }
+        }
 
-        public bool CanSync => (bool)FunctionNoParameters(() => driver.CanSync);
+        public bool CanSync
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanSync);
+            }
+        }
 
-        public bool CanSyncAltAz => (bool)FunctionNoParameters(() => driver.CanSyncAltAz);
+        public bool CanSyncAltAz
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanSyncAltAz);
+            }
+        }
 
-        public bool CanUnpark => (bool)FunctionNoParameters(() => driver.CanUnpark);
+        public bool CanUnpark
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanUnpark);
+            }
+        }
 
-        public double Declination => (double)FunctionNoParameters(() => driver.Declination);
+        public double Declination
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.Declination);
+            }
+        }
 
-        public double DeclinationRate { get => (double)FunctionNoParameters(() => driver.DeclinationRate); set => Method1Parameter((i) => driver.DeclinationRate = i, value); }
-        public bool DoesRefraction { get => (bool)FunctionNoParameters(() => driver.DoesRefraction); set => Method1Parameter((i) => driver.DoesRefraction = i, value); }
+        public double DeclinationRate { get => FunctionNoParameters<double>(() => driver.DeclinationRate); set => Method1Parameter((i) => driver.DeclinationRate = i, value); }
+        public bool DoesRefraction { get => FunctionNoParameters<bool>(() => driver.DoesRefraction); set => Method1Parameter((i) => driver.DoesRefraction = i, value); }
 
-        public EquatorialCoordinateType EquatorialSystem => (EquatorialCoordinateType)FunctionNoParameters(() => driver.EquatorialSystem);
+        public EquatorialCoordinateType EquatorialSystem
+        {
+            get
+            {
+                return (EquatorialCoordinateType)FunctionNoParameters(() => driver.EquatorialSystem);
+            }
+        }
 
-        public double FocalLength => (double)FunctionNoParameters(() => driver.FocalLength);
+        public double FocalLength
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.FocalLength);
+            }
+        }
 
-        public double GuideRateDeclination { get => (double)FunctionNoParameters(() => driver.GuideRateDeclination); set => Method1Parameter((i) => driver.GuideRateDeclination = i, value); }
-        public double GuideRateRightAscension { get => (double)FunctionNoParameters(() => driver.GuideRateRightAscension); set => Method1Parameter((i) => driver.GuideRateRightAscension = i, value); }
+        public double GuideRateDeclination { get => FunctionNoParameters<double>(() => driver.GuideRateDeclination); set => Method1Parameter((i) => driver.GuideRateDeclination = i, value); }
+        public double GuideRateRightAscension { get => FunctionNoParameters<double>(() => driver.GuideRateRightAscension); set => Method1Parameter((i) => driver.GuideRateRightAscension = i, value); }
 
-        public bool IsPulseGuiding => (bool)FunctionNoParameters(() => driver.IsPulseGuiding);
+        public bool IsPulseGuiding
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.IsPulseGuiding);
+            }
+        }
 
-        public double RightAscension => (double)FunctionNoParameters(() => driver.RightAscension);
+        public double RightAscension
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.RightAscension);
+            }
+        }
 
-        public double RightAscensionRate { get => (double)FunctionNoParameters(() => driver.RightAscensionRate); set => Method1Parameter((i) => driver.RightAscensionRate = i, value); }
+        public double RightAscensionRate { get => FunctionNoParameters<double>(() => driver.RightAscensionRate); set => Method1Parameter((i) => driver.RightAscensionRate = i, value); }
         public PointingState SideOfPier { get => (PointingState)FunctionNoParameters(() => driver.SideOfPier); set => Method1Parameter((i) => driver.SideOfPier = i, value); }
 
-        public double SiderealTime => (double)FunctionNoParameters(() => driver.SiderealTime);
+        public double SiderealTime
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.SiderealTime);
+            }
+        }
 
-        public double SiteElevation { get => (double)FunctionNoParameters(() => driver.SiteElevation); set => Method1Parameter((i) => driver.SiteElevation = i, value); }
-        public double SiteLatitude { get => (double)FunctionNoParameters(() => driver.SiteLatitude); set => Method1Parameter((i) => driver.SiteLatitude = i, value); }
-        public double SiteLongitude { get => (double)FunctionNoParameters(() => driver.SiteLongitude); set => Method1Parameter((i) => driver.SiteLongitude = i, value); }
+        public double SiteElevation { get => FunctionNoParameters<double>(() => driver.SiteElevation); set => Method1Parameter((i) => driver.SiteElevation = i, value); }
+        public double SiteLatitude { get => FunctionNoParameters<double>(() => driver.SiteLatitude); set => Method1Parameter((i) => driver.SiteLatitude = i, value); }
+        public double SiteLongitude { get => FunctionNoParameters<double>(() => driver.SiteLongitude); set => Method1Parameter((i) => driver.SiteLongitude = i, value); }
 
-        public bool Slewing => (bool)FunctionNoParameters(() => driver.Slewing);
+        public bool Slewing
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.Slewing);
+            }
+        }
 
-        public short SlewSettleTime { get => (short)FunctionNoParameters(() => driver.SlewSettleTime); set => Method1Parameter((i) => driver.SlewSettleTime = i, value); }
-        public double TargetDeclination { get => (double)FunctionNoParameters(() => driver.TargetDeclination); set => Method1Parameter((i) => driver.TargetDeclination = i, value); }
-        public double TargetRightAscension { get => (double)FunctionNoParameters(() => driver.TargetRightAscension); set => Method1Parameter((i) => driver.TargetRightAscension = i, value); }
-        public bool Tracking { get => (bool)FunctionNoParameters(() => driver.Tracking); set => Method1Parameter((i) => driver.Tracking = i, value); }
+        public short SlewSettleTime { get => FunctionNoParameters<short>(() => driver.SlewSettleTime); set => Method1Parameter((i) => driver.SlewSettleTime = i, value); }
+        public double TargetDeclination { get => FunctionNoParameters<double>(() => driver.TargetDeclination); set => Method1Parameter((i) => driver.TargetDeclination = i, value); }
+        public double TargetRightAscension { get => FunctionNoParameters<double>(() => driver.TargetRightAscension); set => Method1Parameter((i) => driver.TargetRightAscension = i, value); }
+        public bool Tracking { get => FunctionNoParameters<bool>(() => driver.Tracking); set => Method1Parameter((i) => driver.Tracking = i, value); }
         public DriveRate TrackingRate { get => (DriveRate)FunctionNoParameters(() => driver.TrackingRate); set => Method1Parameter((i) => driver.TrackingRate = i, value); }
 
         public ITrackingRates TrackingRates
@@ -120,12 +300,12 @@ namespace ConformU
 
         public bool CanMoveAxis(TelescopeAxis Axis)
         {
-            return (bool)Function1Parameter((i) => driver.CanMoveAxis(i), Axis);
+            return Function1Parameter<bool>((i) => driver.CanMoveAxis(i), Axis);
         }
 
         public PointingState DestinationSideOfPier(double RightAscension, double Declination)
         {
-            return (PointingState)Function2Parameters((i, j) => driver.DestinationSideOfPier(i, j), RightAscension, Declination);
+            return Function2Parameters<PointingState>((i, j) => driver.DestinationSideOfPier(i, j), RightAscension, Declination);
         }
 
         public void FindHome()
@@ -207,10 +387,22 @@ namespace ConformU
 
         #region ITelescopeV4 interface implementation
 
-        public bool OperationComplete => (bool)FunctionNoParameters(() => driver.OperationComplete);
+        public bool OperationComplete
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.OperationComplete);
+            }
+        }
 
-        public bool InterruptionComplete => (bool)FunctionNoParameters(() => driver.InterruptionComplete); //InterruptionComplete
-                                                                                                           //InterruptionComplete
+        public bool InterruptionComplete
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.InterruptionComplete); //InterruptionComplete
+            }
+        }
+        //InterruptionComplete
 
         #endregion
 

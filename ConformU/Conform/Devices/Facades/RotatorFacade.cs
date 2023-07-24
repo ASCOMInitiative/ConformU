@@ -7,19 +7,55 @@ namespace ConformU
         // Create the test device in the facade base class
         public RotatorFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }
 
-        public bool CanReverse => (bool)FunctionNoParameters(() => driver.CanReverse);
+        public bool CanReverse
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CanReverse);
+            }
+        }
 
-        public bool IsMoving => (bool)FunctionNoParameters(() => driver.IsMoving);
+        public bool IsMoving
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.IsMoving);
+            }
+        }
 
-        public float Position => (float)FunctionNoParameters(() => driver.Position);
+        public float Position
+        {
+            get
+            {
+                return FunctionNoParameters<float>(() => driver.Position);
+            }
+        }
 
-        public bool Reverse { get => (bool)FunctionNoParameters(() => driver.Reverse); set => Method1Parameter((i) => driver.Reverse = i, value); }
+        public bool Reverse { get => FunctionNoParameters<bool>(() => driver.Reverse); set => Method1Parameter((i) => driver.Reverse = i, value); }
 
-        public float StepSize => (float)FunctionNoParameters(() => driver.StepSize);
+        public float StepSize
+        {
+            get
+            {
+                return FunctionNoParameters<float>(() => driver.StepSize);
+            }
+        }
 
-        public float TargetPosition => (float)FunctionNoParameters(() => driver.TargetPosition);
+        public float TargetPosition
+        {
+            get
+            {
+                return FunctionNoParameters<float>(() => driver.TargetPosition);
+            }
+        }
 
-        public float MechanicalPosition => (float)FunctionNoParameters(() => driver.MechanicalPosition);
+        public float MechanicalPosition
+        {
+            get
+            {
+                return FunctionNoParameters<float>(() => driver.MechanicalPosition);
+            }
+        }
 
         public void Halt()
         {

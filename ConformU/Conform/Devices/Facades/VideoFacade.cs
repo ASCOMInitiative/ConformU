@@ -25,13 +25,37 @@ namespace ConformU
         // Create the test device in the facade base class
         public VideoFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }
 
-        public string VideoCaptureDeviceName => (string)FunctionNoParameters(() => driver.VideoCaptureDeviceName);
+        public string VideoCaptureDeviceName
+        {
+            get
+            {
+                return (string)FunctionNoParameters(() => driver.VideoCaptureDeviceName);
+            }
+        }
 
-        public double ExposureMax => (double)FunctionNoParameters(() => driver.ExposureMax);
+        public double ExposureMax
+        {
+            get
+            {
+                return (double)FunctionNoParameters(() => driver.ExposureMax);
+            }
+        }
 
-        public double ExposureMin => (double)FunctionNoParameters(() => driver.ExposureMin);
+        public double ExposureMin
+        {
+            get
+            {
+                return (double)FunctionNoParameters(() => driver.ExposureMin);
+            }
+        }
 
-        public VideoCameraFrameRate FrameRate => (VideoCameraFrameRate)FunctionNoParameters(() => driver.FrameRate);
+        public VideoCameraFrameRate FrameRate
+        {
+            get
+            {
+                return (VideoCameraFrameRate)FunctionNoParameters(() => driver.FrameRate);
+            }
+        }
 
         public IList<double> SupportedIntegrationRates
         {
@@ -141,31 +165,109 @@ namespace ConformU
             }
         }
 
-        public string SensorName => (string)FunctionNoParameters(() => driver.SensorName);
+        public string SensorName
+        {
+            get
+            {
+                return (string)FunctionNoParameters(() => driver.SensorName);
+            }
+        }
 
-        public SensorType SensorType => (SensorType)FunctionNoParameters(() => driver.SensorType);
+        public SensorType SensorType
+        {
+            get
+            {
+                return (SensorType)FunctionNoParameters(() => driver.SensorType);
+            }
+        }
 
-        public int Width => (int)FunctionNoParameters(() => driver.Width);
+        public int Width
+        {
+            get
+            {
+                return (int)FunctionNoParameters(() => driver.Width);
+            }
+        }
 
-        public int Height => (int)FunctionNoParameters(() => driver.Height);
+        public int Height
+        {
+            get
+            {
+                return (int)FunctionNoParameters(() => driver.Height);
+            }
+        }
 
-        public double PixelSizeX => (double)FunctionNoParameters(() => driver.PixelSizeX);
+        public double PixelSizeX
+        {
+            get
+            {
+                return (double)FunctionNoParameters(() => driver.PixelSizeX);
+            }
+        }
 
-        public double PixelSizeY => (double)FunctionNoParameters(() => driver.PixelSizeY);
+        public double PixelSizeY
+        {
+            get
+            {
+                return (double)FunctionNoParameters(() => driver.PixelSizeY);
+            }
+        }
 
-        public int BitDepth => (int)FunctionNoParameters(() => driver.BitDepth);
+        public int BitDepth
+        {
+            get
+            {
+                return (int)FunctionNoParameters(() => driver.BitDepth);
+            }
+        }
 
-        public string VideoCodec => (string)FunctionNoParameters(() => driver.VideoCodec);
+        public string VideoCodec
+        {
+            get
+            {
+                return (string)FunctionNoParameters(() => driver.VideoCodec);
+            }
+        }
 
-        public string VideoFileFormat => (string)FunctionNoParameters(() => driver.VideoFileFormat);
+        public string VideoFileFormat
+        {
+            get
+            {
+                return (string)FunctionNoParameters(() => driver.VideoFileFormat);
+            }
+        }
 
-        public int VideoFramesBufferSize => (int)FunctionNoParameters(() => driver.VideoFramesBufferSize);
+        public int VideoFramesBufferSize
+        {
+            get
+            {
+                return (int)FunctionNoParameters(() => driver.VideoFramesBufferSize);
+            }
+        }
 
-        public VideoCameraState CameraState => (VideoCameraState)FunctionNoParameters(() => driver.CameraState);
+        public VideoCameraState CameraState
+        {
+            get
+            {
+                return (VideoCameraState)FunctionNoParameters(() => driver.CameraState);
+            }
+        }
 
-        public short GainMax => (short)FunctionNoParameters(() => driver.GainMax);
+        public short GainMax
+        {
+            get
+            {
+                return (short)FunctionNoParameters(() => driver.GainMax);
+            }
+        }
 
-        public short GainMin => (short)FunctionNoParameters(() => driver.GainMin);
+        public short GainMin
+        {
+            get
+            {
+                return (short)FunctionNoParameters(() => driver.GainMin);
+            }
+        }
 
         public short Gain { get => (short)FunctionNoParameters(() => driver.Gain); set => Method1Parameter((i) => driver.Gain = i, value); }
 
@@ -184,9 +286,21 @@ namespace ConformU
             }
         }
 
-        public short GammaMax => (short)FunctionNoParameters(() => driver.GammaMax);
+        public short GammaMax
+        {
+            get
+            {
+                return (short)FunctionNoParameters(() => driver.GammaMax);
+            }
+        }
 
-        public short GammaMin => (short)FunctionNoParameters(() => driver.GammaMin);
+        public short GammaMin
+        {
+            get
+            {
+                return (short)FunctionNoParameters(() => driver.GammaMin);
+            }
+        }
 
         public short Gamma { get => (short)FunctionNoParameters(() => driver.Gamma); set => Method1Parameter((i) => driver.Gamma = i, value); }
 
@@ -206,11 +320,17 @@ namespace ConformU
             }
         }
 
-        public bool CanConfigureDeviceProperties => (bool)FunctionNoParameters(() => driver.CanConfigureDeviceProperties);
+        public bool CanConfigureDeviceProperties
+        {
+            get
+            {
+                return (bool)FunctionNoParameters(() => driver.CanConfigureDeviceProperties);
+            }
+        }
 
         public string StartRecordingVideoFile(string PreferredFileName)
         {
-            return (string)Function1Parameter((i) => driver.StartRecordingVideoFile(i), PreferredFileName);
+            return Function1Parameter<string>((i) => driver.StartRecordingVideoFile(i), PreferredFileName);
         }
 
         public void StopRecordingVideoFile()

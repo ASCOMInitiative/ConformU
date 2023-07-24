@@ -9,25 +9,73 @@ namespace ConformU
 
         #region Interface implementation
 
-        public bool Absolute => (bool)FunctionNoParameters(() => driver.Absolute);
+        public bool Absolute
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.Absolute);
+            }
+        }
 
-        public bool IsMoving => (bool)FunctionNoParameters(() => driver.IsMoving);
+        public bool IsMoving
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.IsMoving);
+            }
+        }
 
-        public bool Link { get => (bool)FunctionNoParameters(() => driver.Link); set => Method1Parameter((i) => driver.Link = i, value); }
+        public bool Link { get => FunctionNoParameters<bool>(() => driver.Link); set => Method1Parameter((i) => driver.Link = i, value); }
 
-        public int MaxIncrement => (int)FunctionNoParameters(() => driver.MaxIncrement);
+        public int MaxIncrement
+        {
+            get
+            {
+                return FunctionNoParameters<int>(() => driver.MaxIncrement);
+            }
+        }
 
-        public int MaxStep => (int)FunctionNoParameters(() => driver.MaxStep);
+        public int MaxStep
+        {
+            get
+            {
+                return FunctionNoParameters<int>(() => driver.MaxStep);
+            }
+        }
 
-        public int Position => (int)FunctionNoParameters(() => driver.Position);
+        public int Position
+        {
+            get
+            {
+                return FunctionNoParameters<int>(() => driver.Position);
+            }
+        }
 
-        public double StepSize => (double)FunctionNoParameters(() => driver.StepSize);
+        public double StepSize
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.StepSize);
+            }
+        }
 
-        public bool TempComp { get => (bool)FunctionNoParameters(() => driver.TempComp); set => Method1Parameter((i) => driver.TempComp = i, value); }
+        public bool TempComp { get => FunctionNoParameters<bool>(() => driver.TempComp); set => Method1Parameter((i) => driver.TempComp = i, value); }
 
-        public bool TempCompAvailable => (bool)FunctionNoParameters(() => driver.TempCompAvailable);
+        public bool TempCompAvailable
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.TempCompAvailable);
+            }
+        }
 
-        public double Temperature => (double)FunctionNoParameters(() => driver.Temperature);
+        public double Temperature
+        {
+            get
+            {
+                return FunctionNoParameters<double>(() => driver.Temperature);
+            }
+        }
 
         public void Halt()
         {

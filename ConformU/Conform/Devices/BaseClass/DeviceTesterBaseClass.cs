@@ -1389,11 +1389,11 @@ namespace ConformU
         }
 
         /// <summary>
-        /// Determine whether progress of an async operation should be tested using OperationComplete or the appropriate historic polled variable.
+        /// Determine whether a test device has asynchronous connection.
         /// </summary>
         /// <param name="interfaceVersion">This device's interface number</param>
         /// <returns>True if completion should be tested using OperationComplete</returns>
-        public bool UseOperations()
+        public bool HasConnect()
         {
             // Initialise requiredInterfaceVersion to a large value so that the function result will be False when values are omitted from the switch statement below.
             int requiredInterfaceVersion = int.MaxValue;
