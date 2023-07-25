@@ -202,19 +202,19 @@ namespace ConformU
 
         internal T FuncNoParameters<T>(Func<T> func)
         {
-            if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Method called on thread {Environment.CurrentManagedThreadId}, Message loop running: {Application.MessageLoop}");
-            if (this.InvokeRequired)
-            {
-                if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Invoke required for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+                if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Method called on thread {Environment.CurrentManagedThreadId}, Message loop running: {Application.MessageLoop}");
+                if (this.InvokeRequired)
+                {
+                    if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Invoke required for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
                 return this.Invoke(func);
-            }
-            else
-            {
-                if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"About to run Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                }
+                else
+                {
+                    if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"About to run Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                 T returnValue = func();
-                if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Returned from Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
-                return returnValue;
-            }
+                    if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Returned from Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                    return returnValue;
+                }
         }
 
         internal T Func1Parameter<T>(Func<object, T> func, object parameter1)

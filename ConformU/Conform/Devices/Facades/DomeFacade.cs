@@ -118,7 +118,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<ShutterState>(() => driver.ShutterStatus);
+                return (ShutterState)FunctionNoParameters<object>(() => driver.ShutterStatus);
             }
         }
 

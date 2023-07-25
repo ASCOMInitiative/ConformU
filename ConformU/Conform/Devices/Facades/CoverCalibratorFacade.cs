@@ -13,7 +13,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<CoverStatus>(() => driver.CoverState);
+                return (CoverStatus)FunctionNoParameters<object>(() => driver.CoverState);
             }
         }
 
@@ -21,7 +21,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<CalibratorStatus>(() => driver.CalibratorState);
+                return (CalibratorStatus)FunctionNoParameters<object>(() => driver.CalibratorState);
             }
         }
 

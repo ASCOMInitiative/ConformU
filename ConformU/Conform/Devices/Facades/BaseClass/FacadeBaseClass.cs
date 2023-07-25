@@ -455,7 +455,7 @@ namespace ConformU
         {
             get
             {
-                return (bool)FunctionNoParameters(() => driver.Connecting);
+                return FunctionNoParameters<bool>(() => driver.Connecting);
             }
         }
 
@@ -463,7 +463,7 @@ namespace ConformU
         {
             get
             {
-                return ((IEnumerable)FunctionNoParameters(() => driver.DeviceState)).Cast<IStateValue>().ToList();
+                return FunctionNoParameters<IEnumerable>(() => driver.DeviceState).Cast<IStateValue>().ToList();
             }
         }
 

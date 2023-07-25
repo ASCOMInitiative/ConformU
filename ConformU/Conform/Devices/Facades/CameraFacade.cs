@@ -18,7 +18,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<CameraState>(() => driver.CameraState);
+                return (CameraState)FunctionNoParameters<object>(() => driver.CameraState);
             }
         }
 
@@ -140,7 +140,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters(() => driver.ImageArray);
+                return FunctionNoParameters<object>(() => driver.ImageArray);
             }
         }
 
@@ -148,7 +148,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters(() => driver.ImageArrayVariant);
+                return FunctionNoParameters<object>(() => driver.ImageArrayVariant);
             }
         }
 
@@ -350,7 +350,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<SensorType>(() => driver.SensorType);
+                return (SensorType)FunctionNoParameters<object>(() => driver.SensorType);
             }
         }
 

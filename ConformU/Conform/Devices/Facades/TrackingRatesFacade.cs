@@ -17,7 +17,7 @@ namespace ConformU
             m_TrackingRates = Array.Empty<DriveRate>();
 
             // Assign the TrackinRates response to an IEnumerable variable
-            IEnumerable trackingRates = (IEnumerable)telescopeFacade.FunctionNoParameters(() => driver.TrackingRates);
+            IEnumerable trackingRates = telescopeFacade.FunctionNoParameters<IEnumerable>(() => driver.TrackingRates);
 
             // Copy the response values to a local array so that the driver is not continually polled for values
             int nextArrayPosition = 0;

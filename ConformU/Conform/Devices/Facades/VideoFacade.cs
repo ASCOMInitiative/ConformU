@@ -1,21 +1,6 @@
 ﻿
-/* Unmerged change from project 'ConformU (net5.0)'
-Before:
-using System;
-After:
 using ASCOM.Common.DeviceInterfaces;
-using System;
-*/
-using ASCOM.Common.DeviceInterfaces;
-using System.
-/* Unmerged change from project 'ConformU (net5.0)'
-Before:
-using System.Threading.Tasks;
-using ASCOM.Common.DeviceInterfaces;
-After:
-using System.Threading.Tasks;
-*/
-Collections;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace ConformU
@@ -29,7 +14,7 @@ namespace ConformU
         {
             get
             {
-                return (string)FunctionNoParameters(() => driver.VideoCaptureDeviceName);
+                return FunctionNoParameters<string>(() => driver.VideoCaptureDeviceName);
             }
         }
 
@@ -37,7 +22,7 @@ namespace ConformU
         {
             get
             {
-                return (double)FunctionNoParameters(() => driver.ExposureMax);
+                return FunctionNoParameters<double>(() => driver.ExposureMax);
             }
         }
 
@@ -45,7 +30,7 @@ namespace ConformU
         {
             get
             {
-                return (double)FunctionNoParameters(() => driver.ExposureMin);
+                return FunctionNoParameters<double>(() => driver.ExposureMin);
             }
         }
 
@@ -53,7 +38,7 @@ namespace ConformU
         {
             get
             {
-                return (VideoCameraFrameRate)FunctionNoParameters(() => driver.FrameRate);
+                return (VideoCameraFrameRate)FunctionNoParameters<object>(() => driver.FrameRate);
             }
         }
 
@@ -62,7 +47,7 @@ namespace ConformU
             get
             {
                 List<double> returnValue = new();
-                var gains = FunctionNoParameters(() => driver.SupportedIntegrationRates);
+                var gains = FunctionNoParameters<IList<double>>(() => driver.SupportedIntegrationRates);
                 foreach (double o in (IList)gains)
                 {
                     returnValue.Add(o);
@@ -72,7 +57,7 @@ namespace ConformU
             }
         }
 
-        public int IntegrationRate { get => (int)FunctionNoParameters(() => driver.IntegrationRate); set => Method1Parameter((i) => driver.IntegrationRate = i, value); }
+        public int IntegrationRate { get => FunctionNoParameters<int>(() => driver.IntegrationRate); set => Method1Parameter((i) => driver.IntegrationRate = i, value); }
 
         public IVideoFrame LastVideoFrame
         {
@@ -82,7 +67,7 @@ namespace ConformU
                 try
                 {
                     // Get the last VideoFrame
-                    dynamic lastFrame = FunctionNoParameters(() => driver.LastVideoFrame);
+                    dynamic lastFrame = FunctionNoParameters<dynamic>(() => driver.LastVideoFrame);
                     logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Got last frame from driver");
                     // Create and populate the correct metadata return type
                     List<KeyValuePair<string, string>> imageMetaData = new();
@@ -169,7 +154,7 @@ namespace ConformU
         {
             get
             {
-                return (string)FunctionNoParameters(() => driver.SensorName);
+                return FunctionNoParameters<string>(() => driver.SensorName);
             }
         }
 
@@ -177,7 +162,7 @@ namespace ConformU
         {
             get
             {
-                return (SensorType)FunctionNoParameters(() => driver.SensorType);
+                return (SensorType)FunctionNoParameters<object>(() => driver.SensorType);
             }
         }
 
@@ -185,7 +170,7 @@ namespace ConformU
         {
             get
             {
-                return (int)FunctionNoParameters(() => driver.Width);
+                return FunctionNoParameters<int>(() => driver.Width);
             }
         }
 
@@ -193,7 +178,7 @@ namespace ConformU
         {
             get
             {
-                return (int)FunctionNoParameters(() => driver.Height);
+                return FunctionNoParameters<int>(() => driver.Height);
             }
         }
 
@@ -201,7 +186,7 @@ namespace ConformU
         {
             get
             {
-                return (double)FunctionNoParameters(() => driver.PixelSizeX);
+                return FunctionNoParameters<double>(() => driver.PixelSizeX);
             }
         }
 
@@ -209,7 +194,7 @@ namespace ConformU
         {
             get
             {
-                return (double)FunctionNoParameters(() => driver.PixelSizeY);
+                return FunctionNoParameters<double>(() => driver.PixelSizeY);
             }
         }
 
@@ -217,7 +202,7 @@ namespace ConformU
         {
             get
             {
-                return (int)FunctionNoParameters(() => driver.BitDepth);
+                return FunctionNoParameters<int>(() => driver.BitDepth);
             }
         }
 
@@ -225,7 +210,7 @@ namespace ConformU
         {
             get
             {
-                return (string)FunctionNoParameters(() => driver.VideoCodec);
+                return FunctionNoParameters<string>(() => driver.VideoCodec);
             }
         }
 
@@ -233,7 +218,7 @@ namespace ConformU
         {
             get
             {
-                return (string)FunctionNoParameters(() => driver.VideoFileFormat);
+                return FunctionNoParameters<string>(() => driver.VideoFileFormat);
             }
         }
 
@@ -241,7 +226,7 @@ namespace ConformU
         {
             get
             {
-                return (int)FunctionNoParameters(() => driver.VideoFramesBufferSize);
+                return FunctionNoParameters<int>(() => driver.VideoFramesBufferSize);
             }
         }
 
@@ -249,7 +234,7 @@ namespace ConformU
         {
             get
             {
-                return (VideoCameraState)FunctionNoParameters(() => driver.CameraState);
+                return (VideoCameraState)FunctionNoParameters<object>(() => driver.CameraState);
             }
         }
 
@@ -257,7 +242,7 @@ namespace ConformU
         {
             get
             {
-                return (short)FunctionNoParameters(() => driver.GainMax);
+                return FunctionNoParameters<short>(() => driver.GainMax);
             }
         }
 
@@ -265,18 +250,18 @@ namespace ConformU
         {
             get
             {
-                return (short)FunctionNoParameters(() => driver.GainMin);
+                return FunctionNoParameters<short>(() => driver.GainMin);
             }
         }
 
-        public short Gain { get => (short)FunctionNoParameters(() => driver.Gain); set => Method1Parameter((i) => driver.Gain = i, value); }
+        public short Gain { get => FunctionNoParameters<short>(() => driver.Gain); set => Method1Parameter((i) => driver.Gain = i, value); }
 
         public IList<string> Gains
         {
             get
             {
                 List<string> returnValue = new();
-                var gains = FunctionNoParameters(() => driver.Gains);
+                var gains = FunctionNoParameters<IList<string>>(() => driver.Gains);
                 foreach (string o in (IList)gains)
                 {
                     returnValue.Add(o);
@@ -290,7 +275,7 @@ namespace ConformU
         {
             get
             {
-                return (short)FunctionNoParameters(() => driver.GammaMax);
+                return FunctionNoParameters<short>(() => driver.GammaMax);
             }
         }
 
@@ -298,18 +283,18 @@ namespace ConformU
         {
             get
             {
-                return (short)FunctionNoParameters(() => driver.GammaMin);
+                return FunctionNoParameters<short>(() => driver.GammaMin);
             }
         }
 
-        public short Gamma { get => (short)FunctionNoParameters(() => driver.Gamma); set => Method1Parameter((i) => driver.Gamma = i, value); }
+        public short Gamma { get => FunctionNoParameters<short>(() => driver.Gamma); set => Method1Parameter((i) => driver.Gamma = i, value); }
 
         public IList<string> Gammas
         {
             get
             {
                 List<string> returnValue = new();
-                var gains = FunctionNoParameters(() => driver.Gammas);
+                var gains = FunctionNoParameters<IList<string>>(() => driver.Gammas);
                 foreach (string o in (IList)gains)
                 {
                     returnValue.Add(o);
@@ -324,7 +309,7 @@ namespace ConformU
         {
             get
             {
-                return (bool)FunctionNoParameters(() => driver.CanConfigureDeviceProperties);
+                return FunctionNoParameters<bool>(() => driver.CanConfigureDeviceProperties);
             }
         }
 

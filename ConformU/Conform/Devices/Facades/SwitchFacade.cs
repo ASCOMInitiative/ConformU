@@ -13,7 +13,7 @@ namespace ConformU
         {
             get
             {
-                return (short)FunctionNoParameters(() => driver.MaxSwitch);
+                return FunctionNoParameters<short>(() => driver.MaxSwitch);
             }
         }
 

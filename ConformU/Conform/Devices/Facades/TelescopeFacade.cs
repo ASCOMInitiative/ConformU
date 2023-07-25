@@ -23,7 +23,7 @@ namespace ConformU
         {
             get
             {
-                return (AlignmentMode)FunctionNoParameters(() => driver.AlignmentMode);
+                return (AlignmentMode)FunctionNoParameters<object>(() => driver.AlignmentMode);
             }
         }
 
@@ -218,7 +218,7 @@ namespace ConformU
         {
             get
             {
-                return (EquatorialCoordinateType)FunctionNoParameters(() => driver.EquatorialSystem);
+                return (EquatorialCoordinateType)FunctionNoParameters<object>(() => driver.EquatorialSystem);
             }
         }
 
@@ -250,7 +250,7 @@ namespace ConformU
         }
 
         public double RightAscensionRate { get => FunctionNoParameters<double>(() => driver.RightAscensionRate); set => Method1Parameter((i) => driver.RightAscensionRate = i, value); }
-        public PointingState SideOfPier { get => (PointingState)FunctionNoParameters(() => driver.SideOfPier); set => Method1Parameter((i) => driver.SideOfPier = i, value); }
+        public PointingState SideOfPier { get => (PointingState)FunctionNoParameters<object>(() => driver.SideOfPier); set => Method1Parameter((i) => driver.SideOfPier = i, value); }
 
         public double SiderealTime
         {
@@ -276,7 +276,7 @@ namespace ConformU
         public double TargetDeclination { get => FunctionNoParameters<double>(() => driver.TargetDeclination); set => Method1Parameter((i) => driver.TargetDeclination = i, value); }
         public double TargetRightAscension { get => FunctionNoParameters<double>(() => driver.TargetRightAscension); set => Method1Parameter((i) => driver.TargetRightAscension = i, value); }
         public bool Tracking { get => FunctionNoParameters<bool>(() => driver.Tracking); set => Method1Parameter((i) => driver.Tracking = i, value); }
-        public DriveRate TrackingRate { get => (DriveRate)FunctionNoParameters(() => driver.TrackingRate); set => Method1Parameter((i) => driver.TrackingRate = i, value); }
+        public DriveRate TrackingRate { get => (DriveRate)FunctionNoParameters<object>(() => driver.TrackingRate); set => Method1Parameter((i) => driver.TrackingRate = i, value); }
 
         public ITrackingRates TrackingRates
         {
@@ -386,23 +386,6 @@ namespace ConformU
         #endregion
 
         #region ITelescopeV4 interface implementation
-
-        public bool OperationComplete
-        {
-            get
-            {
-                return FunctionNoParameters<bool>(() => driver.OperationComplete);
-            }
-        }
-
-        public bool InterruptionComplete
-        {
-            get
-            {
-                return FunctionNoParameters<bool>(() => driver.InterruptionComplete); //InterruptionComplete
-            }
-        }
-        //InterruptionComplete
 
         #endregion
 
