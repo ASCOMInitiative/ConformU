@@ -14,7 +14,7 @@ namespace ConformU
     {
         const int FWTEST_IS_MOVING = -1;
 
-        private IFilterWheelV2 filterWheel;
+        private IFilterWheelV3 filterWheel;
         enum FilterWheelProperties
         {
             FocusOffsets,

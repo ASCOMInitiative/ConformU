@@ -32,6 +32,9 @@ csharp_style_deconstructed_variable_declaration = true:suggestion
 csharp_style_unused_value_assignment_preference = unused_local_variable:suggestion
 csharp_style_unused_value_expression_statement_preference = unused_local_variable:silent
 
+# VSSpell001: Spell Check
+dotnet_diagnostic.VSSpell001.severity = none
+
 [*.{cs,vb}]
 #### Naming styles ####
 

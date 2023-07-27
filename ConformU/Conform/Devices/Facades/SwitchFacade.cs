@@ -2,7 +2,7 @@
 
 namespace ConformU
 {
-    public class SwitchFacade : FacadeBaseClass, ISwitchV2
+    public class SwitchFacade : FacadeBaseClass, ISwitchV3
     {
         // Create the test device in the facade base class
         public SwitchFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }

@@ -1,12 +1,17 @@
 ﻿// Base class from which particular device testers are derived
 // Put all common elements in here
 using ASCOM;
+using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
+using ASCOM.Common.DeviceInterfaces;
+using ASCOM.DeviceInterface;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using static ConformU.Globals;
@@ -41,7 +46,7 @@ namespace ConformU
 
         private bool l_Connected, l_HasProperties, l_HasCanProperties, l_HasMethods, l_HasPreRunCheck, l_HasPostRunCheck, l_HasPerformanceCheck;
         private bool l_HasPreConnectCheck;
-        internal dynamic baseClassDevice; // IAscomDriverV1
+        internal IAscomDeviceV2 baseClassDevice; // IAscomDriverV1
 
         private string testName, testAction, testStatus;
 
@@ -193,18 +198,17 @@ namespace ConformU
         public void SetupDialog()
         {
             if (settings.DisplayMethodCalls) LogTestAndMessage("SetupDialog", "About to call SetupDialog");
-            baseClassDevice.SetupDialog();
+            ((dynamic)baseClassDevice).SetupDialog();
         }
 
-        public void CheckCommonMethods(object p_DeviceObject, DeviceTypes p_DeviceType)
+        public void CheckCommonMethods(IAscomDeviceV2 deviceObject, DeviceTypes deviceType)
         {
-            string m_DriverVersion, m_DriverInfo, m_Description, m_Name; // , m_LastResult As String
-            IList SA;
+            string driverVersion, driverInfo, description, name;
+            IList supportedActions;
 
-            // Dim m_Configuration, SC() As String
-            bool m_Connected;
+            bool connected;
             LogTestOnly("Common Driver Methods");
-            baseClassDevice = p_DeviceObject; // CType(DeviceObject, IAscomDriverV1)
+            baseClassDevice = deviceObject;
 
             // InterfaceVersion - Required
             try
@@ -236,13 +240,13 @@ namespace ConformU
                 return;
 
             // Connected - Required
-            if (IncludeMethod(MandatoryMethod.Connected, p_DeviceType, interfaceVersion))
+            if (IncludeMethod(MandatoryMethod.Connected, deviceType, interfaceVersion))
             {
                 try
                 {
                     LogCallToDriver("Connected", "About to get property Connected");
-                    m_Connected = baseClassDevice.Connected;
-                    LogOK("Connected", m_Connected.ToString());
+                    connected = baseClassDevice.Connected;
+                    LogOK("Connected", connected.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -254,13 +258,13 @@ namespace ConformU
             }
 
             // Description - Required
-            if (IncludeMethod(MandatoryMethod.Description, p_DeviceType, interfaceVersion))
+            if (IncludeMethod(MandatoryMethod.Description, deviceType, interfaceVersion))
             {
                 try
                 {
                     LogCallToDriver("Description", "About to get property Description");
-                    m_Description = baseClassDevice.Description;
-                    switch (m_Description ?? "")
+                    description = baseClassDevice.Description;
+                    switch (description ?? "")
                     {
                         case var case1 when case1 == "":
                             {
@@ -270,13 +274,13 @@ namespace ConformU
 
                         default:
                             {
-                                if (m_Description.Length > 68 & p_DeviceType == DeviceTypes.Camera)
+                                if (description.Length > 68 & deviceType == DeviceTypes.Camera)
                                 {
-                                    LogIssue("Description", "Maximum number of characters is 68 for compatibility with FITS headers, found: " + m_Description.Length + " characters: " + m_Description);
+                                    LogIssue("Description", "Maximum number of characters is 68 for compatibility with FITS headers, found: " + description.Length + " characters: " + description);
                                 }
                                 else
                                 {
-                                    LogOK("Description", m_Description.ToString());
+                                    LogOK("Description", description.ToString());
                                 }
 
                                 break;
@@ -293,13 +297,13 @@ namespace ConformU
             }
 
             // DriverInfo - Required
-            if (IncludeMethod(MandatoryMethod.DriverInfo, p_DeviceType, interfaceVersion))
+            if (IncludeMethod(MandatoryMethod.DriverInfo, deviceType, interfaceVersion))
             {
                 try
                 {
                     LogCallToDriver("DriverInfo", "About to get property DriverInfo");
-                    m_DriverInfo = baseClassDevice.DriverInfo;
-                    switch (m_DriverInfo ?? "")
+                    driverInfo = baseClassDevice.DriverInfo;
+                    switch (driverInfo ?? "")
                     {
                         case var case2 when case2 == "":
                             {
@@ -309,7 +313,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogOK("DriverInfo", m_DriverInfo.ToString());
+                                LogOK("DriverInfo", driverInfo.ToString());
                                 break;
                             }
                     }
@@ -324,13 +328,13 @@ namespace ConformU
             }
 
             // DriverVersion - Required
-            if (IncludeMethod(MandatoryMethod.DriverVersion, p_DeviceType, interfaceVersion))
+            if (IncludeMethod(MandatoryMethod.DriverVersion, deviceType, interfaceVersion))
             {
                 try
                 {
                     LogCallToDriver("DriverVersion", "About to get property DriverVersion");
-                    m_DriverVersion = baseClassDevice.DriverVersion;
-                    switch (m_DriverVersion ?? "")
+                    driverVersion = baseClassDevice.DriverVersion;
+                    switch (driverVersion ?? "")
                     {
                         case var case3 when case3 == "":
                             {
@@ -340,7 +344,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogOK("DriverVersion", m_DriverVersion.ToString());
+                                LogOK("DriverVersion", driverVersion.ToString());
                                 break;
                             }
                     }
@@ -359,13 +363,13 @@ namespace ConformU
             }
 
             // Name - Required
-            if (IncludeMethod(MandatoryMethod.Name, p_DeviceType, interfaceVersion))
+            if (IncludeMethod(MandatoryMethod.Name, deviceType, interfaceVersion))
             {
                 try
                 {
                     LogCallToDriver("Name", "About to get property Name");
-                    m_Name = baseClassDevice.Name;
-                    switch (m_Name ?? "")
+                    name = baseClassDevice.Name;
+                    switch (name ?? "")
                     {
                         case var case4 when case4 == "":
                             {
@@ -375,7 +379,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogOK("Name", m_Name);
+                                LogOK("Name", name);
                                 break;
                             }
                     }
@@ -388,35 +392,7 @@ namespace ConformU
                 if (applicationCancellationToken.IsCancellationRequested)
                     return;
             }
-
-            // CommandXXX tests - Optional
-            //if (IncludeMethod(MandatoryMethod.CommandXXX, p_DeviceType, g_InterfaceVersion))
-            //{
-
-            //    // Validate that the g_TelescopeTests collection is in a healthy state
-            //    try
-            //    {
-            //        LogMsgDebug("CommandXXX Tests", $"Test collection is null: {Information.IsNothing(g_TelescopeTests)}");
-            //        LogMsgDebug("CommandXXX Tests", $"Test collection size: {g_TelescopeTests.Count}");
-            //        foreach (KeyValuePair<string, CheckState> kvp in g_TelescopeTests)
-            //            LogMsgDebug("CommandXXX Tests", $"Found key: {kvp.Key} = {g_TelescopeTests[kvp.Key]}");
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        LogMsgDebug("CommandXXX Tests", $"Exception: {ex}");
-            //    }
-
-            //    if (g_TelescopeTests[TELTEST_COMMANDXXX] == CheckState.Checked)
-            //    {
-            //        LogMsgInfo("CommandString", "Conform cannot test the CommandString method");
-            //        LogMsgInfo("CommandBlind", "Conform cannot test the CommandBlind method");
-            //        LogMsgInfo("CommandBool", "Conform cannot test the CommandBool method");
-            //    }
-            //    else
-            //    {
-            //        LogMsgInfo(TELTEST_COMMANDXXX, "Tests skipped");
-            //    }
-            //}
+            LogNewLine();
 
             // Action - optional but cannot be tested
             LogInfo("Action", "Conform cannot test the Action method");
@@ -425,15 +401,15 @@ namespace ConformU
             try
             {
                 LogCallToDriver("SupportedActions", "About to call method SupportedActions");
-                SA = (IList)baseClassDevice.SupportedActions;
-                if (SA.Count == 0)
+                supportedActions = (IList)baseClassDevice.SupportedActions;
+                if (supportedActions.Count == 0)
                 {
                     LogOK("SupportedActions", "Driver returned an empty action list");
                 }
                 else
                 {
                     var i = default(int);
-                    foreach (object Action in SA)
+                    foreach (object Action in supportedActions)
                     {
                         i += 1;
                         if (Action.GetType().Name == "String")
@@ -454,7 +430,7 @@ namespace ConformU
                                         LogOK("SupportedActions", "Found action: " + ActionString);
 
                                         // Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
-                                        if (p_DeviceType == DeviceTypes.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.ToUpper() == "ASCOM.OCH.OBSERVINGCONDITIONS")
+                                        if (deviceType == DeviceTypes.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.ToUpper() == "ASCOM.OCH.OBSERVINGCONDITIONS")
                                         {
                                             if (ActionString.ToUpperInvariant().StartsWith("//OCSIMULATOR:"))
                                             {
@@ -523,7 +499,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                if (p_DeviceType == DeviceTypes.Switch & ReferenceEquals(ex.GetType(), typeof(MissingMemberException)))
+                if (deviceType == DeviceTypes.Switch & ReferenceEquals(ex.GetType(), typeof(MissingMemberException)))
                 {
                     LogOK("SupportedActions", "Switch V1 Driver does not have SupportedActions");
                 }
@@ -532,6 +508,187 @@ namespace ConformU
                     HandleException("SupportedActions", MemberType.Property, Required.Optional, ex, "");
                     LogIssue("SupportedActions", ex.Message);
                 }
+            }
+            LogNewLine();
+
+            // DeviceState - Mandatory for Platform 7 and above, otherwise not present
+            if (DeviceCapabilities.HasConnectAndDeviceState(deviceType, interfaceVersion))
+            {
+                try
+                {
+                    LogCallToDriver("DeviceState", "About to get property DeviceState");
+                    IList<IStateValue> deviceState = baseClassDevice.DeviceState;
+
+                    int numberOfItems = 0;
+                    foreach (var item in deviceState)
+                    {
+                        numberOfItems++;
+                    }
+                    LogOK("DeviceState", $"Received {numberOfItems} operational state properties.");
+
+                    // Create a case sensitive dictionary to hold property names
+                    Dictionary<string, bool> casedPropertyNames = new();
+
+                    // Define expected operational properties for each device type
+                    switch (settings.DeviceType)
+                    {
+                        case DeviceTypes.Camera:
+                            casedPropertyNames.Add(nameof(ICameraV4.CameraState), false);
+                            casedPropertyNames.Add(nameof(ICameraV4.CCDTemperature), false);
+                            casedPropertyNames.Add(nameof(ICameraV4.CoolerPower), false);
+                            casedPropertyNames.Add(nameof(ICameraV4.HeatSinkTemperature), false);
+                            casedPropertyNames.Add(nameof(ICameraV4.ImageReady), false);
+                            casedPropertyNames.Add(nameof(ICameraV4.IsPulseGuiding), false);
+                            casedPropertyNames.Add(nameof(ICameraV4.PercentCompleted), false);
+                            break;
+
+                        case DeviceTypes.CoverCalibrator:
+                            casedPropertyNames.Add(nameof(ICoverCalibratorV2.Brightness), false);
+                            casedPropertyNames.Add(nameof(ICoverCalibratorV2.CalibratorState), false);
+                            casedPropertyNames.Add(nameof(ICoverCalibratorV2.CoverState), false);
+                            casedPropertyNames.Add(nameof(ICoverCalibratorV2.CalibratorChanging), false);
+                            casedPropertyNames.Add(nameof(ICoverCalibratorV2.CoverMoving), false);
+                            break;
+
+                        case DeviceTypes.Dome:
+                            casedPropertyNames.Add(nameof(IDomeV3.Altitude), false);
+                            casedPropertyNames.Add(nameof(IDomeV3.AtHome), false);
+                            casedPropertyNames.Add(nameof(IDomeV3.AtPark), false);
+                            casedPropertyNames.Add(nameof(IDomeV3.Azimuth), false);
+                            casedPropertyNames.Add(nameof(IDomeV3.ShutterStatus), false);
+                            casedPropertyNames.Add(nameof(IDomeV3.Slewing), false);
+                            break;
+
+                        case DeviceTypes.FilterWheel:
+                            casedPropertyNames.Add(nameof(IFilterWheelV3.Position), false);
+                            break;
+
+                        case DeviceTypes.Focuser:
+                            casedPropertyNames.Add(nameof(IFocuserV4.IsMoving), false);
+                            casedPropertyNames.Add(nameof(IFocuserV4.Position), false);
+                            casedPropertyNames.Add(nameof(IFocuserV4.Temperature), false);
+                            break;
+
+                        case DeviceTypes.ObservingConditions:
+                            casedPropertyNames.Add(nameof(IObservingConditionsV2.CloudCover), false);
+                            casedPropertyNames.Add(nameof(IObservingConditionsV2.DewPoint), false);
+                            casedPropertyNames.Add(nameof(IObservingConditionsV2.Humidity), false);
+                            casedPropertyNames.Add(nameof(IObservingConditionsV2.Pressure), false);
+                            casedPropertyNames.Add(nameof(IObservingConditionsV2.RainRate), false);
+                            casedPropertyNames.Add(nameof(IObservingConditionsV2.SkyBrightness), false);
+                            casedPropertyNames.Add(nameof(IObservingConditionsV2.SkyQuality), false);
+                            casedPropertyNames.Add(nameof(IObservingConditionsV2.SkyTemperature), false);
+                            casedPropertyNames.Add(nameof(IObservingConditionsV2.StarFWHM), false);
+                            casedPropertyNames.Add(nameof(IObservingConditionsV2.Temperature), false);
+                            casedPropertyNames.Add(nameof(IObservingConditionsV2.WindDirection), false);
+                            casedPropertyNames.Add(nameof(IObservingConditionsV2.WindGust), false);
+                            casedPropertyNames.Add(nameof(IObservingConditionsV2.WindSpeed), false);
+                            break;
+
+                        case DeviceTypes.Rotator:
+                            casedPropertyNames.Add(nameof(IRotatorV4.IsMoving), false);
+                            casedPropertyNames.Add(nameof(IRotatorV4.MechanicalPosition), false);
+                            casedPropertyNames.Add(nameof(IRotatorV4.Position), false);
+                            break;
+
+                        case DeviceTypes.SafetyMonitor:
+                            casedPropertyNames.Add(nameof(ISafetyMonitorV3.IsSafe), false);
+                            break;
+
+                        case DeviceTypes.Switch:
+
+                            // Try to get the MaxSwitch property
+                            short maxSwitch = 0;
+                            LogCallToDriver("DeviceState","About to get MaxSwitch property");
+                            try { maxSwitch = (deviceObject as ISwitchV3).MaxSwitch; } 
+                            catch (Exception ex)
+                            {
+                                LogIssue("DeviceState",$"MaxSwitch exception: {ex}");
+                            }
+                            LogInfo("DeviceState", $"MaxSwitch: {maxSwitch}");
+                            for (var i = 0; i < maxSwitch; i++)
+                            {
+                                casedPropertyNames.Add($"GetSwitch{i}", false);
+                                casedPropertyNames.Add($"GetSwitchValue{i}", false);
+                            }
+
+                            break;
+
+                        case DeviceTypes.Telescope:
+                            casedPropertyNames.Add(nameof(ITelescopeV4.Altitude), false);
+                            casedPropertyNames.Add(nameof(ITelescopeV4.AtHome), false);
+                            casedPropertyNames.Add(nameof(ITelescopeV4.AtPark), false);
+                            casedPropertyNames.Add(nameof(ITelescopeV4.Azimuth), false);
+                            casedPropertyNames.Add(nameof(ITelescopeV4.Declination), false);
+                            casedPropertyNames.Add(nameof(ITelescopeV4.IsPulseGuiding), false);
+                            casedPropertyNames.Add(nameof(ITelescopeV4.RightAscension), false);
+                            casedPropertyNames.Add(nameof(ITelescopeV4.SideOfPier), false);
+                            casedPropertyNames.Add(nameof(ITelescopeV4.SiderealTime), false);
+                            casedPropertyNames.Add(nameof(ITelescopeV4.Slewing), false);
+                            casedPropertyNames.Add(nameof(ITelescopeV4.Tracking), false);
+                            casedPropertyNames.Add(nameof(ITelescopeV4.UTCDate), false);
+                            break;
+
+                        case DeviceTypes.Video:
+                            casedPropertyNames.Add(nameof(IVideoV2.CameraState), false);
+                            break;
+
+                        default:
+                            LogError("DeviceState", $"Unknown device type: {settings.DeviceType}.");
+                            break;
+                    }
+
+                    // Create a case insensitive dictionary containing property names to detect mis-casing issues
+                    Dictionary<string, bool> caseInsensitivePropertyNames = new(casedPropertyNames, StringComparer.OrdinalIgnoreCase);
+
+                    foreach (IStateValue property in deviceState)
+                    {
+                        // Test whether the property name is one that we are expecting
+                        if ((casedPropertyNames.ContainsKey(property.Name)) | ((property.Name == "TimeStamp"))) // Property name is expected
+                        {
+                            casedPropertyNames[property.Name] = true;
+                            LogOK("DeviceState", $"  {property.Name} = {property.Value}");
+                        }
+                        else // An unexpected name was found
+                        {
+                            // Test whether this has the correct spelling but incorrect casing
+                            if (caseInsensitivePropertyNames.ContainsKey(property.Name)) // Property name was found
+                            {
+                                string key = casedPropertyNames.Where(pair => pair.Key.ToLowerInvariant() == property.Name.ToLowerInvariant()).Select(pair => pair.Key).FirstOrDefault();
+                                LogIssue("DeviceState", $"The {key} property name is mis-cased: {property.Name}. The correct casing is: {key}");
+                            }
+                            else // An unexpected name was found
+                            {
+                                LogIssue("DeviceState", $"A non-operational property was included in the DeviceState response: {property.Name} = {property.Value}");
+                            }
+                        }
+                    }
+
+                    // Test whether all expected values were returned
+                    IEnumerable<KeyValuePair<string, bool>> missingProperties = casedPropertyNames.Where(x => x.Value == false);
+
+                    // Test whether any properties were not found
+                    if (missingProperties.Count() == 0) // All properties were supplied
+                    {
+                        LogOK("DeviceState", $"Found all expected operational properties");
+                    }
+                    else // One or more properties were missing
+                    {
+                        foreach (KeyValuePair<string, bool> item in missingProperties)
+                        {
+                            LogInfo("DeviceState", $"Operational property {item.Key} was not included in the DeviceState response.");
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    HandleException("DeviceState", MemberType.Property, Required.Mandatory, ex, "");
+                }
+            }
+            else
+            {
+                LogInfo("DeviceState","DeviceState tests omitted - DeviceState is not available in this interface version.");
             }
 
             if (applicationCancellationToken.IsCancellationRequested)

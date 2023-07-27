@@ -2,7 +2,7 @@
 
 namespace ConformU
 {
-    public class RotatorFacade : FacadeBaseClass, IRotatorV3
+    public class RotatorFacade : FacadeBaseClass, IRotatorV4
     {
         // Create the test device in the facade base class
         public RotatorFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }

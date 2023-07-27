@@ -2,7 +2,7 @@
 
 namespace ConformU
 {
-    public class ObservingConditionsFacade : FacadeBaseClass, IObservingConditions
+    public class ObservingConditionsFacade : FacadeBaseClass, IObservingConditionsV2
     {
         // Create the test device in the facade base class
         public ObservingConditionsFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }

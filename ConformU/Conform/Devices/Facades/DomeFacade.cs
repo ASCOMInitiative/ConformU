@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace ConformU
 {
-    public class DomeFacade : FacadeBaseClass, IDomeV2
+    public class DomeFacade : FacadeBaseClass, IDomeV3
     {
         // Create the test device in the facade base class
         public DomeFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger)

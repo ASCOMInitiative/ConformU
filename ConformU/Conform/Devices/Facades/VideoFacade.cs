@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace ConformU
 {
-    public class VideoFacade : FacadeBaseClass, IVideo
+    public class VideoFacade : FacadeBaseClass, IVideoV2
     {
         // Create the test device in the facade base class
         public VideoFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }
@@ -47,7 +47,7 @@ namespace ConformU
             get
             {
                 List<double> returnValue = new();
-                var gains = FunctionNoParameters<IList<double>>(() => driver.SupportedIntegrationRates);
+                var gains = FunctionNoParameters<object>(() => driver.SupportedIntegrationRates);
                 foreach (double o in (IList)gains)
                 {
                     returnValue.Add(o);
@@ -261,7 +261,7 @@ namespace ConformU
             get
             {
                 List<string> returnValue = new();
-                var gains = FunctionNoParameters<IList<string>>(() => driver.Gains);
+                var gains = FunctionNoParameters<object>(() => driver.Gains);
                 foreach (string o in (IList)gains)
                 {
                     returnValue.Add(o);
@@ -294,7 +294,7 @@ namespace ConformU
             get
             {
                 List<string> returnValue = new();
-                var gains = FunctionNoParameters<IList<string>>(() => driver.Gammas);
+                var gains = FunctionNoParameters<object>(() => driver.Gammas);
                 foreach (string o in (IList)gains)
                 {
                     returnValue.Add(o);

@@ -462,8 +462,8 @@ namespace ConformU
                 GetInterfaceVersion();
                 LogDebug("Connected", $"Interface version: {interfaceVersion}");
 
-                // Use operations to connect if specified to do so 
-                if (HasConnect())
+                // Use Connect /Disconnect if present
+                if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.Telescope, interfaceVersion))
                 {
                     if (value) // Connecting to device
                     {

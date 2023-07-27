@@ -2,12 +2,12 @@
 
 namespace ConformU
 {
-    public class CoverCalibratorFacade : FacadeBaseClass, ICoverCalibratorV1
+    public class CoverCalibratorFacade : FacadeBaseClass, ICoverCalibratorV2
     {
         // Create the test device in the facade base class
         public CoverCalibratorFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }
 
-        #region Interface implementation
+        #region ICoverCalibratorV1  Interface implementation
 
         public CoverStatus CoverState
         {
@@ -68,5 +68,24 @@ namespace ConformU
 
         #endregion
 
+        #region ICoverCalibratorV2 implementation
+
+        public bool CalibratorChanging
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CalibratorChanging);
+            }
+        }
+
+        public bool CoverMoving
+        {
+            get
+            {
+                return FunctionNoParameters<bool>(() => driver.CoverMoving);
+            }
+        }
+
+        #endregion
     }
 }

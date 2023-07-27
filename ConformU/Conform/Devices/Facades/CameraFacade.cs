@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ConformU
 {
-    public class CameraFacade : FacadeBaseClass, ICameraV3, IDisposable
+    public class CameraFacade : FacadeBaseClass, ICameraV4, IDisposable
     {
 
         // Create the test device in the facade base class

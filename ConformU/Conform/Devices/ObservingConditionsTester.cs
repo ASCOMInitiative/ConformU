@@ -48,7 +48,7 @@ namespace ConformU
         private readonly List<string> ValidSensors = new() { PROPERTY_CLOUDCOVER, PROPERTY_DEWPOINT, PROPERTY_HUMIDITY, PROPERTY_PRESSURE, PROPERTY_RAINRATE, PROPERTY_SKYBRIGHTNESS, PROPERTY_SKYQUALITY, PROPERTY_SKYTEMPERATURE, PROPERTY_STARFWHM, PROPERTY_TEMPERATURE, PROPERTY_WINDDIRECTION, PROPERTY_WINDGUST, PROPERTY_WINDSPEED };
 
         // Helper variables
-        private IObservingConditions m_ObservingConditions;
+        private IObservingConditionsV2 m_ObservingConditions;
         private readonly Settings settings;
         private readonly ConformLogger logger;
 

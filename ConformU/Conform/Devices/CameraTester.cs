@@ -66,7 +66,7 @@ namespace ConformU
         private GainOffsetMode m_OffsetMode = GainOffsetMode.Unknown;
         private GainOffsetMode m_GainMode = GainOffsetMode.Unknown;
 
-        private ICameraV3 camera;
+        private ICameraV4 camera;
 
         private enum CanType
         {
@@ -1416,7 +1416,8 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                 // Offsets Read - Optional
                 try
                 {
-                    m_CanReadOffsets = false; LogCallToDriver("ConformanceCheck", "About to get Offsets");
+                    m_CanReadOffsets = false;
+                    LogCallToDriver("ConformanceCheck", "About to get Offsets");
                     m_Offsets = camera.Offsets;
                     // Successfully retrieved a value
                     m_CanReadOffsets = true;

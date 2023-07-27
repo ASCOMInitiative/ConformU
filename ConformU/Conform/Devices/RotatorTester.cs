@@ -34,7 +34,7 @@ namespace ConformU
         private readonly Settings settings;
         private readonly ConformLogger logger;
 
-        private IRotatorV3 m_Rotator;
+        private IRotatorV4 m_Rotator;
 
         #endregion
 

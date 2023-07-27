@@ -106,7 +106,7 @@ namespace ConformU
         }
 
         // Helper variables
-        private IVideo videoDevice;
+        private IVideoV2 videoDevice;
         private readonly CancellationToken cancellationToken;
         private readonly Settings settings;
         private readonly ConformLogger logger;
@@ -143,7 +143,7 @@ namespace ConformU
 
         public override void CheckCommonMethods()
         {
-            base.CheckCommonMethods(videoDevice, DeviceTypes.Camera);
+            base.CheckCommonMethods(videoDevice, DeviceTypes.Video);
         }
 
         public new void CheckInitialise()

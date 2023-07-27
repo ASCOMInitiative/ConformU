@@ -14,7 +14,7 @@ namespace ConformU
     internal class SafetyMonitorTester : DeviceTesterBaseClass
     {
         private bool m_IsSafe;
-        private ISafetyMonitor m_SafetyMonitor;
+        private ISafetyMonitorV3 m_SafetyMonitor;
 
         // Helper variables
         internal static Utilities g_Util;

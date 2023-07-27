@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 
 namespace ConformU
 {
-    public class SafetyMonitorFacade : FacadeBaseClass, ISafetyMonitor
+    public class SafetyMonitorFacade : FacadeBaseClass, ISafetyMonitorV3
     {
 
         // Create the test device in the facade base class

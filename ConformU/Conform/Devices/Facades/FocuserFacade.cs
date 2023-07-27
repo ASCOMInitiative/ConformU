@@ -2,7 +2,7 @@
 
 namespace ConformU
 {
-    public class FocuserFacade : FacadeBaseClass, IFocuserV3
+    public class FocuserFacade : FacadeBaseClass, IFocuserV4
     {
         // Create the test device in the facade base class
         public FocuserFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }

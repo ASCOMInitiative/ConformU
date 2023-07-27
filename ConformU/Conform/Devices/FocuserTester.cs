@@ -35,7 +35,7 @@ namespace ConformU
         private const int OUT_OF_RANGE_INCREMENT = 10; // For absolute focusers, the position delta, below 0 or above maximum steps, to test that the focuser will not move to the specified position
 
         // Helper variables
-        private IFocuserV3 focuser;
+        private IFocuserV4 focuser;
         private readonly CancellationToken cancellationToken;
         private readonly Settings settings;
         private readonly ConformLogger logger;

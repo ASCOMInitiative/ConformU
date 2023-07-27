@@ -45,7 +45,7 @@ namespace ConformU
             SwitchStep
         }
         // Helper variables
-        private ISwitchV2 m_Switch;
+        private ISwitchV3 m_Switch;
         private readonly CancellationToken cancellationToken;
         private readonly Settings settings;
         private readonly ConformLogger logger;
@@ -214,21 +214,19 @@ namespace ConformU
             // MaxSwitch - Mandatory
             switch (interfaceVersion)
             {
-                case 1:
-                case 2 // Original Platform 5 switch interface and ISwitchV2 have the same property
-               :
-                    {
-                        m_MaxSwitch = SwitchPropertyTestShort(SwitchPropertyMethod.MaxSwitch, "MaxSwitch", 1, short.MaxValue); if (cancellationToken.IsCancellationRequested)
-                            return;
-                        break;
-                    }
+                case 1: // Original Platform 5 switch interface, ISwitchV2 and ISwitchV3 have the same property
+                case 2:
+                case 3:
+                    m_MaxSwitch = SwitchPropertyTestShort(SwitchPropertyMethod.MaxSwitch, "MaxSwitch", 1, short.MaxValue);
+                    break;
 
                 default:
-                    {
-                        LogIssue("Switches", "Unknown switch interface version: " + interfaceVersion);
-                        break;
-                    }
+                    LogIssue("Switches", "Unknown switch interface version: " + interfaceVersion);
+                    break;
             }
+
+            if (cancellationToken.IsCancellationRequested)
+                return;
         }
 
         private void WaitForReadDelay(string message)

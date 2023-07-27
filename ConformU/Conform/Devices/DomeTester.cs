@@ -71,7 +71,7 @@ namespace ConformU
             SyncToAzimuth
         }
 
-        private IDomeV2 domeDevice;
+        private IDomeV3 domeDevice;
         private readonly CancellationToken cancellationToken;
         private readonly Settings settings;
         private readonly ConformLogger logger;

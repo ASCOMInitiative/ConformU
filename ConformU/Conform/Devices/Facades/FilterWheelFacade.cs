@@ -2,7 +2,7 @@
 
 namespace ConformU
 {
-    public class FilterWheelFacade : FacadeBaseClass, IFilterWheelV2
+    public class FilterWheelFacade : FacadeBaseClass, IFilterWheelV3
     {
         // Create the test device in the facade base class
         public FilterWheelFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }

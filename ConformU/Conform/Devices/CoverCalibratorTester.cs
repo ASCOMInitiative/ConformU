@@ -35,7 +35,7 @@ namespace ConformU
         private bool maxBrightnessOk;
 
         // Helper variables
-        private ICoverCalibratorV1 coverCalibratorDevice;
+        private ICoverCalibratorV2 coverCalibratorDevice;
         private readonly CancellationToken cancellationToken;
         private readonly Settings settings;
         private readonly ConformLogger logger;
