@@ -175,29 +175,6 @@ namespace ConformU
                 LogIssue("IsSafe", "Cannot confirm that IsSafe is false before connection because it threw an exception: " + ex.Message);
             }
         }
-        public override bool Connected
-        {
-            get
-            {
-                LogCallToDriver("ConformanceCheck", "About to get Connected");
-                return m_SafetyMonitor.Connected;
-            }
-            set
-            {
-                LogCallToDriver("ConformanceCheck", "About to set Connected");
-                SetTest("Connected");
-                SetAction("Waiting for Connected to become 'true'");
-                m_SafetyMonitor.Connected = value;
-                ResetTestActionStatus();
-
-                // Make sure that the value set is reflected in Connected GET
-                bool connectedState = Connected;
-                if (connectedState != value)
-                {
-                    throw new ASCOM.InvalidOperationException($"Connected was set to {value} but Connected Get returned {connectedState}.");
-                }
-            }
-        }
 
         public override void CheckCommonMethods()
         {

@@ -90,6 +90,18 @@
                             (Changes require the application to be restarted)
                         </p>
                     </div>
+                    <div class="row">
+                        <RadzenNumeric Style="margin-left: 20px; margin-top:15px; width: 6em"
+                                       Format="0"
+                        @bind-Value="connectDisconnectTimeout"
+                                       Step="1"
+                                       TValue="int"
+                                       Min="1M"
+                                       Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.ConnectDisconnectTimeout)) />
+                        <p style="margin-left: 5px;margin-top: 20px;">
+                            Device Connect / Disconnect timeout (seconds)
+                        </p>
+                    </div>
 
                 </RadzenCard>
 
@@ -667,6 +679,7 @@
             new KeyValuePair<string, ServiceType>("HTTPS", ServiceType.Https)
         };
     private bool isWindowsOs;
+    private int connectDisconnectTimeout;
 
     // Alpaca and COM configuration
     private int alpacaNumberOfDiscoveryPolls;
@@ -763,6 +776,7 @@
         CameraWaitTimeout,
         CameraXMax,
         CameraYMax,
+        ConnectDisconnectTimeout,
         waitTimeBeforeConformApplicationExits,
         DomeShutterTimeout,
         DomeAzimuthTimeout,
@@ -987,6 +1001,10 @@
                 settings.FilterWheelTimeout = newValue;
                 break;
 
+            case NumericConfigurationItem.ConnectDisconnectTimeout:
+                settings.ConnectDisconnectTimeout = newValue;
+                break;
+
             default:
                 throw new InvalidValueException($"OnIntegerItemChange - Unknown numeric configuration item: {numericConfigurationItem}");
         }
@@ -1126,6 +1144,7 @@
         waitTimeBeforeConformApplicationExits = settings.ConnectionTimeout;
         applicationPort = settings.ApplicationPort;
         runAs32Bit = settings.RunAs32Bit;
+        connectDisconnectTimeout = settings.ConnectDisconnectTimeout;
 
         // Trace settings
         chkTraceDiscovery = settings.TraceDiscovery;

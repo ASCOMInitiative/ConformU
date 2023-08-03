@@ -174,30 +174,6 @@ namespace ConformU
             }
         }
 
-        public override bool Connected
-        {
-            get
-            {
-                LogCallToDriver("ConformanceCheck", "About to get Connected");
-                return m_Rotator.Connected;
-            }
-            set
-            {
-                LogCallToDriver("ConformanceCheck", "About to set Connected");
-                SetTest("Connected");
-                SetAction("Waiting for Connected to become 'true'");
-                m_Rotator.Connected = value;
-                ResetTestActionStatus();
-
-                // Make sure that the value set is reflected in Connected GET
-                bool connectedState = Connected;
-                if (connectedState != value)
-                {
-                    throw new ASCOM.InvalidOperationException($"Connected was set to {value} but Connected Get returned {connectedState}.");
-                }
-            }
-        }
-
         public override void CheckCommonMethods()
         {
             base.CheckCommonMethods(m_Rotator, DeviceTypes.Rotator);
@@ -298,7 +274,7 @@ namespace ConformU
                     LogOK("Post-run Check", $"Current position: {currentPosition}");
 
                     // Restore the original sync offset, if possible, for IRotatorV3 and later devices
-                    if (interfaceVersion >= 3)
+                    if (GetInterfaceVersion() >= 3)
                     {
 
                         if (!Single.IsNaN(initialMechanicalPosiiton))
@@ -365,7 +341,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                if (interfaceVersion < 3)
+                if (GetInterfaceVersion() < 3)
                 {
                     HandleException("IsMoving", MemberType.Property, Required.Optional, ex, "");
                 }
@@ -409,7 +385,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                if (interfaceVersion < 3) // Can be optional in IRotatorV1 and V2
+                if (GetInterfaceVersion() < 3) // Can be optional in IRotatorV1 and V2
                 {
                     if (m_CanReverse)
                     {
@@ -456,7 +432,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                if (interfaceVersion < 3) // Can be optional in IRotatorV1 and V2
+                if (GetInterfaceVersion() < 3) // Can be optional in IRotatorV1 and V2
                 {
                     if (m_CanReverse)
                     {
@@ -474,7 +450,7 @@ namespace ConformU
             }
 
             // Test MechanicalPosition introduced in IRotatorV3
-            if (interfaceVersion >= 3)
+            if (GetInterfaceVersion() >= 3)
             {
                 try
                 {
@@ -524,7 +500,7 @@ namespace ConformU
             Required requiredState;
 
             // Handle properties that were optional in IRotatorV1 and IRotoatorV2 but may have become mandatory in IRotatorV3
-            if (interfaceVersion < 3)
+            if (GetInterfaceVersion() < 3)
             {
                 requiredState = Required.Optional; // Default optional state for early versions
             }
@@ -657,7 +633,7 @@ namespace ConformU
                 return;
 
             // Test the new IRotatorV3 methods
-            if (interfaceVersion >= 3)
+            if (GetInterfaceVersion() >= 3)
             {
                 // Test the MoveMechanical method
                 try
@@ -882,7 +858,7 @@ namespace ConformU
                     LogDebug(p_Name + "1", "Position, value, start, tolerance: " + m_Rotator.Position.ToString("0.000") + " " + p_Value.ToString("0.000") + " " + l_RotatorStartPosition.ToString("0.000") + " " + l_OKLimit.ToString("0.000"));
                     LogCallToDriver(p_Name, $"About to get Position property");
                     rotatorPosition = m_Rotator.Position;
-                    if (interfaceVersion < 3) // Interface V1 and V2 behaviour
+                    if (GetInterfaceVersion() < 3) // Interface V1 and V2 behaviour
                     {
                         if (rotatorPosition < 0.0d)
                             LogInfo(p_Name, "Rotator supports angles < 0.0");
@@ -939,7 +915,7 @@ namespace ConformU
             {
                 if (string.IsNullOrEmpty(p_ExpectErrorMsg)) // Test for normal behaviour
                 {
-                    if (interfaceVersion < 3)
+                    if (GetInterfaceVersion() < 3)
                     {
                         HandleException(p_Name, MemberType.Method, Required.Optional, ex, "");
                     }
@@ -953,7 +929,7 @@ namespace ConformU
                 {
                     HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "", p_ExpectErrorMsg);
                 }
-                else if (interfaceVersion < 3) // Some other type of exception occurred
+                else if (GetInterfaceVersion() < 3) // Some other type of exception occurred
                 {
                     HandleException(p_Name, MemberType.Method, Required.Optional, ex, "");
                 }

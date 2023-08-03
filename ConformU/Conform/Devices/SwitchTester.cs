@@ -180,30 +180,6 @@ namespace ConformU
             }
         }
 
-        public override bool Connected
-        {
-            get
-            {
-                LogCallToDriver("ConformanceCheck", "About to get Connected");
-                return m_Switch.Connected;
-            }
-            set
-            {
-                LogCallToDriver("ConformanceCheck", "About to set Connected");
-                SetTest("Connected");
-                SetAction("Waiting for Connected to become 'true'");
-                m_Switch.Connected = value;
-                ResetTestActionStatus();
-
-                // Make sure that the value set is reflected in Connected GET
-                bool connectedState = Connected;
-                if (connectedState != value)
-                {
-                    throw new ASCOM.InvalidOperationException($"Connected was set to {value} but Connected Get returned {connectedState}.");
-                }
-            }
-        }
-
         public override void CheckCommonMethods()
         {
             base.CheckCommonMethods(m_Switch, DeviceTypes.Switch);
@@ -212,7 +188,7 @@ namespace ConformU
         public override void CheckProperties()
         {
             // MaxSwitch - Mandatory
-            switch (interfaceVersion)
+            switch (GetInterfaceVersion())
             {
                 case 1: // Original Platform 5 switch interface, ISwitchV2 and ISwitchV3 have the same property
                 case 2:
@@ -221,7 +197,7 @@ namespace ConformU
                     break;
 
                 default:
-                    LogIssue("Switches", "Unknown switch interface version: " + interfaceVersion);
+                    LogIssue("Switches", "Unknown switch interface version: " + GetInterfaceVersion());
                     break;
             }
 
@@ -257,7 +233,7 @@ namespace ConformU
             double l_GetSwitchValue, l_GetSwitchValueOriginal = 0.0, l_SwitchMinimum, l_SwitchMaximum, l_SwitchStep, l_SwitchRange;
             string l_SwitchName, l_SwitchDescription;
 
-            switch (interfaceVersion)
+            switch (GetInterfaceVersion())
             {
                 case 1 // Platform 5 interface v1
                :

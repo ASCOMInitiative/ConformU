@@ -43,6 +43,8 @@ namespace ConformU
         public bool UpdateCheck { get; set; } = true;
         public int ApplicationPort { get; set; } = 0;
 
+        public int ConnectDisconnectTimeout { get; set; } = 5;
+
         // Debug output switches
         [FullTestValue(false)]
         public bool Debug { get; set; } = false;

@@ -163,30 +163,6 @@ namespace ConformU
             }
         }
 
-        public override bool Connected
-        {
-            get
-            {
-                LogCallToDriver("ConformanceCheck", "About to get Connected");
-                return focuser.Connected;
-            }
-            set
-            {
-                LogCallToDriver("ConformanceCheck", "About to set Connected");
-                SetTest("Connected");
-                SetAction("Waiting for Connected to become 'true'");
-                focuser.Connected = value;
-                ResetTestActionStatus();
-
-                // Make sure that the value set is reflected in Connected GET
-                bool connectedState = Connected;
-                if (connectedState != value)
-                {
-                    throw new ASCOM.InvalidOperationException($"Connected was set to {value} but Connected Get returned {connectedState}.");
-                }
-            }
-        }
-
         public override void CheckCommonMethods()
         {
             base.CheckCommonMethods(focuser, DeviceTypes.Focuser);
@@ -506,7 +482,7 @@ namespace ConformU
             SetTest("Focuser Move");
             if (m_TempCompTrueOK)
             {
-                switch (interfaceVersion)
+                switch (GetInterfaceVersion())
                 {
                     case 0:
                     case 1:
@@ -545,7 +521,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue("Move - TempComp True", string.Format("Unknown interface version returned {0}, Move test with temperature compensation enabled skipped.", interfaceVersion));
+                            LogIssue("Move - TempComp True", string.Format("Unknown interface version returned {0}, Move test with temperature compensation enabled skipped.", GetInterfaceVersion()));
                             break;
                         }
                 }

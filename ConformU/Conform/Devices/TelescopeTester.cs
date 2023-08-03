@@ -106,8 +106,6 @@ namespace ConformU
         private double targetAltitude, targetAzimuth;
         private bool canReadAltitide, canReadAzimuth, canReadSiderealTime;
 
-        private double operationInitiationTime = 1.0; // Time within which an operation initiation must complete (seconds)
-
         private readonly Dictionary<string, bool> telescopeTests;
 
         // Axis rate checks
@@ -445,73 +443,10 @@ namespace ConformU
             }
         }
 
-        public override bool Connected
-        {
-            get
-            {
-                LogCallToDriver("ConformanceCheck", "About to get Connected");
-                return telescopeDevice.Connected;
-            }
-            set
-            {
-                LogCallToDriver("ConformanceCheck", "About to set Connected");
-                SetTest("Connected");
-                SetAction("Waiting for Connected to become 'true'");
-
-                // Try to get the device's interface version
-                GetInterfaceVersion();
-                LogDebug("Connected", $"Interface version: {interfaceVersion}");
-
-                // Use Connect /Disconnect if present
-                if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.Telescope, interfaceVersion))
-                {
-                    if (value) // Connecting to device
-                    {
-                        if (!telescopeDevice.Connecting) // No connection / disconnection is in progress
-                        {
-                            // Call the Connect method and wait for the device to connect
-                            TimeMethod("", () => telescopeDevice.Connect());
-                            WaitWhile("Connecting to device", () => { return telescopeDevice.Connecting; }, SLEEP_TIME, Convert.ToInt32(settings.ConnectionTimeout));
-                        }
-                        else // Connection already in progress so ignore this connect request
-                        {
-                            LogInfo("Connect", "Ignoring this request because a Connect() or Disconnect() operation is already in progress.");
-                        }
-                    }
-                    else // Disconnecting from device
-                    {
-                        if (!telescopeDevice.Connecting) // No connection / disconnection is in progress
-                        {
-                            // Call the Connect method and wait for the device to connect
-                            TimeMethod("", () => telescopeDevice.Disconnect());
-                            WaitWhile("Disconnecting from device", () => { return telescopeDevice.Connecting; }, SLEEP_TIME, Convert.ToInt32(settings.ConnectionTimeout));
-                        }
-                        else // Connection already in progress so ignore this connect request
-                        {
-                            LogInfo("Disconnect", "Ignoring this request because a Connect() or Disconnect() operation is already in progress.");
-                        }
-                    }
-                }
-                else // Historic synchronous behaviour
-                {
-                    telescopeDevice.Connected = value;
-                }
-
-                ResetTestActionStatus();
-
-                // Make sure that the value set is reflected in Connected GET
-                bool connectedState = Connected;
-                if (connectedState != value)
-                {
-                    throw new ASCOM.InvalidOperationException($"Connected was set to {value} but Connected Get returned {connectedState}.");
-                }
-            }
-        }
-
         public override void PreRunCheck()
         {
             // Get into a consistent state
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 try
                 {
@@ -551,7 +486,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("Mount Safety", "Skipping AtPark test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("Mount Safety", "Skipping AtPark test as this method is not supported in interface V" + GetInterfaceVersion());
                 try
                 {
                     if (canUnpark)
@@ -801,7 +736,7 @@ namespace ConformU
                 return;
 
             // AtHome - Required
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 try
                 {
@@ -816,14 +751,14 @@ namespace ConformU
             }
             else
             {
-                LogInfo("AtHome", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("AtHome", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // AtPark - Required
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 try
                 {
@@ -838,7 +773,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("AtPark", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("AtPark", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -960,7 +895,7 @@ namespace ConformU
                 return;
 
             // DeclinationRate Write - Optional
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (canSetDeclinationRate) // Any value is acceptable
                 {
@@ -1025,7 +960,7 @@ namespace ConformU
                 return;
 
             // DoesRefraction Read - Optional
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 try
                 {
@@ -1043,11 +978,11 @@ namespace ConformU
             }
             else
             {
-                LogInfo("DoesRefraction Read", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("DoesRefraction Read", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             // DoesRefraction Write - Optional
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (doesRefraction) // Try opposite value
                 {
@@ -1078,14 +1013,14 @@ namespace ConformU
             }
             else
             {
-                LogInfo("DoesRefraction Write", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("DoesRefraction Write", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // EquatorialSystem - Required
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 try
                 {
@@ -1100,7 +1035,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("EquatorialSystem", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("EquatorialSystem", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -1141,7 +1076,7 @@ namespace ConformU
                 return;
 
             // GuideRateDeclination - Optional
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (canSetGuideRates) // Can set guide rates so read and write are mandatory
                 {
@@ -1216,14 +1151,14 @@ namespace ConformU
             }
             else
             {
-                LogInfo("GuideRateDeclination", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("GuideRateDeclination", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // GuideRateRightAscension - Optional
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (canSetGuideRates)
                 {
@@ -1297,14 +1232,14 @@ namespace ConformU
             }
             else
             {
-                LogInfo("GuideRateRightAscension", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("GuideRateRightAscension", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // IsPulseGuiding - Optional
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (canPulseGuide) // Can pulse guide so test if we can successfully read IsPulseGuiding
                 {
@@ -1335,7 +1270,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("IsPulseGuiding", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("IsPulseGuiding", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -1422,7 +1357,7 @@ namespace ConformU
                 return;
 
             // RightAscensionRate Write - Optional
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (canSetRightAscensionRate) // Perform several tests starting with proving we can set a rate of 0.0
                 {
@@ -1989,7 +1924,7 @@ namespace ConformU
                 return;
 
             // SideOfPier Read - Optional
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 try
                 {
@@ -2005,7 +1940,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("SideOfPier Read", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("SideOfPier Read", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             // SideOfPier Write - Optional
@@ -2288,7 +2223,7 @@ namespace ConformU
                 return;
 
             // TrackingRates - Required
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 int l_Count = 0;
                 try
@@ -2576,7 +2511,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("TrackingRate", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("TrackingRate", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -2619,7 +2554,7 @@ namespace ConformU
         {
 
             // CanMoveAxis - Required - This must be first test as Parked tests use its results
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (telescopeTests[TELTEST_CAN_MOVE_AXIS] | telescopeTests[TELTEST_MOVE_AXIS] | telescopeTests[TELTEST_PARK_UNPARK])
                 {
@@ -2637,11 +2572,11 @@ namespace ConformU
             }
             else
             {
-                LogInfo("CanMoveAxis", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("CanMoveAxis", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             // Test Park, Unpark - Optional
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (telescopeTests[TELTEST_PARK_UNPARK])
                 {
@@ -2964,7 +2899,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("Park", "Skipping tests since behaviour of this method is not well defined in interface V" + interfaceVersion);
+                LogInfo("Park", "Skipping tests since behaviour of this method is not well defined in interface V" + GetInterfaceVersion());
             }
 
             // AbortSlew - Optional
@@ -2980,7 +2915,7 @@ namespace ConformU
             }
 
             // AxisRates - Required
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (telescopeTests[TELTEST_AXIS_RATE] | telescopeTests[TELTEST_MOVE_AXIS])
                 {
@@ -2995,7 +2930,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("AxisRate", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("AxisRate", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             // FindHome - Optional
@@ -3011,7 +2946,7 @@ namespace ConformU
             }
 
             // MoveAxis - Optional
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (telescopeTests[TELTEST_MOVE_AXIS])
                 {
@@ -3032,7 +2967,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("MoveAxis", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("MoveAxis", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             // PulseGuide - Optional
@@ -3335,7 +3270,7 @@ namespace ConformU
             }
 
             // DestinationSideOfPier - Optional
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (telescopeTests[TELTEST_DESTINATION_SIDE_OF_PIER])
                 {
@@ -3357,11 +3292,11 @@ namespace ConformU
             }
             else
             {
-                LogInfo("DestinationSideOfPier", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("DestinationSideOfPier", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             // Test AltAz Slewing - Optional
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (telescopeTests[TELTEST_SLEW_TO_ALTAZ])
                 {
@@ -3385,11 +3320,11 @@ namespace ConformU
             }
             else
             {
-                LogInfo("SlewToAltAz", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("SlewToAltAz", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             // Test AltAz Slewing asynchronous - Optional
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (telescopeTests[TELTEST_SLEW_TO_ALTAZ_ASYNC])
                 {
@@ -3413,7 +3348,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("SlewToAltAzAsync", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("SlewToAltAzAsync", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             // Equatorial Sync to Target - Optional
@@ -3438,7 +3373,7 @@ namespace ConformU
             }
 
             // AltAz Sync - Optional
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (telescopeTests[TELTEST_SYNC_TO_ALTAZ])
                 {
@@ -3462,14 +3397,14 @@ namespace ConformU
             }
             else
             {
-                LogInfo("SyncToAltAz", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("SyncToAltAz", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             if (settings.TestSideOfPierRead)
             {
                 LogNewLine();
                 LogTestOnly("SideOfPier Model Tests"); LogDebug("SideOfPier Model Tests", "Starting tests");
-                if (interfaceVersion > 1)
+                if (GetInterfaceVersion() > 1)
                 {
                     // 3.0.0.14 - Skip these tests if unable to read SideOfPier
                     if (CanReadSideOfPier("SideOfPier Model Tests"))
@@ -3524,7 +3459,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogInfo("SideOfPier Model Tests", "Skipping test as this method Is Not supported in interface V" + interfaceVersion);
+                    LogInfo("SideOfPier Model Tests", "Skipping test as this method Is Not supported in interface V" + GetInterfaceVersion());
                 }
             }
 
@@ -3536,7 +3471,7 @@ namespace ConformU
             TelescopePerformanceTest(PerformanceType.tstPerfAltitude, "Altitude");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 TelescopePerformanceTest(PerformanceType.tstPerfAtHome, "AtHome");
                 if (cancellationToken.IsCancellationRequested)
@@ -3544,10 +3479,10 @@ namespace ConformU
             }
             else
             {
-                LogInfo("Performance: AtHome", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("Performance: AtHome", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 TelescopePerformanceTest(PerformanceType.tstPerfAtPark, "AtPark");
                 if (cancellationToken.IsCancellationRequested)
@@ -3555,7 +3490,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("Performance: AtPark", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("Performance: AtPark", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             TelescopePerformanceTest(PerformanceType.tstPerfAzimuth, "Azimuth");
@@ -3564,7 +3499,7 @@ namespace ConformU
             TelescopePerformanceTest(PerformanceType.tstPerfDeclination, "Declination");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (canPulseGuide)
                 {
@@ -3579,13 +3514,13 @@ namespace ConformU
             }
             else
             {
-                LogInfo("Performance: IsPulseGuiding", "Skipping test as this method is not supported in interface v1" + interfaceVersion);
+                LogInfo("Performance: IsPulseGuiding", "Skipping test as this method is not supported in interface v1" + GetInterfaceVersion());
             }
 
             TelescopePerformanceTest(PerformanceType.tstPerfRightAscension, "RightAscension");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            if (interfaceVersion > 1)
+            if (GetInterfaceVersion() > 1)
             {
                 if (alignmentMode == AlignmentMode.GermanPolar)
                 {
@@ -3607,7 +3542,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("Performance: SideOfPier", "Skipping test as this method is not supported in interface v1" + interfaceVersion);
+                LogInfo("Performance: SideOfPier", "Skipping test as this method is not supported in interface v1" + GetInterfaceVersion());
             }
 
             if (canReadSiderealTime)
@@ -5703,7 +5638,7 @@ namespace ConformU
                         case OptionalMethodType.FindHome:
                             {
                                 SetAction("Homing mount...");
-                                if (interfaceVersion > 1)
+                                if (GetInterfaceVersion() > 1)
                                 {
                                     LogCallToDriver(testName, "About to call FindHome method");
                                     telescopeDevice.FindHome();
@@ -6124,14 +6059,14 @@ namespace ConformU
 
                     case CanType.CanSetDeclinationRate:
                         {
-                            if (interfaceVersion > 1)
+                            if (GetInterfaceVersion() > 1)
                             {
                                 canSetDeclinationRate = telescopeDevice.CanSetDeclinationRate;
                                 LogOK(p_Name, canSetDeclinationRate.ToString());
                             }
                             else
                             {
-                                LogInfo("CanSetDeclinationRate", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                                LogInfo("CanSetDeclinationRate", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
                             }
 
                             break;
@@ -6139,14 +6074,14 @@ namespace ConformU
 
                     case CanType.CanSetGuideRates:
                         {
-                            if (interfaceVersion > 1)
+                            if (GetInterfaceVersion() > 1)
                             {
                                 canSetGuideRates = telescopeDevice.CanSetGuideRates;
                                 LogOK(p_Name, canSetGuideRates.ToString());
                             }
                             else
                             {
-                                LogInfo("CanSetGuideRates", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                                LogInfo("CanSetGuideRates", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
                             }
 
                             break;
@@ -6161,14 +6096,14 @@ namespace ConformU
 
                     case CanType.CanSetPierSide:
                         {
-                            if (interfaceVersion > 1)
+                            if (GetInterfaceVersion() > 1)
                             {
                                 canSetPierside = telescopeDevice.CanSetPierSide;
                                 LogOK(p_Name, canSetPierside.ToString());
                             }
                             else
                             {
-                                LogInfo("CanSetPierSide", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                                LogInfo("CanSetPierSide", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
                             }
 
                             break;
@@ -6176,14 +6111,14 @@ namespace ConformU
 
                     case CanType.CanSetRightAscensionRate:
                         {
-                            if (interfaceVersion > 1)
+                            if (GetInterfaceVersion() > 1)
                             {
                                 canSetRightAscensionRate = telescopeDevice.CanSetRightAscensionRate;
                                 LogOK(p_Name, canSetRightAscensionRate.ToString());
                             }
                             else
                             {
-                                LogInfo("CanSetRightAscensionRate", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                                LogInfo("CanSetRightAscensionRate", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
                             }
 
                             break;
@@ -6205,14 +6140,14 @@ namespace ConformU
 
                     case CanType.CanSlewAltAz:
                         {
-                            if (interfaceVersion > 1)
+                            if (GetInterfaceVersion() > 1)
                             {
                                 canSlewAltAz = telescopeDevice.CanSlewAltAz;
                                 LogOK(p_Name, canSlewAltAz.ToString());
                             }
                             else
                             {
-                                LogInfo("CanSlewAltAz", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                                LogInfo("CanSlewAltAz", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
                             }
 
                             break;
@@ -6220,14 +6155,14 @@ namespace ConformU
 
                     case CanType.CanSlewAltAzAsync:
                         {
-                            if (interfaceVersion > 1)
+                            if (GetInterfaceVersion() > 1)
                             {
                                 canSlewAltAzAsync = telescopeDevice.CanSlewAltAzAsync;
                                 LogOK(p_Name, canSlewAltAzAsync.ToString());
                             }
                             else
                             {
-                                LogInfo("CanSlewAltAzAsync", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                                LogInfo("CanSlewAltAzAsync", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
                             }
 
                             break;
@@ -6249,14 +6184,14 @@ namespace ConformU
 
                     case CanType.CanSyncAltAz:
                         {
-                            if (interfaceVersion > 1)
+                            if (GetInterfaceVersion() > 1)
                             {
                                 canSyncAltAz = telescopeDevice.CanSyncAltAz;
                                 LogOK(p_Name, canSyncAltAz.ToString());
                             }
                             else
                             {
-                                LogInfo("CanSyncAltAz", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                                LogInfo("CanSyncAltAz", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
                             }
 
                             break;
@@ -8043,14 +7978,6 @@ namespace ConformU
                 LogDebug(test, ex.ToString());
             }
             return false;
-        }
-
-        private void TimeMethod(string methodName, Action method)
-        {
-            Stopwatch sw = Stopwatch.StartNew();
-            method();
-            if (sw.Elapsed.TotalSeconds > operationInitiationTime)
-                LogIssue(methodName, $"Operation initiation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is more than the configured maximum: {operationInitiationTime:0.0} seconds.");
         }
 
         private void AbortSlew(string testName)

@@ -30,6 +30,7 @@ namespace ConformU
         #region Variables and Constants
 
         #region Constants
+
         internal const double PERF_LOOP_TIME = 5.0; // Performance loop run time in seconds
         internal const int SLEEP_TIME = 500; // Loop time for testing whether slewing has completed
         internal const int CAMERA_SLEEP_TIME = 10; // Loop time for testing whether camera events have completed
@@ -40,11 +41,13 @@ namespace ConformU
         // Class not registered COM exception error number
         internal const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
 
+        private const double OPERATION_INITIATION_MAXIMUM_TIME = 1.0; // Time within which an operation initiation must complete (seconds)
+
         #endregion
 
-        internal int interfaceVersion; // Variable to held interface version of the current device
+        private int? baseInterfaceVersion; // Variable to held interface version of the current device
 
-        private bool l_Connected, l_HasProperties, l_HasCanProperties, l_HasMethods, l_HasPreRunCheck, l_HasPostRunCheck, l_HasPerformanceCheck;
+        private bool l_HasProperties, l_HasCanProperties, l_HasMethods, l_HasPreRunCheck, l_HasPostRunCheck, l_HasPerformanceCheck;
         private bool l_HasPreConnectCheck;
         internal IAscomDeviceV2 baseClassDevice; // IAscomDriverV1
 
@@ -121,7 +124,6 @@ namespace ConformU
         public DeviceTesterBaseClass() : base()
         {
             l_HasPreConnectCheck = false;
-            l_Connected = false;
             l_HasPreRunCheck = false;
             l_HasCanProperties = false;
             l_HasProperties = true;
@@ -145,7 +147,6 @@ namespace ConformU
         public DeviceTesterBaseClass(bool HasCanProperties, bool HasProperties, bool HasMethods, bool HasPreRunCheck, bool HasPreConnectCheck, bool HasPerformanceCheck, bool HasPostRunCheck, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken cancellationToken) : this()
         {
             l_HasPreConnectCheck = HasPreConnectCheck;
-            l_Connected = false;
             l_HasPreRunCheck = HasPreRunCheck;
             l_HasCanProperties = HasCanProperties;
             l_HasProperties = HasProperties;
@@ -213,19 +214,17 @@ namespace ConformU
             // InterfaceVersion - Required
             try
             {
-                LogCallToDriver("InterfaceVersion", "About to get property InterfaceVersion");
-                interfaceVersion = baseClassDevice.InterfaceVersion;
-                switch (interfaceVersion)
+                switch (GetInterfaceVersion())
                 {
                     case var @case when @case < 1:
                         {
-                            LogIssue("InterfaceVersion", "InterfaceVersion must be 1 or greater but driver returned: " + interfaceVersion.ToString());
+                            LogIssue("InterfaceVersion", "InterfaceVersion must be 1 or greater but driver returned: " + GetInterfaceVersion().ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogOK("InterfaceVersion", interfaceVersion.ToString());
+                            LogOK("InterfaceVersion", GetInterfaceVersion().ToString());
                             break;
                         }
                 }
@@ -240,7 +239,7 @@ namespace ConformU
                 return;
 
             // Connected - Required
-            if (IncludeMethod(MandatoryMethod.Connected, deviceType, interfaceVersion))
+            if (IncludeMethod(MandatoryMethod.Connected, deviceType, GetInterfaceVersion()))
             {
                 try
                 {
@@ -258,7 +257,7 @@ namespace ConformU
             }
 
             // Description - Required
-            if (IncludeMethod(MandatoryMethod.Description, deviceType, interfaceVersion))
+            if (IncludeMethod(MandatoryMethod.Description, deviceType, GetInterfaceVersion()))
             {
                 try
                 {
@@ -297,7 +296,7 @@ namespace ConformU
             }
 
             // DriverInfo - Required
-            if (IncludeMethod(MandatoryMethod.DriverInfo, deviceType, interfaceVersion))
+            if (IncludeMethod(MandatoryMethod.DriverInfo, deviceType, GetInterfaceVersion()))
             {
                 try
                 {
@@ -328,7 +327,7 @@ namespace ConformU
             }
 
             // DriverVersion - Required
-            if (IncludeMethod(MandatoryMethod.DriverVersion, deviceType, interfaceVersion))
+            if (IncludeMethod(MandatoryMethod.DriverVersion, deviceType, GetInterfaceVersion()))
             {
                 try
                 {
@@ -359,11 +358,11 @@ namespace ConformU
             }
             else
             {
-                LogInfo("DriverVersion", "Skipping test as this method is not supported in interface V" + interfaceVersion);
+                LogInfo("DriverVersion", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
             // Name - Required
-            if (IncludeMethod(MandatoryMethod.Name, deviceType, interfaceVersion))
+            if (IncludeMethod(MandatoryMethod.Name, deviceType, GetInterfaceVersion()))
             {
                 try
                 {
@@ -512,7 +511,7 @@ namespace ConformU
             LogNewLine();
 
             // DeviceState - Mandatory for Platform 7 and above, otherwise not present
-            if (DeviceCapabilities.HasConnectAndDeviceState(deviceType, interfaceVersion))
+            if (DeviceCapabilities.HasConnectAndDeviceState(deviceType, GetInterfaceVersion()))
             {
                 try
                 {
@@ -599,11 +598,11 @@ namespace ConformU
 
                             // Try to get the MaxSwitch property
                             short maxSwitch = 0;
-                            LogCallToDriver("DeviceState","About to get MaxSwitch property");
-                            try { maxSwitch = (deviceObject as ISwitchV3).MaxSwitch; } 
+                            LogCallToDriver("DeviceState", "About to get MaxSwitch property");
+                            try { maxSwitch = (deviceObject as ISwitchV3).MaxSwitch; }
                             catch (Exception ex)
                             {
-                                LogIssue("DeviceState",$"MaxSwitch exception: {ex}");
+                                LogIssue("DeviceState", $"MaxSwitch exception: {ex}");
                             }
                             LogInfo("DeviceState", $"MaxSwitch: {maxSwitch}");
                             for (var i = 0; i < maxSwitch; i++)
@@ -688,12 +687,167 @@ namespace ConformU
             }
             else
             {
-                LogInfo("DeviceState","DeviceState tests omitted - DeviceState is not available in this interface version.");
+                LogInfo("DeviceState", "DeviceState tests omitted - DeviceState is not available in this interface version.");
             }
 
             if (applicationCancellationToken.IsCancellationRequested)
                 return;
             LogNewLine();
+        }
+
+        public int GetInterfaceVersion()
+        {
+
+            try
+            {
+                if (baseInterfaceVersion.HasValue)
+                    return baseInterfaceVersion.Value;
+
+                LogCallToDriver("InterfaceVersion", "About to get property InterfaceVersion");
+                baseInterfaceVersion = baseClassDevice.InterfaceVersion;
+                LogDebug("GetInterfaceVersion", $"Device interface version: {baseInterfaceVersion}");
+
+                return baseInterfaceVersion.Value;
+            }
+            catch (Exception ex)
+            {
+                LogDebug("GetInterfaceVersion", $"Exception getting interface version: {ex.Message}\r\n{ex}");
+                throw;
+            }
+        }
+
+        public void Connect()
+        {
+            SetTest("Connect");
+            SetAction("Waiting for Connected to become 'true'");
+
+            // Try to get the device's interface version
+            LogDebug("Connect", $"Interface version: {GetInterfaceVersion()}");
+
+            // Use Connect /Disconnect if present
+            if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.Telescope, GetInterfaceVersion()))
+            {
+                LogCallToDriver("Connect", "About to get Connecting property");
+                if (!baseClassDevice.Connecting) // No connection / disconnection is in progress
+                {
+                    // First make sure that Connecting is correctly implemented
+                    SetAction("Waiting for Connected to become True");
+                    LogCallToDriver("Connected", "About to set Connected property true");
+                    baseClassDevice.Connected = true;
+
+                    LogCallToDriver("Connect", "About to get Connected property");
+                    if (baseClassDevice.Connected != true)
+                    {
+                        throw new ASCOM.InvalidOperationException($"Set Connected True - The device connected without error but Connected Get returned False.");
+                    }
+
+                    LogOK("Connected", "Connected to device successfully using Connected = True");
+
+                    //Wait for a short time
+                    WaitFor(500, 100);
+
+                    // Make sure that we can disconnect as well
+                    SetAction("Waiting for Connected to become False");
+                    LogCallToDriver("Connected", "About to set Connected property False");
+                    baseClassDevice.Connected = false;
+                    if (baseClassDevice.Connected != false)
+                    {
+                        throw new ASCOM.InvalidOperationException($"Set Connected False - The device disconnected without error but Connected Get returned True.");
+                    }
+
+                    LogOK("Connected", "Disconnected from device successfully using Connected = False");
+
+                    // Call the Connect method and wait for the device to connect
+                    SetAction("Waiting for the Connect method to complete");
+                    LogCallToDriver("Connect", "About to call Connect() method");
+                    TimeMethod("Connect", () => baseClassDevice.Connect());
+                    LogCallToDriver("Connect", "About to get Connecting property repeatedly");
+                    WaitWhile("Connecting to device", () => { return baseClassDevice.Connecting; }, SLEEP_TIME, settings.ConnectDisconnectTimeout);
+                }
+                else // Connection already in progress so ignore this connect request
+                {
+                    LogInfo("Connect", "Ignoring this request because a Connect() or Disconnect() operation is already in progress.");
+                }
+            }
+            else // Historic synchronous behaviour
+            {
+                SetAction("Waiting for Connected to become True");
+                LogCallToDriver("Connected", "About to set Connected property");
+                baseClassDevice.Connected = true;
+            }
+
+            // Make sure that the value set is reflected in Connected GET
+            LogCallToDriver("Connect", "About to get Connected property");
+            
+            if (baseClassDevice.Connected!= true)
+            {
+                throw new ASCOM.InvalidOperationException($"The device connected without error but Connected Get returned False.");
+            }
+
+            if (DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType.Value, (short)GetInterfaceVersion()))
+                TL.LogMessage("Connect", MessageLevel.OK, "Connected to device successfully using Connect()");
+            else
+                LogOK("Connected", "Connected to device successfully using Connected = True");
+
+            ResetTestActionStatus();
+            TL.LogMessage("", MessageLevel.TestOnly, "");
+        }
+
+        public void Disconnect()
+        {
+            SetTest("Disconnect");
+
+            // Try to get the device's interface version
+            LogDebug("Disconnect", $"Interface version: {GetInterfaceVersion()}");
+
+            // Use Connect /Disconnect if present
+            if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.Telescope, GetInterfaceVersion()))
+            {
+                LogCallToDriver("Disconnect", "About to get Connecting property");
+                if (!baseClassDevice.Connecting) // No connection / disconnection is in progress
+                {
+                    // Call the Connect method and wait for the device to connect
+                    SetAction("Waiting for the Disconnect method to complete");
+                    LogCallToDriver("Disconnect", "About to call Disconnect() method");
+                    TimeMethod("Disconnect", () => baseClassDevice.Disconnect());
+                    LogCallToDriver("Disconnect", "About to get Connecting property repeatedly");
+                    WaitWhile("Disconnecting from device", () => { return baseClassDevice.Connecting; }, SLEEP_TIME, settings.ConnectDisconnectTimeout);
+                }
+                else // Connection already in progress so ignore this connect request
+                {
+                    LogInfo("Disconnect", "Ignoring this request because a Connect() or Disconnect() operation is already in progress.");
+                }
+            }
+            else // Historic synchronous behaviour
+            {
+            SetAction("Waiting for Connected to become False");
+                LogCallToDriver("Connected", "About to set Connected property");
+                baseClassDevice.Connected = false;
+            }
+
+            // Make sure that the value set is reflected in Connected GET
+            LogCallToDriver("Disconnect", "About to get Connected property");
+            if (baseClassDevice.Connected != false)
+            {
+                throw new ASCOM.InvalidOperationException($"The device disconnected without error but Connected Get returned True.");
+            }
+
+            if (DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType.Value, (short)GetInterfaceVersion()))
+                TL.LogMessage("Disconnect", MessageLevel.OK, "Disconnected from device successfully using Disconnect()");
+            else
+                TL.LogMessage("Connected", MessageLevel.OK, "False");
+
+            ResetTestActionStatus();
+            TL.LogMessage("", MessageLevel.TestOnly, "");
+        }
+
+        public bool Connected
+        {
+            get
+            {
+                LogCallToDriver("ConformanceCheck", "About to get Connected");
+                return baseClassDevice.Connected;
+            }
         }
 
         public virtual void CheckCommonMethods()
@@ -855,19 +1009,6 @@ namespace ConformU
         public virtual void PreConnectChecks()
         {
             LogIssue("PreConnectChecks", "DeviceTester base Class warning message");
-        }
-
-        public virtual bool Connected
-        {
-            get
-            {
-                return l_Connected;
-            }
-
-            set
-            {
-                l_Connected = value;
-            }
         }
 
         public virtual void ReadCanProperties()
@@ -1545,63 +1686,14 @@ namespace ConformU
                 LogTestAndMessage(test, memberName);
         }
 
-        /// <summary>
-        /// Determine whether a test device has asynchronous connection.
-        /// </summary>
-        /// <param name="interfaceVersion">This device's interface number</param>
-        /// <returns>True if completion should be tested using OperationComplete</returns>
-        public bool HasConnect()
+        protected void TimeMethod(string methodName, Action method)
         {
-            // Initialise requiredInterfaceVersion to a large value so that the function result will be False when values are omitted from the switch statement below.
-            int requiredInterfaceVersion = int.MaxValue;
-
-            // Enter required minimum interface version numbers that support OperationComplete
-            switch (settings.DeviceType)
-            {
-                case DeviceTypes.Camera:
-                    break;
-                case DeviceTypes.CoverCalibrator:
-                    break;
-                case DeviceTypes.Dome:
-                    break;
-                case DeviceTypes.FilterWheel:
-                    break;
-                case DeviceTypes.Focuser:
-                    break;
-                case DeviceTypes.ObservingConditions:
-                    break;
-                case DeviceTypes.Rotator:
-                    break;
-                case DeviceTypes.SafetyMonitor:
-                    break;
-                case DeviceTypes.Switch:
-                    break;
-                case DeviceTypes.Telescope:
-                    requiredInterfaceVersion = 4;
-                    break;
-                case DeviceTypes.Video:
-                    break;
-            }
-
-            if (interfaceVersion >= requiredInterfaceVersion)
-                return true;
-
-            return false;
+            Stopwatch sw = Stopwatch.StartNew();
+            method();
+            if (sw.Elapsed.TotalSeconds > OPERATION_INITIATION_MAXIMUM_TIME)
+                LogIssue(methodName, $"Operation initiation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is more than the configured maximum: {OPERATION_INITIATION_MAXIMUM_TIME:0.0} seconds.");
         }
 
-        protected void GetInterfaceVersion()
-        {
-
-            try
-            {
-                interfaceVersion = baseClassDevice.InterfaceVersion;
-                LogDebug("GetInterfaceVersion", $"Device interface version: {interfaceVersion}");
-            }
-            catch (Exception ex)
-            {
-                LogDebug("GetInterfaceVersion", $"Exception getting interface version: {ex.Message}\r\n{ex}");
-            }
-        }
 
         #endregion
 

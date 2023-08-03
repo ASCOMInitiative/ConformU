@@ -1,4 +1,5 @@
 ﻿using ASCOM.Common;
+using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -207,14 +208,7 @@ namespace ConformU
                         TL.LogMessage("Connect to device", MessageLevel.TestOnly, "");
                         testStage = "Connect";
 
-                        if (settings.DisplayMethodCalls) TL.LogMessage("ConformanceCheck", MessageLevel.TestAndMessage, "About to set Connected property");
-                        testDevice.Connected = true;
-                        if (testDevice.HasConnect())
-                            TL.LogMessage("Connect", MessageLevel.OK, "Connected to device successfully using Connect()");
-                        else
-                            TL.LogMessage("Connected", MessageLevel.OK, "True");
-
-                        TL.LogMessage("", MessageLevel.TestOnly, "");
+                        testDevice.Connect();
 
                         try
                         {
@@ -283,16 +277,9 @@ namespace ConformU
                             try
                             {
                                 TL.LogMessage("Disconnect from device", MessageLevel.TestOnly, "");
-                                if (settings.DisplayMethodCalls) TL.LogMessage("ConformanceCheck", MessageLevel.TestAndMessage, "About to set Connected property false");
                                 testStage = "Disconnect";
 
-                                testDevice.Connected = false;
-                                if (testDevice.HasConnect())
-                                    TL.LogMessage("Disconnect", MessageLevel.OK, "Disconnected from device successfully using Disconnect()");
-                                else
-                                    TL.LogMessage("Connected", MessageLevel.OK, "False");
-
-                                TL.LogMessage("", MessageLevel.TestOnly, "");
+                                testDevice.Disconnect();
                             }
                             catch (Exception ex)
                             {
@@ -334,8 +321,8 @@ namespace ConformU
                     }
                     catch (Exception ex) // Exception when setting Connected = True
                     {
-                        conformResults.Issues.Add(new KeyValuePair<string, string>("Connected", $"Exception when setting Connected to true - testing abandoned: {ex.Message}"));
-                        TL.LogMessage("Connected", MessageLevel.Issue, $"Exception when setting Connected to True: {ex.Message}");
+                        conformResults.Issues.Add(new KeyValuePair<string, string>("Connected", $"Connection exception - testing abandoned: {ex.Message}"));
+                        TL.LogMessage("Connected", MessageLevel.Issue, $"Connection exception: {ex.Message}");
                         TL.LogMessage("Connected", MessageLevel.Debug, $"{ex}");
                         TL.LogMessage("", MessageLevel.TestOnly, "");
                         TL.LogMessage("ConformanceCheck", MessageLevel.TestAndMessage, "Further tests abandoned.");
