@@ -151,7 +151,7 @@ namespace ConformU
                         }
 
                         LogInfo("CreateDevice", "Successfully created driver");
-                        BaseClassDevice = mRotator; // Assign the driver to the base class
+                        SetDevice(mRotator, DeviceTypes.Rotator); // Assign the driver to the base class
 
                         SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                         WaitFor(1000, 100);

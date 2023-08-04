@@ -140,7 +140,7 @@ namespace ConformU
                 }
 
                 LogInfo("CreateDevice", "Successfully created driver");
-                BaseClassDevice = mSafetyMonitor; // Assign the driver to the base class
+                SetDevice(mSafetyMonitor, DeviceTypes.SafetyMonitor); // Assign the driver to the base class
 
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);

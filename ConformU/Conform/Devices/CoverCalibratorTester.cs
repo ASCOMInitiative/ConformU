@@ -147,7 +147,7 @@ namespace ConformU
                 }
 
                 LogInfo("CreateDevice", "Successfully created driver");
-                BaseClassDevice = coverCalibratorDevice; // Assign the driver to the base class
+                SetDevice(coverCalibratorDevice, DeviceTypes.CoverCalibrator); // Assign the driver to the base class
 
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);

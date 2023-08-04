@@ -422,7 +422,7 @@ namespace ConformU
                 }
 
                 LogInfo("CreateDevice", "Successfully created driver");
-                BaseClassDevice = telescopeDevice; // Assign the driver to the base class
+                SetDevice(telescopeDevice, DeviceTypes.Telescope); // Assign the driver to the base class
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);
             }

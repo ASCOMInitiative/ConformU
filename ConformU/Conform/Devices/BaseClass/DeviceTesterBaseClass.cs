@@ -24,8 +24,6 @@ namespace ConformU
     {
         // Implements IDisposable
 
-        #region Variables and Constants
-
         #region Constants
 
         internal const double PERF_LOOP_TIME = 5.0; // Performance loop run time in seconds
@@ -42,11 +40,14 @@ namespace ConformU
 
         #endregion
 
+        #region Variables
+
         private int? baseInterfaceVersion; // Variable to held interface version of the current device
 
         private bool lHasProperties, lHasCanProperties, lHasMethods, lHasPreRunCheck, lHasPostRunCheck, lHasPerformanceCheck;
         private bool lHasPreConnectCheck;
-        internal IAscomDeviceV2 BaseClassDevice; // IAscomDriverV1
+        private IAscomDeviceV2 baseClassDevice;
+        private DeviceTypes baseClassDeviceType;
 
         private string testName, testAction, testStatus;
 
@@ -166,7 +167,7 @@ namespace ConformU
                     try
                     {
                         tl.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, "Calling base class Dispose method...");
-                        BaseClassDevice.Dispose();
+                        baseClassDevice.Dispose();
                         tl.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, "returned from base class Dispose method");
                     }
                     catch (Exception ex)
@@ -174,7 +175,7 @@ namespace ConformU
                         tl.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, $"Exception\r\n{ex}");
                     }
 
-                    BaseClassDevice = null;
+                    baseClassDevice = null;
                     tl.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, "Dispose finished");
                 }
             }
@@ -196,7 +197,7 @@ namespace ConformU
         public void SetupDialog()
         {
             if (settings.DisplayMethodCalls) LogTestAndMessage("SetupDialog", "About to call SetupDialog");
-            ((dynamic)BaseClassDevice).SetupDialog();
+            ((dynamic)baseClassDevice).SetupDialog();
         }
 
         public void CheckCommonMethods(IAscomDeviceV2 deviceObject, DeviceTypes deviceType)
@@ -206,7 +207,7 @@ namespace ConformU
 
             bool connected;
             LogTestOnly("Common Driver Methods");
-            BaseClassDevice = deviceObject;
+            baseClassDevice = deviceObject;
 
             // InterfaceVersion - Required
             try
@@ -242,7 +243,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Connected", "About to get property Connected");
-                    connected = BaseClassDevice.Connected;
+                    connected = baseClassDevice.Connected;
                     LogOk("Connected", connected.ToString());
                 }
                 catch (Exception ex)
@@ -260,7 +261,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Description", "About to get property Description");
-                    description = BaseClassDevice.Description;
+                    description = baseClassDevice.Description;
                     switch (description ?? "")
                     {
                         case var case1 when case1 == "":
@@ -300,7 +301,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DriverInfo", "About to get property DriverInfo");
-                    driverInfo = BaseClassDevice.DriverInfo;
+                    driverInfo = baseClassDevice.DriverInfo;
                     switch (driverInfo ?? "")
                     {
                         case var case2 when case2 == "":
@@ -331,7 +332,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DriverVersion", "About to get property DriverVersion");
-                    driverVersion = BaseClassDevice.DriverVersion;
+                    driverVersion = baseClassDevice.DriverVersion;
                     switch (driverVersion ?? "")
                     {
                         case var case3 when case3 == "":
@@ -367,7 +368,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Name", "About to get property Name");
-                    name = BaseClassDevice.Name;
+                    name = baseClassDevice.Name;
                     switch (name ?? "")
                     {
                         case var case4 when case4 == "":
@@ -400,7 +401,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("SupportedActions", "About to call method SupportedActions");
-                supportedActions = (IList)BaseClassDevice.SupportedActions;
+                supportedActions = (IList)baseClassDevice.SupportedActions;
                 if (supportedActions.Count == 0)
                 {
                     LogOk("SupportedActions", "Driver returned an empty action list");
@@ -436,7 +437,7 @@ namespace ConformU
                                                 try
                                                 {
                                                     LogCallToDriver("SupportedActions", "About to call method Action");
-                                                    result = BaseClassDevice.Action(actionString, testParameters);
+                                                    result = baseClassDevice.Action(actionString, testParameters);
                                                     LogOk("SupportedActions", string.Format("OC simulator action {0} gave result: {1}", actionString, result));
                                                 }
                                                 catch (Exception ex1)
@@ -449,7 +450,7 @@ namespace ConformU
                                                 try
                                                 {
                                                     LogCallToDriver("SupportedActions", "About to call method Action");
-                                                    result = BaseClassDevice.Action(actionString, testParameters);
+                                                    result = baseClassDevice.Action(actionString, testParameters);
                                                     LogOk("SupportedActions", string.Format("OC simulator action {0} gave result: {1}", actionString, result));
                                                 }
                                                 catch (Exception ex1)
@@ -462,7 +463,7 @@ namespace ConformU
                                                 try
                                                 {
                                                     LogCallToDriver("SupportedActions", "About to call method Action");
-                                                    result = BaseClassDevice.Action(actionString, testParameters);
+                                                    result = baseClassDevice.Action(actionString, testParameters);
                                                     LogOk("SupportedActions", string.Format("Switch simulator action {0} gave result: {1}", actionString, result));
                                                 }
                                                 catch (Exception ex1)
@@ -475,7 +476,7 @@ namespace ConformU
                                                 try
                                                 {
                                                     LogCallToDriver("SupportedActions", "About to call method Action");
-                                                    result = BaseClassDevice.Action(actionString, testParameters);
+                                                    result = baseClassDevice.Action(actionString, testParameters);
                                                     LogOk("SupportedActions", string.Format("Switch simulator action {0} gave result: {1}", actionString, result));
                                                 }
                                                 catch (Exception ex1)
@@ -517,7 +518,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DeviceState", "About to get property DeviceState");
-                    IList<IStateValue> deviceState = BaseClassDevice.DeviceState;
+                    IList<IStateValue> deviceState = baseClassDevice.DeviceState;
 
                     int numberOfItems = 0;
                     foreach (var item in deviceState)
@@ -703,7 +704,7 @@ namespace ConformU
                     return baseInterfaceVersion.Value;
 
                 LogCallToDriver("InterfaceVersion", "About to get property InterfaceVersion");
-                baseInterfaceVersion = BaseClassDevice.InterfaceVersion;
+                baseInterfaceVersion = baseClassDevice.InterfaceVersion;
                 LogDebug("GetInterfaceVersion", $"Device interface version: {baseInterfaceVersion}");
 
                 return baseInterfaceVersion.Value;
@@ -727,15 +728,15 @@ namespace ConformU
             if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.Telescope, GetInterfaceVersion()))
             {
                 LogCallToDriver("Connect", "About to get Connecting property");
-                if (!BaseClassDevice.Connecting) // No connection / disconnection is in progress
+                if (!baseClassDevice.Connecting) // No connection / disconnection is in progress
                 {
                     // First make sure that Connecting is correctly implemented
                     SetAction("Waiting for Connected to become True");
                     LogCallToDriver("Connected", "About to set Connected property true");
-                    BaseClassDevice.Connected = true;
+                    baseClassDevice.Connected = true;
 
                     LogCallToDriver("Connect", "About to get Connected property");
-                    if (BaseClassDevice.Connected != true)
+                    if (baseClassDevice.Connected != true)
                     {
                         throw new ASCOM.InvalidOperationException($"Set Connected True - The device connected without error but Connected Get returned False.");
                     }
@@ -748,8 +749,8 @@ namespace ConformU
                     // Make sure that we can disconnect as well
                     SetAction("Waiting for Connected to become False");
                     LogCallToDriver("Connected", "About to set Connected property False");
-                    BaseClassDevice.Connected = false;
-                    if (BaseClassDevice.Connected != false)
+                    baseClassDevice.Connected = false;
+                    if (baseClassDevice.Connected != false)
                     {
                         throw new ASCOM.InvalidOperationException($"Set Connected False - The device disconnected without error but Connected Get returned True.");
                     }
@@ -759,9 +760,9 @@ namespace ConformU
                     // Call the Connect method and wait for the device to connect
                     SetAction("Waiting for the Connect method to complete");
                     LogCallToDriver("Connect", "About to call Connect() method");
-                    TimeMethod("Connect", () => BaseClassDevice.Connect());
+                    TimeMethod("Connect", () => baseClassDevice.Connect());
                     LogCallToDriver("Connect", "About to get Connecting property repeatedly");
-                    WaitWhile("Connecting to device", () => BaseClassDevice.Connecting, SLEEP_TIME, settings.ConnectDisconnectTimeout);
+                    WaitWhile("Connecting to device", () => baseClassDevice.Connecting, SLEEP_TIME, settings.ConnectDisconnectTimeout);
                 }
                 else // Connection already in progress so ignore this connect request
                 {
@@ -772,13 +773,13 @@ namespace ConformU
             {
                 SetAction("Waiting for Connected to become True");
                 LogCallToDriver("Connected", "About to set Connected property");
-                BaseClassDevice.Connected = true;
+                baseClassDevice.Connected = true;
             }
 
             // Make sure that the value set is reflected in Connected GET
             LogCallToDriver("Connect", "About to get Connected property");
             
-            if (BaseClassDevice.Connected!= true)
+            if (baseClassDevice.Connected!= true)
             {
                 throw new ASCOM.InvalidOperationException($"The device connected without error but Connected Get returned False.");
             }
@@ -803,14 +804,14 @@ namespace ConformU
             if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.Telescope, GetInterfaceVersion()))
             {
                 LogCallToDriver("Disconnect", "About to get Connecting property");
-                if (!BaseClassDevice.Connecting) // No connection / disconnection is in progress
+                if (!baseClassDevice.Connecting) // No connection / disconnection is in progress
                 {
                     // Call the Connect method and wait for the device to connect
                     SetAction("Waiting for the Disconnect method to complete");
                     LogCallToDriver("Disconnect", "About to call Disconnect() method");
-                    TimeMethod("Disconnect", () => BaseClassDevice.Disconnect());
+                    TimeMethod("Disconnect", () => baseClassDevice.Disconnect());
                     LogCallToDriver("Disconnect", "About to get Connecting property repeatedly");
-                    WaitWhile("Disconnecting from device", () => BaseClassDevice.Connecting, SLEEP_TIME, settings.ConnectDisconnectTimeout);
+                    WaitWhile("Disconnecting from device", () => baseClassDevice.Connecting, SLEEP_TIME, settings.ConnectDisconnectTimeout);
                 }
                 else // Connection already in progress so ignore this connect request
                 {
@@ -821,12 +822,12 @@ namespace ConformU
             {
             SetAction("Waiting for Connected to become False");
                 LogCallToDriver("Connected", "About to set Connected property");
-                BaseClassDevice.Connected = false;
+                baseClassDevice.Connected = false;
             }
 
             // Make sure that the value set is reflected in Connected GET
             LogCallToDriver("Disconnect", "About to get Connected property");
-            if (BaseClassDevice.Connected != false)
+            if (baseClassDevice.Connected != false)
             {
                 throw new ASCOM.InvalidOperationException($"The device disconnected without error but Connected Get returned True.");
             }
@@ -845,7 +846,7 @@ namespace ConformU
             get
             {
                 LogCallToDriver("ConformanceCheck", "About to get Connected");
-                return BaseClassDevice.Connected;
+                return baseClassDevice.Connected;
             }
         }
 
@@ -1745,6 +1746,12 @@ namespace ConformU
             }
 
             return retVal;
+        }
+
+        public void SetDevice(IAscomDeviceV2 device,DeviceTypes deviceType)
+        {
+            this.baseClassDevice=device;
+            this.baseClassDeviceType = deviceType;
         }
 
         //private void CommandTest(CommandType p_Type, string p_Name)

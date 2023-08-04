@@ -303,7 +303,7 @@ namespace ConformU
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);
 
-                BaseClassDevice = camera; // Assign the driver to the base class
+                SetDevice(camera, DeviceTypes.Camera); // Assign the driver to the base class
 
                 LogInfo("CreateDevice", "Successfully created driver");
             }
@@ -432,7 +432,7 @@ namespace ConformU
                                 lV2 = Convert.ToInt32(lVString[..(lVStringPtr - 1)]); // Extract the number
                                 lVString = lVString[(lVStringPtr + 1)..]; // Get the third version number part
                                 lV3 = Convert.ToInt32(lVString); // Extract the number
-                                                                   // Turn the version parts into a whole number
+                                                                 // Turn the version parts into a whole number
                                 lV1 = lV1 * 1000000 + lV2 * 1000 + lV3;
                                 if (lV1 < 5000008)
                                 {
@@ -945,7 +945,7 @@ namespace ConformU
                     setPoint = CAMERA_HIGH_SETPOINT_START_TEMPERATURE; // Start at 0.0C
 
                     // Loop upward in CAMERA_SETPOINT_INCREMENT degree temperature steps to find the maximum temperature that can be set
-LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature multiple times...");
+                    LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature multiple times...");
                     do
                     {
                         try
@@ -977,7 +977,7 @@ LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature multiple tim
                 }
 
                 // Restore original value
-LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
+                LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                 try
                 {
                     camera.SetCCDTemperature = mSetCcdTemperature;
@@ -1011,7 +1011,7 @@ LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                     LogCallToDriver("ConformanceCheck", "About to get SensorType");
                     mSensorType = (ASCOM.DeviceInterface.SensorType)camera.SensorType;
                     mCanReadSensorType = true; // Set a flag to indicate that we have got a valid SensorType value
-                                                // Successfully retrieved a value
+                                               // Successfully retrieved a value
                     LogOk("SensorType Read", mSensorType.ToString());
                 }
                 catch (Exception ex)
@@ -1152,7 +1152,7 @@ LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                 try
                 {
                     mCanReadGain = false; // Set default value to indicate can't read gain
-LogCallToDriver("ConformanceCheck", "About to get Gain");
+                    LogCallToDriver("ConformanceCheck", "About to get Gain");
                     mGain = camera.Gain;
                     mCanReadGain = true; // Flag that we can read Gain OK
                     if (mCanReadGains)
@@ -1422,7 +1422,7 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                 try
                 {
                     mCanReadOffset = false; // Set default value to indicate can't read offset
-LogCallToDriver("ConformanceCheck", "About to get Offset");
+                    LogCallToDriver("ConformanceCheck", "About to get Offset");
                     mOffset = camera.Offset;
                     mCanReadOffset = true; // Flag that we can read Offset OK
                     if (mCanReadOffsets)
@@ -2594,7 +2594,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                 }, exposeUiTaskCancellationToken);
 
                 // Initiate the exposure
-LogCallToDriver("ConformanceCheck", "About to call StartExposure");
+                LogCallToDriver("ConformanceCheck", "About to call StartExposure");
 
                 // Create a cancellation token that we can set if the task times out
                 CancellationTokenSource cancellationTokenSource = new();
@@ -2734,7 +2734,7 @@ LogCallToDriver("ConformanceCheck", "About to call StartExposure");
                 endTime = DateTime.Now;
 
                 // Test whether we have a synchronous or asynchronous camera
-LogCallToDriver("ConformanceCheck", "About to get ImageReady and CameraState");
+                LogCallToDriver("ConformanceCheck", "About to get ImageReady and CameraState");
                 if (camera.ImageReady & (camera.CameraState == CameraState.Idle)) // Synchronous exposure
                 {
                     #region Check synchronous exposure behaviour
@@ -2766,7 +2766,7 @@ LogCallToDriver("ConformanceCheck", "About to get ImageReady and CameraState");
                     SetStatus("Waiting for exposure to start");
 
                     // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
-LogCallToDriver("ConformanceCheck", "About to get ImageReady");
+                    LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                     imageReadyTooEarly = camera.ImageReady;
 
                     // Wait for exposing state
@@ -2798,7 +2798,7 @@ LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                     }
 
                     // Test whether ImageReady is being set too early i.e. before the camera has returned to idle
-LogCallToDriver("ConformanceCheck", "About to get ImageReady");
+                    LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                     imageReadyTooEarly = camera.ImageReady;
 
                     #endregion
@@ -2884,7 +2884,7 @@ LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                     try
                     {
                         // Wait for camera to become idle
-LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
+                        LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
 
                         WaitWhile("Waiting for camera idle state, reading/downloading image", () => (camera.CameraState != CameraState.Idle) & (camera.CameraState != CameraState.Error), 500, settings.CameraWaitTimeout);
 
@@ -2915,7 +2915,7 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
                     try
                     {
                         // Wait for image to become ready
-LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
+                        LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
 
                         // Wait until ImageReady is true or the camera is in the error state
                         WaitWhile("Waiting for image ready", () => !camera.ImageReady & (camera.CameraState != CameraState.Error), 500, settings.CameraWaitTimeout);
@@ -3199,7 +3199,7 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
                         try
                         {
                             // Get the variant array image
-LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
+                            LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                             sw.Restart();
                             object imageObject = camera.ImageArrayVariant;
                             sw.Stop();
@@ -3563,7 +3563,7 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
 
             lStartTime = DateTime.Now;
             //SetAction("Start " + CAMERA_PULSE_DURATION / (double)1000 + " second pulse guide " + p_Direction.ToString());
-LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {pDirection}");
+            LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {pDirection}");
             camera.PulseGuide(pDirection, CAMERA_PULSE_DURATION); // Start a 2 second pulse
             lEndTime = DateTime.Now;
             try
@@ -3649,7 +3649,7 @@ LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {pDirection}");
             camera.NumX = camera.MaxBinX; LogCallToDriver("ConformanceCheck", "About to set MaxBinY");
             camera.NumY = camera.MaxBinY; LogCallToDriver("ConformanceCheck", "About to call StartExposure");
             camera.StartExposure(1, true); // 1 second exposure
-LogCallToDriver("ConformanceCheck", "About to call ImageReady multiple times");
+            LogCallToDriver("ConformanceCheck", "About to call ImageReady multiple times");
             do
                 SetStatus("Waiting for ImageReady");
             while (!camera.ImageReady);
@@ -3807,7 +3807,7 @@ LogCallToDriver("ConformanceCheck", "About to call ImageReady multiple times");
             try { camera.CoolerOn = mCoolerOn; } catch { }
 
             // Reset the camera image parameters to legal values
-LogCallToDriver("ConformanceCheck", "About to set StartX");
+            LogCallToDriver("ConformanceCheck", "About to set StartX");
             try { camera.StartX = 0; } catch { }
             LogCallToDriver("ConformanceCheck", "About to set StartY");
             try { camera.StartY = 0; } catch { }

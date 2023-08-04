@@ -144,7 +144,7 @@ namespace ConformU
                 }
 
                 LogInfo("CreateDevice", "Successfully created driver");
-                BaseClassDevice = focuser; // Assign the driver to the base class
+                SetDevice(focuser, DeviceTypes.Focuser); // Assign the driver to the base class
 
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);
