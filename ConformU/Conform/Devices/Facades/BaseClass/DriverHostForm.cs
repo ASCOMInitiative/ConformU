@@ -4,7 +4,6 @@ using System.Windows.Forms;
 
 using System;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 #if WINDOWS
 namespace ConformU

@@ -2,7 +2,6 @@
 using System.Text;
 using System;
 using ASCOM.Tools;
-using Microsoft.Extensions.Logging;
 
 namespace ConformU
 {

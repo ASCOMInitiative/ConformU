@@ -1,19 +1,7 @@
 ﻿@page "/CheckAlpacaProtocol"
 
 @implements IDisposable
-
-@using ASCOM.Alpaca.Clients;
-@using ASCOM.Alpaca.Discovery;
 @using System.Threading;
-@using System.Text;
-@using System.Text.Json;
-@using System.Net;
-@using System.Net.Sockets;
-@using ASCOM.Common.Alpaca;
-@using ASCOM.Common;
-@using System.Net.Http.Headers;
-@using System.Diagnostics;
-@using ASCOM.Common.DeviceInterfaces;
 
 @inject ConformLogger logger
 @inject ConformConfiguration configuration

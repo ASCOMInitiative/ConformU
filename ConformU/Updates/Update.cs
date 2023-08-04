@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 using Semver;
 using System.Reflection;
-using ASCOM.Common.Interfaces;
-using ASCOM.Common;
 using System.Threading.Tasks;
 using ASCOM;
 using Octokit;

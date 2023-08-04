@@ -1,16 +1,10 @@
-﻿using ASCOM.Alpaca.Discovery;
-using ASCOM.Common;
+﻿using ASCOM.Common;
 using ASCOM.Common.Alpaca;
-using Blazorise;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Formats.Asn1;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace ConformU
 {

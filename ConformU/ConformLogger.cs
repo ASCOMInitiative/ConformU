@@ -1,6 +1,5 @@
 ﻿using ASCOM.Common.Interfaces;
 using ASCOM.Tools;
-using Microsoft.Extensions.Logging;
 using System;
 using static ConformU.Globals;
 

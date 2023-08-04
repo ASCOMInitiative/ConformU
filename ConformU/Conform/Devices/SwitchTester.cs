@@ -3,7 +3,6 @@ using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using System;
-using System.Configuration;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;

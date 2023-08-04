@@ -1,6 +1,4 @@
-﻿using ASCOM.Alpaca;
-using ASCOM.Alpaca.Clients;
-using ASCOM.Common.Alpaca;
+﻿using ASCOM.Common.Alpaca;
 
 namespace ConformU
 {

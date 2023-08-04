@@ -1,5 +1,4 @@
-﻿using ASCOM;
-using ASCOM.Alpaca.Clients;
+﻿using ASCOM.Alpaca.Clients;
 using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;

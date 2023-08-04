@@ -1,6 +1,4 @@
-﻿using System.Reflection.Metadata.Ecma335;
-
-namespace ConformU
+﻿namespace ConformU
 {
     public class CheckProtocolParameter
     {

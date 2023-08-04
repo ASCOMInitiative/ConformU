@@ -1,5 +1,4 @@
 ﻿using ASCOM.Tools;
-using Blazorise;
 using System;
 
 namespace ConformU

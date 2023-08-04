@@ -1,11 +1,8 @@
 ﻿// Base class from which particular device testers are derived
 // Put all common elements in here
 using ASCOM;
-using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
-using ASCOM.DeviceInterface;
-using Microsoft.VisualBasic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
