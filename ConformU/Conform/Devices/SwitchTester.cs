@@ -75,7 +75,7 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    if (mSwitch is not null) mSwitch.Dispose();
+                    mSwitch?.Dispose();
                     mSwitch = null;
                 }
             }
