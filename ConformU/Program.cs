@@ -42,7 +42,7 @@ namespace ConformU
         [return: MarshalAs(UnmanagedType.Bool)]
         static internal partial bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-        const int SW_SHOWMINIMIZED = 2;
+        private const int SW_SHOWMINIMIZED = 2;
 #endif
 
         #endregion
@@ -559,7 +559,7 @@ namespace ConformU
         /// <param name="debugDiscovery"></param>
         /// <param name="resultsFile"></param>
         /// <param name="settingsFile"></param>
-        static int RootCommandHandler(bool version)
+        private static int RootCommandHandler(bool version)
         {
             if (version)
             {
@@ -624,7 +624,7 @@ namespace ConformU
         /// <param name="debugDiscovery"></param>
         /// <param name="resultsFile"></param>
         /// <param name="settingsFile"></param>
-        static int StartGuiHandler(FileInfo file, DirectoryInfo path, bool debugStartUp, bool debugDiscovery, FileInfo resultsFile, FileInfo settingsFile)
+        private static int StartGuiHandler(FileInfo file, DirectoryInfo path, bool debugStartUp, bool debugDiscovery, FileInfo resultsFile, FileInfo settingsFile)
         {
             // Initialise required variables required by several commands
             InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
@@ -730,7 +730,7 @@ namespace ConformU
 
         #region Support code
 
-        static int RunConformanceTest()
+        private static int RunConformanceTest()
         {
             int returnCode;
 
@@ -765,7 +765,7 @@ namespace ConformU
             return returnCode;
         }
 
-        static int RunAlpacaProtocolTest()
+        private static int RunAlpacaProtocolTest()
         {
             int returnCode;
 

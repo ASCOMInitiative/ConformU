@@ -16,7 +16,7 @@ namespace ConformU
 {
     public class FacadeBaseClass : IAscomDeviceV2, IDisposable
     {
-        const int DRIVER_LOAD_TIMEOUT = 5; // Seconds to wait for the driver to load
+        private const int DRIVER_LOAD_TIMEOUT = 5; // Seconds to wait for the driver to load
         private readonly bool LOG_ENABLED = false; // Enable debug logging of this class
         //private readonly bool LOG_DISABLED = false; // Enable debug logging of this class
 

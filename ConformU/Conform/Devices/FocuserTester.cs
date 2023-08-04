@@ -15,7 +15,7 @@ namespace ConformU
         // If the Move completes within the SYNC_TEST_TIME the move is considered to be asynchronous and it takes longer it will be assumed to be synchronous
         private const int MOVE_SYNC_TEST_TIME = 1000; // Duration of a Move command beyond which the move is considered synchronous (Seconds)
 
-        enum FocuserPropertyMethod
+        private enum FocuserPropertyMethod
         {
             IsMoving,
             Position,

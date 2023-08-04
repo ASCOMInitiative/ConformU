@@ -18,10 +18,10 @@ namespace ConformU
         private readonly int switchWriteDelay;
         private readonly int switchReadDelay;
 
-        const int NUMBER_OF_SWITCH_TEST_STATES = 10;
-        const double BAD_SWITCH_VALUE = double.NaN; // Do not change this value, the Double.IsNaN method is used in various tests in the code below
+        private const int NUMBER_OF_SWITCH_TEST_STATES = 10;
+        private const double BAD_SWITCH_VALUE = double.NaN; // Do not change this value, the Double.IsNaN method is used in various tests in the code below
 
-        enum SwitchPropertyMethod
+        private enum SwitchPropertyMethod
         {
             MaxSwitch,
             GetSwitch,

@@ -12,10 +12,11 @@ namespace ConformU
 {
     internal class FilterWheelTester : DeviceTesterBaseClass
     {
-        const int FWTEST_IS_MOVING = -1;
+        private const int FWTEST_IS_MOVING = -1;
 
         private IFilterWheelV3 filterWheel;
-        enum FilterWheelProperties
+
+        private enum FilterWheelProperties
         {
             FocusOffsets,
             Names,

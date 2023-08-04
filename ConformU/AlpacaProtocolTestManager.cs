@@ -20,20 +20,20 @@ namespace ConformU
     public class AlpacaProtocolTestManager : IDisposable
     {
         // Test values for ClientID and ClientTransactionID
-        const int TEST_CLIENT_ID = 123456;
-        const int TEST_TRANSACTION_ID = 67890;
-        const string BAD_PARAMETER_VALUE = "asduio6fghZZ";
+        private const int TEST_CLIENT_ID = 123456;
+        private const int TEST_TRANSACTION_ID = 67890;
+        private const string BAD_PARAMETER_VALUE = "asduio6fghZZ";
 
         private readonly CancellationToken applicationCancellationToken;
         private bool disposedValue;
         private readonly ConformLogger TL;
         private readonly Settings settings;
-        readonly internal CancellationTokenSource applicationCancellationTokenSource;
+        private readonly CancellationTokenSource applicationCancellationTokenSource;
 
-        HttpClient httpClient;
-        readonly List<string> issueMessages;
-        readonly List<string> informationMessages;
-        readonly List<string> errorMessages;
+        private HttpClient httpClient;
+        private readonly List<string> issueMessages;
+        private readonly List<string> informationMessages;
+        private readonly List<string> errorMessages;
 
         #region New and Dispose
 
@@ -74,10 +74,11 @@ namespace ConformU
         #region Pre-formed status lists
 
         // HTTP statuses used to assess the outcome of protocol tests
-        readonly List<HttpStatusCode> HttpStatusCodeAny = new() { };
-        readonly List<HttpStatusCode> HttpStatusCode200 = new() { HttpStatusCode.OK };
-        readonly List<HttpStatusCode> HttpStatusCode400 = new() { HttpStatusCode.BadRequest };
-        readonly List<HttpStatusCode> HttpStatusCode4XX = new() { HttpStatusCode.BadRequest, HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized, HttpStatusCode.PaymentRequired, HttpStatusCode.Forbidden,
+        private readonly List<HttpStatusCode> HttpStatusCodeAny = new();
+        private readonly List<HttpStatusCode> HttpStatusCode200 = new() { HttpStatusCode.OK };
+        private readonly List<HttpStatusCode> HttpStatusCode400 = new() { HttpStatusCode.BadRequest };
+
+        private readonly List<HttpStatusCode> HttpStatusCode4XX = new() { HttpStatusCode.BadRequest, HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized, HttpStatusCode.PaymentRequired, HttpStatusCode.Forbidden,
                                                      HttpStatusCode.NotFound, HttpStatusCode.MethodNotAllowed, HttpStatusCode.NotAcceptable, HttpStatusCode.ProxyAuthenticationRequired, HttpStatusCode.Conflict, HttpStatusCode.Gone };
 
         #endregion
@@ -2083,7 +2084,7 @@ namespace ConformU
 
         #region Support code
 
-        static string InvertCasing(string s)
+        private static string InvertCasing(string s)
         {
             char[] c = s.ToCharArray();
             char[] cUpper = s.ToUpper().ToCharArray();

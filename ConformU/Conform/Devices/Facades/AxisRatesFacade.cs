@@ -12,7 +12,7 @@ namespace ConformU
         private RateFacade[] m_Rates;
 
         private int pos;
-        readonly ConformLogger logger;
+        private readonly ConformLogger logger;
 
         // Default constructor - Internal prevents public creation instances.
         internal AxisRatesFacade(TelescopeAxis Axis, dynamic driver, TelescopeFacade telescopeFacade, ConformLogger logger)

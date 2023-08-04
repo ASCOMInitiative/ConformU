@@ -30,8 +30,8 @@ namespace ConformU
 
     internal class VideoTester : DeviceTesterBaseClass
     {
-        const int CAMERA_PULSE_DURATION = 2000; // Duration of camera pulse guide test (ms)
-        const int CAMERA_PULSE_TOLERANCE = 300; // Tolerance for acceptable;e performance (ms)
+        private const int CAMERA_PULSE_DURATION = 2000; // Duration of camera pulse guide test (ms)
+        private const int CAMERA_PULSE_TOLERANCE = 300; // Tolerance for acceptable;e performance (ms)
 
         // Camera variables
         private bool CanConfigureDeviceProperties, CanReadSensorType, CanReadGainMax, CanReadGainMin;

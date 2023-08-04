@@ -19,18 +19,18 @@ namespace ConformU
     {
         #region Constants and variables
 
-        const int CAMERA_PULSE_DURATION = 2000; // Duration of camera pulse guide test (ms)
-        const int CAMERA_PULSE_TOLERANCE = 300; // Tolerance for acceptable performance (ms)
+        private const int CAMERA_PULSE_DURATION = 2000; // Duration of camera pulse guide test (ms)
+        private const int CAMERA_PULSE_TOLERANCE = 300; // Tolerance for acceptable performance (ms)
 
-        const int MAX_BIN_X = 16; // Values of MaxBin above which warnings are given. Implemented to warn developers if they are returning "silly" values
-        const int MAX_BIN_Y = 16;
-        const double ABSOLUTE_ZERO_TEMPERATURE = -273.15; // Absolute zero (Celsius)
-        const double BELOW_ABSOLUTE_ZERO_TEMPERATURE = -273.25; // Value (Celsius) below which CCD temperatures will be flagged as "silly", "un-physical" values.
-        const double CAMERA_SETPOINT_INCREMENT = 5.0; // Amount by which the test temperature is decremented or incremented when finding the lowest and highest supported set points.
-        const double BOILING_POINT_TEMPERATURE = 100.0; // Value above which CCD set point temperatures will be flagged as "silly" values
-        const double MAX_CAMERA_REPORTED_TEMPERATURE = 1000.0; // Value above which the CCD reported temperature will be flagged as a "silly" value. It is higher than the MAX_CAMERA_SETPOINT_TEMPERATURE temperature because this value is not specified in the Interface Standard.
-        const double CAMERA_LOW_SETPOINT_START_TEMPERATURE = 15.0; // Start temperature for determining minimum set point value.
-        const double CAMERA_HIGH_SETPOINT_START_TEMPERATURE = 0.0; // Start temperature for determining maximum set point value.
+        private const int MAX_BIN_X = 16; // Values of MaxBin above which warnings are given. Implemented to warn developers if they are returning "silly" values
+        private const int MAX_BIN_Y = 16;
+        private const double ABSOLUTE_ZERO_TEMPERATURE = -273.15; // Absolute zero (Celsius)
+        private const double BELOW_ABSOLUTE_ZERO_TEMPERATURE = -273.25; // Value (Celsius) below which CCD temperatures will be flagged as "silly", "un-physical" values.
+        private const double CAMERA_SETPOINT_INCREMENT = 5.0; // Amount by which the test temperature is decremented or incremented when finding the lowest and highest supported set points.
+        private const double BOILING_POINT_TEMPERATURE = 100.0; // Value above which CCD set point temperatures will be flagged as "silly" values
+        private const double MAX_CAMERA_REPORTED_TEMPERATURE = 1000.0; // Value above which the CCD reported temperature will be flagged as a "silly" value. It is higher than the MAX_CAMERA_SETPOINT_TEMPERATURE temperature because this value is not specified in the Interface Standard.
+        private const double CAMERA_LOW_SETPOINT_START_TEMPERATURE = 15.0; // Start temperature for determining minimum set point value.
+        private const double CAMERA_HIGH_SETPOINT_START_TEMPERATURE = 0.0; // Start temperature for determining maximum set point value.
 
         // Camera variables
         private bool m_CanAbortExposure, m_CanAsymmetricBin, m_CanGetCoolerPower, m_CanSetCCDTemperature, m_CanStopExposure, m_CanFastReadout;
@@ -159,9 +159,9 @@ namespace ConformU
             ValueMode = 2
         }
 
-        readonly Settings settings;
-        readonly CancellationToken cancellationToken;
-        readonly ConformLogger logger;
+        private readonly Settings settings;
+        private readonly CancellationToken cancellationToken;
+        private readonly ConformLogger logger;
 
         #endregion
 

@@ -17,7 +17,7 @@ namespace ConformU
         private ConformLogger TL;
         private Settings settings;
         private bool disposedValue;
-        readonly int settingsFileVersion;
+        private readonly int settingsFileVersion;
         private readonly JsonDocument appSettingsDocument = null;
 
         private readonly ConformStateManager conformStateManager;

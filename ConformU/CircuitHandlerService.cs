@@ -11,8 +11,8 @@ namespace ConformU
     public class CircuitHandlerService : CircuitHandler
     {
         private readonly IHostApplicationLifetime lifetime = null; // This is required if the StopApplication method is used.
-        readonly ILogger<CircuitHandlerService> logger;
-        readonly object connectionsLockObject = new();
+        private readonly ILogger<CircuitHandlerService> logger;
+        private readonly object connectionsLockObject = new();
 
         private readonly List<string> connections;
         public CircuitHandlerService(IHostApplicationLifetime lifetime, ILogger<CircuitHandlerService> logger)

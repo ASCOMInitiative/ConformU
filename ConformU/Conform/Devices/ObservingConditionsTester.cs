@@ -20,9 +20,9 @@ namespace ConformU
         private readonly Dictionary<string, bool> sensorHasDescription = new();
         private readonly Dictionary<string, bool> sensorHasTimeOfLastUpdate = new();
 
-        const double ABSOLUTE_ZERO = -273.15;
-        const double WATER_BOILING_POINT = 100.0;
-        const double BAD_VALUE = double.NaN;
+        private const double ABSOLUTE_ZERO = -273.15;
+        private const double WATER_BOILING_POINT = 100.0;
+        private const double BAD_VALUE = double.NaN;
 
         // Valid sensor properties constants
         private const string PROPERTY_CLOUDCOVER = "CloudCover";
