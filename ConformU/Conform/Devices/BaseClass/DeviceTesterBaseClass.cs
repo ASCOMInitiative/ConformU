@@ -209,7 +209,7 @@ namespace ConformU
             {
                 switch (GetInterfaceVersion())
                 {
-                    case var @case when @case < 1:
+                    case < 1:
                         {
                             LogIssue("InterfaceVersion",
                                 $"InterfaceVersion must be 1 or greater but driver returned: {GetInterfaceVersion()}");
@@ -403,7 +403,7 @@ namespace ConformU
                 }
                 else
                 {
-                    int i = default(int);
+                    int i = 0;
                     foreach (object action in supportedActions)
                     {
                         i += 1;

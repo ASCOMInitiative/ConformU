@@ -53,7 +53,7 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    if (mSafetyMonitor is not null) mSafetyMonitor.Dispose();
+                    mSafetyMonitor?.Dispose();
                 }
             }
 

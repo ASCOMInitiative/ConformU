@@ -127,7 +127,7 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    if (mObservingConditions is not null) mObservingConditions.Dispose();
+                    mObservingConditions?.Dispose();
                     mObservingConditions = null;
                 }
             }
