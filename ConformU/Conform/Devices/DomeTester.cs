@@ -89,7 +89,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogDebug("Dispose", "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("Dispose", $"Disposing of device: {disposing} {disposedValue}");
             if (!disposedValue)
             {
                 if (disposing)
@@ -289,7 +289,8 @@ namespace ConformU
                         if (cancellationToken.IsCancellationRequested)
                         {
                             LogCallToDriver("PreRunCheck", "About to get ShutterStatus property");
-                            LogTestAndMessage("DomeSafety", "Stop button pressed, further testing abandoned, shutter status: " + domeDevice.ShutterStatus.ToString());
+                            LogTestAndMessage("DomeSafety",
+                                $"Stop button pressed, further testing abandoned, shutter status: {domeDevice.ShutterStatus}");
                         }
                         else
                         {
@@ -297,18 +298,18 @@ namespace ConformU
                             if (domeDevice.ShutterStatus == ShutterState.Open)
                             {
                                 LogCallToDriver("PreRunCheck", "About to get ShutterStatus property");
-                                LogOk("DomeSafety", "Shutter status: " + domeDevice.ShutterStatus.ToString());
+                                LogOk("DomeSafety", $"Shutter status: {domeDevice.ShutterStatus}");
                             }
                             else
                             {
                                 LogCallToDriver("PreRunCheck", "About to get ShutterStatus property");
-                                LogIssue("DomeSafety", "Shutter status: " + domeDevice.ShutterStatus.ToString());
+                                LogIssue("DomeSafety", $"Shutter status: {domeDevice.ShutterStatus}");
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        LogTestAndMessage("DomeSafety", "Unable to open shutter, some tests may fail: " + ex.Message);
+                        LogTestAndMessage("DomeSafety", $"Unable to open shutter, some tests may fail: {ex.Message}");
                     }
                     SetTest("");
                 }
@@ -414,7 +415,7 @@ namespace ConformU
                     }
                     catch (Exception ex)
                     {
-                        LogTestAndMessage("DomeSafety", "Exception closing shutter: " + ex.Message);
+                        LogTestAndMessage("DomeSafety", $"Exception closing shutter: {ex.Message}");
                         LogTestAndMessage("DomeSafety", "Please close shutter manually");
                     }
                 }
@@ -480,16 +481,16 @@ namespace ConformU
                 if (domeDevice.Slewing)
                 {
                     DomeWaitForSlew(settings.DomeAltitudeMovementTimeout, () => $"{domeDevice.Altitude:00} / {pAltitude:00} degrees"); if (cancellationToken.IsCancellationRequested) return;
-                    LogOk(pName + " " + pAltitude, "Asynchronous slew OK");
+                    LogOk($"{pName} {pAltitude}", "Asynchronous slew OK");
                 }
                 else
                 {
-                    LogOk(pName + " " + pAltitude, "Synchronous slew OK");
+                    LogOk($"{pName} {pAltitude}", "Synchronous slew OK");
                 }
             }
             else
             {
-                LogOk(pName + " " + pAltitude, "Can't read Slewing so assume synchronous slew OK");
+                LogOk($"{pName} {pAltitude}", "Can't read Slewing so assume synchronous slew OK");
             }
             DomeStabliisationWait();
 
@@ -501,11 +502,11 @@ namespace ConformU
 
                 if (Math.Abs(altitude - pAltitude) <= settings.DomeSlewTolerance)
                 {
-                    LogOk(pName + " " + pAltitude, $"Reached the required altitude: {pAltitude:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported altitude: {altitude:0.0} degrees");
+                    LogOk($"{pName} {pAltitude}", $"Reached the required altitude: {pAltitude:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported altitude: {altitude:0.0} degrees");
                 }
                 else
                 {
-                    LogIssue(pName + " " + pAltitude, $"Failed to reach the required altitude: {pAltitude:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported altitude: {altitude:0.0} degrees");
+                    LogIssue($"{pName} {pAltitude}", $"Failed to reach the required altitude: {pAltitude:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported altitude: {altitude:0.0} degrees");
                 }
             }
         }
@@ -530,16 +531,16 @@ namespace ConformU
                 if (domeDevice.Slewing)
                 {
                     DomeWaitForSlew(settings.DomeAzimuthMovementTimeout, () => $"{domeDevice.Azimuth:000} / {pAzimuth:000} degrees"); if (cancellationToken.IsCancellationRequested) return;
-                    LogOk(pName + " " + pAzimuth, "Asynchronous slew OK");
+                    LogOk($"{pName} {pAzimuth}", "Asynchronous slew OK");
                 }
                 else
                 {
-                    LogOk(pName + " " + pAzimuth, "Synchronous slew OK");
+                    LogOk($"{pName} {pAzimuth}", "Synchronous slew OK");
                 }
             }
             else
             {
-                LogOk(pName + " " + pAzimuth, "Can't read Slewing so assume synchronous slew OK");
+                LogOk($"{pName} {pAzimuth}", "Can't read Slewing so assume synchronous slew OK");
             }
             DomeStabliisationWait();
 
@@ -551,11 +552,11 @@ namespace ConformU
 
                 if (Math.Abs(azimuth - pAzimuth) <= settings.DomeSlewTolerance)
                 {
-                    LogOk(pName + " " + pAzimuth, $"Reached the required azimuth: {pAzimuth:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported azimuth: {azimuth:0.0}");
+                    LogOk($"{pName} {pAzimuth}", $"Reached the required azimuth: {pAzimuth:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported azimuth: {azimuth:0.0}");
                 }
                 else
                 {
-                    LogIssue(pName + " " + pAzimuth, $"Failed to reach the required azimuth: {pAzimuth:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported azimuth: {azimuth:0.0}");
+                    LogIssue($"{pName} {pAzimuth}", $"Failed to reach the required azimuth: {pAzimuth:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported azimuth: {azimuth:0.0}");
                 }
             }
 
@@ -724,7 +725,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(pName, "DomeMandatoryTest: Unknown test type " + pType.ToString());
+                            LogIssue(pName, $"DomeMandatoryTest: Unknown test type {pType}");
                             break;
                         }
                 }
@@ -1042,20 +1043,26 @@ namespace ConformU
                                     try
                                     {
                                         DomeSlewToAltitude(pName, DOME_ILLEGAL_ALTITUDE_LOW);
-                                        LogIssue(pName, "No exception generated when slewing to illegal altitude " + DOME_ILLEGAL_ALTITUDE_LOW + " degrees");
+                                        LogIssue(pName,
+                                            $"No exception generated when slewing to illegal altitude {DOME_ILLEGAL_ALTITUDE_LOW} degrees");
                                     }
                                     catch (Exception ex)
                                     {
-                                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex, "slew to " + DOME_ILLEGAL_ALTITUDE_LOW + " degrees", "Invalid value exception correctly raised for slew to " + DOME_ILLEGAL_ALTITUDE_LOW + " degrees");
+                                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex,
+                                            $"slew to {DOME_ILLEGAL_ALTITUDE_LOW} degrees",
+                                            $"Invalid value exception correctly raised for slew to {DOME_ILLEGAL_ALTITUDE_LOW} degrees");
                                     }
                                     try
                                     {
                                         DomeSlewToAltitude(pName, DOME_ILLEGAL_ALTITUDE_HIGH);
-                                        LogIssue(pName, "No exception generated when slewing to illegal altitude " + DOME_ILLEGAL_ALTITUDE_HIGH + " degrees");
+                                        LogIssue(pName,
+                                            $"No exception generated when slewing to illegal altitude {DOME_ILLEGAL_ALTITUDE_HIGH} degrees");
                                     }
                                     catch (Exception ex)
                                     {
-                                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex, "slew to " + DOME_ILLEGAL_ALTITUDE_HIGH + " degrees", "Invalid value exception correctly raised for slew to " + DOME_ILLEGAL_ALTITUDE_HIGH + " degrees");
+                                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex,
+                                            $"slew to {DOME_ILLEGAL_ALTITUDE_HIGH} degrees",
+                                            $"Invalid value exception correctly raised for slew to {DOME_ILLEGAL_ALTITUDE_HIGH} degrees");
                                     }
                                 }
                             }
@@ -1094,22 +1101,28 @@ namespace ConformU
                                     try
                                     {
                                         DomeSlewToAzimuth(pName, DOME_ILLEGAL_AZIMUTH_LOW);
-                                        LogIssue(pName, "No exception generated when slewing to illegal azimuth " + DOME_ILLEGAL_AZIMUTH_LOW + " degrees");
+                                        LogIssue(pName,
+                                            $"No exception generated when slewing to illegal azimuth {DOME_ILLEGAL_AZIMUTH_LOW} degrees");
                                     }
                                     catch (Exception ex)
                                     {
-                                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex, "slew to " + DOME_ILLEGAL_AZIMUTH_LOW + " degrees", "Invalid value exception correctly raised for slew to " + DOME_ILLEGAL_AZIMUTH_LOW + " degrees");
+                                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex,
+                                            $"slew to {DOME_ILLEGAL_AZIMUTH_LOW} degrees",
+                                            $"Invalid value exception correctly raised for slew to {DOME_ILLEGAL_AZIMUTH_LOW} degrees");
                                     }
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
                                     try
                                     {
                                         DomeSlewToAzimuth(pName, DOME_ILLEGAL_AZIMUTH_HIGH);
-                                        LogIssue(pName, "No exception generated when slewing to illegal azimuth " + DOME_ILLEGAL_AZIMUTH_HIGH + " degrees");
+                                        LogIssue(pName,
+                                            $"No exception generated when slewing to illegal azimuth {DOME_ILLEGAL_AZIMUTH_HIGH} degrees");
                                     }
                                     catch (Exception ex)
                                     {
-                                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex, "slew to " + DOME_ILLEGAL_AZIMUTH_HIGH + " degrees", "Invalid value exception correctly raised for slew to " + DOME_ILLEGAL_AZIMUTH_HIGH + " degrees");
+                                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex,
+                                            $"slew to {DOME_ILLEGAL_AZIMUTH_HIGH} degrees",
+                                            $"Invalid value exception correctly raised for slew to {DOME_ILLEGAL_AZIMUTH_HIGH} degrees");
                                     }
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
@@ -1173,7 +1186,8 @@ namespace ConformU
 
                                             default:
                                                 {
-                                                    LogIssue(pName, "Dome azimuth was " + Math.Abs(lNewAzimuth - domeDevice.Azimuth) + " degrees away from expected value");
+                                                    LogIssue(pName,
+                                                        $"Dome azimuth was {Math.Abs(lNewAzimuth - domeDevice.Azimuth)} degrees away from expected value");
                                                     break;
                                                 }
                                         }
@@ -1193,11 +1207,14 @@ namespace ConformU
                                     {
                                         LogCallToDriver(pName, "About to call SyncToAzimuth method");
                                         domeDevice.SyncToAzimuth(DOME_ILLEGAL_AZIMUTH_LOW);
-                                        LogIssue(pName, "No exception generated when syncing to illegal azimuth " + DOME_ILLEGAL_AZIMUTH_LOW + " degrees");
+                                        LogIssue(pName,
+                                            $"No exception generated when syncing to illegal azimuth {DOME_ILLEGAL_AZIMUTH_LOW} degrees");
                                     }
                                     catch (Exception ex)
                                     {
-                                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex, "sync to " + DOME_ILLEGAL_AZIMUTH_LOW + " degrees", "Invalid value exception correctly raised for sync to " + DOME_ILLEGAL_AZIMUTH_LOW + " degrees");
+                                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex,
+                                            $"sync to {DOME_ILLEGAL_AZIMUTH_LOW} degrees",
+                                            $"Invalid value exception correctly raised for sync to {DOME_ILLEGAL_AZIMUTH_LOW} degrees");
                                     }
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
@@ -1205,11 +1222,14 @@ namespace ConformU
                                     {
                                         LogCallToDriver(pName, "About to call SyncToAzimuth method");
                                         domeDevice.SyncToAzimuth(DOME_ILLEGAL_AZIMUTH_HIGH);
-                                        LogIssue(pName, "No exception generated when syncing to illegal azimuth " + DOME_ILLEGAL_AZIMUTH_HIGH + " degrees");
+                                        LogIssue(pName,
+                                            $"No exception generated when syncing to illegal azimuth {DOME_ILLEGAL_AZIMUTH_HIGH} degrees");
                                     }
                                     catch (Exception ex)
                                     {
-                                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex, "sync to " + DOME_ILLEGAL_AZIMUTH_HIGH + " degrees", "Invalid value exception correctly raised for sync to " + DOME_ILLEGAL_AZIMUTH_HIGH + " degrees");
+                                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex,
+                                            $"sync to {DOME_ILLEGAL_AZIMUTH_HIGH} degrees",
+                                            $"Invalid value exception correctly raised for sync to {DOME_ILLEGAL_AZIMUTH_HIGH} degrees");
                                     }
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
@@ -1229,7 +1249,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(pName, "DomeOptionalTest: Unknown test type " + pType.ToString());
+                            LogIssue(pName, $"DomeOptionalTest: Unknown test type {pType}");
                             break;
                         }
                 }
@@ -1359,7 +1379,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogIssue("DomeShutterTest", "Unexpected shutter status: " + lShutterState.ToString());
+                                LogIssue("DomeShutterTest", $"Unexpected shutter status: {lShutterState}");
                                 break;
                             }
                     }
@@ -1377,7 +1397,7 @@ namespace ConformU
                         {
                             LogCallToDriver(pName, "About to get ShutterStatus property");
                             lShutterState = domeDevice.ShutterStatus;
-                            LogIssue(pName, "Unable to close shutter - ShutterStatus: " + lShutterState.ToString());
+                            LogIssue(pName, $"Unable to close shutter - ShutterStatus: {lShutterState}");
                             return;
                         }
                         else
@@ -1394,7 +1414,7 @@ namespace ConformU
                         {
                             LogCallToDriver(pName, "About to get ShutterStatus property");
                             lShutterState = domeDevice.ShutterStatus;
-                            LogIssue(pName, "Unable to open shutter - ShutterStatus: " + lShutterState.ToString());
+                            LogIssue(pName, $"Unable to open shutter - ShutterStatus: {lShutterState}");
                             return;
                         }
                         else
@@ -1443,11 +1463,12 @@ namespace ConformU
                 if ((domeDevice.ShutterStatus == pRequiredStatus)) returnValue = true; // All worked so return True
 
                 if ((DateTime.Now.Subtract(lStartTime).TotalSeconds > settings.DomeShutterMovementTimeout))
-                    LogIssue("DomeShutterWait", "Timed out waiting for shutter to reach state: " + pRequiredStatus.ToString() + ", consider increasing the timeout setting in Options / Conformance Options");
+                    LogIssue("DomeShutterWait",
+                        $"Timed out waiting for shutter to reach state: {pRequiredStatus}, consider increasing the timeout setting in Options / Conformance Options");
             }
             catch (Exception ex)
             {
-                LogIssue("DomeShutterWait", "Unexpected exception: " + ex.ToString());
+                LogIssue("DomeShutterWait", $"Unexpected exception: {ex}");
             }
 
             return returnValue;
@@ -1505,7 +1526,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogIssue(pName, "DomePerformanceTest: Unknown test type " + pType.ToString());
+                                LogIssue(pName, $"DomePerformanceTest: Unknown test type {pType}");
                                 break;
                             }
                     }
@@ -1513,7 +1534,7 @@ namespace ConformU
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
                     if (lElapsedTime > lLastElapsedTime + 1.0)
                     {
-                        SetStatus(lCount + " transactions in " + lElapsedTime.ToString("0") + " seconds");
+                        SetStatus($"{lCount} transactions in {lElapsedTime:0} seconds");
                         lLastElapsedTime = lElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
@@ -1525,32 +1546,32 @@ namespace ConformU
                 {
                     case object _ when lRate > 10.0:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 2.0 <= lRate && lRate <= 10.0:
                         {
-                            LogOk(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 1.0 <= lRate && lRate <= 2.0:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogInfo(pName, "Unable to complete test: " + ex.Message);
+                LogInfo(pName, $"Unable to complete test: {ex.Message}");
             }
         }
 

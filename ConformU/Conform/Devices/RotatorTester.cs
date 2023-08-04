@@ -64,7 +64,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogDebug("Dispose", "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("Dispose", $"Disposing of device: {disposing} {disposedValue}");
             if (!disposedValue)
             {
                 if (disposing)
@@ -464,13 +464,13 @@ namespace ConformU
                     {
                         case var @case when @case < 0.0f: // Lower than minimum value
                             {
-                                LogIssue("MechanicalPosition", "Invalid value: " + mechanicalPosition.ToString());
+                                LogIssue("MechanicalPosition", $"Invalid value: {mechanicalPosition}");
                                 break;
                             }
 
                         case var case1 when case1 >= 360.0f: // Higher than maximum value
                             {
-                                LogIssue("MechanicalPosition", "Invalid value: " + mechanicalPosition.ToString()); // OK value
+                                LogIssue("MechanicalPosition", $"Invalid value: {mechanicalPosition}"); // OK value
                                 break;
                             }
 
@@ -541,7 +541,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(pName, "RotatorPropertyTestSingle: Unknown test type - " + pType.ToString());
+                            LogIssue(pName, $"RotatorPropertyTestSingle: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -550,13 +550,13 @@ namespace ConformU
                 {
                     case var @case when @case < pMin: // Lower than minimum value
                         {
-                            LogIssue(pName, "Invalid value: " + rotatorPropertyTestSingleRet.ToString());
+                            LogIssue(pName, $"Invalid value: {rotatorPropertyTestSingleRet}");
                             break;
                         }
 
                     case var case1 when case1 >= pMax: // Higher than maximum value
                         {
-                            LogIssue(pName, "Invalid value: " + rotatorPropertyTestSingleRet.ToString()); // OK value
+                            LogIssue(pName, $"Invalid value: {rotatorPropertyTestSingleRet}"); // OK value
                             break;
                         }
 
@@ -578,7 +578,7 @@ namespace ConformU
         public override void CheckMethods()
         {
             LogCallToDriver("AccessChecks", "About to get Connected property");
-            LogDebug("CheckMethods", "Rotator is connected: " + mRotator.Connected.ToString());
+            LogDebug("CheckMethods", $"Rotator is connected: {mRotator.Connected}");
 
             // Halt - Optional (V1,V2 and V3)
             try
@@ -739,7 +739,7 @@ namespace ConformU
             float lRotatorStartPosition = default, rotatorPosition;
             double lOkLimit, lPositionOffset;
             LogCallToDriver(pName, $"About to get Position property");
-            LogDebug("RotatorMoveTest", "Start value, position: " + pValue.ToString("0.000") + " " + mRotator.Position.ToString("0.000"));
+            LogDebug("RotatorMoveTest", $"Start value, position: {pValue:0.000} {mRotator.Position:0.000}");
 
             SetTest(pName);
             SetAction("Setting position");
@@ -750,7 +750,7 @@ namespace ConformU
                 {
                     case RotatorPropertyMethod.Move:
                         {
-                            LogDebug("RotatorMoveTest", "Reading rotator start position: " + canReadPosition);
+                            LogDebug("RotatorMoveTest", $"Reading rotator start position: {canReadPosition}");
                             if (canReadPosition) // Get us to a starting point of 10 degrees
                             {
                                 LogCallToDriver(pName, $"About to get Position property");
@@ -786,7 +786,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(pName, "RotatorMoveTest: Unknown test type - " + pType.ToString());
+                            LogIssue(pName, $"RotatorMoveTest: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -855,7 +855,8 @@ namespace ConformU
                     }
 
                     LogCallToDriver(pName, $"About to get Position property");
-                    LogDebug(pName + "1", "Position, value, start, tolerance: " + mRotator.Position.ToString("0.000") + " " + pValue.ToString("0.000") + " " + lRotatorStartPosition.ToString("0.000") + " " + lOkLimit.ToString("0.000"));
+                    LogDebug($"{pName}1",
+                        $"Position, value, start, tolerance: {mRotator.Position:0.000} {pValue:0.000} {lRotatorStartPosition:0.000} {lOkLimit:0.000}");
                     LogCallToDriver(pName, $"About to get Position property");
                     rotatorPosition = mRotator.Position;
                     if (GetInterfaceVersion() < 3) // Interface V1 and V2 behaviour
@@ -1131,7 +1132,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogIssue(pName, "RotatorPerformanceTest: Unknown test type " + pType.ToString());
+                                LogIssue(pName, $"RotatorPerformanceTest: Unknown test type {pType}");
                                 break;
                             }
                     }
@@ -1139,7 +1140,7 @@ namespace ConformU
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
                     if (lElapsedTime > lLastElapsedTime + 1.0d)
                     {
-                        SetStatus(lCount + " transactions in " + lElapsedTime.ToString("0") + " seconds");
+                        SetStatus($"{lCount} transactions in {lElapsedTime:0} seconds");
                         lLastElapsedTime = lElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
@@ -1151,32 +1152,32 @@ namespace ConformU
                 {
                     case var @case when @case > 10.0d:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case var case1 when 2.0d <= case1 && case1 <= 10.0d:
                         {
-                            LogOk(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case var case2 when 1.0d <= case2 && case2 <= 2.0d:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogInfo(pName, "Unable to complete test: " + ex.Message);
+                LogInfo(pName, $"Unable to complete test: {ex.Message}");
             }
         }
 

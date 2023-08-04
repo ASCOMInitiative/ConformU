@@ -21,7 +21,7 @@ namespace ConformU
                 throw new ArgumentNullException(nameof(name));
             }
 
-            var Github = new GitHubClient(new ProductHeaderValue(name + @"-UpdateCheck"));
+            var Github = new GitHubClient(new ProductHeaderValue($@"{name}-UpdateCheck"));
 
             return Github.Repository.Release.GetAll(owner, name);
         }

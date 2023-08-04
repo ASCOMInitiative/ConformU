@@ -215,7 +215,8 @@ namespace ConformU
                 {
                     case var @case when @case < 1:
                         {
-                            LogIssue("InterfaceVersion", "InterfaceVersion must be 1 or greater but driver returned: " + GetInterfaceVersion().ToString());
+                            LogIssue("InterfaceVersion",
+                                $"InterfaceVersion must be 1 or greater but driver returned: {GetInterfaceVersion()}");
                             break;
                         }
 
@@ -272,7 +273,8 @@ namespace ConformU
                             {
                                 if (description.Length > 68 & deviceType == DeviceTypes.Camera)
                                 {
-                                    LogIssue("Description", "Maximum number of characters is 68 for compatibility with FITS headers, found: " + description.Length + " characters: " + description);
+                                    LogIssue("Description",
+                                        $"Maximum number of characters is 68 for compatibility with FITS headers, found: {description.Length} characters: {description}");
                                 }
                                 else
                                 {
@@ -355,7 +357,8 @@ namespace ConformU
             }
             else
             {
-                LogInfo("DriverVersion", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
+                LogInfo("DriverVersion",
+                    $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
             }
 
             // Name - Required
@@ -417,13 +420,13 @@ namespace ConformU
                             {
                                 case var case5 when case5 == "":
                                     {
-                                        LogIssue("SupportedActions", "Supported action " + i + " Is an empty string"); // List the action that was found
+                                        LogIssue("SupportedActions", $"Supported action {i} Is an empty string"); // List the action that was found
                                         break;
                                     }
 
                                 default:
                                     {
-                                        LogOk("SupportedActions", "Found action: " + actionString);
+                                        LogOk("SupportedActions", $"Found action: {actionString}");
 
                                         // Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
                                         if (deviceType == DeviceTypes.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.ToUpper() == "ASCOM.OCH.OBSERVINGCONDITIONS")
@@ -488,7 +491,8 @@ namespace ConformU
                         }
                         else
                         {
-                            LogIssue("SupportedActions", "Actions must be strings. The type of action " + i + " " + action.ToString() + " is: " + action.GetType().Name);
+                            LogIssue("SupportedActions",
+                                $"Actions must be strings. The type of action {i} {action} is: {action.GetType().Name}");
                         }
                     }
                 }
@@ -1311,7 +1315,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogError("IsMethodNotImplementedException", "Unexpected exception: " + ex.ToString());
+                LogError("IsMethodNotImplementedException", $"Unexpected exception: {ex}");
             }
 
             return isMethodNotImplementedExceptionRet;
@@ -1343,7 +1347,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogError("IsNotImplementedException", "Unexpected exception: " + ex.ToString());
+                LogError("IsNotImplementedException", $"Unexpected exception: {ex}");
             }
 
             return isNotImplementedExceptionRet;
@@ -1375,7 +1379,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogError("IsPropertyNotImplementedException", "Unexpected exception: " + ex.ToString());
+                LogError("IsPropertyNotImplementedException", $"Unexpected exception: {ex}");
             }
 
             return isPropertyNotImplementedExceptionRet;
@@ -1409,7 +1413,8 @@ namespace ConformU
                 {
                     if (exception1.Number == ErrorCodes.InvalidValue) // This is an invalid value exception
                     {
-                        LogIssue(memberName, "Received ASCOM.DriverException(0x" + ErrorCodes.InvalidValue.ToString("X8") + "), please use ASCOM.InvalidValueException to report invalid values");
+                        LogIssue(memberName,
+                            $"Received ASCOM.DriverException(0x{ErrorCodes.InvalidValue:X8}), please use ASCOM.InvalidValueException to report invalid values");
                     }
                 }
 
@@ -1420,7 +1425,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogError("IsInvalidValueException", "Unexpected exception: " + ex.ToString());
+                LogError("IsInvalidValueException", $"Unexpected exception: {ex}");
             }
 
             return isInvalidValueExceptionRet;
@@ -1454,7 +1459,8 @@ namespace ConformU
                 {
                     if (exception1.Number == ErrorCodes.InvalidOperationException) // This is an invalid operation exception
                     {
-                        LogIssue(memberName, "Received ASCOM.DriverException(0x" + ErrorCodes.InvalidOperationException.ToString("X8") + "), please use ASCOM.InvalidOperationException to report invalid operations");
+                        LogIssue(memberName,
+                            $"Received ASCOM.DriverException(0x{ErrorCodes.InvalidOperationException:X8}), please use ASCOM.InvalidOperationException to report invalid operations");
                     }
                 }
 
@@ -1465,7 +1471,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogError("IsInvalidOperationException", "Unexpected exception: " + ex.ToString());
+                LogError("IsInvalidOperationException", $"Unexpected exception: {ex}");
             }
 
             return isInvalidOperationExceptionRet;
@@ -1497,7 +1503,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogError("IsNotSetException", "Unexpected exception: " + ex.ToString());
+                LogError("IsNotSetException", $"Unexpected exception: {ex}");
             }
 
             return isNotSetExceptionRet;
@@ -1522,31 +1528,35 @@ namespace ConformU
                 {
                     case Required.Mandatory:
                         {
-                            LogIssue(memberName, "This member is mandatory but returned a " + GetExceptionName(ex, typeOfMember) + " error, it must function per the ASCOM specification.");
+                            LogIssue(memberName,
+                                $"This member is mandatory but returned a {GetExceptionName(ex, typeOfMember)} error, it must function per the ASCOM specification.");
                             break;
                         }
 
                     case Required.MustNotBeImplemented:
                         {
-                            LogOk(memberName, userMessage + " and a " + GetExceptionName(ex, typeOfMember) + " error was generated as expected");
+                            LogOk(memberName,
+                                $"{userMessage} and a {GetExceptionName(ex, typeOfMember)} error was generated as expected");
                             break;
                         }
 
                     case Required.MustBeImplemented:
                         {
-                            LogIssue(memberName, userMessage + " and a " + GetExceptionName(ex, typeOfMember) + " error was returned, this method must function per the ASCOM specification.");
+                            LogIssue(memberName,
+                                $"{userMessage} and a {GetExceptionName(ex, typeOfMember)} error was returned, this method must function per the ASCOM specification.");
                             break;
                         }
 
                     case Required.Optional:
                         {
-                            LogOk(memberName, "Optional member returned a " + GetExceptionName(ex, typeOfMember) + " error.");
+                            LogOk(memberName, $"Optional member returned a {GetExceptionName(ex, typeOfMember)} error.");
                             break;
                         }
 
                     default:
                         {
-                            LogError(memberName, "CONFORM ERROR! - Received unexpected member of 'Required' enum: " + isRequired.ToString());
+                            LogError(memberName,
+                                $"CONFORM ERROR! - Received unexpected member of 'Required' enum: {isRequired}");
                             break;
                         }
                 }
@@ -1570,12 +1580,14 @@ namespace ConformU
                 }
                 else // We are NOT testing a COM device using the cross platform DriverAccess module so report an issue.
                 {
-                    LogIssue(memberName, "Received a NotImplementedException instead of a " + ((typeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException"));
+                    LogIssue(memberName,
+                        $"Received a NotImplementedException instead of a {((typeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException")}");
                 }
             }
             else if (ex is System.NotImplementedException)
             {
-                LogIssue(memberName, "Received a System.NotImplementedException instead of an ASCOM." + ((typeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException"));
+                LogIssue(memberName,
+                    $"Received a System.NotImplementedException instead of an ASCOM.{((typeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException")}");
             }
 
             // Handle all other types of error
@@ -1584,7 +1596,7 @@ namespace ConformU
                 LogIssue(memberName, $"Unexpected error{(string.IsNullOrEmpty(userMessage) ? ":" : $" - {userMessage}:")} {ex.Message}");
             }
 
-            LogDebug(memberName, "Exception detail: " + ex.ToString());
+            LogDebug(memberName, $"Exception detail: {ex}");
         }
 
         protected void HandleInvalidValueExceptionAsOk(string memberName, MemberType typeOfMember, Required isRequired, Exception ex, string userAction, string message)
@@ -1640,7 +1652,7 @@ namespace ConformU
                 if (clientException.GetType().FullName.ToUpper().Contains("DRIVEREXCEPTION")) // We have a driver exception so add its number
                 {
                     driverEx = (DriverException)clientException;
-                    retVal = "DriverException(0x" + driverEx.Number.ToString("X8") + ")";
+                    retVal = $"DriverException(0x{driverEx.Number:X8})";
                 }
                 else // Otherwise just use the ASCOM exception's name
                 {
@@ -1666,7 +1678,7 @@ namespace ConformU
             }
             else // We got something else so report it
             {
-                retVal = clientException.GetType().FullName + " exception";
+                retVal = $"{clientException.GetType().FullName} exception";
             }
 
             return retVal;

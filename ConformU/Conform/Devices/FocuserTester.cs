@@ -54,7 +54,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogDebug("Dispose", "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("Dispose", $"Disposing of device: {disposing} {disposedValue}");
             if (!disposedValue)
             {
                 if (disposing)
@@ -225,13 +225,14 @@ namespace ConformU
                 {
                     case object _ when mMaxIncrement < 1:
                         {
-                            LogIssue("MaxIncrement", "MaxIncrement must be at least 1, actual value: " + mMaxIncrement);
+                            LogIssue("MaxIncrement", $"MaxIncrement must be at least 1, actual value: {mMaxIncrement}");
                             break;
                         }
 
                     case object _ when mMaxIncrement > mMaxStep:
                         {
-                            LogIssue("MaxIncrement", "MaxIncrement is greater than MaxStep and shouldn't be: " + mMaxIncrement);
+                            LogIssue("MaxIncrement",
+                                $"MaxIncrement is greater than MaxStep and shouldn't be: {mMaxIncrement}");
                             break;
                         }
 
@@ -261,14 +262,14 @@ namespace ConformU
                         case object _ when mPosition < 0 // Lower than lowest position
                        :
                             {
-                                LogIssue("Position", "Position is < 0, actual value: " + mPosition.ToString());
+                                LogIssue("Position", $"Position is < 0, actual value: {mPosition}");
                                 break;
                             }
 
                         case object _ when mPosition > mMaxStep // > highest position
                  :
                             {
-                                LogIssue("Position", "Position is > MaxStep, actual value: " + mPosition.ToString());
+                                LogIssue("Position", $"Position is > MaxStep, actual value: {mPosition}");
                                 break;
                             }
 
@@ -310,7 +311,7 @@ namespace ConformU
                     case object _ when mStepSize <= 0.0 // Must be >0
                    :
                         {
-                            LogIssue("StepSize", "StepSize must be > 0.0, actual value: " + mStepSize);
+                            LogIssue("StepSize", $"StepSize must be > 0.0, actual value: {mStepSize}");
                             break;
                         }
 
@@ -416,14 +417,16 @@ namespace ConformU
                     case object _ when mTemperature <= -50.0 // Probably a bad value
                    :
                         {
-                            LogIssue("Temperature", "Temperature < -50.0, - possibly an issue, actual value: " + mTemperature.ToString());
+                            LogIssue("Temperature",
+                                $"Temperature < -50.0, - possibly an issue, actual value: {mTemperature}");
                             break;
                         }
 
                     case object _ when mTemperature >= 50.0 // Probably a bad value
              :
                         {
-                            LogIssue("Temperature", "Temperature > 50.0, - possibly an issue, actual value: " + mTemperature.ToString());
+                            LogIssue("Temperature",
+                                $"Temperature > 50.0, - possibly an issue, actual value: {mTemperature}");
                             break;
                         }
 
@@ -743,11 +746,11 @@ namespace ConformU
                 // Move the focuser
                 if (mAbsolute)
                 {
-                    LogDebug(testName, "Moving to position: " + newPosition.ToString());
+                    LogDebug(testName, $"Moving to position: {newPosition}");
                 }
                 else
                 {
-                    LogDebug(testName, "Moving by: " + newPosition.ToString());
+                    LogDebug(testName, $"Moving by: {newPosition}");
                 }
 
                 SetAction(testName);
@@ -882,7 +885,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogIssue(pName, "FocuserPerformanceTest: Unknown test type " + pType.ToString());
+                                LogIssue(pName, $"FocuserPerformanceTest: Unknown test type {pType}");
                                 break;
                             }
                     }
@@ -890,7 +893,7 @@ namespace ConformU
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
                     if (lElapsedTime > lLastElapsedTime + 1.0)
                     {
-                        SetStatus(lCount + " transactions in " + lElapsedTime.ToString("0") + " seconds");
+                        SetStatus($"{lCount} transactions in {lElapsedTime:0} seconds");
                         lLastElapsedTime = lElapsedTime;
                         if (cancellationToken.IsCancellationRequested) return;
                     }
@@ -901,32 +904,32 @@ namespace ConformU
                 {
                     case object _ when lRate > 10.0:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 2.0 <= lRate && lRate <= 10.0:
                         {
-                            LogOk(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 1.0 <= lRate && lRate <= 2.0:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogInfo(pName, "Unable to complete test: " + ex.Message);
+                LogInfo(pName, $"Unable to complete test: {ex.Message}");
             }
         }
     }

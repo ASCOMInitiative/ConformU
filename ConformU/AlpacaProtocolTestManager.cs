@@ -7,6 +7,7 @@ using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -86,38 +87,38 @@ namespace ConformU
         #region Pre-formed parameter lists that can be sent to clients
 
         // ClientID and ClientTransactionID OK
-        internal List<CheckProtocolParameter> ParamsOk = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString()) };
+        internal List<CheckProtocolParameter> ParamsOk = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
 
         // ClientID and ClientTransactionID OK but with additional spurious parameter
-        internal List<CheckProtocolParameter> ParamsOkPlusExtraParameter = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString()), new CheckProtocolParameter("ExtraParameter", "ExtraValue") };
+        internal List<CheckProtocolParameter> ParamsOkPlusExtraParameter = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ExtraParameter", "ExtraValue") };
 
         // ClientID and ClientTransactionID parameter names lower case
-        internal List<CheckProtocolParameter> ParamClientIDLowerCase = new() { new CheckProtocolParameter("clientid", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString()) };
-        internal List<CheckProtocolParameter> ParamTransactionIdLowerCase = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("clienttransactionid", TEST_TRANSACTION_ID.ToString()) };
+        internal List<CheckProtocolParameter> ParamClientIDLowerCase = new() { new CheckProtocolParameter("clientid", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
+        internal List<CheckProtocolParameter> ParamTransactionIdLowerCase = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("clienttransactionid", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
 
         // ClientID and ClientTransactionID values empty
-        internal List<CheckProtocolParameter> ParamClientIDEmpty = new() { new CheckProtocolParameter("ClientID", ""), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString()) };
-        internal List<CheckProtocolParameter> ParamTransactionIdEmpty = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("ClientTransactionID", "") };
+        internal List<CheckProtocolParameter> ParamClientIDEmpty = new() { new CheckProtocolParameter("ClientID", ""), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
+        internal List<CheckProtocolParameter> ParamTransactionIdEmpty = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", "") };
 
         // ClientID and ClientTransactionID values white space
-        internal List<CheckProtocolParameter> ParamClientIDWhiteSpace = new() { new CheckProtocolParameter("ClientID", "     "), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString()) };
-        internal List<CheckProtocolParameter> ParamTransactionIdWhiteSpace = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("ClientTransactionID", "     ") };
+        internal List<CheckProtocolParameter> ParamClientIDWhiteSpace = new() { new CheckProtocolParameter("ClientID", "     "), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
+        internal List<CheckProtocolParameter> ParamTransactionIdWhiteSpace = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", "     ") };
 
         // ClientID and ClientTransactionID values negative number
-        internal List<CheckProtocolParameter> ParamClientIDNegative = new() { new CheckProtocolParameter("ClientID", "-12345"), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString()) };
-        internal List<CheckProtocolParameter> ParamTransactionIdNegative = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("ClientTransactionID", "-67890") };
+        internal List<CheckProtocolParameter> ParamClientIDNegative = new() { new CheckProtocolParameter("ClientID", "-12345"), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
+        internal List<CheckProtocolParameter> ParamTransactionIdNegative = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", "-67890") };
 
         // ClientID and ClientTransactionID values non-numeric string
-        internal List<CheckProtocolParameter> ParamClientIDString = new() { new CheckProtocolParameter("ClientID", "asdasd"), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString()) };
-        internal List<CheckProtocolParameter> ParamTransactionIdString = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("ClientTransactionID", "qweqwe") };
+        internal List<CheckProtocolParameter> ParamClientIDString = new() { new CheckProtocolParameter("ClientID", "asdasd"), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
+        internal List<CheckProtocolParameter> ParamTransactionIdString = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", "qweqwe") };
 
         // Set Connected True and False
-        internal List<CheckProtocolParameter> ParamConnectedTrue = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString()), new CheckProtocolParameter("Connected", "True") };
-        internal List<CheckProtocolParameter> ParamConnectedFalse = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString()), new CheckProtocolParameter("Connected", "False") };
+        internal List<CheckProtocolParameter> ParamConnectedTrue = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "True") };
+        internal List<CheckProtocolParameter> ParamConnectedFalse = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "False") };
 
         // Set Telescope.Tracking True and False
-        internal List<CheckProtocolParameter> ParamTrackingTrue = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString()), new CheckProtocolParameter("Tracking", "True") };
-        internal List<CheckProtocolParameter> ParamTrackingFalse = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString()), new CheckProtocolParameter("Tracking", "False") };
+        internal List<CheckProtocolParameter> ParamTrackingTrue = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Tracking", "True") };
+        internal List<CheckProtocolParameter> ParamTrackingFalse = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Tracking", "False") };
 
         #endregion
 
@@ -140,7 +141,7 @@ namespace ConformU
                 // Create a blank line at the start of the console log
                 Console.WriteLine("");
 
-                string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString().ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
+                string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
 
                 LogText("", $"Connecting to device: {settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} through URL: {clientHostAddress}");
                 LogBlankLine();
@@ -280,7 +281,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    LogError("", ex.ToString(), null);
+                    LogError("", ex.ToString(CultureInfo.InvariantCulture), null);
                 }
 
                 // Summarise the protocol test outcome
@@ -361,22 +362,22 @@ namespace ConformU
 
         private async Task TestCommon()
         {
-            List<CheckProtocolParameter> ParamConnectedEmpty = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString()), new CheckProtocolParameter("Connected", "") };
-            List<CheckProtocolParameter> ParamConnectedNumeric = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString()), new CheckProtocolParameter("Connected", "123456") };
-            List<CheckProtocolParameter> ParamConnectedString = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString()), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString()), new CheckProtocolParameter("Connected", "asdqwe") };
+            List<CheckProtocolParameter> ParamConnectedEmpty = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "") };
+            List<CheckProtocolParameter> ParamConnectedNumeric = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "123456") };
+            List<CheckProtocolParameter> ParamConnectedString = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "asdqwe") };
 
             // Test primary URL structure: /api/v1/ if configured to do so
             if (settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure)
             {
-                await SendToDevice("GET Description", $"Bad Alpaca URL base element (api = apx)\"", $"/apx/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                await SendToDevice("GET Description", $"Bad Alpaca URL base element (api = apx)\"", $"/apx/v1/{settings.DeviceType.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
                 if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await SendToDevice("GET Description", $"Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                await SendToDevice("GET Description", $"Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
                 if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await SendToDevice("GET Description", $"Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                await SendToDevice("GET Description", $"Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
                 if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await SendToDevice("GET Description", $"Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                await SendToDevice("GET Description", $"Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
                 if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await SendToDevice("GET Description", $"Bad Alpaca URL version element (v2)", $"/api/v2/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                await SendToDevice("GET Description", $"Bad Alpaca URL version element (v2)", $"/api/v2/{settings.DeviceType.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
                 if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
 
                 // Test bad POST HTTP methods
@@ -397,17 +398,17 @@ namespace ConformU
             }
 
             // Test remaining Alpaca URL structure /devicetype/devicenumber and accept any 4XX status as a correct rejection
-            await SendToDevice("GET Description", $"Bad Alpaca URL device type (capitalised {settings.DeviceType.ToString().ToUpper()})", $"/api/v1/{settings.DeviceType.ToString().ToUpper()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+            await SendToDevice("GET Description", $"Bad Alpaca URL device type (capitalised {settings.DeviceType.ToString(CultureInfo.InvariantCulture).ToUpper()})", $"/api/v1/{settings.DeviceType.ToString(CultureInfo.InvariantCulture).ToUpper()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
             await SendToDevice("GET Description", $"Bad Alpaca URL device type (baddevicetype)", $"/api/v1/baddevicetype/0/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendToDevice("GET Description", $"Bad Alpaca URL device number (-1)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/-1/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+            await SendToDevice("GET Description", $"Bad Alpaca URL device number (-1)", $"/api/v1/{settings.DeviceType.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/-1/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendToDevice("GET Description", $"Bad Alpaca URL device number (99999)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/99999/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+            await SendToDevice("GET Description", $"Bad Alpaca URL device number (99999)", $"/api/v1/{settings.DeviceType.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/99999/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendToDevice("GET Description", $"Bad Alpaca URL device number (A)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/A/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+            await SendToDevice("GET Description", $"Bad Alpaca URL device number (A)", $"/api/v1/{settings.DeviceType.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/A/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendToDevice("GET Description", $"Bad Alpaca URL method name (descrip)", $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/descrip", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+            await SendToDevice("GET Description", $"Bad Alpaca URL method name (descrip)", $"/api/v1/{settings.DeviceType.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/descrip", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
 
             // Test GET Connected
@@ -454,10 +455,10 @@ namespace ConformU
                 await GetNoParameters("BayerOffsetX");
                 await GetNoParameters("BayerOffsetY");
                 await GetNoParameters("BinX");
-                try { parameter1 = camera.BinX.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = camera.BinX.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("BinX", "BinX", parameter1, null);
                 await GetNoParameters("BinY");
-                try { parameter1 = camera.BinY.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = camera.BinY.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("BinY", "BinY", parameter1, null);
                 await GetNoParameters("CameraState");
                 await GetNoParameters("CameraXSize");
@@ -473,7 +474,7 @@ namespace ConformU
                 await GetNoParameters("CanStopExposure");
                 await GetNoParameters("CCDTemperature");
                 await GetNoParameters("CoolerOn");
-                try { parameter1 = camera.CoolerOn.ToString(); } catch (Exception) { parameter1 = "False"; }
+                try { parameter1 = camera.CoolerOn.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "False"; }
                 await PutOneParameter("CoolerOn", "CoolerOn", parameter1, null);
                 await GetNoParameters("CoolerPower");
                 await GetNoParameters("ElectronsPerADU");
@@ -481,11 +482,11 @@ namespace ConformU
                 await GetNoParameters("ExposureMin");
                 await GetNoParameters("ExposureResolution");
                 await GetNoParameters("FastReadout");
-                try { parameter1 = camera.FastReadout.ToString(); } catch (Exception) { parameter1 = "False"; }
+                try { parameter1 = camera.FastReadout.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "False"; }
                 await PutOneParameter("FastReadout", "FastReadout", parameter1, null);
                 await GetNoParameters("FullWellCapacity");
                 await GetNoParameters("Gain");
-                try { parameter1 = camera.Gain.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = camera.Gain.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("Gain", "Gain", parameter1, null);
                 if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
 
@@ -500,13 +501,13 @@ namespace ConformU
                 await GetNoParameters("MaxBinX");
                 await GetNoParameters("MaxBinY");
                 await GetNoParameters("NumX");
-                try { parameter1 = camera.NumX.ToString(); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("NumX", "NumX", camera.NumX.ToString(), null);
+                try { parameter1 = camera.NumX.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                await PutOneParameter("NumX", "NumX", camera.NumX.ToString(CultureInfo.InvariantCulture), null);
                 await GetNoParameters("NumY");
-                try { parameter1 = camera.NumY.ToString(); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("NumY", "NumY", camera.NumY.ToString(), null);
+                try { parameter1 = camera.NumY.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                await PutOneParameter("NumY", "NumY", camera.NumY.ToString(CultureInfo.InvariantCulture), null);
                 await GetNoParameters("Offset");
-                try { parameter1 = camera.Offset.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = camera.Offset.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("Offset", "Offset", parameter1, null);
                 if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
 
@@ -517,24 +518,24 @@ namespace ConformU
                 await GetNoParameters("PixelSizeX");
                 await GetNoParameters("PixelSizeY");
                 await GetNoParameters("ReadoutMode");
-                try { parameter1 = camera.ReadoutMode.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = camera.ReadoutMode.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("ReadoutMode", "ReadoutMode", parameter1, null);
                 await GetNoParameters("ReadoutModes");
                 await GetNoParameters("SensorName");
                 await GetNoParameters("SensorType");
                 await GetNoParameters("SetCCDTemperature");
-                try { parameter1 = camera.SetCCDTemperature.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = camera.SetCCDTemperature.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("SetCCDTemperature", "SetCCDTemperature", parameter1, null);
                 await GetNoParameters("StartX");
                 if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
 
-                try { parameter1 = camera.StartX.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = camera.StartX.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("StartX", "StartX", parameter1, null);
                 await GetNoParameters("StartY");
-                try { parameter1 = camera.StartY.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = camera.StartY.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("StartY", "StartY", parameter1, null);
                 await GetNoParameters("SubExposureDuration");
-                try { parameter1 = camera.SubExposureDuration.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = camera.SubExposureDuration.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("SubExposureDuration", "SubExposureDuration", parameter1, null);
                 if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
 
@@ -542,10 +543,10 @@ namespace ConformU
                 await PutNoParameters("AbortExposure", null);
                 if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
 
-                await PutTwoParameters("PulseGuide", "Direction", ((int)GuideDirection.North).ToString(), "Duration", "1", null);
+                await PutTwoParameters("PulseGuide", "Direction", ((int)GuideDirection.North).ToString(CultureInfo.InvariantCulture), "Duration", "1", null);
                 if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
 
-                await PutTwoParameters("StartExposure", "Duration", settings.CameraExposureDuration.ToString(), "Light", "False", () =>
+                await PutTwoParameters("StartExposure", "Duration", settings.CameraExposureDuration.ToString(CultureInfo.InvariantCulture), "Light", "False", () =>
                 {
                     WaitWhile("StartExposure", () => camera.CameraState == CameraState.Exposing, 500,
                         settings.AlpacaConfiguration.StandardResponseTimeout, null);
@@ -620,7 +621,7 @@ namespace ConformU
                 if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
 
                 var parameter1 = "";
-                try { parameter1 = (coverCalibrator.MaxBrightness / 2).ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = (coverCalibrator.MaxBrightness / 2).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("CalibratorOn", "Brightness", parameter1, () =>
                 {
                     WaitWhile("CalibratorOn", () => coverCalibrator.CalibratorState == CalibratorStatus.NotReady, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
@@ -674,7 +675,7 @@ namespace ConformU
                 await GetNoParameters("ShutterStatus");
 
                 await GetNoParameters("Slaved");
-                try { parameter1 = dome.Slaved.ToString(); } catch (Exception) { parameter1 = "false"; }
+                try { parameter1 = dome.Slaved.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
                 await PutOneParameter("Slaved", "Slaved", parameter1, null);
 
                 await GetNoParameters("Slewing");
@@ -711,7 +712,7 @@ namespace ConformU
 
                 if (settings.DomeOpenShutter)
                 {
-                    try { parameter1 = dome.Altitude.ToString(); } catch (Exception) { parameter1 = "45"; }
+                    try { parameter1 = dome.Altitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
                     await PutOneParameter("SlewToAltitude", "Altitude", parameter1, () =>
                     {
                         WaitWhile("SlewToAltitude", () => dome.ShutterStatus == ShutterState.Opening, 500, settings.DomeAltitudeMovementTimeout, null);
@@ -724,7 +725,7 @@ namespace ConformU
                     LogInformation($"PUT SlewToAltitude", "Test omitted due to Conform configuration setting", null);
                 }
 
-                try { parameter1 = dome.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
+                try { parameter1 = dome.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
                 await PutOneParameter("SlewToAzimuth", "Azimuth", parameter1, () =>
                 {
                     WaitWhile("SlewToAzimuth", () => dome.Slewing == true, 500, settings.DomeAzimuthMovementTimeout, null);
@@ -732,7 +733,7 @@ namespace ConformU
                 WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome azimuth movement delay");
                 if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
 
-                try { parameter1 = dome.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
+                try { parameter1 = dome.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
                 await PutOneParameter("SyncToAzimuth", "Azimuth", parameter1, () =>
                 {
                     WaitWhile("SyncToAzimuth", () => dome.Slewing == true, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
@@ -784,7 +785,7 @@ namespace ConformU
                 await GetNoParameters("Position");
                 if (applicationCancellationToken.IsCancellationRequested) goto FilterWheelEnd; // Exit early if required
 
-                try { parameter1 = filterWheel.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = filterWheel.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("Position", "Position", parameter1, () =>
                 {
                     WaitWhile("Position", () => filterWheel.Position == -1, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
@@ -813,7 +814,7 @@ namespace ConformU
                 if (applicationCancellationToken.IsCancellationRequested) goto FocuserEnd; // Exit early if required
 
                 await GetNoParameters("TempComp");
-                try { parameter1 = focuser.TempComp.ToString(); } catch (Exception) { parameter1 = "false"; }
+                try { parameter1 = focuser.TempComp.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
                 await PutOneParameter("TempComp", "TempComp", parameter1, null);
 
                 await GetNoParameters("TempCompAvailable");
@@ -826,7 +827,7 @@ namespace ConformU
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto FocuserEnd; // Exit early if required
 
-                try { parameter1 = focuser.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = focuser.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("Move", "Position", parameter1, () =>
                 {
                     WaitWhile("Move", () => focuser.IsMoving, 500, settings.FocuserTimeout, null);
@@ -847,7 +848,7 @@ namespace ConformU
 
                 // Test properties
                 await GetNoParameters("AveragePeriod");
-                try { parameter1 = observingConditions.AveragePeriod.ToString(); } catch { }
+                try { parameter1 = observingConditions.AveragePeriod.ToString(CultureInfo.InvariantCulture); } catch { }
                 await PutOneParameter("AveragePeriod", "AveragePeriod", parameter1, null);
                 await GetNoParameters("CloudCover");
                 await GetNoParameters("DewPoint");
@@ -896,7 +897,7 @@ namespace ConformU
                 await GetNoParameters("Reverse");
                 if (applicationCancellationToken.IsCancellationRequested) goto RotatorEnd; // Exit early if required
 
-                try { parameter1 = rotator.Reverse.ToString(); } catch (Exception) { parameter1 = "false"; }
+                try { parameter1 = rotator.Reverse.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
                 await PutOneParameter("Reverse", "Reverse", parameter1, null);
                 await GetNoParameters("StepSize");
                 await GetNoParameters("TargetPosition");
@@ -908,28 +909,28 @@ namespace ConformU
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto RotatorEnd; // Exit early if required
 
-                try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = rotator.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("Move", "Position", parameter1, () =>
                 {
                     WaitWhile("Move", () => rotator.IsMoving, 500, settings.RotatorTimeout, null);
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto RotatorEnd; // Exit early if required
 
-                try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = rotator.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("MoveAbsolute", "Position", parameter1, () =>
                 {
                     WaitWhile("MoveAbsolute", () => rotator.IsMoving, 500, settings.RotatorTimeout, null);
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto RotatorEnd; // Exit early if required
 
-                try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = rotator.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("MoveMechanical", "Position", parameter1, () =>
                 {
                     WaitWhile("MoveMechanical", () => rotator.IsMoving, 500, settings.RotatorTimeout, null);
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto RotatorEnd; // Exit early if required
 
-                try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
+                try { parameter1 = rotator.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("Sync", "Position", parameter1, () =>
                 {
                     WaitWhile("Sync", () => rotator.IsMoving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
@@ -981,7 +982,7 @@ namespace ConformU
                 // Test methods
                 if (settings.SwitchEnableSet) // Test enabled
                 {
-                    try { parameter1 = switchDevice.GetSwitch(0).ToString(); } catch (Exception) { parameter1 = "false"; }
+                    try { parameter1 = switchDevice.GetSwitch(0).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
                     await PutTwoParameters("SetSwitch", "Id", "0", "State", parameter1, null);
                     WaitFor(settings.SwitchWriteDelay, "switch write delay");
                 }
@@ -994,7 +995,7 @@ namespace ConformU
 
                 if (settings.SwitchEnableSet) // Test enabled
                 {
-                    try { parameter1 = switchDevice.GetSwitchName(0).ToString(); } catch (Exception) { parameter1 = "Unknown name"; }
+                    try { parameter1 = switchDevice.GetSwitchName(0).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "Unknown name"; }
                     await PutTwoParameters("SetSwitchName", "Id", "0", "Name", parameter1, null, testParameter2BadValue: false);
                 }
                 else // Test omitted
@@ -1005,7 +1006,7 @@ namespace ConformU
 
                 if (settings.SwitchEnableSet) // Test enabled
                 {
-                    try { parameter1 = switchDevice.GetSwitchValue(0).ToString(); } catch (Exception) { try { parameter1 = switchDevice.MinSwitchValue(0).ToString(); } catch { parameter1 = "0.0"; } }
+                    try { parameter1 = switchDevice.GetSwitchValue(0).ToString(CultureInfo.InvariantCulture); } catch (Exception) { try { parameter1 = switchDevice.MinSwitchValue(0).ToString(CultureInfo.InvariantCulture); } catch { parameter1 = "0.0"; } }
                     await PutTwoParameters("SetSwitchValue", "Id", "0", "Value", parameter1, null);
                     WaitFor(settings.SwitchWriteDelay, "switch write delay");
                 }
@@ -1061,12 +1062,12 @@ namespace ConformU
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
 
                 await GetNoParameters("DeclinationRate");
-                try { parameter1 = telescope.DeclinationRate.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+                try { parameter1 = telescope.DeclinationRate.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
                 await PutOneParameter("DeclinationRate", "DeclinationRate", parameter1, null);
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 await GetNoParameters("DoesRefraction");
-                try { parameter1 = telescope.DoesRefraction.ToString(); } catch (Exception) { parameter1 = "false"; }
+                try { parameter1 = telescope.DoesRefraction.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
                 await PutOneParameter("DoesRefraction", "DoesRefraction", parameter1, null);
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
@@ -1075,12 +1076,12 @@ namespace ConformU
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 await GetNoParameters("GuideRateDeclination");
-                try { parameter1 = telescope.GuideRateDeclination.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+                try { parameter1 = telescope.GuideRateDeclination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
                 await PutOneParameter("GuideRateDeclination", "GuideRateDeclination", parameter1, null);
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 await GetNoParameters("GuideRateRightAscension");
-                try { parameter1 = telescope.GuideRateRightAscension.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+                try { parameter1 = telescope.GuideRateRightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
                 await PutOneParameter("GuideRateRightAscension", "GuideRateRightAscension", parameter1, null);
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
@@ -1089,53 +1090,53 @@ namespace ConformU
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 await GetNoParameters("RightAscensionRate");
-                try { parameter1 = telescope.RightAscensionRate.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+                try { parameter1 = telescope.RightAscensionRate.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
                 await PutOneParameter("RightAscensionRate", "RightAscensionRate", parameter1, null);
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 await GetNoParameters("SideOfPier");
-                try { parameter1 = ((int)telescope.SideOfPier).ToString(); } catch (Exception) { parameter1 = "0"; }
+                try { parameter1 = ((int)telescope.SideOfPier).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0"; }
                 await PutOneParameter("SideOfPier", "SideOfPier", parameter1, null);
 
                 await GetNoParameters("SiderealTime");
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 await GetNoParameters("SiteElevation");
-                try { parameter1 = telescope.SiteElevation.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+                try { parameter1 = telescope.SiteElevation.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
                 await PutOneParameter("SiteElevation", "SiteElevation", parameter1, null);
 
                 await GetNoParameters("SiteLatitude");
-                try { parameter1 = telescope.SiteLatitude.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+                try { parameter1 = telescope.SiteLatitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
                 await PutOneParameter("SiteLatitude", "SiteLatitude", parameter1, null);
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 await GetNoParameters("SiteLongitude");
-                try { parameter1 = telescope.SiteLongitude.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+                try { parameter1 = telescope.SiteLongitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
                 await PutOneParameter("SiteLongitude", "SiteLongitude", parameter1, null);
 
                 await GetNoParameters("Slewing");
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 await GetNoParameters("SlewSettleTime");
-                try { parameter1 = telescope.SlewSettleTime.ToString(); } catch (Exception) { parameter1 = "0"; }
+                try { parameter1 = telescope.SlewSettleTime.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0"; }
                 await PutOneParameter("SlewSettleTime", "SlewSettleTime", parameter1, null);
 
-                try { parameter1 = telescope.TargetDeclination.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+                try { parameter1 = telescope.TargetDeclination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
                 await PutOneParameter("TargetDeclination", "TargetDeclination", parameter1, null);
                 await GetNoParameters("TargetDeclination");
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                try { parameter1 = telescope.TargetRightAscension.ToString(); } catch (Exception) { parameter1 = "0.0"; }
+                try { parameter1 = telescope.TargetRightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
                 await PutOneParameter("TargetRightAscension", "TargetRightAscension", parameter1, null);
                 await GetNoParameters("TargetRightAscension");
 
                 await GetNoParameters("Tracking");
-                try { parameter1 = telescope.Tracking.ToString(); } catch (Exception) { parameter1 = "false"; }
+                try { parameter1 = telescope.Tracking.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
                 await PutOneParameter("Tracking", "Tracking", parameter1, null);
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 await GetNoParameters("TrackingRate");
-                try { parameter1 = ((int)telescope.TrackingRate).ToString(); } catch (Exception) { parameter1 = "0"; }
+                try { parameter1 = ((int)telescope.TrackingRate).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0"; }
                 await PutOneParameter("TrackingRate", "TrackingRate", parameter1, null);
 
                 await GetNoParameters("UTCDate"); // Date format:                                                                   yyyy-MM-ddTHH:mm:ss.fffffffZ
@@ -1188,8 +1189,8 @@ namespace ConformU
                 await GetOneParameter("CanMoveAxis", "Axis", "0");
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "21.0"; }
-                try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "70"; }
+                try { parameter1 = telescope.RightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "21.0"; }
+                try { parameter2 = telescope.Declination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "70"; }
                 await GetTwoParameters("DestinationSideOfPier", "RightAscension", parameter1, "Declination", parameter2);
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
@@ -1218,8 +1219,8 @@ namespace ConformU
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 if (settings.TelescopeTests[TelescopeTester.SLEW_TO_COORDINATES_ASYNC]) // Test enabled
                 {
-                    try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "21.0"; }
-                    try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "70"; }
+                    try { parameter1 = telescope.RightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "21.0"; }
+                    try { parameter2 = telescope.Declination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "70"; }
                     await PutTwoParameters("SlewToCoordinatesAsync", "RightAscension", parameter1, "Declination", parameter2, () =>
                     {
                         WaitWhile("SlewToCoordinatesAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
@@ -1233,8 +1234,8 @@ namespace ConformU
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 if (settings.TelescopeTests[TelescopeTester.SLEW_TO_COORDINATES]) // Test enabled
                 {
-                    try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "12.0"; }
-                    try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "80"; }
+                    try { parameter1 = telescope.RightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "12.0"; }
+                    try { parameter2 = telescope.Declination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "80"; }
                     await PutTwoParameters("SlewToCoordinates", "RightAscension", parameter1, "Declination", parameter2, () =>
                     {
                         WaitWhile("SlewToCoordinates", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
@@ -1276,8 +1277,8 @@ namespace ConformU
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 if (settings.TelescopeTests[TelescopeTester.SYNC_TO_COORDINATES]) // Test enabled
                 {
-                    try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "45"; }
-                    try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "45"; }
+                    try { parameter1 = telescope.RightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
+                    try { parameter2 = telescope.Declination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "45"; }
                     await PutTwoParameters("SyncToCoordinates", "RightAscension", parameter1, "Declination", parameter2, null);
                 }
                 else // Test omitted
@@ -1301,8 +1302,8 @@ namespace ConformU
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 if (settings.TelescopeTests[TelescopeTester.SLEW_TO_ALTAZ_ASYNC]) // Test enabled
                 {
-                    try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "60"; }
-                    try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "60"; }
+                    try { parameter1 = telescope.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "60"; }
+                    try { parameter2 = telescope.Altitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "60"; }
                     await PutTwoParameters("SlewToAltAzAsync", "Azimuth", parameter1, "Altitude", parameter2, () =>
                     {
                         WaitWhile("SlewToTargetAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
@@ -1316,8 +1317,8 @@ namespace ConformU
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 if (settings.TelescopeTests[TelescopeTester.SLEW_TO_ALTAZ]) // Test enabled
                 {
-                    try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
-                    try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
+                    try { parameter1 = telescope.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
+                    try { parameter2 = telescope.Altitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "45"; }
                     await PutTwoParameters("SlewToAltAz", "Azimuth", parameter1, "Altitude", parameter2, () =>
                     {
                         WaitWhile("SlewToTargetAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
@@ -1331,8 +1332,8 @@ namespace ConformU
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
                 if (settings.TelescopeTests[TelescopeTester.SYNC_TO_ALTAZ]) // Test enabled
                 {
-                    try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
-                    try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
+                    try { parameter1 = telescope.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
+                    try { parameter2 = telescope.Altitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "45"; }
                     await PutTwoParameters("SyncToAltAz", "Azimuth", parameter1, "Altitude", parameter2, null);
                 }
                 else // Test omitted
@@ -1735,9 +1736,9 @@ namespace ConformU
                                    bool acceptInvalidValueError = false)
         {
             string methodLowerCase = method.ToLowerInvariant();
-            string httpMethodUpperCase = httpMethod.ToString().ToUpperInvariant();
+            string httpMethodUpperCase = httpMethod.ToString(CultureInfo.InvariantCulture).ToUpperInvariant();
 
-            string url = $"/api/v1/{settings.DeviceType.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}";
+            string url = $"/api/v1/{settings.DeviceType.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}";
             await SendToDevice($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation, badlyCasedTransactionIdName, acceptInvalidValueError);
         }
 
@@ -1769,7 +1770,7 @@ namespace ConformU
 
             try
             {
-                string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString().ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
+                string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
 
                 // Create the URI for this transaction and apply it to the request, adding "client id" and "transaction number" query parameters
                 UriBuilder transactionUri = new($"{clientHostAddress}{url}");
@@ -1999,15 +2000,14 @@ namespace ConformU
                         }
                         else
                         {
-                            ascomOutcome = $"Device returned a {returnedErrorNumber} error (0x{returnedErrorNumber:X}) for client transaction: {returnedClientTransactionID}, " +
-                                $"server transaction: {returnedServerTransactionID}. " +
-                                $"Error message: {returnedErrorMessage}";
+                            ascomOutcome =
+                                $"Device returned a {returnedErrorNumber} error (0x{returnedErrorNumber:X}) for client transaction: {returnedClientTransactionID}, server transaction: {returnedServerTransactionID}. Error message: {returnedErrorMessage}";
                         }
                     }
                     catch (Exception) // Handle possibility of a non-ASCOM error number
                     {
-                        ascomOutcome = $"Device returned error number 0x{returnedErrorNumber:X} for client transaction: {returnedClientTransactionID}, server transaction: {returnedServerTransactionID}. " +
-                            $"Error message: {returnedErrorMessage}";
+                        ascomOutcome =
+                            $"Device returned error number 0x{returnedErrorNumber:X} for client transaction: {returnedClientTransactionID}, server transaction: {returnedServerTransactionID}. Error message: {returnedErrorMessage}";
                     }
                 }
 
@@ -2051,8 +2051,8 @@ namespace ConformU
                             }
                             expectedCodeList = expectedCodeList.TrimEnd(' ', ',');
 
-                            LogIssue(testName, $"{messagePrefix} - Expected HTTP status{(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: " +
-                                $"{(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString);
+                            LogIssue(testName,
+                                $"{messagePrefix} - Expected HTTP status{(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString);
 
                             LogBlankLine();
                         }

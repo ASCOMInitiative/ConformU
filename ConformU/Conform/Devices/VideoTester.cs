@@ -124,7 +124,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogDebug("Dispose", "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("Dispose", $"Disposing of device: {disposing} {disposedValue}");
             if (!disposedValue)
             {
                 if (disposing)
@@ -241,7 +241,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(pName, "Conform:CanTest: Unknown test type " + pType.ToString());
+                            LogIssue(pName, $"Conform:CanTest: Unknown test type {pType}");
                             break;
                         }
                 }
@@ -400,7 +400,8 @@ namespace ConformU
                     imageArray = lastVideoFrame.ImageArray;
                     try
                     {
-                        LogOk("ImageArray", "Received an image object from the driver of type: " + imageArray.GetType().Name);
+                        LogOk("ImageArray",
+                            $"Received an image object from the driver of type: {imageArray.GetType().Name}");
                     }
                     catch (Exception)
                     {
@@ -411,7 +412,8 @@ namespace ConformU
                     try
                     {
                         imageArrayAsArray = (Array)imageArray;
-                        LogOk("ImageArray", "  Received an array of rank: " + imageArrayAsArray.Rank + ", length: " + imageArrayAsArray.LongLength.ToString("#,0") + " and type: " + imageArrayAsArray.GetType().Name);
+                        LogOk("ImageArray",
+                            $"  Received an array of rank: {imageArrayAsArray.Rank}, length: {imageArrayAsArray.LongLength:#,0} and type: {imageArrayAsArray.GetType().Name}");
 
                         switch (imageArrayAsArray.Rank)
                         {
@@ -421,7 +423,8 @@ namespace ConformU
                                     if (imageArrayAsArray.GetType().Equals(typeof(int[])))
                                         LogOk("ImageArray", "  Received a 1 dimension Integer array as expected.");
                                     else
-                                        LogIssue("ImageArray", "  Did not receive a 1 dimension Integer array as expected. Received: " + imageArrayAsArray.GetType().Name);
+                                        LogIssue("ImageArray",
+                                            $"  Did not receive a 1 dimension Integer array as expected. Received: {imageArrayAsArray.GetType().Name}");
                                     break;
                                 }
 
@@ -431,7 +434,8 @@ namespace ConformU
                                     if (imageArrayAsArray.GetType().Equals(typeof(int[,])))
                                         LogOk("ImageArray", "  Received a 2 dimension Integer array as expected.");
                                     else
-                                        LogIssue("ImageArray", "  Did not receive a 2 dimension Integer array as expected. Received: " + imageArrayAsArray.GetType().Name);
+                                        LogIssue("ImageArray",
+                                            $"  Did not receive a 2 dimension Integer array as expected. Received: {imageArrayAsArray.GetType().Name}");
                                     break;
                                 }
 
@@ -441,13 +445,15 @@ namespace ConformU
                                     if (imageArrayAsArray.GetType().Equals(typeof(int[,,])))
                                         LogOk("ImageArray", "  Received a 3 dimension Integer array as expected.");
                                     else
-                                        LogIssue("ImageArray", "  Did not receive a 3 dimension Integer array as expected. Received: " + imageArrayAsArray.GetType().Name);
+                                        LogIssue("ImageArray",
+                                            $"  Did not receive a 3 dimension Integer array as expected. Received: {imageArrayAsArray.GetType().Name}");
                                     break;
                                 }
 
                             default:
                                 {
-                                    LogIssue("ImageArray", "  Array rank is 0 or exceeds 3: " + imageArrayAsArray.GetType().Name);
+                                    LogIssue("ImageArray",
+                                        $"  Array rank is 0 or exceeds 3: {imageArrayAsArray.GetType().Name}");
                                     break;
                                 }
                         }
@@ -486,7 +492,8 @@ namespace ConformU
                                             default:
                                                 {
                                                     // This is an unsupported rank 0 or >3 so create an error
-                                                    LogIssue("ImageArray", "  The zero based array rank must be 1, 2 or 3 . The returned array had rank: " + imageArrayAsArray.Rank);
+                                                    LogIssue("ImageArray",
+                                                        $"  The zero based array rank must be 1, 2 or 3 . The returned array had rank: {imageArrayAsArray.Rank}");
                                                     break;
                                                 }
                                         }
@@ -525,7 +532,8 @@ namespace ConformU
                                             default:
                                                 {
                                                     // This is an unsupported rank 0 or >3 so create an error
-                                                    LogIssue("ImageArray", "  The ImageArray rank must be 1, 2 or 3. The returned array had rank: " + imageArrayAsArray.Rank);
+                                                    LogIssue("ImageArray",
+                                                        $"  The ImageArray rank must be 1, 2 or 3. The returned array had rank: {imageArrayAsArray.Rank}");
                                                     break;
                                                 }
                                         }
@@ -539,7 +547,7 @@ namespace ConformU
                     }
                     catch (Exception ex)
                     {
-                        LogIssue("ImageArray", "Unexpected exception when testing ImageArray: " + ex.ToString());
+                        LogIssue("ImageArray", $"Unexpected exception when testing ImageArray: {ex}");
                     }
                 }
                 catch (Exception ex)
@@ -550,7 +558,7 @@ namespace ConformU
                 try
                 {
                     previewBitmap = lastVideoFrame.PreviewBitmap;
-                    LogOk("PreviewBitmap", "Received an array with " + previewBitmap.Length.ToString("#,#,#") + " entries");
+                    LogOk("PreviewBitmap", $"Received an array with {previewBitmap.Length:#,#,#} entries");
                 }
                 catch (Exception ex)
                 {
@@ -577,9 +585,11 @@ namespace ConformU
             length = dimension1 * ((dimension2 > 0) ? dimension2 : 1) * ((dimension3 > 0) ? dimension3 : 1); // Calculate the overall expected size
 
             if (testArray.LongLength == length)
-                LogOk("CheckImage", "  ImageArray has the expected total number of pixels: " + length.ToString(commaFormat));
+                LogOk("CheckImage",
+                    $"  ImageArray has the expected total number of pixels: {length.ToString(commaFormat)}");
             else
-                LogIssue("CheckImage", "  ImageArray returned a total of " + testArray.Length.ToString(commaFormat) + " pixels instead of the expected number: " + length.ToString(commaFormat));
+                LogIssue("CheckImage",
+                    $"  ImageArray returned a total of {testArray.Length.ToString(commaFormat)} pixels instead of the expected number: {length.ToString(commaFormat)}");
 
             if (dimension1 >= 1)
             {
@@ -588,34 +598,46 @@ namespace ConformU
                     if (dimension3 >= 1)
                     {
                         if (testArray.GetLongLength(0) == dimension1)
-                            LogOk("CheckImage", "  ImageArray dimension 1 has the expected length:: " + dimension1.ToString(commaFormat));
+                            LogOk("CheckImage",
+                                $"  ImageArray dimension 1 has the expected length:: {dimension1.ToString(commaFormat)}");
                         else
-                            LogIssue("CheckImage", "  ImageArray dimension 1 does not has the expected length:: " + dimension1.ToString(commaFormat) + ", received: " + testArray.GetLongLength(0).ToString(commaFormat));
+                            LogIssue("CheckImage",
+                                $"  ImageArray dimension 1 does not has the expected length:: {dimension1.ToString(commaFormat)}, received: {testArray.GetLongLength(0).ToString(commaFormat)}");
                         if (testArray.GetLongLength(1) == dimension2)
-                            LogOk("CheckImage", "  ImageArray dimension 2 has the expected length:: " + dimension2.ToString(commaFormat));
+                            LogOk("CheckImage",
+                                $"  ImageArray dimension 2 has the expected length:: {dimension2.ToString(commaFormat)}");
                         else
-                            LogIssue("CheckImage", "  ImageArray dimension 2 does not has the expected length:: " + dimension2.ToString(commaFormat) + ", received: " + testArray.GetLongLength(1).ToString(commaFormat));
+                            LogIssue("CheckImage",
+                                $"  ImageArray dimension 2 does not has the expected length:: {dimension2.ToString(commaFormat)}, received: {testArray.GetLongLength(1).ToString(commaFormat)}");
                         if (testArray.GetLongLength(2) == dimension3)
-                            LogOk("CheckImage", "  ImageArray dimension 3 has the expected length:: " + dimension3.ToString(commaFormat));
+                            LogOk("CheckImage",
+                                $"  ImageArray dimension 3 has the expected length:: {dimension3.ToString(commaFormat)}");
                         else
-                            LogIssue("CheckImage", "  ImageArray dimension 3 does not has the expected length:: " + dimension3.ToString(commaFormat) + ", received: " + testArray.GetLongLength(2).ToString(commaFormat));
+                            LogIssue("CheckImage",
+                                $"  ImageArray dimension 3 does not has the expected length:: {dimension3.ToString(commaFormat)}, received: {testArray.GetLongLength(2).ToString(commaFormat)}");
                     }
                     else
                     {
                         if (testArray.GetLongLength(0) == dimension1)
-                            LogOk("CheckImage", "  ImageArray dimension 1 has the expected length:: " + dimension1.ToString(commaFormat));
+                            LogOk("CheckImage",
+                                $"  ImageArray dimension 1 has the expected length:: {dimension1.ToString(commaFormat)}");
                         else
-                            LogIssue("CheckImage", "  ImageArray dimension 1 does not has the expected length:: " + dimension1.ToString(commaFormat) + ", received: " + testArray.GetLongLength(0).ToString(commaFormat));
+                            LogIssue("CheckImage",
+                                $"  ImageArray dimension 1 does not has the expected length:: {dimension1.ToString(commaFormat)}, received: {testArray.GetLongLength(0).ToString(commaFormat)}");
                         if (testArray.GetLongLength(1) == dimension2)
-                            LogOk("CheckImage", "  ImageArray dimension 2 has the expected length:: " + dimension2.ToString(commaFormat));
+                            LogOk("CheckImage",
+                                $"  ImageArray dimension 2 has the expected length:: {dimension2.ToString(commaFormat)}");
                         else
-                            LogIssue("CheckImage", "  ImageArray dimension 2 does not has the expected length:: " + dimension2.ToString(commaFormat) + ", received: " + testArray.GetLongLength(1).ToString(commaFormat));
+                            LogIssue("CheckImage",
+                                $"  ImageArray dimension 2 does not has the expected length:: {dimension2.ToString(commaFormat)}, received: {testArray.GetLongLength(1).ToString(commaFormat)}");
                     }
                 }
                 else if (testArray.GetLongLength(0) == dimension1)
-                    LogOk("CheckImage", "  ImageArray dimension 1 has the expected length:: " + dimension1.ToString(commaFormat));
+                    LogOk("CheckImage",
+                        $"  ImageArray dimension 1 has the expected length:: {dimension1.ToString(commaFormat)}");
                 else
-                    LogIssue("CheckImage", "  ImageArray dimension 1 does not has the expected length:: " + dimension1.ToString(commaFormat) + ", received: " + testArray.GetLongLength(0).ToString(commaFormat));
+                    LogIssue("CheckImage",
+                        $"  ImageArray dimension 1 does not has the expected length:: {dimension1.ToString(commaFormat)}, received: {testArray.GetLongLength(0).ToString(commaFormat)}");
             }
             else
                 LogIssue("CheckImage", "  Dimension 1 is 0 it should never be!");
@@ -688,7 +710,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(methodName, "TestShort: Unknown test type - " + pType.ToString());
+                            LogIssue(methodName, $"TestShort: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -699,14 +721,14 @@ namespace ConformU
                     case object _ when returnValue < pMin // Lower than minimum value
                    :
                         {
-                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, $"Invalid value: {returnValue}");
                             break;
                         }
 
                     case object _ when returnValue > pMax // Higher than maximum value
              :
                         {
-                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, $"Invalid value: {returnValue}");
                             break;
                         }
 
@@ -794,7 +816,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(methodName, "TestInteger: Unknown test type - " + pType.ToString());
+                            LogIssue(methodName, $"TestInteger: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -805,14 +827,14 @@ namespace ConformU
                     case object _ when returnValue < pMin // Lower than minimum value
                    :
                         {
-                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, $"Invalid value: {returnValue}");
                             break;
                         }
 
                     case object _ when returnValue > pMax // Higher than maximum value
              :
                         {
-                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, $"Invalid value: {returnValue}");
                             break;
                         }
 
@@ -866,7 +888,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(methodName, "TestInteger: Unknown test type - " + pType.ToString());
+                            LogIssue(methodName, $"TestInteger: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -877,14 +899,14 @@ namespace ConformU
                     case object _ when returnValue < pMin // Lower than minimum value
                    :
                         {
-                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, $"Invalid value: {returnValue}");
                             break;
                         }
 
                     case object _ when returnValue > pMax // Higher than maximum value
              :
                         {
-                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, $"Invalid value: {returnValue}");
                             break;
                         }
 
@@ -942,7 +964,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(methodName, "TestVideoFrame: Unknown test type - " + pType.ToString());
+                            LogIssue(methodName, $"TestVideoFrame: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -1010,7 +1032,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(methodName, "TestDouble: Unknown test type - " + pType.ToString());
+                            LogIssue(methodName, $"TestDouble: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -1020,14 +1042,14 @@ namespace ConformU
                     case object _ when returnValue < pMin // Lower than minimum value
                    :
                         {
-                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, $"Invalid value: {returnValue}");
                             break;
                         }
 
                     case object _ when returnValue > pMax // Higher than maximum value
              :
                         {
-                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, $"Invalid value: {returnValue}");
                             break;
                         }
 
@@ -1066,7 +1088,7 @@ namespace ConformU
                 {
                     default:
                         {
-                            LogIssue(methodName, "TestBoolean: Unknown test type - " + pType.ToString());
+                            LogIssue(methodName, $"TestBoolean: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -1139,7 +1161,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(methodName, "TestArrayList: Unknown test type - " + pType.ToString());
+                            LogIssue(methodName, $"TestArrayList: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -1151,9 +1173,10 @@ namespace ConformU
                 foreach (object listItem in returnValue)
                 {
                     if (listItem.GetType().Equals(pItemType))
-                        LogOk(methodName + "(" + count + ")", "  " + listItem.ToString());
+                        LogOk($"{methodName}({count})", $"  {listItem}");
                     else
-                        LogIssue(methodName, "  Type of ArrayList item: " + listItem.GetType().Name + " does not match expected type: " + pItemType.Name);
+                        LogIssue(methodName,
+                            $"  Type of ArrayList item: {listItem.GetType().Name} does not match expected type: {pItemType.Name}");
                     count += 1;
                 }
             }
@@ -1217,7 +1240,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(methodName, "TestString: Unknown test type - " + pType.ToString());
+                            LogIssue(methodName, $"TestString: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -1235,7 +1258,8 @@ namespace ConformU
                             if (returnValue.Length <= pMaxLength)
                                 LogOk(methodName, returnValue);
                             else
-                                LogIssue(methodName, "String exceeds " + pMaxLength + " characters maximum length - " + returnValue);
+                                LogIssue(methodName,
+                                    $"String exceeds {pMaxLength} characters maximum length - {returnValue}");
                             break;
                         }
                 }
@@ -1264,11 +1288,12 @@ namespace ConformU
                     case VideoProperty.BitDepth:
                         break;
                 }
-                LogOk(pProperty + " write", "Successfully wrote " + pTestOk);
+                LogOk($"{pProperty} write", $"Successfully wrote {pTestOk}");
             }
             catch (Exception ex)
             {
-                LogIssue(pProperty + " write", "Exception generated when setting legal value: " + pTestOk.ToString() + " - " + ex.Message);
+                LogIssue($"{pProperty} write",
+                    $"Exception generated when setting legal value: {pTestOk} - {ex.Message}");
             }
         }
 
@@ -1323,7 +1348,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogIssue(pName, "Conform:PerformanceTest: Unknown test type " + pType.ToString());
+                                LogIssue(pName, $"Conform:PerformanceTest: Unknown test type {pType}");
                                 break;
                             }
                     }
@@ -1331,7 +1356,7 @@ namespace ConformU
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
                     if (lElapsedTime > lLastElapsedTime + 1.0)
                     {
-                        SetStatus(lCount + " transactions in " + lElapsedTime.ToString("0") + " seconds");
+                        SetStatus($"{lCount} transactions in {lElapsedTime:0} seconds");
                         lLastElapsedTime = lElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
@@ -1343,32 +1368,32 @@ namespace ConformU
                 {
                     case object _ when lRate > 10.0:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 2.0 <= lRate && lRate <= 10.0:
                         {
-                            LogOk(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 1.0 <= lRate && lRate <= 2.0:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogInfo(pName, "Unable to complete test: " + ex.ToString());
+                LogInfo(pName, $"Unable to complete test: {ex}");
             }
         }
 

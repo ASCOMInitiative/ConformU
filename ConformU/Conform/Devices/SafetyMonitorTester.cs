@@ -48,7 +48,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogDebug("Dispose", "Disposing of test device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("Dispose", $"Disposing of test device: {disposing} {disposedValue}");
             if (!disposedValue)
             {
                 if (disposing)
@@ -172,7 +172,8 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogIssue("IsSafe", "Cannot confirm that IsSafe is false before connection because it threw an exception: " + ex.Message);
+                LogIssue("IsSafe",
+                    $"Cannot confirm that IsSafe is false before connection because it threw an exception: {ex.Message}");
             }
         }
 
@@ -228,7 +229,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(pName, "RequiredPropertiesTest: Unknown test type " + pType.ToString());
+                            LogIssue(pName, $"RequiredPropertiesTest: Unknown test type {pType}");
                             break;
                         }
                 }
@@ -261,7 +262,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogIssue(pName, "PerformanceTest: Unknown test type " + pType.ToString());
+                                LogIssue(pName, $"PerformanceTest: Unknown test type {pType}");
                                 break;
                             }
                     }
@@ -269,7 +270,7 @@ namespace ConformU
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
                     if (lElapsedTime > lLastElapsedTime + 1.0)
                     {
-                        SetStatus(lCount + " transactions in " + lElapsedTime.ToString("0") + " seconds");
+                        SetStatus($"{lCount} transactions in {lElapsedTime:0} seconds");
                         lLastElapsedTime = lElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
@@ -281,32 +282,32 @@ namespace ConformU
                 {
                     case object _ when lRate > 10.0:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 2.0 <= lRate && lRate <= 10.0:
                         {
-                            LogOk(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 1.0 <= lRate && lRate <= 2.0:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogInfo(pName, "Unable to complete test: " + ex.ToString());
+                LogInfo(pName, $"Unable to complete test: {ex}");
             }
         }
     }

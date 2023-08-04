@@ -176,7 +176,7 @@ namespace ConformU
         private bool disposedValue = false;        // To detect redundant calls
         protected override void Dispose(bool disposing)
         {
-            LogDebug("CameraTester.Dispose", "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("CameraTester.Dispose", $"Disposing of device: {disposing} {disposedValue}");
             if (!disposedValue)
             {
                 if (disposing)
@@ -397,7 +397,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(pName, "Conform:CanTest: Unknown test type " + pType.ToString());
+                            LogIssue(pName, $"Conform:CanTest: Unknown test type {pType}");
                             break;
                         }
                 }
@@ -537,7 +537,7 @@ namespace ConformU
             {
                 LogCallToDriver("ConformanceCheck", "About to set BinX");
                 camera.BinX = (short)(mMaxBinX + 1);
-                LogIssue("BinX Write", "Invalid value " + mMaxBinX + 1 + " written but no error returned");
+                LogIssue("BinX Write", $"Invalid value {mMaxBinX}{1} written but no error returned");
             }
             catch (Exception ex)
             {
@@ -559,7 +559,7 @@ namespace ConformU
             {
                 LogCallToDriver("ConformanceCheck", "About to set BinY");
                 camera.BinY = (short)(mMaxBinY + 1);
-                LogIssue("BinY Write", "Invalid value " + mMaxBinY + 1 + " written but no error returned");
+                LogIssue("BinY Write", $"Invalid value {mMaxBinY}{1} written but no error returned");
             }
             catch (Exception ex)
             {
@@ -614,7 +614,9 @@ namespace ConformU
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsInfo("BinX Write", MemberType.Property, Required.Mandatory, ex, "when setting BinX to " + lBinX, "InvalidValue error received when setting BinX to " + lBinX);
+                            HandleInvalidValueExceptionAsInfo("BinX Write", MemberType.Property, Required.Mandatory, ex,
+                                $"when setting BinX to {lBinX}",
+                                $"InvalidValue error received when setting BinX to {lBinX}");
                         }
 
                         try
@@ -623,13 +625,15 @@ namespace ConformU
                             camera.BinY = (short)lBinY;
 
                             if (binXSetOk)
-                                LogOk("BinXY Write", "Successfully set asymmetric XY binning: " + lBinX + " x " + lBinY);
+                                LogOk("BinXY Write", $"Successfully set asymmetric XY binning: {lBinX} x {lBinY}");
                             else
                                 LogOk("BinXY Write", $"Successfully set Y binning to {lBinY}");
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsInfo("BinY Write", MemberType.Property, Required.Mandatory, ex, "when setting BinY to " + lBinY, "InvalidValue error received when setting BinY to " + lBinY);
+                            HandleInvalidValueExceptionAsInfo("BinY Write", MemberType.Property, Required.Mandatory, ex,
+                                $"when setting BinY to {lBinY}",
+                                $"InvalidValue error received when setting BinY to {lBinY}");
                         }
                     }
                 }
@@ -647,7 +651,9 @@ namespace ConformU
                     }
                     catch (Exception ex)
                     {
-                        HandleInvalidValueExceptionAsInfo("BinX Write", MemberType.Property, Required.Mandatory, ex, "when setting BinX to " + lBinX, "InvalidValueException received when setting BinX to " + lBinX);
+                        HandleInvalidValueExceptionAsInfo("BinX Write", MemberType.Property, Required.Mandatory, ex,
+                            $"when setting BinX to {lBinX}",
+                            $"InvalidValueException received when setting BinX to {lBinX}");
                     }
 
                     try
@@ -655,13 +661,15 @@ namespace ConformU
                         LogCallToDriver("ConformanceCheck", "About to set BinY");
                         camera.BinY = (short)lBinX;
                         if (binXSetOk)
-                            LogOk("BinXY Write", "Successfully set symmetric XY binning: " + lBinX + " x " + lBinX);
+                            LogOk("BinXY Write", $"Successfully set symmetric XY binning: {lBinX} x {lBinX}");
                         else
                             LogOk("BinXY Write", $"Successfully set Y binning to {lBinX}");
                     }
                     catch (Exception ex)
                     {
-                        HandleInvalidValueExceptionAsInfo("BinY Write", MemberType.Property, Required.Mandatory, ex, "when setting BinY to " + lBinX, "InvalidValueException received when setting BinY to " + lBinX);
+                        HandleInvalidValueExceptionAsInfo("BinY Write", MemberType.Property, Required.Mandatory, ex,
+                            $"when setting BinY to {lBinX}",
+                            $"InvalidValueException received when setting BinY to {lBinX}");
                     }
                 }
 
@@ -717,7 +725,8 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    HandleException("CoolerOn Write", MemberType.Property, Required.Optional, ex, "turning Cooler " + lTargetCoolerState);
+                    HandleException("CoolerOn Write", MemberType.Property, Required.Optional, ex,
+                        $"turning Cooler {lTargetCoolerState}");
                 }
 
                 // Restore Cooler state
@@ -1147,7 +1156,7 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                     mGain = camera.Gain;
                     mCanReadGain = true; // Flag that we can read Gain OK
                     if (mCanReadGains)
-                        LogOk("Gain Read", mGain + " " + mGains[0].ToString());
+                        LogOk("Gain Read", $"{mGain} {mGains[0]}");
                     else
                         LogOk("Gain Read", mGain.ToString());
                 }
@@ -1290,14 +1299,14 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                         case object _ when mPercentCompleted < 0 // Lower than minimum value
                        :
                             {
-                                LogIssue("PercentCompleted Read", "Invalid value: " + mPercentCompleted.ToString());
+                                LogIssue("PercentCompleted Read", $"Invalid value: {mPercentCompleted}");
                                 break;
                             }
 
                         case object _ when mPercentCompleted > 100 // Higher than maximum value
                  :
                             {
-                                LogIssue("PercentCompleted Read", "Invalid value: " + mPercentCompleted.ToString());
+                                LogIssue("PercentCompleted Read", $"Invalid value: {mPercentCompleted}");
                                 break;
                             }
 
@@ -1338,7 +1347,7 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                         if (mReadoutMode < mReadoutModes.Count)
                         {
                             LogOk("ReadoutMode Index", "ReadReadoutMode is within the bounds of the ReadoutModes ArrayList");
-                            LogInfo("ReadoutMode Index", "Current value: " + mReadoutModes[mReadoutMode].ToString());
+                            LogInfo("ReadoutMode Index", $"Current value: {mReadoutModes[mReadoutMode]}");
                         }
                         else
                             LogIssue("ReadoutMode Index", "ReadReadoutMode is outside the bounds of the ReadoutModes ArrayList");
@@ -1417,7 +1426,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                     mOffset = camera.Offset;
                     mCanReadOffset = true; // Flag that we can read Offset OK
                     if (mCanReadOffsets)
-                        LogOk("Offset Read", mOffset + " " + mOffsets[0].ToString());
+                        LogOk("Offset Read", $"{mOffset} {mOffsets[0]}");
                     else
                         LogOk("Offset Read", mOffset.ToString());
                 }
@@ -1581,7 +1590,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
                     default:
                         {
-                            LogIssue(pName, "returnValue: Unknown test type - " + pType.ToString());
+                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -1632,7 +1641,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
                     default:
                         {
-                            LogIssue(pName, "returnValue: Unknown test type - " + pType.ToString());
+                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -1642,14 +1651,14 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                     case object _ when returnValue < pMin // Lower than minimum value
                    :
                         {
-                            LogIssue(pName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(pName, $"Invalid value: {returnValue}");
                             break;
                         }
 
                     case object _ when returnValue > pMax // Higher than maximum value
              :
                         {
-                            LogIssue(pName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(pName, $"Invalid value: {returnValue}");
                             break;
                         }
 
@@ -1696,7 +1705,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
                     default:
                         {
-                            LogIssue(pName, "returnValue: Unknown test type - " + pType.ToString());
+                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -1801,7 +1810,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
                     default:
                         {
-                            LogIssue(pName, "returnValue: Unknown test type - " + pType.ToString());
+                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -1809,7 +1818,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                 // Successfully retrieved a value so test it
                 if (returnValue < pMin)
                 {
-                    LogIssue(pName, $"Invalid value below expected minimum ({pMin}): " + returnValue.ToString());
+                    LogIssue(pName, $"Invalid value below expected minimum ({pMin}): {returnValue}");
                 }
                 else if (returnValue > pMax)
                 {
@@ -1941,7 +1950,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
                     default:
                         {
-                            LogIssue(pName, "returnValue: Unknown test type - " + pType.ToString());
+                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -1951,14 +1960,14 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                     case double _ when returnValue < pMin // Lower than minimum value
                    :
                         {
-                            LogIssue(pName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(pName, $"Invalid value: {returnValue}");
                             break;
                         }
 
                     case double _ when returnValue > pMax // Higher than maximum value
              :
                         {
-                            LogIssue(pName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(pName, $"Invalid value: {returnValue}");
                             break;
                         }
 
@@ -2022,7 +2031,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
                     default:
                         {
-                            LogIssue(pName, "returnValue: Unknown test type - " + pType.ToString());
+                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -2059,7 +2068,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
                     default:
                         {
-                            LogIssue(pName, "returnValue: Unknown test type - " + pType.ToString());
+                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -2077,7 +2086,8 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                             if (returnValue.Length <= pMaxLength)
                                 LogOk(pName, returnValue);
                             else
-                                LogIssue(pName, "String exceeds " + pMaxLength + " characters maximum length - " + returnValue);
+                                LogIssue(pName,
+                                    $"String exceeds {pMaxLength} characters maximum length - {returnValue}");
                             break;
                         }
                 }
@@ -2126,11 +2136,12 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                             break;
                         }
                 }
-                LogOk(pProperty + " write", "Successfully wrote " + pTestOk);
+                LogOk($"{pProperty} write", $"Successfully wrote {pTestOk}");
             }
             catch (Exception ex)
             {
-                HandleException(pProperty + " write", MemberType.Property, Required.MustBeImplemented, ex, "Can't set legal value: " + pTestOk.ToString());
+                HandleException($"{pProperty} write", MemberType.Property, Required.MustBeImplemented, ex,
+                    $"Can't set legal value: {pTestOk}");
             }
         }
 
@@ -2315,8 +2326,8 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                             ySize = settings.CameraYMax;
                         }
 
-                        CameraExposure("StartExposure", $"Taking {(constrainedXSize | constrainedYSize ? "configured size" : "full frame")} image {binX} x {binY} bin " +
-                            $"({xSize}{(constrainedXSize ? "*" : "")} x {ySize}{(constrainedYSize ? "*" : "")}) - {Convert.ToDouble(xSize * ySize) / 1000000.0:0.0} MPix",
+                        CameraExposure("StartExposure",
+                            $"Taking {(constrainedXSize | constrainedYSize ? "configured size" : "full frame")} image {binX} x {binY} bin ({xSize}{(constrainedXSize ? "*" : "")} x {ySize}{(constrainedYSize ? "*" : "")}) - {Convert.ToDouble(xSize * ySize) / 1000000.0:0.0} MPix",
                             binX, binY, 0, 0, xSize, ySize, settings.CameraExposureDuration, "");
 
                         if (cancellationToken.IsCancellationRequested)
@@ -2348,8 +2359,8 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                         ySize = settings.CameraYMax;
                     }
 
-                    CameraExposure("StartExposure", $"Taking {(constrainedXSize | constrainedYSize ? "configured size" : "full frame")} image {binX} x {binX} bin " +
-                        $"({xSize}{(constrainedXSize ? "*" : "")} x {ySize}{(constrainedYSize ? "*" : "")}) - {Convert.ToDouble(xSize * ySize) / 1000000.0:0.0} MPix",
+                    CameraExposure("StartExposure",
+                        $"Taking {(constrainedXSize | constrainedYSize ? "configured size" : "full frame")} image {binX} x {binX} bin ({xSize}{(constrainedXSize ? "*" : "")} x {ySize}{(constrainedYSize ? "*" : "")}) - {Convert.ToDouble(xSize * ySize) / 1000000.0:0.0} MPix",
                         binX, binX, 0, 0, xSize, ySize, settings.CameraExposureDuration, "");
 
                     if (cancellationToken.IsCancellationRequested)
@@ -2371,44 +2382,52 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                     if (mCanAsymmetricBin)
                     {
                         // X size too large for binned size
-                        CameraExposure($"Reject Bad XSize (bin {i} x {j})", $"Testing rejection of bad X size value for bin {i} x {j} ({Convert.ToInt32(cameraXSize / (double)i) + 1})", i, j, 0, 0, Convert.ToInt32((cameraXSize / (double)i) + 1), Convert.ToInt32(cameraYSize / (double)j), 0.1, "X size larger than binned chip size, Bin " + i + "x" + j);
+                        CameraExposure($"Reject Bad XSize (bin {i} x {j})", $"Testing rejection of bad X size value for bin {i} x {j} ({Convert.ToInt32(cameraXSize / (double)i) + 1})", i, j, 0, 0, Convert.ToInt32((cameraXSize / (double)i) + 1), Convert.ToInt32(cameraYSize / (double)j), 0.1,
+                            $"X size larger than binned chip size, Bin {i}x{j}");
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
                         // Y size too large for binned size
-                        CameraExposure($"Reject Bad YSize (bin {i} x {j})", $"Testing rejection of bad Y size value for bin {i} x {j} ({Convert.ToInt32(cameraYSize / (double)j) + 1})", i, j, 0, 0, Convert.ToInt32(cameraXSize / (double)i), Convert.ToInt32((cameraYSize / (double)j) + 1), 0.1, "Y size larger than binned chip size, Bin " + i + "x" + j);
+                        CameraExposure($"Reject Bad YSize (bin {i} x {j})", $"Testing rejection of bad Y size value for bin {i} x {j} ({Convert.ToInt32(cameraYSize / (double)j) + 1})", i, j, 0, 0, Convert.ToInt32(cameraXSize / (double)i), Convert.ToInt32((cameraYSize / (double)j) + 1), 0.1,
+                            $"Y size larger than binned chip size, Bin {i}x{j}");
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
                         // X start outside binned chip dimensions
-                        CameraExposure($"Reject Bad XStart (bin {i} x {j})", $"Testing rejection of bad X start value for bin {i} x {j} ({Convert.ToInt32(cameraXSize / (double)i) + 1})", i, j, Convert.ToInt32((cameraXSize / (double)i) + 1), 0, Convert.ToInt32(cameraXSize / (double)i), System.Convert.ToInt32(cameraYSize / (double)j), 0.1, "X start outside binned chip size, Bin " + i + "x" + j);
+                        CameraExposure($"Reject Bad XStart (bin {i} x {j})", $"Testing rejection of bad X start value for bin {i} x {j} ({Convert.ToInt32(cameraXSize / (double)i) + 1})", i, j, Convert.ToInt32((cameraXSize / (double)i) + 1), 0, Convert.ToInt32(cameraXSize / (double)i), System.Convert.ToInt32(cameraYSize / (double)j), 0.1,
+                            $"X start outside binned chip size, Bin {i}x{j}");
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
                         // Y start outside binned chip dimensions
-                        CameraExposure($"Reject Bad YStart (bin {i} x {j})", $"Testing rejection of bad Y start value for bin {i} x {j} ({Convert.ToInt32(cameraYSize / (double)j) + 1})", i, j, 0, Convert.ToInt32((cameraYSize / (double)j) + 1), Convert.ToInt32(cameraXSize / (double)i), System.Convert.ToInt32(cameraYSize / (double)j), 0.1, "Y start outside binned chip size, Bin " + i + "x" + j);
+                        CameraExposure($"Reject Bad YStart (bin {i} x {j})", $"Testing rejection of bad Y start value for bin {i} x {j} ({Convert.ToInt32(cameraYSize / (double)j) + 1})", i, j, 0, Convert.ToInt32((cameraYSize / (double)j) + 1), Convert.ToInt32(cameraXSize / (double)i), System.Convert.ToInt32(cameraYSize / (double)j), 0.1,
+                            $"Y start outside binned chip size, Bin {i}x{j}");
                         if (cancellationToken.IsCancellationRequested)
                             return;
                     }
                     else if (i == j)
                     {
                         // X size too large for binned size
-                        CameraExposure($"Reject Bad XSize (bin {i} x {j})", $"Testing rejection of bad X size value for bin {i} x {j} ({Convert.ToInt32(cameraXSize / (double)i) + 1})", i, j, 0, 0, Convert.ToInt32((cameraXSize / (double)i) + 1), Convert.ToInt32(cameraYSize / (double)j), 0.1, "X size larger than binned chip size, Bin " + i + "x" + j);
+                        CameraExposure($"Reject Bad XSize (bin {i} x {j})", $"Testing rejection of bad X size value for bin {i} x {j} ({Convert.ToInt32(cameraXSize / (double)i) + 1})", i, j, 0, 0, Convert.ToInt32((cameraXSize / (double)i) + 1), Convert.ToInt32(cameraYSize / (double)j), 0.1,
+                            $"X size larger than binned chip size, Bin {i}x{j}");
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
                         // Y size too large for binned size
-                        CameraExposure($"Reject Bad YSize (bin {i} x {j})", $"Testing rejection of bad Y size value for bin {i} x {j} ({Convert.ToInt32(cameraYSize / (double)j) + 1})", i, j, 0, 0, Convert.ToInt32(cameraXSize / (double)i), Convert.ToInt32((cameraYSize / (double)j) + 1), 0.1, "Y size larger than binned chip size, Bin " + i + "x" + j);
+                        CameraExposure($"Reject Bad YSize (bin {i} x {j})", $"Testing rejection of bad Y size value for bin {i} x {j} ({Convert.ToInt32(cameraYSize / (double)j) + 1})", i, j, 0, 0, Convert.ToInt32(cameraXSize / (double)i), Convert.ToInt32((cameraYSize / (double)j) + 1), 0.1,
+                            $"Y size larger than binned chip size, Bin {i}x{j}");
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
                         // X start outside binned chip dimensions
-                        CameraExposure($"Reject Bad XStart (bin {i} x {j})", $"Testing rejection of bad X start value for bin {i} x {j} ({Convert.ToInt32(cameraXSize / (double)i) + 1})", i, j, Convert.ToInt32((cameraXSize / (double)i) + 1), 0, Convert.ToInt32(cameraXSize / (double)i), System.Convert.ToInt32(cameraYSize / (double)j), 0.1, "X start outside binned chip size, Bin " + i + "x" + j);
+                        CameraExposure($"Reject Bad XStart (bin {i} x {j})", $"Testing rejection of bad X start value for bin {i} x {j} ({Convert.ToInt32(cameraXSize / (double)i) + 1})", i, j, Convert.ToInt32((cameraXSize / (double)i) + 1), 0, Convert.ToInt32(cameraXSize / (double)i), System.Convert.ToInt32(cameraYSize / (double)j), 0.1,
+                            $"X start outside binned chip size, Bin {i}x{j}");
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
                         // Y start outside binned chip dimensions
-                        CameraExposure($"Reject Bad YStart (bin {i} x {j})", $"Testing rejection of bad Y start value for bin {i} x {j} ({Convert.ToInt32(cameraYSize / (double)j) + 1})", i, j, 0, Convert.ToInt32((cameraYSize / (double)j) + 1), Convert.ToInt32(cameraXSize / (double)i), System.Convert.ToInt32(cameraYSize / (double)j), 0.1, "Y start outside binned chip size, Bin " + i + "x" + j);
+                        CameraExposure($"Reject Bad YStart (bin {i} x {j})", $"Testing rejection of bad Y start value for bin {i} x {j} ({Convert.ToInt32(cameraYSize / (double)j) + 1})", i, j, 0, Convert.ToInt32((cameraYSize / (double)j) + 1), Convert.ToInt32(cameraXSize / (double)i), System.Convert.ToInt32(cameraYSize / (double)j), 0.1,
+                            $"Y start outside binned chip size, Bin {i}x{j}");
                         if (cancellationToken.IsCancellationRequested)
                             return;
                     }
@@ -2601,7 +2620,8 @@ LogCallToDriver("ConformanceCheck", "About to call StartExposure");
                             else
                             {
                                 LogTestAndMessage(testName, $"No error was returned when {char.ToLowerInvariant(expectedErrorMessage[0])}{expectedErrorMessage[1..]}");
-                                LogIssue(testName, "Expected an error and didn't get one - BinX:" + requiredBinX + " BinY:" + requiredBinY + " StartX:" + requiredStartX + " StartY:" + requiredStartY + " NumX:" + requiredNumX + " NumY:" + requiredNumY);
+                                LogIssue(testName,
+                                    $"Expected an error and didn't get one - BinX:{requiredBinX} BinY:{requiredBinY} StartX:{requiredStartX} StartY:{requiredStartY} NumX:{requiredNumX} NumY:{requiredNumY}");
                             }
                         }
                     }
@@ -2723,7 +2743,7 @@ LogCallToDriver("ConformanceCheck", "About to get ImageReady and CameraState");
                     {
                         if (endTime.Subtract(startTime).TotalSeconds >= requiredDuration)
                         {
-                            LogOk(testName, "Synchronous exposure found OK: " + requiredDuration + " seconds");
+                            LogOk(testName, $"Synchronous exposure found OK: {requiredDuration} seconds");
                             CameraTestLast(requiredDuration, startTimeUtc);
                         }
                         else
@@ -2939,7 +2959,7 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
                 LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                 if (camera.ImageReady)
                 {
-                    LogOk(testName, "Asynchronous exposure found OK: " + requiredDuration + " seconds");
+                    LogOk(testName, $"Asynchronous exposure found OK: {requiredDuration} seconds");
                     CameraTestLast(requiredDuration, startTimeUtc);
                 }
                 else
@@ -3080,17 +3100,21 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
                                     {
                                         numPlanes = "1 plane";
                                         if (mImageArray.GetUpperBound(2) > 0)
-                                            numPlanes = System.Convert.ToString(mImageArray.GetUpperBound(2) + 1) + " planes";
+                                            numPlanes =
+                                                $"{System.Convert.ToString(mImageArray.GetUpperBound(2) + 1)} planes";
                                     }
                                     LogOk("ImageArray", $"Successfully read 32 bit integer array ({numPlanes}) {mImageArray.GetLength(0)} x {mImageArray.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
                                 }
                                 else
-                                    LogIssue("ImageArray", "Expected 32 bit integer array, actually got: " + mImageArray.GetType().ToString());
+                                    LogIssue("ImageArray",
+                                        $"Expected 32 bit integer array, actually got: {mImageArray.GetType()}");
                             }
                             else if ((mImageArray.GetLength(0) == requiredNumY) & (mImageArray.GetLength(1) == requiredNumX))
-                                LogIssue("ImageArray", "Camera image dimensions swapped, expected values: " + requiredNumX + " x " + requiredNumY + " - actual values: " + mImageArray.GetLength(0) + " x " + mImageArray.GetLength(1));
+                                LogIssue("ImageArray",
+                                    $"Camera image dimensions swapped, expected values: {requiredNumX} x {requiredNumY} - actual values: {mImageArray.GetLength(0)} x {mImageArray.GetLength(1)}");
                             else
-                                LogIssue("ImageArray", "Camera image does not have the expected dimensions of: " + requiredNumX + " x " + requiredNumY + " - actual values: " + mImageArray.GetLength(0) + " x " + mImageArray.GetLength(1));
+                                LogIssue("ImageArray",
+                                    $"Camera image does not have the expected dimensions of: {requiredNumX} x {requiredNumY} - actual values: {mImageArray.GetLength(0)} x {mImageArray.GetLength(1)}");
                             break;
                     }
                 }
@@ -3305,7 +3329,8 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                                 numPlanes = "1 plane";
                                 if (mImageArrayVariant.GetUpperBound(2) > 0)
                                 {
-                                    numPlanes = System.Convert.ToString(mImageArrayVariant.GetUpperBound(2) + 1) + " planes";
+                                    numPlanes =
+                                        $"{System.Convert.ToString(mImageArrayVariant.GetUpperBound(2) + 1)} planes";
                                     variantType = ((object[,,])mImageArrayVariant)[0, 0, 0].GetType().ToString();
                                 }
                                 else
@@ -3314,12 +3339,15 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                             LogOk("ImageArrayVariant", $"Successfully read variant array ({numPlanes}) with {variantType} elements {mImageArrayVariant.GetLength(0)} x {mImageArrayVariant.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
                         }
                         else
-                            LogIssue("ImageArrayVariant", "Expected variant array, actually got: " + mImageArrayVariant.GetType().ToString());
+                            LogIssue("ImageArrayVariant",
+                                $"Expected variant array, actually got: {mImageArrayVariant.GetType()}");
                     }
                     else if ((mImageArrayVariant.GetLength(0) == requiredNumY) & (mImageArrayVariant.GetLength(1) == requiredNumX))
-                        LogIssue("ImageArrayVariant", "Camera image dimensions swapped, expected values: " + requiredNumX + " x " + requiredNumY + " - actual values: " + mImageArrayVariant.GetLength(0) + " x " + mImageArrayVariant.GetLength(1));
+                        LogIssue("ImageArrayVariant",
+                            $"Camera image dimensions swapped, expected values: {requiredNumX} x {requiredNumY} - actual values: {mImageArrayVariant.GetLength(0)} x {mImageArrayVariant.GetLength(1)}");
                     else
-                        LogIssue("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + requiredNumX + " x " + requiredNumY + " - actual values: " + mImageArrayVariant.GetLength(0) + " x " + mImageArrayVariant.GetLength(1));
+                        LogIssue("ImageArrayVariant",
+                            $"Camera image does not have the expected dimensions of: {requiredNumX} x {requiredNumY} - actual values: {mImageArrayVariant.GetLength(0)} x {mImageArrayVariant.GetLength(1)}");
 
                     // Release memory currently consumed by images
                     ReleaseMemory();
@@ -3409,7 +3437,8 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                 if ((Math.Abs(mLastExposureDuration - pDuration) / pDuration) < 0.02)
                     LogOk("LastExposureDuration", $"Last exposure duration is: {mLastExposureDuration:0.000} seconds");
                 else
-                    LogIssue("LastExposureDuration", "LastExposureDuration is not the same as image duration: " + mLastExposureDuration + " " + pDuration);
+                    LogIssue("LastExposureDuration",
+                        $"LastExposureDuration is not the same as image duration: {mLastExposureDuration} {pDuration}");
             }
             catch (Exception ex)
             {
@@ -3499,23 +3528,28 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                         {
                             lStartTime = DateTime.Parse(mLastExposureStartTime);
                             if (pStart.Subtract(lStartTime).TotalSeconds < 2.0)
-                                LogOk("LastExposureStartTime", "LastExposureStartTime is correct to within 2 seconds: " + mLastExposureStartTime + " UTC");
+                                LogOk("LastExposureStartTime",
+                                    $"LastExposureStartTime is correct to within 2 seconds: {mLastExposureStartTime} UTC");
                             else
-                                LogIssue("LastExposureStartTime", "LastExposureStartTime is more than 2 seconds inaccurate : " + mLastExposureStartTime + ", expected: " + pStart.ToString("yyyy-MM-ddTHH:mm:ss") + " UTC");
+                                LogIssue("LastExposureStartTime",
+                                    $"LastExposureStartTime is more than 2 seconds inaccurate : {mLastExposureStartTime}, expected: {pStart:yyyy-MM-ddTHH:mm:ss} UTC");
                         }
                         catch (Exception ex)
                         {
-                            LogIssue("LastExposureStartTime", "Parsing LastExposureStartTime - " + ex.Message + " " + mLastExposureStartTime);
+                            LogIssue("LastExposureStartTime",
+                                $"Parsing LastExposureStartTime - {ex.Message} {mLastExposureStartTime}");
                             LogDebug("LastExposureStartTime", $"Exception detail:\r\n {ex}");
                         }
                     }
                     else
-                        LogIssue("LastExposureStartTime", "LastExposureStartTime not in the expected format yyyy-mm-ddThh:mm:ss - " + mLastExposureStartTime);
+                        LogIssue("LastExposureStartTime",
+                            $"LastExposureStartTime not in the expected format yyyy-mm-ddThh:mm:ss - {mLastExposureStartTime}");
                 }
                 else if (mLastExposureStartTime == "")
                     LogIssue("LastExposureStartTime", "LastExposureStartTime has returned an empty string - expected yyyy-mm-ddThh:mm:ss");
                 else
-                    LogIssue("LastExposureStartTime", "LastExposureStartTime is less than 19 characters - expected yyyy-mm-ddThh:mm:ss - " + mLastExposureStartTime);
+                    LogIssue("LastExposureStartTime",
+                        $"LastExposureStartTime is less than 19 characters - expected yyyy-mm-ddThh:mm:ss - {mLastExposureStartTime}");
             }
             catch (Exception ex)
             {
@@ -3545,20 +3579,20 @@ LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {pDirection}");
                             Stopwatch sw = Stopwatch.StartNew();
                             WaitWhile($"Guiding {pDirection}", () => camera.IsPulseGuiding, 500, 3, () => $"{sw.Elapsed.TotalSeconds:0.0} / {CAMERA_PULSE_DURATION / 1000:0.0} seconds"); LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
                             if (!camera.IsPulseGuiding)
-                                LogOk("PulseGuide " + pDirection.ToString(), "Asynchronous pulse guide found OK");
+                                LogOk($"PulseGuide {pDirection}", "Asynchronous pulse guide found OK");
                             else
-                                LogIssue("PulseGuide " + pDirection.ToString(), "Asynchronous pulse guide expected but IsPulseGuiding is TRUE beyond expected time of 2 seconds");
+                                LogIssue($"PulseGuide {pDirection}", "Asynchronous pulse guide expected but IsPulseGuiding is TRUE beyond expected time of 2 seconds");
                         }
                         else
-                            LogIssue("PulseGuide " + pDirection.ToString(), "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE");
+                            LogIssue($"PulseGuide {pDirection}", "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE");
                     }
                     else
                     {
                         LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
                         if (!camera.IsPulseGuiding)
-                            LogOk("PulseGuide " + pDirection.ToString(), "Synchronous pulse guide found OK");
+                            LogOk($"PulseGuide {pDirection}", "Synchronous pulse guide found OK");
                         else
-                            LogIssue("PulseGuide " + pDirection.ToString(), "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE");
+                            LogIssue($"PulseGuide {pDirection}", "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE");
                     }
                 }
                 else
@@ -3567,20 +3601,23 @@ LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {pDirection}");
                         case object _ when lEndTime.Subtract(lStartTime).TotalMilliseconds - CAMERA_PULSE_DURATION > CAMERA_PULSE_TOLERANCE // Duration was more than 0.5 seconds longer than expected
                        :
                             {
-                                LogIssue("PulseGuide " + pDirection.ToString(), "Synchronous pulse guide longer than expected " + (CAMERA_PULSE_DURATION) / (double)1000 + " seconds: " + lEndTime.Subtract(lStartTime).TotalSeconds + " seconds");
+                                LogIssue($"PulseGuide {pDirection}",
+                                    $"Synchronous pulse guide longer than expected {(CAMERA_PULSE_DURATION) / (double)1000} seconds: {lEndTime.Subtract(lStartTime).TotalSeconds} seconds");
                                 break;
                             }
 
                         case object _ when lEndTime.Subtract(lStartTime).TotalMilliseconds - CAMERA_PULSE_DURATION < 20 // Duration was more than 20ms shorter than expected
                  :
                             {
-                                LogIssue("PulseGuide " + pDirection.ToString(), "Synchronous pulse guide shorter than expected " + (CAMERA_PULSE_DURATION) / (double)1000 + " seconds: " + lEndTime.Subtract(lStartTime).TotalSeconds + " seconds");
+                                LogIssue($"PulseGuide {pDirection}",
+                                    $"Synchronous pulse guide shorter than expected {(CAMERA_PULSE_DURATION) / (double)1000} seconds: {lEndTime.Subtract(lStartTime).TotalSeconds} seconds");
                                 break;
                             }
 
                         default:
                             {
-                                LogOk("PulseGuide " + pDirection.ToString(), "Synchronous pulse guide found OK: " + lEndTime.Subtract(lStartTime).TotalSeconds + " seconds");
+                                LogOk($"PulseGuide {pDirection}",
+                                    $"Synchronous pulse guide found OK: {lEndTime.Subtract(lStartTime).TotalSeconds} seconds");
                                 break;
                             }
                     }
@@ -3691,7 +3728,7 @@ LogCallToDriver("ConformanceCheck", "About to call ImageReady multiple times");
 
                         default:
                             {
-                                LogIssue(pName, "Conform:PerformanceTest: Unknown test type " + pType.ToString());
+                                LogIssue(pName, $"Conform:PerformanceTest: Unknown test type {pType}");
                                 break;
                             }
                     }
@@ -3699,7 +3736,7 @@ LogCallToDriver("ConformanceCheck", "About to call ImageReady multiple times");
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
                     if (lElapsedTime > lLastElapsedTime + 1.0)
                     {
-                        SetStatus(lCount + " transactions in " + lElapsedTime.ToString("0") + " seconds");
+                        SetStatus($"{lCount} transactions in {lElapsedTime:0} seconds");
                         lLastElapsedTime = lElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
@@ -3712,25 +3749,25 @@ LogCallToDriver("ConformanceCheck", "About to call ImageReady multiple times");
                 {
                     case object _ when lRate > 10.0:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 2.0 <= lRate && lRate <= 10.0:
                         {
-                            LogOk(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 1.0 <= lRate && lRate <= 2.0:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
                 }

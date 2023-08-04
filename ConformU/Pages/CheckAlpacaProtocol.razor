@@ -289,7 +289,7 @@
         if (contextMessage is not null) logger?.LogMessage("", contextMessage);
 
         // Reformat the text across multiple screen lines if the message does not contain HTML code. If it does contain HTML display as-is.
-        screenLog = screenLog + $"\r\n{methodString}{message.Trim(new char[] { ' ', '\r', '\n' })}";
+        screenLog = $"{screenLog}\r\n{methodString}{message.Trim(new char[] { ' ', '\r', '\n' })}";
 
         // Add the context message if present
         if (contextMessage is not null)
@@ -330,7 +330,7 @@
     private void LogLine(string message)
     {
         logger?.LogMessage(message, "");
-        screenLog = screenLog + $"\r\n{message}";
+        screenLog = $"{screenLog}\r\n{message}";
     }
 
     /// <summary>

@@ -70,7 +70,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogDebug("Dispose", "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("Dispose", $"Disposing of device: {disposing} {disposedValue}");
             if (!disposedValue)
             {
                 if (disposing)
@@ -196,7 +196,7 @@ namespace ConformU
                     break;
 
                 default:
-                    LogIssue("Switches", "Unknown switch interface version: " + GetInterfaceVersion());
+                    LogIssue("Switches", $"Unknown switch interface version: {GetInterfaceVersion()}");
                     break;
             }
 
@@ -248,32 +248,32 @@ namespace ConformU
                                 lSetSwitchOk = false;
                                 try // Read switch state
                                 {
-                                    LogCallToDriver("GetSwitch " + i, $"About to call GetSwitch({i}) method");
+                                    LogCallToDriver($"GetSwitch {i}", $"About to call GetSwitch({i}) method");
                                     SetAction($"GetSwitch");
                                     lGetSwitchOriginal = mSwitch.GetSwitch(i);
                                     WaitForReadDelay("GetSwitch");
 
-                                    LogOk("GetSwitch " + i, "Found switch, state: " + lGetSwitchOriginal.ToString());
+                                    LogOk($"GetSwitch {i}", $"Found switch, state: {lGetSwitchOriginal}");
                                     lGetSwitchOk = true;
                                     if (i > mMaxSwitch)
-                                        LogIssue("GetSwitch " + i, "Usable switch found above MaxSwitch!");
+                                        LogIssue($"GetSwitch {i}", "Usable switch found above MaxSwitch!");
                                     else
                                         mPerformanceGetSwitch = i;// Save last good switch number for performance test
                                 }
                                 catch (Exception ex)
                                 {
                                     if (IsNotSetException(ex))
-                                        LogInfo("GetSwitch " + i, "Switch read is not implemented");
+                                        LogInfo($"GetSwitch {i}", "Switch read is not implemented");
                                     else
                                     {
-                                        LogInfo("GetSwitch " + i, "Unable to read switch: " + ex.Message);
-                                        LogDebug("GetSwitch " + i, "Exception: " + ex.ToString());
+                                        LogInfo($"GetSwitch {i}", $"Unable to read switch: {ex.Message}");
+                                        LogDebug($"GetSwitch {i}", $"Exception: {ex}");
                                     }
                                 }
 
                                 try // Now try to write the value
                                 {
-                                    LogCallToDriver("SetSwitch " + i, $"About to call SetSwitch({i})");
+                                    LogCallToDriver($"SetSwitch {i}", $"About to call SetSwitch({i})");
                                     SetAction($"SetSwitch {!lGetSwitchOriginal}");
                                     mSwitch.SetSwitch(i, !lGetSwitchOriginal); // Swap the switch state
                                     WaitForWriteDelay($"SetSwitch {!lGetSwitchOriginal}");
@@ -288,53 +288,55 @@ namespace ConformU
 
                                         if (lNewSwitchState == !lGetSwitchOriginal)
                                         {
-                                            LogOk("SetSwitch " + i, "Switch correctly changed state");
+                                            LogOk($"SetSwitch {i}", "Switch correctly changed state");
                                             LogCallToDriver("SetSwitch", "About to call SetSwitch method");
                                             SetAction($"SetSwitch {lGetSwitchOriginal}");
                                             mSwitch.SetSwitch(i, lGetSwitchOriginal); // Now put switch back to original state
                                             WaitForWriteDelay($"SetSwitch {lGetSwitchOriginal}");
                                         }
                                         else
-                                            LogIssue("SetSwitch " + i, "Switch did not change state, currently it is " + lNewSwitchState.ToString());
+                                            LogIssue($"SetSwitch {i}",
+                                                $"Switch did not change state, currently it is {lNewSwitchState}");
                                     }
                                     else
-                                        LogInfo("SetSwitch " + i, "You have a write only switch!");
+                                        LogInfo($"SetSwitch {i}", "You have a write only switch!");
                                     if (i > mMaxSwitch)
-                                        LogIssue("SetSwitch " + i, "Usable switch found above MaxSwitch!");
+                                        LogIssue($"SetSwitch {i}", "Usable switch found above MaxSwitch!");
                                 }
                                 catch (Exception ex)
                                 {
                                     if (IsNotSetException(ex))
-                                        LogInfo("SetSwitch " + i, "Switch write is not implemented");
+                                        LogInfo($"SetSwitch {i}", "Switch write is not implemented");
                                     else
                                     {
-                                        LogInfo("SetSwitch " + i, "Unable to write to switch: " + ex.Message);
-                                        LogDebug("SetSwitch " + i, "Exception: " + ex.ToString());
+                                        LogInfo($"SetSwitch {i}", $"Unable to write to switch: {ex.Message}");
+                                        LogDebug($"SetSwitch {i}", $"Exception: {ex}");
                                     }
                                 }
 
                                 try
                                 {
-                                    LogCallToDriver("GetSwitchName " + i, string.Format("About to get switch name {0}", i));
+                                    LogCallToDriver($"GetSwitchName {i}", string.Format("About to get switch name {0}", i));
                                     lSwitchName = mSwitch.GetSwitchName(i);
                                     if (lGetSwitchOk | lSetSwitchOk)
                                     {
                                         if (lSwitchName == "")
-                                            LogInfo("GetSwitchName " + i, "Switch name returns null string");
+                                            LogInfo($"GetSwitchName {i}", "Switch name returns null string");
                                         else
                                         {
                                             mPerformanceGetSwitchName = i; // Save last good name index for performance test
-                                            LogOk("GetSwitchName " + i, "Found switch, name:  " + lSwitchName);
+                                            LogOk($"GetSwitchName {i}", $"Found switch, name:  {lSwitchName}");
                                         }
                                     }
                                     else if (lSwitchName == "")
-                                        LogIssue("GetSwitchName " + i, "Switch name returns null string but switch can neither read nor write!");
+                                        LogIssue($"GetSwitchName {i}", "Switch name returns null string but switch can neither read nor write!");
                                     else
-                                        LogIssue("GetSwitchName " + i, "Found switch, name:  " + lSwitchName + " which can neither read nor write!");
+                                        LogIssue($"GetSwitchName {i}",
+                                            $"Found switch, name:  {lSwitchName} which can neither read nor write!");
                                 }
                                 catch (Exception ex)
                                 {
-                                    LogDebug("GetSwitchName " + i, "Exception: " + ex.ToString());
+                                    LogDebug($"GetSwitchName {i}", $"Exception: {ex}");
                                 }
                             }
                             SetTest("");
@@ -379,7 +381,7 @@ namespace ConformU
                                 {
                                     LogCallToDriver("GetSwitchName", string.Format("About to get switch {0} name", i));
                                     lSwitchName = mSwitch.GetSwitchName(i);
-                                    LogOk("GetSwitchName ", "Found switch " + i);
+                                    LogOk("GetSwitchName ", $"Found switch {i}");
                                     SetTest($"Testing switch {i}");
 
                                     // Test that the switch number is in the valid range of 0..MaxSwitch-1
@@ -390,28 +392,30 @@ namespace ConformU
                                     else
                                         mPerformanceGetSwitch = i;// Save last good switch number for performance test
 
-                                    LogOk("GetSwitchName ", "  Name: " + lSwitchName);
+                                    LogOk("GetSwitchName ", $"  Name: {lSwitchName}");
 
                                     try // Read switch description
                                     {
                                         SetAction("Getting switch description"); LogCallToDriver("GetSwitchDescription", string.Format("  About to get switch {0} description", i));
                                         lSwitchDescription = mSwitch.GetSwitchDescription(i);
-                                        LogOk("GetSwitchDescription ", "  Description: " + lSwitchDescription);
+                                        LogOk("GetSwitchDescription ", $"  Description: {lSwitchDescription}");
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogIssue("GetSwitchDescription ", "Mandatory parameter threw an exception: " + ex.Message);
+                                        LogIssue("GetSwitchDescription ",
+                                            $"Mandatory parameter threw an exception: {ex.Message}");
                                     }
 
                                     try // Read switch minimum value
                                     {
                                         SetAction("Getting switch minimum value"); LogCallToDriver("MinSwitchValue", string.Format("  About to get switch {0} minimum value", i));
                                         lSwitchMinimum = mSwitch.MinSwitchValue(i);
-                                        LogOk("MinSwitchValue ", "  Minimum: " + lSwitchMinimum.ToString());
+                                        LogOk("MinSwitchValue ", $"  Minimum: {lSwitchMinimum}");
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogIssue("MinSwitchValue ", "Mandatory parameter threw an exception: " + ex.Message);
+                                        LogIssue("MinSwitchValue ",
+                                            $"Mandatory parameter threw an exception: {ex.Message}");
                                         lSwitchMinimum = BAD_SWITCH_VALUE;
                                     }
 
@@ -425,26 +429,27 @@ namespace ConformU
                                             // Maximum value must be > Minimum value
                                             if (lSwitchMaximum > lSwitchMinimum)
                                             {
-                                                LogOk("MaxSwitchValue ", "  Maximum: " + lSwitchMaximum.ToString());
+                                                LogOk("MaxSwitchValue ", $"  Maximum: {lSwitchMaximum}");
                                                 lSwitchRange = lSwitchMaximum - lSwitchMinimum; // Calculate the range of values the switch might take
                                             }
                                             else
                                             {
-                                                LogInfo("MaxSwitchValue ", "  Maximum: " + lSwitchMaximum.ToString());
+                                                LogInfo("MaxSwitchValue ", $"  Maximum: {lSwitchMaximum}");
                                                 LogIssue("MaxSwitchValue ", "MaxSwitchValue is less or equal to MinSwitchValue, it must be greater!");
                                                 lSwitchRange = BAD_SWITCH_VALUE; // Special value because the maximum or minimum values are bad
                                             }
                                         }
                                         else
                                         {
-                                            LogInfo("MaxSwitchValue ", "  Maximum: " + lSwitchMaximum.ToString());
+                                            LogInfo("MaxSwitchValue ", $"  Maximum: {lSwitchMaximum}");
                                             lSwitchRange = BAD_SWITCH_VALUE;
                                             LogInfo("MaxSwitchValue ", "  Test that switch Maximum is greater than Minimum skipped because of an error reading the Minimum value.");
                                         }
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogIssue("MaxSwitchValue ", "Mandatory parameter threw an exception: " + ex.Message);
+                                        LogIssue("MaxSwitchValue ",
+                                            $"Mandatory parameter threw an exception: {ex.Message}");
                                         lSwitchMaximum = BAD_SWITCH_VALUE;
                                         lSwitchRange = BAD_SWITCH_VALUE;
                                     }
@@ -453,7 +458,7 @@ namespace ConformU
                                     {
                                         SetAction("Getting switch step size"); LogCallToDriver("SwitchStep", string.Format("  About to get switch {0} step size", i));
                                         lSwitchStep = mSwitch.SwitchStep(i);
-                                        LogOk("SwitchStep ", "  Step size: " + lSwitchStep.ToString());
+                                        LogOk("SwitchStep ", $"  Step size: {lSwitchStep}");
 
                                         // Step must be greater than 0
                                         if (lSwitchStep > 0.0)
@@ -501,7 +506,8 @@ namespace ConformU
 
                                                     default:
                                                         {
-                                                            LogIssue("SwitchStep ", "The switch range must be an integer multiple of the step size. Remainder`: " + decimal.Subtract(Convert.ToDecimal(lSwitchMaximum), Convert.ToDecimal(lSwitchMinimum)) % Convert.ToDecimal(lSwitchStep));
+                                                            LogIssue("SwitchStep ",
+                                                                $"The switch range must be an integer multiple of the step size. Remainder`: {decimal.Subtract(Convert.ToDecimal(lSwitchMaximum), Convert.ToDecimal(lSwitchMinimum)) % Convert.ToDecimal(lSwitchStep)}");
                                                             break;
                                                         }
                                                 }
@@ -520,7 +526,7 @@ namespace ConformU
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogIssue("SwitchStep ", "Mandatory parameter threw an exception: " + ex.Message);
+                                        LogIssue("SwitchStep ", $"Mandatory parameter threw an exception: {ex.Message}");
                                     }
 
                                     LogDebug("SwitchMinimum ", lSwitchMinimum.ToString());
@@ -532,11 +538,11 @@ namespace ConformU
                                     {
                                         LogCallToDriver("CanWrite", string.Format("  About to get switch {0} CanWrite status", i));
                                         lSwitchCanWrite = mSwitch.CanWrite(i);
-                                        LogOk("CanWrite ", "  CanWrite: " + lSwitchCanWrite);
+                                        LogOk("CanWrite ", $"  CanWrite: {lSwitchCanWrite}");
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogIssue("CanWrite ", "Mandatory parameter threw an exception: " + ex.Message);
+                                        LogIssue("CanWrite ", $"Mandatory parameter threw an exception: {ex.Message}");
                                         LogInfo("CanWrite ", "Assuming that CanWrite is false");
                                         lSwitchCanWrite = false;
                                     }// Initialise to a default state
@@ -549,12 +555,12 @@ namespace ConformU
                                         WaitForReadDelay("GetSwitch");
 
                                         lGetSwitchOk = true;
-                                        LogOk("GetSwitch ", "  " + lGetSwitchOriginal.ToString());
+                                        LogOk("GetSwitch ", $"  {lGetSwitchOriginal}");
                                     }
                                     catch (Exception ex)
                                     {
                                         lGetSwitchException = ex;
-                                        LogDebug("GetSwitch ", "Exception: " + ex.ToString());
+                                        LogDebug("GetSwitch ", $"Exception: {ex}");
                                         lGetSwitchOk = false;
                                     }
 
@@ -564,12 +570,12 @@ namespace ConformU
                                         lGetSwitchValueOriginal = mSwitch.GetSwitchValue(i);
                                         WaitForReadDelay("GetSwitchValue");
                                         lGetSwitchValueOk = true;
-                                        LogOk("GetSwitchValue ", "  " + lGetSwitchValueOriginal);
+                                        LogOk("GetSwitchValue ", $"  {lGetSwitchValueOriginal}");
                                     }
                                     catch (Exception ex)
                                     {
                                         lGetSwitchValueException = ex;
-                                        LogDebug("GetSwitchValue ", "Exception: " + ex.ToString());
+                                        LogDebug("GetSwitchValue ", $"Exception: {ex}");
                                         lGetSwitchValueOk = false;
                                     }
 
@@ -624,7 +630,8 @@ namespace ConformU
 
                                                     default:
                                                         {
-                                                            LogIssue("SetSwitch ", "  GetSwitchValue did not return MINIMUM_VALUE after SetSwitch(False): " + lGetSwitchValue);
+                                                            LogIssue("SetSwitch ",
+                                                                $"  GetSwitchValue did not return MINIMUM_VALUE after SetSwitch(False): {lGetSwitchValue}");
                                                             break;
                                                         }
                                                 }
@@ -676,7 +683,8 @@ namespace ConformU
 
                                                     default:
                                                         {
-                                                            LogIssue("SetSwitch ", "  GetSwitchValue did not return MAXIMUM_VALUE after SetSwitch(True): " + lGetSwitchValue);
+                                                            LogIssue("SetSwitch ",
+                                                                $"  GetSwitchValue did not return MAXIMUM_VALUE after SetSwitch(True): {lGetSwitchValue}");
                                                             break;
                                                         }
                                                 }
@@ -711,8 +719,8 @@ namespace ConformU
                                             LogDebug("SetSwitch ", $"Exception generated - Switch can write: {lSwitchCanWrite}, IsMethodNotImplementedException: {IsMethodNotImplementedException(ex)}, IsNotImplementedException: {IsNotImplementedException(ex)}, COM Access mechanic: {settings.ComConfiguration.ComAccessMechanic}, Device Technology: {settings.DeviceTechnology}");
                                             if (lSwitchCanWrite)
                                             {
-                                                LogIssue("SetSwitch ", "Exception: " + ex.Message);
-                                                LogDebug("SetSwitch ", "Exception: " + ex.ToString());
+                                                LogIssue("SetSwitch ", $"Exception: {ex.Message}");
+                                                LogDebug("SetSwitch ", $"Exception: {ex}");
                                             }
                                             else if (IsMethodNotImplementedException(ex))
                                                 LogOk("SetSwitch ", "  CanWrite is False and MethodNotImplementedException was thrown");
@@ -725,14 +733,14 @@ namespace ConformU
                                                 }
                                                 else // Got some other exception, which is an issue.
                                                 {
-                                                    LogIssue("SetSwitch ", "Exception: " + ex.Message);
-                                                    LogDebug("SetSwitch ", "Exception: " + ex.ToString());
+                                                    LogIssue("SetSwitch ", $"Exception: {ex.Message}");
+                                                    LogDebug("SetSwitch ", $"Exception: {ex}");
                                                 }
                                             }
                                             else // Received an unexpected exception, which is an issue.
                                             {
-                                                LogIssue("SetSwitch ", "Exception: " + ex.Message);
-                                                LogDebug("SetSwitch ", "Exception: " + ex.ToString());
+                                                LogIssue("SetSwitch ", $"Exception: {ex.Message}");
+                                                LogDebug("SetSwitch ", $"Exception: {ex}");
                                             }
                                         }
 
@@ -786,7 +794,8 @@ namespace ConformU
 
                                                         default:
                                                             {
-                                                                LogIssue("SetSwitchValue", "  GetSwitchValue did not return MINIMUM_VALUE after SetSwitchValue(MINIMUM_VALUE): " + lGetSwitchValue);
+                                                                LogIssue("SetSwitchValue",
+                                                                    $"  GetSwitchValue did not return MINIMUM_VALUE after SetSwitchValue(MINIMUM_VALUE): {lGetSwitchValue}");
                                                                 break;
                                                             }
                                                     }
@@ -809,11 +818,14 @@ namespace ConformU
                                                     mSwitch.SetSwitchValue(i, lSwitchMinimum - 1.0);
                                                     WaitForWriteDelay($"SetSwitchValue {lSwitchMinimum - 1.0}");
 
-                                                    LogIssue("SetSwitchValue", "Switch did not throw an exception when a value below SwitchMinimum was set: " + (lSwitchMinimum - 1.0).ToString());
+                                                    LogIssue("SetSwitchValue",
+                                                        $"Switch did not throw an exception when a value below SwitchMinimum was set: {(lSwitchMinimum - 1.0)}");
                                                 }
                                                 catch (Exception ex)
                                                 {
-                                                    HandleInvalidValueExceptionAsOk("SetSwitchValue", MemberType.Method, Required.Mandatory, ex, "when setting a value below SwitchMinimum - " + (lSwitchMinimum - 1.0).ToString(), "  Switch threw an InvalidOperationException when a value below SwitchMinimum was set: " + (lSwitchMinimum - 1.0).ToString());
+                                                    HandleInvalidValueExceptionAsOk("SetSwitchValue", MemberType.Method, Required.Mandatory, ex,
+                                                        $"when setting a value below SwitchMinimum - {(lSwitchMinimum - 1.0)}",
+                                                        $"  Switch threw an InvalidOperationException when a value below SwitchMinimum was set: {(lSwitchMinimum - 1.0)}");
                                                 }
                                             }
                                             else
@@ -867,7 +879,8 @@ namespace ConformU
 
                                                         default:
                                                             {
-                                                                LogIssue("SetSwitchValue ", "  GetSwitchValue did not return MAXIMUM_VALUE after SetSwitchValue(MAXIMUM_VALUE): " + lGetSwitchValue);
+                                                                LogIssue("SetSwitchValue ",
+                                                                    $"  GetSwitchValue did not return MAXIMUM_VALUE after SetSwitchValue(MAXIMUM_VALUE): {lGetSwitchValue}");
                                                                 break;
                                                             }
                                                     }
@@ -889,11 +902,14 @@ namespace ConformU
                                                     mSwitch.SetSwitchValue(i, lSwitchMaximum + 1.0);
                                                     WaitForWriteDelay($"SetSwitchValue {lSwitchMaximum + 1.0}");
 
-                                                    LogIssue("SetSwitchValue", "Switch did not throw an exception when a value above SwitchMaximum was set: " + lSwitchMaximum + 1.0);
+                                                    LogIssue("SetSwitchValue",
+                                                        $"Switch did not throw an exception when a value above SwitchMaximum was set: {lSwitchMaximum}{1.0}");
                                                 }
                                                 catch (Exception ex)
                                                 {
-                                                    HandleInvalidValueExceptionAsOk("SetSwitchValue", MemberType.Method, Required.Mandatory, ex, "when setting a value above SwitchMaximum was set: " + lSwitchMaximum + 1.0, "  Switch threw an InvalidOperationException when a value above SwitchMaximum was set: " + lSwitchMaximum + 1.0);
+                                                    HandleInvalidValueExceptionAsOk("SetSwitchValue", MemberType.Method, Required.Mandatory, ex,
+                                                        $"when setting a value above SwitchMaximum was set: {lSwitchMaximum}{1.0}",
+                                                        $"  Switch threw an InvalidOperationException when a value above SwitchMaximum was set: {lSwitchMaximum}{1.0}");
                                                 }
                                                 if (cancellationToken.IsCancellationRequested) return;
                                             }
@@ -944,8 +960,8 @@ namespace ConformU
                                             LogDebug("SetSwitchValue ", $"EXCEPTION GENERATED - Switch can write: {lSwitchCanWrite}, IsMethodNotImplementedException: {IsMethodNotImplementedException(ex)}, IsNotImplementedException: {IsNotImplementedException(ex)}, COM Access mechanic: {settings.ComConfiguration.ComAccessMechanic}, Device Technology: {settings.DeviceTechnology}");
                                             if (lSwitchCanWrite)
                                             {
-                                                LogIssue("SetSwitchValue ", "Exception: " + ex.Message);
-                                                LogDebug("SetSwitchValue ", "Exception: " + ex.ToString());
+                                                LogIssue("SetSwitchValue ", $"Exception: {ex.Message}");
+                                                LogDebug("SetSwitchValue ", $"Exception: {ex}");
                                             }
                                             else if (IsMethodNotImplementedException(ex))
                                                 LogOk("SetSwitchValue ", "  CanWrite is False and MethodNotImplementedException was thrown");
@@ -958,14 +974,14 @@ namespace ConformU
                                                 }
                                                 else // Got some other exception, which is an issue.
                                                 {
-                                                    LogIssue("SetSwitchValue ", "Exception: " + ex.Message);
-                                                    LogDebug("SetSwitchValue ", "Exception: " + ex.ToString());
+                                                    LogIssue("SetSwitchValue ", $"Exception: {ex.Message}");
+                                                    LogDebug("SetSwitchValue ", $"Exception: {ex}");
                                                 }
                                             }
                                             else
                                             {
-                                                LogIssue("SetSwitchValue ", "Exception: " + ex.Message);
-                                                LogDebug("SetSwitchValue ", "Exception: " + ex.ToString());
+                                                LogIssue("SetSwitchValue ", $"Exception: {ex.Message}");
+                                                LogDebug("SetSwitchValue ", $"Exception: {ex}");
                                             }
                                         }
                                     }
@@ -977,9 +993,10 @@ namespace ConformU
                                 catch (Exception ex)
                                 {
                                     if ((i >= 0) & (i < mMaxSwitch))
-                                        LogIssue("GetSwitchName ", "Mandatory method GetSwitchName threw an exception: " + ex.ToString());
+                                        LogIssue("GetSwitchName ",
+                                            $"Mandatory method GetSwitchName threw an exception: {ex}");
                                     else
-                                        LogDebug("GetSwitchName ", "Exception: " + ex.ToString());
+                                        LogDebug("GetSwitchName ", $"Exception: {ex}");
                                 }
 
                                 if (cancellationToken.IsCancellationRequested)
@@ -1060,7 +1077,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(pName, "SwitchPropertyTestInteger: Unknown test type - " + pType.ToString());
+                            LogIssue(pName, $"SwitchPropertyTestInteger: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -1070,14 +1087,14 @@ namespace ConformU
                     case object _ when returnValue < pMin // Lower than minimum value
                    :
                         {
-                            LogIssue(pName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(pName, $"Invalid value: {returnValue}");
                             break;
                         }
 
                     case object _ when returnValue > pMax // Higher than maximum value
              :
                         {
-                            LogIssue(pName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(pName, $"Invalid value: {returnValue}");
                             break;
                         }
 
@@ -1136,7 +1153,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogIssue(pName, "SwitchPerformanceTest: Unknown test type " + pType.ToString());
+                                LogIssue(pName, $"SwitchPerformanceTest: Unknown test type {pType}");
                                 break;
                             }
                     }
@@ -1144,7 +1161,7 @@ namespace ConformU
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
                     if (lElapsedTime > lLastElapsedTime + 1.0)
                     {
-                        SetStatus(lCount + " transactions in " + lElapsedTime.ToString("0") + " seconds");
+                        SetStatus($"{lCount} transactions in {lElapsedTime:0} seconds");
                         lLastElapsedTime = lElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
@@ -1156,32 +1173,32 @@ namespace ConformU
                 {
                     case object _ when lRate > 10.0:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 2.0 <= lRate && lRate <= 10.0:
                         {
-                            LogOk(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 1.0 <= lRate && lRate <= 2.0:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogInfo(pName, "Unable to complete test: " + ex.Message);
+                LogInfo(pName, $"Unable to complete test: {ex.Message}");
             }
         }
 
@@ -1240,7 +1257,8 @@ namespace ConformU
                     msgLevel2 = MessageLevel.Info;
                 }
 
-                LogInfo("SetSwitchValue", "  Testing with steps that are " + offset.ToString("P0") + " offset from integer SwitchStep values");
+                LogInfo("SetSwitchValue",
+                    $"  Testing with steps that are {offset:P0} offset from integer SwitchStep values");
 
                 for (double testValue = switchMinimum; testValue <= switchMinimum + lMultiStateStepSize * lMultiStateNumberOfSteps; testValue += lMultiStateStepSize)
                 {
@@ -1265,79 +1283,92 @@ namespace ConformU
                         {
                             case 0.0:
                                 {
-                                    LogMsg("SetSwitchValue " + "Offset: " + offset.ToString("P0").PadLeft(4), msgLevel0, "  Set and read match: " + testValue2);
+                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel0,
+                                        $"  Set and read match: {testValue2}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.01:
                                 {
-                                    LogMsg("SetSwitchValue " + "Offset: " + offset.ToString("P0").PadLeft(4), msgLevel1, "   Set/Read differ by up to 1% of SwitchStep. Set: " + testValue2 + ", Read: " + lSwitchValue);
+                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel1,
+                                        $"   Set/Read differ by up to 1% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.1:
                                 {
-                                    LogMsg("SetSwitchValue " + "Offset: " + offset.ToString("P0").PadLeft(4), msgLevel2, "   Set/Read differ by 1-10% of SwitchStep. Set: " + testValue2 + ", Read: " + lSwitchValue);
+                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                        $"   Set/Read differ by 1-10% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.2:
                                 {
-                                    LogMsg("SetSwitchValue " + "Offset: " + offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 10-20% of SwitchStep. Set: " + testValue2 + ", Read: " + lSwitchValue);
+                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                        $"  Set/Read differ by 10-20% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.3:
                                 {
-                                    LogMsg("SetSwitchValue " + "Offset: " + offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 20-30% of SwitchStep. Set: " + testValue2 + ", Read: " + lSwitchValue);
+                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                        $"  Set/Read differ by 20-30% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.4:
                                 {
-                                    LogMsg("SetSwitchValue " + "Offset: " + offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 30-40% of SwitchStep. Set: " + testValue2 + ", Read: " + lSwitchValue);
+                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                        $"  Set/Read differ by 30-40% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.5:
                                 {
-                                    LogMsg("SetSwitchValue " + "Offset: " + offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 40-50% of SwitchStep. Set: " + testValue2 + ", Read: " + lSwitchValue);
+                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                        $"  Set/Read differ by 40-50% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.6:
                                 {
-                                    LogMsg("SetSwitchValue " + "Offset: " + offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 50-60% of SwitchStep. Set: " + testValue2 + ", Read: " + lSwitchValue);
+                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                        $"  Set/Read differ by 50-60% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.7:
                                 {
-                                    LogMsg("SetSwitchValue " + "Offset: " + offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 60-70% of SwitchStep. Set: " + testValue2 + ", Read: " + lSwitchValue);
+                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                        $"  Set/Read differ by 60-70% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.8:
                                 {
-                                    LogMsg("SetSwitchValue " + "Offset: " + offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 70-80% of SwitchStep. Set: " + testValue2 + ", Read: " + lSwitchValue);
+                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                        $"  Set/Read differ by 70-80% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.9:
                                 {
-                                    LogMsg("SetSwitchValue " + "Offset: " + offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 80-90% of SwitchStep. Set: " + testValue2 + ", Read: " + lSwitchValue);
+                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                        $"  Set/Read differ by 80-90% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 1.0:
                                 {
-                                    LogMsg("SetSwitchValue " + "Offset: " + offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by 90-100% of SwitchStep. Set: " + testValue2 + ", Read: " + lSwitchValue);
+                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                        $"  Set/Read differ by 90-100% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             default:
                                 {
-                                    LogMsg("SetSwitchValue " + "Offset: " + offset.ToString("P0").PadLeft(4), msgLevel2, "  Set/Read differ by >100% of SwitchStep. Set: " + testValue2 + ", Read: " + lSwitchValue);
+                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                        $"  Set/Read differ by >100% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
                         }
@@ -1444,11 +1475,14 @@ namespace ConformU
                                 break;
                             }
                     }
-                    LogIssue("SwitchNumber", "Switch did not throw an exception when a switch ID below 0 was used in method: " + method.ToString());
+                    LogIssue("SwitchNumber",
+                        $"Switch did not throw an exception when a switch ID below 0 was used in method: {method}");
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidValueExceptionAsOk("SwitchNumber", MemberType.Property, Required.MustBeImplemented, ex, "when a switch ID below 0 was used in method: " + method.ToString(), "Switch device threw an InvalidOperationException when a switch ID below 0 was used in method: " + method.ToString());
+                    HandleInvalidValueExceptionAsOk("SwitchNumber", MemberType.Property, Required.MustBeImplemented, ex,
+                        $"when a switch ID below 0 was used in method: {method}",
+                        $"Switch device threw an InvalidOperationException when a switch ID below 0 was used in method: {method}");
                 }
 
                 // Try a value above MaxSwitch
@@ -1528,11 +1562,14 @@ namespace ConformU
                                 break;
                             }
                     }
-                    LogIssue("SwitchNumber", "Switch did not throw an exception when a switch ID above MaxSwitch was used in method: " + method.ToString());
+                    LogIssue("SwitchNumber",
+                        $"Switch did not throw an exception when a switch ID above MaxSwitch was used in method: {method}");
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidValueExceptionAsOk("SwitchNumber", MemberType.Property, Required.MustBeImplemented, ex, "when a switch ID above MaxSwitch was used in method: " + method.ToString(), "Switch device threw an InvalidOperationException when a switch ID above MaxSwitch was used in method: " + method.ToString());
+                    HandleInvalidValueExceptionAsOk("SwitchNumber", MemberType.Property, Required.MustBeImplemented, ex,
+                        $"when a switch ID above MaxSwitch was used in method: {method}",
+                        $"Switch device threw an InvalidOperationException when a switch ID above MaxSwitch was used in method: {method}");
                 }
             }
             else

@@ -122,7 +122,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogDebug("Dispose", "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("Dispose", $"Disposing of device: {disposing} {disposedValue}");
             if (!disposedValue)
             {
                 if (disposing)
@@ -284,7 +284,7 @@ namespace ConformU
                 {
                     LogCallToDriver("AveragePeriod Write", "About to set AveragePeriod property");
                     mObservingConditions.AveragePeriod = averageperiod;
-                    LogOk("AveragePeriod Write", "Successfully restored original average period: " + averageperiod);
+                    LogOk("AveragePeriod Write", $"Successfully restored original average period: {averageperiod}");
                 }
                 catch (Exception ex)
                 {
@@ -396,15 +396,16 @@ namespace ConformU
             // Now check that the sensor value, description and last updated time are all either implemented or not implemented
             foreach (string sensorName in validSensors)
             {
-                LogDebug("Consistency", "Sensor name: " + sensorName);
+                LogDebug("Consistency", $"Sensor name: {sensorName}");
                 if ((sensorIsImplemented[sensorName] & sensorHasDescription[sensorName] & sensorHasTimeOfLastUpdate[sensorName]))
-                    LogOk("Consistency - " + sensorName, "Sensor value, description and time since last update are all implemented as required by the specification");
+                    LogOk($"Consistency - {sensorName}", "Sensor value, description and time since last update are all implemented as required by the specification");
                 else if (((!sensorIsImplemented[sensorName]) & (!sensorHasDescription[sensorName]) & (!sensorHasTimeOfLastUpdate[sensorName])))
-                    LogOk("Consistency - " + sensorName, "Sensor value, description and time since last update are all not implemented as required by the specification");
+                    LogOk($"Consistency - {sensorName}", "Sensor value, description and time since last update are all not implemented as required by the specification");
                 else
                 {
-                    LogIssue("Consistency - " + sensorName, "Sensor value is implemented: " + sensorIsImplemented[sensorName] + ", Sensor description is implemented: " + sensorHasDescription[sensorName] + ", Sensor time since last update is implemented: " + sensorHasTimeOfLastUpdate[sensorName]);
-                    LogInfo("Consistency - " + sensorName, "The ASCOM specification requires that sensor value, description and time since last update must either all be implemented or all not be implemented.");
+                    LogIssue($"Consistency - {sensorName}",
+                        $"Sensor value is implemented: {sensorIsImplemented[sensorName]}, Sensor description is implemented: {sensorHasDescription[sensorName]}, Sensor time since last update is implemented: {sensorHasTimeOfLastUpdate[sensorName]}");
+                    LogInfo($"Consistency - {sensorName}", "The ASCOM specification requires that sensor value, description and time since last update must either all be implemented or all not be implemented.");
                 }
             }
         }
@@ -474,7 +475,7 @@ namespace ConformU
                 sensorName = methodName;
                 LogCallToDriver(methodName, $"About to get {sensorName} property");
             }
-            LogDebug("returnValue", "methodName: " + methodName + ", SensorName: " + sensorName);
+            LogDebug("returnValue", $"methodName: {methodName}, SensorName: {sensorName}");
             sensorHasTimeOfLastUpdate[sensorName] = false;
 
             do
@@ -654,7 +655,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogIssue(methodName, "returnValue: Unknown test type - " + pType.ToString());
+                                LogIssue(methodName, $"returnValue: Unknown test type - {pType}");
                                 break;
                             }
                     }
@@ -666,13 +667,13 @@ namespace ConformU
                     {
                         case object _ when returnValue < pMin:
                             {
-                                LogIssue(methodName, "Invalid value (below minimum expected - " + pMin.ToString() + "): " + returnValue.ToString());
+                                LogIssue(methodName, $"Invalid value (below minimum expected - {pMin}): {returnValue}");
                                 break;
                             }
 
                         case object _ when returnValue > pMax:
                             {
-                                LogIssue(methodName, "Invalid value (above maximum expected - " + pMax.ToString() + "): " + returnValue.ToString());
+                                LogIssue(methodName, $"Invalid value (above maximum expected - {pMax}): {returnValue}");
                                 break;
                             }
 
@@ -694,7 +695,8 @@ namespace ConformU
                     {
                         returnValue = BAD_VALUE;
                         retryCount += 1;
-                        LogInfo(methodName, "Sensor not ready, received InvalidOperationException, waiting " + settings.ObservingConditionsRetryTime + " second to retry. Attempt " + retryCount + " out of " + settings.ObservingConditionsMaxRetries);
+                        LogInfo(methodName,
+                            $"Sensor not ready, received InvalidOperationException, waiting {settings.ObservingConditionsRetryTime} second to retry. Attempt {retryCount} out of {settings.ObservingConditionsMaxRetries}");
                         WaitFor(settings.ObservingConditionsRetryTime * 1000);
                     }
                     else
@@ -708,7 +710,8 @@ namespace ConformU
             while (!readOk & (retryCount <= settings.ObservingConditionsMaxRetries) & !unexpectedError); // Lower than minimum value// Higher than maximum value
 
             if ((!readOk) & (!unexpectedError))
-                LogInfo(methodName, "InvalidOperationException persisted for longer than " + settings.ObservingConditionsMaxRetries * settings.ObservingConditionsRetryTime + " seconds.");
+                LogInfo(methodName,
+                    $"InvalidOperationException persisted for longer than {settings.ObservingConditionsMaxRetries * settings.ObservingConditionsRetryTime} seconds.");
             return returnValue;
 
         }
@@ -815,7 +818,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(methodName, "TestString: Unknown test type - " + pType.ToString());
+                            LogIssue(methodName, $"TestString: Unknown test type - {pType}");
                             break;
                         }
                 }
@@ -840,7 +843,8 @@ namespace ConformU
                             if (returnValue.Length <= pMaxLength)
                                 LogOk(methodName, returnValue);
                             else
-                                LogIssue(methodName, "String exceeds " + pMaxLength + " characters maximum length - " + returnValue);
+                                LogIssue(methodName,
+                                    $"String exceeds {pMaxLength} characters maximum length - {returnValue}");
                             break;
                         }
                 }

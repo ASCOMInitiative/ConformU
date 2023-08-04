@@ -129,7 +129,7 @@
                                 // Process each Alpaca device in turn
                                 foreach (AlpacaDevice alpacaDevice in alpacaDiscovery.GetAlpacaDevices())
                                 {
-                                    string alpacaDeviceString = $"\"Found: " + $"{alpacaDevice.IpAddress}:{alpacaDevice.Port.ToString().PadRight(6)}".PadRight(40) + $" {alpacaDevice.ServerName,-15} {alpacaDevice.Manufacturer,-15} {alpacaDevice.ManufacturerVersion,-20} {alpacaDevice.Location}\"";
+                                    string alpacaDeviceString = $"\"Found: {$"{alpacaDevice.IpAddress}:{alpacaDevice.Port.ToString().PadRight(6)}".PadRight(40)} {alpacaDevice.ServerName,-15} {alpacaDevice.Manufacturer,-15} {alpacaDevice.ManufacturerVersion,-20} {alpacaDevice.Location}\"";
 
                                     // Create a node for the Alpaca device and add sub-nodes for th device's details
                                     BlazoriseTreeItem alpacaDeviceItem = new() { Text = $"{alpacaDevice.ServerName} on host {alpacaDevice.HostName} ({alpacaDevice.IpAddress}:{alpacaDevice.Port})" };

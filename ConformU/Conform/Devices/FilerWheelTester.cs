@@ -42,7 +42,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogDebug("Dispose", "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("Dispose", $"Disposing of device: {disposing} {disposedValue}");
             if (!disposedValue)
             {
                 if (disposing)
@@ -161,7 +161,8 @@ namespace ConformU
                 LogCallToDriver("Pre-run Check", "About to get Position property repeatedly");
                 do
                 {
-                    SetFullStatus("FilterWheel Pre-run Check", "Waiting for movement to stop", DateTime.Now.Subtract(startTime).Seconds + " second(s)");
+                    SetFullStatus("FilterWheel Pre-run Check", "Waiting for movement to stop",
+                        $"{DateTime.Now.Subtract(startTime).Seconds} second(s)");
                     WaitFor(SLEEP_TIME);
                 }
                 while ((filterWheel.Position == FWTEST_IS_MOVING) & (DateTime.Now.Subtract(startTime).TotalSeconds <= settings.FilterWheelTimeout)); // Wait until movement has stopped or 30 seconds have passed
@@ -208,7 +209,7 @@ namespace ConformU
                     LogIssue("FocusOffsets Get", "Found no offset values in the returned array");
                 else
                 {
-                    LogOk("FocusOffsets Get", "Found " + numberOfFilterOffsets.ToString() + " filter offset values");
+                    LogOk("FocusOffsets Get", $"Found {numberOfFilterOffsets} filter offset values");
                     maxFilterNumber = Convert.ToInt16(numberOfFilterOffsets - 1);
                     halfDistanceFilterNumber = maxFilterNumber / 2;
                 }
@@ -216,7 +217,7 @@ namespace ConformU
                 filterNumber = 0;
                 foreach (var offset in filterOffsets)
                 {
-                    LogInfo("FocusOffsets Get", "Filter " + filterNumber.ToString() + " Offset: " + offset.ToString());
+                    LogInfo("FocusOffsets Get", $"Filter {filterNumber} Offset: {offset}");
                     filterNumber += 1;
                     if (cancellationToken.IsCancellationRequested)
                         break;
@@ -236,16 +237,16 @@ namespace ConformU
                 if (numberOfFilternames == 0)
                     LogIssue("Names Get", "Did not find any names in the returned array");
                 else
-                    LogOk("Names Get", "Found " + numberOfFilternames.ToString() + " filter names");
+                    LogOk("Names Get", $"Found {numberOfFilternames} filter names");
                 filterNumber = 0;
                 foreach (var name in filterNames)
                 {
                     if (name == null)
-                        LogIssue("Names Get", "Filter " + filterNumber.ToString() + " has a value of nothing");
+                        LogIssue("Names Get", $"Filter {filterNumber} has a value of nothing");
                     else if (name == "")
-                        LogIssue("Names Get", "Filter " + filterNumber.ToString() + " has a value of \"\"");
+                        LogIssue("Names Get", $"Filter {filterNumber} has a value of \"\"");
                     else
-                        LogInfo("Names Get", "Filter " + filterNumber.ToString() + " Name: " + name);
+                        LogInfo("Names Get", $"Filter {filterNumber} Name: {name}");
                     filterNumber += 1;
                 }
             }
@@ -256,9 +257,10 @@ namespace ConformU
 
             // Confirm number of array elements in filter names and filter offsets are the same
             if (numberOfFilternames == numberOfFilterOffsets)
-                LogOk("Names Get", "Number of filter offsets and number of names are the same: " + numberOfFilternames.ToString());
+                LogOk("Names Get", $"Number of filter offsets and number of names are the same: {numberOfFilternames}");
             else
-                LogIssue("Names Get", "Number of filter offsets and number of names are different: " + numberOfFilterOffsets.ToString() + " " + numberOfFilternames.ToString());
+                LogIssue("Names Get",
+                    $"Number of filter offsets and number of names are different: {numberOfFilterOffsets} {numberOfFilternames}");
 
             // Position - Required - Read
             try
@@ -282,7 +284,8 @@ namespace ConformU
             // Make sure some filter slots are available
             if (numberOfFilterOffsets <= 0) // No filter slots available so exist
             {
-                LogIssue("Position", "Filter position tests skipped as number of filters appears to be 0: " + numberOfFilterOffsets.ToString());
+                LogIssue("Position",
+                    $"Filter position tests skipped as number of filters appears to be 0: {numberOfFilterOffsets}");
                 ResetTestActionStatus();
                 return;
             }
@@ -385,7 +388,9 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidValueExceptionAsOk("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to " + System.Convert.ToString(numberOfFilterOffsets), "Correctly rejected bad position: " + System.Convert.ToString(numberOfFilterOffsets));
+                    HandleInvalidValueExceptionAsOk("Position Set", MemberType.Property, Required.MustBeImplemented, ex,
+                        $"setting position to {System.Convert.ToString(numberOfFilterOffsets)}",
+                        $"Correctly rejected bad position: {System.Convert.ToString(numberOfFilterOffsets)}");
                 }
 
                 // Report on the uni-directional and bi-directional behaviour.
@@ -408,8 +413,8 @@ namespace ConformU
                     LogInfo("Directionality", $"The filter wheel has 0 or 1 filters and it is not possible to differentiate between uni-directional and bi-directional behaviour.");
                 }
 
-                LogDebug("Directionality", $"Overall upward movement time: {upwardMovewentTime:0.0}, Overall downward movement time: {downwardMovewentTime:0.0}, " +
-                   $"Difference: {Math.Abs(upwardMovewentTime - downwardMovewentTime):0.0}, Smallest average movement time: {Math.Min(upwardMovewentTime, downwardMovewentTime) / numberOfFilterOffsets:0.0}.");
+                LogDebug("Directionality",
+                    $"Overall upward movement time: {upwardMovewentTime:0.0}, Overall downward movement time: {downwardMovewentTime:0.0}, Difference: {Math.Abs(upwardMovewentTime - downwardMovewentTime):0.0}, Smallest average movement time: {Math.Min(upwardMovewentTime, downwardMovewentTime) / numberOfFilterOffsets:0.0}.");
             }
             catch (Exception ex)
             {
@@ -485,7 +490,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogIssue(pName, "FilterWheelPerformanceTest: Unknown test type " + pType.ToString());
+                                LogIssue(pName, $"FilterWheelPerformanceTest: Unknown test type {pType}");
                                 break;
                             }
                     }
@@ -493,7 +498,7 @@ namespace ConformU
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
                     if (lElapsedTime > lLastElapsedTime + 1.0)
                     {
-                        SetStatus(lCount + " transactions in " + lElapsedTime.ToString("0") + " seconds");
+                        SetStatus($"{lCount} transactions in {lElapsedTime:0} seconds");
                         lLastElapsedTime = lElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
@@ -505,32 +510,32 @@ namespace ConformU
                 {
                     case object _ when lRate > 10.0:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 2.0 <= lRate && lRate <= 10.0:
                         {
-                            LogOk(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 1.0 <= lRate && lRate <= 2.0:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogInfo(pName, "Unable to complete test: " + ex.Message);
+                LogInfo(pName, $"Unable to complete test: {ex.Message}");
             }
         }
 

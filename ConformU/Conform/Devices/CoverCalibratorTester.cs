@@ -53,7 +53,7 @@ namespace ConformU
 
         protected override void Dispose(bool disposing)
         {
-            LogDebug("Dispose", "Disposing of device: " + disposing.ToString() + " " + disposedValue.ToString());
+            LogDebug("Dispose", $"Disposing of device: {disposing} {disposedValue}");
             if (!disposedValue)
             {
                 if (disposing)
@@ -799,7 +799,7 @@ LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
                     default:
                         {
                             testWasSuccessful = false; // Flag that an issue occurred
-                            LogIssue(propertyName, "RequiredPropertiesTest: Unknown test type " + propertyToTest.ToString());
+                            LogIssue(propertyName, $"RequiredPropertiesTest: Unknown test type {propertyToTest}");
                             break;
                         }
                 }
@@ -845,7 +845,7 @@ LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
 
                         default:
                             {
-                                LogIssue(propertyName, "PerformanceTest: Unknown test type " + propertyToTest.ToString());
+                                LogIssue(propertyName, $"PerformanceTest: Unknown test type {propertyToTest}");
                                 break;
                             }
                     }
@@ -853,7 +853,7 @@ LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
                     elapsedTime = DateTime.Now.Subtract(startTime).TotalSeconds;
                     if (elapsedTime > lastElapsedTime + 1.0)
                     {
-                        SetStatus(loopCount + " transactions in " + elapsedTime.ToString("0") + " seconds");
+                        SetStatus($"{loopCount} transactions in {elapsedTime:0} seconds");
                         lastElapsedTime = elapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
@@ -866,32 +866,32 @@ LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
                 {
                     case object _ when loopRate > 10.0:
                         {
-                            LogInfo(propertyName, "Transaction rate: " + loopRate.ToString("0.0") + " per second");
+                            LogInfo(propertyName, $"Transaction rate: {loopRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 2.0 <= loopRate && loopRate <= 10.0:
                         {
-                            LogOk(propertyName, "Transaction rate: " + loopRate.ToString("0.0") + " per second");
+                            LogOk(propertyName, $"Transaction rate: {loopRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 1.0 <= loopRate && loopRate <= 2.0:
                         {
-                            LogInfo(propertyName, "Transaction rate: " + loopRate.ToString("0.0") + " per second");
+                            LogInfo(propertyName, $"Transaction rate: {loopRate:0.0} per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(propertyName, "Transaction rate: " + loopRate.ToString("0.0") + " per second");
+                            LogInfo(propertyName, $"Transaction rate: {loopRate:0.0} per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogInfo(propertyName, "Unable to complete test: " + ex.ToString());
+                LogInfo(propertyName, $"Unable to complete test: {ex}");
             }
         }
     }

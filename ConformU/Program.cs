@@ -62,10 +62,9 @@ namespace ConformU
                 #region Command definitions
 
                 // ROOT command
-                var rootCommand = new RootCommand($"Conform Universal {Update.ConformuVersionDisplayString}\r\nCopyright (c) 2021-{DateTime.Now.Year} Peter Simpson\r\n\r\n" +
-                    $"Enter conformu [command] -h for information on options available in each command.\r\n\r\n" +
-                    $"If no command or options are provided Conform Universal will start as a GUI application using default parameters."
-                    );
+                var rootCommand = new RootCommand(
+                    $"Conform Universal {Update.ConformuVersionDisplayString}\r\nCopyright (c) 2021-{DateTime.Now.Year} Peter Simpson\r\n\r\nEnter conformu [command] -h for information on options available in each command.\r\n\r\nIf no command or options are provided Conform Universal will start as a GUI application using default parameters."
+                );
 
                 // CONFORMANCE command
                 var conformanceCommand = new Command("conformance", "Check the specified device for ASCOM device interface conformance with all tests enabled.");
@@ -929,39 +928,8 @@ namespace ConformU
             // <Port Group> - IP port number e.g. 32323
             // <DeviceType Group> - Device type e.g. telescope, camera etc.
             // <DeviceNumber Group> - Device number e.g.0, 1 etc.
-            string alpacaPattern = @"^" + // Start of URI
-                                          // Extract http or https prefix
-                @"(?i)(?<Protocol>https?)" +
-                // Ignore fixed :// text
-                @":\/\/" +
-                // Extract IPv4 address
-                @"(?<Address>(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|" +
-                @"(?:\[(?:(([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))" +
-                // OR
-                @"|" +
-                // Extract IPv6 address
-                @"(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:" +
-                @"[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]" +
-                @"{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(?:(?:[0-9A-Fa-f]{1,4}:){2}(?:(?:(?::[0-9A-Fa-f]" +
-                @"{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]" +
-                @"{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]" +
-                @"{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(?:%.+)?)\])" +
-                // Ignore fixed colon port number separator if present
-                @":?" +
-                // Extract port number if present
-                @"(?<Port>[0-9]{0,5})(?-i)" +
-                // Ignore fixed /api/v1/ text
-                @"\/api\/v1\/" +
-                // Extract the device type
-                @"(?<DeviceType>" + deviceList + @")" +
-                // Ignore fixed / text
-                @"\/" +
-                // Extract the device number
-                @"(?<DeviceNumber>[0-9]{1,3})" +
-                // Ignore fixed / text if present
-                @"\/?" +
-                // Ignore any remaining text at end of the device identifier
-                @"(?<Remainder>[0-9a-zA-Z]*)";
+            string alpacaPattern =
+                $@"^(?i)(?<Protocol>https?):\/\/(?<Address>(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){{3}}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:\[(?:(([0-9A-Fa-f]{{1,4}}:){{7}}([0-9A-Fa-f]{{1,4}}|:))|(([0-9A-Fa-f]{{1,4}}:){{6}}(:[0-9A-Fa-f]{{1,4}}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}})|:))|(([0-9A-Fa-f]{{1,4}}:){{5}}(((:[0-9A-Fa-f]{{1,4}}){{1,2}})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}})|:))|(([0-9A-Fa-f]{{1,4}}:){{4}}(((:[0-9A-Fa-f]{{1,4}}){{1,3}})|((:[0-9A-Fa-f]{{1,4}})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(([0-9A-Fa-f]{{1,4}}:){{3}}(((:[0-9A-Fa-f]{{1,4}}){{1,4}})|((:[0-9A-Fa-f]{{1,4}}){{0,2}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(?:(?:[0-9A-Fa-f]{{1,4}}:){{2}}(?:(?:(?::[0-9A-Fa-f]{{1,4}}){{1,5}})|((:[0-9A-Fa-f]{{1,4}}){{0,3}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(([0-9A-Fa-f]{{1,4}}:){{1}}(((:[0-9A-Fa-f]{{1,4}}){{1,6}})|((:[0-9A-Fa-f]{{1,4}}){{0,4}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(:(((:[0-9A-Fa-f]{{1,4}}){{1,7}})|((:[0-9A-Fa-f]{{1,4}}){{0,5}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:)))(?:%.+)?)\]):?(?<Port>[0-9]{{0,5}})(?-i)\/api\/v1\/(?<DeviceType>{deviceList})\/(?<DeviceNumber>[0-9]{{1,3}})\/?(?<Remainder>[0-9a-zA-Z]*)";
 
             Match alpacaMatch = Regex.Match(progIdOrUri, alpacaPattern, RegexOptions.CultureInvariant);
             if (alpacaMatch.Success) // This is an Alpaca URI
@@ -998,7 +966,7 @@ namespace ConformU
             }
             else // Not an Alpaca device so test for a COM ProgID
             {
-                string progIdPattern = @"^(?<DeviceName>[a-z0-9.]*)\.(?<DeviceType>" + deviceList + @")(?<Tail>.*)";
+                string progIdPattern = $@"^(?<DeviceName>[a-z0-9.]*)\.(?<DeviceType>{deviceList})(?<Tail>.*)";
                 Match comMatch = Regex.Match(progIdOrUri, progIdPattern, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
 
