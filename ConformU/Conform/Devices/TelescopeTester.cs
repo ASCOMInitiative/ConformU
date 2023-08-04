@@ -262,7 +262,7 @@ namespace ConformU
             CheckCommonMethods(telescopeDevice, DeviceTypes.Telescope);
         }
 
-        public override void CheckInitialise()
+        public override void InitialiseTest()
         {
             unchecked
             {
@@ -273,14 +273,14 @@ namespace ConformU
                 {
                     case "Hub.Telescope":
                         {
-                            GExNotImplemented = (int)0x80040400;
-                            GExInvalidValue1 = (int)0x80040401;
-                            GExInvalidValue2 = (int)0x80040402;
-                            GExInvalidValue3 = (int)0x80040405;
-                            GExInvalidValue4 = (int)0x80040402;
-                            GExInvalidValue5 = (int)0x80040402;
-                            GExInvalidValue6 = (int)0x80040402;
-                            GExNotSet1 = (int)0x80040403;
+                            ExNotImplemented = (int)0x80040400;
+                            ExInvalidValue1 = (int)0x80040401;
+                            ExInvalidValue2 = (int)0x80040402;
+                            ExInvalidValue3 = (int)0x80040405;
+                            ExInvalidValue4 = (int)0x80040402;
+                            ExInvalidValue5 = (int)0x80040402;
+                            ExInvalidValue6 = (int)0x80040402;
+                            ExNotSet1 = (int)0x80040403;
                             break;
                         }
 
@@ -288,86 +288,86 @@ namespace ConformU
                     case "Celestron.Telescope":
                     case "ASCOM.MI250.Telescope":
                         {
-                            GExNotImplemented = (int)0x80040400;
-                            GExInvalidValue1 = (int)0x80040401;
-                            GExInvalidValue2 = (int)0x80040402;
-                            GExInvalidValue3 = (int)0x80040402;
-                            GExInvalidValue4 = (int)0x80040402;
-                            GExInvalidValue5 = (int)0x80040402;
-                            GExInvalidValue6 = (int)0x80040402;
-                            GExNotSet1 = (int)0x80040403;
+                            ExNotImplemented = (int)0x80040400;
+                            ExInvalidValue1 = (int)0x80040401;
+                            ExInvalidValue2 = (int)0x80040402;
+                            ExInvalidValue3 = (int)0x80040402;
+                            ExInvalidValue4 = (int)0x80040402;
+                            ExInvalidValue5 = (int)0x80040402;
+                            ExInvalidValue6 = (int)0x80040402;
+                            ExNotSet1 = (int)0x80040403;
                             break;
                         }
 
                     case "TemmaLite.Telescope":
                         {
-                            GExNotImplemented = (int)0x80040400;
-                            GExInvalidValue1 = (int)0x80040410;
-                            GExInvalidValue2 = (int)0x80040418;
-                            GExInvalidValue3 = (int)0x80040418;
-                            GExInvalidValue4 = (int)0x80040418;
-                            GExInvalidValue5 = (int)0x80040418;
-                            GExInvalidValue6 = (int)0x80040418;
-                            GExNotSet1 = (int)0x80040417;
+                            ExNotImplemented = (int)0x80040400;
+                            ExInvalidValue1 = (int)0x80040410;
+                            ExInvalidValue2 = (int)0x80040418;
+                            ExInvalidValue3 = (int)0x80040418;
+                            ExInvalidValue4 = (int)0x80040418;
+                            ExInvalidValue5 = (int)0x80040418;
+                            ExInvalidValue6 = (int)0x80040418;
+                            ExNotSet1 = (int)0x80040417;
                             break;
                         }
 
                     case "Gemini.Telescope":
                         {
-                            GExNotImplemented = (int)0x80040400;
-                            GExInvalidValue1 = (int)0x80040410;
-                            GExInvalidValue2 = (int)0x80040418;
-                            GExInvalidValue3 = (int)0x80040419;
-                            GExInvalidValue4 = (int)0x80040420;
-                            GExInvalidValue5 = (int)0x80040420;
-                            GExInvalidValue6 = (int)0x80040420;
-                            GExNotSet1 = (int)0x80040417;
+                            ExNotImplemented = (int)0x80040400;
+                            ExInvalidValue1 = (int)0x80040410;
+                            ExInvalidValue2 = (int)0x80040418;
+                            ExInvalidValue3 = (int)0x80040419;
+                            ExInvalidValue4 = (int)0x80040420;
+                            ExInvalidValue5 = (int)0x80040420;
+                            ExInvalidValue6 = (int)0x80040420;
+                            ExNotSet1 = (int)0x80040417;
                             break;
                         }
 
                     case "POTH.Telescope":
                         {
-                            GExNotImplemented = (int)0x80040400;
-                            GExInvalidValue1 = (int)0x80040405;
-                            GExInvalidValue2 = (int)0x80040406;
-                            GExInvalidValue3 = (int)0x80040406;
-                            GExInvalidValue4 = (int)0x80040406;
-                            GExInvalidValue5 = (int)0x80040406;
-                            GExInvalidValue6 = (int)0x80040406;
-                            GExNotSet1 = (int)0x80040403;
+                            ExNotImplemented = (int)0x80040400;
+                            ExInvalidValue1 = (int)0x80040405;
+                            ExInvalidValue2 = (int)0x80040406;
+                            ExInvalidValue3 = (int)0x80040406;
+                            ExInvalidValue4 = (int)0x80040406;
+                            ExInvalidValue5 = (int)0x80040406;
+                            ExInvalidValue6 = (int)0x80040406;
+                            ExNotSet1 = (int)0x80040403;
                             break;
                         }
 
                     case "ServoCAT.Telescope":
                         {
-                            GExNotImplemented = (int)0x80040400;
-                            GExInvalidValue1 = ErrorCodes.InvalidValue;
-                            GExInvalidValue2 = (int)0x80040405;
-                            GExInvalidValue3 = (int)0x80040405;
-                            GExInvalidValue4 = (int)0x80040405;
-                            GExInvalidValue5 = (int)0x80040405;
-                            GExInvalidValue6 = (int)0x80040405;
-                            GExNotSet1 = (int)0x80040403;
-                            GExNotSet2 = (int)0x80040404; // I'm using the simulator values as the defaults since it is the reference platform
+                            ExNotImplemented = (int)0x80040400;
+                            ExInvalidValue1 = ErrorCodes.InvalidValue;
+                            ExInvalidValue2 = (int)0x80040405;
+                            ExInvalidValue3 = (int)0x80040405;
+                            ExInvalidValue4 = (int)0x80040405;
+                            ExInvalidValue5 = (int)0x80040405;
+                            ExInvalidValue6 = (int)0x80040405;
+                            ExNotSet1 = (int)0x80040403;
+                            ExNotSet2 = (int)0x80040404; // I'm using the simulator values as the defaults since it is the reference platform
                             break;
                         }
 
                     default:
                         {
-                            GExNotImplemented = (int)0x80040400;
-                            GExInvalidValue1 = ErrorCodes.InvalidValue;
-                            GExInvalidValue2 = (int)0x80040405;
-                            GExInvalidValue3 = (int)0x80040405;
-                            GExInvalidValue4 = (int)0x80040405;
-                            GExInvalidValue5 = (int)0x80040405;
-                            GExInvalidValue6 = (int)0x80040405;
-                            GExNotSet1 = (int)0x80040403;
+                            ExNotImplemented = (int)0x80040400;
+                            ExInvalidValue1 = ErrorCodes.InvalidValue;
+                            ExInvalidValue2 = (int)0x80040405;
+                            ExInvalidValue3 = (int)0x80040405;
+                            ExInvalidValue4 = (int)0x80040405;
+                            ExInvalidValue5 = (int)0x80040405;
+                            ExInvalidValue6 = (int)0x80040405;
+                            ExNotSet1 = (int)0x80040403;
                             break;
                         }
                 }
             }
 
-            base.CheckInitialise();
+            base.InitialiseTest();
         }
 
         public override void CreateDevice()
@@ -2102,11 +2102,11 @@ namespace ConformU
                     }
                 }
             }
-            catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == GExNotSet1 | ex.ErrorCode == GExNotSet2)
+            catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
             {
                 LogOk("TargetDeclination Read", "Not Set exception generated on read before write");
             }
-            catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == GExNotSet1 | ex.Number == GExNotSet2)
+            catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == ExNotSet1 | ex.Number == ExNotSet2)
             {
                 LogOk("TargetDeclination Read", "Not Set exception generated on read before write");
             }
@@ -2152,11 +2152,11 @@ namespace ConformU
                     }
                 }
             }
-            catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == GExNotSet1 | ex.ErrorCode == GExNotSet2)
+            catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
             {
                 LogOk("TargetRightAscension Read", "Not Set exception generated on read before write");
             }
-            catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == GExNotSet1 | ex.Number == GExNotSet2)
+            catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == ExNotSet1 | ex.Number == ExNotSet2)
             {
                 LogOk("TargetRightAscension Read", "Not Set exception generated on read before write");
             }
@@ -3929,7 +3929,7 @@ namespace ConformU
                                                 }
                                         }
                                     }
-                                    catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == GExNotSet1 | ex.ErrorCode == GExNotSet2)
+                                    catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
                                     {
                                         LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
                                     }
@@ -3937,7 +3937,7 @@ namespace ConformU
                                     {
                                         LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
                                     }
-                                    catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == GExNotSet1 | ex.Number == GExNotSet2)
+                                    catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == ExNotSet1 | ex.Number == ExNotSet2)
                                     {
                                         LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
                                     }
@@ -3967,7 +3967,7 @@ namespace ConformU
                                                 }
                                         }
                                     }
-                                    catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == GExNotSet1 | ex.ErrorCode == GExNotSet2)
+                                    catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
                                     {
                                         LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
                                     }
@@ -3975,7 +3975,7 @@ namespace ConformU
                                     {
                                         LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
                                     }
-                                    catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == GExNotSet1 | ex.Number == GExNotSet2)
+                                    catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == ExNotSet1 | ex.Number == ExNotSet2)
                                     {
                                         LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
                                     }
@@ -4388,7 +4388,7 @@ namespace ConformU
                                         LogIssue(pName, $"The TargetRightAscension property: {actualTargetRa.ToHMS()} does not match the expected RA {targetRightAscension.ToHMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
                                     }
                                 }
-                                catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == GExNotSet1 | ex.ErrorCode == GExNotSet2)
+                                catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
                                 {
                                     LogIssue(pName, "The Driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
                                 }
@@ -4396,7 +4396,7 @@ namespace ConformU
                                 {
                                     LogIssue(pName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
                                 }
-                                catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == GExNotSet1 | ex.Number == GExNotSet2)
+                                catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == ExNotSet1 | ex.Number == ExNotSet2)
                                 {
                                     LogIssue(pName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
                                 }
@@ -4421,7 +4421,7 @@ namespace ConformU
                                     }
 
                                 }
-                                catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == GExNotSet1 | ex.ErrorCode == GExNotSet2)
+                                catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
                                 {
                                     LogIssue(pName, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
                                 }
@@ -4429,7 +4429,7 @@ namespace ConformU
                                 {
                                     LogIssue(pName, "The Driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
                                 }
-                                catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == GExNotSet1 | ex.Number == GExNotSet2)
+                                catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == ExNotSet1 | ex.Number == ExNotSet2)
                                 {
                                     LogIssue(pName, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
                                 }

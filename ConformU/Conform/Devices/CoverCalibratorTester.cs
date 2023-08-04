@@ -70,7 +70,7 @@ namespace ConformU
 
         #endregion
 
-        public override void CheckInitialise()
+        public override void InitialiseTest()
         {
             // Set the error type numbers according to the standards adopted by individual authors.
             // Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
@@ -81,19 +81,19 @@ namespace ConformU
                 {
                     default:
                         {
-                            GExNotImplemented = (int)0x80040400;
-                            GExInvalidValue1 = (int)0x80040405;
-                            GExInvalidValue2 = (int)0x80040405;
-                            GExInvalidValue3 = (int)0x80040405;
-                            GExInvalidValue4 = (int)0x80040405;
-                            GExInvalidValue5 = (int)0x80040405;
-                            GExInvalidValue6 = (int)0x80040405;
-                            GExNotSet1 = (int)0x80040403;
+                            ExNotImplemented = (int)0x80040400;
+                            ExInvalidValue1 = (int)0x80040405;
+                            ExInvalidValue2 = (int)0x80040405;
+                            ExInvalidValue3 = (int)0x80040405;
+                            ExInvalidValue4 = (int)0x80040405;
+                            ExInvalidValue5 = (int)0x80040405;
+                            ExInvalidValue6 = (int)0x80040405;
+                            ExNotSet1 = (int)0x80040403;
                             break;
                         }
                 }
             }
-            base.CheckInitialise();
+            base.InitialiseTest();
         }
 
         public override void CreateDevice()

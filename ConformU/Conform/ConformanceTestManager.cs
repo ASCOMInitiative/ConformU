@@ -167,8 +167,6 @@ namespace ConformU
         {
             int returnCode;
 
-            string testStage;
-
             // Start with a blank line to the console log
             Console.WriteLine("");
 
@@ -181,15 +179,17 @@ namespace ConformU
             // Test the device
             try
             {
-                if (testDevice is null) throw new ASCOM.InvalidOperationException("No test device has been selected.");
-                testStage = "CheckInitialise";
-                testDevice.CheckInitialise();
+                if (testDevice is null)
+                    throw new ASCOM.InvalidOperationException("No test device has been selected.");
+                
+                string testStage = "Initialise";
+                testDevice.InitialiseTest();
 
                 try
                 {
                     testStage = "CreateDevice";
                     testDevice.CreateDevice();
-                    TL.LogMessage("ConformanceCheck", MessageLevel.OK, "Driver instance created successfully");
+                    TL.LogMessage(testStage, MessageLevel.OK, "Driver instance created successfully");
                     TL.LogMessage("", MessageLevel.TestOnly, "");
 
                     // Run pre-connect checks if required
@@ -315,24 +315,24 @@ namespace ConformU
                             TL.LogMessage(testStage, MessageLevel.Issue, $"Exception when testing device: {ex.Message}");
                             TL.LogMessage(testStage, MessageLevel.Debug, $"{ex}");
                             TL.LogMessage("", MessageLevel.TestOnly, "");
-                            TL.LogMessage("ConformanceCheck", MessageLevel.TestAndMessage, "Further tests abandoned.");
+                            TL.LogMessage(testStage, MessageLevel.TestAndMessage, "Further tests abandoned.");
                         }
                     }
                     catch (Exception ex) // Exception when setting Connected = True
                     {
                         conformResults.Issues.Add(new KeyValuePair<string, string>("Connected", $"Connection exception - testing abandoned: {ex.Message}"));
-                        TL.LogMessage("Connected", MessageLevel.Issue, $"Connection exception: {ex.Message}");
-                        TL.LogMessage("Connected", MessageLevel.Debug, $"{ex}");
+                        TL.LogMessage(testStage, MessageLevel.Issue, $"Connection exception: {ex.Message}");
+                        TL.LogMessage(testStage, MessageLevel.Debug, $"{ex}");
                         TL.LogMessage("", MessageLevel.TestOnly, "");
-                        TL.LogMessage("ConformanceCheck", MessageLevel.TestAndMessage, "Further tests abandoned.");
+                        TL.LogMessage(testStage, MessageLevel.TestAndMessage, "Further tests abandoned.");
                     }
                 }
                 catch (Exception ex) // Exception when creating device
                 {
                     conformResults.Issues.Add(new KeyValuePair<string, string>("Initialise", $"Unable to {(settings.DeviceTechnology == DeviceTechnology.Alpaca ? "access" : "create")} the device: {ex.Message}"));
-                    TL.LogMessage("Initialise", MessageLevel.Issue, $"Unable to {(settings.DeviceTechnology == DeviceTechnology.Alpaca ? "access" : "create")} the device: {ex.Message}");
+                    TL.LogMessage(testStage, MessageLevel.Issue, $"Unable to {(settings.DeviceTechnology == DeviceTechnology.Alpaca ? "access" : "create")} the device: {ex.Message}");
                     TL.LogMessage("", MessageLevel.TestOnly, "");
-                    TL.LogMessage("ConformanceCheck", MessageLevel.TestAndMessage, "Further tests abandoned as Conform cannot create the driver");
+                    TL.LogMessage(testStage, MessageLevel.TestAndMessage, "Further tests abandoned as Conform cannot create the driver");
                 }
 
                 // Report the success or failure of conformance checking

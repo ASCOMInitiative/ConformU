@@ -12,6 +12,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using static ConformU.Globals;
+using InvalidOperationException = System.InvalidOperationException;
+using NotImplementedException = ASCOM.NotImplementedException;
 
 namespace ConformU
 {
@@ -28,8 +30,6 @@ namespace ConformU
 
         internal const double PERF_LOOP_TIME = 5.0; // Performance loop run time in seconds
         internal const int SLEEP_TIME = 500; // Loop time for testing whether slewing has completed
-        internal const int CAMERA_SLEEP_TIME = 10; // Loop time for testing whether camera events have completed
-        internal const int DEVICE_DESTROY_WAIT = 500; // Time to wait after destroying a device before continuing
         internal const int WAITFOR_UPDATE_INTERVAL = 500; // Time in milliseconds between updates in the WaitFor method
         internal const int WAITWHILE_EXTRA_WAIT_TIME = 2; // Additional time to wait after the expected run time before raising a TimeoutException (seconds)
 
@@ -44,8 +44,8 @@ namespace ConformU
 
         private int? baseInterfaceVersion; // Variable to held interface version of the current device
 
-        private bool lHasProperties, lHasCanProperties, lHasMethods, lHasPreRunCheck, lHasPostRunCheck, lHasPerformanceCheck;
-        private bool lHasPreConnectCheck;
+        private bool hasProperties, hasCanProperties, hasMethods, hasPreRunCheck, hasPostRunCheck, hasPerformanceCheck;
+        private bool hasPreConnectCheck;
         private IAscomDeviceV2 baseClassDevice;
         private DeviceTypes baseClassDeviceType;
 
@@ -56,8 +56,8 @@ namespace ConformU
 
         private readonly Settings settings;
 
-        internal int GExNotImplemented, GExNotSet1, GExNotSet2;
-        internal int GExInvalidValue1, GExInvalidValue2, GExInvalidValue3, GExInvalidValue4, GExInvalidValue5, GExInvalidValue6;
+        internal int ExNotImplemented, ExNotSet1, ExNotSet2;
+        internal int ExInvalidValue1, ExInvalidValue2, ExInvalidValue3, ExInvalidValue4, ExInvalidValue5, ExInvalidValue6;
 
         #endregion
 
@@ -121,13 +121,13 @@ namespace ConformU
         #region New and Dispose
         public DeviceTesterBaseClass() : base()
         {
-            lHasPreConnectCheck = false;
-            lHasPreRunCheck = false;
-            lHasCanProperties = false;
-            lHasProperties = true;
-            lHasMethods = true;
-            lHasPostRunCheck = false;
-            lHasPerformanceCheck = true;
+            hasPreConnectCheck = false;
+            hasPreRunCheck = false;
+            hasCanProperties = false;
+            hasProperties = true;
+            hasMethods = true;
+            hasPostRunCheck = false;
+            hasPerformanceCheck = true;
             ClearStatus();
         }
 
@@ -144,13 +144,13 @@ namespace ConformU
         /// <remarks></remarks>
         public DeviceTesterBaseClass(bool hasCanProperties, bool hasProperties, bool hasMethods, bool hasPreRunCheck, bool hasPreConnectCheck, bool hasPerformanceCheck, bool hasPostRunCheck, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken cancellationToken) : this()
         {
-            lHasPreConnectCheck = hasPreConnectCheck;
-            lHasPreRunCheck = hasPreRunCheck;
-            lHasCanProperties = hasCanProperties;
-            lHasProperties = hasProperties;
-            lHasMethods = hasMethods;
-            lHasPostRunCheck = hasPostRunCheck;
-            lHasPerformanceCheck = hasPerformanceCheck;
+            this.hasPreConnectCheck = hasPreConnectCheck;
+            this.hasPreRunCheck = hasPreRunCheck;
+            this.hasCanProperties = hasCanProperties;
+            this.hasProperties = hasProperties;
+            this.hasMethods = hasMethods;
+            this.hasPostRunCheck = hasPostRunCheck;
+            this.hasPerformanceCheck = hasPerformanceCheck;
             tl = logger;
             this.ApplicationCancellationToken = cancellationToken;
             settings = conformConfiguration.Settings;
@@ -202,10 +202,6 @@ namespace ConformU
 
         public void CheckCommonMethods(IAscomDeviceV2 deviceObject, DeviceTypes deviceType)
         {
-            string driverVersion, driverInfo, description, name;
-            IList supportedActions;
-
-            bool connected;
             LogTestOnly("Common Driver Methods");
             baseClassDevice = deviceObject;
 
@@ -243,7 +239,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Connected", "About to get property Connected");
-                    connected = baseClassDevice.Connected;
+                    bool connected = baseClassDevice.Connected;
                     LogOk("Connected", connected.ToString());
                 }
                 catch (Exception ex)
@@ -261,10 +257,10 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Description", "About to get property Description");
-                    description = baseClassDevice.Description;
+                    string description = baseClassDevice.Description;
                     switch (description ?? "")
                     {
-                        case var case1 when case1 == "":
+                        case "":
                             {
                                 LogInfo("Description", "No description string");
                                 break;
@@ -301,10 +297,10 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DriverInfo", "About to get property DriverInfo");
-                    driverInfo = baseClassDevice.DriverInfo;
+                    string driverInfo = baseClassDevice.DriverInfo;
                     switch (driverInfo ?? "")
                     {
-                        case var case2 when case2 == "":
+                        case "":
                             {
                                 LogInfo("DriverInfo", "No DriverInfo string");
                                 break;
@@ -332,10 +328,10 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DriverVersion", "About to get property DriverVersion");
-                    driverVersion = baseClassDevice.DriverVersion;
+                    string driverVersion = baseClassDevice.DriverVersion;
                     switch (driverVersion ?? "")
                     {
-                        case var case3 when case3 == "":
+                        case "":
                             {
                                 LogInfo("DriverVersion", "No DriverVersion string");
                                 break;
@@ -368,10 +364,10 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Name", "About to get property Name");
-                    name = baseClassDevice.Name;
+                    string name = baseClassDevice.Name;
                     switch (name ?? "")
                     {
-                        case var case4 when case4 == "":
+                        case "":
                             {
                                 LogInfo("Name", "Name is empty");
                                 break;
@@ -401,25 +397,24 @@ namespace ConformU
             try
             {
                 LogCallToDriver("SupportedActions", "About to call method SupportedActions");
-                supportedActions = (IList)baseClassDevice.SupportedActions;
+                IList supportedActions = (IList)baseClassDevice.SupportedActions;
                 if (supportedActions.Count == 0)
                 {
                     LogOk("SupportedActions", "Driver returned an empty action list");
                 }
                 else
                 {
-                    var i = default(int);
+                    int i = default(int);
                     foreach (object action in supportedActions)
                     {
                         i += 1;
                         if (action.GetType().Name == "String")
                         {
                             string actionString = action.ToString();
-                            string result;
                             const string testParameters = "Conform test parameters";
                             switch (actionString ?? "")
                             {
-                                case var case5 when case5 == "":
+                                case "":
                                     {
                                         LogIssue("SupportedActions", $"Supported action {i} Is an empty string"); // List the action that was found
                                         break;
@@ -432,17 +427,20 @@ namespace ConformU
                                         // Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
                                         if (deviceType == DeviceTypes.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.ToUpper() == "ASCOM.OCH.OBSERVINGCONDITIONS")
                                         {
+                                            string result;
                                             if (actionString.ToUpperInvariant().StartsWith("//OCSIMULATOR:"))
                                             {
                                                 try
                                                 {
                                                     LogCallToDriver("SupportedActions", "About to call method Action");
                                                     result = baseClassDevice.Action(actionString, testParameters);
-                                                    LogOk("SupportedActions", string.Format("OC simulator action {0} gave result: {1}", actionString, result));
+                                                    LogOk("SupportedActions",
+                                                        $"OC simulator action {actionString} gave result: {result}");
                                                 }
                                                 catch (Exception ex1)
                                                 {
-                                                    LogIssue("SupportedActions", string.Format("Exception calling OCH simulator action {0}: {1}", actionString, ex1.Message));
+                                                    LogIssue("SupportedActions",
+                                                        $"Exception calling OCH simulator action {actionString}: {ex1.Message}");
                                                 }
                                             }
                                             else if (actionString.ToUpperInvariant().StartsWith("//ASCOM.SIMULATOR.OBSERVINGCONDITIONS:"))
@@ -451,11 +449,13 @@ namespace ConformU
                                                 {
                                                     LogCallToDriver("SupportedActions", "About to call method Action");
                                                     result = baseClassDevice.Action(actionString, testParameters);
-                                                    LogOk("SupportedActions", string.Format("OC simulator action {0} gave result: {1}", actionString, result));
+                                                    LogOk("SupportedActions",
+                                                        $"OC simulator action {actionString} gave result: {result}");
                                                 }
                                                 catch (Exception ex1)
                                                 {
-                                                    LogIssue("SupportedActions", string.Format("Exception calling OCH simulator action {0}: {1}", actionString, ex1.Message));
+                                                    LogIssue("SupportedActions",
+                                                        $"Exception calling OCH simulator action {actionString}: {ex1.Message}");
                                                 }
                                             }
                                             else if (actionString.ToUpperInvariant().StartsWith("//SWITCHSIMULATOR:"))
@@ -464,11 +464,13 @@ namespace ConformU
                                                 {
                                                     LogCallToDriver("SupportedActions", "About to call method Action");
                                                     result = baseClassDevice.Action(actionString, testParameters);
-                                                    LogOk("SupportedActions", string.Format("Switch simulator action {0} gave result: {1}", actionString, result));
+                                                    LogOk("SupportedActions",
+                                                        $"Switch simulator action {actionString} gave result: {result}");
                                                 }
                                                 catch (Exception ex1)
                                                 {
-                                                    LogIssue("SupportedActions", string.Format("Exception calling switch simulator action {0}: {1}", actionString, ex1.Message));
+                                                    LogIssue("SupportedActions",
+                                                        $"Exception calling switch simulator action {actionString}: {ex1.Message}");
                                                 }
                                             }
                                             else if (actionString.ToUpperInvariant().StartsWith("//ASCOM.SIMULATOR.SWITCH:"))
@@ -477,11 +479,13 @@ namespace ConformU
                                                 {
                                                     LogCallToDriver("SupportedActions", "About to call method Action");
                                                     result = baseClassDevice.Action(actionString, testParameters);
-                                                    LogOk("SupportedActions", string.Format("Switch simulator action {0} gave result: {1}", actionString, result));
+                                                    LogOk("SupportedActions",
+                                                        $"Switch simulator action {actionString} gave result: {result}");
                                                 }
                                                 catch (Exception ex1)
                                                 {
-                                                    LogIssue("SupportedActions", string.Format("Exception calling switch simulator action {0}: {1}", actionString, ex1.Message));
+                                                    LogIssue("SupportedActions",
+                                                        $"Exception calling switch simulator action {actionString}: {ex1.Message}");
                                                 }
                                             }
                                         }
@@ -547,7 +551,7 @@ namespace ConformU
                             casedPropertyNames.Add(nameof(ICoverCalibratorV2.Brightness), false);
                             casedPropertyNames.Add(nameof(ICoverCalibratorV2.CalibratorState), false);
                             casedPropertyNames.Add(nameof(ICoverCalibratorV2.CoverState), false);
-                            casedPropertyNames.Add(nameof(ICoverCalibratorV2.CalibratorChanging), false);
+                            casedPropertyNames.Add(nameof(ICoverCalibratorV2.CalibratorReady), false);
                             casedPropertyNames.Add(nameof(ICoverCalibratorV2.CoverMoving), false);
                             break;
 
@@ -607,12 +611,12 @@ namespace ConformU
                                 LogIssue("DeviceState", $"MaxSwitch exception: {ex}");
                             }
                             LogInfo("DeviceState", $"MaxSwitch: {maxSwitch}");
-                            for (var i = 0; i < maxSwitch; i++)
+                            for (int i = 0; i < maxSwitch; i++)
                             {
                                 casedPropertyNames.Add($"GetSwitch{i}", false);
                                 casedPropertyNames.Add($"GetSwitchValue{i}", false);
+                                casedPropertyNames.Add($"StateChangeComplete{i}", false);
                             }
-
                             break;
 
                         case DeviceTypes.Telescope:
@@ -666,7 +670,7 @@ namespace ConformU
                     }
 
                     // Test whether all expected values were returned
-                    IEnumerable<KeyValuePair<string, bool>> missingProperties = casedPropertyNames.Where(x => x.Value == false);
+                    List<KeyValuePair<string, bool>> missingProperties = casedPropertyNames.Where(x => x.Value == false).ToList();
 
                     // Test whether any properties were not found
                     if (missingProperties.Any()) // One or more properties were missing
@@ -778,13 +782,13 @@ namespace ConformU
 
             // Make sure that the value set is reflected in Connected GET
             LogCallToDriver("Connect", "About to get Connected property");
-            
-            if (baseClassDevice.Connected!= true)
+
+            if (baseClassDevice.Connected != true)
             {
                 throw new ASCOM.InvalidOperationException($"The device connected without error but Connected Get returned False.");
             }
 
-            if (DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType.Value, (short)GetInterfaceVersion()))
+            if (DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, (short)GetInterfaceVersion()))
                 tl.LogMessage("Connect", MessageLevel.OK, "Connected to device successfully using Connect()");
             else
                 LogOk("Connected", "Connected to device successfully using Connected = True");
@@ -820,7 +824,7 @@ namespace ConformU
             }
             else // Historic synchronous behaviour
             {
-            SetAction("Waiting for Connected to become False");
+                SetAction("Waiting for Connected to become False");
                 LogCallToDriver("Connected", "About to set Connected property");
                 baseClassDevice.Connected = false;
             }
@@ -832,7 +836,7 @@ namespace ConformU
                 throw new ASCOM.InvalidOperationException($"The device disconnected without error but Connected Get returned True.");
             }
 
-            if (DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType.Value, (short)GetInterfaceVersion()))
+            if (settings.DeviceType != null && DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, (short)GetInterfaceVersion()))
                 tl.LogMessage("Disconnect", MessageLevel.OK, "Disconnected from device successfully using Disconnect()");
             else
                 tl.LogMessage("Connected", MessageLevel.OK, "False");
@@ -859,12 +863,12 @@ namespace ConformU
         {
             get
             {
-                return lHasCanProperties;
+                return hasCanProperties;
             }
 
             set
             {
-                lHasCanProperties = value;
+                hasCanProperties = value;
             }
         }
 
@@ -872,12 +876,12 @@ namespace ConformU
         {
             get
             {
-                return lHasProperties;
+                return hasProperties;
             }
 
             set
             {
-                lHasProperties = value;
+                hasProperties = value;
             }
         }
 
@@ -885,12 +889,12 @@ namespace ConformU
         {
             get
             {
-                return lHasMethods;
+                return hasMethods;
             }
 
             set
             {
-                lHasMethods = value;
+                hasMethods = value;
             }
         }
 
@@ -898,12 +902,12 @@ namespace ConformU
         {
             get
             {
-                return lHasPreConnectCheck;
+                return hasPreConnectCheck;
             }
 
             set
             {
-                lHasPreConnectCheck = value;
+                hasPreConnectCheck = value;
             }
         }
 
@@ -911,12 +915,12 @@ namespace ConformU
         {
             get
             {
-                return lHasPreRunCheck;
+                return hasPreRunCheck;
             }
 
             set
             {
-                lHasPreRunCheck = value;
+                hasPreRunCheck = value;
             }
         }
 
@@ -924,12 +928,12 @@ namespace ConformU
         {
             get
             {
-                return lHasPostRunCheck;
+                return hasPostRunCheck;
             }
 
             set
             {
-                lHasPostRunCheck = value;
+                hasPostRunCheck = value;
             }
         }
 
@@ -937,12 +941,12 @@ namespace ConformU
         {
             get
             {
-                return lHasPerformanceCheck;
+                return hasPerformanceCheck;
             }
 
             set
             {
-                lHasPerformanceCheck = value;
+                hasPerformanceCheck = value;
             }
         }
 
@@ -950,7 +954,7 @@ namespace ConformU
         /// Get error codes.
         /// </summary>
         /// <param name="p_ProgID">The ProgID.</param>
-        public virtual void CheckInitialise()
+        public virtual void InitialiseTest()
         {
             SetTest(""); // Clear status messages
             SetAction("");
@@ -993,6 +997,9 @@ namespace ConformU
 
                 case DeviceTechnology.COM:
                     LogTestOnly($"COM Driver ProgID: {settings.ComDevice.ProgId}"); break;
+
+                case DeviceTechnology.NotSelected:
+                    throw new InvalidValueException($"CheckInitialise - 'NotSelected' is not a technology type, ploease select Alpaca or COM.");
 
                 default:
                     throw new InvalidValueException($"CheckInitialise - Unknown technology type: {settings.DeviceTechnology}");
@@ -1048,7 +1055,7 @@ namespace ConformU
 
         #endregion
 
-        #region Common methods for all device tester classes
+        #region Tests for methods common to all device types
 
         /// <summary>
         ///Set the test, action and status in one call
@@ -1181,10 +1188,7 @@ namespace ConformU
                 }
 
                 // Initialise the status message
-                if (statusString is null)
-                    SetStatus($"0.0 / {timeoutSeconds:0.0} seconds");
-                else
-                    SetStatus(statusString());
+                SetStatus(statusString is null ? $"0.0 / {timeoutSeconds:0.0} seconds" : statusString());
             }
 
             // Create a timeout cancellation token source that times out after the required timeout period
@@ -1299,17 +1303,17 @@ namespace ConformU
             bool isMethodNotImplementedExceptionRet = false; // Set false default value
             try
             {
-                if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
+                switch (deviceException)
                 {
-                    if (exception.ErrorCode == GExNotImplemented | exception.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
-                    {
-                        isMethodNotImplementedExceptionRet = true;
-                    }
-                }
+                    // This is a COM exception so test whether the error code indicates that it is a not implemented exception
+                    case COMException exception:
+                        if (exception.ErrorCode == ExNotImplemented | exception.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
+                            isMethodNotImplementedExceptionRet = true;
+                        break;
 
-                if (deviceException is MethodNotImplementedException)
-                {
-                    isMethodNotImplementedExceptionRet = true;
+                    case MethodNotImplementedException:
+                        isMethodNotImplementedExceptionRet = true;
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1331,17 +1335,17 @@ namespace ConformU
             bool isNotImplementedExceptionRet = false; // Set false default value
             try
             {
-                if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
+                switch (deviceException)
                 {
-                    if (exception.ErrorCode == GExNotImplemented | exception.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
-                    {
-                        isNotImplementedExceptionRet = true;
-                    }
-                }
+                    // This is a COM exception so test whether the error code indicates that it is a not implemented exception
+                    case COMException exception:
+                        if (exception.ErrorCode == ExNotImplemented | exception.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
+                            isNotImplementedExceptionRet = true;
+                        break;
 
-                if (deviceException is ASCOM.NotImplementedException)
-                {
-                    isNotImplementedExceptionRet = true;
+                    case NotImplementedException:
+                        isNotImplementedExceptionRet = true;
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1363,17 +1367,17 @@ namespace ConformU
             bool isPropertyNotImplementedExceptionRet = false; // Set false default value
             try
             {
-                if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is a not implemented exception
+                switch (deviceException)
                 {
-                    if (exception.ErrorCode == GExNotImplemented | exception.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
-                    {
-                        isPropertyNotImplementedExceptionRet = true;
-                    }
-                }
+                    // This is a COM exception so test whether the error code indicates that it is a not implemented exception
+                    case COMException exception:
+                        if (exception.ErrorCode == ExNotImplemented | exception.ErrorCode == ErrorCodes.NotImplemented) // This is a not implemented exception
+                            isPropertyNotImplementedExceptionRet = true;
+                        break;
 
-                if (deviceException is PropertyNotImplementedException)
-                {
-                    isPropertyNotImplementedExceptionRet = true;
+                    case PropertyNotImplementedException:
+                        isPropertyNotImplementedExceptionRet = true;
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1396,30 +1400,26 @@ namespace ConformU
             bool isInvalidValueExceptionRet = false; // Set false default value
             try
             {
-                if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is an invalid value exception
+                switch (deviceException)
                 {
-                    if (exception.ErrorCode == ErrorCodes.InvalidValue | exception.ErrorCode == GExInvalidValue1 | exception.ErrorCode == GExInvalidValue2 | exception.ErrorCode == GExInvalidValue3 | exception.ErrorCode == GExInvalidValue4 | exception.ErrorCode == GExInvalidValue5 | exception.ErrorCode == GExInvalidValue6) // This is an invalid value exception
-                    {
+                    // This is a COM exception so test whether the error code indicates that it is an invalid value exception
+                    case COMException exception:
+                        if (exception.ErrorCode == ErrorCodes.InvalidValue | exception.ErrorCode == ExInvalidValue1 | exception.ErrorCode == ExInvalidValue2 | exception.ErrorCode == ExInvalidValue3 | exception.ErrorCode == ExInvalidValue4 | exception.ErrorCode == ExInvalidValue5 | exception.ErrorCode == ExInvalidValue6) // This is an invalid value exception
+                            isInvalidValueExceptionRet = true;
+                        break;
+
+                    case InvalidValueException:
                         isInvalidValueExceptionRet = true;
-                    }
-                }
+                        break;
 
-                if (deviceException is InvalidValueException)
-                {
-                    isInvalidValueExceptionRet = true;
-                }
-                else if (deviceException is DriverException exception1)
-                {
-                    if (exception1.Number == ErrorCodes.InvalidValue) // This is an invalid value exception
-                    {
-                        LogIssue(memberName,
-                            $"Received ASCOM.DriverException(0x{ErrorCodes.InvalidValue:X8}), please use ASCOM.InvalidValueException to report invalid values");
-                    }
-                }
+                    case DriverException exception1:
+                        if (exception1.Number == ErrorCodes.InvalidValue) // This is an invalid value exception
+                            LogIssue(memberName, $"Received ASCOM.DriverException(0x{ErrorCodes.InvalidValue:X8}), please use ASCOM.InvalidValueException to report invalid values");
+                        break;
 
-                if (deviceException is System.InvalidOperationException)
-                {
-                    LogIssue(memberName, "Received System.InvalidOperationException rather than ASCOM.InvalidValueException");
+                    case InvalidOperationException:
+                        LogIssue(memberName, "Received System.InvalidOperationException rather than ASCOM.InvalidValueException");
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1442,30 +1442,26 @@ namespace ConformU
             bool isInvalidOperationExceptionRet = false; // Set false default value
             try
             {
-                if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is an invalid operation exception
+                switch (deviceException)
                 {
-                    if (exception.ErrorCode == ErrorCodes.InvalidOperationException) // This is an invalid operation exception
-                    {
+                    // This is a COM exception so test whether the error code indicates that it is an invalid operation exception
+                    case COMException exception:
+                        if (exception.ErrorCode == ErrorCodes.InvalidOperationException) // This is an invalid operation exception
+                            isInvalidOperationExceptionRet = true;
+                        break;
+
+                    case ASCOM.InvalidOperationException:
                         isInvalidOperationExceptionRet = true;
-                    }
-                }
+                        break;
 
-                if (deviceException is ASCOM.InvalidOperationException)
-                {
-                    isInvalidOperationExceptionRet = true;
-                }
-                else if (deviceException is DriverException exception1)
-                {
-                    if (exception1.Number == ErrorCodes.InvalidOperationException) // This is an invalid operation exception
-                    {
-                        LogIssue(memberName,
-                            $"Received ASCOM.DriverException(0x{ErrorCodes.InvalidOperationException:X8}), please use ASCOM.InvalidOperationException to report invalid operations");
-                    }
-                }
+                    case DriverException exception1:
+                        if (exception1.Number == ErrorCodes.InvalidOperationException) // This is an invalid operation exception
+                            LogIssue(memberName, $"Received ASCOM.DriverException(0x{ErrorCodes.InvalidOperationException:X8}), please use ASCOM.InvalidOperationException to report invalid operations");
+                        break;
 
-                if (deviceException is System.InvalidOperationException)
-                {
-                    LogIssue(memberName, "Received System.InvalidOperationException rather than ASCOM.InvalidOperationException");
+                    case InvalidOperationException:
+                        LogIssue(memberName, "Received System.InvalidOperationException rather than ASCOM.InvalidOperationException");
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1487,17 +1483,17 @@ namespace ConformU
             bool isNotSetExceptionRet = false; // Set false default value
             try
             {
-                if (deviceException is COMException exception) // This is a COM exception so test whether the error code indicates that it is a not set exception
+                switch (deviceException)
                 {
-                    if (exception.ErrorCode == GExNotSet1) // This is a not set exception
-                    {
-                        isNotSetExceptionRet = true;
-                    }
-                }
+                    // This is a COM exception so test whether the error code indicates that it is a not set exception
+                    case COMException exception:
+                        if (exception.ErrorCode == ExNotSet1) // This is a not set exception
+                            isNotSetExceptionRet = true;
+                        break;
 
-                if (deviceException is ValueNotSetException)
-                {
-                    isNotSetExceptionRet = true;
+                    case ValueNotSetException:
+                        isNotSetExceptionRet = true;
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1526,38 +1522,24 @@ namespace ConformU
                 switch (isRequired)
                 {
                     case Required.Mandatory:
-                        {
-                            LogIssue(memberName,
-                                $"This member is mandatory but returned a {GetExceptionName(ex, typeOfMember)} error, it must function per the ASCOM specification.");
-                            break;
-                        }
+                        LogIssue(memberName, $"This member is mandatory but returned a {GetExceptionName(ex, typeOfMember)} error, it must function per the ASCOM specification.");
+                        break;
 
                     case Required.MustNotBeImplemented:
-                        {
-                            LogOk(memberName,
-                                $"{userMessage} and a {GetExceptionName(ex, typeOfMember)} error was generated as expected");
-                            break;
-                        }
+                        LogOk(memberName, $"{userMessage} and a {GetExceptionName(ex, typeOfMember)} error was generated as expected");
+                        break;
 
                     case Required.MustBeImplemented:
-                        {
-                            LogIssue(memberName,
-                                $"{userMessage} and a {GetExceptionName(ex, typeOfMember)} error was returned, this method must function per the ASCOM specification.");
-                            break;
-                        }
+                        LogIssue(memberName, $"{userMessage} and a {GetExceptionName(ex, typeOfMember)} error was returned, this method must function per the ASCOM specification.");
+                        break;
 
                     case Required.Optional:
-                        {
-                            LogOk(memberName, $"Optional member returned a {GetExceptionName(ex, typeOfMember)} error.");
-                            break;
-                        }
+                        LogOk(memberName, $"Optional member returned a {GetExceptionName(ex, typeOfMember)} error.");
+                        break;
 
                     default:
-                        {
-                            LogError(memberName,
-                                $"CONFORM ERROR! - Received unexpected member of 'Required' enum: {isRequired}");
-                            break;
-                        }
+                        LogError(memberName, $"CONFORM ERROR! - Received unexpected member of 'Required' enum: {isRequired}");
+                        break;
                 }
             }
 
@@ -1601,48 +1583,36 @@ namespace ConformU
         protected void HandleInvalidValueExceptionAsOk(string memberName, MemberType typeOfMember, Required isRequired, Exception ex, string userAction, string message)
         {
             if (IsInvalidValueException(memberName, ex))
-            {
                 LogOk(memberName, message);
-            }
             else
-            {
                 HandleException(memberName, typeOfMember, isRequired, ex, userAction);
-            }
         }
 
         protected void HandleInvalidValueExceptionAsInfo(string memberName, MemberType typeOfMember, Required isRequired, Exception ex, string userAction, string message)
         {
             if (IsInvalidValueException(memberName, ex))
-            {
                 LogInfo(memberName, message);
-            }
             else
-            {
                 HandleException(memberName, typeOfMember, isRequired, ex, userAction);
-            }
         }
 
         protected void HandleInvalidOperationExceptionAsOk(string memberName, MemberType typeOfMember, Required isRequired, Exception ex, string userAction, string message)
         {
             if (IsInvalidOperationException(memberName, ex))
-            {
                 LogOk(memberName, message);
-            }
             else
-            {
                 HandleException(memberName, typeOfMember, isRequired, ex, userAction);
-            }
         }
 
         /// <summary>
         /// Get an exception name (and number if a COM or Driver exception)
         /// </summary>
         /// <param name="clientException">Exception whose name is required</param>
+        /// <param name="memberType">Property or Method.</param>
         /// <returns>String exception name</returns>
         /// <remarks></remarks>
         protected static string GetExceptionName(Exception clientException, MemberType memberType)
         {
-            DriverException driverEx;
             string retVal;
 
             // Treat ASCOM exceptions specially
@@ -1650,7 +1620,7 @@ namespace ConformU
             {
                 if (clientException.GetType().FullName.ToUpper().Contains("DRIVEREXCEPTION")) // We have a driver exception so add its number
                 {
-                    driverEx = (DriverException)clientException;
+                    DriverException driverEx = (DriverException)clientException;
                     retVal = $"DriverException(0x{driverEx.Number:X8})";
                 }
                 else // Otherwise just use the ASCOM exception's name
@@ -1702,12 +1672,11 @@ namespace ConformU
                 LogIssue(methodName, $"Operation initiation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is more than the configured maximum: {OPERATION_INITIATION_MAXIMUM_TIME:0.0} seconds.");
         }
 
-
         #endregion
 
         #region Base class support Code
 
-        private static bool IncludeMethod(MandatoryMethod pMethod, DeviceTypes pDeviceType, int pInterfaceVersion)
+        private static bool IncludeMethod(MandatoryMethod method, DeviceTypes deviceType, int interfaceVersion)
         {
             // This mechanic allows individual tests for particular devices to be skipped. It is no longer required because this is handled by DriverAccess
             // The code is left in place in case it is ever needed in the future
@@ -1715,15 +1684,15 @@ namespace ConformU
             bool retVal = true; // Default to true as most methods will be tested , we just list the exceptions to this below
 
             // Matrix controlling what tests
-            switch (pDeviceType)
+            switch (deviceType)
             {
                 case DeviceTypes.Telescope:
                     {
-                        switch (pInterfaceVersion)
+                        switch (interfaceVersion)
                         {
                             case 1: // Telescope interface V1 does not have Driver Version
                                 {
-                                    if (pMethod == MandatoryMethod.DriverVersion)
+                                    if (method == MandatoryMethod.DriverVersion)
                                         retVal = false;
                                     break;
                                 }
@@ -1748,181 +1717,19 @@ namespace ConformU
             return retVal;
         }
 
-        public void SetDevice(IAscomDeviceV2 device,DeviceTypes deviceType)
+        public void SetDevice(IAscomDeviceV2 device, DeviceTypes deviceType)
         {
-            this.baseClassDevice=device;
+            this.baseClassDevice = device;
             this.baseClassDeviceType = deviceType;
         }
-
-        //private void CommandTest(CommandType p_Type, string p_Name)
-        //{
-        //    string l_CmdSent = "!! Unknown Value !!";
-        //    string m_CommandString;
-        //    bool m_CommandBool;
-        //    g_Status.Test = p_Name;
-        //    try
-        //    {
-        //        switch (p_Type)
-        //        {
-        //            case CommandType.tstCommandBlind:
-        //                {
-        //                    if (g_CmdStrings.CommandBlind is object)
-        //                    {
-        //                        l_CmdSent = g_CmdStrings.CommandBlind;
-        //                        Device.CommandBlind(l_CmdSent, false);
-        //                        LogMsgOK(p_Name, "Sent string \"" + g_CmdStrings.CommandBlind + "\"");
-        //                    }
-        //                    else
-        //                    {
-        //                        LogMsgInfo(p_Name, "Skipped CommandBlind test");
-        //                    }
-
-        //                    break;
-        //                }
-
-        //            case CommandType.tstCommandBool:
-        //                {
-        //                    if (g_CmdStrings.CommandBool is object)
-        //                    {
-        //                        l_CmdSent = g_CmdStrings.CommandBool;
-        //                        m_CommandBool = Conversions.ToBoolean(Device.CommandBool(l_CmdSent, (object)false));
-        //                        if (m_CommandBool == g_CmdStrings.ReturnBool)
-        //                        {
-        //                            LogMsgOK(p_Name, "Sent string \"" + g_CmdStrings.CommandBool + "\" - Received expected return value: " + m_CommandBool);
-        //                        }
-        //                        else
-        //                        {
-        //                            LogMsgError(p_Name, "Sent string \"" + g_CmdStrings.CommandBool + "\" - Received unexpected return value: " + m_CommandBool);
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        LogMsgInfo(p_Name, "Skipped CommandBool test");
-        //                    }
-
-        //                    break;
-        //                }
-
-        //            case CommandType.tstCommandString:
-        //                {
-        //                    if (g_CmdStrings.CommandString is object)
-        //                    {
-        //                        l_CmdSent = g_CmdStrings.CommandString;
-        //                        m_CommandString = Conversions.ToString(Device.CommandString(l_CmdSent, (object)false));
-        //                        if (g_CmdStrings.ReturnString is object) // Valid return string to test
-        //                        {
-        //                            if ((m_CommandString ?? "") == (g_CmdStrings.ReturnString ?? ""))
-        //                            {
-        //                                LogMsgOK(p_Name, "Sent string \"" + g_CmdStrings.CommandString + "\" - Received string: \"" + m_CommandString + "\"");
-        //                            }
-        //                            else
-        //                            {
-        //                                LogMsgError(p_Name, "Sent string \"" + g_CmdStrings.CommandString + "\" - Received string: \"" + m_CommandString + "\" - Expected string: \"" + g_CmdStrings.ReturnString + "\"");
-        //                            }
-        //                        }
-        //                        else // Skip the return string test
-        //                        {
-        //                            LogMsgOK(p_Name, "Sent string \"" + g_CmdStrings.CommandString + "\" - Return string test skipped");
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        LogMsgInfo(p_Name, "Skipped CommandString test");
-        //                    }
-
-        //                    break;
-        //                }
-
-        //            case CommandType.tstCommandBlindRaw:
-        //                {
-        //                    if (g_CmdStringsRaw.CommandBlind is object)
-        //                    {
-        //                        l_CmdSent = g_CmdStringsRaw.CommandBlind;
-        //                        Device.CommandBlind(l_CmdSent, true);
-        //                        LogMsgOK(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandBlind + "\"");
-        //                    }
-        //                    else
-        //                    {
-        //                        LogMsgInfo(p_Name, "Skipped CommandBlind Raw test");
-        //                    }
-
-        //                    break;
-        //                }
-
-        //            case CommandType.tstCommandBoolRaw:
-        //                {
-        //                    if (g_CmdStringsRaw.CommandBool is object)
-        //                    {
-        //                        l_CmdSent = g_CmdStringsRaw.CommandBool;
-        //                        m_CommandBool = Conversions.ToBoolean(Device.CommandBool(l_CmdSent, (object)true));
-        //                        if (m_CommandBool == g_CmdStringsRaw.ReturnBool)
-        //                        {
-        //                            LogMsgOK(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandBool + "\" - Received expected return value: " + m_CommandBool);
-        //                        }
-        //                        else
-        //                        {
-        //                            LogMsgError(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandBool + "\" - Received unexpected return value: " + m_CommandBool);
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        LogMsgInfo(p_Name, "Skipped CommandBool Raw test");
-        //                    }
-
-        //                    break;
-        //                }
-
-        //            case CommandType.tstCommandStringRaw:
-        //                {
-        //                    if (g_CmdStringsRaw.CommandString is object)
-        //                    {
-        //                        l_CmdSent = g_CmdStringsRaw.CommandString;
-        //                        m_CommandString = Conversions.ToString(Device.CommandString(l_CmdSent, (object)true));
-        //                        if (g_CmdStringsRaw.ReturnString is object) // Valid return string to test
-        //                        {
-        //                            if ((m_CommandString ?? "") == (g_CmdStringsRaw.ReturnString ?? ""))
-        //                            {
-        //                                LogMsgOK(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandString + "\" - Received string: \"" + m_CommandString + "\"");
-        //                            }
-        //                            else
-        //                            {
-        //                                LogMsgError(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandString + "\" - Received string: \"" + m_CommandString + "\" - Expected string: \"" + g_CmdStringsRaw.ReturnString + "\"");
-        //                            }
-        //                        }
-        //                        else // Skip the return string test
-        //                        {
-        //                            LogMsgOK(p_Name, "Sent string \"" + g_CmdStringsRaw.CommandString + "\" - Return string test skipped");
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        LogMsgInfo(p_Name, "Skipped CommandString Raw test");
-        //                    }
-
-        //                    break;
-        //                }
-
-        //            default:
-        //                {
-        //                    LogMsgError(p_Name, "Conform:CommandTest: Unknown test type " + p_Type.ToString());
-        //                    break;
-        //                }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        HandleException(p_Name, MemberType.Method, Required.Optional, ex, "");
-        //    }
-
-        //    g_Status.Clear();  // Clear status messages
-        //}
 
         #endregion
 
         #region Private tests
-        public void SpecialTests(SpecialTest pTest)
+
+        public void SpecialTests(SpecialTest test)
         {
-            switch (pTest)
+            switch (test)
             {
                 case SpecialTest.TelescopeSideOfPier:
                     {
@@ -1950,7 +1757,7 @@ namespace ConformU
 
                 default:
                     {
-                        LogIssue("DeviceTesterBaseClass:SpecialTests", $"Unknown test: {pTest}");
+                        LogIssue("DeviceTesterBaseClass:SpecialTests", $"Unknown test: {test}");
                         break;
                     }
             }

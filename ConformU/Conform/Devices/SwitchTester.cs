@@ -87,7 +87,7 @@ namespace ConformU
 
         #endregion
 
-        public override void CheckInitialise()
+        public override void InitialiseTest()
         {
             // Set the error type numbers according to the standards adopted by individual authors.
             // Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
@@ -99,15 +99,15 @@ namespace ConformU
                 {
                     default:
                         {
-                            GExNotImplemented = (int)0x80040400;
-                            GExInvalidValue1 = (int)0x80040405;
-                            GExInvalidValue2 = (int)0x80040405;
-                            GExNotSet1 = (int)0x80040403;
+                            ExNotImplemented = (int)0x80040400;
+                            ExInvalidValue1 = (int)0x80040405;
+                            ExInvalidValue2 = (int)0x80040405;
+                            ExNotSet1 = (int)0x80040403;
                             break;
                         }
                 }
             }
-            base.CheckInitialise();
+            base.InitialiseTest();
         }
 
         public override void CreateDevice()
@@ -202,26 +202,6 @@ namespace ConformU
 
             if (cancellationToken.IsCancellationRequested)
                 return;
-        }
-
-        private void WaitForReadDelay(string message)
-        {
-            if (switchReadDelay > 0)
-            {
-                SetAction($"{message} post read delay");
-                WaitFor(switchReadDelay);
-            }
-            SetAction("");
-        }
-
-        private void WaitForWriteDelay(string message)
-        {
-            if (switchWriteDelay > 0)
-            {
-                SetAction($"{message} post write delay");
-                WaitFor(switchWriteDelay);
-            }
-            SetAction("");
         }
 
         public override void CheckMethods()
@@ -1058,6 +1038,8 @@ namespace ConformU
             }
         }
 
+        #region Support code
+
         private short SwitchPropertyTestShort(SwitchPropertyMethod pType, string pName, short pMin, short pMax)
         {
             short returnValue = 0;
@@ -1575,5 +1557,27 @@ namespace ConformU
             else
                 LogInfo("SwitchNumber", "Skipping range tests because MaxSwitch cannot be read");
         }
+        private void WaitForReadDelay(string message)
+        {
+            if (switchReadDelay > 0)
+            {
+                SetAction($"{message} post read delay");
+                WaitFor(switchReadDelay);
+            }
+            SetAction("");
+        }
+
+        private void WaitForWriteDelay(string message)
+        {
+            if (switchWriteDelay > 0)
+            {
+                SetAction($"{message} post write delay");
+                WaitFor(switchWriteDelay);
+            }
+            SetAction("");
+        }
+
+        #endregion
+
     }
 }
