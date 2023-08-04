@@ -196,11 +196,6 @@ namespace ConformU
             }
         }
 
-        public override void CheckCommonMethods()
-        {
-            base.CheckCommonMethods(domeDevice, DeviceTypes.Dome);
-        }
-
         public override void PreRunCheck()
         {
             int lVStringPtr, lV1, lV2, lV3;

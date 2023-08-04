@@ -178,11 +178,6 @@ namespace ConformU
             }
         }
 
-        public override void CheckCommonMethods()
-        {
-            base.CheckCommonMethods(mSafetyMonitor, DeviceTypes.SafetyMonitor);
-        }
-
         public override void CheckProperties()
         {
             RequiredPropertiesTest(RequiredProperty.PropIsSafe, "IsSafe");

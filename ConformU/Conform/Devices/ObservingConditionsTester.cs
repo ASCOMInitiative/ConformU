@@ -231,11 +231,6 @@ namespace ConformU
             }
         }
 
-        public override void CheckCommonMethods()
-        {
-            base.CheckCommonMethods(mObservingConditions, DeviceTypes.ObservingConditions);
-        }
-
         public override void CheckProperties()
         {
             averageperiod = TestDouble(PROPERTY_AVERAGEPERIOD, ObservingConditionsProperty.AveragePeriod, 0.0, 100000.0, Required.Mandatory); // AveragePeriod is mandatory

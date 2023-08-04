@@ -174,11 +174,6 @@ namespace ConformU
             }
         }
 
-        public override void CheckCommonMethods()
-        {
-            base.CheckCommonMethods(mRotator, DeviceTypes.Rotator);
-        }
-
         public override void ReadCanProperties()
         {
             try

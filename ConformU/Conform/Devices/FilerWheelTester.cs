@@ -184,11 +184,6 @@ namespace ConformU
             ResetTestActionStatus();
         }
 
-        public override void CheckCommonMethods()
-        {
-            base.CheckCommonMethods(filterWheel, DeviceTypes.FilterWheel);
-        }
-
         public override void CheckProperties()
         {
             int[] filterOffsets;

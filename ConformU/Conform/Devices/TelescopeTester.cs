@@ -257,10 +257,6 @@ namespace ConformU
         #endregion
 
         #region Code
-        public override void CheckCommonMethods()
-        {
-            CheckCommonMethods(telescopeDevice, DeviceTypes.Telescope);
-        }
 
         public override void InitialiseTest()
         {

@@ -179,11 +179,6 @@ namespace ConformU
             }
         }
 
-        public override void CheckCommonMethods()
-        {
-            base.CheckCommonMethods(switchDevice, DeviceTypes.Switch);
-        }
-
         public override void CheckProperties()
         {
             // MaxSwitch - Mandatory

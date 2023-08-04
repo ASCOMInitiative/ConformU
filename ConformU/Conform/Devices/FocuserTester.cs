@@ -162,11 +162,6 @@ namespace ConformU
             }
         }
 
-        public override void CheckCommonMethods()
-        {
-            base.CheckCommonMethods(focuser, DeviceTypes.Focuser);
-        }
-
         public override void CheckProperties()
         {
             // Absolute - Required

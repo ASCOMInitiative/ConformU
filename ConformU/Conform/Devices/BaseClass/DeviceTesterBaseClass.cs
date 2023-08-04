@@ -200,10 +200,9 @@ namespace ConformU
             ((dynamic)baseClassDevice).SetupDialog();
         }
 
-        public void CheckCommonMethods(IAscomDeviceV2 deviceObject, DeviceTypes deviceType)
+        public virtual void CheckCommonMethods()
         {
             LogTestOnly("Common Driver Methods");
-            baseClassDevice = deviceObject;
 
             // InterfaceVersion - Required
             try
@@ -234,7 +233,7 @@ namespace ConformU
                 return;
 
             // Connected - Required
-            if (IncludeMethod(MandatoryMethod.Connected, deviceType, GetInterfaceVersion()))
+            if (IncludeMethod(MandatoryMethod.Connected, baseClassDeviceType, GetInterfaceVersion()))
             {
                 try
                 {
@@ -252,7 +251,7 @@ namespace ConformU
             }
 
             // Description - Required
-            if (IncludeMethod(MandatoryMethod.Description, deviceType, GetInterfaceVersion()))
+            if (IncludeMethod(MandatoryMethod.Description, baseClassDeviceType, GetInterfaceVersion()))
             {
                 try
                 {
@@ -268,7 +267,7 @@ namespace ConformU
 
                         default:
                             {
-                                if (description.Length > 68 & deviceType == DeviceTypes.Camera)
+                                if (description.Length > 68 & baseClassDeviceType == DeviceTypes.Camera)
                                 {
                                     LogIssue("Description",
                                         $"Maximum number of characters is 68 for compatibility with FITS headers, found: {description.Length} characters: {description}");
@@ -292,7 +291,7 @@ namespace ConformU
             }
 
             // DriverInfo - Required
-            if (IncludeMethod(MandatoryMethod.DriverInfo, deviceType, GetInterfaceVersion()))
+            if (IncludeMethod(MandatoryMethod.DriverInfo, baseClassDeviceType, GetInterfaceVersion()))
             {
                 try
                 {
@@ -323,7 +322,7 @@ namespace ConformU
             }
 
             // DriverVersion - Required
-            if (IncludeMethod(MandatoryMethod.DriverVersion, deviceType, GetInterfaceVersion()))
+            if (IncludeMethod(MandatoryMethod.DriverVersion, baseClassDeviceType, GetInterfaceVersion()))
             {
                 try
                 {
@@ -359,7 +358,7 @@ namespace ConformU
             }
 
             // Name - Required
-            if (IncludeMethod(MandatoryMethod.Name, deviceType, GetInterfaceVersion()))
+            if (IncludeMethod(MandatoryMethod.Name, baseClassDeviceType, GetInterfaceVersion()))
             {
                 try
                 {
@@ -425,7 +424,7 @@ namespace ConformU
                                         LogOk("SupportedActions", $"Found action: {actionString}");
 
                                         // Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
-                                        if (deviceType == DeviceTypes.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.ToUpper() == "ASCOM.OCH.OBSERVINGCONDITIONS")
+                                        if (baseClassDeviceType == DeviceTypes.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.ToUpper() == "ASCOM.OCH.OBSERVINGCONDITIONS")
                                         {
                                             string result;
                                             if (actionString.ToUpperInvariant().StartsWith("//OCSIMULATOR:"))
@@ -504,7 +503,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                if (deviceType == DeviceTypes.Switch & ReferenceEquals(ex.GetType(), typeof(MissingMemberException)))
+                if (baseClassDeviceType == DeviceTypes.Switch & ReferenceEquals(ex.GetType(), typeof(MissingMemberException)))
                 {
                     LogOk("SupportedActions", "Switch V1 Driver does not have SupportedActions");
                 }
@@ -517,7 +516,7 @@ namespace ConformU
             LogNewLine();
 
             // DeviceState - Mandatory for Platform 7 and above, otherwise not present
-            if (DeviceCapabilities.HasConnectAndDeviceState(deviceType, GetInterfaceVersion()))
+            if (DeviceCapabilities.HasConnectAndDeviceState(baseClassDeviceType, GetInterfaceVersion()))
             {
                 try
                 {
@@ -605,7 +604,7 @@ namespace ConformU
                             // Try to get the MaxSwitch property
                             short maxSwitch = 0;
                             LogCallToDriver("DeviceState", "About to get MaxSwitch property");
-                            try { maxSwitch = (deviceObject as ISwitchV3).MaxSwitch; }
+                            try { maxSwitch = (baseClassDevice as ISwitchV3).MaxSwitch; }
                             catch (Exception ex)
                             {
                                 LogIssue("DeviceState", $"MaxSwitch exception: {ex}");
@@ -852,11 +851,6 @@ namespace ConformU
                 LogCallToDriver("ConformanceCheck", "About to get Connected");
                 return baseClassDevice.Connected;
             }
-        }
-
-        public virtual void CheckCommonMethods()
-        {
-            LogIssue("CheckCommonMethods", "DeviceTester base Class warning message, you should not see this message!");
         }
 
         public virtual bool HasCanProperties

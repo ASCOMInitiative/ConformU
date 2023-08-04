@@ -214,11 +214,6 @@ namespace ConformU
             disposedValue = true;
         }
 
-        public override void CheckCommonMethods()
-        {
-            base.CheckCommonMethods(camera, DeviceTypes.Camera);
-        }
-
         public override void InitialiseTest()
         {
             // Set the error type numbers according to the standards adopted by individual authors.

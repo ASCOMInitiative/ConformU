@@ -169,11 +169,6 @@ namespace ConformU
         {
         }
 
-        public override void CheckCommonMethods()
-        {
-            base.CheckCommonMethods(coverCalibratorDevice, DeviceTypes.CoverCalibrator);
-        }
-
         public override void CheckProperties()
         {
             int brightness;
