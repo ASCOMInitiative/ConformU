@@ -141,23 +141,23 @@ namespace ConformU
         /// </summary>
         public Dictionary<string, bool> TelescopeTests { get; set; } = new()
         {
-            { TelescopeTester.TELTEST_CAN_MOVE_AXIS, true },
-            { TelescopeTester.TELTEST_PARK_UNPARK, true },
-            { TelescopeTester.TELTEST_ABORT_SLEW, true },
-            { TelescopeTester.TELTEST_AXIS_RATE, true },
-            { TelescopeTester.TELTEST_FIND_HOME, true },
-            { TelescopeTester.TELTEST_MOVE_AXIS, true },
-            { TelescopeTester.TELTEST_PULSE_GUIDE, true },
-            { TelescopeTester.TELTEST_SLEW_TO_COORDINATES, true },
-            { TelescopeTester.TELTEST_SLEW_TO_COORDINATES_ASYNC, true },
-            { TelescopeTester.TELTEST_SLEW_TO_TARGET, true },
-            { TelescopeTester.TELTEST_SLEW_TO_TARGET_ASYNC, true },
-            { TelescopeTester.TELTEST_DESTINATION_SIDE_OF_PIER, true },
-            { TelescopeTester.TELTEST_SLEW_TO_ALTAZ, true },
-            { TelescopeTester.TELTEST_SLEW_TO_ALTAZ_ASYNC, true },
-            { TelescopeTester.TELTEST_SYNC_TO_COORDINATES, true },
-            { TelescopeTester.TELTEST_SYNC_TO_TARGET, true },
-            { TelescopeTester.TELTEST_SYNC_TO_ALTAZ, true }
+            { TelescopeTester.CAN_MOVE_AXIS, true },
+            { TelescopeTester.PARK_UNPARK, true },
+            { TelescopeTester.ABORT_SLEW, true },
+            { TelescopeTester.AXIS_RATE, true },
+            { TelescopeTester.FIND_HOME, true },
+            { TelescopeTester.MOVE_AXIS, true },
+            { TelescopeTester.PULSE_GUIDE, true },
+            { TelescopeTester.SLEW_TO_COORDINATES, true },
+            { TelescopeTester.SLEW_TO_COORDINATES_ASYNC, true },
+            { TelescopeTester.SLEW_TO_TARGET, true },
+            { TelescopeTester.SLEW_TO_TARGET_ASYNC, true },
+            { TelescopeTester.DESTINATION_SIDE_OF_PIER, true },
+            { TelescopeTester.SLEW_TO_ALTAZ, true },
+            { TelescopeTester.SLEW_TO_ALTAZ_ASYNC, true },
+            { TelescopeTester.SYNC_TO_COORDINATES, true },
+            { TelescopeTester.SYNC_TO_TARGET, true },
+            { TelescopeTester.SYNC_TO_ALTAZ, true }
         };
 
         [FullTestValue(true)]

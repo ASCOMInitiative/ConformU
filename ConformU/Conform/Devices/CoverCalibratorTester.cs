@@ -81,14 +81,14 @@ namespace ConformU
                 {
                     default:
                         {
-                            g_ExNotImplemented = (int)0x80040400;
-                            g_ExInvalidValue1 = (int)0x80040405;
-                            g_ExInvalidValue2 = (int)0x80040405;
-                            g_ExInvalidValue3 = (int)0x80040405;
-                            g_ExInvalidValue4 = (int)0x80040405;
-                            g_ExInvalidValue5 = (int)0x80040405;
-                            g_ExInvalidValue6 = (int)0x80040405;
-                            g_ExNotSet1 = (int)0x80040403;
+                            GExNotImplemented = (int)0x80040400;
+                            GExInvalidValue1 = (int)0x80040405;
+                            GExInvalidValue2 = (int)0x80040405;
+                            GExInvalidValue3 = (int)0x80040405;
+                            GExInvalidValue4 = (int)0x80040405;
+                            GExInvalidValue5 = (int)0x80040405;
+                            GExInvalidValue6 = (int)0x80040405;
+                            GExNotSet1 = (int)0x80040403;
                             break;
                         }
                 }
@@ -147,7 +147,7 @@ namespace ConformU
                 }
 
                 LogInfo("CreateDevice", "Successfully created driver");
-                baseClassDevice = coverCalibratorDevice; // Assign the driver to the base class
+                BaseClassDevice = coverCalibratorDevice; // Assign the driver to the base class
 
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);
@@ -197,7 +197,7 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
                     {
                         if (maxBrightness >= 1)
                         {
-                            LogOK("MaxBrightness", maxBrightness.ToString());
+                            LogOk("MaxBrightness", maxBrightness.ToString());
                             maxBrightnessOk = true;
                         }
                         else
@@ -237,7 +237,7 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
                             if (maxBrightnessOk)
                             {
                                 if (brightness <= maxBrightness)
-                                    LogOK("Brightness", maxBrightness.ToString());
+                                    LogOk("Brightness", maxBrightness.ToString());
                                 else
                                     LogIssue("Brightness", $"The returned Brightness {brightness} is greater than MaxBrightness {maxBrightness}");
                             }
@@ -292,7 +292,7 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
                         {
                             canAsynchronousOpen = false;
                             if (coverCalibratorDevice.CoverState == CoverStatus.Open)
-                                LogOK("OpenCover", $"OpenCover was successful. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                                LogOk("OpenCover", $"OpenCover was successful. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                             else
                                 LogIssue("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
@@ -309,7 +309,7 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
                             if (coverCalibratorDevice.CoverState == CoverStatus.Open)
                             {
                                 asynchronousOpenTime = DateTime.Now.Subtract(startTime).TotalSeconds;
-                                LogOK("OpenCover", $"OpenCover was successful. The asynchronous open took {asynchronousOpenTime:0.0} seconds");
+                                LogOk("OpenCover", $"OpenCover was successful. The asynchronous open took {asynchronousOpenTime:0.0} seconds");
                             }
                             else
                                 LogIssue("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The asynchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
@@ -349,7 +349,7 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
                         {
                             canAsynchronousOpen = false;
                             if (coverCalibratorDevice.CoverState == CoverStatus.Closed)
-                                LogOK("CloseCover", $"CloseCover was successful. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                                LogOk("CloseCover", $"CloseCover was successful. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                             else
                                 LogIssue("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
@@ -364,7 +364,7 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
                             if (coverCalibratorDevice.CoverState == CoverStatus.Closed)
                             {
                                 asynchronousCloseTime = DateTime.Now.Subtract(startTime).TotalSeconds;
-                                LogOK("CloseCover", $"CloseCover was successful. The asynchronous close took {asynchronousCloseTime:0.0} seconds");
+                                LogOk("CloseCover", $"CloseCover was successful. The asynchronous close took {asynchronousCloseTime:0.0} seconds");
                             }
                             else
                                 LogIssue("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The asynchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
@@ -420,7 +420,7 @@ LogCallToDriver("HaltCover", "About to call HaltCover method");
 
                                     // Confirm that the cover is no longer moving
                                     if (!(coverCalibratorDevice.CoverState == CoverStatus.Moving))
-                                        LogOK("HaltCover", "Cover is no longer moving after issuing the HaltCover command");
+                                        LogOk("HaltCover", "Cover is no longer moving after issuing the HaltCover command");
                                     else
                                         LogIssue("HaltCover", "Cover is still moving after issuing the HaltCover command");
                                 }
@@ -606,12 +606,12 @@ LogCallToDriver("HaltCover", "About to call HaltCover method");
                         {
                             if (coverCalibratorDevice.CalibratorState == CalibratorStatus.Off)
                             {
-                                LogOK("CalibratorOff", $"CalibratorOff was successful. The synchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                                LogOk("CalibratorOff", $"CalibratorOff was successful. The synchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
 
                                 // Confirm that Brightness returns to zero when calibrator is turned off
 LogCallToDriver("CalibratorOff", "About to call Brightness property");
                                 if (coverCalibratorDevice.Brightness == 0)
-                                    LogOK("CalibratorOff", $"Brightness is set to zero when the calibrator is turned off");
+                                    LogOk("CalibratorOff", $"Brightness is set to zero when the calibrator is turned off");
                                 else
                                     LogIssue("CalibratorOff", $"Brightness is not set to zero when the calibrator is turned off");
                             }
@@ -627,12 +627,12 @@ LogCallToDriver("CalibratorOff", "About to call Brightness property");
 
                             if (coverCalibratorDevice.CalibratorState == CalibratorStatus.Off)
                             {
-                                LogOK("CalibratorOff", $"CalibratorOff was successful. The asynchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                                LogOk("CalibratorOff", $"CalibratorOff was successful. The asynchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
 
                                 // Confirm that Brightness returns to zero when calibrator is turned off
 LogCallToDriver("CalibratorOff", "About to call Brightness property");
                                 if (coverCalibratorDevice.Brightness == 0)
-                                    LogOK("CalibratorOff", $"Brightness is set to zero when the calibrator is turned off");
+                                    LogOk("CalibratorOff", $"Brightness is set to zero when the calibrator is turned off");
                                 else
                                     LogIssue("CalibratorOff", $"Brightness is not set to zero when the calibrator is turned off");
                             }
@@ -683,14 +683,14 @@ LogCallToDriver("CalibratorOff", "About to call Brightness property");
                             LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} should have thrown an InvalidValueException but did not.");
                         else if (coverCalibratorDevice.CalibratorState == CalibratorStatus.Ready)
                         {
-                            LogOK("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was successful. The synchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                            LogOk("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was successful. The synchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
 
                             // Confirm that the brightness value is what was set
 LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
                             returnedBrightness = coverCalibratorDevice.Brightness;
 
                             if (returnedBrightness == requestedBrightness)
-                                LogOK("CalibratorOn", $"The Brightness property does return the value that was set");
+                                LogOk("CalibratorOn", $"The Brightness property does return the value that was set");
                             else
                                 LogIssue("CalibratorOn", $"The Brightness property value: {returnedBrightness} does not match the value that was set: {requestedBrightness}");
                         }
@@ -707,7 +707,7 @@ LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
                         if ((requestedBrightness < 0) | (requestedBrightness > maxBrightness))
                             LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} should have thrown an InvalidValueException but did not.");
                         else if (coverCalibratorDevice.CalibratorState == CalibratorStatus.Ready)
-                            LogOK("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was successful. The asynchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                            LogOk("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was successful. The asynchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         else
                             LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Ready'. The asynchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                     }
@@ -717,7 +717,7 @@ LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
                     if ((requestedBrightness < 0) | (requestedBrightness > maxBrightness))
                     {
                         if (IsInvalidValueException("CalibratorOn", ex))
-                            LogOK("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} threw an InvalidValueException as expected");
+                            LogOk("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} threw an InvalidValueException as expected");
                         else
                             LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} threw an {ex.GetType().Name} exception an InvalidValueException was expected");
                     }
@@ -784,7 +784,7 @@ LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
                         {
                             LogCallToDriver("CalibratorState", "About to call CalibratorState property");
                             calibratorState = coverCalibratorDevice.CalibratorState;
-                            LogOK(propertyName, calibratorState.ToString());
+                            LogOk(propertyName, calibratorState.ToString());
                             break;
                         }
 
@@ -792,7 +792,7 @@ LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
                         {
                             LogCallToDriver("CoverState", "About to call CoverState property");
                             coverState = coverCalibratorDevice.CoverState;
-                            LogOK(propertyName, coverState.ToString());
+                            LogOk(propertyName, coverState.ToString());
                             break;
                         }
 
@@ -872,7 +872,7 @@ LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
 
                     case object _ when 2.0 <= loopRate && loopRate <= 10.0:
                         {
-                            LogOK(propertyName, "Transaction rate: " + loopRate.ToString("0.0") + " per second");
+                            LogOk(propertyName, "Transaction rate: " + loopRate.ToString("0.0") + " per second");
                             break;
                         }
 

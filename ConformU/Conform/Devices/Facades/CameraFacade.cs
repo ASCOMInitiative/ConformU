@@ -10,15 +10,15 @@ namespace ConformU
         // Create the test device in the facade base class
         public CameraFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }
 
-        public short BinX { get => FunctionNoParameters<short>(() => driver.BinX); set => Method1Parameter((i) => driver.BinX = i, value); }
+        public short BinX { get => FunctionNoParameters<short>(() => Driver.BinX); set => Method1Parameter((i) => Driver.BinX = i, value); }
 
-        public short BinY { get => FunctionNoParameters<short>(() => driver.BinY); set => Method1Parameter((i) => driver.BinY = i, value); }
+        public short BinY { get => FunctionNoParameters<short>(() => Driver.BinY); set => Method1Parameter((i) => Driver.BinY = i, value); }
 
         public CameraState CameraState
         {
             get
             {
-                return (CameraState)FunctionNoParameters<object>(() => driver.CameraState);
+                return (CameraState)FunctionNoParameters<object>(() => Driver.CameraState);
             }
         }
 
@@ -26,7 +26,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<int>(() => driver.CameraXSize);
+                return FunctionNoParameters<int>(() => Driver.CameraXSize);
             }
         }
 
@@ -34,7 +34,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<int>(() => driver.CameraYSize);
+                return FunctionNoParameters<int>(() => Driver.CameraYSize);
             }
         }
 
@@ -42,7 +42,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanAbortExposure);
+                return FunctionNoParameters<bool>(() => Driver.CanAbortExposure);
             }
         }
 
@@ -50,7 +50,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanAsymmetricBin);
+                return FunctionNoParameters<bool>(() => Driver.CanAsymmetricBin);
             }
         }
 
@@ -58,7 +58,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanGetCoolerPower);
+                return FunctionNoParameters<bool>(() => Driver.CanGetCoolerPower);
             }
         }
 
@@ -66,7 +66,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanPulseGuide);
+                return FunctionNoParameters<bool>(() => Driver.CanPulseGuide);
             }
         }
 
@@ -74,7 +74,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSetCCDTemperature);
+                return FunctionNoParameters<bool>(() => Driver.CanSetCCDTemperature);
             }
         }
 
@@ -82,7 +82,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanStopExposure);
+                return FunctionNoParameters<bool>(() => Driver.CanStopExposure);
             }
         }
 
@@ -90,17 +90,17 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.CCDTemperature);
+                return FunctionNoParameters<double>(() => Driver.CCDTemperature);
             }
         }
 
-        public bool CoolerOn { get => FunctionNoParameters<bool>(() => driver.CoolerOn); set => Method1Parameter((i) => driver.CoolerOn = i, value); }
+        public bool CoolerOn { get => FunctionNoParameters<bool>(() => Driver.CoolerOn); set => Method1Parameter((i) => Driver.CoolerOn = i, value); }
 
         public double CoolerPower
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.CoolerPower);
+                return FunctionNoParameters<double>(() => Driver.CoolerPower);
             }
         }
 
@@ -108,7 +108,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.ElectronsPerADU);
+                return FunctionNoParameters<double>(() => Driver.ElectronsPerADU);
             }
         }
 
@@ -116,7 +116,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.FullWellCapacity);
+                return FunctionNoParameters<double>(() => Driver.FullWellCapacity);
             }
         }
 
@@ -124,7 +124,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.HasShutter);
+                return FunctionNoParameters<bool>(() => Driver.HasShutter);
             }
         }
 
@@ -132,7 +132,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.HeatSinkTemperature);
+                return FunctionNoParameters<double>(() => Driver.HeatSinkTemperature);
             }
         }
 
@@ -140,7 +140,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<object>(() => driver.ImageArray);
+                return FunctionNoParameters<object>(() => Driver.ImageArray);
             }
         }
 
@@ -148,7 +148,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<object>(() => driver.ImageArrayVariant);
+                return FunctionNoParameters<object>(() => Driver.ImageArrayVariant);
             }
         }
 
@@ -156,7 +156,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.ImageReady);
+                return FunctionNoParameters<bool>(() => Driver.ImageReady);
             }
         }
 
@@ -164,7 +164,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.IsPulseGuiding);
+                return FunctionNoParameters<bool>(() => Driver.IsPulseGuiding);
             }
         }
 
@@ -172,7 +172,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.LastExposureDuration);
+                return FunctionNoParameters<double>(() => Driver.LastExposureDuration);
             }
         }
 
@@ -180,7 +180,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<string>(() => driver.LastExposureStartTime);
+                return FunctionNoParameters<string>(() => Driver.LastExposureStartTime);
             }
         }
 
@@ -188,7 +188,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<int>(() => driver.MaxADU);
+                return FunctionNoParameters<int>(() => Driver.MaxADU);
             }
         }
 
@@ -196,7 +196,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<short>(() => driver.MaxBinX);
+                return FunctionNoParameters<short>(() => Driver.MaxBinX);
             }
         }
 
@@ -204,19 +204,19 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<short>(() => driver.MaxBinY);
+                return FunctionNoParameters<short>(() => Driver.MaxBinY);
             }
         }
 
-        public int NumX { get => FunctionNoParameters<int>(() => driver.NumX); set => Method1Parameter((i) => driver.NumX = i, value); }
+        public int NumX { get => FunctionNoParameters<int>(() => Driver.NumX); set => Method1Parameter((i) => Driver.NumX = i, value); }
 
-        public int NumY { get => FunctionNoParameters<int>(() => driver.NumY); set => Method1Parameter((i) => driver.NumY = i, value); }
+        public int NumY { get => FunctionNoParameters<int>(() => Driver.NumY); set => Method1Parameter((i) => Driver.NumY = i, value); }
 
         public double PixelSizeX
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.PixelSizeX);
+                return FunctionNoParameters<double>(() => Driver.PixelSizeX);
             }
         }
 
@@ -224,21 +224,21 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.PixelSizeY);
+                return FunctionNoParameters<double>(() => Driver.PixelSizeY);
             }
         }
 
-        public double SetCCDTemperature { get => FunctionNoParameters<double>(() => driver.SetCCDTemperature); set => Method1Parameter((i) => driver.SetCCDTemperature = i, value); }
+        public double SetCCDTemperature { get => FunctionNoParameters<double>(() => Driver.SetCCDTemperature); set => Method1Parameter((i) => Driver.SetCCDTemperature = i, value); }
 
-        public int StartX { get => FunctionNoParameters<int>(() => driver.StartX); set => Method1Parameter((i) => driver.StartX = i, value); }
+        public int StartX { get => FunctionNoParameters<int>(() => Driver.StartX); set => Method1Parameter((i) => Driver.StartX = i, value); }
 
-        public int StartY { get => FunctionNoParameters<int>(() => driver.StartY); set => Method1Parameter((i) => driver.StartY = i, value); }
+        public int StartY { get => FunctionNoParameters<int>(() => Driver.StartY); set => Method1Parameter((i) => Driver.StartY = i, value); }
 
         public short BayerOffsetX
         {
             get
             {
-                return FunctionNoParameters<short>(() => driver.BayerOffsetX);
+                return FunctionNoParameters<short>(() => Driver.BayerOffsetX);
             }
         }
 
@@ -246,7 +246,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<short>(() => driver.BayerOffsetY);
+                return FunctionNoParameters<short>(() => Driver.BayerOffsetY);
             }
         }
 
@@ -254,7 +254,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanFastReadout);
+                return FunctionNoParameters<bool>(() => Driver.CanFastReadout);
             }
         }
 
@@ -262,7 +262,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.ExposureMax);
+                return FunctionNoParameters<double>(() => Driver.ExposureMax);
             }
         }
 
@@ -270,7 +270,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.ExposureMin);
+                return FunctionNoParameters<double>(() => Driver.ExposureMin);
             }
         }
 
@@ -278,19 +278,19 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.ExposureResolution);
+                return FunctionNoParameters<double>(() => Driver.ExposureResolution);
             }
         }
 
-        public bool FastReadout { get => FunctionNoParameters<bool>(() => driver.FastReadout); set => Method1Parameter((i) => driver.FastReadout = i, value); }
+        public bool FastReadout { get => FunctionNoParameters<bool>(() => Driver.FastReadout); set => Method1Parameter((i) => Driver.FastReadout = i, value); }
 
-        public short Gain { get => FunctionNoParameters<short>(() => driver.Gain); set => Method1Parameter((i) => driver.Gain = i, value); }
+        public short Gain { get => FunctionNoParameters<short>(() => Driver.Gain); set => Method1Parameter((i) => Driver.Gain = i, value); }
 
         public short GainMax
         {
             get
             {
-                return FunctionNoParameters<short>(() => driver.GainMax);
+                return FunctionNoParameters<short>(() => Driver.GainMax);
             }
         }
 
@@ -298,7 +298,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<short>(() => driver.GainMin);
+                return FunctionNoParameters<short>(() => Driver.GainMin);
             }
         }
 
@@ -307,7 +307,7 @@ namespace ConformU
             get
             {
                 List<string> returnValue = new();
-                foreach (string gain in FunctionNoParameters<System.Collections.IEnumerable>(() => driver.Gains))
+                foreach (string gain in FunctionNoParameters<System.Collections.IEnumerable>(() => Driver.Gains))
                 {
                     returnValue.Add(gain);
                 }
@@ -319,18 +319,18 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<short>(() => driver.PercentCompleted);
+                return FunctionNoParameters<short>(() => Driver.PercentCompleted);
             }
         }
 
-        public short ReadoutMode { get => FunctionNoParameters<short>(() => driver.ReadoutMode); set => Method1Parameter((i) => driver.ReadoutMode = i, value); }
+        public short ReadoutMode { get => FunctionNoParameters<short>(() => Driver.ReadoutMode); set => Method1Parameter((i) => Driver.ReadoutMode = i, value); }
 
         public IList<string> ReadoutModes
         {
             get
             {
                 List<string> returnValue = new();
-                foreach (string gain in FunctionNoParameters<System.Collections.IEnumerable>(() => driver.ReadoutModes))
+                foreach (string gain in FunctionNoParameters<System.Collections.IEnumerable>(() => Driver.ReadoutModes))
                 {
                     returnValue.Add(gain);
                 }
@@ -342,7 +342,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<string>(() => driver.SensorName);
+                return FunctionNoParameters<string>(() => Driver.SensorName);
             }
         }
 
@@ -350,17 +350,17 @@ namespace ConformU
         {
             get
             {
-                return (SensorType)FunctionNoParameters<object>(() => driver.SensorType);
+                return (SensorType)FunctionNoParameters<object>(() => Driver.SensorType);
             }
         }
 
-        public int Offset { get => FunctionNoParameters<int>(() => driver.Offset); set => Method1Parameter((i) => driver.Offset = i, value); }
+        public int Offset { get => FunctionNoParameters<int>(() => Driver.Offset); set => Method1Parameter((i) => Driver.Offset = i, value); }
 
         public int OffsetMax
         {
             get
             {
-                return FunctionNoParameters<int>(() => driver.OffsetMax);
+                return FunctionNoParameters<int>(() => Driver.OffsetMax);
             }
         }
 
@@ -368,7 +368,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<int>(() => driver.OffsetMin);
+                return FunctionNoParameters<int>(() => Driver.OffsetMin);
             }
         }
 
@@ -377,7 +377,7 @@ namespace ConformU
             get
             {
                 List<string> returnValue = new();
-                foreach (string gain in FunctionNoParameters<System.Collections.IEnumerable>(() => driver.Offsets))
+                foreach (string gain in FunctionNoParameters<System.Collections.IEnumerable>(() => Driver.Offsets))
                 {
                     returnValue.Add(gain);
                 }
@@ -385,28 +385,28 @@ namespace ConformU
             }
         }
 
-        public double SubExposureDuration { get => FunctionNoParameters<double>(() => driver.SubExposureDuration); set => Method1Parameter((i) => driver.SubExposureDuration = i, value); }
+        public double SubExposureDuration { get => FunctionNoParameters<double>(() => Driver.SubExposureDuration); set => Method1Parameter((i) => Driver.SubExposureDuration = i, value); }
 
         public void AbortExposure()
         {
-            MethodNoParameters(() => driver.AbortExposure());
+            MethodNoParameters(() => Driver.AbortExposure());
 
         }
 
-        public void PulseGuide(GuideDirection Direction, int Duration)
+        public void PulseGuide(GuideDirection direction, int duration)
         {
-            Method2Parameters((i, j) => driver.PulseGuide(i, j), Direction, Duration);
+            Method2Parameters((i, j) => Driver.PulseGuide(i, j), direction, duration);
         }
 
-        public void StartExposure(double Duration, bool Light)
+        public void StartExposure(double duration, bool light)
         {
-            Method2Parameters((i, j) => driver.StartExposure(i, j), Duration, Light);
+            Method2Parameters((i, j) => Driver.StartExposure(i, j), duration, light);
 
         }
 
         public void StopExposure()
         {
-            MethodNoParameters(() => driver.StopExposure());
+            MethodNoParameters(() => Driver.StopExposure());
 
         }
 

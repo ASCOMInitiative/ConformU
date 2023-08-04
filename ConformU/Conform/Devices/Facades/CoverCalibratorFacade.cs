@@ -13,7 +13,7 @@ namespace ConformU
         {
             get
             {
-                return (CoverStatus)FunctionNoParameters<object>(() => driver.CoverState);
+                return (CoverStatus)FunctionNoParameters<object>(() => Driver.CoverState);
             }
         }
 
@@ -21,7 +21,7 @@ namespace ConformU
         {
             get
             {
-                return (CalibratorStatus)FunctionNoParameters<object>(() => driver.CalibratorState);
+                return (CalibratorStatus)FunctionNoParameters<object>(() => Driver.CalibratorState);
             }
         }
 
@@ -29,7 +29,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<int>(() => driver.Brightness);
+                return FunctionNoParameters<int>(() => Driver.Brightness);
             }
         }
 
@@ -37,33 +37,33 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<int>(() => driver.MaxBrightness);
+                return FunctionNoParameters<int>(() => Driver.MaxBrightness);
             }
         }
 
         public void CalibratorOff()
         {
-            MethodNoParameters(() => driver.CalibratorOff());
+            MethodNoParameters(() => Driver.CalibratorOff());
         }
 
-        public void CalibratorOn(int Brightness)
+        public void CalibratorOn(int brightness)
         {
-            Method1Parameter((i) => driver.CalibratorOn(i), Brightness);
+            Method1Parameter((i) => Driver.CalibratorOn(i), brightness);
         }
 
         public void CloseCover()
         {
-            MethodNoParameters(() => driver.CloseCover());
+            MethodNoParameters(() => Driver.CloseCover());
         }
 
         public void HaltCover()
         {
-            MethodNoParameters(() => driver.HaltCover());
+            MethodNoParameters(() => Driver.HaltCover());
         }
 
         public void OpenCover()
         {
-            MethodNoParameters(() => driver.OpenCover());
+            MethodNoParameters(() => Driver.OpenCover());
         }
 
         #endregion
@@ -74,7 +74,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CalibratorChanging);
+                return FunctionNoParameters<bool>(() => Driver.CalibratorChanging);
             }
         }
 
@@ -82,7 +82,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CoverMoving);
+                return FunctionNoParameters<bool>(() => Driver.CoverMoving);
             }
         }
 

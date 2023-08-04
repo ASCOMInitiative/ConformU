@@ -13,7 +13,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.Absolute);
+                return FunctionNoParameters<bool>(() => Driver.Absolute);
             }
         }
 
@@ -21,17 +21,17 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.IsMoving);
+                return FunctionNoParameters<bool>(() => Driver.IsMoving);
             }
         }
 
-        public bool Link { get => FunctionNoParameters<bool>(() => driver.Link); set => Method1Parameter((i) => driver.Link = i, value); }
+        public bool Link { get => FunctionNoParameters<bool>(() => Driver.Link); set => Method1Parameter((i) => Driver.Link = i, value); }
 
         public int MaxIncrement
         {
             get
             {
-                return FunctionNoParameters<int>(() => driver.MaxIncrement);
+                return FunctionNoParameters<int>(() => Driver.MaxIncrement);
             }
         }
 
@@ -39,7 +39,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<int>(() => driver.MaxStep);
+                return FunctionNoParameters<int>(() => Driver.MaxStep);
             }
         }
 
@@ -47,7 +47,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<int>(() => driver.Position);
+                return FunctionNoParameters<int>(() => Driver.Position);
             }
         }
 
@@ -55,17 +55,17 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.StepSize);
+                return FunctionNoParameters<double>(() => Driver.StepSize);
             }
         }
 
-        public bool TempComp { get => FunctionNoParameters<bool>(() => driver.TempComp); set => Method1Parameter((i) => driver.TempComp = i, value); }
+        public bool TempComp { get => FunctionNoParameters<bool>(() => Driver.TempComp); set => Method1Parameter((i) => Driver.TempComp = i, value); }
 
         public bool TempCompAvailable
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.TempCompAvailable);
+                return FunctionNoParameters<bool>(() => Driver.TempCompAvailable);
             }
         }
 
@@ -73,18 +73,18 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.Temperature);
+                return FunctionNoParameters<double>(() => Driver.Temperature);
             }
         }
 
         public void Halt()
         {
-            MethodNoParameters(() => driver.Halt());
+            MethodNoParameters(() => Driver.Halt());
         }
 
-        public void Move(int Position)
+        public void Move(int position)
         {
-            Method1Parameter((i) => driver.Move(i), Position);
+            Method1Parameter((i) => Driver.Move(i), position);
         }
 
         #endregion

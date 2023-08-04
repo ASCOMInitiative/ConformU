@@ -19,24 +19,24 @@ namespace ConformU
 
         #region Variables and Constants
         // TelescopeTest constants
-        internal const string TELTEST_ABORT_SLEW = "AbortSlew";
-        internal const string TELTEST_AXIS_RATE = "AxisRate";
-        internal const string TELTEST_CAN_MOVE_AXIS = "CanMoveAxis";
-        internal const string TELTEST_COMMANDXXX = "CommandXXX";
-        internal const string TELTEST_DESTINATION_SIDE_OF_PIER = "DestinationSideOfPier";
-        internal const string TELTEST_FIND_HOME = "FindHome";
-        internal const string TELTEST_MOVE_AXIS = "MoveAxis";
-        internal const string TELTEST_PARK_UNPARK = "Park/Unpark";
-        internal const string TELTEST_PULSE_GUIDE = "PulseGuide";
-        internal const string TELTEST_SLEW_TO_ALTAZ = "SlewToAltAz";
-        internal const string TELTEST_SLEW_TO_ALTAZ_ASYNC = "SlewToAltAzAsync";
-        internal const string TELTEST_SLEW_TO_TARGET = "SlewToTarget";
-        internal const string TELTEST_SLEW_TO_TARGET_ASYNC = "SlewToTargetAsync";
-        internal const string TELTEST_SYNC_TO_ALTAZ = "SyncToAltAz";
-        internal const string TELTEST_SLEW_TO_COORDINATES = "SlewToCoordinates";
-        internal const string TELTEST_SLEW_TO_COORDINATES_ASYNC = "SlewToCoordinatesAsync";
-        internal const string TELTEST_SYNC_TO_COORDINATES = "SyncToCoordinates";
-        internal const string TELTEST_SYNC_TO_TARGET = "SyncToTarget";
+        internal const string ABORT_SLEW = "AbortSlew";
+        internal const string AXIS_RATE = "AxisRate";
+        internal const string CAN_MOVE_AXIS = "CanMoveAxis";
+        internal const string COMMANDXXX = "CommandXXX";
+        internal const string DESTINATION_SIDE_OF_PIER = "DestinationSideOfPier";
+        internal const string FIND_HOME = "FindHome";
+        internal const string MOVE_AXIS = "MoveAxis";
+        internal const string PARK_UNPARK = "Park/Unpark";
+        internal const string PULSE_GUIDE = "PulseGuide";
+        internal const string SLEW_TO_ALTAZ = "SlewToAltAz";
+        internal const string SLEW_TO_ALTAZ_ASYNC = "SlewToAltAzAsync";
+        internal const string SLEW_TO_TARGET = "SlewToTarget";
+        internal const string SLEW_TO_TARGET_ASYNC = "SlewToTargetAsync";
+        internal const string SYNC_TO_ALTAZ = "SyncToAltAz";
+        internal const string SLEW_TO_COORDINATES = "SlewToCoordinates";
+        internal const string SLEW_TO_COORDINATES_ASYNC = "SlewToCoordinatesAsync";
+        internal const string SYNC_TO_COORDINATES = "SyncToCoordinates";
+        internal const string SYNC_TO_TARGET = "SyncToTarget";
 
         private const int TRACKING_COMMAND_DELAY = 1000; // Time to wait between changing Tracking state
         private const int MOVE_AXIS_TIME = 2000; // Number of milliseconds for each move axis command
@@ -96,7 +96,7 @@ namespace ConformU
         private DateTime utcDate;
         private bool canMoveAxisPrimary, canMoveAxisSecondary, canMoveAxisTertiary;
         private PointingState destinationSideOfPier, destinationSideOfPierEast, destinationSideOfPierWest;
-        private double siderealTimeASCOM;
+        private double siderealTimeAscom;
         private DateTime startTime, endTime;
         private bool? canReadSideOfPier = null; // Start out in the "not read" state
         private double targetAltitude, targetAzimuth;
@@ -140,7 +140,7 @@ namespace ConformU
             CanAbortExposure = 17,
             CanAsymmetricBin = 18,
             CanGetCoolerPower = 19,
-            CanSetCCDTemperature = 20,
+            CanSetCcdTemperature = 20,
             CanStopExposure = 21
         }
 
@@ -158,26 +158,26 @@ namespace ConformU
 
         private enum RequiredMethodType
         {
-            tstAxisrates = 1,
-            tstCanMoveAxisPrimary = 2,
-            tstCanMoveAxisSecondary = 3,
-            tstCanMoveAxisTertiary = 4
+            TstAxisrates = 1,
+            TstCanMoveAxisPrimary = 2,
+            TstCanMoveAxisSecondary = 3,
+            TstCanMoveAxisTertiary = 4
         }
 
         private enum ParkedExceptionType
         {
-            tstPExcepAbortSlew = 1,
-            tstPExcepFindHome = 2,
-            tstPExcepMoveAxisPrimary = 3,
-            tstPExcepMoveAxisSecondary = 4,
-            tstPExcepMoveAxisTertiary = 5,
-            tstPExcepSlewToCoordinates = 6,
-            tstPExcepSlewToCoordinatesAsync = 7,
-            tstPExcepSlewToTarget = 8,
-            tstPExcepSlewToTargetAsync = 9,
-            tstPExcepSyncToCoordinates = 10,
-            tstPExcepSyncToTarget = 11,
-            tstPExcepPulseGuide = 12
+            TstPExcepAbortSlew = 1,
+            TstPExcepFindHome = 2,
+            TstPExcepMoveAxisPrimary = 3,
+            TstPExcepMoveAxisSecondary = 4,
+            TstPExcepMoveAxisTertiary = 5,
+            TstPExcepSlewToCoordinates = 6,
+            TstPExcepSlewToCoordinatesAsync = 7,
+            TstPExcepSlewToTarget = 8,
+            TstPExcepSlewToTargetAsync = 9,
+            TstPExcepSyncToCoordinates = 10,
+            TstPExcepSyncToTarget = 11,
+            TstPExcepPulseGuide = 12
         }
         // Private Enum SyncType
         // End Enum
@@ -196,17 +196,17 @@ namespace ConformU
 
         private enum PerformanceType
         {
-            tstPerfAltitude = 0,
-            tstPerfAtHome = 1,
-            tstPerfAtPark = 2,
-            tstPerfAzimuth = 3,
-            tstPerfDeclination = 4,
-            tstPerfIsPulseGuiding = 5,
-            tstPerfRightAscension = 6,
-            tstPerfSideOfPier = 7,
-            tstPerfSiderealTime = 8,
-            tstPerfSlewing = 9,
-            tstPerfUTCDate = 10
+            TstPerfAltitude = 0,
+            TstPerfAtHome = 1,
+            TstPerfAtPark = 2,
+            TstPerfAzimuth = 3,
+            TstPerfDeclination = 4,
+            TstPerfIsPulseGuiding = 5,
+            TstPerfRightAscension = 6,
+            TstPerfSideOfPier = 7,
+            TstPerfSiderealTime = 8,
+            TstPerfSlewing = 9,
+            TstPerfUtcDate = 10
         }
 
         public enum FlipTestType
@@ -217,9 +217,9 @@ namespace ConformU
 
         private enum InterfaceType
         {
-            ITelescope,
-            ITelescopeV2,
-            ITelescopeV3
+            Telescope,
+            TelescopeV2,
+            TelescopeV3
         }
         #endregion
 
@@ -273,14 +273,14 @@ namespace ConformU
                 {
                     case "Hub.Telescope":
                         {
-                            g_ExNotImplemented = (int)0x80040400;
-                            g_ExInvalidValue1 = (int)0x80040401;
-                            g_ExInvalidValue2 = (int)0x80040402;
-                            g_ExInvalidValue3 = (int)0x80040405;
-                            g_ExInvalidValue4 = (int)0x80040402;
-                            g_ExInvalidValue5 = (int)0x80040402;
-                            g_ExInvalidValue6 = (int)0x80040402;
-                            g_ExNotSet1 = (int)0x80040403;
+                            GExNotImplemented = (int)0x80040400;
+                            GExInvalidValue1 = (int)0x80040401;
+                            GExInvalidValue2 = (int)0x80040402;
+                            GExInvalidValue3 = (int)0x80040405;
+                            GExInvalidValue4 = (int)0x80040402;
+                            GExInvalidValue5 = (int)0x80040402;
+                            GExInvalidValue6 = (int)0x80040402;
+                            GExNotSet1 = (int)0x80040403;
                             break;
                         }
 
@@ -288,80 +288,80 @@ namespace ConformU
                     case "Celestron.Telescope":
                     case "ASCOM.MI250.Telescope":
                         {
-                            g_ExNotImplemented = (int)0x80040400;
-                            g_ExInvalidValue1 = (int)0x80040401;
-                            g_ExInvalidValue2 = (int)0x80040402;
-                            g_ExInvalidValue3 = (int)0x80040402;
-                            g_ExInvalidValue4 = (int)0x80040402;
-                            g_ExInvalidValue5 = (int)0x80040402;
-                            g_ExInvalidValue6 = (int)0x80040402;
-                            g_ExNotSet1 = (int)0x80040403;
+                            GExNotImplemented = (int)0x80040400;
+                            GExInvalidValue1 = (int)0x80040401;
+                            GExInvalidValue2 = (int)0x80040402;
+                            GExInvalidValue3 = (int)0x80040402;
+                            GExInvalidValue4 = (int)0x80040402;
+                            GExInvalidValue5 = (int)0x80040402;
+                            GExInvalidValue6 = (int)0x80040402;
+                            GExNotSet1 = (int)0x80040403;
                             break;
                         }
 
                     case "TemmaLite.Telescope":
                         {
-                            g_ExNotImplemented = (int)0x80040400;
-                            g_ExInvalidValue1 = (int)0x80040410;
-                            g_ExInvalidValue2 = (int)0x80040418;
-                            g_ExInvalidValue3 = (int)0x80040418;
-                            g_ExInvalidValue4 = (int)0x80040418;
-                            g_ExInvalidValue5 = (int)0x80040418;
-                            g_ExInvalidValue6 = (int)0x80040418;
-                            g_ExNotSet1 = (int)0x80040417;
+                            GExNotImplemented = (int)0x80040400;
+                            GExInvalidValue1 = (int)0x80040410;
+                            GExInvalidValue2 = (int)0x80040418;
+                            GExInvalidValue3 = (int)0x80040418;
+                            GExInvalidValue4 = (int)0x80040418;
+                            GExInvalidValue5 = (int)0x80040418;
+                            GExInvalidValue6 = (int)0x80040418;
+                            GExNotSet1 = (int)0x80040417;
                             break;
                         }
 
                     case "Gemini.Telescope":
                         {
-                            g_ExNotImplemented = (int)0x80040400;
-                            g_ExInvalidValue1 = (int)0x80040410;
-                            g_ExInvalidValue2 = (int)0x80040418;
-                            g_ExInvalidValue3 = (int)0x80040419;
-                            g_ExInvalidValue4 = (int)0x80040420;
-                            g_ExInvalidValue5 = (int)0x80040420;
-                            g_ExInvalidValue6 = (int)0x80040420;
-                            g_ExNotSet1 = (int)0x80040417;
+                            GExNotImplemented = (int)0x80040400;
+                            GExInvalidValue1 = (int)0x80040410;
+                            GExInvalidValue2 = (int)0x80040418;
+                            GExInvalidValue3 = (int)0x80040419;
+                            GExInvalidValue4 = (int)0x80040420;
+                            GExInvalidValue5 = (int)0x80040420;
+                            GExInvalidValue6 = (int)0x80040420;
+                            GExNotSet1 = (int)0x80040417;
                             break;
                         }
 
                     case "POTH.Telescope":
                         {
-                            g_ExNotImplemented = (int)0x80040400;
-                            g_ExInvalidValue1 = (int)0x80040405;
-                            g_ExInvalidValue2 = (int)0x80040406;
-                            g_ExInvalidValue3 = (int)0x80040406;
-                            g_ExInvalidValue4 = (int)0x80040406;
-                            g_ExInvalidValue5 = (int)0x80040406;
-                            g_ExInvalidValue6 = (int)0x80040406;
-                            g_ExNotSet1 = (int)0x80040403;
+                            GExNotImplemented = (int)0x80040400;
+                            GExInvalidValue1 = (int)0x80040405;
+                            GExInvalidValue2 = (int)0x80040406;
+                            GExInvalidValue3 = (int)0x80040406;
+                            GExInvalidValue4 = (int)0x80040406;
+                            GExInvalidValue5 = (int)0x80040406;
+                            GExInvalidValue6 = (int)0x80040406;
+                            GExNotSet1 = (int)0x80040403;
                             break;
                         }
 
                     case "ServoCAT.Telescope":
                         {
-                            g_ExNotImplemented = (int)0x80040400;
-                            g_ExInvalidValue1 = ErrorCodes.InvalidValue;
-                            g_ExInvalidValue2 = (int)0x80040405;
-                            g_ExInvalidValue3 = (int)0x80040405;
-                            g_ExInvalidValue4 = (int)0x80040405;
-                            g_ExInvalidValue5 = (int)0x80040405;
-                            g_ExInvalidValue6 = (int)0x80040405;
-                            g_ExNotSet1 = (int)0x80040403;
-                            g_ExNotSet2 = (int)0x80040404; // I'm using the simulator values as the defaults since it is the reference platform
+                            GExNotImplemented = (int)0x80040400;
+                            GExInvalidValue1 = ErrorCodes.InvalidValue;
+                            GExInvalidValue2 = (int)0x80040405;
+                            GExInvalidValue3 = (int)0x80040405;
+                            GExInvalidValue4 = (int)0x80040405;
+                            GExInvalidValue5 = (int)0x80040405;
+                            GExInvalidValue6 = (int)0x80040405;
+                            GExNotSet1 = (int)0x80040403;
+                            GExNotSet2 = (int)0x80040404; // I'm using the simulator values as the defaults since it is the reference platform
                             break;
                         }
 
                     default:
                         {
-                            g_ExNotImplemented = (int)0x80040400;
-                            g_ExInvalidValue1 = ErrorCodes.InvalidValue;
-                            g_ExInvalidValue2 = (int)0x80040405;
-                            g_ExInvalidValue3 = (int)0x80040405;
-                            g_ExInvalidValue4 = (int)0x80040405;
-                            g_ExInvalidValue5 = (int)0x80040405;
-                            g_ExInvalidValue6 = (int)0x80040405;
-                            g_ExNotSet1 = (int)0x80040403;
+                            GExNotImplemented = (int)0x80040400;
+                            GExInvalidValue1 = ErrorCodes.InvalidValue;
+                            GExInvalidValue2 = (int)0x80040405;
+                            GExInvalidValue3 = (int)0x80040405;
+                            GExInvalidValue4 = (int)0x80040405;
+                            GExInvalidValue5 = (int)0x80040405;
+                            GExInvalidValue6 = (int)0x80040405;
+                            GExNotSet1 = (int)0x80040403;
                             break;
                         }
                 }
@@ -422,7 +422,7 @@ namespace ConformU
                 }
 
                 LogInfo("CreateDevice", "Successfully created driver");
-                baseClassDevice = telescopeDevice; // Assign the driver to the base class
+                BaseClassDevice = telescopeDevice; // Assign the driver to the base class
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);
             }
@@ -492,11 +492,11 @@ namespace ConformU
                         LogCallToDriver("Mount Safety", "About to get AtPark property repeatedly");
                         WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
-                        LogOK("Mount Safety", "Scope has been unparked for testing");
+                        LogOk("Mount Safety", "Scope has been unparked for testing");
                     }
                     else
                     {
-                        LogOK("Mount Safety", "Scope reports that it cannot unpark, unparking skipped");
+                        LogOk("Mount Safety", "Scope reports that it cannot unpark, unparking skipped");
                     }
                 }
                 catch (Exception ex)
@@ -579,11 +579,11 @@ namespace ConformU
 
         public override void CheckProperties()
         {
-            bool l_OriginalTrackingState;
-            DriveRate l_DriveRate;
-            double l_TimeDifference;
-            ITrackingRates l_TrackingRates = null;
-            dynamic l_TrackingRate;
+            bool lOriginalTrackingState;
+            DriveRate lDriveRate;
+            double lTimeDifference;
+            ITrackingRates lTrackingRates = null;
+            dynamic lTrackingRate;
 
             // Test TargetDeclination and TargetRightAscension first because these tests will fail if the telescope has been slewed previously.
             // Slews can happen in the extended guide rate tests for example.
@@ -618,7 +618,7 @@ namespace ConformU
             {
                 LogCallToDriver("AlignmentMode", "About to get AlignmentMode property");
                 alignmentMode = (AlignmentMode)telescopeDevice.AlignmentMode;
-                LogOK("AlignmentMode", alignmentMode.ToString());
+                LogOk("AlignmentMode", alignmentMode.ToString());
             }
             catch (Exception ex)
             {
@@ -650,7 +650,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogOK("Altitude", altitude.ToDMS().Trim());
+                            LogOk("Altitude", altitude.ToDMS().Trim());
                             break;
                         }
                 }
@@ -684,7 +684,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogOK("ApertureArea", apertureArea.ToString());
+                            LogOk("ApertureArea", apertureArea.ToString());
                             break;
                         }
                 }
@@ -718,7 +718,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogOK("ApertureDiameter", apertureDiameter.ToString());
+                            LogOk("ApertureDiameter", apertureDiameter.ToString());
                             break;
                         }
                 }
@@ -738,7 +738,7 @@ namespace ConformU
                 {
                     LogCallToDriver("AtHome", "About to get AtHome property");
                     atHome = telescopeDevice.AtHome;
-                    LogOK("AtHome", atHome.ToString());
+                    LogOk("AtHome", atHome.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -760,7 +760,7 @@ namespace ConformU
                 {
                     LogCallToDriver("AtPark", "About to get AtPark property");
                     atPark = telescopeDevice.AtPark;
-                    LogOK("AtPark", atPark.ToString());
+                    LogOk("AtPark", atPark.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -797,7 +797,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogOK("Azimuth", FormatAzimuth(azimuth).Trim());
+                            LogOk("Azimuth", FormatAzimuth(azimuth).Trim());
                             break;
                         }
                 }
@@ -826,7 +826,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogOK("Declination", declination.ToDMS().Trim());
+                            LogOk("Declination", declination.ToDMS().Trim());
                             break;
                         }
                 }
@@ -851,7 +851,7 @@ namespace ConformU
                     {
                         case var case8 when case8 >= 0.0d:
                             {
-                                LogOK("DeclinationRate Read", declinationRate.ToString("0.00"));
+                                LogOk("DeclinationRate Read", declinationRate.ToString("0.00"));
                                 break;
                             }
 
@@ -868,7 +868,7 @@ namespace ConformU
                     {
                         case 0.0d:
                             {
-                                LogOK("DeclinationRate Read", declinationRate.ToString("0.00"));
+                                LogOk("DeclinationRate Read", declinationRate.ToString("0.00"));
                                 break;
                             }
 
@@ -903,25 +903,25 @@ namespace ConformU
                         LogInfo("DeclinationRate Write", $"Configured offset test duration: {settings.TelescopeRateOffsetTestDuration} seconds.");
                     }
 
-                    if (TestRADecRate("DeclinationRate Write", "Set rate to 0.0", Axis.Dec, 0.0d, true))
+                    if (TestRaDecRate("DeclinationRate Write", "Set rate to 0.0", Axis.Dec, 0.0d, true))
                     {
-                        TestRADecRate("DeclinationRate Write", "Set rate to 1.5", Axis.Dec, 1.5d, true);
+                        TestRaDecRate("DeclinationRate Write", "Set rate to 1.5", Axis.Dec, 1.5d, true);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
-                        TestRADecRate("DeclinationRate Write", "Set rate to -1.5", Axis.Dec, -1.5d, true);
+                        TestRaDecRate("DeclinationRate Write", "Set rate to -1.5", Axis.Dec, -1.5d, true);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
-                        TestRADecRate("DeclinationRate Write", "Set rate to 7.5", Axis.Dec, 7.5d, true);
+                        TestRaDecRate("DeclinationRate Write", "Set rate to 7.5", Axis.Dec, 7.5d, true);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
-                        TestRADecRate("DeclinationRate Write", "Set rate to -7.5", Axis.Dec, -7.5d, true);
+                        TestRaDecRate("DeclinationRate Write", "Set rate to -7.5", Axis.Dec, -7.5d, true);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
-                        TestRADecRate("DeclinationRate Write", "Reset rate to 0.0", Axis.Dec, 0.0d, false); // Reset the rate to zero, skipping the slewing test
+                        TestRaDecRate("DeclinationRate Write", "Reset rate to 0.0", Axis.Dec, 0.0d, false); // Reset the rate to zero, skipping the slewing test
                     }
                 }
                 else // Should generate an error
@@ -944,7 +944,7 @@ namespace ConformU
                 {
                     LogCallToDriver("DeclinationRate Write", "About to set DeclinationRate property to 0.0");
                     telescopeDevice.DeclinationRate = 0.0d; // Set to a harmless value
-                    LogOK("DeclinationRate Write", declinationRate.ToString("0.00"));
+                    LogOk("DeclinationRate Write", declinationRate.ToString("0.00"));
                 }
                 catch (Exception ex)
                 {
@@ -962,7 +962,7 @@ namespace ConformU
                 {
                     LogCallToDriver("DoesRefraction Read", "About to DoesRefraction get property");
                     doesRefraction = telescopeDevice.DoesRefraction;
-                    LogOK("DoesRefraction Read", doesRefraction.ToString());
+                    LogOk("DoesRefraction Read", doesRefraction.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -986,7 +986,7 @@ namespace ConformU
                     {
                         LogCallToDriver("DoesRefraction Write", "About to set DoesRefraction property false");
                         telescopeDevice.DoesRefraction = false;
-                        LogOK("DoesRefraction Write", "Can set DoesRefraction to False");
+                        LogOk("DoesRefraction Write", "Can set DoesRefraction to False");
                     }
                     catch (Exception ex)
                     {
@@ -999,7 +999,7 @@ namespace ConformU
                     {
                         LogCallToDriver("DoesRefraction Write", "About to set DoesRefraction property true");
                         telescopeDevice.DoesRefraction = true;
-                        LogOK("DoesRefraction Write", "Can set DoesRefraction to True");
+                        LogOk("DoesRefraction Write", "Can set DoesRefraction to True");
                     }
                     catch (Exception ex)
                     {
@@ -1022,7 +1022,7 @@ namespace ConformU
                 {
                     LogCallToDriver("EquatorialSystem", "About to get EquatorialSystem property");
                     equatorialSystem = (EquatorialCoordinateType)telescopeDevice.EquatorialSystem;
-                    LogOK("EquatorialSystem", equatorialSystem.ToString());
+                    LogOk("EquatorialSystem", equatorialSystem.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1058,7 +1058,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogOK("FocalLength", focalLength.ToString());
+                            LogOk("FocalLength", focalLength.ToString());
                             break;
                         }
                 }
@@ -1083,7 +1083,7 @@ namespace ConformU
 
                         if (guideRateDeclination >= 0.0)
                         {
-                            LogOK("GuideRateDeclination Read", $"{guideRateDeclination:0.000000} ({guideRateDeclination.ToDMS()})");
+                            LogOk("GuideRateDeclination Read", $"{guideRateDeclination:0.000000} ({guideRateDeclination.ToDMS()})");
 
                         }
                         else
@@ -1100,7 +1100,7 @@ namespace ConformU
                     {
                         LogCallToDriver("GuideRateDeclination Read", "About to set GuideRateDeclination property to " + guideRateDeclination);
                         telescopeDevice.GuideRateDeclination = guideRateDeclination;
-                        LogOK("GuideRateDeclination Write", "Can write Declination Guide Rate OK");
+                        LogOk("GuideRateDeclination Write", "Can write Declination Guide Rate OK");
                     }
                     catch (Exception ex) // Write failed
                     {
@@ -1123,7 +1123,7 @@ namespace ConformU
 
                             default:
                                 {
-                                    LogOK("GuideRateDeclination Read", guideRateDeclination.ToString("0.00"));
+                                    LogOk("GuideRateDeclination Read", guideRateDeclination.ToString("0.00"));
                                     break;
                                 }
                         }
@@ -1165,7 +1165,7 @@ namespace ConformU
 
                         if (guideRateRightAscension >= 0.0)
                         {
-                            LogOK("GuideRateRightAscension Read", $"{guideRateRightAscension:0.000000} ({guideRateRightAscension.ToDMS()})");
+                            LogOk("GuideRateRightAscension Read", $"{guideRateRightAscension:0.000000} ({guideRateRightAscension.ToDMS()})");
                         }
                         else
                         {
@@ -1181,7 +1181,7 @@ namespace ConformU
                     {
                         LogCallToDriver("GuideRateRightAscension Read", "About to set GuideRateRightAscension property to " + guideRateRightAscension);
                         telescopeDevice.GuideRateRightAscension = guideRateRightAscension;
-                        LogOK("GuideRateRightAscension Write", "Can set RightAscension Guide OK");
+                        LogOk("GuideRateRightAscension Write", "Can set RightAscension Guide OK");
                     }
                     catch (Exception ex) // Write failed
                     {
@@ -1204,7 +1204,7 @@ namespace ConformU
 
                             default:
                                 {
-                                    LogOK("GuideRateRightAscension Read", guideRateRightAscension.ToString("0.00"));
+                                    LogOk("GuideRateRightAscension Read", guideRateRightAscension.ToString("0.00"));
                                     break;
                                 }
                         }
@@ -1243,7 +1243,7 @@ namespace ConformU
                     {
                         LogCallToDriver("IsPulseGuiding", "About to get IsPulseGuiding property");
                         isPulseGuiding = telescopeDevice.IsPulseGuiding;
-                        LogOK("IsPulseGuiding", isPulseGuiding.ToString());
+                        LogOk("IsPulseGuiding", isPulseGuiding.ToString());
                     }
                     catch (Exception ex) // Read failed
                     {
@@ -1288,7 +1288,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogOK("RightAscension", rightAscension.ToHMS().Trim());
+                            LogOk("RightAscension", rightAscension.ToHMS().Trim());
                             break;
                         }
                 }
@@ -1313,7 +1313,7 @@ namespace ConformU
                     {
                         case var case16 when case16 >= 0.0d:
                             {
-                                LogOK("RightAscensionRate Read", rightAscensionRate.ToString("0.00"));
+                                LogOk("RightAscensionRate Read", rightAscensionRate.ToString("0.00"));
                                 break;
                             }
 
@@ -1330,7 +1330,7 @@ namespace ConformU
                     {
                         case 0.0d:
                             {
-                                LogOK("RightAscensionRate Read", rightAscensionRate.ToString("0.00"));
+                                LogOk("RightAscensionRate Read", rightAscensionRate.ToString("0.00"));
                                 break;
                             }
 
@@ -1363,25 +1363,25 @@ namespace ConformU
                         LogInfo("RightAscensionRate Write", $"Configured offset test duration: {settings.TelescopeRateOffsetTestDuration} seconds.");
                     }
 
-                    if (TestRADecRate("RightAscensionRate Write", "Set rate to 0.0", Axis.RA, 0.0d, true))
+                    if (TestRaDecRate("RightAscensionRate Write", "Set rate to 0.0", Axis.Ra, 0.0d, true))
                     {
-                        TestRADecRate("RightAscensionRate Write", "Set rate to 0.1", Axis.RA, 0.1d, true);
+                        TestRaDecRate("RightAscensionRate Write", "Set rate to 0.1", Axis.Ra, 0.1d, true);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
-                        TestRADecRate("RightAscensionRate Write", "Set rate to -0.1", Axis.RA, -0.1d, true);
+                        TestRaDecRate("RightAscensionRate Write", "Set rate to -0.1", Axis.Ra, -0.1d, true);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
-                        TestRADecRate("RightAscensionRate Write", "Set rate to 0.5", Axis.RA, 0.5d, true);
+                        TestRaDecRate("RightAscensionRate Write", "Set rate to 0.5", Axis.Ra, 0.5d, true);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
-                        TestRADecRate("RightAscensionRate Write", "Set rate to -0.5", Axis.RA, -0.5d, true);
+                        TestRaDecRate("RightAscensionRate Write", "Set rate to -0.5", Axis.Ra, -0.5d, true);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
-                        TestRADecRate("RightAscensionRate Write", "Reset rate to 0.0", Axis.RA, 0.0d, false); // Reset the rate to zero, skipping the slewing test
+                        TestRaDecRate("RightAscensionRate Write", "Reset rate to 0.0", Axis.Ra, 0.0d, false); // Reset the rate to zero, skipping the slewing test
                     }
                 }
                 else // Should generate an error
@@ -1404,7 +1404,7 @@ namespace ConformU
                 {
                     LogCallToDriver("RightAscensionRate Write", "About to set RightAscensionRate property to 0.00");
                     telescopeDevice.RightAscensionRate = 0.0d; // Set to a harmless value
-                    LogOK("RightAscensionRate Write", rightAscensionRate.ToString("0.00"));
+                    LogOk("RightAscensionRate Write", rightAscensionRate.ToString("0.00"));
                 }
                 catch (Exception ex)
                 {
@@ -1441,7 +1441,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogOK("SiteElevation Read", siteElevation.ToString());
+                            LogOk("SiteElevation Read", siteElevation.ToString());
                             break;
                         }
                 }
@@ -1462,7 +1462,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                HandleInvalidValueExceptionAsOK("SiteElevation Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site elevation < -300m");
+                HandleInvalidValueExceptionAsOk("SiteElevation Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site elevation < -300m");
             }
 
             // SiteElevation Write - Invalid high value
@@ -1474,7 +1474,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                HandleInvalidValueExceptionAsOK("SiteElevation Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site elevation > 10,000m");
+                HandleInvalidValueExceptionAsOk("SiteElevation Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site elevation > 10,000m");
             }
 
             //SiteElevation Write - Current device value 
@@ -1483,7 +1483,7 @@ namespace ConformU
                 if (siteElevation < -300.0d | siteElevation > 10000.0d)
                     siteElevation = 1000d; LogCallToDriver("SiteElevation Write", "About to set SiteElevation property to " + siteElevation);
                 telescopeDevice.SiteElevation = siteElevation; // Restore original value
-                LogOK("SiteElevation Write", $"Current value {siteElevation}m written successfully");
+                LogOk("SiteElevation Write", $"Current value {siteElevation}m written successfully");
             }
             catch (Exception ex)
             {
@@ -1507,7 +1507,7 @@ namespace ConformU
                     // Compare with the expected value
                     if (newElevation == SITE_ELEVATION_TEST_VALUE)
                     {
-                        LogOK("SiteElevation Write", $"Test value {SITE_ELEVATION_TEST_VALUE} set and read correctly");
+                        LogOk("SiteElevation Write", $"Test value {SITE_ELEVATION_TEST_VALUE} set and read correctly");
                     }
                     else
                     {
@@ -1525,7 +1525,7 @@ namespace ConformU
                     // Set the original value
                     LogCallToDriver("SiteElevation Write", $"About to restore original SiteElevation property :{siteElevation}");
                     telescopeDevice.SiteElevation = siteElevation;
-                    LogOK("SiteElevation Write", $"Successfully restored original site elevation: {siteElevation}.");
+                    LogOk("SiteElevation Write", $"Successfully restored original site elevation: {siteElevation}.");
                 }
                 catch (Exception ex)
                 {
@@ -1562,7 +1562,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogOK("SiteLatitude Read", siteLatitude.ToDMS());
+                            LogOk("SiteLatitude Read", siteLatitude.ToDMS());
                             break;
                         }
                 }
@@ -1582,7 +1582,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                HandleInvalidValueExceptionAsOK("SiteLatitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site latitude < -90 degrees");
+                HandleInvalidValueExceptionAsOk("SiteLatitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site latitude < -90 degrees");
             }
 
             // SiteLatitude Write - Invalid high value
@@ -1594,7 +1594,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                HandleInvalidValueExceptionAsOK("SiteLatitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site latitude > 90 degrees");
+                HandleInvalidValueExceptionAsOk("SiteLatitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site latitude > 90 degrees");
             }
 
             // SiteLatitude Write - Valid value
@@ -1604,7 +1604,7 @@ namespace ConformU
                 if (siteLatitude < -90.0d | siteLatitude > 90.0d)
                     siteLatitude = 45.0d; LogCallToDriver("SiteLatitude Write", "About to set SiteLatitude property to " + siteLatitude);
                 telescopeDevice.SiteLatitude = siteLatitude; // Restore original value
-                LogOK("SiteLatitude Write", $"Current value: {siteLatitude.ToDMS()} degrees written successfully");
+                LogOk("SiteLatitude Write", $"Current value: {siteLatitude.ToDMS()} degrees written successfully");
             }
             catch (Exception ex)
             {
@@ -1654,7 +1654,7 @@ namespace ConformU
                     // Compare with the expected value
                     if (newLatitude == testLatitude)
                     {
-                        LogOK("SiteLatitude Write", $"Test value {testLatitude.ToDMS()} set and read correctly");
+                        LogOk("SiteLatitude Write", $"Test value {testLatitude.ToDMS()} set and read correctly");
                     }
                     else
                     {
@@ -1672,7 +1672,7 @@ namespace ConformU
                     // Set the original value
                     LogCallToDriver("SiteLatitude Write", $"About to restore original SiteLatitude property :{siteLatitude.ToDMS()}");
                     telescopeDevice.SiteLatitude = siteLatitude;
-                    LogOK("SiteLatitude Write", $"Successfully restored original site latitude: {siteLatitude.ToDMS()}.");
+                    LogOk("SiteLatitude Write", $"Successfully restored original site latitude: {siteLatitude.ToDMS()}.");
                 }
                 catch (Exception ex)
                 {
@@ -1709,7 +1709,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogOK("SiteLongitude Read", siteLongitude.ToDMS());
+                            LogOk("SiteLongitude Read", siteLongitude.ToDMS());
                             break;
                         }
                 }
@@ -1729,7 +1729,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                HandleInvalidValueExceptionAsOK("SiteLongitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site longitude < -180 degrees");
+                HandleInvalidValueExceptionAsOk("SiteLongitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site longitude < -180 degrees");
             }
 
             // SiteLongitude Write - Invalid high value
@@ -1741,7 +1741,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                HandleInvalidValueExceptionAsOK("SiteLongitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site longitude > 180 degrees");
+                HandleInvalidValueExceptionAsOk("SiteLongitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site longitude > 180 degrees");
             }
 
             // SiteLongitude Write - Valid value
@@ -1751,7 +1751,7 @@ namespace ConformU
                 if (siteLongitude < -180.0d | siteLongitude > 180.0d)
                     siteLongitude = 60.0d; LogCallToDriver("SiteLongitude Write", "About to set SiteLongitude property to " + siteLongitude);
                 telescopeDevice.SiteLongitude = siteLongitude; // Restore original value
-                LogOK("SiteLongitude Write", $"Current value {siteLongitude.ToDMS()} degrees written successfully");
+                LogOk("SiteLongitude Write", $"Current value {siteLongitude.ToDMS()} degrees written successfully");
             }
             catch (Exception ex)
             {
@@ -1801,7 +1801,7 @@ namespace ConformU
                     // Compare with the expected value
                     if (newLongitude == testLongitude)
                     {
-                        LogOK("SiteLongitude Write", $"Test value {testLongitude.ToDMS()} set and read correctly");
+                        LogOk("SiteLongitude Write", $"Test value {testLongitude.ToDMS()} set and read correctly");
                     }
                     else
                     {
@@ -1819,7 +1819,7 @@ namespace ConformU
                     // Set the original value
                     LogCallToDriver("SiteLongitude Write", $"About to restore original SiteLongitude property :{siteLongitude.ToDMS()}");
                     telescopeDevice.SiteLongitude = siteLongitude;
-                    LogOK("SiteLongitude Write", $"Successfully restored original site longitude: {siteLongitude.ToDMS()}.");
+                    LogOk("SiteLongitude Write", $"Successfully restored original site longitude: {siteLongitude.ToDMS()}.");
                 }
                 catch (Exception ex)
                 {
@@ -1839,7 +1839,7 @@ namespace ConformU
                 {
                     case false:
                         {
-                            LogOK("Slewing", slewing.ToString());
+                            LogOk("Slewing", slewing.ToString());
                             break;
                         }
 
@@ -1879,7 +1879,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogOK("SlewSettleTime Read", slewSettleTime.ToString());
+                            LogOk("SlewSettleTime Read", slewSettleTime.ToString());
                             break;
                         }
                 }
@@ -1901,7 +1901,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                HandleInvalidValueExceptionAsOK("SlewSettleTime Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set slew settle time < 0");
+                HandleInvalidValueExceptionAsOk("SlewSettleTime Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set slew settle time < 0");
             }
 
             try
@@ -1909,7 +1909,7 @@ namespace ConformU
                 if (slewSettleTime < 0)
                     slewSettleTime = 0; LogCallToDriver("SlewSettleTime Write", "About to set SlewSettleTime property to " + slewSettleTime);
                 telescopeDevice.SlewSettleTime = slewSettleTime; // Restore original value
-                LogOK("SlewSettleTime Write", "Legal value " + slewSettleTime.ToString() + " seconds written successfully");
+                LogOk("SlewSettleTime Write", "Legal value " + slewSettleTime.ToString() + " seconds written successfully");
             }
             catch (Exception ex)
             {
@@ -1926,7 +1926,7 @@ namespace ConformU
                 {
                     LogCallToDriver("SideOfPier Read", "About to get SideOfPier property");
                     sideOfPier = (PointingState)telescopeDevice.SideOfPier;
-                    LogOK("SideOfPier Read", sideOfPier.ToString());
+                    LogOk("SideOfPier Read", sideOfPier.ToString());
                     canReadSideOfPier = true; // Flag that it is OK to read SideOfPier
                 }
                 catch (Exception ex)
@@ -1948,7 +1948,7 @@ namespace ConformU
                 canReadSiderealTime = false; LogCallToDriver("SiderealTime", "About to get SiderealTime property");
                 siderealTimeScope = telescopeDevice.SiderealTime;
                 canReadSiderealTime = true;
-                siderealTimeASCOM = (18.697374558d + 24.065709824419081d * (DateTime.UtcNow.ToOADate() + 2415018.5 - 2451545.0d) + siteLongitude / 15.0d) % 24.0d;
+                siderealTimeAscom = (18.697374558d + 24.065709824419081d * (DateTime.UtcNow.ToOADate() + 2415018.5 - 2451545.0d) + siteLongitude / 15.0d) % 24.0d;
                 switch (siderealTimeScope)
                 {
                     case var case25 when case25 < 0.0d:
@@ -1961,66 +1961,66 @@ namespace ConformU
                     default:
                         {
                             // Now do a sense check on the received value
-                            LogOK("SiderealTime", siderealTimeScope.ToHMS());
-                            l_TimeDifference = Math.Abs(siderealTimeScope - siderealTimeASCOM); // Get time difference between scope and PC
+                            LogOk("SiderealTime", siderealTimeScope.ToHMS());
+                            lTimeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom); // Get time difference between scope and PC
                                                                                                 // Process edge cases where the two clocks are on either side of 0:0:0/24:0:0
-                            if (siderealTimeASCOM > 23.0d & siderealTimeASCOM < 23.999d & siderealTimeScope > 0.0d & siderealTimeScope < 1.0d)
+                            if (siderealTimeAscom > 23.0d & siderealTimeAscom < 23.999d & siderealTimeScope > 0.0d & siderealTimeScope < 1.0d)
                             {
-                                l_TimeDifference = Math.Abs(siderealTimeScope - siderealTimeASCOM + 24.0d);
+                                lTimeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom + 24.0d);
                             }
 
-                            if (siderealTimeScope > 23.0d & siderealTimeScope < 23.999d & siderealTimeASCOM > 0.0d & siderealTimeASCOM < 1.0d)
+                            if (siderealTimeScope > 23.0d & siderealTimeScope < 23.999d & siderealTimeAscom > 0.0d & siderealTimeAscom < 1.0d)
                             {
-                                l_TimeDifference = Math.Abs(siderealTimeScope - siderealTimeASCOM - 24.0d);
+                                lTimeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom - 24.0d);
                             }
 
-                            switch (l_TimeDifference)
+                            switch (lTimeDifference)
                             {
                                 case var case27 when case27 <= 1.0d / 3600.0d: // 1 seconds
                                     {
-                                        LogOK("SiderealTime", "Scope and ASCOM sidereal times agree to better than 1 second, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeASCOM.ToHMS());
+                                        LogOk("SiderealTime", "Scope and ASCOM sidereal times agree to better than 1 second, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeAscom.ToHMS());
                                         break;
                                     }
 
                                 case var case28 when case28 <= 2.0d / 3600.0d: // 2 seconds
                                     {
-                                        LogOK("SiderealTime", "Scope and ASCOM sidereal times agree to better than 2 seconds, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeASCOM.ToHMS());
+                                        LogOk("SiderealTime", "Scope and ASCOM sidereal times agree to better than 2 seconds, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeAscom.ToHMS());
                                         break;
                                     }
 
                                 case var case29 when case29 <= 5.0d / 3600.0d: // 5 seconds
                                     {
-                                        LogOK("SiderealTime", "Scope and ASCOM sidereal times agree to better than 5 seconds, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeASCOM.ToHMS());
+                                        LogOk("SiderealTime", "Scope and ASCOM sidereal times agree to better than 5 seconds, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeAscom.ToHMS());
                                         break;
                                     }
 
                                 case var case30 when case30 <= 1.0d / 60.0d: // 1 minute
                                     {
-                                        LogOK("SiderealTime", "Scope and ASCOM sidereal times agree to better than 1 minute, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeASCOM.ToHMS());
+                                        LogOk("SiderealTime", "Scope and ASCOM sidereal times agree to better than 1 minute, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeAscom.ToHMS());
                                         break;
                                     }
 
                                 case var case31 when case31 <= 5.0d / 60.0d: // 5 minutes
                                     {
-                                        LogOK("SiderealTime", "Scope and ASCOM sidereal times agree to better than 5 minutes, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeASCOM.ToHMS());
+                                        LogOk("SiderealTime", "Scope and ASCOM sidereal times agree to better than 5 minutes, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeAscom.ToHMS());
                                         break;
                                     }
 
                                 case var case32 when case32 <= 0.5d: // 0.5 an hour
                                     {
-                                        LogInfo("SiderealTime", "Scope and ASCOM sidereal times are up to 0.5 hour different, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeASCOM.ToHMS());
+                                        LogInfo("SiderealTime", "Scope and ASCOM sidereal times are up to 0.5 hour different, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeAscom.ToHMS());
                                         break;
                                     }
 
                                 case var case33 when case33 <= 1.0d: // 1.0 an hour
                                     {
-                                        LogInfo("SiderealTime", "Scope and ASCOM sidereal times are up to 1.0 hour different, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeASCOM.ToHMS());
+                                        LogInfo("SiderealTime", "Scope and ASCOM sidereal times are up to 1.0 hour different, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeAscom.ToHMS());
                                         break;
                                     }
 
                                 default:
                                     {
-                                        LogIssue("SiderealTime", "Scope and ASCOM sidereal times are more than 1 hour apart, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeASCOM.ToHMS());
+                                        LogIssue("SiderealTime", "Scope and ASCOM sidereal times are more than 1 hour apart, Scope: " + siderealTimeScope.ToHMS() + ", ASCOM: " + siderealTimeAscom.ToHMS());
                                         return;
                                     }
                             }
@@ -2061,23 +2061,23 @@ namespace ConformU
 
                         default:
                             {
-                                LogOK("TargetDeclination Read", targetDeclination.ToDMS());
+                                LogOk("TargetDeclination Read", targetDeclination.ToDMS());
                                 break;
                             }
                     }
                 }
             }
-            catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
+            catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == GExNotSet1 | ex.ErrorCode == GExNotSet2)
             {
-                LogOK("TargetDeclination Read", "Not Set exception generated on read before write");
+                LogOk("TargetDeclination Read", "Not Set exception generated on read before write");
             }
-            catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == g_ExNotSet1 | ex.Number == g_ExNotSet2)
+            catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == GExNotSet1 | ex.Number == GExNotSet2)
             {
-                LogOK("TargetDeclination Read", "Not Set exception generated on read before write");
+                LogOk("TargetDeclination Read", "Not Set exception generated on read before write");
             }
             catch (Exception ex)
             {
-                HandleInvalidOperationExceptionAsOK("TargetDeclination Read", MemberType.Property, Required.Optional, ex, "Incorrect exception received", "InvalidOperationException generated as expected on target read before read");
+                HandleInvalidOperationExceptionAsOk("TargetDeclination Read", MemberType.Property, Required.Optional, ex, "Incorrect exception received", "InvalidOperationException generated as expected on target read before read");
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -2110,23 +2110,23 @@ namespace ConformU
 
                         default:
                             {
-                                LogOK("TargetRightAscension Read", targetRightAscension.ToHMS());
+                                LogOk("TargetRightAscension Read", targetRightAscension.ToHMS());
                                 break;
                             }
                     }
                 }
             }
-            catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
+            catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == GExNotSet1 | ex.ErrorCode == GExNotSet2)
             {
-                LogOK("TargetRightAscension Read", "Not Set exception generated on read before write");
+                LogOk("TargetRightAscension Read", "Not Set exception generated on read before write");
             }
-            catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == g_ExNotSet1 | ex.Number == g_ExNotSet2)
+            catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == GExNotSet1 | ex.Number == GExNotSet2)
             {
-                LogOK("TargetRightAscension Read", "Not Set exception generated on read before write");
+                LogOk("TargetRightAscension Read", "Not Set exception generated on read before write");
             }
             catch (Exception ex)
             {
-                HandleInvalidOperationExceptionAsOK("TargetRightAscension Read", MemberType.Property, Required.Optional, ex, "Incorrect exception received", "InvalidOperationException generated as expected on target read before read");
+                HandleInvalidOperationExceptionAsOk("TargetRightAscension Read", MemberType.Property, Required.Optional, ex, "Incorrect exception received", "InvalidOperationException generated as expected on target read before read");
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -2140,7 +2140,7 @@ namespace ConformU
             {
                 LogCallToDriver("Tracking Read", "About to get Tracking property");
                 tracking = telescopeDevice.Tracking; // Read of tracking state is mandatory
-                LogOK("Tracking Read", tracking.ToString());
+                LogOk("Tracking Read", tracking.ToString());
             }
             catch (Exception ex)
             {
@@ -2151,7 +2151,7 @@ namespace ConformU
                 return;
 
             // Tracking Write - Optional
-            l_OriginalTrackingState = tracking;
+            lOriginalTrackingState = tracking;
             if (canSetTracking) // Set should work OK
             {
                 SetTest("Tracking Write");
@@ -2172,16 +2172,16 @@ namespace ConformU
                     WaitFor(TRACKING_COMMAND_DELAY); // Wait for a short time to allow mounts to implement the tracking state change
                     LogCallToDriver("Tracking Write", "About to get Tracking property");
                     tracking = telescopeDevice.Tracking;
-                    if (tracking != l_OriginalTrackingState)
+                    if (tracking != lOriginalTrackingState)
                     {
-                        LogOK("Tracking Write", tracking.ToString());
+                        LogOk("Tracking Write", tracking.ToString());
                     }
                     else
                     {
                         LogIssue("Tracking Write", "Tracking didn't change state on write: " + tracking.ToString());
                     }
-                    LogCallToDriver("Tracking Write", "About to set Tracking property " + l_OriginalTrackingState);
-                    telescopeDevice.Tracking = l_OriginalTrackingState; // Restore original state
+                    LogCallToDriver("Tracking Write", "About to set Tracking property " + lOriginalTrackingState);
+                    telescopeDevice.Tracking = lOriginalTrackingState; // Restore original state
                     SetAction("Waiting for mount to stabilise");
                     WaitFor(TRACKING_COMMAND_DELAY); // Wait for a short time to allow mounts to implement the tracking state change
                 }
@@ -2221,12 +2221,12 @@ namespace ConformU
             // TrackingRates - Required
             if (GetInterfaceVersion() > 1)
             {
-                int l_Count = 0;
+                int lCount = 0;
                 try
                 {
                     LogCallToDriver("TrackingRates", "About to get TrackingRates property");
-                    l_TrackingRates = telescopeDevice.TrackingRates;
-                    if (l_TrackingRates is null)
+                    lTrackingRates = telescopeDevice.TrackingRates;
+                    if (lTrackingRates is null)
                     {
                         LogDebug("TrackingRates", "ERROR: The driver did NOT return an TrackingRates object!");
                     }
@@ -2235,27 +2235,27 @@ namespace ConformU
                         LogDebug("TrackingRates", "OK - the driver returned an TrackingRates object");
                     }
 
-                    l_Count = l_TrackingRates.Count; // Save count for use later if no members are returned in the for each loop test
-                    LogDebug("TrackingRates Count", l_Count.ToString());
+                    lCount = lTrackingRates.Count; // Save count for use later if no members are returned in the for each loop test
+                    LogDebug("TrackingRates Count", lCount.ToString());
 
-                    var loopTo = l_TrackingRates.Count;
+                    var loopTo = lTrackingRates.Count;
                     for (int ii = 1; ii <= loopTo; ii++)
-                        LogDebug("TrackingRates Count", "Found drive rate: " + Enum.GetName(typeof(DriveRate), (l_TrackingRates[ii])));
+                        LogDebug("TrackingRates Count", "Found drive rate: " + Enum.GetName(typeof(DriveRate), (lTrackingRates[ii])));
                 }
                 catch (Exception ex)
                 {
                     HandleException("TrackingRates", MemberType.Property, Required.Mandatory, ex, "");
                 }
 
-                if (l_TrackingRates is not null)
+                if (lTrackingRates is not null)
                 {
                     try
                     {
-                        IEnumerator l_Enum;
-                        object l_Obj;
-                        DriveRate l_Drv;
-                        l_Enum = (IEnumerator)l_TrackingRates.GetEnumerator();
-                        if (l_Enum is null)
+                        IEnumerator lEnum;
+                        object lObj;
+                        DriveRate lDrv;
+                        lEnum = (IEnumerator)lTrackingRates.GetEnumerator();
+                        if (lEnum is null)
                         {
                             LogDebug("TrackingRates Enum", "ERROR: The driver did NOT return an Enumerator object!");
                         }
@@ -2264,26 +2264,26 @@ namespace ConformU
                             LogDebug("TrackingRates Enum", "OK - the driver returned an Enumerator object");
                         }
 
-                        l_Enum.Reset();
+                        lEnum.Reset();
                         LogDebug("TrackingRates Enum", "Reset Enumerator");
-                        while (l_Enum.MoveNext())
+                        while (lEnum.MoveNext())
                         {
                             LogDebug("TrackingRates Enum", "Reading Current");
-                            l_Obj = l_Enum.Current;
-                            LogDebug("TrackingRates Enum", "Read Current OK, Type: " + l_Obj.GetType().Name);
-                            l_Drv = (DriveRate)l_Obj;
-                            LogDebug("TrackingRates Enum", "Found drive rate: " + Enum.GetName(typeof(DriveRate), l_Drv));
+                            lObj = lEnum.Current;
+                            LogDebug("TrackingRates Enum", "Read Current OK, Type: " + lObj.GetType().Name);
+                            lDrv = (DriveRate)lObj;
+                            LogDebug("TrackingRates Enum", "Found drive rate: " + Enum.GetName(typeof(DriveRate), lDrv));
                         }
 
-                        l_Enum.Reset();
-                        l_Enum = null;
+                        lEnum.Reset();
+                        lEnum = null;
 
                         // Clean up TrackingRates object
-                        if (l_TrackingRates is object)
+                        if (lTrackingRates is object)
                         {
                             try
                             {
-                                l_TrackingRates.Dispose();
+                                lTrackingRates.Dispose();
                             }
                             catch
                             {
@@ -2293,14 +2293,14 @@ namespace ConformU
                             {
                                 try
                                 {
-                                    Marshal.ReleaseComObject(l_TrackingRates);
+                                    Marshal.ReleaseComObject(lTrackingRates);
                                 }
                                 catch
                                 {
                                 }
                             }
 
-                            l_TrackingRates = null;
+                            lTrackingRates = null;
                         }
                     }
                     catch (Exception ex)
@@ -2316,26 +2316,26 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("TrackingRates", "About to get TrackingRates property");
-                    l_TrackingRates = telescopeDevice.TrackingRates;
-                    LogDebug("TrackingRates", $"Read TrackingRates OK, Count: {l_TrackingRates.Count}");
-                    int l_RateCount = 0;
-                    foreach (DriveRate currentL_DriveRate in (IEnumerable)l_TrackingRates)
+                    lTrackingRates = telescopeDevice.TrackingRates;
+                    LogDebug("TrackingRates", $"Read TrackingRates OK, Count: {lTrackingRates.Count}");
+                    int lRateCount = 0;
+                    foreach (DriveRate currentLDriveRate in (IEnumerable)lTrackingRates)
                     {
-                        l_DriveRate = currentL_DriveRate;
-                        LogTestAndMessage("TrackingRates", "Found drive rate: " + l_DriveRate.ToString());
-                        l_RateCount += 1;
+                        lDriveRate = currentLDriveRate;
+                        LogTestAndMessage("TrackingRates", "Found drive rate: " + lDriveRate.ToString());
+                        lRateCount += 1;
                     }
 
-                    if (l_RateCount > 0)
+                    if (lRateCount > 0)
                     {
-                        LogOK("TrackingRates", "Drive rates read OK");
+                        LogOk("TrackingRates", "Drive rates read OK");
                     }
-                    else if (l_Count > 0) // We did get some members on the first call, but now they have disappeared!
+                    else if (lCount > 0) // We did get some members on the first call, but now they have disappeared!
                     {
                         // This can be due to the driver returning the same TrackingRates object on every TrackingRates call but not resetting the iterator pointer
                         LogIssue("TrackingRates", "Multiple calls to TrackingRates returned different answers!");
                         LogInfo("TrackingRates", "");
-                        LogInfo("TrackingRates", "The first call to TrackingRates returned " + l_Count + " drive rates; the next call appeared to return no rates.");
+                        LogInfo("TrackingRates", "The first call to TrackingRates returned " + lCount + " drive rates; the next call appeared to return no rates.");
                         LogInfo("TrackingRates", "This can arise when the SAME TrackingRates object is returned on every TrackingRates call.");
                         LogInfo("TrackingRates", "The root cause is usually that the enumeration pointer in the object is set to the end of the");
                         LogInfo("TrackingRates", "collection through the application's use of the first object; subsequent uses see the pointer at the end");
@@ -2356,11 +2356,11 @@ namespace ConformU
                 }
 
                 // Clean up TrackingRates object
-                if (l_TrackingRates is object)
+                if (lTrackingRates is object)
                 {
                     try
                     {
-                        l_TrackingRates.Dispose();
+                        lTrackingRates.Dispose();
                     }
                     catch
                     {
@@ -2370,7 +2370,7 @@ namespace ConformU
                     {
                         try
                         {
-                            Marshal.ReleaseComObject(l_TrackingRates);
+                            Marshal.ReleaseComObject(lTrackingRates);
                         }
                         catch { }
                     }
@@ -2378,16 +2378,16 @@ namespace ConformU
 
                 // Test the TrackingRates.Dispose() method
                 LogDebug("TrackingRates", "Getting tracking rates");
-                l_TrackingRates = telescopeDevice.TrackingRates;
+                lTrackingRates = telescopeDevice.TrackingRates;
                 try
                 {
                     LogDebug("TrackingRates", "Disposing tracking rates");
-                    l_TrackingRates.Dispose();
-                    LogOK("TrackingRates", "Disposed tracking rates OK");
+                    lTrackingRates.Dispose();
+                    LogOk("TrackingRates", "Disposed tracking rates OK");
                 }
                 catch (MissingMemberException)
                 {
-                    LogOK("TrackingRates", "Dispose member not present");
+                    LogOk("TrackingRates", "Dispose member not present");
                 }
                 catch (Exception ex)
                 {
@@ -2399,7 +2399,7 @@ namespace ConformU
                 {
                     try
                     {
-                        Marshal.ReleaseComObject(l_TrackingRates);
+                        Marshal.ReleaseComObject(lTrackingRates);
                     }
                     catch { }
                 }
@@ -2412,36 +2412,36 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("TrackingRates", "About to get TrackingRates property");
-                    l_TrackingRates = telescopeDevice.TrackingRates;
-                    if (l_TrackingRates is object) // Make sure that we have received a TrackingRates object after the Dispose() method was called
+                    lTrackingRates = telescopeDevice.TrackingRates;
+                    if (lTrackingRates is object) // Make sure that we have received a TrackingRates object after the Dispose() method was called
                     {
-                        LogOK("TrackingRates", "Successfully obtained a TrackingRates object after the previous TrackingRates object was disposed"); LogCallToDriver("TrackingRate Read", "About to get TrackingRate property");
-                        l_TrackingRate = (DriveRate)telescopeDevice.TrackingRate;
-                        LogOK("TrackingRate Read", l_TrackingRate.ToString());
+                        LogOk("TrackingRates", "Successfully obtained a TrackingRates object after the previous TrackingRates object was disposed"); LogCallToDriver("TrackingRate Read", "About to get TrackingRate property");
+                        lTrackingRate = (DriveRate)telescopeDevice.TrackingRate;
+                        LogOk("TrackingRate Read", lTrackingRate.ToString());
 
                         // TrackingRate Write - Optional
                         // We can read TrackingRate so now test trying to set each tracking rate in turn
                         try
                         {
                             LogDebug("TrackingRate Write", "About to enumerate tracking rates object");
-                            foreach (DriveRate currentL_DriveRate1 in (IEnumerable)l_TrackingRates)
+                            foreach (DriveRate currentLDriveRate1 in (IEnumerable)lTrackingRates)
                             {
-                                l_DriveRate = currentL_DriveRate1;
+                                lDriveRate = currentLDriveRate1;
                                 //Application.DoEvents();
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 try
                                 {
-                                    LogCallToDriver("TrackingRate Write", "About to set TrackingRate property to " + l_DriveRate.ToString());
-                                    telescopeDevice.TrackingRate = l_DriveRate;
+                                    LogCallToDriver("TrackingRate Write", "About to set TrackingRate property to " + lDriveRate.ToString());
+                                    telescopeDevice.TrackingRate = lDriveRate;
                                     if (settings.DisplayMethodCalls)
-                                        if (telescopeDevice.TrackingRate == l_DriveRate)
+                                        if (telescopeDevice.TrackingRate == lDriveRate)
                                         {
-                                            LogOK("TrackingRate Write", "Successfully set drive rate: " + l_DriveRate.ToString());
+                                            LogOk("TrackingRate Write", "Successfully set drive rate: " + lDriveRate.ToString());
                                         }
                                         else
                                         {
-                                            LogIssue("TrackingRate Write", "Unable to set drive rate: " + l_DriveRate.ToString());
+                                            LogIssue("TrackingRate Write", "Unable to set drive rate: " + lDriveRate.ToString());
                                         }
                                 }
                                 catch (Exception ex)
@@ -2469,7 +2469,7 @@ namespace ConformU
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsOK("TrackingRate Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected when TrackingRate is set to an invalid value (5)");
+                            HandleInvalidValueExceptionAsOk("TrackingRate Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected when TrackingRate is set to an invalid value (5)");
                         }
 
                         // Attempt to write an invalid low tracking rate
@@ -2481,14 +2481,14 @@ namespace ConformU
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsOK("TrackingRate Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected when TrackingRate is set to an invalid value (-1)");
+                            HandleInvalidValueExceptionAsOk("TrackingRate Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected when TrackingRate is set to an invalid value (-1)");
                         }
 
                         // Finally restore original TrackingRate
                         try
                         {
-                            LogCallToDriver("TrackingRate Write", "About to set TrackingRate property to " + l_TrackingRate.ToString());
-                            telescopeDevice.TrackingRate = l_TrackingRate;
+                            LogCallToDriver("TrackingRate Write", "About to set TrackingRate property to " + lTrackingRate.ToString());
+                            telescopeDevice.TrackingRate = lTrackingRate;
                         }
                         catch (Exception ex)
                         {
@@ -2518,19 +2518,19 @@ namespace ConformU
             {
                 LogCallToDriver("UTCDate Read", "About to get UTCDate property");
                 utcDate = telescopeDevice.UTCDate; // Save starting value
-                LogOK("UTCDate Read", utcDate.ToString("dd-MMM-yyyy HH:mm:ss.fff"));
+                LogOk("UTCDate Read", utcDate.ToString("dd-MMM-yyyy HH:mm:ss.fff"));
 
                 try // UTCDate Write is optional since if you are using the PC time as UTCTime then you should not write to the PC clock!
                 {
                     // Try to write a new UTCDate  1 hour in the future
                     LogCallToDriver("UTCDate Write", $"About to set UTCDate property to {utcDate.AddHours(1.0d)}");
                     telescopeDevice.UTCDate = utcDate.AddHours(1.0d);
-                    LogOK("UTCDate Write", $"New UTCDate written successfully: {utcDate.AddHours(1.0d)}");
+                    LogOk("UTCDate Write", $"New UTCDate written successfully: {utcDate.AddHours(1.0d)}");
 
                     // Restore original value
                     LogCallToDriver("UTCDate Write", $"About to set UTCDate property to {utcDate}");
                     telescopeDevice.UTCDate = utcDate;
-                    LogOK("UTCDate Write", $"Original UTCDate restored successfully: {utcDate}");
+                    LogOk("UTCDate Write", $"Original UTCDate restored successfully: {utcDate}");
                 }
                 catch (Exception ex)
                 {
@@ -2552,18 +2552,18 @@ namespace ConformU
             // CanMoveAxis - Required - This must be first test as Parked tests use its results
             if (GetInterfaceVersion() > 1)
             {
-                if (telescopeTests[TELTEST_CAN_MOVE_AXIS] | telescopeTests[TELTEST_MOVE_AXIS] | telescopeTests[TELTEST_PARK_UNPARK])
+                if (telescopeTests[CAN_MOVE_AXIS] | telescopeTests[MOVE_AXIS] | telescopeTests[PARK_UNPARK])
                 {
-                    TelescopeRequiredMethodsTest(RequiredMethodType.tstCanMoveAxisPrimary, "CanMoveAxis:Primary");
+                    TelescopeRequiredMethodsTest(RequiredMethodType.TstCanMoveAxisPrimary, "CanMoveAxis:Primary");
                     if (cancellationToken.IsCancellationRequested) return;
-                    TelescopeRequiredMethodsTest(RequiredMethodType.tstCanMoveAxisSecondary, "CanMoveAxis:Secondary");
+                    TelescopeRequiredMethodsTest(RequiredMethodType.TstCanMoveAxisSecondary, "CanMoveAxis:Secondary");
                     if (cancellationToken.IsCancellationRequested) return;
-                    TelescopeRequiredMethodsTest(RequiredMethodType.tstCanMoveAxisTertiary, "CanMoveAxis:Tertiary");
+                    TelescopeRequiredMethodsTest(RequiredMethodType.TstCanMoveAxisTertiary, "CanMoveAxis:Tertiary");
                     if (cancellationToken.IsCancellationRequested) return;
                 }
                 else
                 {
-                    LogInfo(TELTEST_CAN_MOVE_AXIS, "Tests skipped");
+                    LogInfo(CAN_MOVE_AXIS, "Tests skipped");
                 }
             }
             else
@@ -2574,7 +2574,7 @@ namespace ConformU
             // Test Park, Unpark - Optional
             if (GetInterfaceVersion() > 1)
             {
-                if (telescopeTests[TELTEST_PARK_UNPARK])
+                if (telescopeTests[PARK_UNPARK])
                 {
                     if (canPark) // Can Park
                     {
@@ -2600,7 +2600,7 @@ namespace ConformU
                                     if (telescopeDevice.AtPark)
                                     {
                                         SetStatus("Scope parked");
-                                        LogOK("Park", "Parked successfully.");
+                                        LogOk("Park", "Parked successfully.");
 
                                         if (cancellationToken.IsCancellationRequested) return;
 
@@ -2617,7 +2617,7 @@ namespace ConformU
                                             if (telescopeDevice.AtPark)
                                             {
                                                 SetStatus("Scope parked");
-                                                LogOK("Park", "Calling Park twice is harmless and leaves the mount in the parked state.");
+                                                LogOk("Park", "Calling Park twice is harmless and leaves the mount in the parked state.");
                                             }
                                             else
                                             {
@@ -2638,7 +2638,7 @@ namespace ConformU
                                         // Confirm that methods do raise exceptions when scope is parked
                                         if (canSlew | canSlewAsync | canSlewAltAz | canSlewAltAzAsync)
                                         {
-                                            TelescopeParkedExceptionTest(ParkedExceptionType.tstPExcepAbortSlew, "AbortSlew");
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepAbortSlew, "AbortSlew");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
                                         }
@@ -2650,77 +2650,77 @@ namespace ConformU
 
                                     if (canFindHome)
                                     {
-                                        TelescopeParkedExceptionTest(ParkedExceptionType.tstPExcepFindHome, "FindHome");
+                                        TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepFindHome, "FindHome");
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                     }
 
                                     if (canMoveAxisPrimary)
                                     {
-                                        TelescopeParkedExceptionTest(ParkedExceptionType.tstPExcepMoveAxisPrimary, "MoveAxis Primary");
+                                        TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepMoveAxisPrimary, "MoveAxis Primary");
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                     }
 
                                     if (canMoveAxisSecondary)
                                     {
-                                        TelescopeParkedExceptionTest(ParkedExceptionType.tstPExcepMoveAxisSecondary, "MoveAxis Secondary");
+                                        TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepMoveAxisSecondary, "MoveAxis Secondary");
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                     }
 
                                     if (canMoveAxisTertiary)
                                     {
-                                        TelescopeParkedExceptionTest(ParkedExceptionType.tstPExcepMoveAxisTertiary, "MoveAxis Tertiary");
+                                        TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepMoveAxisTertiary, "MoveAxis Tertiary");
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                     }
 
                                     if (canPulseGuide)
                                     {
-                                        TelescopeParkedExceptionTest(ParkedExceptionType.tstPExcepPulseGuide, "PulseGuide");
+                                        TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepPulseGuide, "PulseGuide");
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                     }
 
                                     if (canSlew)
                                     {
-                                        TelescopeParkedExceptionTest(ParkedExceptionType.tstPExcepSlewToCoordinates, "SlewToCoordinates");
+                                        TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepSlewToCoordinates, "SlewToCoordinates");
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                     }
 
                                     if (canSlewAsync)
                                     {
-                                        TelescopeParkedExceptionTest(ParkedExceptionType.tstPExcepSlewToCoordinatesAsync, "SlewToCoordinatesAsync");
+                                        TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepSlewToCoordinatesAsync, "SlewToCoordinatesAsync");
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                     }
 
                                     if (canSlew)
                                     {
-                                        TelescopeParkedExceptionTest(ParkedExceptionType.tstPExcepSlewToTarget, "SlewToTarget");
+                                        TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepSlewToTarget, "SlewToTarget");
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                     }
 
                                     if (canSlewAsync)
                                     {
-                                        TelescopeParkedExceptionTest(ParkedExceptionType.tstPExcepSlewToTargetAsync, "SlewToTargetAsync");
+                                        TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepSlewToTargetAsync, "SlewToTargetAsync");
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                     }
 
                                     if (canSync)
                                     {
-                                        TelescopeParkedExceptionTest(ParkedExceptionType.tstPExcepSyncToCoordinates, "SyncToCoordinates");
+                                        TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepSyncToCoordinates, "SyncToCoordinates");
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                     }
 
                                     if (canSync)
                                     {
-                                        TelescopeParkedExceptionTest(ParkedExceptionType.tstPExcepSyncToTarget, "SyncToTarget");
+                                        TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepSyncToTarget, "SyncToTarget");
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
                                     }
@@ -2741,7 +2741,7 @@ namespace ConformU
                                             // Validate unparking
                                             if (!telescopeDevice.AtPark) // Scope unparked OK
                                             {
-                                                LogOK("Unpark", "Unparked successfully.");
+                                                LogOk("Unpark", "Unparked successfully.");
                                                 SetStatus("Scope Unparked OK");
 
                                                 try // Make sure tracking doesn't generate an error if it is not implemented
@@ -2765,7 +2765,7 @@ namespace ConformU
                                                     // Validate unparking
                                                     if (!telescopeDevice.AtPark) // Scope remained unparked
                                                     {
-                                                        LogOK("Park", "Calling Unpark twice is harmless and leaves the mount in the un-parked state.");
+                                                        LogOk("Park", "Calling Unpark twice is harmless and leaves the mount in the un-parked state.");
                                                         SetStatus("Scope Unparked OK");
                                                     }
                                                     else // Scope is still parked - it did not unpark
@@ -2834,7 +2834,7 @@ namespace ConformU
                         {
                             LogCallToDriver("Park", "About to Park call method");
                             telescopeDevice.Park();
-                            LogOK("Park", "Success if already parked");
+                            LogOk("Park", "Success if already parked");
 
                             LogCallToDriver("Park", "About to get AtPark property repeatedly...");
 
@@ -2860,7 +2860,7 @@ namespace ConformU
                                 LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
                                 WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
-                                LogOK("UnPark", "CanPark is false and CanUnPark is true; no exception generated as expected");
+                                LogOk("UnPark", "CanPark is false and CanUnPark is true; no exception generated as expected");
                             }
                             catch (Exception ex)
                             {
@@ -2890,7 +2890,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogInfo(TELTEST_PARK_UNPARK, "Tests skipped");
+                    LogInfo(PARK_UNPARK, "Tests skipped");
                 }
             }
             else
@@ -2899,7 +2899,7 @@ namespace ConformU
             }
 
             // AbortSlew - Optional
-            if (telescopeTests[TELTEST_ABORT_SLEW])
+            if (telescopeTests[ABORT_SLEW])
             {
                 TelescopeOptionalMethodsTest(OptionalMethodType.AbortSlew, "AbortSlew", true);
                 if (cancellationToken.IsCancellationRequested)
@@ -2907,13 +2907,13 @@ namespace ConformU
             }
             else
             {
-                LogInfo(TELTEST_ABORT_SLEW, "Tests skipped");
+                LogInfo(ABORT_SLEW, "Tests skipped");
             }
 
             // AxisRates - Required
             if (GetInterfaceVersion() > 1)
             {
-                if (telescopeTests[TELTEST_AXIS_RATE] | telescopeTests[TELTEST_MOVE_AXIS])
+                if (telescopeTests[AXIS_RATE] | telescopeTests[MOVE_AXIS])
                 {
                     TelescopeAxisRateTest("AxisRate:Primary", TelescopeAxis.Primary);
                     TelescopeAxisRateTest("AxisRate:Secondary", TelescopeAxis.Secondary);
@@ -2921,7 +2921,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogInfo(TELTEST_AXIS_RATE, "Tests skipped");
+                    LogInfo(AXIS_RATE, "Tests skipped");
                 }
             }
             else
@@ -2930,7 +2930,7 @@ namespace ConformU
             }
 
             // FindHome - Optional
-            if (telescopeTests[TELTEST_FIND_HOME])
+            if (telescopeTests[FIND_HOME])
             {
                 TelescopeOptionalMethodsTest(OptionalMethodType.FindHome, "FindHome", canFindHome);
                 if (cancellationToken.IsCancellationRequested)
@@ -2938,13 +2938,13 @@ namespace ConformU
             }
             else
             {
-                LogInfo(TELTEST_FIND_HOME, "Tests skipped");
+                LogInfo(FIND_HOME, "Tests skipped");
             }
 
             // MoveAxis - Optional
             if (GetInterfaceVersion() > 1)
             {
-                if (telescopeTests[TELTEST_MOVE_AXIS])
+                if (telescopeTests[MOVE_AXIS])
                 {
                     TelescopeOptionalMethodsTest(OptionalMethodType.MoveAxisPrimary, "MoveAxis Primary", canMoveAxisPrimary);
                     if (cancellationToken.IsCancellationRequested)
@@ -2958,7 +2958,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogInfo(TELTEST_MOVE_AXIS, "Tests skipped");
+                    LogInfo(MOVE_AXIS, "Tests skipped");
                 }
             }
             else
@@ -2967,7 +2967,7 @@ namespace ConformU
             }
 
             // PulseGuide - Optional
-            if (telescopeTests[TELTEST_PULSE_GUIDE])
+            if (telescopeTests[PULSE_GUIDE])
             {
                 TelescopeOptionalMethodsTest(OptionalMethodType.PulseGuide, "PulseGuide", canPulseGuide);
                 if (cancellationToken.IsCancellationRequested)
@@ -2983,33 +2983,33 @@ namespace ConformU
                         if ((guideRateRightAscension >= 0.0) & (guideRateDeclination >= 0.0))
                         {
                             TestPulseGuide(-9.0);
-                            if (applicationCancellationToken.IsCancellationRequested)
+                            if (ApplicationCancellationToken.IsCancellationRequested)
                                 return;
 
                             TestPulseGuide(+9.0);
-                            if (applicationCancellationToken.IsCancellationRequested)
+                            if (ApplicationCancellationToken.IsCancellationRequested)
                                 return;
 
                             TestPulseGuide(-3.0);
-                            if (applicationCancellationToken.IsCancellationRequested)
+                            if (ApplicationCancellationToken.IsCancellationRequested)
                                 return;
 
                             TestPulseGuide(+3.0);
                         }
                         else
-                            LogIssue(TELTEST_PULSE_GUIDE, $"Extended pulse guide tests skipped because at least one of the GuideRateRightAscension or GuideRateDeclination properties was not implemented or returned a zero or negative value.");
+                            LogIssue(PULSE_GUIDE, $"Extended pulse guide tests skipped because at least one of the GuideRateRightAscension or GuideRateDeclination properties was not implemented or returned a zero or negative value.");
                     }
                     else
-                        LogInfo(TELTEST_PULSE_GUIDE, $"Extended pulse guide tests skipped because the CanPulseGuide property returned False.");
+                        LogInfo(PULSE_GUIDE, $"Extended pulse guide tests skipped because the CanPulseGuide property returned False.");
                 }
             }
             else
             {
-                LogInfo(TELTEST_PULSE_GUIDE, "Tests skipped");
+                LogInfo(PULSE_GUIDE, "Tests skipped");
             }
 
             // Test Equatorial slewing to coordinates - Optional
-            if (telescopeTests[TELTEST_SLEW_TO_COORDINATES])
+            if (telescopeTests[SLEW_TO_COORDINATES])
             {
                 TelescopeSlewTest(SlewSyncType.SlewToCoordinates, "SlewToCoordinates", canSlew, "CanSlew");
                 if (cancellationToken.IsCancellationRequested)
@@ -3026,11 +3026,11 @@ namespace ConformU
             }
             else
             {
-                LogInfo(TELTEST_SLEW_TO_COORDINATES, "Tests skipped");
+                LogInfo(SLEW_TO_COORDINATES, "Tests skipped");
             }
 
             // Test Equatorial slewing to coordinates asynchronous - Optional
-            if (telescopeTests[TELTEST_SLEW_TO_COORDINATES_ASYNC])
+            if (telescopeTests[SLEW_TO_COORDINATES_ASYNC])
             {
                 TelescopeSlewTest(SlewSyncType.SlewToCoordinatesAsync, "SlewToCoordinatesAsync", canSlewAsync, "CanSlewAsync");
                 if (cancellationToken.IsCancellationRequested)
@@ -3047,11 +3047,11 @@ namespace ConformU
             }
             else
             {
-                LogInfo(TELTEST_SLEW_TO_COORDINATES_ASYNC, "Tests skipped");
+                LogInfo(SLEW_TO_COORDINATES_ASYNC, "Tests skipped");
             }
 
             // Equatorial Sync to Coordinates - Optional - Moved here so that it can be tested before any target coordinates are set - Peter 4th August 2018
-            if (telescopeTests[TELTEST_SYNC_TO_COORDINATES])
+            if (telescopeTests[SYNC_TO_COORDINATES])
             {
                 TelescopeSyncTest(SlewSyncType.SyncToCoordinates, "SyncToCoordinates", canSync, "CanSync");
                 if (cancellationToken.IsCancellationRequested)
@@ -3068,7 +3068,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo(TELTEST_SYNC_TO_COORDINATES, "Tests skipped");
+                LogInfo(SYNC_TO_COORDINATES, "Tests skipped");
             }
 
             // TargetRightAscension Write - Optional - Test moved here so that Conform can check that the SlewTo... methods properly set target coordinates.")
@@ -3080,7 +3080,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                HandleInvalidValueExceptionAsOK("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetRightAscension < 0 hours");
+                HandleInvalidValueExceptionAsOk("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetRightAscension < 0 hours");
             }
 
             try
@@ -3091,12 +3091,12 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                HandleInvalidValueExceptionAsOK("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetRightAscension > 24 hours");
+                HandleInvalidValueExceptionAsOk("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetRightAscension > 24 hours");
             }
 
             try
             {
-                targetRightAscension = TelescopeRAFromSiderealTime("TargetRightAscension Write", -4.0d); LogCallToDriver("TargetRightAscension Write", "About to set TargetRightAscension property to " + targetRightAscension);
+                targetRightAscension = TelescopeRaFromSiderealTime("TargetRightAscension Write", -4.0d); LogCallToDriver("TargetRightAscension Write", "About to set TargetRightAscension property to " + targetRightAscension);
                 telescopeDevice.TargetRightAscension = targetRightAscension; // Set a valid value
                 try
                 {
@@ -3105,25 +3105,25 @@ namespace ConformU
                     {
                         case 0.0d:
                             {
-                                LogOK("TargetRightAscension Write", "Legal value " + targetRightAscension.ToHMS() + " HH:MM:SS written successfully");
+                                LogOk("TargetRightAscension Write", "Legal value " + targetRightAscension.ToHMS() + " HH:MM:SS written successfully");
                                 break;
                             }
 
                         case var @case when @case <= 1.0d / 3600.0d: // 1 seconds
                             {
-                                LogOK("TargetRightAscension Write", "Target RightAscension is within 1 second of the value set: " + targetRightAscension.ToHMS());
+                                LogOk("TargetRightAscension Write", "Target RightAscension is within 1 second of the value set: " + targetRightAscension.ToHMS());
                                 break;
                             }
 
                         case var case1 when case1 <= 2.0d / 3600.0d: // 2 seconds
                             {
-                                LogOK("TargetRightAscension Write", "Target RightAscension is within 2 seconds of the value set: " + targetRightAscension.ToHMS());
+                                LogOk("TargetRightAscension Write", "Target RightAscension is within 2 seconds of the value set: " + targetRightAscension.ToHMS());
                                 break;
                             }
 
                         case var case2 when case2 <= 5.0d / 3600.0d: // 5 seconds
                             {
-                                LogOK("TargetRightAscension Write", "Target RightAscension is within 5 seconds of the value set: " + targetRightAscension.ToHMS());
+                                LogOk("TargetRightAscension Write", "Target RightAscension is within 5 seconds of the value set: " + targetRightAscension.ToHMS());
                                 break;
                             }
 
@@ -3156,7 +3156,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                HandleInvalidValueExceptionAsOK("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetDeclination < -90 degrees");
+                HandleInvalidValueExceptionAsOk("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetDeclination < -90 degrees");
             }
 
             try
@@ -3167,7 +3167,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                HandleInvalidValueExceptionAsOK("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetDeclination < -90 degrees");
+                HandleInvalidValueExceptionAsOk("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetDeclination < -90 degrees");
             }
 
             try
@@ -3181,25 +3181,25 @@ namespace ConformU
                     {
                         case 0.0d:
                             {
-                                LogOK("TargetDeclination Write", "Legal value " + targetDeclination.ToDMS() + " DD:MM:SS written successfully");
+                                LogOk("TargetDeclination Write", "Legal value " + targetDeclination.ToDMS() + " DD:MM:SS written successfully");
                                 break;
                             }
 
                         case var case3 when case3 <= 1.0d / 3600.0d: // 1 seconds
                             {
-                                LogOK("TargetDeclination Write", "Target Declination is within 1 second of the value set: " + targetDeclination.ToDMS());
+                                LogOk("TargetDeclination Write", "Target Declination is within 1 second of the value set: " + targetDeclination.ToDMS());
                                 break;
                             }
 
                         case var case4 when case4 <= 2.0d / 3600.0d: // 2 seconds
                             {
-                                LogOK("TargetDeclination Write", "Target Declination is within 2 seconds of the value set: " + targetDeclination.ToDMS());
+                                LogOk("TargetDeclination Write", "Target Declination is within 2 seconds of the value set: " + targetDeclination.ToDMS());
                                 break;
                             }
 
                         case var case5 when case5 <= 5.0d / 3600.0d: // 5 seconds
                             {
-                                LogOK("TargetDeclination Write", "Target Declination is within 5 seconds of the value set: " + targetDeclination.ToDMS());
+                                LogOk("TargetDeclination Write", "Target Declination is within 5 seconds of the value set: " + targetDeclination.ToDMS());
                                 break;
                             }
 
@@ -3224,7 +3224,7 @@ namespace ConformU
                 return;
 
             // Test Equatorial target slewing - Optional
-            if (telescopeTests[TELTEST_SLEW_TO_TARGET])
+            if (telescopeTests[SLEW_TO_TARGET])
             {
                 TelescopeSlewTest(SlewSyncType.SlewToTarget, "SlewToTarget", canSlew, "CanSlew");
                 if (cancellationToken.IsCancellationRequested)
@@ -3241,11 +3241,11 @@ namespace ConformU
             }
             else
             {
-                LogInfo(TELTEST_SLEW_TO_TARGET, "Tests skipped");
+                LogInfo(SLEW_TO_TARGET, "Tests skipped");
             }
 
             // Test Equatorial target slewing asynchronous - Optional
-            if (telescopeTests[TELTEST_SLEW_TO_TARGET_ASYNC])
+            if (telescopeTests[SLEW_TO_TARGET_ASYNC])
             {
                 TelescopeSlewTest(SlewSyncType.SlewToTargetAsync, "SlewToTargetAsync", canSlewAsync, "CanSlewAsync");
                 if (cancellationToken.IsCancellationRequested)
@@ -3262,13 +3262,13 @@ namespace ConformU
             }
             else
             {
-                LogInfo(TELTEST_SLEW_TO_TARGET_ASYNC, "Tests skipped");
+                LogInfo(SLEW_TO_TARGET_ASYNC, "Tests skipped");
             }
 
             // DestinationSideOfPier - Optional
             if (GetInterfaceVersion() > 1)
             {
-                if (telescopeTests[TELTEST_DESTINATION_SIDE_OF_PIER])
+                if (telescopeTests[DESTINATION_SIDE_OF_PIER])
                 {
                     if (alignmentMode == AlignmentMode.GermanPolar)
                     {
@@ -3283,7 +3283,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogInfo(TELTEST_DESTINATION_SIDE_OF_PIER, "Tests skipped");
+                    LogInfo(DESTINATION_SIDE_OF_PIER, "Tests skipped");
                 }
             }
             else
@@ -3294,7 +3294,7 @@ namespace ConformU
             // Test AltAz Slewing - Optional
             if (GetInterfaceVersion() > 1)
             {
-                if (telescopeTests[TELTEST_SLEW_TO_ALTAZ])
+                if (telescopeTests[SLEW_TO_ALTAZ])
                 {
                     TelescopeSlewTest(SlewSyncType.SlewToAltAz, "SlewToAltAz", canSlewAltAz, "CanSlewAltAz");
                     if (cancellationToken.IsCancellationRequested)
@@ -3311,7 +3311,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogInfo(TELTEST_SLEW_TO_ALTAZ, "Tests skipped");
+                    LogInfo(SLEW_TO_ALTAZ, "Tests skipped");
                 }
             }
             else
@@ -3322,7 +3322,7 @@ namespace ConformU
             // Test AltAz Slewing asynchronous - Optional
             if (GetInterfaceVersion() > 1)
             {
-                if (telescopeTests[TELTEST_SLEW_TO_ALTAZ_ASYNC])
+                if (telescopeTests[SLEW_TO_ALTAZ_ASYNC])
                 {
                     TelescopeSlewTest(SlewSyncType.SlewToAltAzAsync, "SlewToAltAzAsync", canSlewAltAzAsync, "CanSlewAltAzAsync");
                     if (cancellationToken.IsCancellationRequested)
@@ -3339,7 +3339,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogInfo(TELTEST_SLEW_TO_ALTAZ_ASYNC, "Tests skipped");
+                    LogInfo(SLEW_TO_ALTAZ_ASYNC, "Tests skipped");
                 }
             }
             else
@@ -3348,7 +3348,7 @@ namespace ConformU
             }
 
             // Equatorial Sync to Target - Optional
-            if (telescopeTests[TELTEST_SYNC_TO_TARGET])
+            if (telescopeTests[SYNC_TO_TARGET])
             {
                 TelescopeSyncTest(SlewSyncType.SyncToTarget, "SyncToTarget", canSync, "CanSync");
                 if (cancellationToken.IsCancellationRequested)
@@ -3365,13 +3365,13 @@ namespace ConformU
             }
             else
             {
-                LogInfo(TELTEST_SYNC_TO_TARGET, "Tests skipped");
+                LogInfo(SYNC_TO_TARGET, "Tests skipped");
             }
 
             // AltAz Sync - Optional
             if (GetInterfaceVersion() > 1)
             {
-                if (telescopeTests[TELTEST_SYNC_TO_ALTAZ])
+                if (telescopeTests[SYNC_TO_ALTAZ])
                 {
                     TelescopeSyncTest(SlewSyncType.SyncToAltAz, "SyncToAltAz", canSyncAltAz, "CanSyncAltAz");
                     if (cancellationToken.IsCancellationRequested)
@@ -3388,7 +3388,7 @@ namespace ConformU
                 }
                 else
                 {
-                    LogInfo(TELTEST_SYNC_TO_ALTAZ, "Tests skipped");
+                    LogInfo(SYNC_TO_ALTAZ, "Tests skipped");
                 }
             }
             else
@@ -3464,12 +3464,12 @@ namespace ConformU
         public override void CheckPerformance()
         {
             SetTest("Performance"); // Clear status messages
-            TelescopePerformanceTest(PerformanceType.tstPerfAltitude, "Altitude");
+            TelescopePerformanceTest(PerformanceType.TstPerfAltitude, "Altitude");
             if (cancellationToken.IsCancellationRequested)
                 return;
             if (GetInterfaceVersion() > 1)
             {
-                TelescopePerformanceTest(PerformanceType.tstPerfAtHome, "AtHome");
+                TelescopePerformanceTest(PerformanceType.TstPerfAtHome, "AtHome");
                 if (cancellationToken.IsCancellationRequested)
                     return;
             }
@@ -3480,7 +3480,7 @@ namespace ConformU
 
             if (GetInterfaceVersion() > 1)
             {
-                TelescopePerformanceTest(PerformanceType.tstPerfAtPark, "AtPark");
+                TelescopePerformanceTest(PerformanceType.TstPerfAtPark, "AtPark");
                 if (cancellationToken.IsCancellationRequested)
                     return;
             }
@@ -3489,17 +3489,17 @@ namespace ConformU
                 LogInfo("Performance: AtPark", "Skipping test as this method is not supported in interface V" + GetInterfaceVersion());
             }
 
-            TelescopePerformanceTest(PerformanceType.tstPerfAzimuth, "Azimuth");
+            TelescopePerformanceTest(PerformanceType.TstPerfAzimuth, "Azimuth");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            TelescopePerformanceTest(PerformanceType.tstPerfDeclination, "Declination");
+            TelescopePerformanceTest(PerformanceType.TstPerfDeclination, "Declination");
             if (cancellationToken.IsCancellationRequested)
                 return;
             if (GetInterfaceVersion() > 1)
             {
                 if (canPulseGuide)
                 {
-                    TelescopePerformanceTest(PerformanceType.tstPerfIsPulseGuiding, "IsPulseGuiding");
+                    TelescopePerformanceTest(PerformanceType.TstPerfIsPulseGuiding, "IsPulseGuiding");
                     if (cancellationToken.IsCancellationRequested)
                         return;
                 }
@@ -3513,7 +3513,7 @@ namespace ConformU
                 LogInfo("Performance: IsPulseGuiding", "Skipping test as this method is not supported in interface v1" + GetInterfaceVersion());
             }
 
-            TelescopePerformanceTest(PerformanceType.tstPerfRightAscension, "RightAscension");
+            TelescopePerformanceTest(PerformanceType.TstPerfRightAscension, "RightAscension");
             if (cancellationToken.IsCancellationRequested)
                 return;
             if (GetInterfaceVersion() > 1)
@@ -3522,7 +3522,7 @@ namespace ConformU
                 {
                     if (CanReadSideOfPier("Performance - SideOfPier"))
                     {
-                        TelescopePerformanceTest(PerformanceType.tstPerfSideOfPier, "SideOfPier");
+                        TelescopePerformanceTest(PerformanceType.TstPerfSideOfPier, "SideOfPier");
                         if (cancellationToken.IsCancellationRequested)
                             return;
                     }
@@ -3543,7 +3543,7 @@ namespace ConformU
 
             if (canReadSiderealTime)
             {
-                TelescopePerformanceTest(PerformanceType.tstPerfSiderealTime, "SiderealTime");
+                TelescopePerformanceTest(PerformanceType.TstPerfSiderealTime, "SiderealTime");
                 if (cancellationToken.IsCancellationRequested)
                     return;
             }
@@ -3552,10 +3552,10 @@ namespace ConformU
                 LogInfo("Performance: SiderealTime", "Skipping test because the SiderealTime property throws an exception.");
             }
 
-            TelescopePerformanceTest(PerformanceType.tstPerfSlewing, "Slewing");
+            TelescopePerformanceTest(PerformanceType.TstPerfSlewing, "Slewing");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            TelescopePerformanceTest(PerformanceType.tstPerfUTCDate, "UTCDate");
+            TelescopePerformanceTest(PerformanceType.TstPerfUtcDate, "UTCDate");
             if (cancellationToken.IsCancellationRequested)
                 return;
         }
@@ -3569,7 +3569,7 @@ namespace ConformU
                 if (telescopeDevice.CanSetTracking)
                 {
                     telescopeDevice.Tracking = false;
-                    LogOK("Mount Safety", "Tracking stopped to protect your mount.");
+                    LogOk("Mount Safety", "Tracking stopped to protect your mount.");
                 }
                 else
                 {
@@ -3595,55 +3595,55 @@ namespace ConformU
                 else
                 {
                     // Method tests
-                    if (!telescopeTests[TELTEST_CAN_MOVE_AXIS])
+                    if (!telescopeTests[CAN_MOVE_AXIS])
                         LogConfigurationAlert("Can move axis tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_PARK_UNPARK])
+                    if (!telescopeTests[PARK_UNPARK])
                         LogConfigurationAlert("Park and Unpark tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_ABORT_SLEW])
+                    if (!telescopeTests[ABORT_SLEW])
                         LogConfigurationAlert("Abort slew tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_AXIS_RATE])
+                    if (!telescopeTests[AXIS_RATE])
                         LogConfigurationAlert("Axis rate tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_FIND_HOME])
+                    if (!telescopeTests[FIND_HOME])
                         LogConfigurationAlert("Find home tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_MOVE_AXIS])
+                    if (!telescopeTests[MOVE_AXIS])
                         LogConfigurationAlert("Move axis tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_PULSE_GUIDE])
+                    if (!telescopeTests[PULSE_GUIDE])
                         LogConfigurationAlert("Pulse guide tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_SLEW_TO_COORDINATES])
+                    if (!telescopeTests[SLEW_TO_COORDINATES])
                         LogConfigurationAlert("Synchronous Slew to coordinates tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_SLEW_TO_COORDINATES_ASYNC])
+                    if (!telescopeTests[SLEW_TO_COORDINATES_ASYNC])
                         LogConfigurationAlert("Asynchronous slew to coordinates tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_SLEW_TO_TARGET])
+                    if (!telescopeTests[SLEW_TO_TARGET])
                         LogConfigurationAlert("Synchronous slew to target tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_SLEW_TO_TARGET_ASYNC])
+                    if (!telescopeTests[SLEW_TO_TARGET_ASYNC])
                         LogConfigurationAlert("Asynchronous slew to target tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_DESTINATION_SIDE_OF_PIER])
+                    if (!telescopeTests[DESTINATION_SIDE_OF_PIER])
                         LogConfigurationAlert("Destination side of pier tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_SLEW_TO_ALTAZ])
+                    if (!telescopeTests[SLEW_TO_ALTAZ])
                         LogConfigurationAlert("Synchronous slew to altitude / azimuth tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_SLEW_TO_ALTAZ_ASYNC])
+                    if (!telescopeTests[SLEW_TO_ALTAZ_ASYNC])
                         LogConfigurationAlert("Asynchronous slew to altitude / azimuth tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_SYNC_TO_COORDINATES])
+                    if (!telescopeTests[SYNC_TO_COORDINATES])
                         LogConfigurationAlert("Sync to coordinates tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_SYNC_TO_TARGET])
+                    if (!telescopeTests[SYNC_TO_TARGET])
                         LogConfigurationAlert("Sync to target tests were omitted due to Conform configuration.");
 
-                    if (!telescopeTests[TELTEST_SYNC_TO_ALTAZ])
+                    if (!telescopeTests[SYNC_TO_ALTAZ])
                         LogConfigurationAlert("Sync to altitude / azimuth tests were omitted due to Conform configuration.");
                 }
 
@@ -3677,15 +3677,15 @@ namespace ConformU
         private void TelescopeSyncTest(SlewSyncType testType, string testName, bool driverSupportsMethod, string canDoItName)
         {
             bool showOutcome = false;
-            double difference, syncRA, syncDEC, syncAlt = default, syncAz = default, newAlt, newAz, currentAz = default, currentAlt = default, startRA, startDec, currentRA, currentDec;
+            double difference, syncRa, syncDec, syncAlt = default, syncAz = default, newAlt, newAz, currentAz = default, currentAlt = default, startRa, startDec, currentRa, currentDec;
 
             SetTest(testName);
             SetAction("Running test...");
 
             // Basic test to make sure the method is either implemented OK or fails as expected if it is not supported in this driver.
             LogCallToDriver(testName, "About to get RightAscension property");
-            syncRA = telescopeDevice.RightAscension; LogCallToDriver(testName, "About to get Declination property");
-            syncDEC = telescopeDevice.Declination;
+            syncRa = telescopeDevice.RightAscension; LogCallToDriver(testName, "About to get Declination property");
+            syncDec = telescopeDevice.Declination;
             if (!driverSupportsMethod) // Call should fail
             {
                 try
@@ -3701,8 +3701,8 @@ namespace ConformU
                                     telescopeDevice.Tracking = true;
                                 }
 
-                                LogDebug(testName, "SyncToCoordinates: " + syncRA.ToHMS() + " " + syncDEC.ToDMS()); LogCallToDriver(testName, "About to call SyncToCoordinates method, RA: " + syncRA.ToHMS() + ", Declination: " + syncDEC.ToDMS());
-                                telescopeDevice.SyncToCoordinates(syncRA, syncDEC);
+                                LogDebug(testName, "SyncToCoordinates: " + syncRa.ToHMS() + " " + syncDec.ToDMS()); LogCallToDriver(testName, "About to call SyncToCoordinates method, RA: " + syncRa.ToHMS() + ", Declination: " + syncDec.ToDMS());
+                                telescopeDevice.SyncToCoordinates(syncRa, syncDec);
                                 LogIssue(testName, "CanSyncToCoordinates is False but call to SyncToCoordinates did not throw an exception.");
                                 break;
                             }
@@ -3718,8 +3718,8 @@ namespace ConformU
 
                                 try
                                 {
-                                    LogDebug(testName, "Setting TargetRightAscension: " + syncRA.ToHMS()); LogCallToDriver(testName, "About to set TargetRightAscension property to " + syncRA.ToHMS());
-                                    telescopeDevice.TargetRightAscension = syncRA;
+                                    LogDebug(testName, "Setting TargetRightAscension: " + syncRa.ToHMS()); LogCallToDriver(testName, "About to set TargetRightAscension property to " + syncRa.ToHMS());
+                                    telescopeDevice.TargetRightAscension = syncRa;
                                     LogDebug(testName, "Completed Set TargetRightAscension");
                                 }
                                 catch (Exception)
@@ -3729,8 +3729,8 @@ namespace ConformU
 
                                 try
                                 {
-                                    LogDebug(testName, "Setting TargetDeclination: " + syncDEC.ToDMS()); LogCallToDriver(testName, "About to set TargetDeclination property to " + syncDEC.ToDMS());
-                                    telescopeDevice.TargetDeclination = syncDEC;
+                                    LogDebug(testName, "Setting TargetDeclination: " + syncDec.ToDMS()); LogCallToDriver(testName, "About to set TargetDeclination property to " + syncDec.ToDMS());
+                                    telescopeDevice.TargetDeclination = syncDec;
                                     LogDebug(testName, "Completed Set TargetDeclination");
                                 }
                                 catch (Exception)
@@ -3791,8 +3791,8 @@ namespace ConformU
                             {
 
                                 // Calculate the Sync test RA position
-                                startRA = TelescopeRAFromHourAngle(testName, +3.0d);
-                                LogDebug(testName, string.Format("RA for sync tests: {0}", startRA.ToHMS()));
+                                startRa = TelescopeRaFromHourAngle(testName, +3.0d);
+                                LogDebug(testName, string.Format("RA for sync tests: {0}", startRa.ToHMS()));
 
                                 // Calculate the Sync test DEC position
                                 if (siteLatitude > 0.0d) // We are in the northern hemisphere
@@ -3805,27 +3805,27 @@ namespace ConformU
                                 } // Calculate for southern hemisphere
 
                                 LogDebug(testName, string.Format("Declination for sync tests: {0}", startDec.ToDMS()));
-                                SlewScope(startRA, startDec, "start position");
+                                SlewScope(startRa, startDec, "start position");
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 SetAction("Checking that scope slewed OK");
                                 // Now test that we have actually arrived
-                                CheckScopePosition(testName, "Slewed to start position", startRA, startDec);
+                                CheckScopePosition(testName, "Slewed to start position", startRa, startDec);
 
                                 // Calculate the sync test RA coordinate as a variation from the current RA coordinate
-                                syncRA = startRA - SYNC_SIMULATED_ERROR / (15.0d * 60.0d); // Convert sync error in arc minutes to RA hours
-                                if (syncRA < 0.0d)
-                                    syncRA += 24.0d; // Ensure legal RA
+                                syncRa = startRa - SYNC_SIMULATED_ERROR / (15.0d * 60.0d); // Convert sync error in arc minutes to RA hours
+                                if (syncRa < 0.0d)
+                                    syncRa += 24.0d; // Ensure legal RA
 
                                 // Calculate the sync test DEC coordinate as a variation from the current DEC coordinate
-                                syncDEC = startDec - SYNC_SIMULATED_ERROR / 60.0d; // Convert sync error in arc minutes to degrees
+                                syncDec = startDec - SYNC_SIMULATED_ERROR / 60.0d; // Convert sync error in arc minutes to degrees
 
                                 SetAction("Syncing the scope");
                                 // Sync the scope to the offset RA and DEC coordinates
-                                SyncScope(testName, canDoItName, testType, syncRA, syncDEC);
+                                SyncScope(testName, canDoItName, testType, syncRa, syncDec);
 
                                 // Check that the scope's synchronised position is as expected
-                                CheckScopePosition(testName, "Synced to sync position", syncRA, syncDEC);
+                                CheckScopePosition(testName, "Synced to sync position", syncRa, syncDec);
 
                                 // Check that the TargetRA and TargetDec were 
                                 SetAction("Checking that the scope synced OK");
@@ -3834,26 +3834,26 @@ namespace ConformU
                                     // Check that target coordinates are present and set correctly per the ASCOM Telescope specification
                                     try
                                     {
-                                        currentRA = telescopeDevice.TargetRightAscension;
-                                        LogDebug(testName, string.Format("Current TargetRightAscension: {0}, Set TargetRightAscension: {1}", currentRA, syncRA));
+                                        currentRa = telescopeDevice.TargetRightAscension;
+                                        LogDebug(testName, string.Format("Current TargetRightAscension: {0}, Set TargetRightAscension: {1}", currentRa, syncRa));
                                         double raDifference;
-                                        raDifference = RaDifferenceInArcSeconds(syncRA, currentRA);
+                                        raDifference = RaDifferenceInArcSeconds(syncRa, currentRa);
                                         switch (raDifference)
                                         {
                                             case var @case when @case <= SLEW_SYNC_OK_TOLERANCE:  // Within specified tolerance
                                                 {
-                                                    LogOK(testName, string.Format("The TargetRightAscension property {0} matches the expected RA OK. ", syncRA.ToHMS())); // Outside specified tolerance
+                                                    LogOk(testName, string.Format("The TargetRightAscension property {0} matches the expected RA OK. ", syncRa.ToHMS())); // Outside specified tolerance
                                                     break;
                                                 }
 
                                             default:
                                                 {
-                                                    LogIssue(testName, string.Format("The TargetRightAscension property {0} does not match the expected RA {1}", currentRA.ToHMS(), syncRA.ToHMS()));
+                                                    LogIssue(testName, string.Format("The TargetRightAscension property {0} does not match the expected RA {1}", currentRa.ToHMS(), syncRa.ToHMS()));
                                                     break;
                                                 }
                                         }
                                     }
-                                    catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
+                                    catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == GExNotSet1 | ex.ErrorCode == GExNotSet2)
                                     {
                                         LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
                                     }
@@ -3861,7 +3861,7 @@ namespace ConformU
                                     {
                                         LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
                                     }
-                                    catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == g_ExNotSet1 | ex.Number == g_ExNotSet2)
+                                    catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == GExNotSet1 | ex.Number == GExNotSet2)
                                     {
                                         LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
                                     }
@@ -3873,25 +3873,25 @@ namespace ConformU
                                     try
                                     {
                                         currentDec = telescopeDevice.TargetDeclination;
-                                        LogDebug(testName, string.Format("Current TargetDeclination: {0}, Set TargetDeclination: {1}", currentDec, syncDEC));
+                                        LogDebug(testName, string.Format("Current TargetDeclination: {0}, Set TargetDeclination: {1}", currentDec, syncDec));
                                         double decDifference;
-                                        decDifference = Math.Round(Math.Abs(currentDec - syncDEC) * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero); // Dec difference is in arc seconds from degrees of Declination
+                                        decDifference = Math.Round(Math.Abs(currentDec - syncDec) * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero); // Dec difference is in arc seconds from degrees of Declination
                                         switch (decDifference)
                                         {
                                             case var case1 when case1 <= SLEW_SYNC_OK_TOLERANCE: // Within specified tolerance
                                                 {
-                                                    LogOK(testName, string.Format("The TargetDeclination property {0} matches the expected Declination OK. ", syncDEC.ToDMS())); // Outside specified tolerance
+                                                    LogOk(testName, string.Format("The TargetDeclination property {0} matches the expected Declination OK. ", syncDec.ToDMS())); // Outside specified tolerance
                                                     break;
                                                 }
 
                                             default:
                                                 {
-                                                    LogIssue(testName, string.Format("The TargetDeclination property {0} does not match the expected Declination {1}", currentDec.ToDMS(), syncDEC.ToDMS()));
+                                                    LogIssue(testName, string.Format("The TargetDeclination property {0} does not match the expected Declination {1}", currentDec.ToDMS(), syncDec.ToDMS()));
                                                     break;
                                                 }
                                         }
                                     }
-                                    catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
+                                    catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == GExNotSet1 | ex.ErrorCode == GExNotSet2)
                                     {
                                         LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
                                     }
@@ -3899,7 +3899,7 @@ namespace ConformU
                                     {
                                         LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
                                     }
-                                    catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == g_ExNotSet1 | ex.Number == g_ExNotSet2)
+                                    catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == GExNotSet1 | ex.Number == GExNotSet2)
                                     {
                                         LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
                                     }
@@ -3910,33 +3910,33 @@ namespace ConformU
                                 }
 
                                 // Now slew to the scope's original position
-                                SlewScope(startRA, startDec, "original position in post-sync coordinates");
+                                SlewScope(startRa, startDec, "original position in post-sync coordinates");
 
                                 // Check that the scope's position is the original position
-                                CheckScopePosition(testName, "Slewed back to start position", startRA, startDec);
+                                CheckScopePosition(testName, "Slewed back to start position", startRa, startDec);
 
                                 // Now "undo" the sync by reversing syncing in the opposition sense than originally made
 
                                 // Calculate the sync test RA coordinate as a variation from the current RA coordinate
-                                syncRA = startRA + SYNC_SIMULATED_ERROR / (15.0d * 60.0d); // Convert sync error in arc minutes to RA hours
-                                if (syncRA >= 24.0d)
-                                    syncRA -= 24.0d; // Ensure legal RA
+                                syncRa = startRa + SYNC_SIMULATED_ERROR / (15.0d * 60.0d); // Convert sync error in arc minutes to RA hours
+                                if (syncRa >= 24.0d)
+                                    syncRa -= 24.0d; // Ensure legal RA
 
                                 // Calculate the sync test DEC coordinate as a variation from the current DEC coordinate
-                                syncDEC = startDec + SYNC_SIMULATED_ERROR / 60.0d; // Convert sync error in arc minutes to degrees
+                                syncDec = startDec + SYNC_SIMULATED_ERROR / 60.0d; // Convert sync error in arc minutes to degrees
 
                                 // Sync back to the original coordinates
                                 SetAction("Restoring original sync values");
-                                SyncScope(testName, canDoItName, testType, syncRA, syncDEC);
+                                SyncScope(testName, canDoItName, testType, syncRa, syncDec);
 
                                 // Check that the scope's synchronised position is as expected
-                                CheckScopePosition(testName, "Synced to reversed sync position", syncRA, syncDEC);
+                                CheckScopePosition(testName, "Synced to reversed sync position", syncRa, syncDec);
 
                                 // Now slew to the scope's original position
-                                SlewScope(startRA, startDec, "original position in pre-sync coordinates");
+                                SlewScope(startRa, startDec, "original position in pre-sync coordinates");
 
                                 // Check that the scope's position is the original position
-                                CheckScopePosition(testName, "Slewed back to start position", startRA, startDec);
+                                CheckScopePosition(testName, "Slewed back to start position", startRa, startDec);
                                 break;
                             }
 
@@ -3980,13 +3980,13 @@ namespace ConformU
                                     {
                                         case var case2 when case2 <= 1.0d / (60 * 60): // Within 1 seconds
                                             {
-                                                LogOK(testName, "Synced Altitude OK");
+                                                LogOk(testName, "Synced Altitude OK");
                                                 break;
                                             }
 
                                         case var case3 when case3 <= 2.0d / (60 * 60): // Within 2 seconds
                                             {
-                                                LogOK(testName, "Synced within 2 seconds of Altitude");
+                                                LogOk(testName, "Synced within 2 seconds of Altitude");
                                                 showOutcome = true;
                                                 break;
                                             }
@@ -4004,13 +4004,13 @@ namespace ConformU
                                     {
                                         case var case4 when case4 <= 1.0d / (60 * 60): // Within 1 seconds
                                             {
-                                                LogOK(testName, "Synced Azimuth OK");
+                                                LogOk(testName, "Synced Azimuth OK");
                                                 break;
                                             }
 
                                         case var case5 when case5 <= 2.0d / (60 * 60): // Within 2 seconds
                                             {
-                                                LogOK(testName, "Synced within 2 seconds of Azimuth");
+                                                LogOk(testName, "Synced within 2 seconds of Azimuth");
                                                 showOutcome = true;
                                                 break;
                                             }
@@ -4052,78 +4052,78 @@ namespace ConformU
             }
         }
 
-        private void TelescopeSlewTest(SlewSyncType p_Test, string p_Name, bool p_CanDoIt, string p_CanDoItName)
+        private void TelescopeSlewTest(SlewSyncType pTest, string pName, bool pCanDoIt, string pCanDoItName)
         {
-            SetTest(p_Name);
+            SetTest(pName);
             if (canSetTracking)
             {
-                LogCallToDriver(p_Name, "About to set Tracking property to true");
+                LogCallToDriver(pName, "About to set Tracking property to true");
                 telescopeDevice.Tracking = true; // Enable tracking for these tests
             }
 
             try
             {
-                switch (p_Test)
+                switch (pTest)
                 {
                     case SlewSyncType.SlewToCoordinates:
                         {
-                            LogCallToDriver(p_Name, "About to get Tracking property");
+                            LogCallToDriver(pName, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
-                                LogCallToDriver(p_Name, "About to set Tracking property to true");
+                                LogCallToDriver(pName, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
-                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -1.0d);
+                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -1.0d);
                             targetDeclination = 1.0d;
                             SetAction("Slewing synchronously...");
 
-                            LogCallToDriver(p_Name, "About to call SlewToCoordinates method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
+                            LogCallToDriver(pName, "About to call SlewToCoordinates method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
                             telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination);
-                            LogDebug(p_Name, "Returned from SlewToCoordinates method");
+                            LogDebug(pName, "Returned from SlewToCoordinates method");
                             break;
                         }
 
                     case SlewSyncType.SlewToCoordinatesAsync:
                         {
-                            LogCallToDriver(p_Name, "About to get Tracking property");
+                            LogCallToDriver(pName, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
-                                LogCallToDriver(p_Name, "About to set Tracking property to true");
+                                LogCallToDriver(pName, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
-                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
+                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -2.0d);
                             targetDeclination = 2.0d;
 
-                            LogCallToDriver(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
+                            LogCallToDriver(pName, "About to call SlewToCoordinatesAsync method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
                             telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
 
-                            WaitForSlew(p_Name, $"Slewing to coordinates asynchronously");
+                            WaitForSlew(pName, $"Slewing to coordinates asynchronously");
                             break;
                         }
 
                     case SlewSyncType.SlewToTarget:
                         {
-                            LogCallToDriver(p_Name, "About to get Tracking property");
+                            LogCallToDriver(pName, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
-                                LogCallToDriver(p_Name, "About to set Tracking property to true");
+                                LogCallToDriver(pName, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
-                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -3.0d);
+                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -3.0d);
                             targetDeclination = 3.0d;
                             try
                             {
-                                LogCallToDriver(p_Name, "About to set TargetRightAscension property to " + targetRightAscension.ToHMS());
+                                LogCallToDriver(pName, "About to set TargetRightAscension property to " + targetRightAscension.ToHMS());
                                 telescopeDevice.TargetRightAscension = targetRightAscension;
                             }
                             catch (Exception ex)
                             {
-                                if (p_CanDoIt)
+                                if (pCanDoIt)
                                 {
-                                    HandleException(p_Name, MemberType.Property, Required.MustBeImplemented, ex, p_CanDoItName + " is True but can't set TargetRightAscension");
+                                    HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex, pCanDoItName + " is True but can't set TargetRightAscension");
                                 }
                                 else
                                 {
@@ -4133,14 +4133,14 @@ namespace ConformU
 
                             try
                             {
-                                LogCallToDriver(p_Name, "About to set TargetDeclination property to " + targetDeclination.ToDMS());
+                                LogCallToDriver(pName, "About to set TargetDeclination property to " + targetDeclination.ToDMS());
                                 telescopeDevice.TargetDeclination = targetDeclination;
                             }
                             catch (Exception ex)
                             {
-                                if (p_CanDoIt)
+                                if (pCanDoIt)
                                 {
-                                    HandleException(p_Name, MemberType.Property, Required.MustBeImplemented, ex, p_CanDoItName + " is True but can't set TargetDeclination");
+                                    HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex, pCanDoItName + " is True but can't set TargetDeclination");
                                 }
                                 else
                                 {
@@ -4149,32 +4149,32 @@ namespace ConformU
                             }
 
                             SetAction("Slewing synchronously...");
-                            LogCallToDriver(p_Name, "About to call SlewToTarget method");
+                            LogCallToDriver(pName, "About to call SlewToTarget method");
                             telescopeDevice.SlewToTarget();
                             break;
                         }
 
                     case SlewSyncType.SlewToTargetAsync: // SlewToTargetAsync
                         {
-                            LogCallToDriver(p_Name, "About to get Tracking property");
+                            LogCallToDriver(pName, "About to get Tracking property");
                             if (canSetTracking & !telescopeDevice.Tracking)
                             {
-                                LogCallToDriver(p_Name, "About to set Tracking property to true");
+                                LogCallToDriver(pName, "About to set Tracking property to true");
                                 telescopeDevice.Tracking = true;
                             }
 
-                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -4.0d);
+                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -4.0d);
                             targetDeclination = 4.0d;
                             try
                             {
-                                LogCallToDriver(p_Name, "About to set TargetRightAscension property to " + targetRightAscension.ToHMS());
+                                LogCallToDriver(pName, "About to set TargetRightAscension property to " + targetRightAscension.ToHMS());
                                 telescopeDevice.TargetRightAscension = targetRightAscension;
                             }
                             catch (Exception ex)
                             {
-                                if (p_CanDoIt)
+                                if (pCanDoIt)
                                 {
-                                    HandleException(p_Name, MemberType.Property, Required.MustBeImplemented, ex, p_CanDoItName + " is True but can't set TargetRightAscension");
+                                    HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex, pCanDoItName + " is True but can't set TargetRightAscension");
                                 }
                                 else
                                 {
@@ -4184,14 +4184,14 @@ namespace ConformU
 
                             try
                             {
-                                LogCallToDriver(p_Name, "About to set TargetDeclination property to " + targetDeclination.ToDMS());
+                                LogCallToDriver(pName, "About to set TargetDeclination property to " + targetDeclination.ToDMS());
                                 telescopeDevice.TargetDeclination = targetDeclination;
                             }
                             catch (Exception ex)
                             {
-                                if (p_CanDoIt)
+                                if (pCanDoIt)
                                 {
-                                    HandleException(p_Name, MemberType.Property, Required.MustBeImplemented, ex, p_CanDoItName + " is True but can't set TargetDeclination");
+                                    HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex, pCanDoItName + " is True but can't set TargetDeclination");
                                 }
                                 else
                                 {
@@ -4199,80 +4199,80 @@ namespace ConformU
                                 }
                             }
 
-                            LogCallToDriver(p_Name, "About to call SlewToTargetAsync method");
+                            LogCallToDriver(pName, "About to call SlewToTargetAsync method");
                             telescopeDevice.SlewToTargetAsync();
 
-                            WaitForSlew(p_Name, $"Slewing to target asynchronously");
+                            WaitForSlew(pName, $"Slewing to target asynchronously");
                             break;
                         }
 
                     case SlewSyncType.SlewToAltAz:
                         {
-                            LogDebug(p_Name, $"Tracking 1: {telescopeDevice.Tracking}");
-                            LogCallToDriver(p_Name, "About to get Tracking property");
+                            LogDebug(pName, $"Tracking 1: {telescopeDevice.Tracking}");
+                            LogCallToDriver(pName, "About to get Tracking property");
                             if (canSetTracking & telescopeDevice.Tracking)
                             {
-                                LogCallToDriver(p_Name, "About to set property Tracking to false");
+                                LogCallToDriver(pName, "About to set property Tracking to false");
                                 telescopeDevice.Tracking = false;
-                                LogDebug(p_Name, "Tracking turned off");
+                                LogDebug(pName, "Tracking turned off");
                             }
 
-                            LogCallToDriver(p_Name, "About to get Tracking property");
-                            LogDebug(p_Name, $"Tracking 2: {telescopeDevice.Tracking}");
+                            LogCallToDriver(pName, "About to get Tracking property");
+                            LogDebug(pName, $"Tracking 2: {telescopeDevice.Tracking}");
                             targetAltitude = 50.0d;
                             targetAzimuth = 150.0d;
                             SetAction("Slewing to Alt/Az synchronously...");
 
-                            LogCallToDriver(p_Name, "About to call SlewToAltAz method, Altitude: " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
+                            LogCallToDriver(pName, "About to call SlewToAltAz method, Altitude: " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
                             telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
 
-                            LogCallToDriver(p_Name, "About to get Tracking property");
-                            LogDebug(p_Name, $"Tracking 3: {telescopeDevice.Tracking}");
+                            LogCallToDriver(pName, "About to get Tracking property");
+                            LogDebug(pName, $"Tracking 3: {telescopeDevice.Tracking}");
                             break;
                         }
 
                     case SlewSyncType.SlewToAltAzAsync:
                         {
-                            LogCallToDriver(p_Name, "About to get Tracking property");
-                            LogDebug(p_Name, $"Tracking 1: {telescopeDevice.Tracking}");
-                            LogCallToDriver(p_Name, "About to get Tracking property");
+                            LogCallToDriver(pName, "About to get Tracking property");
+                            LogDebug(pName, $"Tracking 1: {telescopeDevice.Tracking}");
+                            LogCallToDriver(pName, "About to get Tracking property");
                             if (canSetTracking & telescopeDevice.Tracking)
                             {
-                                LogCallToDriver(p_Name, "About to set Tracking property false");
+                                LogCallToDriver(pName, "About to set Tracking property false");
                                 telescopeDevice.Tracking = false;
-                                LogDebug(p_Name, "Tracking turned off");
+                                LogDebug(pName, "Tracking turned off");
                             }
 
-                            LogCallToDriver(p_Name, "About to get Tracking property");
-                            LogDebug(p_Name, $"Tracking 2: {telescopeDevice.Tracking}");
+                            LogCallToDriver(pName, "About to get Tracking property");
+                            LogDebug(pName, $"Tracking 2: {telescopeDevice.Tracking}");
                             targetAltitude = 55.0d;
                             targetAzimuth = 155.0d;
 
-                            LogCallToDriver(p_Name, "About to call SlewToAltAzAsync method, Altitude: " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
+                            LogCallToDriver(pName, "About to call SlewToAltAzAsync method, Altitude: " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
                             telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
 
-                            LogCallToDriver(p_Name, "About to get Tracking property");
-                            LogDebug(p_Name, $"Tracking 3: {telescopeDevice.Tracking}");
+                            LogCallToDriver(pName, "About to get Tracking property");
+                            LogDebug(pName, $"Tracking 3: {telescopeDevice.Tracking}");
 
-                            WaitForSlew(p_Name, $"Slewing to Alt/Az asynchronously");
-                            LogCallToDriver(p_Name, "About to get Tracking property");
-                            LogDebug(p_Name, $"Tracking 4: {telescopeDevice.Tracking}");
+                            WaitForSlew(pName, $"Slewing to Alt/Az asynchronously");
+                            LogCallToDriver(pName, "About to get Tracking property");
+                            LogDebug(pName, $"Tracking 4: {telescopeDevice.Tracking}");
                             break;
                         }
 
                     default:
                         {
-                            LogError(p_Name, "Conform:SlewTest: Unknown test type " + p_Test.ToString());
+                            LogError(pName, "Conform:SlewTest: Unknown test type " + pTest.ToString());
                             break;
                         }
                 }
 
                 if (cancellationToken.IsCancellationRequested) return;
 
-                if (p_CanDoIt) // Should be able to do this so report what happened
+                if (pCanDoIt) // Should be able to do this so report what happened
                 {
                     SetAction("Slew completed");
-                    switch (p_Test)
+                    switch (pTest)
                     {
                         case SlewSyncType.SlewToCoordinates:
                         case SlewSyncType.SlewToCoordinatesAsync:
@@ -4280,71 +4280,71 @@ namespace ConformU
                         case SlewSyncType.SlewToTargetAsync:
                             {
                                 // Test how close the slew was to the required coordinates
-                                CheckScopePosition(p_Name, "Slewed", targetRightAscension, targetDeclination);
+                                CheckScopePosition(pName, "Slewed", targetRightAscension, targetDeclination);
 
                                 // Check that the slews and syncs set the target RA coordinate correctly per the ASCOM Telescope specification
                                 try
                                 {
-                                    double actualTargetRA = telescopeDevice.TargetRightAscension;
-                                    LogDebug(p_Name, $"Current TargetRightAscension: {actualTargetRA}, Set TargetRightAscension: {targetRightAscension}");
+                                    double actualTargetRa = telescopeDevice.TargetRightAscension;
+                                    LogDebug(pName, $"Current TargetRightAscension: {actualTargetRa}, Set TargetRightAscension: {targetRightAscension}");
 
-                                    if (RaDifferenceInArcSeconds(actualTargetRA, targetRightAscension) <= settings.TelescopeSlewTolerance) // Within specified tolerance
+                                    if (RaDifferenceInArcSeconds(actualTargetRa, targetRightAscension) <= settings.TelescopeSlewTolerance) // Within specified tolerance
                                     {
-                                        LogOK(p_Name, $"The TargetRightAscension property: {actualTargetRA.ToHMS()} matches the expected RA {targetRightAscension.ToHMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds."); // Outside specified tolerance
+                                        LogOk(pName, $"The TargetRightAscension property: {actualTargetRa.ToHMS()} matches the expected RA {targetRightAscension.ToHMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds."); // Outside specified tolerance
                                     }
                                     else
                                     {
-                                        LogIssue(p_Name, $"The TargetRightAscension property: {actualTargetRA.ToHMS()} does not match the expected RA {targetRightAscension.ToHMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
+                                        LogIssue(pName, $"The TargetRightAscension property: {actualTargetRa.ToHMS()} does not match the expected RA {targetRightAscension.ToHMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
                                     }
                                 }
-                                catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
+                                catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == GExNotSet1 | ex.ErrorCode == GExNotSet2)
                                 {
-                                    LogIssue(p_Name, "The Driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
+                                    LogIssue(pName, "The Driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
                                 }
                                 catch (ASCOM.InvalidOperationException)
                                 {
-                                    LogIssue(p_Name, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
+                                    LogIssue(pName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
                                 }
-                                catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == g_ExNotSet1 | ex.Number == g_ExNotSet2)
+                                catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == GExNotSet1 | ex.Number == GExNotSet2)
                                 {
-                                    LogIssue(p_Name, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
+                                    LogIssue(pName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleException(p_Name, MemberType.Property, Required.Mandatory, ex, "");
+                                    HandleException(pName, MemberType.Property, Required.Mandatory, ex, "");
                                 }
 
                                 // Check that the slews and syncs set the target declination coordinate correctly per the ASCOM Telescope specification
                                 try
                                 {
                                     double actualTargetDec = telescopeDevice.TargetDeclination;
-                                    LogDebug(p_Name, $"Current TargetDeclination: {actualTargetDec}, Set TargetDeclination: {targetDeclination}");
+                                    LogDebug(pName, $"Current TargetDeclination: {actualTargetDec}, Set TargetDeclination: {targetDeclination}");
 
                                     if (Math.Round(Math.Abs(actualTargetDec - targetDeclination) * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero) <= settings.TelescopeSlewTolerance) // Within specified tolerance
                                     {
-                                        LogOK(p_Name, $"The TargetDeclination property {actualTargetDec.ToDMS()} matches the expected Declination {targetDeclination.ToDMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds."); // Outside specified tolerance
+                                        LogOk(pName, $"The TargetDeclination property {actualTargetDec.ToDMS()} matches the expected Declination {targetDeclination.ToDMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds."); // Outside specified tolerance
                                     }
                                     else
                                     {
-                                        LogIssue(p_Name, $"The TargetDeclination property {actualTargetDec.ToDMS()} does not match the expected Declination {targetDeclination.ToDMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
+                                        LogIssue(pName, $"The TargetDeclination property {actualTargetDec.ToDMS()} does not match the expected Declination {targetDeclination.ToDMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
                                     }
 
                                 }
-                                catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == g_ExNotSet1 | ex.ErrorCode == g_ExNotSet2)
+                                catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == GExNotSet1 | ex.ErrorCode == GExNotSet2)
                                 {
-                                    LogIssue(p_Name, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
+                                    LogIssue(pName, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
                                 }
                                 catch (ASCOM.InvalidOperationException)
                                 {
-                                    LogIssue(p_Name, "The Driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
+                                    LogIssue(pName, "The Driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
                                 }
-                                catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == g_ExNotSet1 | ex.Number == g_ExNotSet2)
+                                catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == GExNotSet1 | ex.Number == GExNotSet2)
                                 {
-                                    LogIssue(p_Name, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
+                                    LogIssue(pName, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleException(p_Name, MemberType.Property, Required.Mandatory, ex, "");
+                                    HandleException(pName, MemberType.Property, Required.Mandatory, ex, "");
                                 }
 
                                 break;
@@ -4354,10 +4354,10 @@ namespace ConformU
                         case SlewSyncType.SlewToAltAzAsync:
                             {
                                 // Test how close the slew was to the required coordinates
-                                LogCallToDriver(p_Name, "About to get Azimuth property");
+                                LogCallToDriver(pName, "About to get Azimuth property");
                                 double actualAzimuth = telescopeDevice.Azimuth;
 
-                                LogCallToDriver(p_Name, "About to get Altitude property");
+                                LogCallToDriver(pName, "About to get Altitude property");
                                 double actualAltitude = telescopeDevice.Altitude;
 
                                 double azimuthDifference = Math.Abs(actualAzimuth - targetAzimuth);
@@ -4365,21 +4365,21 @@ namespace ConformU
 
                                 if (azimuthDifference <= settings.TelescopeSlewTolerance)
                                 {
-                                    LogOK(p_Name, $"Slewed to target Azimuth OK within tolerance: {settings.TelescopeSlewTolerance} arc seconds. Actual Azimuth: {FormatAzimuth(actualAzimuth)}, Target Azimuth: {FormatAzimuth(targetAzimuth)}");
+                                    LogOk(pName, $"Slewed to target Azimuth OK within tolerance: {settings.TelescopeSlewTolerance} arc seconds. Actual Azimuth: {FormatAzimuth(actualAzimuth)}, Target Azimuth: {FormatAzimuth(targetAzimuth)}");
                                 }
                                 else
                                 {
-                                    LogIssue(p_Name, $"Slewed {azimuthDifference:0.0} arc seconds away from Azimuth target: {FormatAzimuth(targetAzimuth)} Actual Azimuth: {FormatAzimuth(actualAzimuth)}. Tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
+                                    LogIssue(pName, $"Slewed {azimuthDifference:0.0} arc seconds away from Azimuth target: {FormatAzimuth(targetAzimuth)} Actual Azimuth: {FormatAzimuth(actualAzimuth)}. Tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
                                 }
 
                                 double altitudeDifference = Math.Abs(actualAltitude - targetAltitude);
                                 if (altitudeDifference <= settings.DomeSlewTolerance)
                                 {
-                                    LogOK(p_Name, $"Slewed to target Altitude OK within tolerance: {settings.TelescopeSlewTolerance} arc seconds. Actual Altitude: {actualAltitude.ToDMS()}, Target Altitude: {targetAltitude.ToDMS()}");
+                                    LogOk(pName, $"Slewed to target Altitude OK within tolerance: {settings.TelescopeSlewTolerance} arc seconds. Actual Altitude: {actualAltitude.ToDMS()}, Target Altitude: {targetAltitude.ToDMS()}");
                                 }
                                 else
                                 {
-                                    LogIssue(p_Name, $"Slewed {altitudeDifference:0.0} degree(s) away from Altitude target: {targetAltitude.ToDMS()} Actual Altitude: {actualAltitude.ToDMS()}. Tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
+                                    LogIssue(pName, $"Slewed {altitudeDifference:0.0} degree(s) away from Altitude target: {targetAltitude.ToDMS()} Actual Altitude: {actualAltitude.ToDMS()}. Tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
                                 }
 
                                 break;
@@ -4393,18 +4393,18 @@ namespace ConformU
                 }
                 else // Not supposed to be able to do this but no error generated so report an error
                 {
-                    LogIssue(p_Name, p_CanDoItName + " is false but no exception was generated on use");
+                    LogIssue(pName, pCanDoItName + " is false but no exception was generated on use");
                 }
             }
             catch (Exception ex)
             {
-                if (p_CanDoIt)
+                if (pCanDoIt)
                 {
-                    HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, p_CanDoItName + " is True");
+                    HandleException(pName, MemberType.Method, Required.MustBeImplemented, ex, pCanDoItName + " is True");
                 }
                 else
                 {
-                    HandleException(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, p_CanDoItName + " is False");
+                    HandleException(pName, MemberType.Method, Required.MustNotBeImplemented, ex, pCanDoItName + " is False");
                 }
             }
 
@@ -4413,88 +4413,88 @@ namespace ConformU
         /// <summary>
         /// Confirm that InValidValueExceptions are thrown for invalid values
         /// </summary>
-        /// <param name="p_Name"></param>
-        /// <param name="p_Test">The method to test</param>
-        /// <param name="BadCoordinate1">RA or Altitude</param>
-        /// <param name="BadCoordinate2">Dec or Azimuth</param>
+        /// <param name="pName"></param>
+        /// <param name="pTest">The method to test</param>
+        /// <param name="badCoordinate1">RA or Altitude</param>
+        /// <param name="badCoordinate2">Dec or Azimuth</param>
         /// <remarks></remarks>
-        private void TelescopeBadCoordinateTest(string p_Name, SlewSyncType p_Test, double BadCoordinate1, double BadCoordinate2)
+        private void TelescopeBadCoordinateTest(string pName, SlewSyncType pTest, double badCoordinate1, double badCoordinate2)
         {
-            switch (p_Test)
+            switch (pTest)
             {
                 case SlewSyncType.SlewToCoordinates:
                 case SlewSyncType.SlewToCoordinatesAsync:
                     {
-                        LogCallToDriver(p_Name, "About to get Tracking property");
+                        LogCallToDriver(pName, "About to get Tracking property");
                         if (canSetTracking & !telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(p_Name, "About to set Tracking property to true");
+                            LogCallToDriver(pName, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
 
                         try
                         {
                             SetAction("Slew underway");
-                            targetRightAscension = BadCoordinate1;
+                            targetRightAscension = badCoordinate1;
                             targetDeclination = 0.0d;
 
-                            if (p_Test == SlewSyncType.SlewToCoordinates)
+                            if (pTest == SlewSyncType.SlewToCoordinates)
                             {
-                                LogCallToDriver(p_Name, "About to call SlewToCoordinates method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
+                                LogCallToDriver(pName, "About to call SlewToCoordinates method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
                                 telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination);
                             }
                             else
                             {
-                                LogCallToDriver(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
+                                LogCallToDriver(pName, "About to call SlewToCoordinatesAsync method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
                                 telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
                             }
 
                             SetAction("Attempting to abort slew");
                             try
                             {
-                                AbortSlew(p_Name);
+                                AbortSlew(pName);
                             }
                             catch { } // Attempt to stop any motion that has actually started
 
-                            LogIssue(p_Name, "Failed to reject bad RA coordinate: " + targetRightAscension.ToHMS());
+                            LogIssue(pName, "Failed to reject bad RA coordinate: " + targetRightAscension.ToHMS());
                         }
                         catch (Exception ex)
                         {
                             SetAction("Slew rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + targetRightAscension.ToHMS());
+                            HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + targetRightAscension.ToHMS());
                         }
 
                         try
                         {
                             SetAction("Slew underway");
-                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
-                            targetDeclination = BadCoordinate2;
-                            if (p_Test == SlewSyncType.SlewToCoordinates)
+                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -2.0d);
+                            targetDeclination = badCoordinate2;
+                            if (pTest == SlewSyncType.SlewToCoordinates)
                             {
-                                LogCallToDriver(p_Name, "About to call SlewToCoordinates method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
+                                LogCallToDriver(pName, "About to call SlewToCoordinates method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
                                 telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination);
                             }
                             else
                             {
-                                LogCallToDriver(p_Name, "About to call SlewToCoordinatesAsync method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
+                                LogCallToDriver(pName, "About to call SlewToCoordinatesAsync method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
                                 telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
                             }
 
                             SetAction("Attempting to abort slew");
                             try
                             {
-                                AbortSlew(p_Name);
+                                AbortSlew(pName);
                             }
                             catch
                             {
                             } // Attempt to stop any motion that has actually started
 
-                            LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + targetDeclination.ToDMS());
+                            LogIssue(pName, "Failed to reject bad Dec coordinate: " + targetDeclination.ToDMS());
                         }
                         catch (Exception ex)
                         {
                             SetAction("Slew rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + targetDeclination.ToDMS());
+                            HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + targetDeclination.ToDMS());
                         }
 
                         break;
@@ -4502,39 +4502,39 @@ namespace ConformU
 
                 case SlewSyncType.SyncToCoordinates:
                     {
-                        LogCallToDriver(p_Name, "About to get Tracking property");
+                        LogCallToDriver(pName, "About to get Tracking property");
                         if (canSetTracking & !telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(p_Name, "About to set Tracking property to true");
+                            LogCallToDriver(pName, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
 
                         try
                         {
                             SetAction("Sync underway");
-                            targetRightAscension = BadCoordinate1;
-                            targetDeclination = 0.0d; LogCallToDriver(p_Name, "About to call SyncToCoordinates method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
+                            targetRightAscension = badCoordinate1;
+                            targetDeclination = 0.0d; LogCallToDriver(pName, "About to call SyncToCoordinates method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
                             telescopeDevice.SyncToCoordinates(targetRightAscension, targetDeclination);
-                            LogIssue(p_Name, "Failed to reject bad RA coordinate: " + targetRightAscension.ToHMS());
+                            LogIssue(pName, "Failed to reject bad RA coordinate: " + targetRightAscension.ToHMS());
                         }
                         catch (Exception ex)
                         {
                             SetAction("Sync rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + targetRightAscension.ToHMS());
+                            HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + targetRightAscension.ToHMS());
                         }
 
                         try
                         {
                             SetAction("Sync underway");
-                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -3.0d);
-                            targetDeclination = BadCoordinate2; LogCallToDriver(p_Name, "About to call SyncToCoordinates method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
+                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -3.0d);
+                            targetDeclination = badCoordinate2; LogCallToDriver(pName, "About to call SyncToCoordinates method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + targetDeclination.ToDMS());
                             telescopeDevice.SyncToCoordinates(targetRightAscension, targetDeclination);
-                            LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + targetDeclination.ToDMS());
+                            LogIssue(pName, "Failed to reject bad Dec coordinate: " + targetDeclination.ToDMS());
                         }
                         catch (Exception ex)
                         {
                             SetAction("Sync rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + targetDeclination.ToDMS());
+                            HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + targetDeclination.ToDMS());
                         }
 
                         break;
@@ -4543,23 +4543,23 @@ namespace ConformU
                 case SlewSyncType.SlewToTarget:
                 case SlewSyncType.SlewToTargetAsync:
                     {
-                        LogCallToDriver(p_Name, "About to get Tracking property");
+                        LogCallToDriver(pName, "About to get Tracking property");
                         if (canSetTracking & !telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(p_Name, "About to set Tracking property to true");
+                            LogCallToDriver(pName, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
 
                         try
                         {
                             SetAction("Slew underway");
-                            targetRightAscension = BadCoordinate1;
-                            targetDeclination = 0.0d; LogCallToDriver(p_Name, "About to set TargetRightAscension property to " + targetRightAscension.ToHMS());
+                            targetRightAscension = badCoordinate1;
+                            targetDeclination = 0.0d; LogCallToDriver(pName, "About to set TargetRightAscension property to " + targetRightAscension.ToHMS());
                             telescopeDevice.TargetRightAscension = targetRightAscension;
                             // Successfully set bad RA coordinate so now set the good Dec coordinate and see whether the move fails when the slew is attempted
                             try
                             {
-                                LogCallToDriver(p_Name, "About to set TargetDeclination property to " + targetDeclination.ToDMS());
+                                LogCallToDriver(pName, "About to set TargetDeclination property to " + targetDeclination.ToDMS());
                                 telescopeDevice.TargetDeclination = targetDeclination;
                             }
                             catch
@@ -4568,49 +4568,49 @@ namespace ConformU
 
                             try
                             {
-                                if (p_Test == SlewSyncType.SlewToTarget)
+                                if (pTest == SlewSyncType.SlewToTarget)
                                 {
-                                    LogCallToDriver(p_Name, "About to call SlewToTarget method");
+                                    LogCallToDriver(pName, "About to call SlewToTarget method");
                                     telescopeDevice.SlewToTarget();
                                 }
                                 else
                                 {
-                                    LogCallToDriver(p_Name, "About to call SlewToTargetAsync method");
+                                    LogCallToDriver(pName, "About to call SlewToTargetAsync method");
                                     telescopeDevice.SlewToTargetAsync();
                                 }
 
                                 SetAction("Attempting to abort slew");
                                 try
                                 {
-                                    AbortSlew(p_Name);
+                                    AbortSlew(pName);
                                 }
                                 catch
                                 {
                                 } // Attempt to stop any motion that has actually started
 
-                                LogIssue(p_Name, "Failed to reject bad RA coordinate: " + targetRightAscension.ToHMS());
+                                LogIssue(pName, "Failed to reject bad RA coordinate: " + targetRightAscension.ToHMS());
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
                                 SetAction("Slew rejected");
-                                HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + targetRightAscension.ToHMS());
+                                HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + targetRightAscension.ToHMS());
                             }
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad RA coordinate", "Telescope.TargetRA correctly rejected bad RA coordinate: " + targetRightAscension.ToHMS());
+                            HandleInvalidValueExceptionAsOk(pName, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad RA coordinate", "Telescope.TargetRA correctly rejected bad RA coordinate: " + targetRightAscension.ToHMS());
                         }
 
                         try
                         {
                             SetAction("Slew underway");
-                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0d);
-                            targetDeclination = BadCoordinate2; LogCallToDriver(p_Name, "About to set TargetDeclination property to " + targetDeclination.ToDMS());
+                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -2.0d);
+                            targetDeclination = badCoordinate2; LogCallToDriver(pName, "About to set TargetDeclination property to " + targetDeclination.ToDMS());
                             telescopeDevice.TargetDeclination = targetDeclination;
                             // Successfully set bad Dec coordinate so now set the good RA coordinate and see whether the move fails when the slew is attempted
                             try
                             {
-                                LogCallToDriver(p_Name, "About to set TargetRightAscension property to " + targetRightAscension.ToHMS());
+                                LogCallToDriver(pName, "About to set TargetRightAscension property to " + targetRightAscension.ToHMS());
                                 telescopeDevice.TargetRightAscension = targetRightAscension;
                             }
                             catch
@@ -4619,37 +4619,37 @@ namespace ConformU
 
                             try
                             {
-                                if (p_Test == SlewSyncType.SlewToTarget)
+                                if (pTest == SlewSyncType.SlewToTarget)
                                 {
-                                    LogCallToDriver(p_Name, "About to call SlewToTarget method");
+                                    LogCallToDriver(pName, "About to call SlewToTarget method");
                                     telescopeDevice.SlewToTarget();
                                 }
                                 else
                                 {
-                                    LogCallToDriver(p_Name, "About to call SlewToTargetAsync method");
+                                    LogCallToDriver(pName, "About to call SlewToTargetAsync method");
                                     telescopeDevice.SlewToTargetAsync();
                                 }
 
                                 SetAction("Attempting to abort slew");
                                 try
                                 {
-                                    AbortSlew(p_Name);
+                                    AbortSlew(pName);
                                 }
                                 catch
                                 {
                                 } // Attempt to stop any motion that has actually started
 
-                                LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + targetDeclination.ToDMS());
+                                LogIssue(pName, "Failed to reject bad Dec coordinate: " + targetDeclination.ToDMS());
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
                                 SetAction("Slew rejected");
-                                HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + targetDeclination.ToDMS());
+                                HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + targetDeclination.ToDMS());
                             }
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad Dec coordinate", "Telescope.TargetDeclination correctly rejected bad Dec coordinate: " + targetDeclination.ToDMS());
+                            HandleInvalidValueExceptionAsOk(pName, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad Dec coordinate", "Telescope.TargetDeclination correctly rejected bad Dec coordinate: " + targetDeclination.ToDMS());
                         }
 
                         break;
@@ -4657,23 +4657,23 @@ namespace ConformU
 
                 case SlewSyncType.SyncToTarget:
                     {
-                        LogCallToDriver(p_Name, "About to get Tracking property");
+                        LogCallToDriver(pName, "About to get Tracking property");
                         if (canSetTracking & !telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(p_Name, "About to set Tracking property to true");
+                            LogCallToDriver(pName, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
 
                         try
                         {
                             SetAction("Sync underway");
-                            targetRightAscension = BadCoordinate1;
-                            targetDeclination = 0.0d; LogCallToDriver(p_Name, "About to set TargetRightAscension property to " + targetRightAscension.ToHMS());
+                            targetRightAscension = badCoordinate1;
+                            targetDeclination = 0.0d; LogCallToDriver(pName, "About to set TargetRightAscension property to " + targetRightAscension.ToHMS());
                             telescopeDevice.TargetRightAscension = targetRightAscension;
                             // Successfully set bad RA coordinate so now set the good Dec coordinate and see whether the move fails when the slew is attempted
                             try
                             {
-                                LogCallToDriver(p_Name, "About to set TargetDeclination property to " + targetDeclination.ToDMS());
+                                LogCallToDriver(pName, "About to set TargetDeclination property to " + targetDeclination.ToDMS());
                                 telescopeDevice.TargetDeclination = targetDeclination;
                             }
                             catch
@@ -4682,31 +4682,31 @@ namespace ConformU
 
                             try
                             {
-                                LogCallToDriver(p_Name, "About to call SyncToTarget method");
+                                LogCallToDriver(pName, "About to call SyncToTarget method");
                                 telescopeDevice.SyncToTarget();
-                                LogIssue(p_Name, "Failed to reject bad RA coordinate: " + targetRightAscension.ToHMS());
+                                LogIssue(pName, "Failed to reject bad RA coordinate: " + targetRightAscension.ToHMS());
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
                                 SetAction("Sync rejected");
-                                HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + targetRightAscension.ToHMS());
+                                HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad RA coordinate", "Correctly rejected bad RA coordinate: " + targetRightAscension.ToHMS());
                             }
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad RA coordinate", "Telescope.TargetRA correctly rejected bad RA coordinate: " + targetRightAscension.ToHMS());
+                            HandleInvalidValueExceptionAsOk(pName, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad RA coordinate", "Telescope.TargetRA correctly rejected bad RA coordinate: " + targetRightAscension.ToHMS());
                         }
 
                         try
                         {
                             SetAction("Sync underway");
-                            targetRightAscension = TelescopeRAFromSiderealTime(p_Name, -3.0d);
-                            targetDeclination = BadCoordinate2; LogCallToDriver(p_Name, "About to set TargetDeclination property to " + targetDeclination.ToDMS());
+                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -3.0d);
+                            targetDeclination = badCoordinate2; LogCallToDriver(pName, "About to set TargetDeclination property to " + targetDeclination.ToDMS());
                             telescopeDevice.TargetDeclination = targetDeclination;
                             // Successfully set bad Dec coordinate so now set the good RA coordinate and see whether the move fails when the slew is attempted
                             try
                             {
-                                LogCallToDriver(p_Name, "About to set TargetRightAscension property to " + targetRightAscension.ToHMS());
+                                LogCallToDriver(pName, "About to set TargetRightAscension property to " + targetRightAscension.ToHMS());
                                 telescopeDevice.TargetRightAscension = targetRightAscension;
                             }
                             catch
@@ -4715,19 +4715,19 @@ namespace ConformU
 
                             try
                             {
-                                LogCallToDriver(p_Name, "About to call SyncToTarget method");
+                                LogCallToDriver(pName, "About to call SyncToTarget method");
                                 telescopeDevice.SyncToTarget();
-                                LogIssue(p_Name, "Failed to reject bad Dec coordinate: " + targetDeclination.ToDMS());
+                                LogIssue(pName, "Failed to reject bad Dec coordinate: " + targetDeclination.ToDMS());
                             }
                             catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                             {
                                 SetAction("Sync rejected");
-                                HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + targetDeclination.ToDMS());
+                                HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " + targetDeclination.ToDMS());
                             }
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad Dec coordinate", "Telescope.TargetDeclination correctly rejected bad Dec coordinate: " + targetDeclination.ToDMS());
+                            HandleInvalidValueExceptionAsOk(pName, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad Dec coordinate", "Telescope.TargetDeclination correctly rejected bad Dec coordinate: " + targetDeclination.ToDMS());
                         }
 
                         break;
@@ -4736,77 +4736,77 @@ namespace ConformU
                 case SlewSyncType.SlewToAltAz:
                 case SlewSyncType.SlewToAltAzAsync:
                     {
-                        LogCallToDriver(p_Name, "About to get Tracking property");
+                        LogCallToDriver(pName, "About to get Tracking property");
                         if (canSetTracking & telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(p_Name, "About to set Tracking property to false");
+                            LogCallToDriver(pName, "About to set Tracking property to false");
                             telescopeDevice.Tracking = false;
                         }
 
                         try
                         {
                             SetAction("Slew underway");
-                            targetAltitude = BadCoordinate1;
+                            targetAltitude = badCoordinate1;
                             targetAzimuth = 45.0d;
-                            if (p_Test == SlewSyncType.SlewToAltAz)
+                            if (pTest == SlewSyncType.SlewToAltAz)
                             {
-                                LogCallToDriver(p_Name, "About to call SlewToAltAz method, Altitude: " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
+                                LogCallToDriver(pName, "About to call SlewToAltAz method, Altitude: " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
                                 telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
                             }
                             else
                             {
-                                LogCallToDriver(p_Name, "About To call SlewToAltAzAsync method, Altitude:  " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
+                                LogCallToDriver(pName, "About To call SlewToAltAzAsync method, Altitude:  " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
                                 telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
                             }
 
                             SetAction("Attempting to abort slew");
                             try
                             {
-                                AbortSlew(p_Name);
+                                AbortSlew(pName);
                             }
                             catch
                             {
                             } // Attempt to stop any motion that has actually started
 
-                            LogIssue(p_Name, $"Failed to reject bad Altitude coordinate: {targetAltitude.ToDMS()}");
+                            LogIssue(pName, $"Failed to reject bad Altitude coordinate: {targetAltitude.ToDMS()}");
                         }
                         catch (Exception ex)
                         {
                             SetAction("Slew rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {targetAltitude.ToDMS()}");
+                            HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {targetAltitude.ToDMS()}");
                         }
 
                         try
                         {
                             SetAction("Slew underway");
                             targetAltitude = 45.0d;
-                            targetAzimuth = BadCoordinate2;
-                            if (p_Test == SlewSyncType.SlewToAltAz)
+                            targetAzimuth = badCoordinate2;
+                            if (pTest == SlewSyncType.SlewToAltAz)
                             {
-                                LogCallToDriver(p_Name, "About to call SlewToAltAz method, Altitude: " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
+                                LogCallToDriver(pName, "About to call SlewToAltAz method, Altitude: " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
                                 telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
                             }
                             else
                             {
-                                LogCallToDriver(p_Name, "About to call SlewToAltAzAsync method, Altitude: " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
+                                LogCallToDriver(pName, "About to call SlewToAltAzAsync method, Altitude: " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
                                 telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
                             }
 
                             SetAction("Attempting to abort slew");
                             try
                             {
-                                AbortSlew(p_Name);
+                                AbortSlew(pName);
                             }
                             catch
                             {
                             } // Attempt to stop any motion that has actually started
 
-                            LogIssue(p_Name, "Failed to reject bad Azimuth coordinate: " + FormatAzimuth(targetAzimuth));
+                            LogIssue(pName, "Failed to reject bad Azimuth coordinate: " + FormatAzimuth(targetAzimuth));
                         }
                         catch (Exception ex)
                         {
                             SetAction("Slew rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Azimuth coordinate", "Correctly rejected bad Azimuth coordinate: " + FormatAzimuth(targetAzimuth));
+                            HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad Azimuth coordinate", "Correctly rejected bad Azimuth coordinate: " + FormatAzimuth(targetAzimuth));
                         }
 
                         break;
@@ -4814,39 +4814,39 @@ namespace ConformU
 
                 case SlewSyncType.SyncToAltAz:
                     {
-                        LogCallToDriver(p_Name, "About to get Tracking property");
+                        LogCallToDriver(pName, "About to get Tracking property");
                         if (canSetTracking & telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(p_Name, "About to set Tracking property to false");
+                            LogCallToDriver(pName, "About to set Tracking property to false");
                             telescopeDevice.Tracking = false;
                         }
 
                         try
                         {
                             SetAction("Sync underway");
-                            targetAltitude = BadCoordinate1;
-                            targetAzimuth = 45.0d; LogCallToDriver(p_Name, "About to call SyncToAltAz method, Altitude: " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
+                            targetAltitude = badCoordinate1;
+                            targetAzimuth = 45.0d; LogCallToDriver(pName, "About to call SyncToAltAz method, Altitude: " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
                             telescopeDevice.SyncToAltAz(targetAzimuth, targetAltitude);
-                            LogIssue(p_Name, $"Failed to reject bad Altitude coordinate: {targetAltitude.ToDMS()}");
+                            LogIssue(pName, $"Failed to reject bad Altitude coordinate: {targetAltitude.ToDMS()}");
                         }
                         catch (Exception ex)
                         {
                             SetAction("Sync rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {targetAltitude.ToDMS()}");
+                            HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {targetAltitude.ToDMS()}");
                         }
 
                         try
                         {
                             SetAction("Sync underway");
                             targetAltitude = 45.0d;
-                            targetAzimuth = BadCoordinate2; LogCallToDriver(p_Name, "About to call SyncToAltAz method, Altitude: " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
+                            targetAzimuth = badCoordinate2; LogCallToDriver(pName, "About to call SyncToAltAz method, Altitude: " + targetAltitude.ToDMS() + ", Azimuth: " + targetAzimuth.ToDMS());
                             telescopeDevice.SyncToAltAz(targetAzimuth, targetAltitude);
-                            LogIssue(p_Name, "Failed to reject bad Azimuth coordinate: " + FormatAzimuth(targetAzimuth));
+                            LogIssue(pName, "Failed to reject bad Azimuth coordinate: " + FormatAzimuth(targetAzimuth));
                         }
                         catch (Exception ex)
                         {
                             SetAction("Sync rejected");
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Azimuth coordinate", "Correctly rejected bad Azimuth coordinate: " + FormatAzimuth(targetAzimuth));
+                            HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad Azimuth coordinate", "Correctly rejected bad Azimuth coordinate: " + FormatAzimuth(targetAzimuth));
                         }
 
                         break;
@@ -4854,7 +4854,7 @@ namespace ConformU
 
                 default:
                     {
-                        LogIssue(p_Name, "Conform:SlewTest: Unknown test type " + p_Test.ToString());
+                        LogIssue(pName, "Conform:SlewTest: Unknown test type " + pTest.ToString());
                         break;
                     }
             }
@@ -4863,82 +4863,82 @@ namespace ConformU
                 return;
         }
 
-        private void TelescopePerformanceTest(PerformanceType p_Type, string p_Name)
+        private void TelescopePerformanceTest(PerformanceType pType, string pName)
         {
-            DateTime l_StartTime;
-            double l_Count, l_LastElapsedTime, l_ElapsedTime, l_Rate;
-            SetAction(p_Name);
+            DateTime lStartTime;
+            double lCount, lLastElapsedTime, lElapsedTime, lRate;
+            SetAction(pName);
             try
             {
-                l_StartTime = DateTime.Now;
-                l_Count = 0.0d;
-                l_LastElapsedTime = 0.0d;
+                lStartTime = DateTime.Now;
+                lCount = 0.0d;
+                lLastElapsedTime = 0.0d;
                 do
                 {
-                    l_Count += 1.0d;
-                    switch (p_Type)
+                    lCount += 1.0d;
+                    switch (pType)
                     {
-                        case PerformanceType.tstPerfAltitude:
+                        case PerformanceType.TstPerfAltitude:
                             {
                                 altitude = telescopeDevice.Altitude;
                                 break;
                             }
 
-                        case var @case when @case == PerformanceType.tstPerfAtHome:
+                        case var @case when @case == PerformanceType.TstPerfAtHome:
                             {
                                 atHome = telescopeDevice.AtHome;
                                 break;
                             }
 
-                        case PerformanceType.tstPerfAtPark:
+                        case PerformanceType.TstPerfAtPark:
                             {
                                 atPark = telescopeDevice.AtPark;
                                 break;
                             }
 
-                        case PerformanceType.tstPerfAzimuth:
+                        case PerformanceType.TstPerfAzimuth:
                             {
                                 azimuth = telescopeDevice.Azimuth;
                                 break;
                             }
 
-                        case PerformanceType.tstPerfDeclination:
+                        case PerformanceType.TstPerfDeclination:
                             {
                                 declination = telescopeDevice.Declination;
                                 break;
                             }
 
-                        case PerformanceType.tstPerfIsPulseGuiding:
+                        case PerformanceType.TstPerfIsPulseGuiding:
                             {
                                 isPulseGuiding = telescopeDevice.IsPulseGuiding;
                                 break;
                             }
 
-                        case PerformanceType.tstPerfRightAscension:
+                        case PerformanceType.TstPerfRightAscension:
                             {
                                 rightAscension = telescopeDevice.RightAscension;
                                 break;
                             }
 
-                        case PerformanceType.tstPerfSideOfPier:
+                        case PerformanceType.TstPerfSideOfPier:
                             {
                                 sideOfPier = (PointingState)telescopeDevice.SideOfPier;
                                 break;
                             }
 
-                        case PerformanceType.tstPerfSiderealTime:
+                        case PerformanceType.TstPerfSiderealTime:
                             {
                                 siderealTimeScope = telescopeDevice.SiderealTime;
                                 break;
                             }
 
-                        case PerformanceType.tstPerfSlewing:
+                        case PerformanceType.TstPerfSlewing:
                             {
                                 slewing = telescopeDevice.Slewing;
                                 break;
                             }
 
-                        case PerformanceType.tstPerfUTCDate:
+                        case PerformanceType.TstPerfUtcDate:
                             {
                                 utcDate = telescopeDevice.UTCDate;
                                 break;
@@ -4946,401 +4946,401 @@ namespace ConformU
 
                         default:
                             {
-                                LogIssue(p_Name, "Conform:PerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(pName, "Conform:PerformanceTest: Unknown test type " + pType.ToString());
                                 break;
                             }
                     }
 
-                    l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
-                    if (l_ElapsedTime > l_LastElapsedTime + 1.0d)
+                    lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
+                    if (lElapsedTime > lLastElapsedTime + 1.0d)
                     {
-                        SetStatus(l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
-                        l_LastElapsedTime = l_ElapsedTime;
+                        SetStatus(lCount + " transactions in " + lElapsedTime.ToString("0") + " seconds");
+                        lLastElapsedTime = lElapsedTime;
                         //Application.DoEvents();
                         if (cancellationToken.IsCancellationRequested)
                             return;
                     }
                 }
-                while (l_ElapsedTime <= PERF_LOOP_TIME);
-                l_Rate = l_Count / l_ElapsedTime;
-                switch (l_Rate)
+                while (lElapsedTime <= PERF_LOOP_TIME);
+                lRate = lCount / lElapsedTime;
+                switch (lRate)
                 {
                     case var case1 when case1 > 10.0d:
                         {
-                            LogInfo("Performance: " + p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo("Performance: " + pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case var case2 when 2.0d <= case2 && case2 <= 10.0d:
                         {
-                            LogInfo("Performance: " + p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo("Performance: " + pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
                     case var case3 when 1.0d <= case3 && case3 <= 2.0d:
                         {
-                            LogInfo("Performance: " + p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo("Performance: " + pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo("Performance: " + p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo("Performance: " + pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogIssue("Performance: " + p_Name, $"Exception {ex.Message}");
+                LogIssue("Performance: " + pName, $"Exception {ex.Message}");
             }
         }
 
-        private void TelescopeParkedExceptionTest(ParkedExceptionType p_Type, string p_Name)
+        private void TelescopeParkedExceptionTest(ParkedExceptionType pType, string pName)
         {
-            double l_TargetRA; LogCallToDriver("Parked:" + p_Name, "About to get AtPark property");
+            double lTargetRa; LogCallToDriver("Parked:" + pName, "About to get AtPark property");
             if (telescopeDevice.AtPark) // We are still parked so test AbortSlew
             {
                 try
                 {
-                    switch (p_Type)
+                    switch (pType)
                     {
-                        case ParkedExceptionType.tstPExcepAbortSlew:
+                        case ParkedExceptionType.TstPExcepAbortSlew:
                             {
                                 AbortSlew("Parked");
                                 break;
                             }
 
-                        case ParkedExceptionType.tstPExcepFindHome:
+                        case ParkedExceptionType.TstPExcepFindHome:
                             {
-                                LogCallToDriver("Parked:" + p_Name, "About to call FindHome method");
+                                LogCallToDriver("Parked:" + pName, "About to call FindHome method");
                                 telescopeDevice.FindHome();
                                 // Wait for mount to find home
                                 WaitWhile("Waiting for mount to home...", () => { return !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
                                 break;
                             }
 
-                        case ParkedExceptionType.tstPExcepMoveAxisPrimary:
+                        case ParkedExceptionType.TstPExcepMoveAxisPrimary:
                             {
-                                LogCallToDriver("Parked:" + p_Name, "About to call MoveAxis(Primary, 0.0) method");
+                                LogCallToDriver("Parked:" + pName, "About to call MoveAxis(Primary, 0.0) method");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Primary, 0.0d);
                                 break;
                             }
 
-                        case ParkedExceptionType.tstPExcepMoveAxisSecondary:
+                        case ParkedExceptionType.TstPExcepMoveAxisSecondary:
                             {
-                                LogCallToDriver("Parked:" + p_Name, "About to call MoveAxis(Secondary, 0.0) method");
+                                LogCallToDriver("Parked:" + pName, "About to call MoveAxis(Secondary, 0.0) method");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Secondary, 0.0d);
                                 break;
                             }
 
-                        case ParkedExceptionType.tstPExcepMoveAxisTertiary:
+                        case ParkedExceptionType.TstPExcepMoveAxisTertiary:
                             {
-                                LogCallToDriver("Parked:" + p_Name, "About to call MoveAxis(Tertiary, 0.0) method");
+                                LogCallToDriver("Parked:" + pName, "About to call MoveAxis(Tertiary, 0.0) method");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Tertiary, 0.0d);
                                 break;
                             }
 
-                        case ParkedExceptionType.tstPExcepPulseGuide:
+                        case ParkedExceptionType.TstPExcepPulseGuide:
                             {
-                                LogCallToDriver("Parked:" + p_Name, "About to call PulseGuide(East, 0.0) method");
+                                LogCallToDriver("Parked:" + pName, "About to call PulseGuide(East, 0.0) method");
                                 telescopeDevice.PulseGuide(GuideDirection.East, 0);
                                 break;
                             }
 
-                        case ParkedExceptionType.tstPExcepSlewToCoordinates:
+                        case ParkedExceptionType.TstPExcepSlewToCoordinates:
                             {
-                                LogCallToDriver("Parked:" + p_Name, "About to call SlewToCoordinates method");
-                                telescopeDevice.SlewToCoordinates(TelescopeRAFromSiderealTime("Parked:" + p_Name, 1.0d), 0.0d);
+                                LogCallToDriver("Parked:" + pName, "About to call SlewToCoordinates method");
+                                telescopeDevice.SlewToCoordinates(TelescopeRaFromSiderealTime("Parked:" + pName, 1.0d), 0.0d);
                                 break;
                             }
 
-                        case ParkedExceptionType.tstPExcepSlewToCoordinatesAsync:
+                        case ParkedExceptionType.TstPExcepSlewToCoordinatesAsync:
                             {
-                                LogCallToDriver("Parked:" + p_Name, "About to call SlewToCoordinatesAsync method");
-                                telescopeDevice.SlewToCoordinatesAsync(TelescopeRAFromSiderealTime("Parked:" + p_Name, 1.0d), 0.0d);
-                                WaitForSlew("Parked:" + p_Name, "Slewing to coordinates asynchronously");
+                                LogCallToDriver("Parked:" + pName, "About to call SlewToCoordinatesAsync method");
+                                telescopeDevice.SlewToCoordinatesAsync(TelescopeRaFromSiderealTime("Parked:" + pName, 1.0d), 0.0d);
+                                WaitForSlew("Parked:" + pName, "Slewing to coordinates asynchronously");
                                 break;
                             }
 
-                        case ParkedExceptionType.tstPExcepSlewToTarget:
+                        case ParkedExceptionType.TstPExcepSlewToTarget:
                             {
-                                l_TargetRA = TelescopeRAFromSiderealTime("Parked:" + p_Name, 1.0d); LogCallToDriver("Parked:" + p_Name, "About to set property TargetRightAscension to " + l_TargetRA.ToHMS());
-                                telescopeDevice.TargetRightAscension = l_TargetRA; LogCallToDriver("Parked:" + p_Name, "About to set property TargetDeclination to 0.0");
-                                telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver("Parked:" + p_Name, "About to call SlewToTarget method");
+                                lTargetRa = TelescopeRaFromSiderealTime("Parked:" + pName, 1.0d); LogCallToDriver("Parked:" + pName, "About to set property TargetRightAscension to " + lTargetRa.ToHMS());
+                                telescopeDevice.TargetRightAscension = lTargetRa; LogCallToDriver("Parked:" + pName, "About to set property TargetDeclination to 0.0");
+                                telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver("Parked:" + pName, "About to call SlewToTarget method");
                                 telescopeDevice.SlewToTarget();
                                 break;
                             }
 
-                        case ParkedExceptionType.tstPExcepSlewToTargetAsync:
+                        case ParkedExceptionType.TstPExcepSlewToTargetAsync:
                             {
-                                l_TargetRA = TelescopeRAFromSiderealTime("Parked:" + p_Name, 1.0d); LogCallToDriver("Parked:" + p_Name, "About to set property to " + l_TargetRA.ToHMS());
-                                telescopeDevice.TargetRightAscension = l_TargetRA; LogCallToDriver("Parked:" + p_Name, "About to set property to 0.0");
-                                telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver("Parked:" + p_Name, "About to call method");
+                                lTargetRa = TelescopeRaFromSiderealTime("Parked:" + pName, 1.0d); LogCallToDriver("Parked:" + pName, "About to set property to " + lTargetRa.ToHMS());
+                                telescopeDevice.TargetRightAscension = lTargetRa; LogCallToDriver("Parked:" + pName, "About to set property to 0.0");
+                                telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver("Parked:" + pName, "About to call method");
                                 telescopeDevice.SlewToTargetAsync();
-                                WaitForSlew("Parked:" + p_Name, "Slewing to target asynchronously");
+                                WaitForSlew("Parked:" + pName, "Slewing to target asynchronously");
                                 break;
                             }
 
-                        case ParkedExceptionType.tstPExcepSyncToCoordinates:
+                        case ParkedExceptionType.TstPExcepSyncToCoordinates:
                             {
-                                l_TargetRA = TelescopeRAFromSiderealTime("Parked:" + p_Name, 1.0d); LogCallToDriver("Parked:" + p_Name, "About to call method, RA: " + l_TargetRA.ToHMS() + ", Declination: 0.0");
-                                telescopeDevice.SyncToCoordinates(l_TargetRA, 0.0d);
+                                lTargetRa = TelescopeRaFromSiderealTime("Parked:" + pName, 1.0d); LogCallToDriver("Parked:" + pName, "About to call method, RA: " + lTargetRa.ToHMS() + ", Declination: 0.0");
+                                telescopeDevice.SyncToCoordinates(lTargetRa, 0.0d);
                                 break;
                             }
 
-                        case ParkedExceptionType.tstPExcepSyncToTarget:
+                        case ParkedExceptionType.TstPExcepSyncToTarget:
                             {
-                                l_TargetRA = TelescopeRAFromSiderealTime("Parked:" + p_Name, 1.0d); LogCallToDriver("Parked:" + p_Name, "About to set property to " + l_TargetRA.ToHMS());
-                                telescopeDevice.TargetRightAscension = l_TargetRA; LogCallToDriver("Parked:" + p_Name, "About to set property to 0.0");
-                                telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver("Parked:" + p_Name, "About to call SyncToTarget method");
+                                lTargetRa = TelescopeRaFromSiderealTime("Parked:" + pName, 1.0d); LogCallToDriver("Parked:" + pName, "About to set property to " + lTargetRa.ToHMS());
+                                telescopeDevice.TargetRightAscension = lTargetRa; LogCallToDriver("Parked:" + pName, "About to set property to 0.0");
+                                telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver("Parked:" + pName, "About to call SyncToTarget method");
                                 telescopeDevice.SyncToTarget();
                                 break;
                             }
 
                         default:
                             {
-                                LogIssue("Parked:" + p_Name, "Conform:ParkedExceptionTest: Unknown test type " + p_Type.ToString());
+                                LogIssue("Parked:" + pName, "Conform:ParkedExceptionTest: Unknown test type " + pType.ToString());
                                 break;
                             }
                     }
 
-                    LogIssue("Parked:" + p_Name, p_Name + " didn't raise an error when Parked as required");
+                    LogIssue("Parked:" + pName, pName + " didn't raise an error when Parked as required");
                 }
                 catch (Exception)
                 {
-                    LogOK("Parked:" + p_Name, p_Name + " did raise an exception when Parked as required");
+                    LogOk("Parked:" + pName, pName + " did raise an exception when Parked as required");
                 }
                 // Check that Telescope is still parked after issuing the command!
-                LogCallToDriver("Parked:" + p_Name, "About to get AtPark property");
+                LogCallToDriver("Parked:" + pName, "About to get AtPark property");
                 if (!telescopeDevice.AtPark)
-                    LogIssue("Parked:" + p_Name, "Telescope was unparked by the " + p_Name + " command. This should not happen!");
+                    LogIssue("Parked:" + pName, "Telescope was unparked by the " + pName + " command. This should not happen!");
             }
             else
             {
-                LogIssue("Parked:" + p_Name, "Not parked after Telescope.Park command, " + p_Name + " when parked test skipped");
+                LogIssue("Parked:" + pName, "Not parked after Telescope.Park command, " + pName + " when parked test skipped");
             }
 
         }
 
-        private void TelescopeAxisRateTest(string p_Name, TelescopeAxis p_Axis)
+        private void TelescopeAxisRateTest(string pName, TelescopeAxis pAxis)
         {
-            int l_NAxisRates, l_i, l_j;
-            bool l_AxisRateOverlap = default, l_AxisRateDuplicate, l_CanGetAxisRates = default, l_HasRates = default;
-            int l_Count;
+            int lNAxisRates, lI, lJ;
+            bool lAxisRateOverlap = default, lAxisRateDuplicate, lCanGetAxisRates = default, lHasRates = default;
+            int lCount;
 
-            IAxisRates l_AxisRatesIRates;
-            IAxisRates l_AxisRates = null;
-            IRate l_Rate = null;
+            IAxisRates lAxisRatesIRates;
+            IAxisRates lAxisRates = null;
+            IRate lRate = null;
 
             try
             {
-                l_NAxisRates = 0;
-                l_AxisRates = null;
-                switch (p_Axis)
+                lNAxisRates = 0;
+                lAxisRates = null;
+                switch (pAxis)
                 {
                     case TelescopeAxis.Primary:
                         {
-                            LogCallToDriver(p_Name, "About to call AxisRates method, Axis: " + ((int)TelescopeAxis.Primary).ToString());
-                            l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary); // Get primary axis rates
+                            LogCallToDriver(pName, "About to call AxisRates method, Axis: " + ((int)TelescopeAxis.Primary).ToString());
+                            lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary); // Get primary axis rates
                             break;
                         }
 
                     case TelescopeAxis.Secondary:
                         {
-                            LogCallToDriver(p_Name, "About to call AxisRates method, Axis: " + ((int)TelescopeAxis.Secondary).ToString());
-                            l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary); // Get secondary axis rates
+                            LogCallToDriver(pName, "About to call AxisRates method, Axis: " + ((int)TelescopeAxis.Secondary).ToString());
+                            lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary); // Get secondary axis rates
                             break;
                         }
 
                     case TelescopeAxis.Tertiary:
                         {
-                            LogCallToDriver(p_Name, "About to call AxisRates method, Axis: " + ((int)TelescopeAxis.Tertiary).ToString());
-                            l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary); // Get tertiary axis rates
+                            LogCallToDriver(pName, "About to call AxisRates method, Axis: " + ((int)TelescopeAxis.Tertiary).ToString());
+                            lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary); // Get tertiary axis rates
                             break;
                         }
 
                     default:
                         {
-                            LogIssue("TelescopeAxisRateTest", "Unknown telescope axis: " + p_Axis.ToString());
+                            LogIssue("TelescopeAxisRateTest", "Unknown telescope axis: " + pAxis.ToString());
                             break;
                         }
                 }
 
                 try
                 {
-                    if (l_AxisRates is null)
+                    if (lAxisRates is null)
                     {
-                        LogDebug(p_Name, "ERROR: The driver did NOT return an AxisRates object!");
+                        LogDebug(pName, "ERROR: The driver did NOT return an AxisRates object!");
                     }
                     else
                     {
-                        LogDebug(p_Name, "OK - the driver returned an AxisRates object");
+                        LogDebug(pName, "OK - the driver returned an AxisRates object");
                     }
 
-                    l_Count = l_AxisRates.Count; // Save count for use later if no members are returned in the for each loop test
-                    LogDebug(p_Name + " Count", "The driver returned " + l_Count + " rates");
+                    lCount = lAxisRates.Count; // Save count for use later if no members are returned in the for each loop test
+                    LogDebug(pName + " Count", "The driver returned " + lCount + " rates");
                     int i;
-                    var loopTo = l_Count;
+                    var loopTo = lCount;
                     for (i = 1; i <= loopTo; i++)
                     {
-                        IRate AxisRateItem;
+                        IRate axisRateItem;
 
-                        AxisRateItem = l_AxisRates[i];
-                        LogDebug(p_Name + " Count", "Rate " + i + " - Minimum: " + AxisRateItem.Minimum.ToString() + ", Maximum: " + AxisRateItem.Maximum.ToString());
+                        axisRateItem = lAxisRates[i];
+                        LogDebug(pName + " Count", "Rate " + i + " - Minimum: " + axisRateItem.Minimum.ToString() + ", Maximum: " + axisRateItem.Maximum.ToString());
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogIssue(p_Name + " Count", $"Unexpected exception: {ex.Message}");
+                    LogIssue(pName + " Count", $"Unexpected exception: {ex.Message}");
                 }
 
                 try
                 {
-                    IEnumerator l_Enum;
-                    dynamic l_Obj;
-                    IRate AxisRateItem = null;
+                    IEnumerator lEnum;
+                    dynamic lObj;
+                    IRate axisRateItem = null;
 
-                    l_Enum = (IEnumerator)l_AxisRates.GetEnumerator();
-                    if (l_Enum is null)
+                    lEnum = (IEnumerator)lAxisRates.GetEnumerator();
+                    if (lEnum is null)
                     {
-                        LogDebug(p_Name + " Enum", "ERROR: The driver did NOT return an Enumerator object!");
+                        LogDebug(pName + " Enum", "ERROR: The driver did NOT return an Enumerator object!");
                     }
                     else
                     {
-                        LogDebug(p_Name + " Enum", "OK - the driver returned an Enumerator object");
+                        LogDebug(pName + " Enum", "OK - the driver returned an Enumerator object");
                     }
 
-                    l_Enum.Reset();
-                    LogDebug(p_Name + " Enum", "Reset Enumerator");
-                    while (l_Enum.MoveNext())
+                    lEnum.Reset();
+                    LogDebug(pName + " Enum", "Reset Enumerator");
+                    while (lEnum.MoveNext())
                     {
-                        LogDebug(p_Name + " Enum", "Reading Current");
-                        l_Obj = l_Enum.Current;
-                        LogDebug(p_Name + " Enum", "Read Current OK, Type: " + l_Obj.GetType().Name);
-                        AxisRateItem = l_Obj;
+                        LogDebug(pName + " Enum", "Reading Current");
+                        lObj = lEnum.Current;
+                        LogDebug(pName + " Enum", "Read Current OK, Type: " + lObj.GetType().Name);
+                        axisRateItem = lObj;
 
-                        LogDebug(p_Name + " Enum", "Found axis rate - Minimum: " + AxisRateItem.Minimum.ToString() + ", Maximum: " + AxisRateItem.Maximum.ToString());
+                        LogDebug(pName + " Enum", "Found axis rate - Minimum: " + axisRateItem.Minimum.ToString() + ", Maximum: " + axisRateItem.Maximum.ToString());
                     }
 
-                    l_Enum.Reset();
-                    l_Enum = null;
-                    AxisRateItem = null;
+                    lEnum.Reset();
+                    lEnum = null;
+                    axisRateItem = null;
                 }
                 catch (Exception ex)
                 {
-                    LogIssue(p_Name + " Enum", $"Exception: {ex}");
+                    LogIssue(pName + " Enum", $"Exception: {ex}");
                 }
 
-                if (l_AxisRates.Count > 0)
+                if (lAxisRates.Count > 0)
                 {
                     try
                     {
-                        l_AxisRatesIRates = l_AxisRates;
-                        foreach (IRate currentL_Rate in l_AxisRatesIRates)
+                        lAxisRatesIRates = lAxisRates;
+                        foreach (IRate currentLRate in lAxisRatesIRates)
                         {
-                            l_Rate = currentL_Rate;
-                            if ((l_Rate.Minimum < 0.0d) | (l_Rate.Maximum < 0.0d)) // Error because negative values are not allowed
+                            lRate = currentLRate;
+                            if ((lRate.Minimum < 0.0d) | (lRate.Maximum < 0.0d)) // Error because negative values are not allowed
                             {
-                                LogIssue(p_Name, "Minimum or maximum rate is negative: " + l_Rate.Minimum.ToString() + ", " + l_Rate.Maximum.ToString());
+                                LogIssue(pName, "Minimum or maximum rate is negative: " + lRate.Minimum.ToString() + ", " + lRate.Maximum.ToString());
                             }
                             else  // All positive values so continue tests
                             {
-                                if (l_Rate.Minimum <= l_Rate.Maximum) // Minimum <= Maximum so OK
+                                if (lRate.Minimum <= lRate.Maximum) // Minimum <= Maximum so OK
                                 {
-                                    LogOK(p_Name, "Axis rate minimum: " + l_Rate.Minimum.ToString() + " Axis rate maximum: " + l_Rate.Maximum.ToString());
+                                    LogOk(pName, "Axis rate minimum: " + lRate.Minimum.ToString() + " Axis rate maximum: " + lRate.Maximum.ToString());
                                 }
                                 else // Minimum > Maximum so error!
                                 {
-                                    LogIssue(p_Name, "Maximum rate is less than minimum rate - minimum: " + l_Rate.Minimum.ToString() + " maximum: " + l_Rate.Maximum.ToString());
+                                    LogIssue(pName, "Maximum rate is less than minimum rate - minimum: " + lRate.Minimum.ToString() + " maximum: " + lRate.Maximum.ToString());
                                 }
                             }
                             // Save rates for overlap testing
-                            l_NAxisRates += 1;
-                            axisRatesArray[l_NAxisRates, AXIS_RATE_MINIMUM] = l_Rate.Minimum;
-                            axisRatesArray[l_NAxisRates, AXIS_RATE_MAXIMUM] = l_Rate.Maximum;
-                            l_HasRates = true;
+                            lNAxisRates += 1;
+                            axisRatesArray[lNAxisRates, AXIS_RATE_MINIMUM] = lRate.Minimum;
+                            axisRatesArray[lNAxisRates, AXIS_RATE_MAXIMUM] = lRate.Maximum;
+                            lHasRates = true;
                         }
                     }
                     catch (Exception ex)
                     {
-                        LogIssue(p_Name, "Unable to read AxisRates object - Exception: " + ex.Message);
-                        LogDebug(p_Name, "Unable to read AxisRates object - Exception: " + ex.ToString());
+                        LogIssue(pName, "Unable to read AxisRates object - Exception: " + ex.Message);
+                        LogDebug(pName, "Unable to read AxisRates object - Exception: " + ex.ToString());
                     }
 
                     // Overlap testing
-                    if (l_NAxisRates > 1) // Confirm whether there are overlaps if number of axis rate pairs exceeds 1
+                    if (lNAxisRates > 1) // Confirm whether there are overlaps if number of axis rate pairs exceeds 1
                     {
-                        int loopTo1 = l_NAxisRates;
-                        for (l_i = 1; l_i <= loopTo1; l_i++)
+                        int loopTo1 = lNAxisRates;
+                        for (lI = 1; lI <= loopTo1; lI++)
                         {
-                            int loopTo2 = l_NAxisRates;
-                            for (l_j = 1; l_j <= loopTo2; l_j++)
+                            int loopTo2 = lNAxisRates;
+                            for (lJ = 1; lJ <= loopTo2; lJ++)
                             {
-                                if (l_i != l_j) // Only test different lines, shouldn't compare same lines!
+                                if (lI != lJ) // Only test different lines, shouldn't compare same lines!
                                 {
-                                    if (axisRatesArray[l_i, AXIS_RATE_MINIMUM] >= axisRatesArray[l_j, AXIS_RATE_MINIMUM] & axisRatesArray[l_i, AXIS_RATE_MINIMUM] <= axisRatesArray[l_j, AXIS_RATE_MAXIMUM])
-                                        l_AxisRateOverlap = true;
+                                    if (axisRatesArray[lI, AXIS_RATE_MINIMUM] >= axisRatesArray[lJ, AXIS_RATE_MINIMUM] & axisRatesArray[lI, AXIS_RATE_MINIMUM] <= axisRatesArray[lJ, AXIS_RATE_MAXIMUM])
+                                        lAxisRateOverlap = true;
                                 }
                             }
                         }
                     }
 
-                    if (l_AxisRateOverlap)
+                    if (lAxisRateOverlap)
                     {
-                        LogIssue(p_Name, "Overlapping axis rates found, suggest these be rationalised to remove overlaps");
+                        LogIssue(pName, "Overlapping axis rates found, suggest these be rationalised to remove overlaps");
                     }
                     else
                     {
-                        LogOK(p_Name, "No overlapping axis rates found");
+                        LogOk(pName, "No overlapping axis rates found");
                     }
 
                     // Duplicate testing
-                    l_AxisRateDuplicate = false;
-                    if (l_NAxisRates > 1) // Confirm whether there are overlaps if number of axis rate pairs exceeds 1
+                    lAxisRateDuplicate = false;
+                    if (lNAxisRates > 1) // Confirm whether there are overlaps if number of axis rate pairs exceeds 1
                     {
-                        int loopTo3 = l_NAxisRates;
-                        for (l_i = 1; l_i <= loopTo3; l_i++)
+                        int loopTo3 = lNAxisRates;
+                        for (lI = 1; lI <= loopTo3; lI++)
                         {
-                            int loopTo4 = l_NAxisRates;
-                            for (l_j = 1; l_j <= loopTo4; l_j++)
+                            int loopTo4 = lNAxisRates;
+                            for (lJ = 1; lJ <= loopTo4; lJ++)
                             {
-                                if (l_i != l_j) // Only test different lines, shouldn't compare same lines!
+                                if (lI != lJ) // Only test different lines, shouldn't compare same lines!
                                 {
-                                    if (axisRatesArray[l_i, AXIS_RATE_MINIMUM] == axisRatesArray[l_j, AXIS_RATE_MINIMUM] & axisRatesArray[l_i, AXIS_RATE_MAXIMUM] == axisRatesArray[l_j, AXIS_RATE_MAXIMUM])
-                                        l_AxisRateDuplicate = true;
+                                    if (axisRatesArray[lI, AXIS_RATE_MINIMUM] == axisRatesArray[lJ, AXIS_RATE_MINIMUM] & axisRatesArray[lI, AXIS_RATE_MAXIMUM] == axisRatesArray[lJ, AXIS_RATE_MAXIMUM])
+                                        lAxisRateDuplicate = true;
                                 }
                             }
                         }
                     }
 
-                    if (l_AxisRateDuplicate)
+                    if (lAxisRateDuplicate)
                     {
-                        LogIssue(p_Name, "Duplicate axis rates found, suggest these be removed");
+                        LogIssue(pName, "Duplicate axis rates found, suggest these be removed");
                     }
                     else
                     {
-                        LogOK(p_Name, "No duplicate axis rates found");
+                        LogOk(pName, "No duplicate axis rates found");
                     }
                 }
                 else
                 {
-                    LogOK(p_Name, "Empty axis rate returned");
+                    LogOk(pName, "Empty axis rate returned");
                 }
 
-                l_CanGetAxisRates = true; // Record that this driver can deliver a viable AxisRates object that can be tested for AxisRates.Dispose() later
+                lCanGetAxisRates = true; // Record that this driver can deliver a viable AxisRates object that can be tested for AxisRates.Dispose() later
             }
             catch (Exception ex)
             {
-                LogIssue(p_Name, "Unable to get or unable to use an AxisRates object - Exception: " + ex.ToString());
+                LogIssue(pName, "Unable to get or unable to use an AxisRates object - Exception: " + ex.ToString());
             }
 
             // Clean up AxisRate object if used
-            if (l_AxisRates is object)
+            if (lAxisRates is object)
             {
                 try
                 {
-                    l_AxisRates.Dispose();
+                    lAxisRates.Dispose();
                 }
                 catch
                 {
@@ -5350,22 +5350,22 @@ namespace ConformU
                 {
                     try
                     {
-                        Marshal.ReleaseComObject(l_AxisRates);
+                        Marshal.ReleaseComObject(lAxisRates);
                     }
                     catch
                     {
                     }
                 }
 
-                l_AxisRates = null;
+                lAxisRates = null;
             }
 
             // Clean up and release rate object if used
-            if (l_Rate is object)
+            if (lRate is object)
             {
                 try
                 {
-                    l_Rate.Dispose();
+                    lRate.Dispose();
                 }
                 catch
                 {
@@ -5375,61 +5375,61 @@ namespace ConformU
                 {
                     try
                     {
-                        Marshal.ReleaseComObject(l_Rate);
+                        Marshal.ReleaseComObject(lRate);
                     }
                     catch { }
                 }
             }
 
-            if (l_CanGetAxisRates) // The driver does return a viable AxisRates object that can be tested for correct AxisRates.Dispose() and Rate.Dispose() operation
+            if (lCanGetAxisRates) // The driver does return a viable AxisRates object that can be tested for correct AxisRates.Dispose() and Rate.Dispose() operation
             {
                 try
                 {
                     // Test Rate.Dispose()
-                    switch (p_Axis) // Get the relevant axis rates object for this axis
+                    switch (pAxis) // Get the relevant axis rates object for this axis
                     {
                         case TelescopeAxis.Primary:
                             {
-                                l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary);
+                                lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary);
                                 break;
                             }
 
                         case TelescopeAxis.Secondary:
                             {
-                                l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary);
+                                lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary);
                                 break;
                             }
 
                         case TelescopeAxis.Tertiary:
                             {
-                                l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary);
+                                lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary);
                                 break;
                             }
 
                         default:
                             {
-                                LogIssue(p_Name, "AxisRate.Dispose() - Unknown axis: " + p_Axis.ToString());
+                                LogIssue(pName, "AxisRate.Dispose() - Unknown axis: " + pAxis.ToString());
                                 break;
                             }
                     }
 
-                    if (l_HasRates) // This axis does have one or more rates that can be accessed through ForEach so test these for correct Rate.Dispose() action
+                    if (lHasRates) // This axis does have one or more rates that can be accessed through ForEach so test these for correct Rate.Dispose() action
                     {
-                        foreach (IRate currentL_Rate2 in (IEnumerable)l_AxisRates)
+                        foreach (IRate currentLRate2 in (IEnumerable)lAxisRates)
                         {
-                            l_Rate = currentL_Rate2;
+                            lRate = currentLRate2;
                             try
                             {
-                                l_Rate.Dispose();
-                                LogOK(p_Name, string.Format("Successfully disposed of rate {0} - {1}", l_Rate.Minimum, l_Rate.Maximum));
+                                lRate.Dispose();
+                                LogOk(pName, string.Format("Successfully disposed of rate {0} - {1}", lRate.Minimum, lRate.Maximum));
                             }
                             catch (MissingMemberException)
                             {
-                                LogOK(p_Name, string.Format("Rate.Dispose() member not present for rate {0} - {1}", l_Rate.Minimum, l_Rate.Maximum));
+                                LogOk(pName, string.Format("Rate.Dispose() member not present for rate {0} - {1}", lRate.Minimum, lRate.Maximum));
                             }
                             catch (Exception ex1)
                             {
-                                LogIssue(p_Name, string.Format("Rate.Dispose() for rate {0} - {1} threw an exception but it is poor practice to throw exceptions in Dispose methods: {2}", l_Rate.Minimum, l_Rate.Maximum, ex1.Message));
+                                LogIssue(pName, string.Format("Rate.Dispose() for rate {0} - {1} threw an exception but it is poor practice to throw exceptions in Dispose methods: {2}", lRate.Minimum, lRate.Maximum, ex1.Message));
                                 LogDebug("TrackingRates.Dispose", "Exception: " + ex1.ToString());
                             }
                         }
@@ -5438,77 +5438,77 @@ namespace ConformU
                     // Test AxisRates.Dispose()
                     try
                     {
-                        LogDebug(p_Name, "Disposing axis rates");
-                        l_AxisRates.Dispose();
-                        LogOK(p_Name, "Disposed axis rates OK");
+                        LogDebug(pName, "Disposing axis rates");
+                        lAxisRates.Dispose();
+                        LogOk(pName, "Disposed axis rates OK");
                     }
                     catch (MissingMemberException)
                     {
-                        LogOK(p_Name, "AxisRates.Dispose() member not present for axis " + p_Axis.ToString());
+                        LogOk(pName, "AxisRates.Dispose() member not present for axis " + pAxis.ToString());
                     }
                     catch (Exception ex1)
                     {
-                        LogIssue(p_Name, "AxisRates.Dispose() threw an exception but it is poor practice to throw exceptions in Dispose() methods: " + ex1.Message);
+                        LogIssue(pName, "AxisRates.Dispose() threw an exception but it is poor practice to throw exceptions in Dispose() methods: " + ex1.Message);
                         LogDebug("AxisRates.Dispose", "Exception: " + ex1.ToString());
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogIssue(p_Name, "AxisRate.Dispose() - Unable to get or unable to use an AxisRates object - Exception: " + ex.ToString());
+                    LogIssue(pName, "AxisRate.Dispose() - Unable to get or unable to use an AxisRates object - Exception: " + ex.ToString());
                 }
             }
             else
             {
-                LogInfo(p_Name, "AxisRates.Dispose() testing skipped because of earlier issues in obtaining a viable AxisRates object.");
+                LogInfo(pName, "AxisRates.Dispose() testing skipped because of earlier issues in obtaining a viable AxisRates object.");
             }
 
         }
 
-        private void TelescopeRequiredMethodsTest(RequiredMethodType p_Type, string p_Name)
+        private void TelescopeRequiredMethodsTest(RequiredMethodType pType, string pName)
         {
             try
             {
-                switch (p_Type)
+                switch (pType)
                 {
-                    case RequiredMethodType.tstAxisrates:
+                    case RequiredMethodType.TstAxisrates:
                         {
                             break;
                         }
                     // This is now done by TelescopeAxisRateTest subroutine 
-                    case RequiredMethodType.tstCanMoveAxisPrimary:
+                    case RequiredMethodType.TstCanMoveAxisPrimary:
                         {
-                            LogCallToDriver(p_Name, "About to call CanMoveAxis method " + ((int)TelescopeAxis.Primary).ToString());
+                            LogCallToDriver(pName, "About to call CanMoveAxis method " + ((int)TelescopeAxis.Primary).ToString());
                             canMoveAxisPrimary = telescopeDevice.CanMoveAxis(TelescopeAxis.Primary);
-                            LogOK(p_Name, p_Name + " " + canMoveAxisPrimary.ToString());
+                            LogOk(pName, pName + " " + canMoveAxisPrimary.ToString());
                             break;
                         }
 
-                    case RequiredMethodType.tstCanMoveAxisSecondary:
+                    case RequiredMethodType.TstCanMoveAxisSecondary:
                         {
-                            LogCallToDriver(p_Name, "About to call CanMoveAxis method " + ((int)TelescopeAxis.Secondary).ToString());
+                            LogCallToDriver(pName, "About to call CanMoveAxis method " + ((int)TelescopeAxis.Secondary).ToString());
                             canMoveAxisSecondary = telescopeDevice.CanMoveAxis(TelescopeAxis.Secondary);
-                            LogOK(p_Name, p_Name + " " + canMoveAxisSecondary.ToString());
+                            LogOk(pName, pName + " " + canMoveAxisSecondary.ToString());
                             break;
                         }
 
-                    case RequiredMethodType.tstCanMoveAxisTertiary:
+                    case RequiredMethodType.TstCanMoveAxisTertiary:
                         {
-                            LogCallToDriver(p_Name, "About to call CanMoveAxis method " + ((int)TelescopeAxis.Tertiary).ToString());
+                            LogCallToDriver(pName, "About to call CanMoveAxis method " + ((int)TelescopeAxis.Tertiary).ToString());
                             canMoveAxisTertiary = telescopeDevice.CanMoveAxis(TelescopeAxis.Tertiary);
-                            LogOK(p_Name, p_Name + " " + canMoveAxisTertiary.ToString());
+                            LogOk(pName, pName + " " + canMoveAxisTertiary.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogIssue(p_Name, "Conform:RequiredMethodsTest: Unknown test type " + p_Type.ToString());
+                            LogIssue(pName, "Conform:RequiredMethodsTest: Unknown test type " + pType.ToString());
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                HandleException(p_Name, MemberType.Method, Required.Mandatory, ex, "");
+                HandleException(pName, MemberType.Method, Required.Mandatory, ex, "");
             }
 
             // Clean up and release each object after use
@@ -5518,8 +5518,8 @@ namespace ConformU
 
         private void TelescopeOptionalMethodsTest(OptionalMethodType testType, string testName, bool canTest)
         {
-            double l_TestDec, l_TestRAOffset;
-            IAxisRates l_AxisRates = null;
+            double lTestDec, lTestRaOffset;
+            IAxisRates lAxisRates = null;
 
             SetTest(testName);
             LogDebug("TelescopeOptionalMethodsTest", testType.ToString() + " " + testName + " " + canTest.ToString());
@@ -5530,22 +5530,22 @@ namespace ConformU
                     // Set the test declination value depending on whether the scope is in the northern or southern hemisphere
                     if (siteLatitude > 0.0d)
                     {
-                        l_TestDec = 45.0d; // Positive for the northern hemisphere
+                        lTestDec = 45.0d; // Positive for the northern hemisphere
                     }
                     else
                     {
-                        l_TestDec = -45.0d;
+                        lTestDec = -45.0d;
                     } // Negative for the southern hemisphere
 
-                    l_TestRAOffset = 3.0d; // Set the test RA offset as 3 hours from local sider5eal time
-                    LogDebug(testName, string.Format("Test RA offset: {0}, Test declination: {1}", l_TestRAOffset, l_TestDec));
+                    lTestRaOffset = 3.0d; // Set the test RA offset as 3 hours from local sider5eal time
+                    LogDebug(testName, string.Format("Test RA offset: {0}, Test declination: {1}", lTestRaOffset, lTestDec));
                     switch (testType)
                     {
                         case OptionalMethodType.AbortSlew:
                             {
                                 LogDebug(testName, "TelescopeOptionalMethodsTest - ABout to call the ConformU AbortSlew method.");
                                 AbortSlew(testName);
-                                LogOK(testName, "AbortSlew OK when not slewing");
+                                LogOk(testName, "AbortSlew OK when not slewing");
 
                                 // If we get here the AbortSlew method is available so start a slew and then try to halt it.
 
@@ -5590,7 +5590,7 @@ namespace ConformU
 
                                 if (!afterAbortSlewing)
                                 {
-                                    LogOK(testName, "AbortSlew stopped the mount from slewing.");
+                                    LogOk(testName, "AbortSlew stopped the mount from slewing.");
                                 }
                                 else
                                 {
@@ -5605,14 +5605,14 @@ namespace ConformU
                         case OptionalMethodType.DestinationSideOfPier:
                             {
                                 // Get the DestinationSideOfPier for a target in the West i.e. for a German mount when the tube is on the East side of the pier
-                                targetRightAscension = TelescopeRAFromSiderealTime(testName, -l_TestRAOffset); LogCallToDriver(testName, "About to call DestinationSideOfPier method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + l_TestDec.ToDMS());
-                                destinationSideOfPierEast = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, l_TestDec);
-                                LogDebug(testName, "German mount - scope on the pier's East side, target in the West : " + targetRightAscension.ToHMS() + " " + l_TestDec.ToDMS() + " " + destinationSideOfPierEast.ToString());
+                                targetRightAscension = TelescopeRaFromSiderealTime(testName, -lTestRaOffset); LogCallToDriver(testName, "About to call DestinationSideOfPier method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + lTestDec.ToDMS());
+                                destinationSideOfPierEast = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, lTestDec);
+                                LogDebug(testName, "German mount - scope on the pier's East side, target in the West : " + targetRightAscension.ToHMS() + " " + lTestDec.ToDMS() + " " + destinationSideOfPierEast.ToString());
 
                                 // Get the DestinationSideOfPier for a target in the East i.e. for a German mount when the tube is on the West side of the pier
-                                targetRightAscension = TelescopeRAFromSiderealTime(testName, l_TestRAOffset); LogCallToDriver(testName, "About to call DestinationSideOfPier method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + l_TestDec.ToDMS());
-                                destinationSideOfPierWest = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, l_TestDec);
-                                LogDebug(testName, "German mount - scope on the pier's West side, target in the East: " + targetRightAscension.ToHMS() + " " + l_TestDec.ToDMS() + " " + destinationSideOfPierWest.ToString());
+                                targetRightAscension = TelescopeRaFromSiderealTime(testName, lTestRaOffset); LogCallToDriver(testName, "About to call DestinationSideOfPier method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + lTestDec.ToDMS());
+                                destinationSideOfPierWest = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, lTestDec);
+                                LogDebug(testName, "German mount - scope on the pier's West side, target in the East: " + targetRightAscension.ToHMS() + " " + lTestDec.ToDMS() + " " + destinationSideOfPierWest.ToString());
 
                                 // Make sure that we received two valid values i.e. that neither side returned PierSide.Unknown and that the two valid returned values are not the same i.e. we got one PointingState.Normal and one PointingState.ThroughThePole
                                 if (destinationSideOfPierEast == PointingState.Unknown | destinationSideOfPierWest == PointingState.Unknown)
@@ -5625,7 +5625,7 @@ namespace ConformU
                                 }
                                 else
                                 {
-                                    LogOK(testName, "DestinationSideOfPier is different on either side of the meridian");
+                                    LogOk(testName, "DestinationSideOfPier is different on either side of the meridian");
                                 }
 
                                 break;
@@ -5645,7 +5645,7 @@ namespace ConformU
                                     // Validate FindHome outcome
                                     if (telescopeDevice.AtHome)
                                     {
-                                        LogOK(testName, "Found home OK.");
+                                        LogOk(testName, "Found home OK.");
                                     }
                                     else
                                     {
@@ -5671,7 +5671,7 @@ namespace ConformU
                                     // Wait for mount to find home
                                     WaitWhile("Waiting for mount to home...", () => { return !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
 
-                                    LogOK(testName, "Found home OK."); LogCallToDriver(testName, "About to call Unpark method");
+                                    LogOk(testName, "Found home OK."); LogCallToDriver(testName, "About to call Unpark method");
                                     telescopeDevice.Unpark();
                                     LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
                                     WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -5684,24 +5684,24 @@ namespace ConformU
                             {
                                 // Get axis rates for primary axis
                                 LogCallToDriver(testName, "About to call AxisRates method for axis " + ((int)TelescopeAxis.Primary).ToString());
-                                l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary);
-                                TelescopeMoveAxisTest(testName, TelescopeAxis.Primary, l_AxisRates);
+                                lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary);
+                                TelescopeMoveAxisTest(testName, TelescopeAxis.Primary, lAxisRates);
                                 break;
                             }
 
                         case OptionalMethodType.MoveAxisSecondary:
                             {
                                 // Get axis rates for secondary axis
-                                l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary);
-                                TelescopeMoveAxisTest(testName, TelescopeAxis.Secondary, l_AxisRates);
+                                lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary);
+                                TelescopeMoveAxisTest(testName, TelescopeAxis.Secondary, lAxisRates);
                                 break;
                             }
 
                         case OptionalMethodType.MoveAxisTertiary:
                             {
                                 // Get axis rates for tertiary axis
-                                l_AxisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary);
-                                TelescopeMoveAxisTest(testName, TelescopeAxis.Tertiary, l_AxisRates);
+                                lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary);
+                                TelescopeMoveAxisTest(testName, TelescopeAxis.Tertiary, lAxisRates);
                                 break;
                             }
 
@@ -5728,7 +5728,7 @@ namespace ConformU
                                             WaitWhile("Pulse guiding Eastwards", () => { return telescopeDevice.IsPulseGuiding; }, SLEEP_TIME, PULSEGUIDE_TIMEOUT_TIME); LogCallToDriver(testName, "About to get IsPulseGuiding property");
                                             if (!telescopeDevice.IsPulseGuiding)
                                             {
-                                                LogOK(testName, "Asynchronous pulse guide found OK");
+                                                LogOk(testName, "Asynchronous pulse guide found OK");
                                                 LogDebug(testName, "IsPulseGuiding = True duration: " + DateTime.Now.Subtract(startTime).TotalMilliseconds + " milliseconds");
                                             }
                                             else
@@ -5746,7 +5746,7 @@ namespace ConformU
                                         LogCallToDriver(testName, "About to get IsPulseGuiding property");
                                         if (!telescopeDevice.IsPulseGuiding)
                                         {
-                                            LogOK(testName, "Synchronous pulse guide found OK");
+                                            LogOk(testName, "Synchronous pulse guide found OK");
                                         }
                                         else
                                         {
@@ -5763,11 +5763,11 @@ namespace ConformU
                                 // SideOfPier Write
                                 if (canSetPierside) // Can set pier side so test if we can
                                 {
-                                    SlewScope(TelescopeRAFromHourAngle(testName, -3.0d), 0.0d, "far start point");
+                                    SlewScope(TelescopeRaFromHourAngle(testName, -3.0d), 0.0d, "far start point");
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
 
-                                    SlewScope(TelescopeRAFromHourAngle(testName, -0.03d), 0.0d, "near start point"); // 2 minutes from zenith
+                                    SlewScope(TelescopeRaFromHourAngle(testName, -0.03d), 0.0d, "near start point"); // 2 minutes from zenith
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
 
@@ -5804,7 +5804,7 @@ namespace ConformU
 
                                                     if (sideOfPier == PointingState.ThroughThePole)
                                                     {
-                                                        LogOK(testName, "Successfully flipped pierEast to pierWest");
+                                                        LogOk(testName, "Successfully flipped pierEast to pierWest");
                                                     }
                                                     else
                                                     {
@@ -5841,7 +5841,7 @@ namespace ConformU
                                                     sideOfPier = telescopeDevice.SideOfPier;
                                                     if (sideOfPier == PointingState.Normal)
                                                     {
-                                                        LogOK(testName, "Successfully flipped pierWest to pierEast");
+                                                        LogOk(testName, "Successfully flipped pierWest to pierEast");
                                                     }
                                                     else
                                                     {
@@ -5897,14 +5897,14 @@ namespace ConformU
                     }
 
                     // Clean up AxisRate object, if used
-                    if (l_AxisRates is object)
+                    if (lAxisRates is object)
                     {
                         try
                         {
                             LogCallToDriver(testName, "About to dispose of AxisRates object");
-                            l_AxisRates.Dispose();
+                            lAxisRates.Dispose();
 
-                            LogOK(testName, "AxisRates object successfully disposed");
+                            LogOk(testName, "AxisRates object successfully disposed");
                         }
                         catch (Exception ex)
                         {
@@ -5915,14 +5915,14 @@ namespace ConformU
                         try
                         {
 #if WINDOWS
-                            Marshal.ReleaseComObject(l_AxisRates);
+                            Marshal.ReleaseComObject(lAxisRates);
 #endif
                         }
                         catch
                         {
                         }
 
-                        l_AxisRates = null;
+                        lAxisRates = null;
                     }
                     if (cancellationToken.IsCancellationRequested)
                         return;
@@ -5947,7 +5947,7 @@ namespace ConformU
 
                         case OptionalMethodType.DestinationSideOfPier:
                             {
-                                targetRightAscension = TelescopeRAFromSiderealTime(testName, -1.0d); LogCallToDriver(testName, "About to call DestinationSideOfPier method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + 0.0d.ToDMS());
+                                targetRightAscension = TelescopeRaFromSiderealTime(testName, -1.0d); LogCallToDriver(testName, "About to call DestinationSideOfPier method, RA: " + targetRightAscension.ToHMS() + ", Declination: " + 0.0d.ToDMS());
                                 destinationSideOfPier = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, 0.0d);
                                 break;
                             }
@@ -6009,7 +6009,7 @@ namespace ConformU
                 {
                     if (IsInvalidValueException(testName, ex))
                     {
-                        LogOK(testName, "Received an invalid value exception");
+                        LogOk(testName, "Received an invalid value exception");
                     }
                     else if (testType == OptionalMethodType.SideOfPierWrite) // PierSide is actually a property even though I have it in the methods section!!
                     {
@@ -6025,31 +6025,31 @@ namespace ConformU
 
         }
 
-        private void TelescopeCanTest(CanType p_Type, string p_Name)
+        private void TelescopeCanTest(CanType pType, string pName)
         {
             try
             {
-                LogCallToDriver(p_Name, string.Format("About to get {0} property", p_Type.ToString()));
-                switch (p_Type)
+                LogCallToDriver(pName, string.Format("About to get {0} property", pType.ToString()));
+                switch (pType)
                 {
                     case CanType.CanFindHome:
                         {
                             canFindHome = telescopeDevice.CanFindHome;
-                            LogOK(p_Name, canFindHome.ToString());
+                            LogOk(pName, canFindHome.ToString());
                             break;
                         }
 
                     case CanType.CanPark:
                         {
                             canPark = telescopeDevice.CanPark;
-                            LogOK(p_Name, canPark.ToString());
+                            LogOk(pName, canPark.ToString());
                             break;
                         }
 
                     case CanType.CanPulseGuide:
                         {
                             canPulseGuide = telescopeDevice.CanPulseGuide;
-                            LogOK(p_Name, canPulseGuide.ToString());
+                            LogOk(pName, canPulseGuide.ToString());
                             break;
                         }
 
@@ -6058,7 +6058,7 @@ namespace ConformU
                             if (GetInterfaceVersion() > 1)
                             {
                                 canSetDeclinationRate = telescopeDevice.CanSetDeclinationRate;
-                                LogOK(p_Name, canSetDeclinationRate.ToString());
+                                LogOk(pName, canSetDeclinationRate.ToString());
                             }
                             else
                             {
@@ -6073,7 +6073,7 @@ namespace ConformU
                             if (GetInterfaceVersion() > 1)
                             {
                                 canSetGuideRates = telescopeDevice.CanSetGuideRates;
-                                LogOK(p_Name, canSetGuideRates.ToString());
+                                LogOk(pName, canSetGuideRates.ToString());
                             }
                             else
                             {
@@ -6086,7 +6086,7 @@ namespace ConformU
                     case CanType.CanSetPark:
                         {
                             canSetPark = telescopeDevice.CanSetPark;
-                            LogOK(p_Name, canSetPark.ToString());
+                            LogOk(pName, canSetPark.ToString());
                             break;
                         }
 
@@ -6095,7 +6095,7 @@ namespace ConformU
                             if (GetInterfaceVersion() > 1)
                             {
                                 canSetPierside = telescopeDevice.CanSetPierSide;
-                                LogOK(p_Name, canSetPierside.ToString());
+                                LogOk(pName, canSetPierside.ToString());
                             }
                             else
                             {
@@ -6110,7 +6110,7 @@ namespace ConformU
                             if (GetInterfaceVersion() > 1)
                             {
                                 canSetRightAscensionRate = telescopeDevice.CanSetRightAscensionRate;
-                                LogOK(p_Name, canSetRightAscensionRate.ToString());
+                                LogOk(pName, canSetRightAscensionRate.ToString());
                             }
                             else
                             {
@@ -6123,14 +6123,14 @@ namespace ConformU
                     case CanType.CanSetTracking:
                         {
                             canSetTracking = telescopeDevice.CanSetTracking;
-                            LogOK(p_Name, canSetTracking.ToString());
+                            LogOk(pName, canSetTracking.ToString());
                             break;
                         }
 
                     case CanType.CanSlew:
                         {
                             canSlew = telescopeDevice.CanSlew;
-                            LogOK(p_Name, canSlew.ToString());
+                            LogOk(pName, canSlew.ToString());
                             break;
                         }
 
@@ -6139,7 +6139,7 @@ namespace ConformU
                             if (GetInterfaceVersion() > 1)
                             {
                                 canSlewAltAz = telescopeDevice.CanSlewAltAz;
-                                LogOK(p_Name, canSlewAltAz.ToString());
+                                LogOk(pName, canSlewAltAz.ToString());
                             }
                             else
                             {
@@ -6154,7 +6154,7 @@ namespace ConformU
                             if (GetInterfaceVersion() > 1)
                             {
                                 canSlewAltAzAsync = telescopeDevice.CanSlewAltAzAsync;
-                                LogOK(p_Name, canSlewAltAzAsync.ToString());
+                                LogOk(pName, canSlewAltAzAsync.ToString());
                             }
                             else
                             {
@@ -6167,14 +6167,14 @@ namespace ConformU
                     case CanType.CanSlewAsync:
                         {
                             canSlewAsync = telescopeDevice.CanSlewAsync;
-                            LogOK(p_Name, canSlewAsync.ToString());
+                            LogOk(pName, canSlewAsync.ToString());
                             break;
                         }
 
                     case CanType.CanSync:
                         {
                             canSync = telescopeDevice.CanSync;
-                            LogOK(p_Name, canSync.ToString());
+                            LogOk(pName, canSync.ToString());
                             break;
                         }
 
@@ -6183,7 +6183,7 @@ namespace ConformU
                             if (GetInterfaceVersion() > 1)
                             {
                                 canSyncAltAz = telescopeDevice.CanSyncAltAz;
-                                LogOK(p_Name, canSyncAltAz.ToString());
+                                LogOk(pName, canSyncAltAz.ToString());
                             }
                             else
                             {
@@ -6196,20 +6196,20 @@ namespace ConformU
                     case CanType.CanUnPark:
                         {
                             canUnpark = telescopeDevice.CanUnpark;
-                            LogOK(p_Name, canUnpark.ToString());
+                            LogOk(pName, canUnpark.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogIssue(p_Name, "Conform:CanTest: Unknown test type " + p_Type.ToString());
+                            LogIssue(pName, "Conform:CanTest: Unknown test type " + pType.ToString());
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                HandleException(p_Name, MemberType.Property, Required.Mandatory, ex, "");
+                HandleException(pName, MemberType.Property, Required.Mandatory, ex, "");
             }
         }
 
@@ -6231,11 +6231,11 @@ namespace ConformU
             // Make sure that some axis rates are available
             if (axisRates.Count > 0) // Some rates are available
             {
-                IAxisRates l_AxisRatesIRates = axisRates;
+                IAxisRates lAxisRatesIRates = axisRates;
                 rateCount = 0;
-                foreach (IRate currentL_Rate in l_AxisRatesIRates)
+                foreach (IRate currentLRate in lAxisRatesIRates)
                 {
-                    rate = currentL_Rate;
+                    rate = currentLRate;
                     if (rate.Minimum < rateMinimum) rateMinimum = rate.Minimum;
                     if (rate.Maximum > rateMaximum) rateMaximum = rate.Maximum;
                     LogDebug(testName, $"Checking rates: {rate.Minimum} {rate.Maximum} Current rates: {rateMinimum} {rateMaximum}");
@@ -6256,7 +6256,7 @@ namespace ConformU
 
                         if (ValidateSlewing(testName, false))
                         {
-                            LogOK(testName, "Can successfully set a movement rate of zero");
+                            LogOk(testName, "Can successfully set a movement rate of zero");
                             canSetZero = true;
                         }
                         else
@@ -6304,7 +6304,7 @@ namespace ConformU
                     }
                     catch (Exception ex)
                     {
-                        HandleInvalidValueExceptionAsOK(testName, MemberType.Method, Required.MustBeImplemented, ex, "when move axis is set below lowest rate (" + moveRate + ")", "Exception correctly generated when move axis is set below lowest rate (" + moveRate + ")");
+                        HandleInvalidValueExceptionAsOk(testName, MemberType.Method, Required.MustBeImplemented, ex, "when move axis is set below lowest rate (" + moveRate + ")", "Exception correctly generated when move axis is set below lowest rate (" + moveRate + ")");
                     }
 
                     // Clean up and release each object after use
@@ -6339,7 +6339,7 @@ namespace ConformU
                     }
                     catch (Exception ex)
                     {
-                        HandleInvalidValueExceptionAsOK(testName, MemberType.Method, Required.MustBeImplemented, ex, "when move axis is set above highest rate (" + moveRate + ")", "Exception correctly generated when move axis is set above highest rate (" + moveRate + ")");
+                        HandleInvalidValueExceptionAsOk(testName, MemberType.Method, Required.MustBeImplemented, ex, "when move axis is set above highest rate (" + moveRate + ")", "Exception correctly generated when move axis is set above highest rate (" + moveRate + ")");
                     }
                     // Clean up and release each object after use
                     try
@@ -6372,7 +6372,7 @@ namespace ConformU
                                 {
                                     if (ValidateSlewing(testName, false))
                                     {
-                                        LogOK(testName, $"Can successfully set a movement rate of {rateMinimum}");
+                                        LogOk(testName, $"Can successfully set a movement rate of {rateMinimum}");
                                     }
                                     else
                                     {
@@ -6384,7 +6384,7 @@ namespace ConformU
                                 {
                                     if (ValidateSlewing(testName, true))
                                     {
-                                        LogOK(testName, $"Can successfully set a movement rate of {rateMinimum}");
+                                        LogOk(testName, $"Can successfully set a movement rate of {rateMinimum}");
                                     }
                                     else
                                     {
@@ -6405,7 +6405,7 @@ namespace ConformU
                                 // Assess outcome depending on whether or not the minimum rate was 0.0
                                 if (ValidateSlewing(testName, false))
                                 {
-                                    LogOK(testName, $"Successfully stopped movement.");
+                                    LogOk(testName, $"Successfully stopped movement.");
                                 }
                                 else
                                 {
@@ -6424,7 +6424,7 @@ namespace ConformU
                                 {
                                     if (ValidateSlewing(testName, false))
                                     {
-                                        LogOK(testName, $"Can successfully set a movement rate of {rateMinimum}");
+                                        LogOk(testName, $"Can successfully set a movement rate of {rateMinimum}");
                                     }
                                     else
                                     {
@@ -6436,7 +6436,7 @@ namespace ConformU
                                 {
                                     if (ValidateSlewing(testName, true))
                                     {
-                                        LogOK(testName, $"Can successfully set a movement rate of {-rateMinimum}");
+                                        LogOk(testName, $"Can successfully set a movement rate of {-rateMinimum}");
                                     }
                                     else
                                     {
@@ -6457,7 +6457,7 @@ namespace ConformU
                                 // Assess outcome depending on whether or not the minimum rate was 0.0
                                 if (ValidateSlewing(testName, false))
                                 {
-                                    LogOK(testName, $"Successfully stopped movement.");
+                                    LogOk(testName, $"Successfully stopped movement.");
                                 }
                                 else
                                 {
@@ -6493,7 +6493,7 @@ namespace ConformU
                                 {
                                     if (ValidateSlewing(testName, false))
                                     {
-                                        LogOK(testName, $"Can successfully set a movement rate of {rateMaximum}");
+                                        LogOk(testName, $"Can successfully set a movement rate of {rateMaximum}");
                                     }
                                     else
                                     {
@@ -6505,7 +6505,7 @@ namespace ConformU
                                 {
                                     if (ValidateSlewing(testName, true))
                                     {
-                                        LogOK(testName, $"Can successfully set a movement rate of {rateMaximum}");
+                                        LogOk(testName, $"Can successfully set a movement rate of {rateMaximum}");
                                     }
                                     else
                                     {
@@ -6526,7 +6526,7 @@ namespace ConformU
                                 // Assess outcome depending on whether or not the maximum rate was 0.0
                                 if (ValidateSlewing(testName, false))
                                 {
-                                    LogOK(testName, $"Successfully stopped movement.");
+                                    LogOk(testName, $"Successfully stopped movement.");
                                 }
                                 else
                                 {
@@ -6544,7 +6544,7 @@ namespace ConformU
                                 {
                                     if (ValidateSlewing(testName, false))
                                     {
-                                        LogOK(testName, $"Can successfully set a movement rate of {rateMaximum}");
+                                        LogOk(testName, $"Can successfully set a movement rate of {rateMaximum}");
                                     }
                                     else
                                     {
@@ -6556,7 +6556,7 @@ namespace ConformU
                                 {
                                     if (ValidateSlewing(testName, true))
                                     {
-                                        LogOK(testName, $"Can successfully set a movement rate of {-rateMaximum}");
+                                        LogOk(testName, $"Can successfully set a movement rate of {-rateMaximum}");
                                     }
                                     else
                                     {
@@ -6577,7 +6577,7 @@ namespace ConformU
                                 // Assess outcome depending on whether or not the maximum rate was 0.0
                                 if (ValidateSlewing(testName, false))
                                 {
-                                    LogOK(testName, $"Successfully stopped movement.");
+                                    LogOk(testName, $"Successfully stopped movement.");
                                 }
                                 else
                                 {
@@ -6631,7 +6631,7 @@ namespace ConformU
                                         SetStatus(""); LogCallToDriver(testName, "About to get Tracking property");
                                         if (telescopeDevice.Tracking == false) // tracking correctly retained in both states
                                         {
-                                            LogOK(testName, "Tracking state correctly retained for both tracking states");
+                                            LogOk(testName, "Tracking state correctly retained for both tracking states");
                                         }
                                         else
                                         {
@@ -6651,7 +6651,7 @@ namespace ConformU
                                         SetStatus(""); LogCallToDriver(testName, "About to get Tracking property");
                                         if (telescopeDevice.Tracking == true) // tracking correctly retained in both states
                                         {
-                                            LogOK(testName, "Tracking state correctly retained for both tracking states");
+                                            LogOk(testName, "Tracking state correctly retained for both tracking states");
                                         }
                                         else
                                         {
@@ -6698,7 +6698,7 @@ namespace ConformU
                                 telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
                                 if (trackingStart == trackingEnd)
                                 {
-                                    LogOK(testName, "Tracking state correctly restored after MoveAxis when CanSetTracking is false");
+                                    LogOk(testName, "Tracking state correctly restored after MoveAxis when CanSetTracking is false");
                                 }
                                 else
                                 {
@@ -6736,70 +6736,70 @@ namespace ConformU
 
         private void SideOfPierTests()
         {
-            SideOfPierResults l_PierSideMinus3, l_PierSideMinus9, l_PierSidePlus3, l_PierSidePlus9;
-            double l_Declination3, l_Declination9, l_StartRA;
+            SideOfPierResults lPierSideMinus3, lPierSideMinus9, lPierSidePlus3, lPierSidePlus9;
+            double lDeclination3, lDeclination9, lStartRa;
 
             // Slew to starting position
             LogDebug("SideofPier", "Starting Side of Pier tests");
             SetTest("Side of pier tests");
-            l_StartRA = TelescopeRAFromHourAngle("SideofPier", -3.0d);
+            lStartRa = TelescopeRaFromHourAngle("SideofPier", -3.0d);
             if (siteLatitude > 0.0d) // We are in the northern hemisphere
             {
-                l_Declination3 = 90.0d - (180.0d - siteLatitude) * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR; // Calculate for northern hemisphere
-                l_Declination9 = 90.0d - siteLatitude * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR;
+                lDeclination3 = 90.0d - (180.0d - siteLatitude) * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR; // Calculate for northern hemisphere
+                lDeclination9 = 90.0d - siteLatitude * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR;
             }
             else // We are in the southern hemisphere
             {
-                l_Declination3 = -90.0d + (180.0d + siteLatitude) * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR; // Calculate for southern hemisphere
-                l_Declination9 = -90.0d - siteLatitude * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR;
+                lDeclination3 = -90.0d + (180.0d + siteLatitude) * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR; // Calculate for southern hemisphere
+                lDeclination9 = -90.0d - siteLatitude * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR;
             }
 
-            LogDebug("SideofPier", "Declination for hour angle = +-3.0 tests: " + l_Declination3.ToDMS() + ", Declination for hour angle = +-9.0 tests: " + l_Declination9.ToDMS());
-            SlewScope(l_StartRA, 0.0d, "starting position");
+            LogDebug("SideofPier", "Declination for hour angle = +-3.0 tests: " + lDeclination3.ToDMS() + ", Declination for hour angle = +-9.0 tests: " + lDeclination9.ToDMS());
+            SlewScope(lStartRa, 0.0d, "starting position");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // Run tests
-            SetAction("Test hour angle -3.0 at declination: " + l_Declination3.ToDMS());
-            l_PierSideMinus3 = SOPPierTest(l_StartRA, l_Declination3, "hour angle -3.0");
+            SetAction("Test hour angle -3.0 at declination: " + lDeclination3.ToDMS());
+            lPierSideMinus3 = SopPierTest(lStartRa, lDeclination3, "hour angle -3.0");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            SetAction("Test hour angle +3.0 at declination: " + l_Declination3.ToDMS());
-            l_PierSidePlus3 = SOPPierTest(TelescopeRAFromHourAngle("SideofPier", +3.0d), l_Declination3, "hour angle +3.0");
+            SetAction("Test hour angle +3.0 at declination: " + lDeclination3.ToDMS());
+            lPierSidePlus3 = SopPierTest(TelescopeRaFromHourAngle("SideofPier", +3.0d), lDeclination3, "hour angle +3.0");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            SetAction("Test hour angle -9.0 at declination: " + l_Declination9.ToDMS());
-            l_PierSideMinus9 = SOPPierTest(TelescopeRAFromHourAngle("SideofPier", -9.0d), l_Declination9, "hour angle -9.0");
+            SetAction("Test hour angle -9.0 at declination: " + lDeclination9.ToDMS());
+            lPierSideMinus9 = SopPierTest(TelescopeRaFromHourAngle("SideofPier", -9.0d), lDeclination9, "hour angle -9.0");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            SetAction("Test hour angle +9.0 at declination: " + l_Declination9.ToDMS());
-            l_PierSidePlus9 = SOPPierTest(TelescopeRAFromHourAngle("SideofPier", +9.0d), l_Declination9, "hour angle +9.0");
+            SetAction("Test hour angle +9.0 at declination: " + lDeclination9.ToDMS());
+            lPierSidePlus9 = SopPierTest(TelescopeRaFromHourAngle("SideofPier", +9.0d), lDeclination9, "hour angle +9.0");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            if ((l_PierSideMinus3.SideOfPier == l_PierSidePlus9.SideOfPier) & (l_PierSidePlus3.SideOfPier == l_PierSideMinus9.SideOfPier))// Reporting physical pier side
+            if ((lPierSideMinus3.SideOfPier == lPierSidePlus9.SideOfPier) & (lPierSidePlus3.SideOfPier == lPierSideMinus9.SideOfPier))// Reporting physical pier side
             {
                 LogIssue("SideofPier", "SideofPier reports physical pier side rather than pointing state");
             }
-            else if ((l_PierSideMinus3.SideOfPier == l_PierSideMinus9.SideOfPier) & (l_PierSidePlus3.SideOfPier == l_PierSidePlus9.SideOfPier)) // Make other tests
+            else if ((lPierSideMinus3.SideOfPier == lPierSideMinus9.SideOfPier) & (lPierSidePlus3.SideOfPier == lPierSidePlus9.SideOfPier)) // Make other tests
             {
-                LogOK("SideofPier", "Reports the pointing state of the mount as expected");
+                LogOk("SideofPier", "Reports the pointing state of the mount as expected");
             }
             else // Don't know what this means!
             {
-                LogInfo("SideofPier", "Unknown SideofPier reporting model: HA-3: " + l_PierSideMinus3.SideOfPier.ToString() + " HA-9: " + l_PierSideMinus9.SideOfPier.ToString() + " HA+3: " + l_PierSidePlus3.SideOfPier.ToString() + " HA+9: " + l_PierSidePlus9.SideOfPier.ToString());
+                LogInfo("SideofPier", "Unknown SideofPier reporting model: HA-3: " + lPierSideMinus3.SideOfPier.ToString() + " HA-9: " + lPierSideMinus9.SideOfPier.ToString() + " HA+3: " + lPierSidePlus3.SideOfPier.ToString() + " HA+9: " + lPierSidePlus9.SideOfPier.ToString());
             }
 
-            LogInfo("SideofPier", "Reported SideofPier at HA -9, +9: " + TranslatePierSide((PointingState)l_PierSideMinus9.SideOfPier, false) + TranslatePierSide((PointingState)l_PierSidePlus9.SideOfPier, false));
-            LogInfo("SideofPier", "Reported SideofPier at HA -3, +3: " + TranslatePierSide((PointingState)l_PierSideMinus3.SideOfPier, false) + TranslatePierSide((PointingState)l_PierSidePlus3.SideOfPier, false));
+            LogInfo("SideofPier", "Reported SideofPier at HA -9, +9: " + TranslatePierSide((PointingState)lPierSideMinus9.SideOfPier, false) + TranslatePierSide((PointingState)lPierSidePlus9.SideOfPier, false));
+            LogInfo("SideofPier", "Reported SideofPier at HA -3, +3: " + TranslatePierSide((PointingState)lPierSideMinus3.SideOfPier, false) + TranslatePierSide((PointingState)lPierSidePlus3.SideOfPier, false));
 
             // Now test the ASCOM convention that pierWest is returned when the mount is on the west side of the pier facing east at hour angle -3
-            if (l_PierSideMinus3.SideOfPier == PointingState.ThroughThePole)
+            if (lPierSideMinus3.SideOfPier == PointingState.ThroughThePole)
             {
-                LogOK("SideofPier", "pierWest is returned when the mount is observing at an hour angle between -6.0 and 0.0");
+                LogOk("SideofPier", "pierWest is returned when the mount is observing at an hour angle between -6.0 and 0.0");
             }
             else
             {
@@ -6807,9 +6807,9 @@ namespace ConformU
                 LogInfo("SideofPier", "ASCOM has adopted a convention that, for German Equatorial mounts, pierWest must be returned when observing at hour angles from -6.0 to -0.0 and that pierEast must be returned at hour angles from 0.0 to +6.0.");
             }
 
-            if (l_PierSidePlus3.SideOfPier == (int)PointingState.Normal)
+            if (lPierSidePlus3.SideOfPier == (int)PointingState.Normal)
             {
-                LogOK("SideofPier", "pierEast is returned when the mount is observing at an hour angle between 0.0 and +6.0");
+                LogOk("SideofPier", "pierEast is returned when the mount is observing at an hour angle between 0.0 and +6.0");
             }
             else
             {
@@ -6818,29 +6818,29 @@ namespace ConformU
             }
 
             // Test whether DestinationSideOfPier is implemented
-            if (l_PierSideMinus3.DestinationSideOfPier == PointingState.Unknown & l_PierSideMinus9.DestinationSideOfPier == PointingState.Unknown & l_PierSidePlus3.DestinationSideOfPier == PointingState.Unknown & l_PierSidePlus9.DestinationSideOfPier == PointingState.Unknown)
+            if (lPierSideMinus3.DestinationSideOfPier == PointingState.Unknown & lPierSideMinus9.DestinationSideOfPier == PointingState.Unknown & lPierSidePlus3.DestinationSideOfPier == PointingState.Unknown & lPierSidePlus9.DestinationSideOfPier == PointingState.Unknown)
             {
                 LogInfo("DestinationSideofPier", "Analysis skipped as this method is not implemented"); // Not implemented
             }
             else // It is implemented so assess the results
             {
-                if (l_PierSideMinus3.DestinationSideOfPier == l_PierSidePlus9.DestinationSideOfPier & l_PierSidePlus3.DestinationSideOfPier == l_PierSideMinus9.DestinationSideOfPier) // Reporting physical pier side
+                if (lPierSideMinus3.DestinationSideOfPier == lPierSidePlus9.DestinationSideOfPier & lPierSidePlus3.DestinationSideOfPier == lPierSideMinus9.DestinationSideOfPier) // Reporting physical pier side
                 {
                     LogIssue("DestinationSideofPier", "DestinationSideofPier reports physical pier side rather than pointing state");
                 }
-                else if (l_PierSideMinus3.DestinationSideOfPier == l_PierSideMinus9.DestinationSideOfPier & l_PierSidePlus3.DestinationSideOfPier == l_PierSidePlus9.DestinationSideOfPier) // Make other tests
+                else if (lPierSideMinus3.DestinationSideOfPier == lPierSideMinus9.DestinationSideOfPier & lPierSidePlus3.DestinationSideOfPier == lPierSidePlus9.DestinationSideOfPier) // Make other tests
                 {
-                    LogOK("DestinationSideofPier", "Reports the pointing state of the mount as expected");
+                    LogOk("DestinationSideofPier", "Reports the pointing state of the mount as expected");
                 }
                 else // Don't know what this means!
                 {
-                    LogInfo("DestinationSideofPier", "Unknown DestinationSideofPier reporting model: HA-3: " + l_PierSideMinus3.SideOfPier.ToString() + " HA-9: " + l_PierSideMinus9.SideOfPier.ToString() + " HA+3: " + l_PierSidePlus3.SideOfPier.ToString() + " HA+9: " + l_PierSidePlus9.SideOfPier.ToString());
+                    LogInfo("DestinationSideofPier", "Unknown DestinationSideofPier reporting model: HA-3: " + lPierSideMinus3.SideOfPier.ToString() + " HA-9: " + lPierSideMinus9.SideOfPier.ToString() + " HA+3: " + lPierSidePlus3.SideOfPier.ToString() + " HA+9: " + lPierSidePlus9.SideOfPier.ToString());
                 }
 
                 // Now test the ASCOM convention that pierWest is returned when the mount is on the west side of the pier facing east at hour angle -3
-                if ((int)l_PierSideMinus3.DestinationSideOfPier == (int)PointingState.ThroughThePole)
+                if ((int)lPierSideMinus3.DestinationSideOfPier == (int)PointingState.ThroughThePole)
                 {
-                    LogOK("DestinationSideofPier", "pierWest is returned when the mount will observe at an hour angle between -6.0 and 0.0");
+                    LogOk("DestinationSideofPier", "pierWest is returned when the mount will observe at an hour angle between -6.0 and 0.0");
                 }
                 else
                 {
@@ -6848,9 +6848,9 @@ namespace ConformU
                     LogInfo("DestinationSideofPier", "ASCOM has adopted a convention that, for German Equatorial mounts, pierWest must be returned when the mount will observe at hour angles from -6.0 to -0.0 and that pierEast must be returned for hour angles from 0.0 to +6.0.");
                 }
 
-                if (l_PierSidePlus3.DestinationSideOfPier == (int)PointingState.Normal)
+                if (lPierSidePlus3.DestinationSideOfPier == (int)PointingState.Normal)
                 {
-                    LogOK("DestinationSideofPier", "pierEast is returned when the mount will observe at an hour angle between 0.0 and +6.0");
+                    LogOk("DestinationSideofPier", "pierEast is returned when the mount will observe at an hour angle between 0.0 and +6.0");
                 }
                 else
                 {
@@ -6859,8 +6859,8 @@ namespace ConformU
                 }
             }
 
-            LogInfo("DestinationSideofPier", "Reported DesintationSideofPier at HA -9, +9: " + TranslatePierSide((PointingState)l_PierSideMinus9.DestinationSideOfPier, false) + TranslatePierSide((PointingState)l_PierSidePlus9.DestinationSideOfPier, false));
-            LogInfo("DestinationSideofPier", "Reported DesintationSideofPier at HA -3, +3: " + TranslatePierSide((PointingState)l_PierSideMinus3.DestinationSideOfPier, false) + TranslatePierSide((PointingState)l_PierSidePlus3.DestinationSideOfPier, false));
+            LogInfo("DestinationSideofPier", "Reported DesintationSideofPier at HA -9, +9: " + TranslatePierSide((PointingState)lPierSideMinus9.DestinationSideOfPier, false) + TranslatePierSide((PointingState)lPierSidePlus9.DestinationSideOfPier, false));
+            LogInfo("DestinationSideofPier", "Reported DesintationSideofPier at HA -3, +3: " + TranslatePierSide((PointingState)lPierSideMinus3.DestinationSideOfPier, false) + TranslatePierSide((PointingState)lPierSidePlus3.DestinationSideOfPier, false));
 
             // Clean up
             // 3.0.0.12 added conditional test to next line
@@ -6869,24 +6869,24 @@ namespace ConformU
             ClearStatus();
         }
 
-        public SideOfPierResults SOPPierTest(double p_RA, double p_DEC, string p_Msg)
+        public SideOfPierResults SopPierTest(double pRa, double pDec, string pMsg)
         {
             // Determine side of pier and destination side of pier results for a particular RA and DEC
-            var l_Results = new SideOfPierResults(); // Create result set object
-            double l_StartRA, l_StartDEC;
+            var lResults = new SideOfPierResults(); // Create result set object
+            double lStartRa, lStartDec;
             try
             {
                 // Prepare for tests
-                l_StartRA = telescopeDevice.RightAscension;
-                l_StartDEC = telescopeDevice.Declination;
+                lStartRa = telescopeDevice.RightAscension;
+                lStartDec = telescopeDevice.Declination;
 
                 // Do destination side of pier test to see what side of pier we should end up on
                 LogDebug("", "");
-                LogDebug("SOPPierTest", "Testing RA DEC: " + p_RA.ToHMS() + " " + p_DEC.ToDMS() + " Current pierSide: " + TranslatePierSide((PointingState)telescopeDevice.SideOfPier, true));
+                LogDebug("SOPPierTest", "Testing RA DEC: " + pRa.ToHMS() + " " + pDec.ToDMS() + " Current pierSide: " + TranslatePierSide((PointingState)telescopeDevice.SideOfPier, true));
                 try
                 {
-                    l_Results.DestinationSideOfPier = telescopeDevice.DestinationSideOfPier(p_RA, p_DEC);
-                    LogDebug("SOPPierTest", "Target DestinationSideOfPier: " + l_Results.DestinationSideOfPier.ToString());
+                    lResults.DestinationSideOfPier = telescopeDevice.DestinationSideOfPier(pRa, pDec);
+                    LogDebug("SOPPierTest", "Target DestinationSideOfPier: " + lResults.DestinationSideOfPier.ToString());
                 }
                 catch (COMException ex)
                 {
@@ -6894,8 +6894,8 @@ namespace ConformU
                     {
                         case var @case when @case == ErrorCodes.NotImplemented:
                             {
-                                l_Results.DestinationSideOfPier = PointingState.Unknown;
-                                LogDebug("SOPPierTest", "DestinationSideOfPier is not implemented setting result to: " + l_Results.DestinationSideOfPier.ToString());
+                                lResults.DestinationSideOfPier = PointingState.Unknown;
+                                LogDebug("SOPPierTest", "DestinationSideOfPier is not implemented setting result to: " + lResults.DestinationSideOfPier.ToString());
                                 break;
                             }
 
@@ -6908,8 +6908,8 @@ namespace ConformU
                 }
                 catch (MethodNotImplementedException) // DestinationSideOfPier not available so mark as unknown
                 {
-                    l_Results.DestinationSideOfPier = PointingState.Unknown;
-                    LogDebug("SOPPierTest", "DestinationSideOfPier is not implemented setting result to: " + l_Results.DestinationSideOfPier.ToString());
+                    lResults.DestinationSideOfPier = PointingState.Unknown;
+                    LogDebug("SOPPierTest", "DestinationSideOfPier is not implemented setting result to: " + lResults.DestinationSideOfPier.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -6917,83 +6917,83 @@ namespace ConformU
                 }
 
                 // Now do an actual slew and record side of pier we actually get
-                SlewScope(p_RA, p_DEC, $"test position {p_Msg}");
-                l_Results.SideOfPier = (PointingState)telescopeDevice.SideOfPier;
-                LogDebug("SOPPierTest", "Actual SideOfPier: " + l_Results.SideOfPier.ToString());
+                SlewScope(pRa, pDec, $"test position {pMsg}");
+                lResults.SideOfPier = (PointingState)telescopeDevice.SideOfPier;
+                LogDebug("SOPPierTest", "Actual SideOfPier: " + lResults.SideOfPier.ToString());
 
                 // Return to original RA
-                SlewScope(l_StartRA, l_StartDEC, "initial start point");
-                LogDebug("SOPPierTest", "Returned to: " + l_StartRA.ToHMS() + " " + l_StartDEC.ToDMS());
+                SlewScope(lStartRa, lStartDec, "initial start point");
+                LogDebug("SOPPierTest", "Returned to: " + lStartRa.ToHMS() + " " + lStartDec.ToDMS());
             }
             catch (Exception ex)
             {
                 LogIssue("SOPPierTest", "SideofPierException: " + ex.ToString());
             }
 
-            return l_Results;
+            return lResults;
         }
 
         private void DestinationSideOfPierTests()
         {
-            PointingState l_PierSideMinus3, l_PierSideMinus9, l_PierSidePlus3, l_PierSidePlus9;
+            PointingState lPierSideMinus3, lPierSideMinus9, lPierSidePlus3, lPierSidePlus9;
 
             // Slew to one position, then call destination side of pier 4 times and report the pattern
-            SlewScope(TelescopeRAFromHourAngle("DestinationSideofPier", -3.0d), 0.0d, "start position");
-            l_PierSideMinus3 = telescopeDevice.DestinationSideOfPier(-3.0d, 0.0d);
-            l_PierSidePlus3 = telescopeDevice.DestinationSideOfPier(3.0d, 0.0d);
-            l_PierSideMinus9 = telescopeDevice.DestinationSideOfPier(-9.0d, 90.0d - siteLatitude);
-            l_PierSidePlus9 = telescopeDevice.DestinationSideOfPier(9.0d, 90.0d - siteLatitude);
-            if (l_PierSideMinus3 == l_PierSidePlus9 & l_PierSidePlus3 == l_PierSideMinus9) // Reporting physical pier side
+            SlewScope(TelescopeRaFromHourAngle("DestinationSideofPier", -3.0d), 0.0d, "start position");
+            lPierSideMinus3 = telescopeDevice.DestinationSideOfPier(-3.0d, 0.0d);
+            lPierSidePlus3 = telescopeDevice.DestinationSideOfPier(3.0d, 0.0d);
+            lPierSideMinus9 = telescopeDevice.DestinationSideOfPier(-9.0d, 90.0d - siteLatitude);
+            lPierSidePlus9 = telescopeDevice.DestinationSideOfPier(9.0d, 90.0d - siteLatitude);
+            if (lPierSideMinus3 == lPierSidePlus9 & lPierSidePlus3 == lPierSideMinus9) // Reporting physical pier side
             {
                 LogIssue("DestinationSideofPier", "The driver appears to be reporting physical pier side rather than pointing state");
             }
-            else if (l_PierSideMinus3 == l_PierSideMinus9 & l_PierSidePlus3 == l_PierSidePlus9) // Make other tests
+            else if (lPierSideMinus3 == lPierSideMinus9 & lPierSidePlus3 == lPierSidePlus9) // Make other tests
             {
-                LogOK("DestinationSideofPier", "The driver reports the pointing state of the mount");
+                LogOk("DestinationSideofPier", "The driver reports the pointing state of the mount");
             }
             else // Don't know what this means!
             {
-                LogInfo("DestinationSideofPier", "Unknown pier side reporting model: HA-3: " + l_PierSideMinus3.ToString() + " HA-9: " + l_PierSideMinus9.ToString() + " HA+3: " + l_PierSidePlus3.ToString() + " HA+9: " + l_PierSidePlus9.ToString());
+                LogInfo("DestinationSideofPier", "Unknown pier side reporting model: HA-3: " + lPierSideMinus3.ToString() + " HA-9: " + lPierSideMinus9.ToString() + " HA+3: " + lPierSidePlus3.ToString() + " HA+9: " + lPierSidePlus9.ToString());
             }
 
             telescopeDevice.Tracking = false;
-            LogInfo("DestinationSideofPier", TranslatePierSide(l_PierSideMinus9, false) + TranslatePierSide(l_PierSidePlus9, false));
-            LogInfo("DestinationSideofPier", TranslatePierSide(l_PierSideMinus3, false) + TranslatePierSide(l_PierSidePlus3, false));
+            LogInfo("DestinationSideofPier", TranslatePierSide(lPierSideMinus9, false) + TranslatePierSide(lPierSidePlus9, false));
+            LogInfo("DestinationSideofPier", TranslatePierSide(lPierSideMinus3, false) + TranslatePierSide(lPierSidePlus3, false));
         }
 
         #endregion
 
         #region Support Code
 
-        private void CheckScopePosition(string testName, string functionName, double expectedRA, double expectedDec)
+        private void CheckScopePosition(string testName, string functionName, double expectedRa, double expectedDec)
         {
-            double actualRA, actualDec, difference;
+            double actualRa, actualDec, difference;
 
             LogCallToDriver(testName, "About to get RightAscension property");
-            actualRA = telescopeDevice.RightAscension;
-            LogDebug(testName, "Read RightAscension: " + actualRA.ToHMS());
+            actualRa = telescopeDevice.RightAscension;
+            LogDebug(testName, "Read RightAscension: " + actualRa.ToHMS());
 
             LogCallToDriver(testName, "About to get Declination property");
             actualDec = telescopeDevice.Declination;
             LogDebug(testName, "Read Declination: " + actualDec.ToDMS());
 
             // Check that we have actually arrived where we are expected to be
-            difference = RaDifferenceInArcSeconds(actualRA, expectedRA); // Convert RA difference to arc seconds
+            difference = RaDifferenceInArcSeconds(actualRa, expectedRa); // Convert RA difference to arc seconds
 
             if (difference <= settings.TelescopeSlewTolerance)
             {
-                LogOK(testName, $"{functionName} OK within tolerance: ±{settings.TelescopeSlewTolerance} arc seconds. Actual RA: {actualRA.ToHMS()}, Target RA: {expectedRA.ToHMS()}");
+                LogOk(testName, $"{functionName} OK within tolerance: ±{settings.TelescopeSlewTolerance} arc seconds. Actual RA: {actualRa.ToHMS()}, Target RA: {expectedRa.ToHMS()}");
 
             }
             else
             {
-                LogIssue(testName, $"{functionName} {difference:0.0} arc seconds away from RA target: {expectedRA.ToHMS()} Actual RA: {actualRA.ToHMS()}. Tolerance: ±{settings.TelescopeSlewTolerance} arc seconds");
+                LogIssue(testName, $"{functionName} {difference:0.0} arc seconds away from RA target: {expectedRa.ToHMS()} Actual RA: {actualRa.ToHMS()}. Tolerance: ±{settings.TelescopeSlewTolerance} arc seconds");
             }
 
             difference = Math.Round(Math.Abs(actualDec - expectedDec) * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero);
             if (difference <= settings.TelescopeSlewTolerance) // Dec difference is in arc seconds from degrees of Declination
             {
-                LogOK(testName, $"{functionName} OK within tolerance: ±{settings.TelescopeSlewTolerance} arc seconds. Actual DEC: {actualDec.ToDMS()}, Target DEC: {expectedDec.ToDMS()}");
+                LogOk(testName, $"{functionName} OK within tolerance: ±{settings.TelescopeSlewTolerance} arc seconds. Actual DEC: {actualDec.ToDMS()}, Target DEC: {expectedDec.ToDMS()}");
             }
             else
             {
@@ -7004,19 +7004,19 @@ namespace ConformU
         /// <summary>
         /// Return the difference between two RAs (in hours) as seconds
         /// </summary>
-        /// <param name="FirstRA">First RA (hours)</param>
-        /// <param name="SecondRA">Second RA (hours)</param>
+        /// <param name="firstRa">First RA (hours)</param>
+        /// <param name="secondRa">Second RA (hours)</param>
         /// <returns>Difference (seconds) between the supplied RAs</returns>
-        private static double RaDifferenceInArcSeconds(double FirstRA, double SecondRA)
+        private static double RaDifferenceInArcSeconds(double firstRa, double secondRa)
         {
-            double RaDifferenceInSecondsRet = Math.Abs(FirstRA - SecondRA); // Calculate the difference allowing for negative outcomes
-            if (RaDifferenceInSecondsRet > 12.0d) RaDifferenceInSecondsRet = 24.0d - RaDifferenceInSecondsRet; // Deal with the cases where the two elements are more than 12 hours apart going in the initial direction
+            double raDifferenceInSecondsRet = Math.Abs(firstRa - secondRa); // Calculate the difference allowing for negative outcomes
+            if (raDifferenceInSecondsRet > 12.0d) raDifferenceInSecondsRet = 24.0d - raDifferenceInSecondsRet; // Deal with the cases where the two elements are more than 12 hours apart going in the initial direction
 
-            RaDifferenceInSecondsRet = Math.Round(RaDifferenceInSecondsRet * 15.0d * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero); // RA difference is in arc seconds from hours of RA
-            return RaDifferenceInSecondsRet;
+            raDifferenceInSecondsRet = Math.Round(raDifferenceInSecondsRet * 15.0d * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero); // RA difference is in arc seconds from hours of RA
+            return raDifferenceInSecondsRet;
         }
 
-        private void SyncScope(string testName, string canDoItName, SlewSyncType testType, double syncRA, double syncDec)
+        private void SyncScope(string testName, string canDoItName, SlewSyncType testType, double syncRa, double syncDec)
         {
             switch (testType)
             {
@@ -7028,8 +7028,8 @@ namespace ConformU
                             LogCallToDriver(testName, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
-                        LogCallToDriver(testName, "About to call SyncToCoordinates method, RA: " + syncRA.ToHMS() + ", Declination: " + syncDec.ToDMS());
-                        telescopeDevice.SyncToCoordinates(syncRA, syncDec); // Sync to slightly different coordinates
+                        LogCallToDriver(testName, "About to call SyncToCoordinates method, RA: " + syncRa.ToHMS() + ", Declination: " + syncDec.ToDMS());
+                        telescopeDevice.SyncToCoordinates(syncRa, syncDec); // Sync to slightly different coordinates
                         LogDebug(testName, "Completed SyncToCoordinates");
                         break;
                     }
@@ -7045,8 +7045,8 @@ namespace ConformU
 
                         try
                         {
-                            LogCallToDriver(testName, "About to set TargetRightAscension property to " + syncRA.ToHMS());
-                            telescopeDevice.TargetRightAscension = syncRA;
+                            LogCallToDriver(testName, "About to set TargetRightAscension property to " + syncRa.ToHMS());
+                            telescopeDevice.TargetRightAscension = syncRa;
                             LogDebug(testName, "Completed Set TargetRightAscension");
                         }
                         catch (Exception ex)
@@ -7078,7 +7078,7 @@ namespace ConformU
             }
         }
 
-        public void SlewScope(double p_RA, double p_DEC, string p_Msg)
+        public void SlewScope(double pRa, double pDec, string pMsg)
         {
             if (canSetTracking)
             {
@@ -7090,18 +7090,18 @@ namespace ConformU
             {
                 if (canSlewAsync)
                 {
-                    LogDebug("SlewScope", $"Slewing asynchronously to {p_Msg} {p_RA.ToHMS()} {p_DEC.ToDMS()}");
+                    LogDebug("SlewScope", $"Slewing asynchronously to {pMsg} {pRa.ToHMS()} {pDec.ToDMS()}");
 
-                    LogCallToDriver("SlewScope", "About to call SlewToCoordinatesAsync method, RA: " + p_RA.ToHMS() + ", Declination: " + p_DEC.ToDMS());
-                    telescopeDevice.SlewToCoordinatesAsync(p_RA, p_DEC);
+                    LogCallToDriver("SlewScope", "About to call SlewToCoordinatesAsync method, RA: " + pRa.ToHMS() + ", Declination: " + pDec.ToDMS());
+                    telescopeDevice.SlewToCoordinatesAsync(pRa, pDec);
 
-                    WaitForSlew(p_Msg, $"Slewing asynchronously to {p_Msg}");
+                    WaitForSlew(pMsg, $"Slewing asynchronously to {pMsg}");
                 }
                 else
                 {
-                    LogDebug("SlewScope", "Slewing synchronously to " + p_Msg + " " + p_RA.ToHMS() + " " + p_DEC.ToDMS()); LogCallToDriver("SlewScope", "About to call SlewToCoordinates method, RA: " + p_RA.ToHMS() + ", Declination: " + p_DEC.ToDMS());
-                    SetStatus($"Slewing synchronously to {p_Msg}: {p_RA.ToHMS()} {p_DEC.ToDMS()}");
-                    telescopeDevice.SlewToCoordinates(p_RA, p_DEC);
+                    LogDebug("SlewScope", "Slewing synchronously to " + pMsg + " " + pRa.ToHMS() + " " + pDec.ToDMS()); LogCallToDriver("SlewScope", "About to call SlewToCoordinates method, RA: " + pRa.ToHMS() + ", Declination: " + pDec.ToDMS());
+                    SetStatus($"Slewing synchronously to {pMsg}: {pRa.ToHMS()} {pDec.ToDMS()}");
+                    telescopeDevice.SlewToCoordinates(pRa, pDec);
                 }
 
                 if (CanReadSideOfPier("SlewScope"))
@@ -7130,161 +7130,161 @@ namespace ConformU
             LogDebug(testName, $"Completed wait for slew.");
         }
 
-        private double TelescopeRAFromHourAngle(string testName, double p_Offset)
+        private double TelescopeRaFromHourAngle(string testName, double pOffset)
         {
-            double TelescopeRAFromHourAngleRet;
+            double telescopeRaFromHourAngleRet;
 
             // Handle the possibility that the mandatory SideealTime property has not been implemented
             if (canReadSiderealTime)
             {
                 // Create a legal RA based on an offset from Sidereal time
                 LogCallToDriver(testName, "About to get SiderealTime property");
-                TelescopeRAFromHourAngleRet = telescopeDevice.SiderealTime - p_Offset;
-                switch (TelescopeRAFromHourAngleRet)
+                telescopeRaFromHourAngleRet = telescopeDevice.SiderealTime - pOffset;
+                switch (telescopeRaFromHourAngleRet)
                 {
                     case var @case when @case < 0.0d: // Illegal if < 0 hours
                         {
-                            TelescopeRAFromHourAngleRet += 24.0d;
+                            telescopeRaFromHourAngleRet += 24.0d;
                             break;
                         }
 
                     case var case1 when case1 >= 24.0d: // Illegal if > 24 hours
                         {
-                            TelescopeRAFromHourAngleRet -= 24.0d;
+                            telescopeRaFromHourAngleRet -= 24.0d;
                             break;
                         }
                 }
             }
             else
             {
-                TelescopeRAFromHourAngleRet = 0.0d - p_Offset;
+                telescopeRaFromHourAngleRet = 0.0d - pOffset;
             }
 
-            return TelescopeRAFromHourAngleRet;
+            return telescopeRaFromHourAngleRet;
         }
 
-        private double TelescopeRAFromSiderealTime(string testName, double p_Offset)
+        private double TelescopeRaFromSiderealTime(string testName, double pOffset)
         {
-            double TelescopeRAFromSiderealTimeRet;
-            double CurrentSiderealTime;
+            double telescopeRaFromSiderealTimeRet;
+            double currentSiderealTime;
 
             // Handle the possibility that the mandatory SideealTime property has not been implemented
             if (canReadSiderealTime)
             {
                 // Create a legal RA based on an offset from Sidereal time
                 LogCallToDriver(testName, "About to get SiderealTime property");
-                CurrentSiderealTime = telescopeDevice.SiderealTime;
-                switch (CurrentSiderealTime) // Deal with possibility that sidereal time from the driver is bad
+                currentSiderealTime = telescopeDevice.SiderealTime;
+                switch (currentSiderealTime) // Deal with possibility that sidereal time from the driver is bad
                 {
                     case var @case when @case < 0.0d: // Illegal if < 0 hours
                         {
-                            CurrentSiderealTime = 0d;
+                            currentSiderealTime = 0d;
                             break;
                         }
 
                     case var case1 when case1 >= 24.0d: // Illegal if > 24 hours
                         {
-                            CurrentSiderealTime = 0d;
+                            currentSiderealTime = 0d;
                             break;
                         }
                 }
 
-                TelescopeRAFromSiderealTimeRet = CurrentSiderealTime + p_Offset;
-                switch (TelescopeRAFromSiderealTimeRet)
+                telescopeRaFromSiderealTimeRet = currentSiderealTime + pOffset;
+                switch (telescopeRaFromSiderealTimeRet)
                 {
                     case var case2 when case2 < 0.0d: // Illegal if < 0 hours
                         {
-                            TelescopeRAFromSiderealTimeRet += 24.0d;
+                            telescopeRaFromSiderealTimeRet += 24.0d;
                             break;
                         }
 
                     case var case3 when case3 >= 24.0d: // Illegal if > 24 hours
                         {
-                            TelescopeRAFromSiderealTimeRet -= 24.0d;
+                            telescopeRaFromSiderealTimeRet -= 24.0d;
                             break;
                         }
                 }
             }
             else
             {
-                TelescopeRAFromSiderealTimeRet = 0.0d + p_Offset;
+                telescopeRaFromSiderealTimeRet = 0.0d + pOffset;
             }
 
-            return TelescopeRAFromSiderealTimeRet;
+            return telescopeRaFromSiderealTimeRet;
         }
 #if WINDOWS
-        private void TestEarlyBinding(InterfaceType TestType)
+        private void TestEarlyBinding(InterfaceType testType)
         {
-            dynamic l_ITelescope;
-            dynamic l_DeviceObject = null;
-            string l_ErrMsg;
-            int l_TryCount = 0;
+            dynamic lITelescope;
+            dynamic lDeviceObject = null;
+            string lErrMsg;
+            int lTryCount = 0;
             try
             {
                 // Try early binding
-                l_ITelescope = null;
+                lITelescope = null;
                 do
                 {
-                    l_TryCount += 1;
+                    lTryCount += 1;
                     try
                     {
                         LogCallToDriver("AccessChecks", "About to create driver object with CreateObject");
                         LogDebug("AccessChecks", "Creating late bound object for interface test");
                         Type driverType = Type.GetTypeFromProgID(settings.ComDevice.ProgId);
-                        l_DeviceObject = Activator.CreateInstance(driverType);
+                        lDeviceObject = Activator.CreateInstance(driverType);
                         LogDebug("AccessChecks", "Created late bound object OK");
-                        switch (TestType)
+                        switch (testType)
                         {
-                            case InterfaceType.ITelescopeV2:
+                            case InterfaceType.TelescopeV2:
                                 {
                                     //l_ITelescope = (ASCOM.Interface.ITelescope)l_DeviceObject;
                                     break;
                                 }
 
-                            case InterfaceType.ITelescopeV3:
+                            case InterfaceType.TelescopeV3:
                                 {
-                                    l_ITelescope = (ITelescopeV3)l_DeviceObject;
+                                    lITelescope = (ITelescopeV3)lDeviceObject;
                                     break;
                                 }
 
                             default:
                                 {
-                                    LogIssue("TestEarlyBinding", "Unknown interface type: " + TestType.ToString());
+                                    LogIssue("TestEarlyBinding", "Unknown interface type: " + testType.ToString());
                                     break;
                                 }
                         }
 
-                        LogDebug("AccessChecks", "Successfully created driver with interface " + TestType.ToString());
+                        LogDebug("AccessChecks", "Successfully created driver with interface " + testType.ToString());
                         try
                         {
                             LogCallToDriver("AccessChecks", "About to set Connected property true");
-                            l_ITelescope.Connected = true;
-                            LogInfo("AccessChecks", "Device exposes interface " + TestType.ToString()); LogCallToDriver("AccessChecks", "About to set Connected property false");
-                            l_ITelescope.Connected = false;
+                            lITelescope.Connected = true;
+                            LogInfo("AccessChecks", "Device exposes interface " + testType.ToString()); LogCallToDriver("AccessChecks", "About to set Connected property false");
+                            lITelescope.Connected = false;
                         }
                         catch (Exception)
                         {
-                            LogInfo("AccessChecks", "Device does not expose interface " + TestType.ToString());
+                            LogInfo("AccessChecks", "Device does not expose interface " + testType.ToString());
                             LogNewLine();
                         }
                     }
                     catch (Exception ex)
                     {
-                        l_ErrMsg = ex.ToString();
+                        lErrMsg = ex.ToString();
                         LogDebug("AccessChecks", "Exception: " + ex.Message);
                     }
 
-                    if (l_DeviceObject is null)
+                    if (lDeviceObject is null)
                         WaitFor(200);
                 }
-                while (l_TryCount < 3 & l_ITelescope is not object); // Exit if created OK
-                if (l_ITelescope is null)
+                while (lTryCount < 3 & lITelescope is not object); // Exit if created OK
+                if (lITelescope is null)
                 {
-                    LogInfo("AccessChecks", "Device does not expose interface " + TestType.ToString());
+                    LogInfo("AccessChecks", "Device does not expose interface " + testType.ToString());
                 }
                 else
                 {
-                    LogDebug("AccessChecks", "Created telescope on attempt: " + l_TryCount.ToString());
+                    LogDebug("AccessChecks", "Created telescope on attempt: " + lTryCount.ToString());
                 }
 
                 // Clean up
@@ -7304,8 +7304,8 @@ namespace ConformU
                 {
                 }
 
-                l_DeviceObject = null;
-                l_ITelescope = null;
+                lDeviceObject = null;
+                lITelescope = null;
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
 
@@ -7319,25 +7319,25 @@ namespace ConformU
         }
 #endif
 
-        private static string FormatAzimuth(double Az)
+        private static string FormatAzimuth(double az)
         {
-            return Az.ToDMS().PadLeft(11);
+            return az.ToDMS().PadLeft(11);
         }
 
-        public static string TranslatePierSide(PointingState p_PierSide, bool p_Long)
+        public static string TranslatePierSide(PointingState pPierSide, bool pLong)
         {
-            string l_PierSide;
-            switch (p_PierSide)
+            string lPierSide;
+            switch (pPierSide)
             {
                 case PointingState.Normal:
                     {
-                        if (p_Long)
+                        if (pLong)
                         {
-                            l_PierSide = "pierEast";
+                            lPierSide = "pierEast";
                         }
                         else
                         {
-                            l_PierSide = "E";
+                            lPierSide = "E";
                         }
 
                         break;
@@ -7345,13 +7345,13 @@ namespace ConformU
 
                 case PointingState.ThroughThePole:
                     {
-                        if (p_Long)
+                        if (pLong)
                         {
-                            l_PierSide = "pierWest";
+                            lPierSide = "pierWest";
                         }
                         else
                         {
-                            l_PierSide = "W";
+                            lPierSide = "W";
                         }
 
                         break;
@@ -7359,29 +7359,29 @@ namespace ConformU
 
                 default:
                     {
-                        if (p_Long)
+                        if (pLong)
                         {
-                            l_PierSide = "pierUnknown";
+                            lPierSide = "pierUnknown";
                         }
                         else
                         {
-                            l_PierSide = "U";
+                            lPierSide = "U";
                         }
 
                         break;
                     }
             }
 
-            return l_PierSide;
+            return lPierSide;
         }
 
         private enum Axis
         {
-            RA,
+            Ra,
             Dec
         }
 
-        private bool TestRADecRate(string testName, string description, Axis axis, double rate, bool includeSlewiingTest)
+        private bool TestRaDecRate(string testName, string description, Axis axis, double rate, bool includeSlewiingTest)
         {
             // Initialise the outcome to false
             bool success = false;
@@ -7428,7 +7428,7 @@ namespace ConformU
                     LogCallToDriver(testName, $"{description} - About to set {RateOffsetName(axis)} property to {rate}");
 
                     // Set the appropriate offset rate
-                    if (axis == Axis.RA)
+                    if (axis == Axis.Ra)
                         telescopeDevice.RightAscensionRate = rate;
                     else
                         telescopeDevice.DeclinationRate = rate;
@@ -7440,7 +7440,7 @@ namespace ConformU
                     LogCallToDriver(testName, $"{description} - About to get {RateOffsetName(axis)} property");
 
                     // Get the appropriate offset rate
-                    if (axis == Axis.RA)
+                    if (axis == Axis.Ra)
                         offsetRate = telescopeDevice.RightAscensionRate;
                     else
                         offsetRate = telescopeDevice.DeclinationRate; LogCallToDriver(testName, $"{description} - About to get the Slewing property");
@@ -7448,7 +7448,7 @@ namespace ConformU
 
                     if (offsetRate == rate & !slewing)
                     {
-                        LogOK(testName, $"{description} - successfully set rate to {offsetRate}");
+                        LogOk(testName, $"{description} - successfully set rate to {offsetRate}");
                         success = true;
 
                         // Run the extended rate offset tests if configured to do so.
@@ -7458,7 +7458,7 @@ namespace ConformU
                             if (rate != 0.0)
                             {
                                 // Now test the actual amount of movement
-                                if (axis == Axis.RA)
+                                if (axis == Axis.Ra)
                                 {
                                     TestOffsetRate(testName, -9.0, rate, 0.0);
                                     if (cancellationToken.IsCancellationRequested)
@@ -7533,7 +7533,7 @@ namespace ConformU
         /// <returns>RightAscensionRate or DeclinationRate string</returns>
         private static string RateOffsetName(Axis axis)
         {
-            if (axis == Axis.RA)
+            if (axis == Axis.Ra)
                 return "RightAscensionRate";
             return "DeclinationRate";
         }
@@ -7663,18 +7663,18 @@ namespace ConformU
         private void TestDouble(string testName, string name, double actualValue, double expectedValue, double tolerance = 0.0)
         {
             // Tolerance 0 = 2%
-            const double TOLERANCE = 0.05; // 2%
+            const double toleranceDefault = 0.05; // 2%
 
             if (tolerance == 0.0)
             {
-                tolerance = TOLERANCE;
+                tolerance = toleranceDefault;
             }
 
             if (expectedValue == 0.0)
             {
                 if (Math.Abs(actualValue - expectedValue) <= tolerance)
                 {
-                    LogOK(testName, $"{name} is within expected tolerance. Expected: {expectedValue:+0.000;-0.000;+0.000}, Actual: {actualValue:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / tolerance):N2}%.");
+                    LogOk(testName, $"{name} is within expected tolerance. Expected: {expectedValue:+0.000;-0.000;+0.000}, Actual: {actualValue:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / tolerance):N2}%.");
                 }
                 else
                 {
@@ -7685,7 +7685,7 @@ namespace ConformU
             {
                 if (Math.Abs(Math.Abs(actualValue - expectedValue) / expectedValue) <= tolerance)
                 {
-                    LogOK(testName, $"{name} is within expected tolerance. Expected: {expectedValue:+0.000;-0.000;+0.000}, Actual: {actualValue:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%.");
+                    LogOk(testName, $"{name} is within expected tolerance. Expected: {expectedValue:+0.000;-0.000;+0.000}, Actual: {actualValue:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%.");
                 }
                 else
                 {
@@ -7702,20 +7702,20 @@ namespace ConformU
         {
             // Slew to the test HA/RA and a sensible Declination
             SlewToHa(ha);
-            if (applicationCancellationToken.IsCancellationRequested)
+            if (ApplicationCancellationToken.IsCancellationRequested)
                 return;
 
             // Test each of the four guide directions
             TestPulseGuideDirection(ha, GuideDirection.North);
-            if (applicationCancellationToken.IsCancellationRequested)
+            if (ApplicationCancellationToken.IsCancellationRequested)
                 return;
 
             TestPulseGuideDirection(ha, GuideDirection.South);
-            if (applicationCancellationToken.IsCancellationRequested)
+            if (ApplicationCancellationToken.IsCancellationRequested)
                 return;
 
             TestPulseGuideDirection(ha, GuideDirection.East);
-            if (applicationCancellationToken.IsCancellationRequested)
+            if (ApplicationCancellationToken.IsCancellationRequested)
                 return;
 
             TestPulseGuideDirection(ha, GuideDirection.West);
@@ -7727,10 +7727,10 @@ namespace ConformU
         /// <param name="direction">Guide direction: North, South, East or West</param>
         private void TestPulseGuideDirection(double ha, GuideDirection direction)
         {
-            const int PULSE_GUIDE_DURATION = 5; // Pulse guide test duration (Seconds)
+            const int pulseGuideDuration = 5; // Pulse guide test duration (Seconds)
 
-            double expectedDecChange = guideRateDeclination * PULSE_GUIDE_DURATION; // Degrees
-            double expectedRaChange = guideRateRightAscension * PULSE_GUIDE_DURATION / (15.0 * SIDEREAL_SECONDS_TO_SI_SECONDS); // Hours - 15 converts from 360 degrees = 24 hours, SIDEREAL_RATE converts from change in SI hours to change in sidereal hours
+            double expectedDecChange = guideRateDeclination * pulseGuideDuration; // Degrees
+            double expectedRaChange = guideRateRightAscension * pulseGuideDuration / (15.0 * SIDEREAL_SECONDS_TO_SI_SECONDS); // Hours - 15 converts from 360 degrees = 24 hours, SIDEREAL_RATE converts from change in SI hours to change in sidereal hours
 
             // Handle direction reverse for south and west vs north and east
             if (direction == GuideDirection.South)
@@ -7745,15 +7745,15 @@ namespace ConformU
             string logName = $"PulseGuide {ha:+0.0;-0.0;+0.0} {direction}";
 
             LogDebug(logName, $"Test guiding direction: {direction}, RA change tolerance: {changeToleranceRa} ({changeToleranceRa.ToHMS()}, {changeToleranceRa.ToDMS()}), Declination change tolerance: {changeToleranceDec} ({changeToleranceDec.ToDMS()}, {changeToleranceDec.ToHMS()})"); LogCallToDriver(logName, "About to get RightAscension property");
-            double initialRACoordinate = telescopeDevice.RightAscension; LogCallToDriver(logName, "About to get Declination property");
-            double initialDecCoordinate = telescopeDevice.Declination; LogCallToDriver(logName, $"About to call PulseGuide. Direction: {direction}, Duration: {PULSE_GUIDE_DURATION * 1000}ms.");
-            telescopeDevice.PulseGuide(direction, PULSE_GUIDE_DURATION * 1000);
+            double initialRaCoordinate = telescopeDevice.RightAscension; LogCallToDriver(logName, "About to get Declination property");
+            double initialDecCoordinate = telescopeDevice.Declination; LogCallToDriver(logName, $"About to call PulseGuide. Direction: {direction}, Duration: {pulseGuideDuration * 1000}ms.");
+            telescopeDevice.PulseGuide(direction, pulseGuideDuration * 1000);
 
-            WaitWhile($"Pulse guiding {direction} at HA {ha:+0.0;-0.0;+0.0}", () => { return telescopeDevice.IsPulseGuiding; }, SLEEP_TIME, PULSE_GUIDE_DURATION); LogCallToDriver(logName, "About to get RightAscension property");
-            double finalRACoordinate = telescopeDevice.RightAscension; LogCallToDriver(logName, "About to get Declination property");
+            WaitWhile($"Pulse guiding {direction} at HA {ha:+0.0;-0.0;+0.0}", () => { return telescopeDevice.IsPulseGuiding; }, SLEEP_TIME, pulseGuideDuration); LogCallToDriver(logName, "About to get RightAscension property");
+            double finalRaCoordinate = telescopeDevice.RightAscension; LogCallToDriver(logName, "About to get Declination property");
             double finalDecCoordinate = telescopeDevice.Declination;
 
-            double raChange = finalRACoordinate - initialRACoordinate;
+            double raChange = finalRaCoordinate - initialRaCoordinate;
             double decChange = finalDecCoordinate - initialDecCoordinate;
 
             double raDifference = Math.Abs(raChange - expectedRaChange);
@@ -7763,7 +7763,7 @@ namespace ConformU
             {
                 case GuideDirection.North:
                     if ((decChange > 0.0) & (decDifference <= changeToleranceDec) & (Math.Abs(raChange) <= changeToleranceRa)) // Moved north by expected amount with no east-west movement
-                        LogOK(logName, $"Moved north with no east-west movement  - Declination change (DMS): {decChange.ToDMS()},  Expected: {expectedDecChange.ToDMS()},  Difference: {decDifference.ToDMS()},  Test tolerance: {changeToleranceDec.ToDMS()}.");
+                        LogOk(logName, $"Moved north with no east-west movement  - Declination change (DMS): {decChange.ToDMS()},  Expected: {expectedDecChange.ToDMS()},  Difference: {decDifference.ToDMS()},  Test tolerance: {changeToleranceDec.ToDMS()}.");
                     else
                     {
                         switch (decChange)
@@ -7778,13 +7778,13 @@ namespace ConformU
 
                             default: // Moved north
                                 if (decDifference <= changeToleranceDec) // Moved north OK.
-                                    LogOK(logName, $"Moved north - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                                    LogOk(logName, $"Moved north - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
                                 else // Moved north but by wrong amount.
                                     LogIssue(logName, $"Moved north but outside test tolerance - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
                                 break;
                         }
                         if (Math.Abs(raChange) <= changeToleranceRa)
-                            LogOK(logName, $"No significant east-west movement as expected. RA change (HMS): {raChange.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                            LogOk(logName, $"No significant east-west movement as expected. RA change (HMS): {raChange.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
                         else
                             LogIssue(logName, $"East-West movement was outside test tolerance: RA change (HMS): {raChange.ToHMS()}, Expected: {0.0.ToHMS()}, Tolerance: {changeToleranceRa.ToHMS()}.");
                     }
@@ -7792,7 +7792,7 @@ namespace ConformU
 
                 case GuideDirection.South:
                     if ((decChange < 0.0) & (decDifference <= changeToleranceDec) & (Math.Abs(raChange) <= changeToleranceRa)) // Moved south by expected amount with no east-west movement
-                        LogOK(logName, $"Moved south with no east-west movement  - Declination change (DMS): {decChange.ToDMS()},  Expected: {expectedDecChange.ToDMS()},  Difference: {decDifference.ToDMS()},  Test tolerance: {changeToleranceDec.ToDMS()}.");
+                        LogOk(logName, $"Moved south with no east-west movement  - Declination change (DMS): {decChange.ToDMS()},  Expected: {expectedDecChange.ToDMS()},  Difference: {decDifference.ToDMS()},  Test tolerance: {changeToleranceDec.ToDMS()}.");
                     else
                     {
                         switch (decChange)
@@ -7807,13 +7807,13 @@ namespace ConformU
 
                             default: // Moved south
                                 if (decDifference <= changeToleranceDec)// Moved south OK
-                                    LogOK(logName, $"Moved south - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                                    LogOk(logName, $"Moved south - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
                                 else// Moved south but by wrong amount.
                                     LogIssue(logName, $"Moved south but outside test tolerance - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
                                 break;
                         }
                         if (Math.Abs(raChange) <= changeToleranceRa)
-                            LogOK(logName, $"No significant east-west movement as expected. RA change (HMS): {raChange.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                            LogOk(logName, $"No significant east-west movement as expected. RA change (HMS): {raChange.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
                         else
                             LogIssue(logName, $"East-West movement was outside test tolerance: RA change (HMS): {raChange.ToHMS()}, Expected: {0.0.ToHMS()}, Tolerance: {changeToleranceRa.ToHMS()}.");
                     }
@@ -7821,7 +7821,7 @@ namespace ConformU
 
                 case GuideDirection.East:
                     if ((raChange > 0.0) & (raDifference <= changeToleranceRa) & (Math.Abs(decChange) <= changeToleranceDec)) // Moved east by expected amount with no north-south movement
-                        LogOK(logName, $"Moved east with no north-south movement - RA change (HMS):          {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                        LogOk(logName, $"Moved east with no north-south movement - RA change (HMS):          {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
                     else
                     {
                         switch (raChange)
@@ -7836,13 +7836,13 @@ namespace ConformU
 
                             default: // Moved east
                                 if (raDifference <= changeToleranceRa)  // Moved east OK
-                                    LogOK(logName, $"Moved east - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                                    LogOk(logName, $"Moved east - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
                                 else // Moved east but by wrong amount.
                                     LogIssue(logName, $"Moved east but outside test tolerance - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
                                 break;
                         }
                         if (Math.Abs(decChange) <= changeToleranceDec)
-                            LogOK(logName, $"No significant north-south movement as expected. Declination change (DMS): {decChange.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                            LogOk(logName, $"No significant north-south movement as expected. Declination change (DMS): {decChange.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
                         else
                             LogIssue(logName, $"North-south movement was outside test tolerance: Declination change (DMS): {decChange.ToDMS()}, Expected: {0.0.ToDMS()}, Tolerance: {changeToleranceDec.ToDMS()}.");
                     }
@@ -7850,7 +7850,7 @@ namespace ConformU
 
                 case GuideDirection.West:
                     if ((raChange < 0.0) & (raDifference <= changeToleranceRa) & (Math.Abs(decChange) <= changeToleranceDec)) // Moved west by expected amount with no north-south movement
-                        LogOK(logName, $"Moved west with no north-south movement - RA change (HMS):          {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                        LogOk(logName, $"Moved west with no north-south movement - RA change (HMS):          {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
                     else
                     {
                         switch (raChange)
@@ -7865,13 +7865,13 @@ namespace ConformU
 
                             default: // Moved west
                                 if (raDifference <= changeToleranceRa) // Moved west OK
-                                    LogOK(logName, $"Moved west - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                                    LogOk(logName, $"Moved west - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
                                 else// Moved west but by wrong amount.
                                     LogIssue(logName, $"Moved west but outside test tolerance - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
                                 break;
                         }
                         if (Math.Abs(decChange) <= changeToleranceDec)
-                            LogOK(logName, $"No significant north-south movement as expected. Declination change (DMS): {decChange.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                            LogOk(logName, $"No significant north-south movement as expected. Declination change (DMS): {decChange.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
                         else
                             LogIssue(logName, $"North-south movement was outside test tolerance: Declination change (DMS): {decChange.ToDMS()}, Expected: {0.0.ToDMS()}, Tolerance: {changeToleranceDec.ToDMS()}.");
                     }

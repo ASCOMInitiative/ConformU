@@ -71,10 +71,10 @@ namespace ConformU
                 {
                     default:
                         {
-                            g_ExNotImplemented = (int)0x80040400;
-                            g_ExInvalidValue1 = (int)0x80040404;
-                            g_ExInvalidValue2 = (int)0x80040404;
-                            g_ExNotSet1 = (int)0x80040403;
+                            GExNotImplemented = (int)0x80040400;
+                            GExInvalidValue1 = (int)0x80040404;
+                            GExInvalidValue2 = (int)0x80040404;
+                            GExNotSet1 = (int)0x80040403;
                             break;
                         }
                 }
@@ -130,7 +130,7 @@ namespace ConformU
                 }
 
                 LogInfo("CreateDevice", "Successfully created driver");
-                baseClassDevice = filterWheel; // Assign the driver to the base class
+                BaseClassDevice = filterWheel; // Assign the driver to the base class
 
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);
@@ -150,23 +150,23 @@ namespace ConformU
 
         public override void PreRunCheck()
         {
-            DateTime StartTime;
+            DateTime startTime;
 
             // Get into a consistent state
             SetFullStatus("FilterWheel Pre-run Check", "Wait one second for initialisation", "");
             WaitFor(1000); // Wait for 1 second to allow any movement to start
-            StartTime = DateTime.Now;
+            startTime = DateTime.Now;
             try
             {
                 LogCallToDriver("Pre-run Check", "About to get Position property repeatedly");
                 do
                 {
-                    SetFullStatus("FilterWheel Pre-run Check", "Waiting for movement to stop", DateTime.Now.Subtract(StartTime).Seconds + " second(s)");
+                    SetFullStatus("FilterWheel Pre-run Check", "Waiting for movement to stop", DateTime.Now.Subtract(startTime).Seconds + " second(s)");
                     WaitFor(SLEEP_TIME);
                 }
-                while ((filterWheel.Position == FWTEST_IS_MOVING) & (DateTime.Now.Subtract(StartTime).TotalSeconds <= settings.FilterWheelTimeout)); // Wait until movement has stopped or 30 seconds have passed
+                while ((filterWheel.Position == FWTEST_IS_MOVING) & (DateTime.Now.Subtract(startTime).TotalSeconds <= settings.FilterWheelTimeout)); // Wait until movement has stopped or 30 seconds have passed
                 if (filterWheel.Position != FWTEST_IS_MOVING)
-                    LogOK("Pre-run Check", "Filter wheel is stationary, ready to start tests");
+                    LogOk("Pre-run Check", "Filter wheel is stationary, ready to start tests");
                 else
                 {
                     LogIssue("Pre-run Check", $"The filter wheel is still moving after {settings.FilterWheelTimeout} seconds, further tests abandoned because the device is not in the expected stationary state.");
@@ -208,7 +208,7 @@ namespace ConformU
                     LogIssue("FocusOffsets Get", "Found no offset values in the returned array");
                 else
                 {
-                    LogOK("FocusOffsets Get", "Found " + numberOfFilterOffsets.ToString() + " filter offset values");
+                    LogOk("FocusOffsets Get", "Found " + numberOfFilterOffsets.ToString() + " filter offset values");
                     maxFilterNumber = Convert.ToInt16(numberOfFilterOffsets - 1);
                     halfDistanceFilterNumber = maxFilterNumber / 2;
                 }
@@ -236,7 +236,7 @@ namespace ConformU
                 if (numberOfFilternames == 0)
                     LogIssue("Names Get", "Did not find any names in the returned array");
                 else
-                    LogOK("Names Get", "Found " + numberOfFilternames.ToString() + " filter names");
+                    LogOk("Names Get", "Found " + numberOfFilternames.ToString() + " filter names");
                 filterNumber = 0;
                 foreach (var name in filterNames)
                 {
@@ -256,7 +256,7 @@ namespace ConformU
 
             // Confirm number of array elements in filter names and filter offsets are the same
             if (numberOfFilternames == numberOfFilterOffsets)
-                LogOK("Names Get", "Number of filter offsets and number of names are the same: " + numberOfFilternames.ToString());
+                LogOk("Names Get", "Number of filter offsets and number of names are the same: " + numberOfFilternames.ToString());
             else
                 LogIssue("Names Get", "Number of filter offsets and number of names are different: " + numberOfFilterOffsets.ToString() + " " + numberOfFilternames.ToString());
 
@@ -269,7 +269,7 @@ namespace ConformU
                 if ((startingFilterNumber < 0) | (startingFilterNumber >= numberOfFilterOffsets))
                     LogIssue("Position Get", $"Illegal filter position returned: {startingFilterNumber}");
                 else
-                    LogOK("Position Get", $"Currently at position: {startingFilterNumber}");
+                    LogOk("Position Get", $"Currently at position: {startingFilterNumber}");
             }
             catch (Exception ex)
             {
@@ -371,7 +371,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidValueExceptionAsOK("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to - 1", "Correctly rejected bad position: -1");
+                    HandleInvalidValueExceptionAsOk("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to - 1", "Correctly rejected bad position: -1");
                 }
                 if (cancellationToken.IsCancellationRequested)
                     return;
@@ -385,7 +385,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidValueExceptionAsOK("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to " + System.Convert.ToString(numberOfFilterOffsets), "Correctly rejected bad position: " + System.Convert.ToString(numberOfFilterOffsets));
+                    HandleInvalidValueExceptionAsOk("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to " + System.Convert.ToString(numberOfFilterOffsets), "Correctly rejected bad position: " + System.Convert.ToString(numberOfFilterOffsets));
                 }
 
                 // Report on the uni-directional and bi-directional behaviour.
@@ -445,92 +445,92 @@ namespace ConformU
         }
 
 
-        private void FilterWheelPerformanceTest(FilterWheelProperties p_Type, string p_Name)
+        private void FilterWheelPerformanceTest(FilterWheelProperties pType, string pName)
         {
-            int[] l_Offsets;
-            string[] l_Names;
-            int l_StartFilterNumber;
-            DateTime l_StartTime;
-            double l_Count, l_LastElapsedTime, l_ElapsedTime;
-            double l_Rate;
+            int[] lOffsets;
+            string[] lNames;
+            int lStartFilterNumber;
+            DateTime lStartTime;
+            double lCount, lLastElapsedTime, lElapsedTime;
+            double lRate;
             SetTest("Performance Test");
-            SetAction(p_Name);
+            SetAction(pName);
             try
             {
-                l_StartTime = DateTime.Now;
-                l_Count = 0.0;
-                l_LastElapsedTime = 0.0;
+                lStartTime = DateTime.Now;
+                lCount = 0.0;
+                lLastElapsedTime = 0.0;
                 do
                 {
-                    l_Count += 1.0;
-                    switch (p_Type)
+                    lCount += 1.0;
+                    switch (pType)
                     {
                         case FilterWheelProperties.FocusOffsets:
                             {
-                                l_Offsets = filterWheel.FocusOffsets;
+                                lOffsets = filterWheel.FocusOffsets;
                                 break;
                             }
 
                         case FilterWheelProperties.Names:
                             {
-                                l_Names = filterWheel.Names;
+                                lNames = filterWheel.Names;
                                 break;
                             }
 
                         case FilterWheelProperties.Position:
                             {
-                                l_StartFilterNumber = filterWheel.Position;
+                                lStartFilterNumber = filterWheel.Position;
                                 break;
                             }
 
                         default:
                             {
-                                LogIssue(p_Name, "FilterWheelPerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(pName, "FilterWheelPerformanceTest: Unknown test type " + pType.ToString());
                                 break;
                             }
                     }
 
-                    l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
-                    if (l_ElapsedTime > l_LastElapsedTime + 1.0)
+                    lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
+                    if (lElapsedTime > lLastElapsedTime + 1.0)
                     {
-                        SetStatus(l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
-                        l_LastElapsedTime = l_ElapsedTime;
+                        SetStatus(lCount + " transactions in " + lElapsedTime.ToString("0") + " seconds");
+                        lLastElapsedTime = lElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
                     }
                 }
-                while (l_ElapsedTime <= PERF_LOOP_TIME);
-                l_Rate = l_Count / l_ElapsedTime;
-                switch (l_Rate)
+                while (lElapsedTime <= PERF_LOOP_TIME);
+                lRate = lCount / lElapsedTime;
+                switch (lRate)
                 {
-                    case object _ when l_Rate > 10.0:
+                    case object _ when lRate > 10.0:
                         {
-                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
-                    case object _ when 2.0 <= l_Rate && l_Rate <= 10.0:
+                    case object _ when 2.0 <= lRate && lRate <= 10.0:
                         {
-                            LogOK(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogOk(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
-                    case object _ when 1.0 <= l_Rate && l_Rate <= 2.0:
+                    case object _ when 1.0 <= lRate && lRate <= 2.0:
                         {
-                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogInfo(p_Name, "Unable to complete test: " + ex.Message);
+                LogInfo(pName, "Unable to complete test: " + ex.Message);
             }
         }
 
@@ -570,7 +570,7 @@ namespace ConformU
 
                 // Test whether the reported position matches the required position
                 if (reportedPosition == position) // The filter wheel is at the required position
-                    LogOK(testName, $"Reached position: {position} in: {duration:0.0} seconds");
+                    LogOk(testName, $"Reached position: {position} in: {duration:0.0} seconds");
                 else // The filter wheel is not at the required position so must have timed out
                     LogIssue(testName, $"The filter wheel did not reach specified position: {position} within the {settings.FilterWheelTimeout} second timeout. The reported position after {duration:0.0} seconds is: {reportedPosition}.");
 

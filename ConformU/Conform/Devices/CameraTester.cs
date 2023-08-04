@@ -33,68 +33,68 @@ namespace ConformU
         private const double CAMERA_HIGH_SETPOINT_START_TEMPERATURE = 0.0; // Start temperature for determining maximum set point value.
 
         // Camera variables
-        private bool m_CanAbortExposure, m_CanAsymmetricBin, m_CanGetCoolerPower, m_CanSetCCDTemperature, m_CanStopExposure, m_CanFastReadout;
-        private bool m_CoolerOn, m_ImageReady;
+        private bool mCanAbortExposure, mCanAsymmetricBin, mCanGetCoolerPower, mCanSetCcdTemperature, mCanStopExposure, mCanFastReadout;
+        private bool mCoolerOn, mImageReady;
         private int cameraXSize, cameraYSize;
-        private short m_MaxBinX, m_MaxBinY, m_BinX, m_BinY;
-        private double m_LastExposureDuration;
-        private double m_SetCCDTemperature;
-        private string m_LastExposureStartTime;
-        private CameraState m_CameraState;
-        private Array m_ImageArray, m_ImageArrayVariant;
-        private bool m_IsPulseGuidingSupported; // Confirm that IsPulseGuiding command will work
-        private bool m_CanPulseGuide;
-        private bool m_IsPulseGuiding;
+        private short mMaxBinX, mMaxBinY, mBinX, mBinY;
+        private double mLastExposureDuration;
+        private double mSetCcdTemperature;
+        private string mLastExposureStartTime;
+        private CameraState mCameraState;
+        private Array mImageArray, mImageArrayVariant;
+        private bool mIsPulseGuidingSupported; // Confirm that IsPulseGuiding command will work
+        private bool mCanPulseGuide;
+        private bool mIsPulseGuiding;
         // ICameraV2 properties
-        private short m_Gain, m_GainMax, m_GainMin, m_PercentCompleted, m_ReadoutMode;
-        private double m_ExposureMax, m_ExposureMin, m_ExposureResolution;
-        private bool m_FastReadout, m_CanReadGain, m_CanReadGainMax, m_CanReadGainMin, m_CanReadGains, m_CanReadReadoutModes;
-        private IList<string> m_Gains;
-        private IList<string> m_ReadoutModes;
-        private ASCOM.DeviceInterface.SensorType m_SensorType;
-        private bool m_CanReadSensorType = false;
+        private short mGain, mGainMax, mGainMin, mPercentCompleted, mReadoutMode;
+        private double mExposureMax, mExposureMin, mExposureResolution;
+        private bool mFastReadout, mCanReadGain, mCanReadGainMax, mCanReadGainMin, mCanReadGains, mCanReadReadoutModes;
+        private IList<string> mGains;
+        private IList<string> mReadoutModes;
+        private ASCOM.DeviceInterface.SensorType mSensorType;
+        private bool mCanReadSensorType = false;
         private readonly Stopwatch sw = new();
 
         // ICameraV3 properties
-        private int m_Offset, m_OffsetMax, m_OffsetMin;
-        private bool m_CanReadOffset, m_CanReadOffsetMax, m_CanReadOffsetMin, m_CanReadOffsets;
-        private IList<string> m_Offsets;
-        private double m_SubExposureDuration;
-        private GainOffsetMode m_OffsetMode = GainOffsetMode.Unknown;
-        private GainOffsetMode m_GainMode = GainOffsetMode.Unknown;
+        private int mOffset, mOffsetMax, mOffsetMin;
+        private bool mCanReadOffset, mCanReadOffsetMax, mCanReadOffsetMin, mCanReadOffsets;
+        private IList<string> mOffsets;
+        private double mSubExposureDuration;
+        private GainOffsetMode mOffsetMode = GainOffsetMode.Unknown;
+        private GainOffsetMode mGainMode = GainOffsetMode.Unknown;
 
         private ICameraV4 camera;
 
         private enum CanType
         {
-            tstCanFindHome = 1,
-            tstCanPark = 2,
-            tstCanPulseGuide = 3,
-            tstCanSetDeclinationRate = 4,
-            tstCanSetGuideRates = 5,
-            tstCanSetPark = 6,
-            tstCanSetPierSide = 7,
-            tstCanSetRightAscensionRate = 8,
-            tstCanSetTracking = 9,
-            tstCanSlew = 10,
-            tstCanSlewAsync = 11,
-            tstCanSlewAltAz = 12,
-            tstCanSlewAltAzAsync = 13,
-            tstCanSync = 14,
-            tstCanSyncAltAz = 15,
-            tstCanUnPark = 16,
-            tstCanAbortExposure = 17,
-            tstCanAsymmetricBin = 18,
-            tstCanGetCoolerPower = 19,
-            tstCanSetCCDTemperature = 20,
-            tstCanStopExposure = 21,
+            TstCanFindHome = 1,
+            TstCanPark = 2,
+            TstCanPulseGuide = 3,
+            TstCanSetDeclinationRate = 4,
+            TstCanSetGuideRates = 5,
+            TstCanSetPark = 6,
+            TstCanSetPierSide = 7,
+            TstCanSetRightAscensionRate = 8,
+            TstCanSetTracking = 9,
+            TstCanSlew = 10,
+            TstCanSlewAsync = 11,
+            TstCanSlewAltAz = 12,
+            TstCanSlewAltAzAsync = 13,
+            TstCanSync = 14,
+            TstCanSyncAltAz = 15,
+            TstCanUnPark = 16,
+            TstCanAbortExposure = 17,
+            TstCanAsymmetricBin = 18,
+            TstCanGetCoolerPower = 19,
+            TstCanSetCcdTemperature = 20,
+            TstCanStopExposure = 21,
             // ICameraV2 property
-            tstCanFastReadout = 22
+            TstCanFastReadout = 22
         }
         private enum CameraPerformance : int
         {
             CameraState,
-            CCDTemperature,
+            CcdTemperature,
             CoolerPower,
             HeatSinkTemperature,
             ImageReady,
@@ -110,25 +110,25 @@ namespace ConformU
             CameraState = 3,
             CameraXSize = 4,
             CameraYSize = 5,
-            CCDTemperature = 6,
+            CcdTemperature = 6,
             CoolerOn = 7,
             CoolerPower = 8,
             Description = 9,
             DriverInfo = 10,
-            ElectronsPerADU = 11,
+            ElectronsPerAdu = 11,
             FullWellCapacity = 12,
             HasShutter = 13,
             HeatSinkTemperature = 14,
             ImageReady = 15,
             IsPulseGuiding = 16,
-            MaxADU = 17,
+            MaxAdu = 17,
             MaxBinX = 18,
             MaxBinY = 19,
             NumX = 20,
             NumY = 21,
             PixelSizeX = 22,
             PixelSizeY = 23,
-            SetCCDTemperature = 24,
+            SetCcdTemperature = 24,
             StartX = 25,
             StartY = 26,
 
@@ -195,8 +195,8 @@ namespace ConformU
                     camera = null;
                     LogDebug("CameraTester.Dispose", "Camera set to null");
                     LogDebug("CameraTester.Dispose", "About to release memory...");
-                    m_ImageArray = null;
-                    m_ImageArrayVariant = null;
+                    mImageArray = null;
+                    mImageArrayVariant = null;
 
                     //SetTest("Cleaning up");
                     //try { ReleaseMemory(); } catch { }
@@ -230,10 +230,10 @@ namespace ConformU
                 {
                     default:
                         {
-                            g_ExNotImplemented = (int)0x80040400;
-                            g_ExInvalidValue1 = (int)0x80040405;
-                            g_ExInvalidValue2 = (int)0x80040405;
-                            g_ExNotSet1 = (int)0x80040403;
+                            GExNotImplemented = (int)0x80040400;
+                            GExInvalidValue1 = (int)0x80040405;
+                            GExInvalidValue2 = (int)0x80040405;
+                            GExNotSet1 = (int)0x80040403;
                             break;
                         }
                 }
@@ -303,7 +303,7 @@ namespace ConformU
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);
 
-                baseClassDevice = camera; // Assign the driver to the base class
+                BaseClassDevice = camera; // Assign the driver to the base class
 
                 LogInfo("CreateDevice", "Successfully created driver");
             }
@@ -323,118 +323,118 @@ namespace ConformU
         public override void ReadCanProperties()
         {
             // ICameraV1 properties
-            CameraCanTest(CanType.tstCanAbortExposure, "CanAbortExposure");
-            CameraCanTest(CanType.tstCanAsymmetricBin, "CanAsymmetricBin");
-            CameraCanTest(CanType.tstCanGetCoolerPower, "CanGetCoolerPower");
-            CameraCanTest(CanType.tstCanPulseGuide, "CanPulseGuide");
-            CameraCanTest(CanType.tstCanSetCCDTemperature, "CanSetCCDTemperature");
-            CameraCanTest(CanType.tstCanStopExposure, "CanStopExposure");
+            CameraCanTest(CanType.TstCanAbortExposure, "CanAbortExposure");
+            CameraCanTest(CanType.TstCanAsymmetricBin, "CanAsymmetricBin");
+            CameraCanTest(CanType.TstCanGetCoolerPower, "CanGetCoolerPower");
+            CameraCanTest(CanType.TstCanPulseGuide, "CanPulseGuide");
+            CameraCanTest(CanType.TstCanSetCcdTemperature, "CanSetCCDTemperature");
+            CameraCanTest(CanType.TstCanStopExposure, "CanStopExposure");
 
             // ICameraV2 properties
-            CameraCanTest(CanType.tstCanFastReadout, "CanFastReadout");
+            CameraCanTest(CanType.TstCanFastReadout, "CanFastReadout");
         }
-        private void CameraCanTest(CanType p_Type, string p_Name)
+        private void CameraCanTest(CanType pType, string pName)
         {
             try
             {
-                switch (p_Type)
+                switch (pType)
                 {
-                    case CanType.tstCanAbortExposure:
+                    case CanType.TstCanAbortExposure:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CanAbortExposure");
-                            m_CanAbortExposure = camera.CanAbortExposure;
-                            LogOK(p_Name, m_CanAbortExposure.ToString());
+                            mCanAbortExposure = camera.CanAbortExposure;
+                            LogOk(pName, mCanAbortExposure.ToString());
                             break;
                         }
 
-                    case CanType.tstCanAsymmetricBin:
+                    case CanType.TstCanAsymmetricBin:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CanAsymmetricBin");
-                            m_CanAsymmetricBin = camera.CanAsymmetricBin;
-                            LogOK(p_Name, m_CanAsymmetricBin.ToString());
+                            mCanAsymmetricBin = camera.CanAsymmetricBin;
+                            LogOk(pName, mCanAsymmetricBin.ToString());
                             break;
                         }
 
-                    case CanType.tstCanGetCoolerPower:
+                    case CanType.TstCanGetCoolerPower:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CanGetCoolerPower");
-                            m_CanGetCoolerPower = camera.CanGetCoolerPower;
-                            LogOK(p_Name, m_CanGetCoolerPower.ToString());
+                            mCanGetCoolerPower = camera.CanGetCoolerPower;
+                            LogOk(pName, mCanGetCoolerPower.ToString());
                             break;
                         }
 
-                    case CanType.tstCanPulseGuide:
+                    case CanType.TstCanPulseGuide:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CanPulseGuide");
-                            m_CanPulseGuide = camera.CanPulseGuide;
-                            LogOK(p_Name, m_CanPulseGuide.ToString());
+                            mCanPulseGuide = camera.CanPulseGuide;
+                            LogOk(pName, mCanPulseGuide.ToString());
                             break;
                         }
 
-                    case CanType.tstCanSetCCDTemperature:
+                    case CanType.TstCanSetCcdTemperature:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CanSetCCDTemperature");
-                            m_CanSetCCDTemperature = camera.CanSetCCDTemperature;
-                            LogOK(p_Name, m_CanSetCCDTemperature.ToString());
+                            mCanSetCcdTemperature = camera.CanSetCCDTemperature;
+                            LogOk(pName, mCanSetCcdTemperature.ToString());
                             break;
                         }
 
-                    case CanType.tstCanStopExposure:
+                    case CanType.TstCanStopExposure:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CanStopExposure");
-                            m_CanStopExposure = camera.CanStopExposure;
-                            LogOK(p_Name, m_CanStopExposure.ToString());
+                            mCanStopExposure = camera.CanStopExposure;
+                            LogOk(pName, mCanStopExposure.ToString());
                             break;
                         }
 
-                    case CanType.tstCanFastReadout:
+                    case CanType.TstCanFastReadout:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CanFastReadout");
-                            m_CanFastReadout = camera.CanFastReadout;
-                            LogOK(p_Name, m_CanFastReadout.ToString());
+                            mCanFastReadout = camera.CanFastReadout;
+                            LogOk(pName, mCanFastReadout.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogIssue(p_Name, "Conform:CanTest: Unknown test type " + p_Type.ToString());
+                            LogIssue(pName, "Conform:CanTest: Unknown test type " + pType.ToString());
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                HandleException(p_Name, MemberType.Property, Required.Mandatory, ex, "");
+                HandleException(pName, MemberType.Property, Required.Mandatory, ex, "");
             }
         }
         public override void PreRunCheck()
         {
-            int l_VStringPtr, l_V1, l_V2, l_V3;
+            int lVStringPtr, lV1, lV2, lV3;
             // Add a test for a back level version of the Camera simulator - just abandon this process if any errors occur
             if (settings.ComDevice.ProgId.ToUpper() == "CCDSIMULATOR.CAMERA")
             {
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to get Description");
-                    l_VStringPtr = camera.Description.ToUpper().IndexOf("VERSION "); // Point at the start of the version string
-                    if (l_VStringPtr >= 0)
+                    lVStringPtr = camera.Description.ToUpper().IndexOf("VERSION "); // Point at the start of the version string
+                    if (lVStringPtr >= 0)
                     {
                         LogCallToDriver("ConformanceCheck", "About to get Description");
-                        string l_VString = camera.Description.ToUpper().Substring(l_VStringPtr, 8);
-                        l_VStringPtr = l_VString.IndexOf(".");
-                        if (l_VStringPtr > 0)
+                        string lVString = camera.Description.ToUpper().Substring(lVStringPtr, 8);
+                        lVStringPtr = lVString.IndexOf(".");
+                        if (lVStringPtr > 0)
                         {
-                            l_V1 = Convert.ToInt32(l_VString[..(l_VStringPtr - 1)]); // Extract the number
-                            l_VString = l_VString[(l_VStringPtr + 1)..]; // Get the second version number part
-                            l_VStringPtr = l_VString.IndexOf(".");
-                            if (l_VStringPtr > 1)
+                            lV1 = Convert.ToInt32(lVString[..(lVStringPtr - 1)]); // Extract the number
+                            lVString = lVString[(lVStringPtr + 1)..]; // Get the second version number part
+                            lVStringPtr = lVString.IndexOf(".");
+                            if (lVStringPtr > 1)
                             {
-                                l_V2 = Convert.ToInt32(l_VString[..(l_VStringPtr - 1)]); // Extract the number
-                                l_VString = l_VString[(l_VStringPtr + 1)..]; // Get the third version number part
-                                l_V3 = Convert.ToInt32(l_VString); // Extract the number
+                                lV2 = Convert.ToInt32(lVString[..(lVStringPtr - 1)]); // Extract the number
+                                lVString = lVString[(lVStringPtr + 1)..]; // Get the third version number part
+                                lV3 = Convert.ToInt32(lVString); // Extract the number
                                                                    // Turn the version parts into a whole number
-                                l_V1 = l_V1 * 1000000 + l_V2 * 1000 + l_V3;
-                                if (l_V1 < 5000008)
+                                lV1 = lV1 * 1000000 + lV2 * 1000 + lV3;
+                                if (lV1 < 5000008)
                                 {
                                     LogIssue("Version Check", "*** This version of the camera simulator has known conformance issues, ***");
                                     LogIssue("Version Check", "*** please update it from the ASCOM site https://ascom-standards.org/Downloads/Index.htm ***");
@@ -468,24 +468,24 @@ namespace ConformU
                     LogTestOnly("Last Tests"); try
                     {
                         LogCallToDriver("ConformanceCheck", "About to get LastExposureDuration");
-                        m_LastExposureDuration = camera.LastExposureDuration;
+                        mLastExposureDuration = camera.LastExposureDuration;
                         LogIssue("LastExposureDuration", "LastExposureDuration did not return an error when called before an exposure was made");
                     }
                     catch (Exception ex)
                     {
-                        LogOK("LastExposureDuration", $"LastExposureDuration returned an error before an exposure was made: {ex.Message}");
+                        LogOk("LastExposureDuration", $"LastExposureDuration returned an error before an exposure was made: {ex.Message}");
                     }
 
                     // Check LastExposureStartTime
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to get LastExposureStartTime");
-                        m_LastExposureStartTime = camera.LastExposureStartTime;
+                        mLastExposureStartTime = camera.LastExposureStartTime;
                         LogIssue("LastExposureStartTime", "LastExposureStartTime did not return an error when called before an exposure was made");
                     }
                     catch (Exception ex)
                     {
-                        LogOK("LastExposureStartTime", $"LastExposureStartTime returned an error before an exposure was made: {ex.Message}");
+                        LogOk("LastExposureStartTime", $"LastExposureStartTime returned an error before an exposure was made: {ex.Message}");
                     }
 
                 }
@@ -499,25 +499,25 @@ namespace ConformU
 
         public override void CheckProperties()
         {
-            int l_BinX, l_BinY, l_MaxBinX, l_MaxBinY;
+            int lBinX, lBinY, lMaxBinX, lMaxBinY;
 
 
             // Basic read tests
-            m_MaxBinX = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.MaxBinX, "MaxBinX", 1, MAX_BIN_X)); if (cancellationToken.IsCancellationRequested) return;
-            m_MaxBinY = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.MaxBinY, "MaxBinY", 1, MAX_BIN_Y)); if (cancellationToken.IsCancellationRequested) return;
+            mMaxBinX = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.MaxBinX, "MaxBinX", 1, MAX_BIN_X)); if (cancellationToken.IsCancellationRequested) return;
+            mMaxBinY = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.MaxBinY, "MaxBinY", 1, MAX_BIN_Y)); if (cancellationToken.IsCancellationRequested) return;
 
-            if (!m_CanAsymmetricBin)
+            if (!mCanAsymmetricBin)
             {
-                if (m_MaxBinX != m_MaxBinY)
+                if (mMaxBinX != mMaxBinY)
                     LogIssue("CanAsymmetricBin", "CanAsymmetricBin is false but MaxBinX and MaxBinY are not equal!");
             }
 
-            m_BinX = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.BinX, "BinX Read", 1, 1)); if (cancellationToken.IsCancellationRequested) return; // Must default to 1 on start-up
-            m_BinY = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.BinY, "BinY Read", 1, 1)); if (cancellationToken.IsCancellationRequested) return; // Must default to 1 on start-up
+            mBinX = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.BinX, "BinX Read", 1, 1)); if (cancellationToken.IsCancellationRequested) return; // Must default to 1 on start-up
+            mBinY = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.BinY, "BinY Read", 1, 1)); if (cancellationToken.IsCancellationRequested) return; // Must default to 1 on start-up
 
-            if (!m_CanAsymmetricBin)
+            if (!mCanAsymmetricBin)
             {
-                if (m_BinX != m_BinY)
+                if (mBinX != mBinY)
                     LogIssue("CanAsymmetricBin", "CanAsymmetricBin is false but BinX and BinY are not equal!");
             }
 
@@ -530,18 +530,18 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogOK("BinX Write", $"Received error on setting BinX to 0: {ex.Message}");
+                LogOk("BinX Write", $"Received error on setting BinX to 0: {ex.Message}");
             }
 
             try // Invalid high value
             {
                 LogCallToDriver("ConformanceCheck", "About to set BinX");
-                camera.BinX = (short)(m_MaxBinX + 1);
-                LogIssue("BinX Write", "Invalid value " + m_MaxBinX + 1 + " written but no error returned");
+                camera.BinX = (short)(mMaxBinX + 1);
+                LogIssue("BinX Write", "Invalid value " + mMaxBinX + 1 + " written but no error returned");
             }
             catch (Exception ex)
             {
-                LogOK("BinX Write", $"Received error on setting BinX to {m_MaxBinX + 1}: {ex.Message}");
+                LogOk("BinX Write", $"Received error on setting BinX to {mMaxBinX + 1}: {ex.Message}");
             }
 
             try // Invalid low value
@@ -552,18 +552,18 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogOK("BinY Write", $"Received error on setting BinY to 0: {ex.Message}");
+                LogOk("BinY Write", $"Received error on setting BinY to 0: {ex.Message}");
             }
 
             try // Invalid high value
             {
                 LogCallToDriver("ConformanceCheck", "About to set BinY");
-                camera.BinY = (short)(m_MaxBinY + 1);
-                LogIssue("BinY Write", "Invalid value " + m_MaxBinY + 1 + " written but no error returned");
+                camera.BinY = (short)(mMaxBinY + 1);
+                LogIssue("BinY Write", "Invalid value " + mMaxBinY + 1 + " written but no error returned");
             }
             catch (Exception ex)
             {
-                LogOK("BinY Write", $"Received error on setting BinY to {m_MaxBinY + 1}: {ex.Message}");
+                LogOk("BinY Write", $"Received error on setting BinY to {mMaxBinY + 1}: {ex.Message}");
             }
 
             // Use either the maximum values supplied by the camera driver or the maximum values defined in Conform's setup, if these have been set
@@ -572,96 +572,96 @@ namespace ConformU
 
             if (settings.CameraMaxBinX > 0)
             {
-                l_MaxBinX = settings.CameraMaxBinX;
-                LogTestAndMessage("BinXY Write", string.Format("Test range set to MaxBinX = {0} by Conform configuration, camera MaxBinX = {1}", l_MaxBinX, m_MaxBinX));
+                lMaxBinX = settings.CameraMaxBinX;
+                LogTestAndMessage("BinXY Write", string.Format("Test range set to MaxBinX = {0} by Conform configuration, camera MaxBinX = {1}", lMaxBinX, mMaxBinX));
             }
             else
-                l_MaxBinX = m_MaxBinX;
+                lMaxBinX = mMaxBinX;
 
             if (settings.CameraMaxBinY > 0)
             {
-                l_MaxBinY = settings.CameraMaxBinY;
-                LogTestAndMessage("BinXY Write", string.Format("Test range set to MaxBinY = {0} by Conform configuration, camera MaxBinY = {1}", l_MaxBinY, m_MaxBinY));
+                lMaxBinY = settings.CameraMaxBinY;
+                LogTestAndMessage("BinXY Write", string.Format("Test range set to MaxBinY = {0} by Conform configuration, camera MaxBinY = {1}", lMaxBinY, mMaxBinY));
             }
             else
-                l_MaxBinY = m_MaxBinY;
+                lMaxBinY = mMaxBinY;
 
-            if ((settings.CameraMaxBinX > m_MaxBinX) | (settings.CameraMaxBinY > m_MaxBinY))
+            if ((settings.CameraMaxBinX > mMaxBinX) | (settings.CameraMaxBinY > mMaxBinY))
                 LogNewLine(); // Insert a blank line if required
 
-            if (settings.CameraMaxBinX > m_MaxBinX)
-                LogTestAndMessage("BinXY Write", string.Format("WARNING - Conform's configured MaxBinX: {0} is greater than the camera's reported MaxBinX: {1}!", l_MaxBinX, m_MaxBinX));
+            if (settings.CameraMaxBinX > mMaxBinX)
+                LogTestAndMessage("BinXY Write", string.Format("WARNING - Conform's configured MaxBinX: {0} is greater than the camera's reported MaxBinX: {1}!", lMaxBinX, mMaxBinX));
 
-            if (settings.CameraMaxBinY > m_MaxBinY)
-                LogTestAndMessage("BinXY Write", string.Format("WARNING - Conform's configured MaxBinY: {0} is greater than the camera's reported MaxBinY: {1}!", l_MaxBinY, m_MaxBinY));
+            if (settings.CameraMaxBinY > mMaxBinY)
+                LogTestAndMessage("BinXY Write", string.Format("WARNING - Conform's configured MaxBinY: {0} is greater than the camera's reported MaxBinY: {1}!", lMaxBinY, mMaxBinY));
 
             if ((settings.CameraMaxBinX > 0) | (settings.CameraMaxBinY > 0))
                 LogNewLine(); // Insert a blank line if required
 
             // Write BinX and BinY
-            if (m_CanAsymmetricBin)
+            if (mCanAsymmetricBin)
             {
-                for (l_BinX = 1; l_BinX <= l_MaxBinX; l_BinX++)
+                for (lBinX = 1; lBinX <= lMaxBinX; lBinX++)
                 {
-                    for (l_BinY = 1; l_BinY <= l_MaxBinY; l_BinY++)
+                    for (lBinY = 1; lBinY <= lMaxBinY; lBinY++)
                     {
                         bool binXSetOk = false;
                         try
                         {
                             LogCallToDriver("ConformanceCheck", "About to set BinX");
-                            camera.BinX = (short)l_BinX;
+                            camera.BinX = (short)lBinX;
                             binXSetOk = true;
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsInfo("BinX Write", MemberType.Property, Required.Mandatory, ex, "when setting BinX to " + l_BinX, "InvalidValue error received when setting BinX to " + l_BinX);
+                            HandleInvalidValueExceptionAsInfo("BinX Write", MemberType.Property, Required.Mandatory, ex, "when setting BinX to " + lBinX, "InvalidValue error received when setting BinX to " + lBinX);
                         }
 
                         try
                         {
                             LogCallToDriver("ConformanceCheck", "About to set BinY");
-                            camera.BinY = (short)l_BinY;
+                            camera.BinY = (short)lBinY;
 
                             if (binXSetOk)
-                                LogOK("BinXY Write", "Successfully set asymmetric XY binning: " + l_BinX + " x " + l_BinY);
+                                LogOk("BinXY Write", "Successfully set asymmetric XY binning: " + lBinX + " x " + lBinY);
                             else
-                                LogOK("BinXY Write", $"Successfully set Y binning to {l_BinY}");
+                                LogOk("BinXY Write", $"Successfully set Y binning to {lBinY}");
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsInfo("BinY Write", MemberType.Property, Required.Mandatory, ex, "when setting BinY to " + l_BinY, "InvalidValue error received when setting BinY to " + l_BinY);
+                            HandleInvalidValueExceptionAsInfo("BinY Write", MemberType.Property, Required.Mandatory, ex, "when setting BinY to " + lBinY, "InvalidValue error received when setting BinY to " + lBinY);
                         }
                     }
                 }
             }
             else // Can only bin symmetrically
-                for (l_BinX = 1; l_BinX <= l_MaxBinX; l_BinX++)
+                for (lBinX = 1; lBinX <= lMaxBinX; lBinX++)
                 {
                     bool binXSetOk = false;
 
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to set BinX");
-                        camera.BinX = (short)l_BinX;
+                        camera.BinX = (short)lBinX;
                         binXSetOk = true;
                     }
                     catch (Exception ex)
                     {
-                        HandleInvalidValueExceptionAsInfo("BinX Write", MemberType.Property, Required.Mandatory, ex, "when setting BinX to " + l_BinX, "InvalidValueException received when setting BinX to " + l_BinX);
+                        HandleInvalidValueExceptionAsInfo("BinX Write", MemberType.Property, Required.Mandatory, ex, "when setting BinX to " + lBinX, "InvalidValueException received when setting BinX to " + lBinX);
                     }
 
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to set BinY");
-                        camera.BinY = (short)l_BinX;
+                        camera.BinY = (short)lBinX;
                         if (binXSetOk)
-                            LogOK("BinXY Write", "Successfully set symmetric XY binning: " + l_BinX + " x " + l_BinX);
+                            LogOk("BinXY Write", "Successfully set symmetric XY binning: " + lBinX + " x " + lBinX);
                         else
-                            LogOK("BinXY Write", $"Successfully set Y binning to {l_BinX}");
+                            LogOk("BinXY Write", $"Successfully set Y binning to {lBinX}");
                     }
                     catch (Exception ex)
                     {
-                        HandleInvalidValueExceptionAsInfo("BinY Write", MemberType.Property, Required.Mandatory, ex, "when setting BinY to " + l_BinX, "InvalidValueException received when setting BinY to " + l_BinX);
+                        HandleInvalidValueExceptionAsInfo("BinY Write", MemberType.Property, Required.Mandatory, ex, "when setting BinY to " + lBinX, "InvalidValueException received when setting BinY to " + lBinX);
                     }
                 }
 
@@ -683,27 +683,27 @@ namespace ConformU
             {
             }
 
-            m_CameraState = CameraPropertyTestCameraState(CamPropertyType.CameraState, "CameraState"); if (cancellationToken.IsCancellationRequested) return;
+            mCameraState = CameraPropertyTestCameraState(CamPropertyType.CameraState, "CameraState"); if (cancellationToken.IsCancellationRequested) return;
             cameraXSize = CameraPropertyTestInteger(CamPropertyType.CameraXSize, "CameraXSize", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
             cameraYSize = CameraPropertyTestInteger(CamPropertyType.CameraYSize, "CameraYSize", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
 
-            CameraPropertyTestDouble(CamPropertyType.CCDTemperature, "CCDTemperature", ABSOLUTE_ZERO_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
-            m_CoolerOn = CameraPropertyTestBoolean(CamPropertyType.CoolerOn, "CoolerOn Read", false); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyTestDouble(CamPropertyType.CcdTemperature, "CCDTemperature", ABSOLUTE_ZERO_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
+            mCoolerOn = CameraPropertyTestBoolean(CamPropertyType.CoolerOn, "CoolerOn Read", false); if (cancellationToken.IsCancellationRequested) return;
 
             // Write CoolerOn
-            bool l_OriginalCoolerState;
-            string l_TargetCoolerState;
+            bool lOriginalCoolerState;
+            string lTargetCoolerState;
             try
             {
                 LogCallToDriver("ConformanceCheck", "About to set CoolerOn");
-                l_OriginalCoolerState = camera.CoolerOn;
-                if (l_OriginalCoolerState)
-                    l_TargetCoolerState = "off";
+                lOriginalCoolerState = camera.CoolerOn;
+                if (lOriginalCoolerState)
+                    lTargetCoolerState = "off";
                 else
-                    l_TargetCoolerState = "on";
+                    lTargetCoolerState = "on";
                 try
                 {
-                    if (l_OriginalCoolerState)
+                    if (lOriginalCoolerState)
                     {
                         LogCallToDriver("ConformanceCheck", "About to set CoolerOn");
                         camera.CoolerOn = false;
@@ -713,18 +713,18 @@ namespace ConformU
                         LogCallToDriver("ConformanceCheck", "About to set CoolerOn");
                         camera.CoolerOn = true;
                     }
-                    LogOK("CoolerOn Write", "Successfully changed CoolerOn state");
+                    LogOk("CoolerOn Write", "Successfully changed CoolerOn state");
                 }
                 catch (Exception ex)
                 {
-                    HandleException("CoolerOn Write", MemberType.Property, Required.Optional, ex, "turning Cooler " + l_TargetCoolerState);
+                    HandleException("CoolerOn Write", MemberType.Property, Required.Optional, ex, "turning Cooler " + lTargetCoolerState);
                 }
 
                 // Restore Cooler state
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to set CoolerOn");
-                    camera.CoolerOn = l_OriginalCoolerState;
+                    camera.CoolerOn = lOriginalCoolerState;
                 }
                 catch
                 {
@@ -737,13 +737,13 @@ namespace ConformU
             }
 
             CameraPropertyTestDouble(CamPropertyType.CoolerPower, "CoolerPower", 0.0, 100.0, false); if (cancellationToken.IsCancellationRequested) return;
-            CameraPropertyTestDouble(CamPropertyType.ElectronsPerADU, "ElectronsPerADU", 0.00001, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyTestDouble(CamPropertyType.ElectronsPerAdu, "ElectronsPerADU", 0.00001, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyTestDouble(CamPropertyType.FullWellCapacity, "FullWellCapacity", 0.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyTestBoolean(CamPropertyType.HasShutter, "HasShutter", false); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyTestDouble(CamPropertyType.HeatSinkTemperature, "HeatSinkTemperature", ABSOLUTE_ZERO_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
 
-            m_ImageReady = CameraPropertyTestBoolean(CamPropertyType.ImageReady, "ImageReady", false); if (cancellationToken.IsCancellationRequested) return;
-            if (m_ImageReady & settings.CameraFirstUseTests) // Issue this warning if configured to do so
+            mImageReady = CameraPropertyTestBoolean(CamPropertyType.ImageReady, "ImageReady", false); if (cancellationToken.IsCancellationRequested) return;
+            if (mImageReady & settings.CameraFirstUseTests) // Issue this warning if configured to do so
                 LogIssue("ImageReady", "Image is flagged as ready but no exposure has been started!");
 
             // Release memory currently consumed by images
@@ -752,19 +752,19 @@ namespace ConformU
             // ImageArray 
             SetFullStatus("ImageArray", "Getting image data from device...", "");
 
-            if (m_ImageReady) // ImageReady is true
+            if (mImageReady) // ImageReady is true
             {
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to get ImageArray");
-                    m_ImageArray = (Array)camera.ImageArray;
+                    mImageArray = (Array)camera.ImageArray;
                     if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
                     {
                         LogIssue("ImageArray", "No image has been taken but ImageArray has not returned an error");
                     }
                     else  // Omit first use tests
                     {
-                        LogOK("ImageArray", "ImageArray read OK");
+                        LogOk("ImageArray", "ImageArray read OK");
                     }
                 }
                 catch (Exception ex)
@@ -772,7 +772,7 @@ namespace ConformU
                     LogDebug("ImageArray", $"Exception 1:\r\n{ex}");
                     if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
                     {
-                        LogOK("ImageArray", $"Received error when camera is idle: {ex.Message}");
+                        LogOk("ImageArray", $"Received error when camera is idle: {ex.Message}");
                     }
                     else // Omit first use tests
                     {
@@ -786,12 +786,12 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to get ImageArray");
-                    m_ImageArray = (Array)camera.ImageArray;
+                    mImageArray = (Array)camera.ImageArray;
                     LogIssue("ImageArray", "ImageReady is false and no image has been taken but ImageArray has not returned an error");
                 }
                 catch (Exception ex)
                 {
-                    LogOK("ImageArray", $"Received error when ImageReady is false: {ex.Message}");
+                    LogOk("ImageArray", $"Received error when ImageReady is false: {ex.Message}");
                     LogDebug("ImageArray", $"Exception 2:\r\n{ex}");
                 }
             }
@@ -806,12 +806,12 @@ namespace ConformU
             SetFullStatus("ImageArrayVariant", "Getting image data from device...", "");
             if (settings.CameraTestImageArrayVariant) // Test if configured to do so
             {
-                if (m_ImageReady)
+                if (mImageReady)
                 {
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
-                        m_ImageArrayVariant = (Array)camera.ImageArrayVariant;
+                        mImageArrayVariant = (Array)camera.ImageArrayVariant;
 
                         if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
                         {
@@ -819,14 +819,14 @@ namespace ConformU
                         }
                         else
                         {
-                            LogOK("ImageArrayVariant", "ImageArray read OK");
+                            LogOk("ImageArrayVariant", "ImageArray read OK");
                         }
                     }
                     catch (Exception ex)
                     {
                         if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
                         {
-                            LogOK("ImageArrayVariant", $"Received error before an image has been taken: {ex.Message}");
+                            LogOk("ImageArrayVariant", $"Received error before an image has been taken: {ex.Message}");
                         }
                         else // Omit first use tests
                         {
@@ -840,12 +840,12 @@ namespace ConformU
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
-                        m_ImageArrayVariant = (Array)camera.ImageArrayVariant;
+                        mImageArrayVariant = (Array)camera.ImageArrayVariant;
                         LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not returned an error");
                     }
                     catch (Exception ex)
                     {
-                        LogOK("ImageArrayVariant", $"Received error when ImageReady is false: {ex.Message}");
+                        LogOk("ImageArrayVariant", $"Received error when ImageReady is false: {ex.Message}");
                     }
                 }
             }
@@ -859,11 +859,11 @@ namespace ConformU
 
             ClearStatus();
 
-            m_IsPulseGuiding = CameraPropertyTestBoolean(CamPropertyType.IsPulseGuiding, "IsPulseGuiding", false); if (cancellationToken.IsCancellationRequested) return;
-            if (m_IsPulseGuiding)
+            mIsPulseGuiding = CameraPropertyTestBoolean(CamPropertyType.IsPulseGuiding, "IsPulseGuiding", false); if (cancellationToken.IsCancellationRequested) return;
+            if (mIsPulseGuiding)
                 LogIssue("IsPulseGuiding", "Camera is showing pulse guiding underway although no PulseGuide command has been issued!");
 
-            CameraPropertyTestInteger(CamPropertyType.MaxADU, "MaxADU", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyTestInteger(CamPropertyType.MaxAdu, "MaxADU", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
 
             CameraPropertyTestInteger(CamPropertyType.NumX, "NumX Read", 1, cameraXSize); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyWriteTest(CamPropertyType.NumX, "NumX", System.Convert.ToInt32(cameraXSize / (double)2));
@@ -874,15 +874,15 @@ namespace ConformU
             CameraPropertyTestDouble(CamPropertyType.PixelSizeX, "PixelSizeX", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyTestDouble(CamPropertyType.PixelSizeY, "PixelSizeY", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
 
-            m_SetCCDTemperature = CameraPropertyTestDouble(CamPropertyType.SetCCDTemperature, "SetCCDTemperature Read", ABSOLUTE_ZERO_TEMPERATURE, BOILING_POINT_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
+            mSetCcdTemperature = CameraPropertyTestDouble(CamPropertyType.SetCcdTemperature, "SetCCDTemperature Read", ABSOLUTE_ZERO_TEMPERATURE, BOILING_POINT_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
 
-            if (m_CanSetCCDTemperature)
+            if (mCanSetCcdTemperature)
             {
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                     camera.SetCCDTemperature = 0.0; // Try an acceptable value
-                    LogOK("SetCCDTemperature Write", "Successfully wrote 0.0");
+                    LogOk("SetCCDTemperature Write", "Successfully wrote 0.0");
 
                     // Execution only gets here if the CCD temperature can be set successfully
                     bool exceptionGenerated;
@@ -971,7 +971,7 @@ LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature multiple tim
 LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                 try
                 {
-                    camera.SetCCDTemperature = m_SetCCDTemperature;
+                    camera.SetCCDTemperature = mSetCcdTemperature;
                 }
                 catch
                 {
@@ -1000,10 +1000,10 @@ LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to get SensorType");
-                    m_SensorType = (ASCOM.DeviceInterface.SensorType)camera.SensorType;
-                    m_CanReadSensorType = true; // Set a flag to indicate that we have got a valid SensorType value
+                    mSensorType = (ASCOM.DeviceInterface.SensorType)camera.SensorType;
+                    mCanReadSensorType = true; // Set a flag to indicate that we have got a valid SensorType value
                                                 // Successfully retrieved a value
-                    LogOK("SensorType Read", m_SensorType.ToString());
+                    LogOk("SensorType Read", mSensorType.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1011,9 +1011,9 @@ LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                 }
 
                 // BayerOffset Read
-                if (m_CanReadSensorType)
+                if (mCanReadSensorType)
                 {
-                    if (m_SensorType == ASCOM.DeviceInterface.SensorType.Monochrome)
+                    if (mSensorType == ASCOM.DeviceInterface.SensorType.Monochrome)
                     {
                         // Monochrome so both BayerOffset properties should throw not implemented exceptions
                         CameraPropertyMustNotImplemented(CamPropertyType.BayerOffsetX, "BayerOffsetX Read");
@@ -1034,28 +1034,28 @@ LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                 }
 
                 // ExposureMin and ExpoosureMax Read
-                m_ExposureMax = CameraPropertyTestDouble(CamPropertyType.ExposureMax, "ExposureMax Read", 0.0001, double.MaxValue, true);
-                m_ExposureMin = CameraPropertyTestDouble(CamPropertyType.ExposureMin, "ExposureMin Read", 0.0, double.MaxValue, true);
-                if (m_ExposureMin <= m_ExposureMax)
-                    LogOK("ExposureMin", "ExposureMin is less than or equal to ExposureMax");
+                mExposureMax = CameraPropertyTestDouble(CamPropertyType.ExposureMax, "ExposureMax Read", 0.0001, double.MaxValue, true);
+                mExposureMin = CameraPropertyTestDouble(CamPropertyType.ExposureMin, "ExposureMin Read", 0.0, double.MaxValue, true);
+                if (mExposureMin <= mExposureMax)
+                    LogOk("ExposureMin", "ExposureMin is less than or equal to ExposureMax");
                 else
                     LogIssue("ExposureMin", "ExposureMin is greater than ExposureMax");
 
                 // ExposureResolution Read
-                m_ExposureResolution = CameraPropertyTestDouble(CamPropertyType.ExposureResolution, "ExposureResolution Read", 0.0, double.MaxValue, true);
-                if (m_ExposureResolution <= m_ExposureMax)
-                    LogOK("ExposureResolution", "ExposureResolution is less than or equal to ExposureMax");
+                mExposureResolution = CameraPropertyTestDouble(CamPropertyType.ExposureResolution, "ExposureResolution Read", 0.0, double.MaxValue, true);
+                if (mExposureResolution <= mExposureMax)
+                    LogOk("ExposureResolution", "ExposureResolution is less than or equal to ExposureMax");
                 else
                     LogIssue("ExposureResolution", "ExposureResolution is greater than ExposureMax");
 
                 // FastReadout Read Optional
-                if (m_CanFastReadout)
-                    m_FastReadout = CameraPropertyTestBoolean(CamPropertyType.FastReadout, "FastReadout Read", true);
+                if (mCanFastReadout)
+                    mFastReadout = CameraPropertyTestBoolean(CamPropertyType.FastReadout, "FastReadout Read", true);
                 else
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to get FastReadout");
-                        m_FastReadout = camera.FastReadout;
+                        mFastReadout = camera.FastReadout;
                         LogIssue("FastReadout Read", "CanFastReadout is False but a PropertyNotImplemented error was not returned.");
                     }
                     catch (Exception ex)
@@ -1064,14 +1064,14 @@ LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                     }
 
                 // FastReadout Write Optional
-                if (m_CanFastReadout)
+                if (mCanFastReadout)
                 {
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to set FastReadout");
-                        camera.FastReadout = !m_FastReadout; LogCallToDriver("ConformanceCheck", "About to set FastReadout");
-                        camera.FastReadout = m_FastReadout;
-                        LogOK("FastReadout Write", "Able to change the FastReadout state OK");
+                        camera.FastReadout = !mFastReadout; LogCallToDriver("ConformanceCheck", "About to set FastReadout");
+                        camera.FastReadout = mFastReadout;
+                        LogOk("FastReadout Write", "Able to change the FastReadout state OK");
                     }
                     catch (Exception ex)
                     {
@@ -1093,47 +1093,47 @@ LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                 // GainMin Read - Optional
                 try
                 {
-                    m_CanReadGainMin = false; LogCallToDriver("ConformanceCheck", "About to get GainMin");
-                    m_GainMin = camera.GainMin;
+                    mCanReadGainMin = false; LogCallToDriver("ConformanceCheck", "About to get GainMin");
+                    mGainMin = camera.GainMin;
                     // Successfully retrieved a value
-                    m_CanReadGainMin = true;
-                    LogOK("GainMin Read", m_GainMin.ToString());
+                    mCanReadGainMin = true;
+                    LogOk("GainMin Read", mGainMin.ToString());
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidOperationExceptionAsOK("GainMin Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
+                    HandleInvalidOperationExceptionAsOk("GainMin Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
                 }
 
                 // GainMax Read - Optional
                 try
                 {
-                    m_CanReadGainMax = false; LogCallToDriver("ConformanceCheck", "About to get GainMax");
-                    m_GainMax = camera.GainMax;
+                    mCanReadGainMax = false; LogCallToDriver("ConformanceCheck", "About to get GainMax");
+                    mGainMax = camera.GainMax;
                     // Successfully retrieved a value
-                    m_CanReadGainMax = true;
-                    LogOK("GainMax Read", m_GainMax.ToString());
+                    mCanReadGainMax = true;
+                    LogOk("GainMax Read", mGainMax.ToString());
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidOperationExceptionAsOK("GainMax Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
+                    HandleInvalidOperationExceptionAsOk("GainMax Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
                 }
 
                 // Gains Read - Optional
                 try
                 {
-                    m_CanReadGains = false; LogCallToDriver("ConformanceCheck", "About to get Gains");
-                    m_Gains = camera.Gains;
+                    mCanReadGains = false; LogCallToDriver("ConformanceCheck", "About to get Gains");
+                    mGains = camera.Gains;
                     // Successfully retrieved a value
-                    m_CanReadGains = true;
-                    foreach (string Gain in m_Gains)
-                        LogOK("Gains Read", Gain.ToString());
+                    mCanReadGains = true;
+                    foreach (string gain in mGains)
+                        LogOk("Gains Read", gain.ToString());
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidOperationExceptionAsOK("Gains Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
+                    HandleInvalidOperationExceptionAsOk("Gains Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
                 }
 
-                if (m_CanReadGainMax & m_CanReadGainMin & m_CanReadGains)
+                if (mCanReadGainMax & mCanReadGainMin & mCanReadGains)
                     LogIssue("Gains", "GainMin, GainMax and Gains are all readable. Only one of GainMin/Max as a pair or Gains should be used, the other should throw a PropertyNotImplemented error");
                 else
                 {
@@ -1142,14 +1142,14 @@ LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                 // Gain Read - Optional 
                 try
                 {
-                    m_CanReadGain = false; // Set default value to indicate can't read gain
+                    mCanReadGain = false; // Set default value to indicate can't read gain
 LogCallToDriver("ConformanceCheck", "About to get Gain");
-                    m_Gain = camera.Gain;
-                    m_CanReadGain = true; // Flag that we can read Gain OK
-                    if (m_CanReadGains)
-                        LogOK("Gain Read", m_Gain + " " + m_Gains[0].ToString());
+                    mGain = camera.Gain;
+                    mCanReadGain = true; // Flag that we can read Gain OK
+                    if (mCanReadGains)
+                        LogOk("Gain Read", mGain + " " + mGains[0].ToString());
                     else
-                        LogOK("Gain Read", m_Gain.ToString());
+                        LogOk("Gain Read", mGain.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1157,25 +1157,25 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                 }
 
                 // Now check that gain property groups are implemented to handle the three gain modes: NotImplemented, Gain Index (Gain + Gains) and Gain Value (Gain + GainMin + GainMax)
-                if (!m_CanReadGain & !m_CanReadGains & !m_CanReadGainMin & !m_CanReadGainMax)
-                    LogOK("Gain Read", "All four gain properties return errors - the driver is in \"Gain Not Implemented\" mode.");
-                else if (m_CanReadGain)
+                if (!mCanReadGain & !mCanReadGains & !mCanReadGainMin & !mCanReadGainMax)
+                    LogOk("Gain Read", "All four gain properties return errors - the driver is in \"Gain Not Implemented\" mode.");
+                else if (mCanReadGain)
                 {
                     // Test for Gain Index mode
-                    if ((m_CanReadGain & m_CanReadGains & !m_CanReadGainMin & !m_CanReadGainMax))
+                    if ((mCanReadGain & mCanReadGains & !mCanReadGainMin & !mCanReadGainMax))
                     {
-                        m_GainMode = GainOffsetMode.IndexMode;
-                        LogOK("Gain Read", "Gain and Gains can be read while GainMin and GainMax returned errors - the driver is in \"Gain Index\" mode.");
+                        mGainMode = GainOffsetMode.IndexMode;
+                        LogOk("Gain Read", "Gain and Gains can be read while GainMin and GainMax returned errors - the driver is in \"Gain Index\" mode.");
                     }
-                    else if ((m_CanReadGain & !m_CanReadGains & m_CanReadGainMin & m_CanReadGainMax))
+                    else if ((mCanReadGain & !mCanReadGains & mCanReadGainMin & mCanReadGainMax))
                     {
-                        m_GainMode = GainOffsetMode.ValueMode;
-                        LogOK("Gain Read", "Gain, GainMin and GainMax can be read OK while Gains returns an error - the driver is in \"Gain Value\" mode.");
+                        mGainMode = GainOffsetMode.ValueMode;
+                        LogOk("Gain Read", "Gain, GainMin and GainMax can be read OK while Gains returns an error - the driver is in \"Gain Value\" mode.");
                     }
                     else
                     {
                         LogIssue("Gain Read", $"Unable to determine whether the driver is in \"Gain Not Implemented\", \"Gain Index\" or \"Gain Value\" mode. Please check the interface specification.");
-                        LogInfo("Gain Read", $"Gain returned an error: {m_CanReadGain}, Gains returned an error: {m_CanReadGains}, GainMin returned an error: {m_CanReadGainMin}, GainMax returned an error: {m_CanReadGainMax}.");
+                        LogInfo("Gain Read", $"Gain returned an error: {mCanReadGain}, Gains returned an error: {mCanReadGains}, GainMin returned an error: {mCanReadGainMin}, GainMax returned an error: {mCanReadGainMax}.");
                         LogInfo("Gain Read", $"\"Gain Not Implemented\" mode: Gain, Gains, GainMin and GainMax must all return errors.");
                         LogInfo("Gain Read", $"\"Gain Index\" mode: Gain and Gains must work while GainMin and GainMax must return errors.");
                         LogInfo("Gain Read", $"\"Gain Value\" mode: Gain, GainMin and GainMax must work while Gains must return an error.");
@@ -1184,13 +1184,13 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                 else
                 {
                     LogIssue("Gain Read", $"Gain Read returned an error but at least one of Gains, GainMin Or GainMax did not return an error. If Gain returns an error, all the other gain properties should do likewise.");
-                    LogInfo("Gain Read", $"Gains returned an error : {m_CanReadGains}, GainMin returned an error : {m_CanReadGainMin}, GainMax returned an error : {m_CanReadGainMax}.");
+                    LogInfo("Gain Read", $"Gains returned an error : {mCanReadGains}, GainMin returned an error : {mCanReadGainMin}, GainMax returned an error : {mCanReadGainMax}.");
                 }
 
                 // Gain write - Optional when neither gain index nor gain value mode is supported; must be implemented if either mode is supported
 
                 // First test for the only valid not implemented state when neither gain mode is supported
-                if (!m_CanReadGain & !m_CanReadGains & !m_CanReadGainMin & !m_CanReadGainMax)
+                if (!mCanReadGain & !mCanReadGains & !mCanReadGainMin & !mCanReadGainMax)
                 {
                     try
                     {
@@ -1205,7 +1205,7 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                 }
                 else
                 {
-                    switch (m_GainMode)
+                    switch (mGainMode)
                     {
                         case GainOffsetMode.Unknown:
                             {
@@ -1224,8 +1224,8 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                                 try
                                 {
                                     LogCallToDriver("ConformanceCheck", "About to set Gain");
-                                    camera.Gain = m_GainMin;
-                                    LogOK("Gain Write", $"Successfully set gain minimum value {m_GainMin}.");
+                                    camera.Gain = mGainMin;
+                                    LogOk("Gain Write", $"Successfully set gain minimum value {mGainMin}.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -1236,8 +1236,8 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                                 try
                                 {
                                     LogCallToDriver("ConformanceCheck", "About to set Gain");
-                                    camera.Gain = m_GainMax;
-                                    LogOK("Gain Write", $"Successfully set gain maximum value {m_GainMax}.");
+                                    camera.Gain = mGainMax;
+                                    LogOk("Gain Write", $"Successfully set gain maximum value {mGainMax}.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -1248,24 +1248,24 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                                 try
                                 {
                                     LogCallToDriver("ConformanceCheck", "About to set Gain");
-                                    camera.Gain = (short)(m_GainMin - 1);
-                                    LogIssue("Gain Write", $"Successfully set an gain below the minimum value ({m_GainMin - 1}), this should have resulted in an InvalidValue error.");
+                                    camera.Gain = (short)(mGainMin - 1);
+                                    LogIssue("Gain Write", $"Successfully set an gain below the minimum value ({mGainMin - 1}), this should have resulted in an InvalidValue error.");
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleInvalidValueExceptionAsOK("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"InvalidValue Received error for gain {m_GainMin - 1}, which is lower than the minimum value.");
+                                    HandleInvalidValueExceptionAsOk("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"InvalidValue Received error for gain {mGainMin - 1}, which is lower than the minimum value.");
                                 }
 
                                 // Test writing a lower than minimum value - this should result in am invalid value exception
                                 try
                                 {
                                     LogCallToDriver("ConformanceCheck", "About to set Gain");
-                                    camera.Gain = (short)(m_GainMax + 1);
-                                    LogIssue("Gain Write", $"Successfully set a gain above the maximum value({m_GainMax + 1}), this should have resulted in an InvalidValue error.");
+                                    camera.Gain = (short)(mGainMax + 1);
+                                    LogIssue("Gain Write", $"Successfully set a gain above the maximum value({mGainMax + 1}), this should have resulted in an InvalidValue error.");
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleInvalidValueExceptionAsOK("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"InvalidValue Received error for gain {m_GainMax + 1} which is higher than the maximum value.");
+                                    HandleInvalidValueExceptionAsOk("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"InvalidValue Received error for gain {mGainMax + 1} which is higher than the maximum value.");
                                 }
 
                                 break;
@@ -1273,7 +1273,7 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
 
                         default:
                             {
-                                LogIssue("Gain Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {m_GainMode}");
+                                LogIssue("Gain Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {mGainMode}");
                                 break;
                             }
                     }
@@ -1284,44 +1284,44 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to get PercentCompleted");
-                    m_PercentCompleted = camera.PercentCompleted;
-                    switch (m_PercentCompleted)
+                    mPercentCompleted = camera.PercentCompleted;
+                    switch (mPercentCompleted)
                     {
-                        case object _ when m_PercentCompleted < 0 // Lower than minimum value
+                        case object _ when mPercentCompleted < 0 // Lower than minimum value
                        :
                             {
-                                LogIssue("PercentCompleted Read", "Invalid value: " + m_PercentCompleted.ToString());
+                                LogIssue("PercentCompleted Read", "Invalid value: " + mPercentCompleted.ToString());
                                 break;
                             }
 
-                        case object _ when m_PercentCompleted > 100 // Higher than maximum value
+                        case object _ when mPercentCompleted > 100 // Higher than maximum value
                  :
                             {
-                                LogIssue("PercentCompleted Read", "Invalid value: " + m_PercentCompleted.ToString());
+                                LogIssue("PercentCompleted Read", "Invalid value: " + mPercentCompleted.ToString());
                                 break;
                             }
 
                         default:
                             {
-                                LogOK("PercentCompleted Read", m_PercentCompleted.ToString());
+                                LogOk("PercentCompleted Read", mPercentCompleted.ToString());
                                 break;
                             }
                     }
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidValueExceptionAsOK("PercentCompleted Read", MemberType.Property, Required.Optional, ex, "", "Operation is invalid when camera is not imaging or downloading");
+                    HandleInvalidValueExceptionAsOk("PercentCompleted Read", MemberType.Property, Required.Optional, ex, "", "Operation is invalid when camera is not imaging or downloading");
                 }
 
                 // ReadoutModes - Mandatory
                 try
                 {
-                    m_CanReadReadoutModes = false; LogCallToDriver("ConformanceCheck", "About to get ReadoutModes");
-                    m_ReadoutModes = camera.ReadoutModes;
+                    mCanReadReadoutModes = false; LogCallToDriver("ConformanceCheck", "About to get ReadoutModes");
+                    mReadoutModes = camera.ReadoutModes;
                     // Successfully retrieved a value
-                    m_CanReadReadoutModes = true;
-                    foreach (string ReadoutMode in m_ReadoutModes)
-                        LogOK("ReadoutModes Read", ReadoutMode.ToString());
+                    mCanReadReadoutModes = true;
+                    foreach (string readoutMode in mReadoutModes)
+                        LogOk("ReadoutModes Read", readoutMode.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1330,15 +1330,15 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                 if (cancellationToken.IsCancellationRequested) return;
 
                 // ReadoutMode Read - Mandatory
-                m_ReadoutMode = CameraPropertyTestShort(CamPropertyType.ReadoutMode, "ReadoutMode Read", 0, short.MaxValue, true);
-                if (m_CanReadReadoutModes)
+                mReadoutMode = CameraPropertyTestShort(CamPropertyType.ReadoutMode, "ReadoutMode Read", 0, short.MaxValue, true);
+                if (mCanReadReadoutModes)
                 {
                     try
                     {
-                        if (m_ReadoutMode < m_ReadoutModes.Count)
+                        if (mReadoutMode < mReadoutModes.Count)
                         {
-                            LogOK("ReadoutMode Index", "ReadReadoutMode is within the bounds of the ReadoutModes ArrayList");
-                            LogInfo("ReadoutMode Index", "Current value: " + m_ReadoutModes[m_ReadoutMode].ToString());
+                            LogOk("ReadoutMode Index", "ReadReadoutMode is within the bounds of the ReadoutModes ArrayList");
+                            LogInfo("ReadoutMode Index", "Current value: " + mReadoutModes[mReadoutMode].ToString());
                         }
                         else
                             LogIssue("ReadoutMode Index", "ReadReadoutMode is outside the bounds of the ReadoutModes ArrayList");
@@ -1361,48 +1361,48 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                 // OffsetMin Read - Optional
                 try
                 {
-                    m_CanReadOffsetMin = false; LogCallToDriver("ConformanceCheck", "About to get OffsetMin");
-                    m_OffsetMin = camera.OffsetMin;
+                    mCanReadOffsetMin = false; LogCallToDriver("ConformanceCheck", "About to get OffsetMin");
+                    mOffsetMin = camera.OffsetMin;
                     // Successfully retrieved a value
-                    m_CanReadOffsetMin = true;
-                    LogOK("OffsetMin Read", m_OffsetMin.ToString());
+                    mCanReadOffsetMin = true;
+                    LogOk("OffsetMin Read", mOffsetMin.ToString());
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidOperationExceptionAsOK("OffsetMin Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
+                    HandleInvalidOperationExceptionAsOk("OffsetMin Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
                 }
 
                 // OffsetMax Read - Optional
                 try
                 {
-                    m_CanReadOffsetMax = false; LogCallToDriver("ConformanceCheck", "About to get OffsetMax");
-                    m_OffsetMax = camera.OffsetMax;
+                    mCanReadOffsetMax = false; LogCallToDriver("ConformanceCheck", "About to get OffsetMax");
+                    mOffsetMax = camera.OffsetMax;
                     // Successfully retrieved a value
-                    m_CanReadOffsetMax = true;
-                    LogOK("OffsetMax Read", m_OffsetMax.ToString());
+                    mCanReadOffsetMax = true;
+                    LogOk("OffsetMax Read", mOffsetMax.ToString());
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidOperationExceptionAsOK("OffsetMax Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
+                    HandleInvalidOperationExceptionAsOk("OffsetMax Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
                 }
 
                 // Offsets Read - Optional
                 try
                 {
-                    m_CanReadOffsets = false;
+                    mCanReadOffsets = false;
                     LogCallToDriver("ConformanceCheck", "About to get Offsets");
-                    m_Offsets = camera.Offsets;
+                    mOffsets = camera.Offsets;
                     // Successfully retrieved a value
-                    m_CanReadOffsets = true;
-                    foreach (string Offset in m_Offsets)
-                        LogOK("Offsets Read", Offset.ToString());
+                    mCanReadOffsets = true;
+                    foreach (string offset in mOffsets)
+                        LogOk("Offsets Read", offset.ToString());
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidOperationExceptionAsOK("Offsets Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
+                    HandleInvalidOperationExceptionAsOk("Offsets Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
                 }
 
-                if (m_CanReadOffsetMax & m_CanReadOffsetMin & m_CanReadOffsets)
+                if (mCanReadOffsetMax & mCanReadOffsetMin & mCanReadOffsets)
                     LogIssue("Offsets", "OffsetMin, OffsetMax and Offsets are all readable. Only one of OffsetMin/Max as a pair or Offsets should be used, the other should throw a PropertyNotImplemented error");
                 else
                 {
@@ -1412,14 +1412,14 @@ LogCallToDriver("ConformanceCheck", "About to get Gain");
                 // Offset Read - Optional 
                 try
                 {
-                    m_CanReadOffset = false; // Set default value to indicate can't read offset
+                    mCanReadOffset = false; // Set default value to indicate can't read offset
 LogCallToDriver("ConformanceCheck", "About to get Offset");
-                    m_Offset = camera.Offset;
-                    m_CanReadOffset = true; // Flag that we can read Offset OK
-                    if (m_CanReadOffsets)
-                        LogOK("Offset Read", m_Offset + " " + m_Offsets[0].ToString());
+                    mOffset = camera.Offset;
+                    mCanReadOffset = true; // Flag that we can read Offset OK
+                    if (mCanReadOffsets)
+                        LogOk("Offset Read", mOffset + " " + mOffsets[0].ToString());
                     else
-                        LogOK("Offset Read", m_Offset.ToString());
+                        LogOk("Offset Read", mOffset.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -1427,26 +1427,26 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                 }
 
                 // Now check that offset property groups are implemented to handle the three offset modes: NotImplemented, Offset Index (Offset + Offsets) and Offset Value (Offset + OffsetMin + OffsetMax)
-                if (!m_CanReadOffset & !m_CanReadOffsets & !m_CanReadOffsetMin & !m_CanReadOffsetMax)
-                    LogOK("Offset Read", "All four offset properties return errors - the driver is in \"Offset Not Implemented\" mode.");
-                else if (m_CanReadOffset)
+                if (!mCanReadOffset & !mCanReadOffsets & !mCanReadOffsetMin & !mCanReadOffsetMax)
+                    LogOk("Offset Read", "All four offset properties return errors - the driver is in \"Offset Not Implemented\" mode.");
+                else if (mCanReadOffset)
                 {
                     // Test for Offset Index mode
-                    if ((m_CanReadOffset & m_CanReadOffsets & !m_CanReadOffsetMin & !m_CanReadOffsetMax))
+                    if ((mCanReadOffset & mCanReadOffsets & !mCanReadOffsetMin & !mCanReadOffsetMax))
                     {
-                        m_OffsetMode = GainOffsetMode.IndexMode;
-                        LogOK("Offset Read", "Offset and Offsets can be read while OffsetMin and OffsetMax return errors - the driver is in \"Offset Index\" mode.");
+                        mOffsetMode = GainOffsetMode.IndexMode;
+                        LogOk("Offset Read", "Offset and Offsets can be read while OffsetMin and OffsetMax return errors - the driver is in \"Offset Index\" mode.");
                     }
-                    else if ((m_CanReadOffset & !m_CanReadOffsets & m_CanReadOffsetMin & m_CanReadOffsetMax))
+                    else if ((mCanReadOffset & !mCanReadOffsets & mCanReadOffsetMin & mCanReadOffsetMax))
                     {
-                        m_OffsetMode = GainOffsetMode.ValueMode;
-                        LogOK("Offset Read", "Offset, OffsetMin and OffsetMax can be read OK while Offsets returns an error - the driver is in \"Offset Value\" mode.");
+                        mOffsetMode = GainOffsetMode.ValueMode;
+                        LogOk("Offset Read", "Offset, OffsetMin and OffsetMax can be read OK while Offsets returns an error - the driver is in \"Offset Value\" mode.");
                     }
                     else
                     {
-                        m_OffsetMode = GainOffsetMode.Unknown;
+                        mOffsetMode = GainOffsetMode.Unknown;
                         LogIssue("Offset Read", $"Unable to determine whether the driver is in \"Offset Not Implemented\", \"Offset Index\" or \"Offset Value\" mode. Please check the interface specification.");
-                        LogInfo("Offset Read", $"Offset returned an error: {m_CanReadOffset}, Offsets returned an error: {m_CanReadOffsets}, OffsetMin returned an error: {m_CanReadOffsetMin}, OffsetMax returned an error: {m_CanReadOffsetMax}.");
+                        LogInfo("Offset Read", $"Offset returned an error: {mCanReadOffset}, Offsets returned an error: {mCanReadOffsets}, OffsetMin returned an error: {mCanReadOffsetMin}, OffsetMax returned an error: {mCanReadOffsetMax}.");
                         LogInfo("Offset Read", $"\"Offset Not Implemented\" mode: Offset, Offsets, OffsetMin and OffsetMax must all return errors.");
                         LogInfo("Offset Read", $"\"Offset Index\" mode: Offset and Offsets must work while OffsetMin and OffsetMax must return errors.");
                         LogInfo("Offset Read", $"\"Offset Value\" mode: Offset, OffsetMin and OffsetMax must work while Offsets must throw return an error.");
@@ -1455,13 +1455,13 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                 else
                 {
                     LogIssue("Offset Read", $"Offset Read returned an error but at least one of Offsets, OffsetMin Or OffsetMax did not return an error. If Offset returns an error, all the other offset properties must do likewise.");
-                    LogInfo("Offset Read", $"Offsets returned an error : {m_CanReadOffsets}, OffsetMin returned an error : {m_CanReadOffsetMin}, OffsetMax returned an error : {m_CanReadOffsetMax}.");
+                    LogInfo("Offset Read", $"Offsets returned an error : {mCanReadOffsets}, OffsetMin returned an error : {mCanReadOffsetMin}, OffsetMax returned an error : {mCanReadOffsetMax}.");
                 }
 
                 // Offset write - Optional when neither offset index nor offset value mode is supported; must be implemented if either mode is supported
 
                 // First test for the only valid not implemented state when neither offset mode is supported
-                if (!m_CanReadOffset & !m_CanReadOffsets & !m_CanReadOffsetMin & !m_CanReadOffsetMax)
+                if (!mCanReadOffset & !mCanReadOffsets & !mCanReadOffsetMin & !mCanReadOffsetMax)
                 {
                     try
                     {
@@ -1475,7 +1475,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                     }
                 }
                 else
-                    switch (m_OffsetMode)
+                    switch (mOffsetMode)
                     {
                         case GainOffsetMode.Unknown:
                             {
@@ -1494,8 +1494,8 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                                 try
                                 {
                                     LogCallToDriver("ConformanceCheck", "About to set Offset");
-                                    camera.Offset = m_OffsetMin;
-                                    LogOK("Offset Write", $"Successfully set offset minimum value {m_OffsetMin}.");
+                                    camera.Offset = mOffsetMin;
+                                    LogOk("Offset Write", $"Successfully set offset minimum value {mOffsetMin}.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -1506,8 +1506,8 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                                 try
                                 {
                                     LogCallToDriver("ConformanceCheck", "About to set Offset");
-                                    camera.Offset = m_OffsetMax;
-                                    LogOK("Offset Write", $"Successfully set offset maximum value {m_OffsetMax}.");
+                                    camera.Offset = mOffsetMax;
+                                    LogOk("Offset Write", $"Successfully set offset maximum value {mOffsetMax}.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -1518,45 +1518,45 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                                 try
                                 {
                                     LogCallToDriver("ConformanceCheck", "About to set Offset");
-                                    camera.Offset = m_OffsetMin - 1;
-                                    LogIssue("Offset Write", $"Successfully set an offset below the minimum value ({m_OffsetMin - 1}), this should have resulted in an InvalidValue error.");
+                                    camera.Offset = mOffsetMin - 1;
+                                    LogIssue("Offset Write", $"Successfully set an offset below the minimum value ({mOffsetMin - 1}), this should have resulted in an InvalidValue error.");
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleInvalidValueExceptionAsOK("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"InvalidValue Received error for offset {m_OffsetMin - 1}, which is lower than the minimum value.");
+                                    HandleInvalidValueExceptionAsOk("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"InvalidValue Received error for offset {mOffsetMin - 1}, which is lower than the minimum value.");
                                 }
 
                                 // Test writing a lower than minimum value - this should result in am invalid value exception
                                 try
                                 {
                                     LogCallToDriver("ConformanceCheck", "About to set Offset");
-                                    camera.Offset = m_OffsetMax + 1;
-                                    LogIssue("Offset Write", $"Successfully set an offset above the maximum value({m_OffsetMax + 1}), this should have resulted in an InvalidValueerror.");
+                                    camera.Offset = mOffsetMax + 1;
+                                    LogIssue("Offset Write", $"Successfully set an offset above the maximum value({mOffsetMax + 1}), this should have resulted in an InvalidValueerror.");
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleInvalidValueExceptionAsOK("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"InvalidValue Received error for offset {m_OffsetMax + 1} which is higher than the maximum value.");
+                                    HandleInvalidValueExceptionAsOk("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"InvalidValue Received error for offset {mOffsetMax + 1} which is higher than the maximum value.");
                                 }
                                 break;
                             }
 
                         default:
                             {
-                                LogIssue("Offset Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {m_OffsetMode}");
+                                LogIssue("Offset Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {mOffsetMode}");
                                 break;
                             }
                     }
 
                 // SubExposureDuration Read - Optional 
-                m_SubExposureDuration = CameraPropertyTestDouble(CamPropertyType.SubExposureDuration, "SubExposureDuration", double.Epsilon, double.MaxValue, false); if (cancellationToken.IsCancellationRequested)
+                mSubExposureDuration = CameraPropertyTestDouble(CamPropertyType.SubExposureDuration, "SubExposureDuration", double.Epsilon, double.MaxValue, false); if (cancellationToken.IsCancellationRequested)
                     return;
 
                 // SubExposureDuration Write - Optional 
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to set SubExposureDuration");
-                    camera.SubExposureDuration = m_SubExposureDuration;
-                    LogOK("SubExposureDuration write", $"Successfully wrote {m_SubExposureDuration}");
+                    camera.SubExposureDuration = mSubExposureDuration;
+                    LogOk("SubExposureDuration write", $"Successfully wrote {mSubExposureDuration}");
                 }
                 catch (Exception ex)
                 {
@@ -1564,13 +1564,13 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                 }
             }
         }
-        private CameraState CameraPropertyTestCameraState(CamPropertyType p_Type, string p_Name)
+        private CameraState CameraPropertyTestCameraState(CamPropertyType pType, string pName)
         {
             CameraState returnValue = CameraState.Idle;
 
             try
             {
-                switch (p_Type)
+                switch (pType)
                 {
                     case CamPropertyType.CameraState:
                         {
@@ -1581,26 +1581,26 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
                     default:
                         {
-                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogIssue(pName, "returnValue: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
-                LogOK(p_Name, returnValue.ToString());
+                LogOk(pName, returnValue.ToString());
             }
             catch (Exception ex)
             {
-                HandleException(p_Name, MemberType.Property, Required.Optional, ex, "");
+                HandleException(pName, MemberType.Property, Required.Optional, ex, "");
             }
 
             return returnValue;
         }
-        private short CameraPropertyTestShort(CamPropertyType p_Type, string p_Name, short p_Min, short p_Max, bool p_Mandatory)
+        private short CameraPropertyTestShort(CamPropertyType pType, string pName, short pMin, short pMax, bool pMandatory)
         {
             short returnValue = 0;
 
             try
             {
-                switch (p_Type)
+                switch (pType)
                 {
                     case CamPropertyType.BayerOffsetX:
                         {
@@ -1632,88 +1632,88 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
                     default:
                         {
-                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogIssue(pName, "returnValue: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
                 // Successfully retrieved a value
                 switch (returnValue)
                 {
-                    case object _ when returnValue < p_Min // Lower than minimum value
+                    case object _ when returnValue < pMin // Lower than minimum value
                    :
                         {
-                            LogIssue(p_Name, "Invalid value: " + returnValue.ToString());
+                            LogIssue(pName, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
-                    case object _ when returnValue > p_Max // Higher than maximum value
+                    case object _ when returnValue > pMax // Higher than maximum value
              :
                         {
-                            LogIssue(p_Name, "Invalid value: " + returnValue.ToString());
+                            LogIssue(pName, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogOK(p_Name, returnValue.ToString());
+                            LogOk(pName, returnValue.ToString());
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                HandleException(p_Name, MemberType.Property, p_Mandatory ? Required.Mandatory : Required.Optional, ex, "");
+                HandleException(pName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
             }
 
             return returnValue;
         }
-        private bool CameraPropertyMustNotImplemented(CamPropertyType p_Type, string p_Name)
+        private bool CameraPropertyMustNotImplemented(CamPropertyType pType, string pName)
         {
-            short TestShort; // Dummy variable to hold value that should never be returned
+            short testShort; // Dummy variable to hold value that should never be returned
             bool returnValue = true;
 
             try
             {
-                switch (p_Type)
+                switch (pType)
                 {
                     case CamPropertyType.BayerOffsetX:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get BayerOffsetX");
-                            TestShort = camera.BayerOffsetX;
+                            testShort = camera.BayerOffsetX;
                             returnValue = false; // Property should throw an exception but did not so record that fact
-                            LogIssue(p_Name, "Sensor type is Monochrome so this property must throw a PropertyNotImplemented error; it must not return a value");
+                            LogIssue(pName, "Sensor type is Monochrome so this property must throw a PropertyNotImplemented error; it must not return a value");
                             break;
                         }
 
                     case CamPropertyType.BayerOffsetY:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get BayerOffsetY");
-                            TestShort = camera.BayerOffsetY;
+                            testShort = camera.BayerOffsetY;
                             returnValue = false; // Property should throw an exception but did not so record that fact
-                            LogIssue(p_Name, "Sensor type is Monochrome so this property must throw a PropertyNotImplemented error; it must not return a value");
+                            LogIssue(pName, "Sensor type is Monochrome so this property must throw a PropertyNotImplemented error; it must not return a value");
                             break;
                         }
 
                     default:
                         {
-                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogIssue(pName, "returnValue: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                HandleException(p_Name, MemberType.Property, Required.MustNotBeImplemented, ex, "Sensor type is Monochrome");
+                HandleException(pName, MemberType.Property, Required.MustNotBeImplemented, ex, "Sensor type is Monochrome");
             }
             return returnValue; // Return success indicator, True means property did thrown the exception, False means that it did not
         }
-        private int CameraPropertyTestInteger(CamPropertyType p_Type, string p_Name, int p_Min, int p_Max)
+        private int CameraPropertyTestInteger(CamPropertyType pType, string pName, int pMin, int pMax)
         {
             int returnValue = 0;
 
             try
             {
-                switch (p_Type)
+                switch (pType)
                 {
                     case CamPropertyType.BinX:
                         {
@@ -1750,7 +1750,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                             break;
                         }
 
-                    case CamPropertyType.MaxADU:
+                    case CamPropertyType.MaxAdu:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get MaxADU");
                             returnValue = camera.MaxADU;
@@ -1801,61 +1801,61 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
                     default:
                         {
-                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogIssue(pName, "returnValue: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
 
                 // Successfully retrieved a value so test it
-                if (returnValue < p_Min)
+                if (returnValue < pMin)
                 {
-                    LogIssue(p_Name, $"Invalid value below expected minimum ({p_Min}): " + returnValue.ToString());
+                    LogIssue(pName, $"Invalid value below expected minimum ({pMin}): " + returnValue.ToString());
                 }
-                else if (returnValue > p_Max)
+                else if (returnValue > pMax)
                 {
-                    switch (p_Type) // Provide the required message depending on the property being tested
+                    switch (pType) // Provide the required message depending on the property being tested
                     {
                         case CamPropertyType.MaxBinX // Informational message for MaxBinX
                        :
                             {
-                                LogInfo(p_Name, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_X}. Is this intended?");
+                                LogInfo(pName, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_X}. Is this intended?");
                                 break;
                             }
 
                         case CamPropertyType.MaxBinY // Informational message for MaxBinY
                  :
                             {
-                                LogInfo(p_Name, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_Y}. Is this intended?");
+                                LogInfo(pName, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_Y}. Is this intended?");
                                 break;
                             }
 
                         default:
                             {
-                                LogIssue(p_Name, $"Invalid value (expected range: {p_Min} - {p_Max}): {returnValue}");
+                                LogIssue(pName, $"Invalid value (expected range: {pMin} - {pMax}): {returnValue}");
                                 break;
                             }
                     }
                 }
                 else
                 {
-                    LogOK(p_Name, returnValue.ToString());
+                    LogOk(pName, returnValue.ToString());
                 }
             }
             catch (Exception ex)
             {
-                HandleException(p_Name, MemberType.Property, Required.Optional, ex, "");
+                HandleException(pName, MemberType.Property, Required.Optional, ex, "");
             }
             return returnValue;
         }
-        private double CameraPropertyTestDouble(CamPropertyType p_Type, string p_Name, double p_Min, double p_Max, bool p_Mandatory)
+        private double CameraPropertyTestDouble(CamPropertyType pType, string pName, double pMin, double pMax, bool pMandatory)
         {
             double returnValue = 0.0;
 
             try
             {
-                switch (p_Type)
+                switch (pType)
                 {
-                    case CamPropertyType.CCDTemperature:
+                    case CamPropertyType.CcdTemperature:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CCDTemperature");
                             returnValue = camera.CCDTemperature;
@@ -1869,7 +1869,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                             break;
                         }
 
-                    case CamPropertyType.ElectronsPerADU:
+                    case CamPropertyType.ElectronsPerAdu:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get ElectronsPerADU");
                             returnValue = camera.ElectronsPerADU;
@@ -1904,7 +1904,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                             break;
                         }
 
-                    case CamPropertyType.SetCCDTemperature:
+                    case CamPropertyType.SetCcdTemperature:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get SetCCDTemperature");
                             returnValue = camera.SetCCDTemperature;
@@ -1941,48 +1941,48 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
                     default:
                         {
-                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogIssue(pName, "returnValue: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
                 // Successfully retrieved a value
                 switch (returnValue)
                 {
-                    case double _ when returnValue < p_Min // Lower than minimum value
+                    case double _ when returnValue < pMin // Lower than minimum value
                    :
                         {
-                            LogIssue(p_Name, "Invalid value: " + returnValue.ToString());
+                            LogIssue(pName, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
-                    case double _ when returnValue > p_Max // Higher than maximum value
+                    case double _ when returnValue > pMax // Higher than maximum value
              :
                         {
-                            LogIssue(p_Name, "Invalid value: " + returnValue.ToString());
+                            LogIssue(pName, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogOK(p_Name, returnValue.ToString());
+                            LogOk(pName, returnValue.ToString());
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                HandleException(p_Name, MemberType.Property, p_Mandatory ? Required.Mandatory : Required.Optional, ex, "");
+                HandleException(pName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
             }
             return returnValue;
         }
-        private bool CameraPropertyTestBoolean(CamPropertyType p_Type, string p_Name, bool p_Mandatory)
+        private bool CameraPropertyTestBoolean(CamPropertyType pType, string pName, bool pMandatory)
         {
             bool returnValue = false;
 
             try
             {
                 returnValue = false;
-                switch (p_Type)
+                switch (pType)
                 {
                     case CamPropertyType.CoolerOn:
                         {
@@ -2007,9 +2007,9 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
                     case CamPropertyType.IsPulseGuiding:
                         {
-                            m_IsPulseGuidingSupported = false; LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
+                            mIsPulseGuidingSupported = false; LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
                             returnValue = camera.IsPulseGuiding;
-                            m_IsPulseGuidingSupported = true; // Command works properly and doesn't cause a not implemented exception
+                            mIsPulseGuidingSupported = true; // Command works properly and doesn't cause a not implemented exception
                             break;
                         }
 
@@ -2022,26 +2022,26 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
                     default:
                         {
-                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogIssue(pName, "returnValue: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
                 // Successfully retrieved a value
-                LogOK(p_Name, returnValue.ToString());
+                LogOk(pName, returnValue.ToString());
             }
             catch (Exception ex)
             {
-                HandleException(p_Name, MemberType.Property, p_Mandatory ? Required.Mandatory : Required.Optional, ex, "");
+                HandleException(pName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
             }
 
             return returnValue;
         }
-        private string CameraPropertyTestString(CamPropertyType p_Type, string p_Name, int p_MaxLength, bool p_Mandatory)
+        private string CameraPropertyTestString(CamPropertyType pType, string pName, int pMaxLength, bool pMandatory)
         {
             string returnValue = "";
             try
             {
-                switch (p_Type)
+                switch (pType)
                 {
                     case CamPropertyType.Description:
                         {
@@ -2059,7 +2059,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
                     default:
                         {
-                            LogIssue(p_Name, "returnValue: Unknown test type - " + p_Type.ToString());
+                            LogIssue(pName, "returnValue: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
@@ -2068,69 +2068,69 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                 {
                     case object _ when returnValue == "":
                         {
-                            LogOK(p_Name, "The driver returned an empty string");
+                            LogOk(pName, "The driver returned an empty string");
                             break;
                         }
 
                     default:
                         {
-                            if (returnValue.Length <= p_MaxLength)
-                                LogOK(p_Name, returnValue);
+                            if (returnValue.Length <= pMaxLength)
+                                LogOk(pName, returnValue);
                             else
-                                LogIssue(p_Name, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);
+                                LogIssue(pName, "String exceeds " + pMaxLength + " characters maximum length - " + returnValue);
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                HandleException(p_Name, MemberType.Property, p_Mandatory ? Required.Mandatory : Required.Optional, ex, "");
+                HandleException(pName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
             }
 
             return returnValue;
         }
-        private void CameraPropertyWriteTest(CamPropertyType p_Type, string p_Property, int p_TestOK)
+        private void CameraPropertyWriteTest(CamPropertyType pType, string pProperty, int pTestOk)
         {
 
             // NOTE: Out of range values should not be tested here but later when the exposure is actually taken
 
             try // OK value first
             {
-                switch (p_Type)
+                switch (pType)
                 {
                     case CamPropertyType.NumX:
                         {
                             LogCallToDriver("ConformanceCheck", "About to set NumX");
-                            camera.NumX = p_TestOK;
+                            camera.NumX = pTestOk;
                             break;
                         }
 
                     case CamPropertyType.NumY:
                         {
                             LogCallToDriver("ConformanceCheck", "About to set NumY");
-                            camera.NumY = p_TestOK;
+                            camera.NumY = pTestOk;
                             break;
                         }
 
                     case CamPropertyType.StartX:
                         {
                             LogCallToDriver("ConformanceCheck", "About to set StartX");
-                            camera.StartX = p_TestOK;
+                            camera.StartX = pTestOk;
                             break;
                         }
 
                     case CamPropertyType.StartY:
                         {
                             LogCallToDriver("ConformanceCheck", "About to set StartY");
-                            camera.StartY = p_TestOK;
+                            camera.StartY = pTestOk;
                             break;
                         }
                 }
-                LogOK(p_Property + " write", "Successfully wrote " + p_TestOK);
+                LogOk(pProperty + " write", "Successfully wrote " + pTestOk);
             }
             catch (Exception ex)
             {
-                HandleException(p_Property + " write", MemberType.Property, Required.MustBeImplemented, ex, "Can't set legal value: " + p_TestOK.ToString());
+                HandleException(pProperty + " write", MemberType.Property, Required.MustBeImplemented, ex, "Can't set legal value: " + pTestOk.ToString());
             }
         }
 
@@ -2142,32 +2142,32 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
             try
             {
                 LogCallToDriver("ConformanceCheck", "About to get CameraState");
-                m_CameraState = camera.CameraState;
+                mCameraState = camera.CameraState;
 
                 // Test whether the camera is idle, which it should be in a well behaved device
-                if (m_CameraState != CameraState.Idle)
+                if (mCameraState != CameraState.Idle)
                 {
-                    LogIssue("AbortExposure", $"The camera should be idle but is not: {m_CameraState}");
+                    LogIssue("AbortExposure", $"The camera should be idle but is not: {mCameraState}");
                 }
 
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to call AbortExposure");
                     camera.AbortExposure();
-                    if (m_CanAbortExposure)
-                        LogOK("AbortExposure", "No error returned when camera is already idle");
+                    if (mCanAbortExposure)
+                        LogOk("AbortExposure", "No error returned when camera is already idle");
                     else
                         LogIssue("AbortExposure", "CanAbortExposure is false but no error is returned when AbortExposure is called");
                 }
                 catch (Exception ex)
                 {
-                    if (m_CanAbortExposure)
+                    if (mCanAbortExposure)
                     {
                         LogIssue("AbortExposure", $"Received error when camera is idle: {ex.Message}");
                         LogDebug("AbortExposure", $"Exception detail: {ex}");
                     }
                     else
-                        LogOK("AbortExposure", "CanAbortExposure is false and an error was returned");
+                        LogOk("AbortExposure", "CanAbortExposure is false and an error was returned");
                 }
             }
             catch (Exception ex)
@@ -2178,7 +2178,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
 
             // PulseGuide
             SetTest("PulseGuide");
-            if (m_CanPulseGuide) // Can pulse guide
+            if (mCanPulseGuide) // Can pulse guide
             {
                 try
                 {
@@ -2208,11 +2208,11 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                 {
                     if (IsMethodNotImplementedException(ex))
                     {
-                        LogOK("PulseGuide", "CanPulseGuide is false and PulseGuide is not implemented in this driver");
+                        LogOk("PulseGuide", "CanPulseGuide is false and PulseGuide is not implemented in this driver");
                     }
                     else
                     {
-                        LogOK("PulseGuide", $"CanPulseGuide is false and an error was returned when calling the method: {ex.Message}");
+                        LogOk("PulseGuide", $"CanPulseGuide is false and an error was returned when calling the method: {ex.Message}");
                     }
                 }
 
@@ -2221,12 +2221,12 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
             try
             {
                 LogCallToDriver("ConformanceCheck", "About to get CameraState");
-                m_CameraState = camera.CameraState;
+                mCameraState = camera.CameraState;
 
                 // Test whether the camera is idle, which it should be in a well behaved device
-                if (m_CameraState != CameraState.Idle)
+                if (mCameraState != CameraState.Idle)
                 {
-                    LogIssue("AbortExposure", $"The camera should be idle but is not: {m_CameraState}");
+                    LogIssue("AbortExposure", $"The camera should be idle but is not: {mCameraState}");
                 }
 
                 try
@@ -2234,18 +2234,18 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                     LogCallToDriver("ConformanceCheck", "About to call StopExposure");
                     SetAction("Calling StopExposure()");
                     camera.StopExposure();
-                    if (m_CanStopExposure)
-                        LogOK("StopExposure", "No error returned when camera is already idle");
+                    if (mCanStopExposure)
+                        LogOk("StopExposure", "No error returned when camera is already idle");
                     else
                         LogIssue("StopExposure", "CanStopExposure is false but no error is returned when StopExposure is called");
                 }
                 catch (Exception ex)
                 {
-                    if (m_CanStopExposure)
+                    if (mCanStopExposure)
                         LogIssue("StopExposure", $"Received error when the camera is idle: {ex.Message}");
                     else
                     {
-                        LogOK("StopExposure", $"CanStopExposure is false and an error was returned: {ex.Message}");
+                        LogOk("StopExposure", $"CanStopExposure is false and an error was returned: {ex.Message}");
                     }
 
                     LogDebug("StopExposure", $"Exception detail: {ex}");
@@ -2267,28 +2267,28 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
             if (settings.CameraMaxBinX > 0)
             {
                 maxBinX = settings.CameraMaxBinX;
-                LogTestAndMessage("StartExposure", string.Format("Test range set to MaxBinX = {0} by Conform configuration, camera MaxBinX = {1}", maxBinX, m_MaxBinX));
+                LogTestAndMessage("StartExposure", string.Format("Test range set to MaxBinX = {0} by Conform configuration, camera MaxBinX = {1}", maxBinX, mMaxBinX));
             }
             else
-                maxBinX = m_MaxBinX;
+                maxBinX = mMaxBinX;
             if (settings.CameraMaxBinY > 0)
             {
                 maxBinY = settings.CameraMaxBinY;
-                LogTestAndMessage("StartExposure", string.Format("Test range set to MaxBinY = {0} by Conform configuration, camera MaxBinY = {1}", maxBinY, m_MaxBinY));
+                LogTestAndMessage("StartExposure", string.Format("Test range set to MaxBinY = {0} by Conform configuration, camera MaxBinY = {1}", maxBinY, mMaxBinY));
             }
             else
-                maxBinY = m_MaxBinY;
+                maxBinY = mMaxBinY;
 
-            if ((settings.CameraMaxBinX > m_MaxBinX) | (settings.CameraMaxBinY > m_MaxBinY))
+            if ((settings.CameraMaxBinX > mMaxBinX) | (settings.CameraMaxBinY > mMaxBinY))
                 LogNewLine(); // Insert a blank line if required
-            if (settings.CameraMaxBinX > m_MaxBinX)
-                LogTestAndMessage("StartExposure", string.Format("WARNING - Conform's configured MaxBinX: {0} is greater than the camera's reported MaxBinX: {1}!", maxBinX, m_MaxBinX));
-            if (settings.CameraMaxBinY > m_MaxBinY)
-                LogTestAndMessage("StartExposure", string.Format("WARNING - Conform's configured MaxBinY: {0} is greater than the camera's reported MaxBinY: {1}!", maxBinY, m_MaxBinY));
+            if (settings.CameraMaxBinX > mMaxBinX)
+                LogTestAndMessage("StartExposure", string.Format("WARNING - Conform's configured MaxBinX: {0} is greater than the camera's reported MaxBinX: {1}!", maxBinX, mMaxBinX));
+            if (settings.CameraMaxBinY > mMaxBinY)
+                LogTestAndMessage("StartExposure", string.Format("WARNING - Conform's configured MaxBinY: {0} is greater than the camera's reported MaxBinY: {1}!", maxBinY, mMaxBinY));
 
             // StartExposure - Confirm that correct operation occurs
             int binX, binY;
-            if (m_CanAsymmetricBin)
+            if (mCanAsymmetricBin)
             {
                 for (binY = 1; binY <= maxBinY; binY++)
                 {
@@ -2368,7 +2368,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
             {
                 for (j = 1; j <= maxBinY; j++)
                 {
-                    if (m_CanAsymmetricBin)
+                    if (mCanAsymmetricBin)
                     {
                         // X size too large for binned size
                         CameraExposure($"Reject Bad XSize (bin {i} x {j})", $"Testing rejection of bad X size value for bin {i} x {j} ({Convert.ToInt32(cameraXSize / (double)i) + 1})", i, j, 0, 0, Convert.ToInt32((cameraXSize / (double)i) + 1), Convert.ToInt32(cameraYSize / (double)j), 0.1, "X size larger than binned chip size, Bin " + i + "x" + j);
@@ -2419,12 +2419,12 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
         private void CameraExposure(string testName, string testDescription, int requiredBinX, int requiredBinY, int requiredStartX, int requiredStartY, int requiredNumX, int requiredNumY, double requiredDuration, string expectedErrorMessage)
         {
             string numPlanes, variantType;
-            bool exposedOK, imageReadyTooEarly = false; // Flag to determine whether we were successful or something failed
-            DateTime startTime, startTimeUTC, endTime;
+            bool exposedOk, imageReadyTooEarly = false; // Flag to determine whether we were successful or something failed
+            DateTime startTime, startTimeUtc, endTime;
             short percentCompleted;
 
             // Start off by assuming the worst case, this will be set true if the exposure completes OK
-            exposedOK = false;
+            exposedOk = false;
 
             LogDebug(testName, $"Entered CameraExposure");
 
@@ -2556,7 +2556,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
             // Start exposure because all parameters were set OK
 
             startTime = DateTime.Now;
-            startTimeUTC = DateTime.UtcNow;
+            startTimeUtc = DateTime.UtcNow;
             bool initiatedOk = false; // Flag indicating whether the StarteExposure task completed OK
             try
             {
@@ -2571,7 +2571,7 @@ LogCallToDriver("ConformanceCheck", "About to get Offset");
                 // Start a task to update the UI while initiating the exposure
                 Task.Run(() =>
                 {
-                    UpdateUI(exposeUiTaskCancellationToken);
+                    UpdateUi(exposeUiTaskCancellationToken);
                 }, exposeUiTaskCancellationToken);
 
                 // Initiate the exposure
@@ -2612,7 +2612,7 @@ LogCallToDriver("ConformanceCheck", "About to call StartExposure");
                         {
                             // Record the error
                             if (expectedErrorMessage != "")
-                                LogOK(testName, $"Received error: {ex.Message}");
+                                LogOk(testName, $"Received error: {ex.Message}");
                             else
                             {
                                 LogIssue(testName, $"Error initiating exposure: {ex.Message}");
@@ -2625,7 +2625,7 @@ LogCallToDriver("ConformanceCheck", "About to call StartExposure");
                 // Wait for the start exposure task to complete or be cancelled
                 try
                 {
-                    ranToCompletion = startExposureTask.Wait(TimeSpan.FromSeconds(settings.CameraWaitTimeout), applicationCancellationToken);
+                    ranToCompletion = startExposureTask.Wait(TimeSpan.FromSeconds(settings.CameraWaitTimeout), ApplicationCancellationToken);
                 }
                 catch (OperationCanceledException)
                 {
@@ -2723,8 +2723,8 @@ LogCallToDriver("ConformanceCheck", "About to get ImageReady and CameraState");
                     {
                         if (endTime.Subtract(startTime).TotalSeconds >= requiredDuration)
                         {
-                            LogOK(testName, "Synchronous exposure found OK: " + requiredDuration + " seconds");
-                            CameraTestLast(requiredDuration, startTimeUTC);
+                            LogOk(testName, "Synchronous exposure found OK: " + requiredDuration + " seconds");
+                            CameraTestLast(requiredDuration, startTimeUtc);
                         }
                         else
                             LogIssue(testName, "Synchronous exposure found but image was returned before exposure time was complete");
@@ -2775,7 +2775,7 @@ LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                         return;
                     }
 
-                    if (applicationCancellationToken.IsCancellationRequested) // Exit if required
+                    if (ApplicationCancellationToken.IsCancellationRequested) // Exit if required
                     {
                         ResetTestActionStatus();
                         return;
@@ -2793,7 +2793,7 @@ LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                     {
                         // Wait for the exposing state to finish
                         startTime = DateTime.Now;
-                        startTimeUTC = DateTime.UtcNow; LogCallToDriver("ConformanceCheck", "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
+                        startTimeUtc = DateTime.UtcNow; LogCallToDriver("ConformanceCheck", "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
 
                         // Start the loop timing stopwatch
                         sw.Restart();
@@ -2845,7 +2845,7 @@ LogCallToDriver("ConformanceCheck", "About to get ImageReady");
 
                         endTime = DateTime.Now;
 
-                        if (applicationCancellationToken.IsCancellationRequested) // Exit if required
+                        if (ApplicationCancellationToken.IsCancellationRequested) // Exit if required
                         {
                             ResetTestActionStatus();
                             return;
@@ -2880,7 +2880,7 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
                             return (camera.CameraState != CameraState.Idle) & (camera.CameraState != CameraState.Error);
                         }, 500, settings.CameraWaitTimeout);
 
-                        if (applicationCancellationToken.IsCancellationRequested) // Exit if required
+                        if (ApplicationCancellationToken.IsCancellationRequested) // Exit if required
                         {
                             ResetTestActionStatus();
                             return;
@@ -2946,7 +2946,7 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
 
             try
             {
-                if (applicationCancellationToken.IsCancellationRequested) // Exit if required
+                if (ApplicationCancellationToken.IsCancellationRequested) // Exit if required
                 {
                     ResetTestActionStatus();
                     return;
@@ -2954,8 +2954,8 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
                 LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                 if (camera.ImageReady)
                 {
-                    LogOK(testName, "Asynchronous exposure found OK: " + requiredDuration + " seconds");
-                    CameraTestLast(requiredDuration, startTimeUTC);
+                    LogOk(testName, "Asynchronous exposure found OK: " + requiredDuration + " seconds");
+                    CameraTestLast(requiredDuration, startTimeUtc);
                 }
                 else
                 {
@@ -2976,9 +2976,9 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
                 // Camera exposed OK and didn't generate an exception
                 else
                 {
-                    exposedOK = true;
+                    exposedOk = true;
                 }
-                LogDebug(testName, $"Camera exposed image OK: {exposedOK}");
+                LogDebug(testName, $"Camera exposed image OK: {exposedOk}");
             }
             catch (Exception ex)
             {
@@ -3006,7 +3006,7 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
                 CancellationToken iaUiTaskCancellationToken = iaUiTaskTokenSource.Token;
                 Task.Run(() =>
                 {
-                    UpdateUI(iaUiTaskCancellationToken);
+                    UpdateUi(iaUiTaskCancellationToken);
                 }, iaUiTaskCancellationToken);
 
                 // Create a cancellation token that we can set if the task times out
@@ -3020,7 +3020,7 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
                     {
                         LogCallToDriver("ConformanceCheck", "About to get ImageArray");
                         sw.Restart();
-                        m_ImageArray = (Array)camera.ImageArray;
+                        mImageArray = (Array)camera.ImageArray;
                         sw.Stop();
                         // Do not respond if the task has been cancelled
                         if (!cancellationToken.IsCancellationRequested) // Task is live and has not been cancelled
@@ -3046,7 +3046,7 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
                 bool ranToCompletion = false;
                 try
                 {
-                    ranToCompletion = iaTask.Wait(TimeSpan.FromSeconds(settings.CameraWaitTimeout), applicationCancellationToken);
+                    ranToCompletion = iaTask.Wait(TimeSpan.FromSeconds(settings.CameraWaitTimeout), ApplicationCancellationToken);
                 }
                 catch (OperationCanceledException)
                 {
@@ -3085,27 +3085,27 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
 
                         case TaskStatus.RanToCompletion: // The ImageArray method completed OK within the specified timeout period.
                             // Test image array variant array for conformity
-                            if ((m_ImageArray.GetLength(0) == requiredNumX) & (m_ImageArray.GetLength(1) == requiredNumY))
+                            if ((mImageArray.GetLength(0) == requiredNumX) & (mImageArray.GetLength(1) == requiredNumY))
                             {
-                                if (m_ImageArray.GetType().ToString() == "System.Int32[,]" | m_ImageArray.GetType().ToString() == "System.Int32[,,]")
+                                if (mImageArray.GetType().ToString() == "System.Int32[,]" | mImageArray.GetType().ToString() == "System.Int32[,,]")
                                 {
-                                    if (m_ImageArray.Rank == 2)
+                                    if (mImageArray.Rank == 2)
                                         numPlanes = "1 plane";
                                     else
                                     {
                                         numPlanes = "1 plane";
-                                        if (m_ImageArray.GetUpperBound(2) > 0)
-                                            numPlanes = System.Convert.ToString(m_ImageArray.GetUpperBound(2) + 1) + " planes";
+                                        if (mImageArray.GetUpperBound(2) > 0)
+                                            numPlanes = System.Convert.ToString(mImageArray.GetUpperBound(2) + 1) + " planes";
                                     }
-                                    LogOK("ImageArray", $"Successfully read 32 bit integer array ({numPlanes}) {m_ImageArray.GetLength(0)} x {m_ImageArray.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
+                                    LogOk("ImageArray", $"Successfully read 32 bit integer array ({numPlanes}) {mImageArray.GetLength(0)} x {mImageArray.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
                                 }
                                 else
-                                    LogIssue("ImageArray", "Expected 32 bit integer array, actually got: " + m_ImageArray.GetType().ToString());
+                                    LogIssue("ImageArray", "Expected 32 bit integer array, actually got: " + mImageArray.GetType().ToString());
                             }
-                            else if ((m_ImageArray.GetLength(0) == requiredNumY) & (m_ImageArray.GetLength(1) == requiredNumX))
-                                LogIssue("ImageArray", "Camera image dimensions swapped, expected values: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
+                            else if ((mImageArray.GetLength(0) == requiredNumY) & (mImageArray.GetLength(1) == requiredNumX))
+                                LogIssue("ImageArray", "Camera image dimensions swapped, expected values: " + requiredNumX + " x " + requiredNumY + " - actual values: " + mImageArray.GetLength(0) + " x " + mImageArray.GetLength(1));
                             else
-                                LogIssue("ImageArray", "Camera image does not have the expected dimensions of: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArray.GetLength(0) + " x " + m_ImageArray.GetLength(1));
+                                LogIssue("ImageArray", "Camera image does not have the expected dimensions of: " + requiredNumX + " x " + requiredNumY + " - actual values: " + mImageArray.GetLength(0) + " x " + mImageArray.GetLength(1));
                             break;
                     }
                 }
@@ -3131,7 +3131,7 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
                 }
 
                 // Exit if cancelled
-                if (applicationCancellationToken.IsCancellationRequested) // Exit if required
+                if (ApplicationCancellationToken.IsCancellationRequested) // Exit if required
                 {
                     ResetTestActionStatus();
                     return;
@@ -3177,7 +3177,7 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
 
                     Task.Run(() =>
                     {
-                        UpdateUI(iavUiTaskCancellationToken);
+                        UpdateUi(iavUiTaskCancellationToken);
                     }, iavUiTaskCancellationToken);
 
                     // Create a cancellation token that we can set if the task times out
@@ -3198,7 +3198,7 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                             // Assign the array to the application variable if the task is not cancelled
                             if (!cancellationToken.IsCancellationRequested) // Completed successfully
                             {
-                                m_ImageArrayVariant = (Array)imageObject;
+                                mImageArrayVariant = (Array)imageObject;
                                 gotImageOk = true;
                             }
                             else // Operation cancelled
@@ -3237,7 +3237,7 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                     // Wait for the ImageArrayVariant task to complete or be cancelled
                     try
                     {
-                        ranToCompletion = iavTask.Wait(TimeSpan.FromSeconds(settings.CameraWaitTimeout), applicationCancellationToken);
+                        ranToCompletion = iavTask.Wait(TimeSpan.FromSeconds(settings.CameraWaitTimeout), ApplicationCancellationToken);
                     }
                     catch (OperationCanceledException)
                     {
@@ -3299,42 +3299,42 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                     }
 
                     // Exit if cancelled
-                    if (applicationCancellationToken.IsCancellationRequested)
+                    if (ApplicationCancellationToken.IsCancellationRequested)
                     {
                         ResetTestActionStatus();
                         return;
                     }
 
                     // Test image array variant array for conformity
-                    if ((m_ImageArrayVariant.GetLength(0) == requiredNumX) & (m_ImageArrayVariant.GetLength(1) == requiredNumY))
+                    if ((mImageArrayVariant.GetLength(0) == requiredNumX) & (mImageArrayVariant.GetLength(1) == requiredNumY))
                     {
-                        if (m_ImageArrayVariant.GetType().ToString() == "System.Object[,]" | m_ImageArrayVariant.GetType().ToString() == "System.Object[,,]")
+                        if (mImageArrayVariant.GetType().ToString() == "System.Object[,]" | mImageArrayVariant.GetType().ToString() == "System.Object[,,]")
                         {
-                            if (m_ImageArrayVariant.Rank == 2)
+                            if (mImageArrayVariant.Rank == 2)
                             {
                                 numPlanes = "1 plane";
-                                variantType = ((object[,])m_ImageArrayVariant)[0, 0].GetType().ToString();
+                                variantType = ((object[,])mImageArrayVariant)[0, 0].GetType().ToString();
                             }
                             else
                             {
                                 numPlanes = "1 plane";
-                                if (m_ImageArrayVariant.GetUpperBound(2) > 0)
+                                if (mImageArrayVariant.GetUpperBound(2) > 0)
                                 {
-                                    numPlanes = System.Convert.ToString(m_ImageArrayVariant.GetUpperBound(2) + 1) + " planes";
-                                    variantType = ((object[,,])m_ImageArrayVariant)[0, 0, 0].GetType().ToString();
+                                    numPlanes = System.Convert.ToString(mImageArrayVariant.GetUpperBound(2) + 1) + " planes";
+                                    variantType = ((object[,,])mImageArrayVariant)[0, 0, 0].GetType().ToString();
                                 }
                                 else
-                                    variantType = ((object[,])m_ImageArrayVariant)[0, 0].GetType().ToString();
+                                    variantType = ((object[,])mImageArrayVariant)[0, 0].GetType().ToString();
                             }
-                            LogOK("ImageArrayVariant", $"Successfully read variant array ({numPlanes}) with {variantType} elements {m_ImageArrayVariant.GetLength(0)} x {m_ImageArrayVariant.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
+                            LogOk("ImageArrayVariant", $"Successfully read variant array ({numPlanes}) with {variantType} elements {mImageArrayVariant.GetLength(0)} x {mImageArrayVariant.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
                         }
                         else
-                            LogIssue("ImageArrayVariant", "Expected variant array, actually got: " + m_ImageArrayVariant.GetType().ToString());
+                            LogIssue("ImageArrayVariant", "Expected variant array, actually got: " + mImageArrayVariant.GetType().ToString());
                     }
-                    else if ((m_ImageArrayVariant.GetLength(0) == requiredNumY) & (m_ImageArrayVariant.GetLength(1) == requiredNumX))
-                        LogIssue("ImageArrayVariant", "Camera image dimensions swapped, expected values: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
+                    else if ((mImageArrayVariant.GetLength(0) == requiredNumY) & (mImageArrayVariant.GetLength(1) == requiredNumX))
+                        LogIssue("ImageArrayVariant", "Camera image dimensions swapped, expected values: " + requiredNumX + " x " + requiredNumY + " - actual values: " + mImageArrayVariant.GetLength(0) + " x " + mImageArrayVariant.GetLength(1));
                     else
-                        LogIssue("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + requiredNumX + " x " + requiredNumY + " - actual values: " + m_ImageArrayVariant.GetLength(0) + " x " + m_ImageArrayVariant.GetLength(1));
+                        LogIssue("ImageArrayVariant", "Camera image does not have the expected dimensions of: " + requiredNumX + " x " + requiredNumY + " - actual values: " + mImageArrayVariant.GetLength(0) + " x " + mImageArrayVariant.GetLength(1));
 
                     // Release memory currently consumed by images
                     ReleaseMemory();
@@ -3384,19 +3384,19 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
         /// Updates the UI status field with a count from 0.0 to the operation timeout.
         /// </summary>
         /// <param name="updateUiTaskCancellationToken"></param>
-        private void UpdateUI(CancellationToken updateUiTaskCancellationToken)
+        private void UpdateUi(CancellationToken updateUiTaskCancellationToken)
         {
             // Update the status every 500ms
-            const int POLL_INTERVAL = 500;
+            const int pollInterval = 500;
 
             // Continually update the status field until the task is cancelled
             do
             {
                 // Calculate the current loop number (starts at 0 given that the timer's elapsed time will be zero or very low on the first loop)
-                int currentLoopNumber = ((int)(sw.ElapsedMilliseconds) + 50) / POLL_INTERVAL; // Add a small positive offset (50) because integer division always rounds down
+                int currentLoopNumber = ((int)(sw.ElapsedMilliseconds) + 50) / pollInterval; // Add a small positive offset (50) because integer division always rounds down
 
                 // Calculate the sleep time required to start the next loop at a multiple of the poll interval
-                int sleeptime = POLL_INTERVAL * (currentLoopNumber + 1) - (int)sw.ElapsedMilliseconds;
+                int sleeptime = pollInterval * (currentLoopNumber + 1) - (int)sw.ElapsedMilliseconds;
 
                 // Sleep until it is time for the next completion function poll
                 Thread.Sleep(sleeptime);
@@ -3412,19 +3412,19 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
             } while (!updateUiTaskCancellationToken.IsCancellationRequested & (sw.Elapsed.TotalSeconds < settings.CameraWaitTimeout));
         }
 
-        private void CameraTestLast(double p_Duration, DateTime p_Start)
+        private void CameraTestLast(double pDuration, DateTime pStart)
         {
-            DateTime l_StartTime;
+            DateTime lStartTime;
 
             // LastExposureDuration
             try
             {
                 LogCallToDriver("ConformanceCheck", "About to get LastExposureDuration");
-                m_LastExposureDuration = camera.LastExposureDuration;
-                if ((Math.Abs(m_LastExposureDuration - p_Duration) / p_Duration) < 0.02)
-                    LogOK("LastExposureDuration", $"Last exposure duration is: {m_LastExposureDuration:0.000} seconds");
+                mLastExposureDuration = camera.LastExposureDuration;
+                if ((Math.Abs(mLastExposureDuration - pDuration) / pDuration) < 0.02)
+                    LogOk("LastExposureDuration", $"Last exposure duration is: {mLastExposureDuration:0.000} seconds");
                 else
-                    LogIssue("LastExposureDuration", "LastExposureDuration is not the same as image duration: " + m_LastExposureDuration + " " + p_Duration);
+                    LogIssue("LastExposureDuration", "LastExposureDuration is not the same as image duration: " + mLastExposureDuration + " " + pDuration);
             }
             catch (Exception ex)
             {
@@ -3435,25 +3435,25 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
             try // Confirm that it can be read
             {
                 LogCallToDriver("ConformanceCheck", "About to get LastExposureStartTime");
-                m_LastExposureStartTime = camera.LastExposureStartTime;
-                int l_i;
+                mLastExposureStartTime = camera.LastExposureStartTime;
+                int lI;
                 // Confirm that the format is as expected
-                bool l_FormatOK;
-                l_FormatOK = true;
-                if (m_LastExposureStartTime.Length >= 19)
+                bool lFormatOk;
+                lFormatOk = true;
+                if (mLastExposureStartTime.Length >= 19)
                 {
-                    for (l_i = 1; l_i <= 19; l_i++)
+                    for (lI = 1; lI <= 19; lI++)
                     {
-                        switch (l_i)
+                        switch (lI)
                         {
                             case 5:
                             case 8 // "-"
                            :
                                 {
-                                    if (m_LastExposureStartTime.Substring(l_i - 1, 1) != "-")
+                                    if (mLastExposureStartTime.Substring(lI - 1, 1) != "-")
                                     {
-                                        LogInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not '-'");
-                                        l_FormatOK = false;
+                                        LogInfo("LastExposureDuration", $"Character '{mLastExposureStartTime.Substring(lI - 1, 1)}' at position {lI}is not '-'");
+                                        lFormatOk = false;
                                     }
                                     else
                                     {
@@ -3465,10 +3465,10 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                             case 11 // "T"
                      :
                                 {
-                                    if (m_LastExposureStartTime.Substring(l_i - 1, 1) != "T")
+                                    if (mLastExposureStartTime.Substring(lI - 1, 1) != "T")
                                     {
-                                        LogInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not 'T'");
-                                        l_FormatOK = false;
+                                        LogInfo("LastExposureDuration", $"Character '{mLastExposureStartTime.Substring(lI - 1, 1)}' at position {lI}is not 'T'");
+                                        lFormatOk = false;
                                     }
                                     else
                                     {
@@ -3481,10 +3481,10 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                             case 17 // ":"
                      :
                                 {
-                                    if (m_LastExposureStartTime.Substring(l_i - 1, 1) != ":")
+                                    if (mLastExposureStartTime.Substring(lI - 1, 1) != ":")
                                     {
-                                        LogInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not ':'");
-                                        l_FormatOK = false;
+                                        LogInfo("LastExposureDuration", $"Character '{mLastExposureStartTime.Substring(lI - 1, 1)}' at position {lI}is not ':'");
+                                        lFormatOk = false;
                                     }
                                     else
                                     {
@@ -3495,10 +3495,10 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
 
                             default:
                                 {
-                                    if (!m_LastExposureStartTime.Substring(l_i - 1, 1).IsNumeric())
+                                    if (!mLastExposureStartTime.Substring(lI - 1, 1).IsNumeric())
                                     {
-                                        LogInfo("LastExposureDuration", $"Character '{m_LastExposureStartTime.Substring(l_i - 1, 1)}' at position {l_i}is not 'numeric'");
-                                        l_FormatOK = false;
+                                        LogInfo("LastExposureDuration", $"Character '{mLastExposureStartTime.Substring(lI - 1, 1)}' at position {lI}is not 'numeric'");
+                                        lFormatOk = false;
                                     }
                                     else
                                     {
@@ -3508,94 +3508,94 @@ LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                                 }
                         }
                     }
-                    if (l_FormatOK)
+                    if (lFormatOk)
                     {
                         try // Confirm that it parses as a valid date and check for correct value
                         {
-                            l_StartTime = DateTime.Parse(m_LastExposureStartTime);
-                            if (p_Start.Subtract(l_StartTime).TotalSeconds < 2.0)
-                                LogOK("LastExposureStartTime", "LastExposureStartTime is correct to within 2 seconds: " + m_LastExposureStartTime + " UTC");
+                            lStartTime = DateTime.Parse(mLastExposureStartTime);
+                            if (pStart.Subtract(lStartTime).TotalSeconds < 2.0)
+                                LogOk("LastExposureStartTime", "LastExposureStartTime is correct to within 2 seconds: " + mLastExposureStartTime + " UTC");
                             else
-                                LogIssue("LastExposureStartTime", "LastExposureStartTime is more than 2 seconds inaccurate : " + m_LastExposureStartTime + ", expected: " + p_Start.ToString("yyyy-MM-ddTHH:mm:ss") + " UTC");
+                                LogIssue("LastExposureStartTime", "LastExposureStartTime is more than 2 seconds inaccurate : " + mLastExposureStartTime + ", expected: " + pStart.ToString("yyyy-MM-ddTHH:mm:ss") + " UTC");
                         }
                         catch (Exception ex)
                         {
-                            LogIssue("LastExposureStartTime", "Parsing LastExposureStartTime - " + ex.Message + " " + m_LastExposureStartTime);
+                            LogIssue("LastExposureStartTime", "Parsing LastExposureStartTime - " + ex.Message + " " + mLastExposureStartTime);
                             LogDebug("LastExposureStartTime", $"Exception detail:\r\n {ex}");
                         }
                     }
                     else
-                        LogIssue("LastExposureStartTime", "LastExposureStartTime not in the expected format yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
+                        LogIssue("LastExposureStartTime", "LastExposureStartTime not in the expected format yyyy-mm-ddThh:mm:ss - " + mLastExposureStartTime);
                 }
-                else if (m_LastExposureStartTime == "")
+                else if (mLastExposureStartTime == "")
                     LogIssue("LastExposureStartTime", "LastExposureStartTime has returned an empty string - expected yyyy-mm-ddThh:mm:ss");
                 else
-                    LogIssue("LastExposureStartTime", "LastExposureStartTime is less than 19 characters - expected yyyy-mm-ddThh:mm:ss - " + m_LastExposureStartTime);
+                    LogIssue("LastExposureStartTime", "LastExposureStartTime is less than 19 characters - expected yyyy-mm-ddThh:mm:ss - " + mLastExposureStartTime);
             }
             catch (Exception ex)
             {
                 HandleException("LastExposureStartTime", MemberType.Property, Required.Optional, ex, "");
             }
         }
-        private void CameraPulseGuideTest(GuideDirection p_Direction)
+        private void CameraPulseGuideTest(GuideDirection pDirection)
         {
-            DateTime l_StartTime, l_EndTime;
+            DateTime lStartTime, lEndTime;
             // Dim pulseGuideStatus As PulseGuideState
 
-            l_StartTime = DateTime.Now;
+            lStartTime = DateTime.Now;
             //SetAction("Start " + CAMERA_PULSE_DURATION / (double)1000 + " second pulse guide " + p_Direction.ToString());
-LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {p_Direction}");
-            camera.PulseGuide(p_Direction, CAMERA_PULSE_DURATION); // Start a 2 second pulse
-            l_EndTime = DateTime.Now;
+LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {pDirection}");
+            camera.PulseGuide(pDirection, CAMERA_PULSE_DURATION); // Start a 2 second pulse
+            lEndTime = DateTime.Now;
             try
             {
-                if (m_IsPulseGuidingSupported)
+                if (mIsPulseGuidingSupported)
                 {
-                    if (l_EndTime.Subtract(l_StartTime).TotalMilliseconds < (CAMERA_PULSE_DURATION - 500))
+                    if (lEndTime.Subtract(lStartTime).TotalMilliseconds < (CAMERA_PULSE_DURATION - 500))
                     {
                         LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
                         if (camera.IsPulseGuiding)
                         {
                             LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding multiple times");
                             Stopwatch sw = Stopwatch.StartNew();
-                            WaitWhile($"Guiding {p_Direction}", () => { return camera.IsPulseGuiding; }, 500, 3, () => { return $"{sw.Elapsed.TotalSeconds:0.0} / {CAMERA_PULSE_DURATION / 1000:0.0} seconds"; }); LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
+                            WaitWhile($"Guiding {pDirection}", () => { return camera.IsPulseGuiding; }, 500, 3, () => { return $"{sw.Elapsed.TotalSeconds:0.0} / {CAMERA_PULSE_DURATION / 1000:0.0} seconds"; }); LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
                             if (!camera.IsPulseGuiding)
-                                LogOK("PulseGuide " + p_Direction.ToString(), "Asynchronous pulse guide found OK");
+                                LogOk("PulseGuide " + pDirection.ToString(), "Asynchronous pulse guide found OK");
                             else
-                                LogIssue("PulseGuide " + p_Direction.ToString(), "Asynchronous pulse guide expected but IsPulseGuiding is TRUE beyond expected time of 2 seconds");
+                                LogIssue("PulseGuide " + pDirection.ToString(), "Asynchronous pulse guide expected but IsPulseGuiding is TRUE beyond expected time of 2 seconds");
                         }
                         else
-                            LogIssue("PulseGuide " + p_Direction.ToString(), "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE");
+                            LogIssue("PulseGuide " + pDirection.ToString(), "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE");
                     }
                     else
                     {
                         LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
                         if (!camera.IsPulseGuiding)
-                            LogOK("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide found OK");
+                            LogOk("PulseGuide " + pDirection.ToString(), "Synchronous pulse guide found OK");
                         else
-                            LogIssue("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE");
+                            LogIssue("PulseGuide " + pDirection.ToString(), "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE");
                     }
                 }
                 else
-                    switch (l_EndTime.Subtract(l_StartTime).TotalMilliseconds - CAMERA_PULSE_DURATION)
+                    switch (lEndTime.Subtract(lStartTime).TotalMilliseconds - CAMERA_PULSE_DURATION)
                     {
-                        case object _ when l_EndTime.Subtract(l_StartTime).TotalMilliseconds - CAMERA_PULSE_DURATION > CAMERA_PULSE_TOLERANCE // Duration was more than 0.5 seconds longer than expected
+                        case object _ when lEndTime.Subtract(lStartTime).TotalMilliseconds - CAMERA_PULSE_DURATION > CAMERA_PULSE_TOLERANCE // Duration was more than 0.5 seconds longer than expected
                        :
                             {
-                                LogIssue("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide longer than expected " + (CAMERA_PULSE_DURATION) / (double)1000 + " seconds: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
+                                LogIssue("PulseGuide " + pDirection.ToString(), "Synchronous pulse guide longer than expected " + (CAMERA_PULSE_DURATION) / (double)1000 + " seconds: " + lEndTime.Subtract(lStartTime).TotalSeconds + " seconds");
                                 break;
                             }
 
-                        case object _ when l_EndTime.Subtract(l_StartTime).TotalMilliseconds - CAMERA_PULSE_DURATION < 20 // Duration was more than 20ms shorter than expected
+                        case object _ when lEndTime.Subtract(lStartTime).TotalMilliseconds - CAMERA_PULSE_DURATION < 20 // Duration was more than 20ms shorter than expected
                  :
                             {
-                                LogIssue("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide shorter than expected " + (CAMERA_PULSE_DURATION) / (double)1000 + " seconds: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
+                                LogIssue("PulseGuide " + pDirection.ToString(), "Synchronous pulse guide shorter than expected " + (CAMERA_PULSE_DURATION) / (double)1000 + " seconds: " + lEndTime.Subtract(lStartTime).TotalSeconds + " seconds");
                                 break;
                             }
 
                         default:
                             {
-                                LogOK("PulseGuide " + p_Direction.ToString(), "Synchronous pulse guide found OK: " + l_EndTime.Subtract(l_StartTime).TotalSeconds + " seconds");
+                                LogOk("PulseGuide " + pDirection.ToString(), "Synchronous pulse guide found OK: " + lEndTime.Subtract(lStartTime).TotalSeconds + " seconds");
                                 break;
                             }
                     }
@@ -3603,7 +3603,7 @@ LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {p_Direction}")
             }
             catch (TimeoutException ex)
             {
-                LogIssue($"PulseGuide {p_Direction}", $"Timed out waiting for IsPulseGuiding to go false. It should have done this in {Convert.ToDouble(CAMERA_PULSE_DURATION) / 1000.0:0.0} seconds");
+                LogIssue($"PulseGuide {pDirection}", $"Timed out waiting for IsPulseGuiding to go false. It should have done this in {Convert.ToDouble(CAMERA_PULSE_DURATION) / 1000.0:0.0} seconds");
                 LogDebug("PulseGuide", $"Exception detail:\r\n {ex}");
             }
         }
@@ -3611,12 +3611,12 @@ LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {p_Direction}")
         public override void CheckPerformance()
         {
             CameraPerformanceTest(CameraPerformance.CameraState, "CameraState");
-            CameraPerformanceTest(CameraPerformance.CCDTemperature, "CCDTemperature");
+            CameraPerformanceTest(CameraPerformance.CcdTemperature, "CCDTemperature");
             CameraPerformanceTest(CameraPerformance.CoolerPower, "CoolerPower");
-            if (m_CanSetCCDTemperature)
+            if (mCanSetCcdTemperature)
                 CameraPerformanceTest(CameraPerformance.HeatSinkTemperature, "HeatSinkTemperature");
             CameraPerformanceTest(CameraPerformance.ImageReady, "ImageReady");
-            if (m_CanPulseGuide)
+            if (mCanPulseGuide)
                 CameraPerformanceTest(CameraPerformance.IsPulseGuiding, "IsPulseGuiding");
             SetAction("Exposure for ImageArray Test");
             SetStatus("Start"); LogCallToDriver("ConformanceCheck", "About to set BinX");
@@ -3635,28 +3635,28 @@ LogCallToDriver("ConformanceCheck", "About to call ImageReady multiple times");
             CameraPerformanceTest(CameraPerformance.ImageArray, "ImageArray");
             CameraPerformanceTest(CameraPerformance.ImageArrayVariant, "ImageArrayVariant");
         }
-        private void CameraPerformanceTest(CameraPerformance p_Type, string p_Name)
+        private void CameraPerformanceTest(CameraPerformance pType, string pName)
         {
-            DateTime l_StartTime;
-            double l_Count, l_LastElapsedTime, l_ElapsedTime, l_Rate;
-            SetAction(p_Name);
+            DateTime lStartTime;
+            double lCount, lLastElapsedTime, lElapsedTime, lRate;
+            SetAction(pName);
             try
             {
-                l_StartTime = DateTime.Now;
-                l_Count = 0.0;
-                l_LastElapsedTime = 0.0;
+                lStartTime = DateTime.Now;
+                lCount = 0.0;
+                lLastElapsedTime = 0.0;
                 do
                 {
-                    l_Count += 1.0;
-                    switch (p_Type)
+                    lCount += 1.0;
+                    switch (pType)
                     {
                         case CameraPerformance.CameraState:
                             {
-                                m_CameraState = camera.CameraState;
+                                mCameraState = camera.CameraState;
                                 break;
                             }
 
-                        case CameraPerformance.CCDTemperature:
+                        case CameraPerformance.CcdTemperature:
                             {
                                 _ = camera.CCDTemperature;
                                 break;
@@ -3676,13 +3676,13 @@ LogCallToDriver("ConformanceCheck", "About to call ImageReady multiple times");
 
                         case CameraPerformance.ImageReady:
                             {
-                                m_ImageReady = camera.ImageReady;
+                                mImageReady = camera.ImageReady;
                                 break;
                             }
 
                         case CameraPerformance.IsPulseGuiding:
                             {
-                                m_IsPulseGuiding = camera.IsPulseGuiding;
+                                mIsPulseGuiding = camera.IsPulseGuiding;
                                 break;
                             }
 
@@ -3691,7 +3691,7 @@ LogCallToDriver("ConformanceCheck", "About to call ImageReady multiple times");
                                 // Release memory currently consumed by images
                                 ReleaseMemory();
 
-                                m_ImageArray = (Array)camera.ImageArray;
+                                mImageArray = (Array)camera.ImageArray;
                                 break;
                             }
 
@@ -3700,89 +3700,89 @@ LogCallToDriver("ConformanceCheck", "About to call ImageReady multiple times");
                                 // Release memory currently consumed by images
                                 ReleaseMemory();
 
-                                m_ImageArrayVariant = (Array)camera.ImageArrayVariant;
+                                mImageArrayVariant = (Array)camera.ImageArrayVariant;
                                 break;
                             }
 
                         default:
                             {
-                                LogIssue(p_Name, "Conform:PerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(pName, "Conform:PerformanceTest: Unknown test type " + pType.ToString());
                                 break;
                             }
                     }
 
-                    l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
-                    if (l_ElapsedTime > l_LastElapsedTime + 1.0)
+                    lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
+                    if (lElapsedTime > lLastElapsedTime + 1.0)
                     {
-                        SetStatus(l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
-                        l_LastElapsedTime = l_ElapsedTime;
+                        SetStatus(lCount + " transactions in " + lElapsedTime.ToString("0") + " seconds");
+                        lLastElapsedTime = lElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
                     }
                 }
-                while (l_ElapsedTime <= PERF_LOOP_TIME);
+                while (lElapsedTime <= PERF_LOOP_TIME);
 
-                l_Rate = l_Count / l_ElapsedTime;
-                switch (l_Rate)
+                lRate = lCount / lElapsedTime;
+                switch (lRate)
                 {
-                    case object _ when l_Rate > 10.0:
+                    case object _ when lRate > 10.0:
                         {
-                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
-                    case object _ when 2.0 <= l_Rate && l_Rate <= 10.0:
+                    case object _ when 2.0 <= lRate && lRate <= 10.0:
                         {
-                            LogOK(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogOk(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
-                    case object _ when 1.0 <= l_Rate && l_Rate <= 2.0:
+                    case object _ when 1.0 <= lRate && lRate <= 2.0:
                         {
-                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogInfo(p_Name, $"Unable to complete test: {ex.Message}");
-                LogDebug(p_Name, $"Exception detail:\r\n {ex}");
+                LogInfo(pName, $"Unable to complete test: {ex.Message}");
+                LogDebug(pName, $"Exception detail:\r\n {ex}");
             }
         }
 
         public override void PostRunCheck()
         {
-            if (m_CanAbortExposure)
+            if (mCanAbortExposure)
             {
                 LogCallToDriver("ConformanceCheck", "About to call AbortExposure");
                 try { camera.AbortExposure(); } catch { }
             }
 
-            if (m_CanStopExposure)
+            if (mCanStopExposure)
             {
                 LogCallToDriver("ConformanceCheck", "About to call StopExposure");
                 try { camera.StopExposure(); } catch { }
             }
 
-            if (m_CanSetCCDTemperature)
+            if (mCanSetCcdTemperature)
             {
                 LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
                 try
                 {
-                    camera.SetCCDTemperature = m_SetCCDTemperature;
-                    LogOK("PostRunCheck", "Camera returned to initial cooler temperature");
+                    camera.SetCCDTemperature = mSetCcdTemperature;
+                    LogOk("PostRunCheck", "Camera returned to initial cooler temperature");
                 }
                 catch { }
             }
             LogCallToDriver("ConformanceCheck", "About to set CoolerOn");
-            try { camera.CoolerOn = m_CoolerOn; } catch { }
+            try { camera.CoolerOn = mCoolerOn; } catch { }
 
             // Reset the camera image parameters to legal values
 LogCallToDriver("ConformanceCheck", "About to set StartX");
@@ -3832,8 +3832,8 @@ LogCallToDriver("ConformanceCheck", "About to set StartX");
             SetAction("Releasing memory");
 
             // Clear out any previous memory allocations
-            m_ImageArray = null;
-            m_ImageArrayVariant = null;
+            mImageArray = null;
+            mImageArrayVariant = null;
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect(2, GCCollectionMode.Forced, true, true);
         }

@@ -23,7 +23,7 @@ namespace ConformU
         {
             get
             {
-                return (AlignmentMode)FunctionNoParameters<object>(() => driver.AlignmentMode);
+                return (AlignmentMode)FunctionNoParameters<object>(() => Driver.AlignmentMode);
             }
         }
 
@@ -31,7 +31,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.Altitude);
+                return FunctionNoParameters<double>(() => Driver.Altitude);
             }
         }
 
@@ -39,7 +39,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.ApertureArea);
+                return FunctionNoParameters<double>(() => Driver.ApertureArea);
             }
         }
 
@@ -47,7 +47,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.ApertureDiameter);
+                return FunctionNoParameters<double>(() => Driver.ApertureDiameter);
             }
         }
 
@@ -55,7 +55,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.AtHome);
+                return FunctionNoParameters<bool>(() => Driver.AtHome);
             }
         }
 
@@ -63,7 +63,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.AtPark);
+                return FunctionNoParameters<bool>(() => Driver.AtPark);
             }
         }
 
@@ -71,7 +71,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.Azimuth);
+                return FunctionNoParameters<double>(() => Driver.Azimuth);
             }
         }
 
@@ -79,7 +79,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanFindHome);
+                return FunctionNoParameters<bool>(() => Driver.CanFindHome);
             }
         }
 
@@ -87,7 +87,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanPark);
+                return FunctionNoParameters<bool>(() => Driver.CanPark);
             }
         }
 
@@ -95,7 +95,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanPulseGuide);
+                return FunctionNoParameters<bool>(() => Driver.CanPulseGuide);
             }
         }
 
@@ -103,7 +103,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSetDeclinationRate);
+                return FunctionNoParameters<bool>(() => Driver.CanSetDeclinationRate);
             }
         }
 
@@ -111,7 +111,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSetGuideRates);
+                return FunctionNoParameters<bool>(() => Driver.CanSetGuideRates);
             }
         }
 
@@ -119,7 +119,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSetPark);
+                return FunctionNoParameters<bool>(() => Driver.CanSetPark);
             }
         }
 
@@ -127,7 +127,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSetPierSide);
+                return FunctionNoParameters<bool>(() => Driver.CanSetPierSide);
             }
         }
 
@@ -135,7 +135,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSetRightAscensionRate);
+                return FunctionNoParameters<bool>(() => Driver.CanSetRightAscensionRate);
             }
         }
 
@@ -143,7 +143,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSetTracking);
+                return FunctionNoParameters<bool>(() => Driver.CanSetTracking);
             }
         }
 
@@ -151,7 +151,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSlew);
+                return FunctionNoParameters<bool>(() => Driver.CanSlew);
             }
         }
 
@@ -159,7 +159,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSlewAltAz);
+                return FunctionNoParameters<bool>(() => Driver.CanSlewAltAz);
             }
         }
 
@@ -167,7 +167,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSlewAltAzAsync);
+                return FunctionNoParameters<bool>(() => Driver.CanSlewAltAzAsync);
             }
         }
 
@@ -175,7 +175,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSlewAsync);
+                return FunctionNoParameters<bool>(() => Driver.CanSlewAsync);
             }
         }
 
@@ -183,7 +183,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSync);
+                return FunctionNoParameters<bool>(() => Driver.CanSync);
             }
         }
 
@@ -191,7 +191,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSyncAltAz);
+                return FunctionNoParameters<bool>(() => Driver.CanSyncAltAz);
             }
         }
 
@@ -199,7 +199,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanUnpark);
+                return FunctionNoParameters<bool>(() => Driver.CanUnpark);
             }
         }
 
@@ -207,18 +207,18 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.Declination);
+                return FunctionNoParameters<double>(() => Driver.Declination);
             }
         }
 
-        public double DeclinationRate { get => FunctionNoParameters<double>(() => driver.DeclinationRate); set => Method1Parameter((i) => driver.DeclinationRate = i, value); }
-        public bool DoesRefraction { get => FunctionNoParameters<bool>(() => driver.DoesRefraction); set => Method1Parameter((i) => driver.DoesRefraction = i, value); }
+        public double DeclinationRate { get => FunctionNoParameters<double>(() => Driver.DeclinationRate); set => Method1Parameter((i) => Driver.DeclinationRate = i, value); }
+        public bool DoesRefraction { get => FunctionNoParameters<bool>(() => Driver.DoesRefraction); set => Method1Parameter((i) => Driver.DoesRefraction = i, value); }
 
         public EquatorialCoordinateType EquatorialSystem
         {
             get
             {
-                return (EquatorialCoordinateType)FunctionNoParameters<object>(() => driver.EquatorialSystem);
+                return (EquatorialCoordinateType)FunctionNoParameters<object>(() => Driver.EquatorialSystem);
             }
         }
 
@@ -226,18 +226,18 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.FocalLength);
+                return FunctionNoParameters<double>(() => Driver.FocalLength);
             }
         }
 
-        public double GuideRateDeclination { get => FunctionNoParameters<double>(() => driver.GuideRateDeclination); set => Method1Parameter((i) => driver.GuideRateDeclination = i, value); }
-        public double GuideRateRightAscension { get => FunctionNoParameters<double>(() => driver.GuideRateRightAscension); set => Method1Parameter((i) => driver.GuideRateRightAscension = i, value); }
+        public double GuideRateDeclination { get => FunctionNoParameters<double>(() => Driver.GuideRateDeclination); set => Method1Parameter((i) => Driver.GuideRateDeclination = i, value); }
+        public double GuideRateRightAscension { get => FunctionNoParameters<double>(() => Driver.GuideRateRightAscension); set => Method1Parameter((i) => Driver.GuideRateRightAscension = i, value); }
 
         public bool IsPulseGuiding
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.IsPulseGuiding);
+                return FunctionNoParameters<bool>(() => Driver.IsPulseGuiding);
             }
         }
 
@@ -245,142 +245,142 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.RightAscension);
+                return FunctionNoParameters<double>(() => Driver.RightAscension);
             }
         }
 
-        public double RightAscensionRate { get => FunctionNoParameters<double>(() => driver.RightAscensionRate); set => Method1Parameter((i) => driver.RightAscensionRate = i, value); }
-        public PointingState SideOfPier { get => (PointingState)FunctionNoParameters<object>(() => driver.SideOfPier); set => Method1Parameter((i) => driver.SideOfPier = i, value); }
+        public double RightAscensionRate { get => FunctionNoParameters<double>(() => Driver.RightAscensionRate); set => Method1Parameter((i) => Driver.RightAscensionRate = i, value); }
+        public PointingState SideOfPier { get => (PointingState)FunctionNoParameters<object>(() => Driver.SideOfPier); set => Method1Parameter((i) => Driver.SideOfPier = i, value); }
 
         public double SiderealTime
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.SiderealTime);
+                return FunctionNoParameters<double>(() => Driver.SiderealTime);
             }
         }
 
-        public double SiteElevation { get => FunctionNoParameters<double>(() => driver.SiteElevation); set => Method1Parameter((i) => driver.SiteElevation = i, value); }
-        public double SiteLatitude { get => FunctionNoParameters<double>(() => driver.SiteLatitude); set => Method1Parameter((i) => driver.SiteLatitude = i, value); }
-        public double SiteLongitude { get => FunctionNoParameters<double>(() => driver.SiteLongitude); set => Method1Parameter((i) => driver.SiteLongitude = i, value); }
+        public double SiteElevation { get => FunctionNoParameters<double>(() => Driver.SiteElevation); set => Method1Parameter((i) => Driver.SiteElevation = i, value); }
+        public double SiteLatitude { get => FunctionNoParameters<double>(() => Driver.SiteLatitude); set => Method1Parameter((i) => Driver.SiteLatitude = i, value); }
+        public double SiteLongitude { get => FunctionNoParameters<double>(() => Driver.SiteLongitude); set => Method1Parameter((i) => Driver.SiteLongitude = i, value); }
 
         public bool Slewing
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.Slewing);
+                return FunctionNoParameters<bool>(() => Driver.Slewing);
             }
         }
 
-        public short SlewSettleTime { get => FunctionNoParameters<short>(() => driver.SlewSettleTime); set => Method1Parameter((i) => driver.SlewSettleTime = i, value); }
-        public double TargetDeclination { get => FunctionNoParameters<double>(() => driver.TargetDeclination); set => Method1Parameter((i) => driver.TargetDeclination = i, value); }
-        public double TargetRightAscension { get => FunctionNoParameters<double>(() => driver.TargetRightAscension); set => Method1Parameter((i) => driver.TargetRightAscension = i, value); }
-        public bool Tracking { get => FunctionNoParameters<bool>(() => driver.Tracking); set => Method1Parameter((i) => driver.Tracking = i, value); }
-        public DriveRate TrackingRate { get => (DriveRate)FunctionNoParameters<object>(() => driver.TrackingRate); set => Method1Parameter((i) => driver.TrackingRate = i, value); }
+        public short SlewSettleTime { get => FunctionNoParameters<short>(() => Driver.SlewSettleTime); set => Method1Parameter((i) => Driver.SlewSettleTime = i, value); }
+        public double TargetDeclination { get => FunctionNoParameters<double>(() => Driver.TargetDeclination); set => Method1Parameter((i) => Driver.TargetDeclination = i, value); }
+        public double TargetRightAscension { get => FunctionNoParameters<double>(() => Driver.TargetRightAscension); set => Method1Parameter((i) => Driver.TargetRightAscension = i, value); }
+        public bool Tracking { get => FunctionNoParameters<bool>(() => Driver.Tracking); set => Method1Parameter((i) => Driver.Tracking = i, value); }
+        public DriveRate TrackingRate { get => (DriveRate)FunctionNoParameters<object>(() => Driver.TrackingRate); set => Method1Parameter((i) => Driver.TrackingRate = i, value); }
 
         public ITrackingRates TrackingRates
         {
             get
             {
-                return new TrackingRatesFacade(driver, this);
+                return new TrackingRatesFacade(Driver, this);
             }
         }
 
-        public DateTime UTCDate { get => (DateTime)FunctionNoParameters(() => driver.UTCDate); set => Method1Parameter((i) => driver.UTCDate = i, value); }
+        public DateTime UTCDate { get => (DateTime)FunctionNoParameters(() => Driver.UTCDate); set => Method1Parameter((i) => Driver.UTCDate = i, value); }
 
         public void AbortSlew()
         {
-            MethodNoParameters(() => driver.AbortSlew());
+            MethodNoParameters(() => Driver.AbortSlew());
         }
 
-        public IAxisRates AxisRates(TelescopeAxis Axis)
+        public IAxisRates AxisRates(TelescopeAxis axis)
         {
-            return new AxisRatesFacade(Axis, driver, this, logger);
+            return new AxisRatesFacade(axis, Driver, this, Logger);
         }
 
-        public bool CanMoveAxis(TelescopeAxis Axis)
+        public bool CanMoveAxis(TelescopeAxis axis)
         {
-            return Function1Parameter<bool>((i) => driver.CanMoveAxis(i), Axis);
+            return Function1Parameter<bool>((i) => Driver.CanMoveAxis(i), axis);
         }
 
-        public PointingState DestinationSideOfPier(double RightAscension, double Declination)
+        public PointingState DestinationSideOfPier(double rightAscension, double declination)
         {
-            return Function2Parameters<PointingState>((i, j) => driver.DestinationSideOfPier(i, j), RightAscension, Declination);
+            return Function2Parameters<PointingState>((i, j) => Driver.DestinationSideOfPier(i, j), rightAscension, declination);
         }
 
         public void FindHome()
         {
-            MethodNoParameters(() => driver.FindHome());
+            MethodNoParameters(() => Driver.FindHome());
         }
 
-        public void MoveAxis(TelescopeAxis Axis, double Rate)
+        public void MoveAxis(TelescopeAxis axis, double rate)
         {
-            Method2Parameters((i, j) => driver.MoveAxis(i, j), Axis, Rate);
+            Method2Parameters((i, j) => Driver.MoveAxis(i, j), axis, rate);
         }
 
         public void Park()
         {
-            MethodNoParameters(() => driver.Park());
+            MethodNoParameters(() => Driver.Park());
         }
 
-        public void PulseGuide(GuideDirection Direction, int Duration)
+        public void PulseGuide(GuideDirection direction, int duration)
         {
-            Method2Parameters((i, j) => driver.PulseGuide(i, j), Direction, Duration);
+            Method2Parameters((i, j) => Driver.PulseGuide(i, j), direction, duration);
         }
 
         public void SetPark()
         {
-            MethodNoParameters(() => driver.SetPark());
+            MethodNoParameters(() => Driver.SetPark());
         }
 
-        public void SlewToAltAz(double Azimuth, double Altitude)
+        public void SlewToAltAz(double azimuth, double altitude)
         {
-            Method2Parameters((i, j) => driver.SlewToAltAz(i, j), Azimuth, Altitude);
+            Method2Parameters((i, j) => Driver.SlewToAltAz(i, j), azimuth, altitude);
         }
 
-        public void SlewToAltAzAsync(double Azimuth, double Altitude)
+        public void SlewToAltAzAsync(double azimuth, double altitude)
         {
-            Method2Parameters((i, j) => driver.SlewToAltAzAsync(i, j), Azimuth, Altitude);
+            Method2Parameters((i, j) => Driver.SlewToAltAzAsync(i, j), azimuth, altitude);
         }
 
-        public void SlewToCoordinates(double RightAscension, double Declination)
+        public void SlewToCoordinates(double rightAscension, double declination)
         {
-            Method2Parameters((i, j) => driver.SlewToCoordinates(i, j), RightAscension, Declination);
+            Method2Parameters((i, j) => Driver.SlewToCoordinates(i, j), rightAscension, declination);
         }
 
-        public void SlewToCoordinatesAsync(double RightAscension, double Declination)
+        public void SlewToCoordinatesAsync(double rightAscension, double declination)
         {
-            Method2Parameters((i, j) => driver.SlewToCoordinatesAsync(i, j), RightAscension, Declination);
+            Method2Parameters((i, j) => Driver.SlewToCoordinatesAsync(i, j), rightAscension, declination);
         }
 
         public void SlewToTarget()
         {
-            MethodNoParameters(() => driver.SlewToTarget());
+            MethodNoParameters(() => Driver.SlewToTarget());
         }
 
         public void SlewToTargetAsync()
         {
-            MethodNoParameters(() => driver.SlewToTargetAsync());
+            MethodNoParameters(() => Driver.SlewToTargetAsync());
         }
 
-        public void SyncToAltAz(double Azimuth, double Altitude)
+        public void SyncToAltAz(double azimuth, double altitude)
         {
-            Method2Parameters((i, j) => driver.SyncToAltAz(i, j), Azimuth, Altitude);
+            Method2Parameters((i, j) => Driver.SyncToAltAz(i, j), azimuth, altitude);
         }
 
-        public void SyncToCoordinates(double RightAscension, double Declination)
+        public void SyncToCoordinates(double rightAscension, double declination)
         {
-            Method2Parameters((i, j) => driver.SyncToCoordinates(i, j), RightAscension, Declination);
+            Method2Parameters((i, j) => Driver.SyncToCoordinates(i, j), rightAscension, declination);
         }
 
         public void SyncToTarget()
         {
-            MethodNoParameters(() => driver.SyncToTarget());
+            MethodNoParameters(() => Driver.SyncToTarget());
         }
 
         public void Unpark()
         {
-            MethodNoParameters(() => driver.Unpark());
+            MethodNoParameters(() => Driver.Unpark());
         }
 
         #endregion

@@ -22,7 +22,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.Altitude);
+                return FunctionNoParameters<double>(() => Driver.Altitude);
             }
         }
 
@@ -30,7 +30,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.AtHome);
+                return FunctionNoParameters<bool>(() => Driver.AtHome);
             }
         }
 
@@ -38,7 +38,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.AtPark);
+                return FunctionNoParameters<bool>(() => Driver.AtPark);
             }
         }
 
@@ -46,7 +46,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.Azimuth);
+                return FunctionNoParameters<double>(() => Driver.Azimuth);
             }
         }
 
@@ -54,7 +54,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanFindHome);
+                return FunctionNoParameters<bool>(() => Driver.CanFindHome);
             }
         }
 
@@ -62,7 +62,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanPark);
+                return FunctionNoParameters<bool>(() => Driver.CanPark);
             }
         }
 
@@ -70,7 +70,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSetAltitude);
+                return FunctionNoParameters<bool>(() => Driver.CanSetAltitude);
             }
         }
 
@@ -78,7 +78,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSetAzimuth);
+                return FunctionNoParameters<bool>(() => Driver.CanSetAzimuth);
             }
         }
 
@@ -86,7 +86,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSetPark);
+                return FunctionNoParameters<bool>(() => Driver.CanSetPark);
             }
         }
 
@@ -94,7 +94,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSetShutter);
+                return FunctionNoParameters<bool>(() => Driver.CanSetShutter);
             }
         }
 
@@ -102,7 +102,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSlave);
+                return FunctionNoParameters<bool>(() => Driver.CanSlave);
             }
         }
 
@@ -110,7 +110,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanSyncAzimuth);
+                return FunctionNoParameters<bool>(() => Driver.CanSyncAzimuth);
             }
         }
 
@@ -118,63 +118,63 @@ namespace ConformU
         {
             get
             {
-                return (ShutterState)FunctionNoParameters<object>(() => driver.ShutterStatus);
+                return (ShutterState)FunctionNoParameters<object>(() => Driver.ShutterStatus);
             }
         }
 
-        public bool Slaved { get => FunctionNoParameters<bool>(() => driver.Slaved); set => Method1Parameter((i) => driver.Slaved = i, value); }
+        public bool Slaved { get => FunctionNoParameters<bool>(() => Driver.Slaved); set => Method1Parameter((i) => Driver.Slaved = i, value); }
 
         public bool Slewing
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.Slewing);
+                return FunctionNoParameters<bool>(() => Driver.Slewing);
             }
         }
 
         public void AbortSlew()
         {
-            MethodNoParameters(() => driver.AbortSlew());
+            MethodNoParameters(() => Driver.AbortSlew());
         }
 
         public void CloseShutter()
         {
-            MethodNoParameters(() => driver.CloseShutter());
+            MethodNoParameters(() => Driver.CloseShutter());
         }
 
         public void FindHome()
         {
-            MethodNoParameters(() => driver.FindHome());
+            MethodNoParameters(() => Driver.FindHome());
         }
 
         public void OpenShutter()
         {
-            MethodNoParameters(() => driver.OpenShutter());
+            MethodNoParameters(() => Driver.OpenShutter());
         }
 
         public void Park()
         {
-            MethodNoParameters(() => driver.Park());
+            MethodNoParameters(() => Driver.Park());
         }
 
         public void SetPark()
         {
-            MethodNoParameters(() => driver.SetPark());
+            MethodNoParameters(() => Driver.SetPark());
         }
 
-        public void SlewToAltitude(double Altitude)
+        public void SlewToAltitude(double altitude)
         {
-            Method1Parameter((i) => driver.SlewToAltitude(i), Altitude);
+            Method1Parameter((i) => Driver.SlewToAltitude(i), altitude);
         }
 
-        public void SlewToAzimuth(double Azimuth)
+        public void SlewToAzimuth(double azimuth)
         {
-            Method1Parameter((i) => driver.SlewToAzimuth(i), Azimuth);
+            Method1Parameter((i) => Driver.SlewToAzimuth(i), azimuth);
         }
 
-        public void SyncToAzimuth(double Azimuth)
+        public void SyncToAzimuth(double azimuth)
         {
-            Method1Parameter((i) => driver.SyncToAzimuth(i), Azimuth);
+            Method1Parameter((i) => Driver.SyncToAzimuth(i), azimuth);
         }
 
         #endregion

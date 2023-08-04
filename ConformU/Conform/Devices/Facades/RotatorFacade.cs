@@ -11,7 +11,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanReverse);
+                return FunctionNoParameters<bool>(() => Driver.CanReverse);
             }
         }
 
@@ -19,7 +19,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.IsMoving);
+                return FunctionNoParameters<bool>(() => Driver.IsMoving);
             }
         }
 
@@ -27,17 +27,17 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<float>(() => driver.Position);
+                return FunctionNoParameters<float>(() => Driver.Position);
             }
         }
 
-        public bool Reverse { get => FunctionNoParameters<bool>(() => driver.Reverse); set => Method1Parameter((i) => driver.Reverse = i, value); }
+        public bool Reverse { get => FunctionNoParameters<bool>(() => Driver.Reverse); set => Method1Parameter((i) => Driver.Reverse = i, value); }
 
         public float StepSize
         {
             get
             {
-                return FunctionNoParameters<float>(() => driver.StepSize);
+                return FunctionNoParameters<float>(() => Driver.StepSize);
             }
         }
 
@@ -45,7 +45,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<float>(() => driver.TargetPosition);
+                return FunctionNoParameters<float>(() => Driver.TargetPosition);
             }
         }
 
@@ -53,33 +53,33 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<float>(() => driver.MechanicalPosition);
+                return FunctionNoParameters<float>(() => Driver.MechanicalPosition);
             }
         }
 
         public void Halt()
         {
-            MethodNoParameters(() => driver.Halt());
+            MethodNoParameters(() => Driver.Halt());
         }
 
-        public void Move(float Position)
+        public void Move(float position)
         {
-            Method1Parameter((i) => driver.Move(i), Position);
+            Method1Parameter((i) => Driver.Move(i), position);
         }
 
-        public void MoveAbsolute(float Position)
+        public void MoveAbsolute(float position)
         {
-            Method1Parameter((i) => driver.MoveAbsolute(i), Position);
+            Method1Parameter((i) => Driver.MoveAbsolute(i), position);
         }
 
-        public void MoveMechanical(float Position)
+        public void MoveMechanical(float position)
         {
-            Method1Parameter((i) => driver.MoveMechanical(i), Position);
+            Method1Parameter((i) => Driver.MoveMechanical(i), position);
         }
 
-        public void Sync(float Position)
+        public void Sync(float position)
         {
-            Method1Parameter((i) => driver.Sync(i), Position);
+            Method1Parameter((i) => Driver.Sync(i), position);
         }
     }
 }

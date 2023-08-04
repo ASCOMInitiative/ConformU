@@ -13,7 +13,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<int[]>(() => driver.FocusOffsets);
+                return FunctionNoParameters<int[]>(() => Driver.FocusOffsets);
             }
         }
 
@@ -21,11 +21,11 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<string[]>(() => driver.Names);
+                return FunctionNoParameters<string[]>(() => Driver.Names);
             }
         }
 
-        public short Position { get => FunctionNoParameters<short>(() => driver.Position); set => Method1Parameter((i) => driver.Position = i, value); }
+        public short Position { get => FunctionNoParameters<short>(() => Driver.Position); set => Method1Parameter((i) => Driver.Position = i, value); }
 
         #endregion
 

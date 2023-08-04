@@ -34,27 +34,27 @@ namespace ConformU
         private const int CAMERA_PULSE_TOLERANCE = 300; // Tolerance for acceptable;e performance (ms)
 
         // Camera variables
-        private bool CanConfigureDeviceProperties, CanReadSensorType, CanReadGainMax, CanReadGainMin;
-        private bool CanReadGammaMin, CanReadGammaMax, CanReadIntegrationRate, CanReadSupportedIntegrationRates;
-        private bool CanReadVideoFrame;
-        private double PixelSizeX, PixelSizeY, ExposureMax, ExposureMin;
-        private int BitDepth, Height, Width, IntegrationRate, VideoFramesBufferSize;
-        private short Gain, GainMax, GainMin, Gamma, GammaMin, GammaMax;
-        private dynamic Gains, Gammas, SupportedIntegrationRates;
-        private string SensorName;
-        private SensorType SensorType;
-        private VideoCameraState CameraState;
-        private VideoCameraFrameRate FrameRate;
-        private dynamic LastVideoFrame;
-        private string ExposureStartTime, VideoCaptureDeviceName, VideoCodec, VideoFileFormat;
+        private bool canConfigureDeviceProperties, canReadSensorType, canReadGainMax, canReadGainMin;
+        private bool canReadGammaMin, canReadGammaMax, canReadIntegrationRate, canReadSupportedIntegrationRates;
+        private bool canReadVideoFrame;
+        private double pixelSizeX, pixelSizeY, exposureMax, exposureMin;
+        private int bitDepth, height, width, integrationRate, videoFramesBufferSize;
+        private short gain, gainMax, gainMin, gamma, gammaMin, gammaMax;
+        private dynamic gains, gammas, supportedIntegrationRates;
+        private string sensorName;
+        private SensorType sensorType;
+        private VideoCameraState cameraState;
+        private VideoCameraFrameRate frameRate;
+        private dynamic lastVideoFrame;
+        private string exposureStartTime, videoCaptureDeviceName, videoCodec, videoFileFormat;
 
         // VideoFrame properties
-        private double ExposureDuration;
-        private long FrameNumber;
-        private object ImageArray;
-        private Array ImageArrayAsArray;
-        private dynamic ImageMetadata;
-        private byte[] PreviewBitmap;
+        private double exposureDuration;
+        private long frameNumber;
+        private object imageArray;
+        private Array imageArrayAsArray;
+        private dynamic imageMetadata;
+        private byte[] previewBitmap;
 
         private enum CanProperty
         {
@@ -72,7 +72,7 @@ namespace ConformU
             CanConfigureDeviceProperties,
             ExposureMax,
             ExposureMin,
-            CCDTemperature,
+            CcdTemperature,
             FrameRate,
             Gain,
             GainMax,
@@ -157,10 +157,10 @@ namespace ConformU
                 {
                     default:
                         {
-                            g_ExNotImplemented = (int)0x80040400;
-                            g_ExInvalidValue1 = (int)0x80040405;
-                            g_ExInvalidValue2 = (int)0x80040405;
-                            g_ExNotSet1 = (int)0x80040403;
+                            GExNotImplemented = (int)0x80040400;
+                            GExInvalidValue1 = (int)0x80040405;
+                            GExInvalidValue2 = (int)0x80040405;
+                            GExNotSet1 = (int)0x80040403;
                             break;
                         }
                 }
@@ -201,7 +201,7 @@ namespace ConformU
                 }
 
                 LogInfo("CreateDevice", "Successfully created driver");
-                baseClassDevice = videoDevice; // Assign the driver to the base class
+                BaseClassDevice = videoDevice; // Assign the driver to the base class
 
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);
@@ -225,30 +225,30 @@ namespace ConformU
             CameraCanTest(CanProperty.CanConfigureDeviceProperties, "CanConfigureDeviceProperties");
         }
 
-        private void CameraCanTest(CanProperty p_Type, string p_Name)
+        private void CameraCanTest(CanProperty pType, string pName)
         {
             try
             {
-                switch (p_Type)
+                switch (pType)
                 {
                     case CanProperty.CanConfigureDeviceProperties:
                         {
-                            LogCallToDriver(p_Type.ToString(), "About to get CanConfigureDeviceProperties property");
-                            CanConfigureDeviceProperties = videoDevice.CanConfigureDeviceProperties;
-                            LogOK(p_Name, CanConfigureDeviceProperties.ToString());
+                            LogCallToDriver(pType.ToString(), "About to get CanConfigureDeviceProperties property");
+                            canConfigureDeviceProperties = videoDevice.CanConfigureDeviceProperties;
+                            LogOk(pName, canConfigureDeviceProperties.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogIssue(p_Name, "Conform:CanTest: Unknown test type " + p_Type.ToString());
+                            LogIssue(pName, "Conform:CanTest: Unknown test type " + pType.ToString());
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogIssue(p_Name, $"Exception: {ex.Message}");
+                LogIssue(pName, $"Exception: {ex.Message}");
             }
         }
 
@@ -256,16 +256,16 @@ namespace ConformU
         {
 
             // BitDepth - Mandatory
-            BitDepth = TestInteger(VideoProperty.BitDepth, 1, int.MaxValue, true); if (cancellationToken.IsCancellationRequested)
+            bitDepth = TestInteger(VideoProperty.BitDepth, 1, int.MaxValue, true); if (cancellationToken.IsCancellationRequested)
                 return;
 
             // CameraState - Mandatory
             try
             {
                 LogCallToDriver("CameraState", "About to get VideoCameraRunning property");
-                CameraState = VideoCameraState.Running;
-                CameraState = videoDevice.CameraState;
-                LogOK("CameraState Read", CameraState.ToString());
+                cameraState = VideoCameraState.Running;
+                cameraState = videoDevice.CameraState;
+                LogOk("CameraState Read", cameraState.ToString());
             }
             catch (Exception ex)
             {
@@ -273,22 +273,22 @@ namespace ConformU
             }
 
             // ExposureMin and ExpoosureMax Read - Mandatory
-            ExposureMax = TestDouble(VideoProperty.ExposureMax, 0.0001, double.MaxValue, true);
-            ExposureMin = TestDouble(VideoProperty.ExposureMin, 0.0, double.MaxValue, true);
+            exposureMax = TestDouble(VideoProperty.ExposureMax, 0.0001, double.MaxValue, true);
+            exposureMin = TestDouble(VideoProperty.ExposureMin, 0.0, double.MaxValue, true);
 
             // Apply tests to resultant exposure values
-            if (ExposureMin <= ExposureMax)
-                LogOK("ExposureMin", "ExposureMin is less than or equal to ExposureMax");
+            if (exposureMin <= exposureMax)
+                LogOk("ExposureMin", "ExposureMin is less than or equal to ExposureMax");
             else
                 LogIssue("ExposureMin", "ExposureMin is greater than ExposureMax");
 
             // FrameRate - Mandatory
             try
             {
-                FrameRate = VideoCameraFrameRate.PAL;
+                frameRate = VideoCameraFrameRate.PAL;
                 LogCallToDriver("FrameRate", "About to get FrameRate property");
-                FrameRate = videoDevice.FrameRate;
-                LogOK("FrameRate Read", FrameRate.ToString());
+                frameRate = videoDevice.FrameRate;
+                LogOk("FrameRate Read", frameRate.ToString());
             }
             catch (Exception ex)
             {
@@ -296,76 +296,76 @@ namespace ConformU
             }
 
             // Read the Gain properties - Optional
-            GainMax = TestShort(VideoProperty.GainMax, 0, short.MaxValue, false);
-            GainMin = TestShort(VideoProperty.GainMin, 0, short.MaxValue, false);
-            Gains = TestArrayList(VideoProperty.Gains, false, Type.GetType("System.String"));
-            Gain = TestShort(VideoProperty.Gain, 0, short.MaxValue, false);
+            gainMax = TestShort(VideoProperty.GainMax, 0, short.MaxValue, false);
+            gainMin = TestShort(VideoProperty.GainMin, 0, short.MaxValue, false);
+            gains = TestArrayList(VideoProperty.Gains, false, Type.GetType("System.String"));
+            gain = TestShort(VideoProperty.Gain, 0, short.MaxValue, false);
 
             // Now apply tests to the resultant Gain values
-            if (CanReadGainMin ^ CanReadGainMax)
+            if (canReadGainMin ^ canReadGainMax)
             {
-                if (CanReadGainMin)
+                if (canReadGainMin)
                     LogIssue("GainMinMax", "Can read GainMin but GainMax threw an exception");
                 else
                     LogIssue("GainMinMax", "Can read GainMax but GainMin threw an exception");
             }
             else
-                LogOK("GainMinMax", "Both GainMin and GainMax are readable or both throw exceptions");
+                LogOk("GainMinMax", "Both GainMin and GainMax are readable or both throw exceptions");
 
             // Read the Gamma properties - Optional
-            GammaMax = TestShort(VideoProperty.GammaMax, 0, short.MaxValue, false);
-            GammaMin = TestShort(VideoProperty.GammaMin, 0, short.MaxValue, false);
-            Gammas = TestArrayList(VideoProperty.Gammas, false, Type.GetType("System.String"));
-            Gamma = TestShort(VideoProperty.Gamma, 0, short.MaxValue, false);
+            gammaMax = TestShort(VideoProperty.GammaMax, 0, short.MaxValue, false);
+            gammaMin = TestShort(VideoProperty.GammaMin, 0, short.MaxValue, false);
+            gammas = TestArrayList(VideoProperty.Gammas, false, Type.GetType("System.String"));
+            gamma = TestShort(VideoProperty.Gamma, 0, short.MaxValue, false);
 
             // Now apply tests to the resultant Gamma values
-            if (CanReadGammaMin ^ CanReadGammaMax)
+            if (canReadGammaMin ^ canReadGammaMax)
             {
-                if (CanReadGammaMin)
+                if (canReadGammaMin)
                     LogIssue("GammaMinMax", "Can read GammaMin but GammaMax threw an exception");
                 else
                     LogIssue("GammaMinMax", "Can read GammaMax but GammaMin threw an exception");
             }
             else
-                LogOK("GammaMinMax", "Both GammaMin and GammaMax are readable or both throw exceptions");
+                LogOk("GammaMinMax", "Both GammaMin and GammaMax are readable or both throw exceptions");
 
             // Height and width - Mandatory
-            Height = TestInteger(VideoProperty.Height, 1, int.MaxValue, true);
-            Width = TestInteger(VideoProperty.Width, 1, int.MaxValue, true);
+            height = TestInteger(VideoProperty.Height, 1, int.MaxValue, true);
+            width = TestInteger(VideoProperty.Width, 1, int.MaxValue, true);
 
             // Integration rates - Optional
-            IntegrationRate = TestInteger(VideoProperty.IntegrationRate, 0, int.MaxValue, false);
-            SupportedIntegrationRates = TestArrayList(VideoProperty.SupportedIntegrationRates, false, Type.GetType("System.Double"));
+            integrationRate = TestInteger(VideoProperty.IntegrationRate, 0, int.MaxValue, false);
+            supportedIntegrationRates = TestArrayList(VideoProperty.SupportedIntegrationRates, false, Type.GetType("System.Double"));
 
             // Now apply tests to the resultant integration rate values
-            if (CanReadIntegrationRate ^ CanReadSupportedIntegrationRates)
+            if (canReadIntegrationRate ^ canReadSupportedIntegrationRates)
             {
-                if (CanReadIntegrationRate)
+                if (canReadIntegrationRate)
                     LogIssue("IntegrationRates", "Can read IntegrationRate but SupportedIntegrationRates threw an exception");
                 else
                     LogIssue("IntegrationRates", "Can read SupportedIntegrationRates but IntegrationRate threw an exception");
             }
             else
-                LogOK("IntegrationRates", "Both IntegrationRate and SupportedIntegrationRates are readable or both throw exceptions");
+                LogOk("IntegrationRates", "Both IntegrationRate and SupportedIntegrationRates are readable or both throw exceptions");
 
             // Pixel size - Mandatory
-            PixelSizeX = TestDouble(VideoProperty.PixelSizeX, 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
+            pixelSizeX = TestDouble(VideoProperty.PixelSizeX, 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
                 return;
-            PixelSizeY = TestDouble(VideoProperty.PixelSizeY, 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
+            pixelSizeY = TestDouble(VideoProperty.PixelSizeY, 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested)
                 return;
 
             // SensorName - Mandatory
-            SensorName = TestString(VideoProperty.SensorName, 250, true);
+            sensorName = TestString(VideoProperty.SensorName, 250, true);
 
             // SensorType - Mandatory
             try
             {
-                CanReadSensorType = false;
+                canReadSensorType = false;
                 LogCallToDriver("SensorType", "About to get SensorType property");
-                SensorType = videoDevice.SensorType;
-                CanReadSensorType = true; // Set a flag to indicate that we have got a valid SensorType value
+                sensorType = videoDevice.SensorType;
+                canReadSensorType = true; // Set a flag to indicate that we have got a valid SensorType value
                                           // Successfully retrieved a value
-                LogOK("SensorType", SensorType.ToString());
+                LogOk("SensorType", sensorType.ToString());
             }
             catch (Exception ex)
             {
@@ -373,34 +373,34 @@ namespace ConformU
             }
 
             // VideoCaptureDeviceName
-            VideoCaptureDeviceName = TestString(VideoProperty.VideoCaptureDeviceName, 1000, false);
+            videoCaptureDeviceName = TestString(VideoProperty.VideoCaptureDeviceName, 1000, false);
 
             // VideoCodec 
-            VideoCodec = TestString(VideoProperty.VideoCodec, 1000, false);
+            videoCodec = TestString(VideoProperty.VideoCodec, 1000, false);
 
             // VideoFileFormat 
-            VideoFileFormat = TestString(VideoProperty.VideoFileFormat, 1000, true);
+            videoFileFormat = TestString(VideoProperty.VideoFileFormat, 1000, true);
 
             // VideoFramesBufferSize 
-            VideoFramesBufferSize = TestInteger(VideoProperty.VideoFramesBufferSize, 0, int.MaxValue, true);
+            videoFramesBufferSize = TestInteger(VideoProperty.VideoFramesBufferSize, 0, int.MaxValue, true);
 
             // LastVideoFrame
-            LastVideoFrame = TestVideoFrame(VideoProperty.LastVideoFrame, true);
+            lastVideoFrame = TestVideoFrame(VideoProperty.LastVideoFrame, true);
 
             // Check contents of received frame
-            if (CanReadVideoFrame)
+            if (canReadVideoFrame)
             {
-                ExposureDuration = TestDouble(VideoProperty.ExposureDuration, 0.0, double.MaxValue, false);
-                ExposureStartTime = TestString(VideoProperty.ExposureStartTime, int.MaxValue, false);
-                FrameNumber = TestLong(VideoProperty.FrameNumber, 0, long.MaxValue, true);
-                ImageMetadata = TestArrayList(VideoProperty.ImageMetadata, true, typeof(KeyValuePair));
+                exposureDuration = TestDouble(VideoProperty.ExposureDuration, 0.0, double.MaxValue, false);
+                exposureStartTime = TestString(VideoProperty.ExposureStartTime, int.MaxValue, false);
+                frameNumber = TestLong(VideoProperty.FrameNumber, 0, long.MaxValue, true);
+                imageMetadata = TestArrayList(VideoProperty.ImageMetadata, true, typeof(KeyValuePair));
 
                 try
                 {
-                    ImageArray = LastVideoFrame.ImageArray;
+                    imageArray = lastVideoFrame.ImageArray;
                     try
                     {
-                        LogOK("ImageArray", "Received an image object from the driver of type: " + ImageArray.GetType().Name);
+                        LogOk("ImageArray", "Received an image object from the driver of type: " + imageArray.GetType().Name);
                     }
                     catch (Exception)
                     {
@@ -410,56 +410,56 @@ namespace ConformU
                     // Check image array dimensions
                     try
                     {
-                        ImageArrayAsArray = (Array)ImageArray;
-                        LogOK("ImageArray", "  Received an array of rank: " + ImageArrayAsArray.Rank + ", length: " + ImageArrayAsArray.LongLength.ToString("#,0") + " and type: " + ImageArrayAsArray.GetType().Name);
+                        imageArrayAsArray = (Array)imageArray;
+                        LogOk("ImageArray", "  Received an array of rank: " + imageArrayAsArray.Rank + ", length: " + imageArrayAsArray.LongLength.ToString("#,0") + " and type: " + imageArrayAsArray.GetType().Name);
 
-                        switch (ImageArrayAsArray.Rank)
+                        switch (imageArrayAsArray.Rank)
                         {
                             case 1 // Rank 1
                            :
                                 {
-                                    if (ImageArrayAsArray.GetType().Equals(typeof(int[])))
-                                        LogOK("ImageArray", "  Received a 1 dimension Integer array as expected.");
+                                    if (imageArrayAsArray.GetType().Equals(typeof(int[])))
+                                        LogOk("ImageArray", "  Received a 1 dimension Integer array as expected.");
                                     else
-                                        LogIssue("ImageArray", "  Did not receive a 1 dimension Integer array as expected. Received: " + ImageArrayAsArray.GetType().Name);
+                                        LogIssue("ImageArray", "  Did not receive a 1 dimension Integer array as expected. Received: " + imageArrayAsArray.GetType().Name);
                                     break;
                                 }
 
                             case 2 // Rank 2
                      :
                                 {
-                                    if (ImageArrayAsArray.GetType().Equals(typeof(int[,])))
-                                        LogOK("ImageArray", "  Received a 2 dimension Integer array as expected.");
+                                    if (imageArrayAsArray.GetType().Equals(typeof(int[,])))
+                                        LogOk("ImageArray", "  Received a 2 dimension Integer array as expected.");
                                     else
-                                        LogIssue("ImageArray", "  Did not receive a 2 dimension Integer array as expected. Received: " + ImageArrayAsArray.GetType().Name);
+                                        LogIssue("ImageArray", "  Did not receive a 2 dimension Integer array as expected. Received: " + imageArrayAsArray.GetType().Name);
                                     break;
                                 }
 
                             case 3 // Rank 3
                      :
                                 {
-                                    if (ImageArrayAsArray.GetType().Equals(typeof(int[,,])))
-                                        LogOK("ImageArray", "  Received a 3 dimension Integer array as expected.");
+                                    if (imageArrayAsArray.GetType().Equals(typeof(int[,,])))
+                                        LogOk("ImageArray", "  Received a 3 dimension Integer array as expected.");
                                     else
-                                        LogIssue("ImageArray", "  Did not receive a 3 dimension Integer array as expected. Received: " + ImageArrayAsArray.GetType().Name);
+                                        LogIssue("ImageArray", "  Did not receive a 3 dimension Integer array as expected. Received: " + imageArrayAsArray.GetType().Name);
                                     break;
                                 }
 
                             default:
                                 {
-                                    LogIssue("ImageArray", "  Array rank is 0 or exceeds 3: " + ImageArrayAsArray.GetType().Name);
+                                    LogIssue("ImageArray", "  Array rank is 0 or exceeds 3: " + imageArrayAsArray.GetType().Name);
                                     break;
                                 }
                         }
 
-                        if (CanReadSensorType)
+                        if (canReadSensorType)
                         {
-                            switch (SensorType)
+                            switch (sensorType)
                             {
-                                case object _ when SensorType == SensorType.Color // This camera returns multiple image planes of colour information
+                                case object _ when sensorType == SensorType.Color // This camera returns multiple image planes of colour information
                                :
                                     {
-                                        switch (ImageArrayAsArray.Rank)
+                                        switch (imageArrayAsArray.Rank)
                                         {
                                             case 1 // Invalid configuration
                                            :
@@ -472,21 +472,21 @@ namespace ConformU
                                             case 2 // NumPlanes x (Height * Width). NumPlanes should be 3
                                      :
                                                 {
-                                                    CheckImage(ImageArrayAsArray, 3, Height * Width, 0);
+                                                    CheckImage(imageArrayAsArray, 3, height * width, 0);
                                                     break;
                                                 }
 
                                             case 3 // NumPlanes x Height x Width. NumPlanes should be 3
                                      :
                                                 {
-                                                    CheckImage(ImageArrayAsArray, 3, Height, Width);
+                                                    CheckImage(imageArrayAsArray, 3, height, width);
                                                     break;
                                                 }
 
                                             default:
                                                 {
                                                     // This is an unsupported rank 0 or >3 so create an error
-                                                    LogIssue("ImageArray", "  The zero based array rank must be 1, 2 or 3 . The returned array had rank: " + ImageArrayAsArray.Rank);
+                                                    LogIssue("ImageArray", "  The zero based array rank must be 1, 2 or 3 . The returned array had rank: " + imageArrayAsArray.Rank);
                                                     break;
                                                 }
                                         }
@@ -498,19 +498,19 @@ namespace ConformU
                                     {
                                         // This camera returns just one plane that may be literally monochrome or may appear monochrome 
                                         // but contain encoded colour information e.g. Bayer RGGB format
-                                        switch (ImageArrayAsArray.Rank)
+                                        switch (imageArrayAsArray.Rank)
                                         {
                                             case 1 // (Height * Width)
                                            :
                                                 {
-                                                    CheckImage(ImageArrayAsArray, Height * Width, 0, 0);
+                                                    CheckImage(imageArrayAsArray, height * width, 0, 0);
                                                     break;
                                                 }
 
                                             case 2 // Height x Width.
                                      :
                                                 {
-                                                    CheckImage(ImageArrayAsArray, Height, Width, 0);
+                                                    CheckImage(imageArrayAsArray, height, width, 0);
                                                     break;
                                                 }
 
@@ -525,7 +525,7 @@ namespace ConformU
                                             default:
                                                 {
                                                     // This is an unsupported rank 0 or >3 so create an error
-                                                    LogIssue("ImageArray", "  The ImageArray rank must be 1, 2 or 3. The returned array had rank: " + ImageArrayAsArray.Rank);
+                                                    LogIssue("ImageArray", "  The ImageArray rank must be 1, 2 or 3. The returned array had rank: " + imageArrayAsArray.Rank);
                                                     break;
                                                 }
                                         }
@@ -549,8 +549,8 @@ namespace ConformU
 
                 try
                 {
-                    PreviewBitmap = LastVideoFrame.PreviewBitmap;
-                    LogOK("PreviewBitmap", "Received an array with " + PreviewBitmap.Length.ToString("#,#,#") + " entries");
+                    previewBitmap = lastVideoFrame.PreviewBitmap;
+                    LogOk("PreviewBitmap", "Received an array with " + previewBitmap.Length.ToString("#,#,#") + " entries");
                 }
                 catch (Exception ex)
                 {
@@ -564,97 +564,97 @@ namespace ConformU
         /// <summary>
         ///     ''' Reports whether the overall array size matches the expected size
         ///     ''' </summary>
-        ///     ''' <param name="TestArray">The array to test</param>
-        ///     ''' <param name="Dimension1">Size of the first array dimension</param>
-        ///     ''' <param name="Dimension2">Size of the second dimension or 0 for not present</param>
-        ///     ''' <param name="Dimension3">Size of the third dimension or 0 for not present</param>
+        ///     ''' <param name="testArray">The array to test</param>
+        ///     ''' <param name="dimension1">Size of the first array dimension</param>
+        ///     ''' <param name="dimension2">Size of the second dimension or 0 for not present</param>
+        ///     ''' <param name="dimension3">Size of the third dimension or 0 for not present</param>
         ///     ''' <remarks></remarks>
-        private void CheckImage(Array TestArray, long Dimension1, long Dimension2, long Dimension3)
+        private void CheckImage(Array testArray, long dimension1, long dimension2, long dimension3)
         {
-            long Length;
-            const string CommaFormat = "#,0";
+            long length;
+            const string commaFormat = "#,0";
 
-            Length = Dimension1 * ((Dimension2 > 0) ? Dimension2 : 1) * ((Dimension3 > 0) ? Dimension3 : 1); // Calculate the overall expected size
+            length = dimension1 * ((dimension2 > 0) ? dimension2 : 1) * ((dimension3 > 0) ? dimension3 : 1); // Calculate the overall expected size
 
-            if (TestArray.LongLength == Length)
-                LogOK("CheckImage", "  ImageArray has the expected total number of pixels: " + Length.ToString(CommaFormat));
+            if (testArray.LongLength == length)
+                LogOk("CheckImage", "  ImageArray has the expected total number of pixels: " + length.ToString(commaFormat));
             else
-                LogIssue("CheckImage", "  ImageArray returned a total of " + TestArray.Length.ToString(CommaFormat) + " pixels instead of the expected number: " + Length.ToString(CommaFormat));
+                LogIssue("CheckImage", "  ImageArray returned a total of " + testArray.Length.ToString(commaFormat) + " pixels instead of the expected number: " + length.ToString(commaFormat));
 
-            if (Dimension1 >= 1)
+            if (dimension1 >= 1)
             {
-                if (Dimension2 > 0)
+                if (dimension2 > 0)
                 {
-                    if (Dimension3 >= 1)
+                    if (dimension3 >= 1)
                     {
-                        if (TestArray.GetLongLength(0) == Dimension1)
-                            LogOK("CheckImage", "  ImageArray dimension 1 has the expected length:: " + Dimension1.ToString(CommaFormat));
+                        if (testArray.GetLongLength(0) == dimension1)
+                            LogOk("CheckImage", "  ImageArray dimension 1 has the expected length:: " + dimension1.ToString(commaFormat));
                         else
-                            LogIssue("CheckImage", "  ImageArray dimension 1 does not has the expected length:: " + Dimension1.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(0).ToString(CommaFormat));
-                        if (TestArray.GetLongLength(1) == Dimension2)
-                            LogOK("CheckImage", "  ImageArray dimension 2 has the expected length:: " + Dimension2.ToString(CommaFormat));
+                            LogIssue("CheckImage", "  ImageArray dimension 1 does not has the expected length:: " + dimension1.ToString(commaFormat) + ", received: " + testArray.GetLongLength(0).ToString(commaFormat));
+                        if (testArray.GetLongLength(1) == dimension2)
+                            LogOk("CheckImage", "  ImageArray dimension 2 has the expected length:: " + dimension2.ToString(commaFormat));
                         else
-                            LogIssue("CheckImage", "  ImageArray dimension 2 does not has the expected length:: " + Dimension2.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(1).ToString(CommaFormat));
-                        if (TestArray.GetLongLength(2) == Dimension3)
-                            LogOK("CheckImage", "  ImageArray dimension 3 has the expected length:: " + Dimension3.ToString(CommaFormat));
+                            LogIssue("CheckImage", "  ImageArray dimension 2 does not has the expected length:: " + dimension2.ToString(commaFormat) + ", received: " + testArray.GetLongLength(1).ToString(commaFormat));
+                        if (testArray.GetLongLength(2) == dimension3)
+                            LogOk("CheckImage", "  ImageArray dimension 3 has the expected length:: " + dimension3.ToString(commaFormat));
                         else
-                            LogIssue("CheckImage", "  ImageArray dimension 3 does not has the expected length:: " + Dimension3.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(2).ToString(CommaFormat));
+                            LogIssue("CheckImage", "  ImageArray dimension 3 does not has the expected length:: " + dimension3.ToString(commaFormat) + ", received: " + testArray.GetLongLength(2).ToString(commaFormat));
                     }
                     else
                     {
-                        if (TestArray.GetLongLength(0) == Dimension1)
-                            LogOK("CheckImage", "  ImageArray dimension 1 has the expected length:: " + Dimension1.ToString(CommaFormat));
+                        if (testArray.GetLongLength(0) == dimension1)
+                            LogOk("CheckImage", "  ImageArray dimension 1 has the expected length:: " + dimension1.ToString(commaFormat));
                         else
-                            LogIssue("CheckImage", "  ImageArray dimension 1 does not has the expected length:: " + Dimension1.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(0).ToString(CommaFormat));
-                        if (TestArray.GetLongLength(1) == Dimension2)
-                            LogOK("CheckImage", "  ImageArray dimension 2 has the expected length:: " + Dimension2.ToString(CommaFormat));
+                            LogIssue("CheckImage", "  ImageArray dimension 1 does not has the expected length:: " + dimension1.ToString(commaFormat) + ", received: " + testArray.GetLongLength(0).ToString(commaFormat));
+                        if (testArray.GetLongLength(1) == dimension2)
+                            LogOk("CheckImage", "  ImageArray dimension 2 has the expected length:: " + dimension2.ToString(commaFormat));
                         else
-                            LogIssue("CheckImage", "  ImageArray dimension 2 does not has the expected length:: " + Dimension2.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(1).ToString(CommaFormat));
+                            LogIssue("CheckImage", "  ImageArray dimension 2 does not has the expected length:: " + dimension2.ToString(commaFormat) + ", received: " + testArray.GetLongLength(1).ToString(commaFormat));
                     }
                 }
-                else if (TestArray.GetLongLength(0) == Dimension1)
-                    LogOK("CheckImage", "  ImageArray dimension 1 has the expected length:: " + Dimension1.ToString(CommaFormat));
+                else if (testArray.GetLongLength(0) == dimension1)
+                    LogOk("CheckImage", "  ImageArray dimension 1 has the expected length:: " + dimension1.ToString(commaFormat));
                 else
-                    LogIssue("CheckImage", "  ImageArray dimension 1 does not has the expected length:: " + Dimension1.ToString(CommaFormat) + ", received: " + TestArray.GetLongLength(0).ToString(CommaFormat));
+                    LogIssue("CheckImage", "  ImageArray dimension 1 does not has the expected length:: " + dimension1.ToString(commaFormat) + ", received: " + testArray.GetLongLength(0).ToString(commaFormat));
             }
             else
                 LogIssue("CheckImage", "  Dimension 1 is 0 it should never be!");
         }
 
-        private short TestShort(VideoProperty p_Type, short p_Min, short p_Max, bool p_Mandatory)
+        private short TestShort(VideoProperty pType, short pMin, short pMax, bool pMandatory)
         {
-            string MethodName;
+            string methodName;
             short returnValue = 0;
 
             // Create a text version of the calling method name
             try
             {
-                MethodName = p_Type.ToString(); // & " Read"
+                methodName = pType.ToString(); // & " Read"
             }
             catch (Exception)
             {
-                MethodName = "?????? Read";
+                methodName = "?????? Read";
             }
 
             try
             {
                 returnValue = 0;
-                LogCallToDriver(p_Type.ToString(), $"About to get {p_Type} property");
-                switch (p_Type)
+                LogCallToDriver(pType.ToString(), $"About to get {pType} property");
+                switch (pType)
                 {
                     case VideoProperty.GainMax:
                         {
-                            CanReadGainMax = false;
+                            canReadGainMax = false;
                             returnValue = videoDevice.GainMax;
-                            CanReadGainMax = true;
+                            canReadGainMax = true;
                             break;
                         }
 
                     case VideoProperty.GainMin:
                         {
-                            CanReadGainMin = false;
+                            canReadGainMin = false;
                             returnValue = videoDevice.GainMin;
-                            CanReadGainMin = true;
+                            canReadGainMin = true;
                             break;
                         }
 
@@ -666,17 +666,17 @@ namespace ConformU
 
                     case VideoProperty.GammaMax:
                         {
-                            CanReadGammaMax = false;
+                            canReadGammaMax = false;
                             returnValue = videoDevice.GammaMax;
-                            CanReadGammaMax = true;
+                            canReadGammaMax = true;
                             break;
                         }
 
                     case VideoProperty.GammaMin:
                         {
-                            CanReadGammaMin = false;
+                            canReadGammaMin = false;
                             returnValue = videoDevice.GammaMin;
-                            CanReadGammaMin = true;
+                            canReadGammaMin = true;
                             break;
                         }
 
@@ -688,7 +688,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(MethodName, "TestShort: Unknown test type - " + p_Type.ToString());
+                            LogIssue(methodName, "TestShort: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
@@ -696,30 +696,30 @@ namespace ConformU
                 // Successfully retrieved a value
                 switch (returnValue)
                 {
-                    case object _ when returnValue < p_Min // Lower than minimum value
+                    case object _ when returnValue < pMin // Lower than minimum value
                    :
                         {
-                            LogIssue(MethodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
-                    case object _ when returnValue > p_Max // Higher than maximum value
+                    case object _ when returnValue > pMax // Higher than maximum value
              :
                         {
-                            LogIssue(MethodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogOK(MethodName, returnValue.ToString());
+                            LogOk(methodName, returnValue.ToString());
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                HandleException(MethodName, MemberType.Property, p_Mandatory ? Required.Mandatory : Required.Optional, ex, "");
+                HandleException(methodName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
             }
             return returnValue;
         }
@@ -727,32 +727,32 @@ namespace ConformU
         /// <summary>
         ///     ''' Test whether an integer is returned by a driver
         ///     ''' </summary>
-        ///     ''' <param name="p_Type">Method to test</param>
-        ///     ''' <param name="p_Min">Lowest valid value</param>
-        ///     ''' <param name="p_Max">Highest valid value</param>
-        ///     ''' <param name="p_Mandatory">Mandatory method</param>
+        ///     ''' <param name="pType">Method to test</param>
+        ///     ''' <param name="pMin">Lowest valid value</param>
+        ///     ''' <param name="pMax">Highest valid value</param>
+        ///     ''' <param name="pMandatory">Mandatory method</param>
         ///     ''' <returns>Integer value returned by the driver</returns>
         ///     ''' <remarks></remarks>
-        private int TestInteger(VideoProperty p_Type, int p_Min, int p_Max, bool p_Mandatory)
+        private int TestInteger(VideoProperty pType, int pMin, int pMax, bool pMandatory)
         {
-            string MethodName;
+            string methodName;
             int returnValue = 0;
 
             // Create a text version of the calling method name
             try
             {
-                MethodName = p_Type.ToString(); // & " Read"
+                methodName = pType.ToString(); // & " Read"
             }
             catch (Exception)
             {
-                MethodName = "?????? Read";
+                methodName = "?????? Read";
             }
 
             try
             {
                 returnValue = 0;
-                LogCallToDriver(p_Type.ToString(), $"About to get {p_Type} property");
-                switch (p_Type)
+                LogCallToDriver(pType.ToString(), $"About to get {pType} property");
+                switch (pType)
                 {
                     case VideoProperty.BitDepth:
                         {
@@ -774,9 +774,9 @@ namespace ConformU
 
                     case VideoProperty.IntegrationRate:
                         {
-                            CanReadIntegrationRate = false;
+                            canReadIntegrationRate = false;
                             returnValue = videoDevice.IntegrationRate;
-                            CanReadIntegrationRate = true;
+                            canReadIntegrationRate = true;
                             break;
                         }
 
@@ -794,7 +794,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(MethodName, "TestInteger: Unknown test type - " + p_Type.ToString());
+                            LogIssue(methodName, "TestInteger: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
@@ -802,71 +802,71 @@ namespace ConformU
                 // Successfully retrieved a value
                 switch (returnValue)
                 {
-                    case object _ when returnValue < p_Min // Lower than minimum value
+                    case object _ when returnValue < pMin // Lower than minimum value
                    :
                         {
-                            LogIssue(MethodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
-                    case object _ when returnValue > p_Max // Higher than maximum value
+                    case object _ when returnValue > pMax // Higher than maximum value
              :
                         {
-                            LogIssue(MethodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogOK(MethodName, returnValue.ToString());
+                            LogOk(methodName, returnValue.ToString());
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                HandleException(MethodName, MemberType.Property, p_Mandatory ? Required.Mandatory : Required.Optional, ex, "");
+                HandleException(methodName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
             }
             return returnValue;
         }
         /// <summary>
         ///     ''' Test whether an integer is returned by a driver
         ///     ''' </summary>
-        ///     ''' <param name="p_Type">Method to test</param>
-        ///     ''' <param name="p_Min">Lowest valid value</param>
-        ///     ''' <param name="p_Max">Highest valid value</param>
-        ///     ''' <param name="p_Mandatory">Mandatory method</param>
+        ///     ''' <param name="pType">Method to test</param>
+        ///     ''' <param name="pMin">Lowest valid value</param>
+        ///     ''' <param name="pMax">Highest valid value</param>
+        ///     ''' <param name="pMandatory">Mandatory method</param>
         ///     ''' <returns>Integer value returned by the driver</returns>
         ///     ''' <remarks></remarks>
-        private long TestLong(VideoProperty p_Type, long p_Min, long p_Max, bool p_Mandatory)
+        private long TestLong(VideoProperty pType, long pMin, long pMax, bool pMandatory)
         {
-            string MethodName;
+            string methodName;
             long returnValue = 0;
 
             // Create a text version of the calling method name
             try
             {
-                MethodName = p_Type.ToString(); // & " Read"
+                methodName = pType.ToString(); // & " Read"
             }
             catch (Exception)
             {
-                MethodName = "?????? Read";
+                methodName = "?????? Read";
             }
 
             try
             {
                 returnValue = 0;
-                switch (p_Type)
+                switch (pType)
                 {
                     case VideoProperty.FrameNumber:
                         {
-                            returnValue = LastVideoFrame.FrameNumber;
+                            returnValue = lastVideoFrame.FrameNumber;
                             break;
                         }
 
                     default:
                         {
-                            LogIssue(MethodName, "TestInteger: Unknown test type - " + p_Type.ToString());
+                            LogIssue(methodName, "TestInteger: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
@@ -874,30 +874,30 @@ namespace ConformU
                 // Successfully retrieved a value
                 switch (returnValue)
                 {
-                    case object _ when returnValue < p_Min // Lower than minimum value
+                    case object _ when returnValue < pMin // Lower than minimum value
                    :
                         {
-                            LogIssue(MethodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
-                    case object _ when returnValue > p_Max // Higher than maximum value
+                    case object _ when returnValue > pMax // Higher than maximum value
              :
                         {
-                            LogIssue(MethodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogOK(MethodName, returnValue.ToString());
+                            LogOk(methodName, returnValue.ToString());
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                HandleException(MethodName, MemberType.Property, p_Mandatory ? Required.Mandatory : Required.Optional, ex, "");
+                HandleException(methodName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
             }
             return returnValue;
         }
@@ -905,78 +905,78 @@ namespace ConformU
         /// <summary>
         ///     ''' Test whether an integer is returned by a driver
         ///     ''' </summary>
-        ///     ''' <param name="p_Type">Method to test</param>
+        ///     ''' <param name="pType">Method to test</param>
         ///     ''' <param name="p_Min">Lowest valid value</param>
         ///     ''' <param name="p_Max">Highest valid value</param>
-        ///     ''' <param name="p_Mandatory">Mandatory method</param>
+        ///     ''' <param name="pMandatory">Mandatory method</param>
         ///     ''' <returns>Integer value returned by the driver</returns>
         ///     ''' <remarks></remarks>
-        private dynamic TestVideoFrame(VideoProperty p_Type, bool p_Mandatory)
+        private dynamic TestVideoFrame(VideoProperty pType, bool pMandatory)
         {
-            string MethodName;
+            string methodName;
 
             // Create a text version of the calling method name
             try
             {
-                MethodName = p_Type.ToString(); // & " Read"
+                methodName = pType.ToString(); // & " Read"
             }
             catch (Exception)
             {
-                MethodName = "?????? Read";
+                methodName = "?????? Read";
             }
 
             dynamic returnValue = null;
 
             try
             {
-                LogCallToDriver(p_Type.ToString(), $"About to get {p_Type} property");
-                switch (p_Type)
+                LogCallToDriver(pType.ToString(), $"About to get {pType} property");
+                switch (pType)
                 {
                     case VideoProperty.LastVideoFrame:
                         {
-                            CanReadVideoFrame = false;
+                            canReadVideoFrame = false;
                             returnValue = videoDevice.LastVideoFrame;
-                            CanReadVideoFrame = true;
+                            canReadVideoFrame = true;
                             break;
                         }
 
                     default:
                         {
-                            LogIssue(MethodName, "TestVideoFrame: Unknown test type - " + p_Type.ToString());
+                            LogIssue(methodName, "TestVideoFrame: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
 
                 // Successfully retrieved a value
-                LogOK(MethodName, "Successfully received VideoFrame");
+                LogOk(methodName, "Successfully received VideoFrame");
             }
             catch (Exception ex)
             {
-                HandleException(MethodName, MemberType.Property, p_Mandatory ? Required.Mandatory : Required.Optional, ex, "");
+                HandleException(methodName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
             }
             return returnValue;
         }
 
-        private double TestDouble(VideoProperty p_Type, double p_Min, double p_Max, bool p_Mandatory)
+        private double TestDouble(VideoProperty pType, double pMin, double pMax, bool pMandatory)
         {
-            string MethodName;
+            string methodName;
             double returnValue = 0.0;
 
             // Create a text version of the calling method name
             try
             {
-                MethodName = p_Type.ToString(); // & " Read"
+                methodName = pType.ToString(); // & " Read"
             }
             catch (Exception)
             {
-                MethodName = "?????? Read";
+                methodName = "?????? Read";
             }
 
             try
             {
                 returnValue = 0.0;
-                LogCallToDriver(p_Type.ToString(), $"About to get {p_Type} property");
-                switch (p_Type)
+                LogCallToDriver(pType.ToString(), $"About to get {pType} property");
+                switch (pType)
                 {
                     case VideoProperty.PixelSizeX:
                         {
@@ -1004,78 +1004,78 @@ namespace ConformU
 
                     case VideoProperty.ExposureDuration:
                         {
-                            returnValue = LastVideoFrame.ExposureDuration;
+                            returnValue = lastVideoFrame.ExposureDuration;
                             break;
                         }
 
                     default:
                         {
-                            LogIssue(MethodName, "TestDouble: Unknown test type - " + p_Type.ToString());
+                            LogIssue(methodName, "TestDouble: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
                 // Successfully retrieved a value
                 switch (returnValue)
                 {
-                    case object _ when returnValue < p_Min // Lower than minimum value
+                    case object _ when returnValue < pMin // Lower than minimum value
                    :
                         {
-                            LogIssue(MethodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
-                    case object _ when returnValue > p_Max // Higher than maximum value
+                    case object _ when returnValue > pMax // Higher than maximum value
              :
                         {
-                            LogIssue(MethodName, "Invalid value: " + returnValue.ToString());
+                            LogIssue(methodName, "Invalid value: " + returnValue.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogOK(MethodName, returnValue.ToString());
+                            LogOk(methodName, returnValue.ToString());
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                HandleException(MethodName, MemberType.Property, p_Mandatory ? Required.Mandatory : Required.Optional, ex, "");
+                HandleException(methodName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
             }
             return returnValue;
         }
-        private bool TestBoolean(VideoProperty p_Type, bool p_Mandatory)
+        private bool TestBoolean(VideoProperty pType, bool pMandatory)
         {
-            string MethodName;
+            string methodName;
             bool returnValue = false;
 
             // Create a text version of the calling method name
             try
             {
-                MethodName = p_Type.ToString(); // & " Read"
+                methodName = pType.ToString(); // & " Read"
             }
             catch (Exception)
             {
-                MethodName = "?????? Read";
+                methodName = "?????? Read";
             }
 
             try
             {
                 returnValue = false;
-                switch (p_Type)
+                switch (pType)
                 {
                     default:
                         {
-                            LogIssue(MethodName, "TestBoolean: Unknown test type - " + p_Type.ToString());
+                            LogIssue(methodName, "TestBoolean: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
                 // Successfully retrieved a value
-                LogOK(MethodName, returnValue.ToString());
+                LogOk(methodName, returnValue.ToString());
             }
             catch (Exception ex)
             {
-                HandleException(MethodName, MemberType.Property, p_Mandatory ? Required.Mandatory : Required.Optional, ex, "");
+                HandleException(methodName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
             }
             return returnValue;
         }
@@ -1083,33 +1083,33 @@ namespace ConformU
         /// <summary>
         ///     ''' Test whether the driver returns a valid ArrayList
         ///     ''' </summary>
-        ///     ''' <param name="p_Type">Property</param>
-        ///     ''' <param name="p_Mandatory"></param>
-        ///     ''' <param name="p_ItemType"></param>
+        ///     ''' <param name="pType">Property</param>
+        ///     ''' <param name="pMandatory"></param>
+        ///     ''' <param name="pItemType"></param>
         ///     ''' <returns></returns>
         ///     ''' <remarks></remarks>
         ///     
-        private dynamic TestArrayList(VideoProperty p_Type, bool p_Mandatory, Type p_ItemType)
+        private dynamic TestArrayList(VideoProperty pType, bool pMandatory, Type pItemType)
         {
-            string MethodName;
-            int Count;
+            string methodName;
+            int count;
 
             dynamic returnValue = new ArrayList();
 
             // Create a text version of the calling method name
             try
             {
-                MethodName = p_Type.ToString(); // & " Read"
+                methodName = pType.ToString(); // & " Read"
             }
             catch (Exception)
             {
-                MethodName = "?????? Read";
+                methodName = "?????? Read";
             }
 
             try
             {
-                LogCallToDriver(p_Type.ToString(), $"About to get {p_Type} property");
-                switch (p_Type)
+                LogCallToDriver(pType.ToString(), $"About to get {pType} property");
+                switch (pType)
                 {
                     case VideoProperty.Gains:
                         {
@@ -1125,65 +1125,65 @@ namespace ConformU
 
                     case VideoProperty.SupportedIntegrationRates:
                         {
-                            CanReadSupportedIntegrationRates = false;
+                            canReadSupportedIntegrationRates = false;
                             returnValue = videoDevice.SupportedIntegrationRates;
-                            CanReadSupportedIntegrationRates = true;
+                            canReadSupportedIntegrationRates = true;
                             break;
                         }
 
                     case VideoProperty.ImageMetadata:
                         {
-                            returnValue = LastVideoFrame.ImageMetadata;
+                            returnValue = lastVideoFrame.ImageMetadata;
                             break;
                         }
 
                     default:
                         {
-                            LogIssue(MethodName, "TestArrayList: Unknown test type - " + p_Type.ToString());
+                            LogIssue(methodName, "TestArrayList: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
 
                 // Successfully retrieved a value
-                Count = 0;
-                LogOK(MethodName, "Received an array containing " + returnValue.Count + " items.");
+                count = 0;
+                LogOk(methodName, "Received an array containing " + returnValue.Count + " items.");
 
-                foreach (object ListItem in returnValue)
+                foreach (object listItem in returnValue)
                 {
-                    if (ListItem.GetType().Equals(p_ItemType))
-                        LogOK(MethodName + "(" + Count + ")", "  " + ListItem.ToString());
+                    if (listItem.GetType().Equals(pItemType))
+                        LogOk(methodName + "(" + count + ")", "  " + listItem.ToString());
                     else
-                        LogIssue(MethodName, "  Type of ArrayList item: " + ListItem.GetType().Name + " does not match expected type: " + p_ItemType.Name);
-                    Count += 1;
+                        LogIssue(methodName, "  Type of ArrayList item: " + listItem.GetType().Name + " does not match expected type: " + pItemType.Name);
+                    count += 1;
                 }
             }
             catch (Exception ex)
             {
-                HandleException(MethodName, MemberType.Property, p_Mandatory ? Required.Mandatory : Required.Optional, ex, "");
+                HandleException(methodName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
             }
 
             return returnValue;
         }
 
-        private string TestString(VideoProperty p_Type, int p_MaxLength, bool p_Mandatory)
+        private string TestString(VideoProperty pType, int pMaxLength, bool pMandatory)
         {
-            string MethodName;
+            string methodName;
 
             // Create a text version of the calling method name
             try
             {
-                MethodName = p_Type.ToString(); // & " Read"
+                methodName = pType.ToString(); // & " Read"
             }
             catch (Exception)
             {
-                MethodName = "?????? Read";
+                methodName = "?????? Read";
             }
 
             string returnValue = "";
             try
             {
-                LogCallToDriver(p_Type.ToString(), $"About to get {p_Type} property");
-                switch (p_Type)
+                LogCallToDriver(pType.ToString(), $"About to get {pType} property");
+                switch (pType)
                 {
                     case VideoProperty.SensorName:
                         {
@@ -1193,7 +1193,7 @@ namespace ConformU
 
                     case VideoProperty.ExposureStartTime:
                         {
-                            returnValue = LastVideoFrame.ExposureStartTime;
+                            returnValue = lastVideoFrame.ExposureStartTime;
                             break;
                         }
 
@@ -1217,7 +1217,7 @@ namespace ConformU
 
                     default:
                         {
-                            LogIssue(MethodName, "TestString: Unknown test type - " + p_Type.ToString());
+                            LogIssue(methodName, "TestString: Unknown test type - " + pType.ToString());
                             break;
                         }
                 }
@@ -1226,23 +1226,23 @@ namespace ConformU
                 {
                     case object _ when returnValue == "":
                         {
-                            LogOK(MethodName, "The driver returned an empty string");
+                            LogOk(methodName, "The driver returned an empty string");
                             break;
                         }
 
                     default:
                         {
-                            if (returnValue.Length <= p_MaxLength)
-                                LogOK(MethodName, returnValue);
+                            if (returnValue.Length <= pMaxLength)
+                                LogOk(methodName, returnValue);
                             else
-                                LogIssue(MethodName, "String exceeds " + p_MaxLength + " characters maximum length - " + returnValue);
+                                LogIssue(methodName, "String exceeds " + pMaxLength + " characters maximum length - " + returnValue);
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                HandleException(MethodName, MemberType.Property, p_Mandatory ? Required.Mandatory : Required.Optional, ex, "");
+                HandleException(methodName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
             }
             return returnValue;
         }
@@ -1250,25 +1250,25 @@ namespace ConformU
         /// <summary>
         /// Not currently used in ConformU
         /// </summary>
-        /// <param name="p_Type"></param>
-        /// <param name="p_Property"></param>
-        /// <param name="p_TestOK"></param>
+        /// <param name="pType"></param>
+        /// <param name="pProperty"></param>
+        /// <param name="pTestOk"></param>
         /// <param name="p_TestLow"></param>
         /// <param name="p_TestHigh"></param>
-        private void CameraPropertyWriteTest(VideoProperty p_Type, string p_Property, int p_TestOK)
+        private void CameraPropertyWriteTest(VideoProperty pType, string pProperty, int pTestOk)
         {
             try // OK value first
             {
-                switch (p_Type)
+                switch (pType)
                 {
                     case VideoProperty.BitDepth:
                         break;
                 }
-                LogOK(p_Property + " write", "Successfully wrote " + p_TestOK);
+                LogOk(pProperty + " write", "Successfully wrote " + pTestOk);
             }
             catch (Exception ex)
             {
-                LogIssue(p_Property + " write", "Exception generated when setting legal value: " + p_TestOK.ToString() + " - " + ex.Message);
+                LogIssue(pProperty + " write", "Exception generated when setting legal value: " + pTestOk.ToString() + " - " + ex.Message);
             }
         }
 
@@ -1300,75 +1300,75 @@ namespace ConformU
             }
         }
 
-        private void CameraPerformanceTest(CameraPerformance p_Type, string p_Name)
+        private void CameraPerformanceTest(CameraPerformance pType, string pName)
         {
-            DateTime l_StartTime;
-            double l_Count, l_LastElapsedTime, l_ElapsedTime, l_Rate;
-            SetAction(p_Name);
+            DateTime lStartTime;
+            double lCount, lLastElapsedTime, lElapsedTime, lRate;
+            SetAction(pName);
             try
             {
-                l_StartTime = DateTime.Now;
-                l_Count = 0.0;
-                l_LastElapsedTime = 0.0;
+                lStartTime = DateTime.Now;
+                lCount = 0.0;
+                lLastElapsedTime = 0.0;
                 do
                 {
-                    l_Count += 1.0;
-                    switch (p_Type)
+                    lCount += 1.0;
+                    switch (pType)
                     {
                         case CameraPerformance.CameraState:
                             {
-                                CameraState = videoDevice.CameraState;
+                                cameraState = videoDevice.CameraState;
                                 break;
                             }
 
                         default:
                             {
-                                LogIssue(p_Name, "Conform:PerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(pName, "Conform:PerformanceTest: Unknown test type " + pType.ToString());
                                 break;
                             }
                     }
 
-                    l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
-                    if (l_ElapsedTime > l_LastElapsedTime + 1.0)
+                    lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
+                    if (lElapsedTime > lLastElapsedTime + 1.0)
                     {
-                        SetStatus(l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
-                        l_LastElapsedTime = l_ElapsedTime;
+                        SetStatus(lCount + " transactions in " + lElapsedTime.ToString("0") + " seconds");
+                        lLastElapsedTime = lElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
                     }
                 }
-                while (l_ElapsedTime <= PERF_LOOP_TIME);
-                l_Rate = l_Count / l_ElapsedTime;
-                switch (l_Rate)
+                while (lElapsedTime <= PERF_LOOP_TIME);
+                lRate = lCount / lElapsedTime;
+                switch (lRate)
                 {
-                    case object _ when l_Rate > 10.0:
+                    case object _ when lRate > 10.0:
                         {
-                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
-                    case object _ when 2.0 <= l_Rate && l_Rate <= 10.0:
+                    case object _ when 2.0 <= lRate && lRate <= 10.0:
                         {
-                            LogOK(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogOk(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
-                    case object _ when 1.0 <= l_Rate && l_Rate <= 2.0:
+                    case object _ when 1.0 <= lRate && lRate <= 2.0:
                         {
-                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogInfo(p_Name, "Unable to complete test: " + ex.ToString());
+                LogInfo(pName, "Unable to complete test: " + ex.ToString());
             }
         }
 
@@ -1381,7 +1381,7 @@ namespace ConformU
             catch
             {
             }
-            LogOK("PostRunCheck", "Camera returned to initial cooler temperature");
+            LogOk("PostRunCheck", "Camera returned to initial cooler temperature");
         }
     }
 

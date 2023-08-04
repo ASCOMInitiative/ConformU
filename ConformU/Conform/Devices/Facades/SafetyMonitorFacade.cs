@@ -22,7 +22,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.IsSafe);
+                return FunctionNoParameters<bool>(() => Driver.IsSafe);
             }
         }
 

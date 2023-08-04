@@ -13,11 +13,11 @@ namespace ConformU
 
     internal class SafetyMonitorTester : DeviceTesterBaseClass
     {
-        private bool m_IsSafe;
-        private ISafetyMonitorV3 m_SafetyMonitor;
+        private bool mIsSafe;
+        private ISafetyMonitorV3 mSafetyMonitor;
 
         // Helper variables
-        internal static Utilities g_Util;
+        internal static Utilities GUtil;
         private readonly CancellationToken cancellationToken;
         private readonly Settings settings;
         private readonly ConformLogger logger;
@@ -27,18 +27,18 @@ namespace ConformU
 
         private enum RequiredProperty
         {
-            propIsSafe
+            PropIsSafe
         }
         private enum PerformanceProperty
         {
-            propIsSafe
+            PropIsSafe
         }
 
         #region New and Dispose
 
         public SafetyMonitorTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(false, true, false, false, true, true, false, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
         {
-            g_Util = new();
+            GUtil = new();
             //g_settings.MessageLevel = MessageLevel.Debug;
 
             settings = conformConfiguration.Settings;
@@ -53,7 +53,7 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    if (m_SafetyMonitor is not null) m_SafetyMonitor.Dispose();
+                    if (mSafetyMonitor is not null) mSafetyMonitor.Dispose();
                 }
             }
 
@@ -75,14 +75,14 @@ namespace ConformU
                 {
                     default:
                         {
-                            g_ExNotImplemented = (int)0x80040400;
-                            g_ExInvalidValue1 = (int)0x80040405;
-                            g_ExInvalidValue2 = (int)0x80040405;
-                            g_ExInvalidValue3 = (int)0x80040405;
-                            g_ExInvalidValue4 = (int)0x80040405;
-                            g_ExInvalidValue5 = (int)0x80040405;
-                            g_ExInvalidValue6 = (int)0x80040405;
-                            g_ExNotSet1 = (int)0x80040403;
+                            GExNotImplemented = (int)0x80040400;
+                            GExInvalidValue1 = (int)0x80040405;
+                            GExInvalidValue2 = (int)0x80040405;
+                            GExInvalidValue3 = (int)0x80040405;
+                            GExInvalidValue4 = (int)0x80040405;
+                            GExInvalidValue5 = (int)0x80040405;
+                            GExInvalidValue6 = (int)0x80040405;
+                            GExNotSet1 = (int)0x80040403;
                             break;
                         }
                 }
@@ -97,7 +97,7 @@ namespace ConformU
                 {
                     case DeviceTechnology.Alpaca:
                         LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
-                        m_SafetyMonitor = new AlpacaSafetyMonitor(
+                        mSafetyMonitor = new AlpacaSafetyMonitor(
                                                     settings.AlpacaConfiguration.AccessServiceType,
                                                     settings.AlpacaDevice.IpAddress,
                                                     settings.AlpacaDevice.IpPort,
@@ -122,12 +122,12 @@ namespace ConformU
                         {
                             case ComAccessMechanic.Native:
                                 LogInfo("CreateDevice", $"Creating NATIVE COM device: {settings.ComDevice.ProgId}");
-                                m_SafetyMonitor = new SafetyMonitorFacade(settings, logger);
+                                mSafetyMonitor = new SafetyMonitorFacade(settings, logger);
                                 break;
 
                             case ComAccessMechanic.DriverAccess:
                                 LogInfo("CreateDevice", $"Creating DRIVERACCESS device: {settings.ComDevice.ProgId}");
-                                m_SafetyMonitor = new SafetyMonitor(settings.ComDevice.ProgId);
+                                mSafetyMonitor = new SafetyMonitor(settings.ComDevice.ProgId);
                                 break;
 
                             default:
@@ -140,7 +140,7 @@ namespace ConformU
                 }
 
                 LogInfo("CreateDevice", "Successfully created driver");
-                baseClassDevice = m_SafetyMonitor; // Assign the driver to the base class
+                BaseClassDevice = mSafetyMonitor; // Assign the driver to the base class
 
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);
@@ -164,9 +164,9 @@ namespace ConformU
             try
             {
                 LogCallToDriver("IsSafe", "About to get IsSafe property");
-                m_IsSafe = m_SafetyMonitor.IsSafe;
-                if (!m_IsSafe)
-                    LogOK("IsSafe", "Reports false before connection");
+                mIsSafe = mSafetyMonitor.IsSafe;
+                if (!mIsSafe)
+                    LogOk("IsSafe", "Reports false before connection");
                 else
                     LogIssue("IsSafe", "Reports true before connection rather than false");
             }
@@ -178,17 +178,17 @@ namespace ConformU
 
         public override void CheckCommonMethods()
         {
-            base.CheckCommonMethods(m_SafetyMonitor, DeviceTypes.SafetyMonitor);
+            base.CheckCommonMethods(mSafetyMonitor, DeviceTypes.SafetyMonitor);
         }
 
         public override void CheckProperties()
         {
-            RequiredPropertiesTest(RequiredProperty.propIsSafe, "IsSafe");
+            RequiredPropertiesTest(RequiredProperty.PropIsSafe, "IsSafe");
         }
         public override void CheckPerformance()
         {
             SetTest("Performance");
-            PerformanceTest(PerformanceProperty.propIsSafe, "IsSafe");
+            PerformanceTest(PerformanceProperty.PropIsSafe, "IsSafe");
             SetTest("");
             SetAction("");
             SetStatus("");
@@ -212,101 +212,101 @@ namespace ConformU
             }
         }
 
-        private void RequiredPropertiesTest(RequiredProperty p_Type, string p_Name)
+        private void RequiredPropertiesTest(RequiredProperty pType, string pName)
         {
             try
             {
-                switch (p_Type)
+                switch (pType)
                 {
-                    case RequiredProperty.propIsSafe:
+                    case RequiredProperty.PropIsSafe:
                         {
-                            m_IsSafe = m_SafetyMonitor.IsSafe;
+                            mIsSafe = mSafetyMonitor.IsSafe;
                             LogCallToDriver("IsSafe", "About to get IsSafe property");
-                            LogOK(p_Name, m_IsSafe.ToString());
+                            LogOk(pName, mIsSafe.ToString());
                             break;
                         }
 
                     default:
                         {
-                            LogIssue(p_Name, "RequiredPropertiesTest: Unknown test type " + p_Type.ToString());
+                            LogIssue(pName, "RequiredPropertiesTest: Unknown test type " + pType.ToString());
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                HandleException(p_Name, MemberType.Property, Required.Mandatory, ex, "");
+                HandleException(pName, MemberType.Property, Required.Mandatory, ex, "");
             }
         }
-        private void PerformanceTest(PerformanceProperty p_Type, string p_Name)
+        private void PerformanceTest(PerformanceProperty pType, string pName)
         {
-            DateTime l_StartTime;
-            double l_Count, l_LastElapsedTime, l_ElapsedTime, l_Rate;
-            SetAction(p_Name);
+            DateTime lStartTime;
+            double lCount, lLastElapsedTime, lElapsedTime, lRate;
+            SetAction(pName);
             try
             {
-                l_StartTime = DateTime.Now;
-                l_Count = 0.0;
-                l_LastElapsedTime = 0.0;
+                lStartTime = DateTime.Now;
+                lCount = 0.0;
+                lLastElapsedTime = 0.0;
                 do
                 {
-                    l_Count += 1.0;
-                    switch (p_Type)
+                    lCount += 1.0;
+                    switch (pType)
                     {
-                        case PerformanceProperty.propIsSafe:
+                        case PerformanceProperty.PropIsSafe:
                             {
-                                m_IsSafe = m_SafetyMonitor.IsSafe;
+                                mIsSafe = mSafetyMonitor.IsSafe;
                                 break;
                             }
 
                         default:
                             {
-                                LogIssue(p_Name, "PerformanceTest: Unknown test type " + p_Type.ToString());
+                                LogIssue(pName, "PerformanceTest: Unknown test type " + pType.ToString());
                                 break;
                             }
                     }
 
-                    l_ElapsedTime = DateTime.Now.Subtract(l_StartTime).TotalSeconds;
-                    if (l_ElapsedTime > l_LastElapsedTime + 1.0)
+                    lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
+                    if (lElapsedTime > lLastElapsedTime + 1.0)
                     {
-                        SetStatus(l_Count + " transactions in " + l_ElapsedTime.ToString("0") + " seconds");
-                        l_LastElapsedTime = l_ElapsedTime;
+                        SetStatus(lCount + " transactions in " + lElapsedTime.ToString("0") + " seconds");
+                        lLastElapsedTime = lElapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
                     }
                 }
-                while (l_ElapsedTime <= PERF_LOOP_TIME);
-                l_Rate = l_Count / l_ElapsedTime;
-                switch (l_Rate)
+                while (lElapsedTime <= PERF_LOOP_TIME);
+                lRate = lCount / lElapsedTime;
+                switch (lRate)
                 {
-                    case object _ when l_Rate > 10.0:
+                    case object _ when lRate > 10.0:
                         {
-                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
-                    case object _ when 2.0 <= l_Rate && l_Rate <= 10.0:
+                    case object _ when 2.0 <= lRate && lRate <= 10.0:
                         {
-                            LogOK(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogOk(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
-                    case object _ when 1.0 <= l_Rate && l_Rate <= 2.0:
+                    case object _ when 1.0 <= lRate && lRate <= 2.0:
                         {
-                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(p_Name, "Transaction rate: " + l_Rate.ToString("0.0") + " per second");
+                            LogInfo(pName, "Transaction rate: " + lRate.ToString("0.0") + " per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogInfo(p_Name, "Unable to complete test: " + ex.ToString());
+                LogInfo(pName, "Unable to complete test: " + ex.ToString());
             }
         }
     }

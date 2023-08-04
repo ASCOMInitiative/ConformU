@@ -8,29 +8,29 @@ namespace ConformU
 {
     public class AxisRatesFacade : IAxisRates, IEnumerable, IEnumerator, IDisposable
     {
-        private readonly TelescopeAxis m_axis;
-        private RateFacade[] m_Rates;
+        private readonly TelescopeAxis mAxis;
+        private RateFacade[] mRates;
 
         private int pos;
         private readonly ConformLogger logger;
 
         // Default constructor - Internal prevents public creation instances.
-        internal AxisRatesFacade(TelescopeAxis Axis, dynamic driver, TelescopeFacade telescopeFacade, ConformLogger logger)
+        internal AxisRatesFacade(TelescopeAxis axis, dynamic driver, TelescopeFacade telescopeFacade, ConformLogger logger)
         {
-            m_Rates = Array.Empty<RateFacade>(); // Initialise to an empty array
+            mRates = Array.Empty<RateFacade>(); // Initialise to an empty array
 
             this.logger = logger;
-            m_axis = Axis;
+            mAxis = axis;
 
             // Assign the AxisRates response to an IEnumerable variable
-            IEnumerable driverAxisRates = telescopeFacade.Function1Parameter<IEnumerable>((i) => driver.AxisRates(i), Axis);
+            IEnumerable driverAxisRates = telescopeFacade.Function1Parameter<IEnumerable>((i) => driver.AxisRates(i), axis);
 
             // Copy the response values to a local array so that the driver is not continually polled for values
             int nextArrayPosition = 0;
             foreach (dynamic rate in driverAxisRates)
             {
-                Array.Resize<RateFacade>(ref m_Rates, nextArrayPosition + 1); // Resize the array to add one more entry (always 1 more than the array element position, which is 0 based).
-                m_Rates[nextArrayPosition] = new RateFacade(rate.Minimum, rate.Maximum); // Store the rate in the new array entry
+                Array.Resize<RateFacade>(ref mRates, nextArrayPosition + 1); // Resize the array to add one more entry (always 1 more than the array element position, which is 0 based).
+                mRates[nextArrayPosition] = new RateFacade(rate.Minimum, rate.Maximum); // Store the rate in the new array entry
                 nextArrayPosition++; // Increment the rate counter
             }
 
@@ -42,7 +42,7 @@ namespace ConformU
 
         public int Count
         {
-            get { return m_Rates.Length; }
+            get { return mRates.Length; }
         }
 
         public IEnumerator GetEnumerator()
@@ -59,7 +59,7 @@ namespace ConformU
             {
                 if (index < 1 || index > this.Count) throw new InvalidValueException("AxisRates.index", index.ToString(CultureInfo.CurrentCulture), string.Format(CultureInfo.CurrentCulture, "1 to {0}", this.Count));
                 logger?.LogMessage($"AxisRateFacade.this[index]", MessageLevel.Debug, $"Retuning index item: {index}");
-                return (IRate)m_Rates[index - 1]; 	// 1-based
+                return (IRate)mRates[index - 1]; 	// 1-based
             }
         }
 
@@ -80,7 +80,7 @@ namespace ConformU
             {
                 logger?.LogMessage($"AxisRateFacade.Dispose(bool)", MessageLevel.Debug, $"SETTING M_RATES TO NULL!!");
                 // free managed resources
-                m_Rates = null;
+                mRates = null;
             }
         }
 
@@ -91,7 +91,7 @@ namespace ConformU
         public bool MoveNext()
         {
             logger?.LogMessage($"AxisRateFacade.MoveNext", MessageLevel.Debug, $"SETTING Moving to next item");
-            if (++pos >= m_Rates.Length) return false;
+            if (++pos >= mRates.Length) return false;
             return true;
         }
 
@@ -112,9 +112,9 @@ namespace ConformU
         {
             get
             {
-                if (pos < 0 || pos >= m_Rates.Length) throw new ASCOM.InvalidOperationException();
+                if (pos < 0 || pos >= mRates.Length) throw new ASCOM.InvalidOperationException();
                 logger?.LogMessage($"AxisRateFacade.Current", MessageLevel.Debug, $"Returning Current value");
-                return m_Rates[pos];
+                return mRates[pos];
             }
         }
 

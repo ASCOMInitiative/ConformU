@@ -6,17 +6,17 @@ namespace ConformU
 {
     public class RateFacade : IRate, IDisposable
     {
-        private double m_dMaximum = 0;
-        private double m_dMinimum = 0;
+        private double mDMaximum = 0;
+        private double mDMinimum = 0;
 
         //
         // Default constructor - Internal prevents public creation
         // of instances. These are values for AxisRates.
         //
-        internal RateFacade(double Minimum, double Maximum)
+        internal RateFacade(double minimum, double maximum)
         {
-            m_dMaximum = Maximum;
-            m_dMinimum = Minimum;
+            mDMaximum = maximum;
+            mDMinimum = minimum;
         }
 
         #region IRate Members
@@ -28,14 +28,14 @@ namespace ConformU
 
         public double Maximum
         {
-            get { return m_dMaximum; }
-            set { m_dMaximum = value; }
+            get { return mDMaximum; }
+            set { mDMaximum = value; }
         }
 
         public double Minimum
         {
-            get { return m_dMinimum; }
-            set { m_dMinimum = value; }
+            get { return mDMinimum; }
+            set { mDMinimum = value; }
         }
 
         #endregion

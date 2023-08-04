@@ -10,8 +10,8 @@ namespace ConformU
 {
     public partial class DriverHostForm : Form
     {
-        private readonly bool LOG_ENABLED = false; // Enable debug logging of this class
-        private readonly bool LOG_DISABLED = false; // Enable debug logging of this class
+        private readonly bool logEnabled = false; // Enable debug logging of this class
+        private readonly bool logDisabled = false; // Enable debug logging of this class
 
         private string progId;
         private readonly ConformLogger logger;
@@ -28,7 +28,7 @@ namespace ConformU
 
             this.FormClosed += DriverHostForm_FormClosed;
             this.Load += DriverHostForm_Load;
-            if (LOG_DISABLED) logger?.LogMessage("DriverHostForm", MessageLevel.Debug, $"Instantiated on thread: {Environment.CurrentManagedThreadId}, Message loop is running: {Application.MessageLoop}");
+            if (logDisabled) logger?.LogMessage("DriverHostForm", MessageLevel.Debug, $"Instantiated on thread: {Environment.CurrentManagedThreadId}, Message loop is running: {Application.MessageLoop}");
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace ConformU
         /// <param name="e"></param>
         private void DriverHostForm_Load(object sender, EventArgs e)
         {
-            if (LOG_DISABLED) logger?.LogMessage("DriverHostForm_Load", MessageLevel.Debug, $"Form load event has been called on thread: {Environment.CurrentManagedThreadId}. Message loop is running: {Application.MessageLoop}");
+            if (logDisabled) logger?.LogMessage("DriverHostForm_Load", MessageLevel.Debug, $"Form load event has been called on thread: {Environment.CurrentManagedThreadId}. Message loop is running: {Application.MessageLoop}");
             this.Show();
             this.WindowState = FormWindowState.Minimized;
             this.Hide();
@@ -62,7 +62,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    if (LOG_DISABLED) logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Exception setting Connected false: \r\n{ex}");
+                    if (logDisabled) logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Exception setting Connected false: \r\n{ex}");
                 }
 
                 try
@@ -72,7 +72,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    if (LOG_DISABLED) logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Exception disposing driver: \r\n{ex}");
+                    if (logDisabled) logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Exception disposing driver: \r\n{ex}");
                 }
 
                 try
@@ -89,7 +89,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    if (LOG_DISABLED) logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Exception releaseing COM object: \r\n{ex}");
+                    if (logDisabled) logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Exception releaseing COM object: \r\n{ex}");
                 }
 
                 try
@@ -104,7 +104,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    if (LOG_DISABLED) logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Exception ending application: \r\n{ex}");
+                    if (logDisabled) logger?.LogMessage("DriverHostForm-Dispose", MessageLevel.Debug, $"Exception ending application: \r\n{ex}");
                 }
             }
 
@@ -124,12 +124,12 @@ namespace ConformU
 
             if (this.InvokeRequired)
             {
-                if (LOG_DISABLED) logger?.LogMessage("HostForm.CreateDriver", MessageLevel.Debug, $"INVOKE REQUIRED - Message loop is running: {Application.MessageLoop}");
+                if (logDisabled) logger?.LogMessage("HostForm.CreateDriver", MessageLevel.Debug, $"INVOKE REQUIRED - Message loop is running: {Application.MessageLoop}");
                 this.Invoke(() => { CreateDriverInvoked(); });
             }
             else
             {
-                if (LOG_DISABLED) logger?.LogMessage("HostForm.CreateDriver", MessageLevel.Debug, $"NO INVOKE REQUIRED - Message loop is running: {Application.MessageLoop}");
+                if (logDisabled) logger?.LogMessage("HostForm.CreateDriver", MessageLevel.Debug, $"NO INVOKE REQUIRED - Message loop is running: {Application.MessageLoop}");
                 CreateDriverInvoked();
             }
             driver = this.driver;
@@ -138,30 +138,30 @@ namespace ConformU
         private void CreateDriverInvoked()
         {
             this.Hide();
-            if (LOG_DISABLED) logger?.LogMessage("HostForm.CreateDriverInvoked", MessageLevel.Debug, $"Running on thread: {Environment.CurrentManagedThreadId}");
-            if (LOG_DISABLED) logger?.LogMessage("HostForm.CreateDriverInvoked", MessageLevel.Debug, $"Getting type for {progId}");
+            if (logDisabled) logger?.LogMessage("HostForm.CreateDriverInvoked", MessageLevel.Debug, $"Running on thread: {Environment.CurrentManagedThreadId}");
+            if (logDisabled) logger?.LogMessage("HostForm.CreateDriverInvoked", MessageLevel.Debug, $"Getting type for {progId}");
             Type driverType = Type.GetTypeFromProgID(progId);
-            if (LOG_DISABLED) logger?.LogMessage("HostForm.CreateDriverInvoked", MessageLevel.Debug, $"Creating Type: {driverType}");
+            if (logDisabled) logger?.LogMessage("HostForm.CreateDriverInvoked", MessageLevel.Debug, $"Creating Type: {driverType}");
             driver = Activator.CreateInstance(driverType);
-            if (LOG_DISABLED) logger?.LogMessage("HostForm.CreateDriverInvoked", MessageLevel.Debug, $"Driver {progId} has been created on thread: {Environment.CurrentManagedThreadId}");
-            if (LOG_DISABLED) logger?.LogMessage("HostForm.CreateDriverInvoked", MessageLevel.Debug, $"Driver is not null: {driver is not null}");
-            if (LOG_DISABLED) logger?.LogMessage("HostForm.CreateDriverInvoked", MessageLevel.Debug, $"Message loop is running: {Application.MessageLoop}");
+            if (logDisabled) logger?.LogMessage("HostForm.CreateDriverInvoked", MessageLevel.Debug, $"Driver {progId} has been created on thread: {Environment.CurrentManagedThreadId}");
+            if (logDisabled) logger?.LogMessage("HostForm.CreateDriverInvoked", MessageLevel.Debug, $"Driver is not null: {driver is not null}");
+            if (logDisabled) logger?.LogMessage("HostForm.CreateDriverInvoked", MessageLevel.Debug, $"Message loop is running: {Application.MessageLoop}");
         }
 
         internal void ActionNoParameters(Action action)
         {
             if (this.InvokeRequired)
             {
-                if (LOG_DISABLED) logger?.LogMessage("HostForm.ActionNoParameters", MessageLevel.Debug, $"Invoke required for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+                if (logDisabled) logger?.LogMessage("HostForm.ActionNoParameters", MessageLevel.Debug, $"Invoke required for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
                 ActionNoParametersDelegate sendVoid = new(ActionNoParameters);
                 this.Invoke(sendVoid, action);
-                if (LOG_DISABLED) logger?.LogMessage("HostForm.ActionNoParameters", MessageLevel.Debug, $"Returned from invoking Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                if (logDisabled) logger?.LogMessage("HostForm.ActionNoParameters", MessageLevel.Debug, $"Returned from invoking Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
             }
             else
             {
-                if (LOG_DISABLED) logger?.LogMessage("HostForm.ActionNoParameters", MessageLevel.Debug, $"About to run Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                if (logDisabled) logger?.LogMessage("HostForm.ActionNoParameters", MessageLevel.Debug, $"About to run Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                 action();
-                if (LOG_DISABLED) logger?.LogMessage("HostForm.ActionNoParameters", MessageLevel.Debug, $"Returned from Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                if (logDisabled) logger?.LogMessage("HostForm.ActionNoParameters", MessageLevel.Debug, $"Returned from Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
             }
         }
 
@@ -169,16 +169,16 @@ namespace ConformU
         {
             if (this.InvokeRequired)
             {
-                if (LOG_DISABLED) logger?.LogMessage("HostForm.Action1Parameter", MessageLevel.Debug, $"Invoke required for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+                if (logDisabled) logger?.LogMessage("HostForm.Action1Parameter", MessageLevel.Debug, $"Invoke required for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
                 Action1ParameterDelegate sendVoid = new(Action1Parameter);
                 this.Invoke(sendVoid, action, parameter1);
-                if (LOG_DISABLED) logger?.LogMessage("HostForm.Action1Parameter", MessageLevel.Debug, $"Returned from invoking Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                if (logDisabled) logger?.LogMessage("HostForm.Action1Parameter", MessageLevel.Debug, $"Returned from invoking Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
             }
             else
             {
-                if (LOG_DISABLED) logger?.LogMessage("HostForm.Action1Parameter", MessageLevel.Debug, $"About to run Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                if (logDisabled) logger?.LogMessage("HostForm.Action1Parameter", MessageLevel.Debug, $"About to run Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                 action(parameter1);
-                if (LOG_DISABLED) logger?.LogMessage("HostForm.Action1Parameter", MessageLevel.Debug, $"Returned from Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                if (logDisabled) logger?.LogMessage("HostForm.Action1Parameter", MessageLevel.Debug, $"Returned from Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
             }
         }
 
@@ -186,32 +186,32 @@ namespace ConformU
         {
             if (this.InvokeRequired)
             {
-                if (LOG_ENABLED) logger?.LogMessage("HostForm.Action2Parameters", MessageLevel.Debug, $"Invoke required for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+                if (logEnabled) logger?.LogMessage("HostForm.Action2Parameters", MessageLevel.Debug, $"Invoke required for {action.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
                 Action2ParametersDelegate sendVoid = new(Action2Parameters);
                 this.Invoke(sendVoid, action, parameter1, parameter2);
-                if (LOG_ENABLED) logger?.LogMessage("HostForm.Action2Parameters", MessageLevel.Debug, $"Returned from invoking Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                if (logEnabled) logger?.LogMessage("HostForm.Action2Parameters", MessageLevel.Debug, $"Returned from invoking Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
             }
             else
             {
-                if (LOG_ENABLED) logger?.LogMessage("HostForm.Action2Parameters", MessageLevel.Debug, $"About to run Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                if (logEnabled) logger?.LogMessage("HostForm.Action2Parameters", MessageLevel.Debug, $"About to run Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                 action(parameter1, parameter2);
-                if (LOG_ENABLED) logger?.LogMessage("HostForm.Action2Parameters", MessageLevel.Debug, $"Returned from Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                if (logEnabled) logger?.LogMessage("HostForm.Action2Parameters", MessageLevel.Debug, $"Returned from Action {action.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
             }
         }
 
         internal T FuncNoParameters<T>(Func<T> func)
         {
-                if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Method called on thread {Environment.CurrentManagedThreadId}, Message loop running: {Application.MessageLoop}");
+                if (logEnabled) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Method called on thread {Environment.CurrentManagedThreadId}, Message loop running: {Application.MessageLoop}");
                 if (this.InvokeRequired)
                 {
-                    if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Invoke required for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+                    if (logEnabled) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Invoke required for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
                 return this.Invoke(func);
                 }
                 else
                 {
-                    if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"About to run Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                    if (logEnabled) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"About to run Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                 T returnValue = func();
-                    if (LOG_ENABLED) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Returned from Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                    if (logEnabled) logger?.LogMessage("HostForm.FuncNoParameters", MessageLevel.Debug, $"Returned from Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                     return returnValue;
                 }
         }
@@ -220,14 +220,14 @@ namespace ConformU
         {
             if (this.InvokeRequired)
             {
-                if (LOG_ENABLED) logger?.LogMessage("HostForm.Func1Parameter", MessageLevel.Debug, $"Invoke required for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+                if (logEnabled) logger?.LogMessage("HostForm.Func1Parameter", MessageLevel.Debug, $"Invoke required for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
                 return this.Invoke(() => func(parameter1));
             }
             else
             {
-                if (LOG_ENABLED) logger?.LogMessage("HostForm.Func1Parameter", MessageLevel.Debug, $"About to run Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                if (logEnabled) logger?.LogMessage("HostForm.Func1Parameter", MessageLevel.Debug, $"About to run Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                 T returnValue = func(parameter1);
-                if (LOG_ENABLED) logger?.LogMessage("HostForm.Func1Parameter", MessageLevel.Debug, $"Returned from Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                if (logEnabled) logger?.LogMessage("HostForm.Func1Parameter", MessageLevel.Debug, $"Returned from Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                 return returnValue;
             }
         }
@@ -236,14 +236,14 @@ namespace ConformU
         {
             if (this.InvokeRequired)
             {
-                if (LOG_ENABLED) logger?.LogMessage("HostForm.Func2Parameters", MessageLevel.Debug, $"Invoke required for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
+                if (logEnabled) logger?.LogMessage("HostForm.Func2Parameters", MessageLevel.Debug, $"Invoke required for {func.Method.Name} command on thread: {Environment.CurrentManagedThreadId}");
                 return this.Invoke(() => func(parameter1, parameter2));
             }
             else
             {
-                if (LOG_ENABLED) logger?.LogMessage("HostForm.Func2Parameters", MessageLevel.Debug, $"About to run Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                if (logEnabled) logger?.LogMessage("HostForm.Func2Parameters", MessageLevel.Debug, $"About to run Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                 T returnValue = func(parameter1, parameter2);
-                if (LOG_ENABLED) logger?.LogMessage("HostForm.Func2Parameters", MessageLevel.Debug, $"Returned from Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
+                if (logEnabled) logger?.LogMessage("HostForm.Func2Parameters", MessageLevel.Debug, $"Returned from Action {func.Method.Name} on thread: {Environment.CurrentManagedThreadId}");
                 return returnValue;
             }
         }

@@ -1145,7 +1145,7 @@ namespace ConformU
                 // Test Methods
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.TELTEST_PARK_UNPARK]) // Test enabled
+                if (settings.TelescopeTests[TelescopeTester.PARK_UNPARK]) // Test enabled
                 {
                     SetStatus("Parking scope...");
                     await PutNoParameters("Park", null);
@@ -1156,11 +1156,11 @@ namespace ConformU
                 }
                 else // Test omitted
                 {
-                    LogInformation($"PUT {TelescopeTester.TELTEST_PARK_UNPARK}", "Test omitted due to Conform configuration setting", null);
+                    LogInformation($"PUT {TelescopeTester.PARK_UNPARK}", "Test omitted due to Conform configuration setting", null);
                 }
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.TELTEST_FIND_HOME]) // Test enabled
+                if (settings.TelescopeTests[TelescopeTester.FIND_HOME]) // Test enabled
                 {
                     SetStatus("Finding home...");
                     await PutNoParameters("FindHome", null);
@@ -1168,20 +1168,20 @@ namespace ConformU
                 }
                 else // Test omitted
                 {
-                    LogInformation($"PUT {TelescopeTester.TELTEST_FIND_HOME}", "Test omitted due to Conform configuration setting", null);
+                    LogInformation($"PUT {TelescopeTester.FIND_HOME}", "Test omitted due to Conform configuration setting", null);
                 }
 
                 // Set tracking to TRUE for RA/Dec slews
                 await CallApi("True", "Tracking", HttpMethod.Put, ParamTrackingTrue, HttpStatusCode200);
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.TELTEST_ABORT_SLEW]) // Test enabled
+                if (settings.TelescopeTests[TelescopeTester.ABORT_SLEW]) // Test enabled
                 {
                     await PutNoParameters("AbortSlew", null);
                 }
                 else // Test omitted
                 {
-                    LogInformation($"PUT {TelescopeTester.TELTEST_ABORT_SLEW}", "Test omitted due to Conform configuration setting", null);
+                    LogInformation($"PUT {TelescopeTester.ABORT_SLEW}", "Test omitted due to Conform configuration setting", null);
                 }
 
                 await GetOneParameter("AxisRates", "Axis", "0");
@@ -1193,17 +1193,17 @@ namespace ConformU
                 await GetTwoParameters("DestinationSideOfPier", "RightAscension", parameter1, "Declination", parameter2);
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.TELTEST_MOVE_AXIS]) // Test enabled
+                if (settings.TelescopeTests[TelescopeTester.MOVE_AXIS]) // Test enabled
                 {
                     await PutTwoParameters("MoveAxis", "Axis", "0", "Rate", "0.0", null);
                 }
                 else // Test omitted
                 {
-                    LogInformation($"PUT {TelescopeTester.TELTEST_MOVE_AXIS}", "Test omitted due to Conform configuration setting", null);
+                    LogInformation($"PUT {TelescopeTester.MOVE_AXIS}", "Test omitted due to Conform configuration setting", null);
                 }
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.TELTEST_PULSE_GUIDE]) // Test enabled
+                if (settings.TelescopeTests[TelescopeTester.PULSE_GUIDE]) // Test enabled
                 {
                     await PutTwoParameters("PulseGuide", "Direction", "0", "Duration", "0", () =>
                     {
@@ -1212,11 +1212,11 @@ namespace ConformU
                 }
                 else // Test omitted
                 {
-                    LogInformation($"PUT {TelescopeTester.TELTEST_PULSE_GUIDE}", "Test omitted due to Conform configuration setting", null);
+                    LogInformation($"PUT {TelescopeTester.PULSE_GUIDE}", "Test omitted due to Conform configuration setting", null);
                 }
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_COORDINATES_ASYNC]) // Test enabled
+                if (settings.TelescopeTests[TelescopeTester.SLEW_TO_COORDINATES_ASYNC]) // Test enabled
                 {
                     try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "21.0"; }
                     try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "70"; }
@@ -1227,11 +1227,11 @@ namespace ConformU
                 }
                 else // Test omitted
                 {
-                    LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_COORDINATES_ASYNC}", "Test omitted due to Conform configuration setting", null);
+                    LogInformation($"PUT {TelescopeTester.SLEW_TO_COORDINATES_ASYNC}", "Test omitted due to Conform configuration setting", null);
                 }
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_COORDINATES]) // Test enabled
+                if (settings.TelescopeTests[TelescopeTester.SLEW_TO_COORDINATES]) // Test enabled
                 {
                     try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "12.0"; }
                     try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "80"; }
@@ -1242,11 +1242,11 @@ namespace ConformU
                 }
                 else // Test omitted
                 {
-                    LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_COORDINATES}", "Test omitted due to Conform configuration setting", null);
+                    LogInformation($"PUT {TelescopeTester.SLEW_TO_COORDINATES}", "Test omitted due to Conform configuration setting", null);
                 }
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_TARGET_ASYNC]) // Test enabled
+                if (settings.TelescopeTests[TelescopeTester.SLEW_TO_TARGET_ASYNC]) // Test enabled
                 {
                     try { telescope.TargetRightAscension = telescope.RightAscension; } catch { }
                     try { telescope.TargetDeclination = telescope.Declination; } catch { }
@@ -1257,11 +1257,11 @@ namespace ConformU
                 }
                 else // Test omitted
                 {
-                    LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_TARGET_ASYNC}", "Test omitted due to Conform configuration setting", null);
+                    LogInformation($"PUT {TelescopeTester.SLEW_TO_TARGET_ASYNC}", "Test omitted due to Conform configuration setting", null);
                 }
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_TARGET]) // Test enabled
+                if (settings.TelescopeTests[TelescopeTester.SLEW_TO_TARGET]) // Test enabled
                 {
                     await PutNoParameters("SlewToTarget", () =>
                     {
@@ -1270,11 +1270,11 @@ namespace ConformU
                 }
                 else // Test omitted
                 {
-                    LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_TARGET}", "Test omitted due to Conform configuration setting", null);
+                    LogInformation($"PUT {TelescopeTester.SLEW_TO_TARGET}", "Test omitted due to Conform configuration setting", null);
                 }
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.TELTEST_SYNC_TO_COORDINATES]) // Test enabled
+                if (settings.TelescopeTests[TelescopeTester.SYNC_TO_COORDINATES]) // Test enabled
                 {
                     try { parameter1 = telescope.RightAscension.ToString(); } catch (Exception) { parameter1 = "45"; }
                     try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "45"; }
@@ -1282,24 +1282,24 @@ namespace ConformU
                 }
                 else // Test omitted
                 {
-                    LogInformation($"PUT {TelescopeTester.TELTEST_SYNC_TO_COORDINATES}", "Test omitted due to Conform configuration setting", null);
+                    LogInformation($"PUT {TelescopeTester.SYNC_TO_COORDINATES}", "Test omitted due to Conform configuration setting", null);
                 }
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.TELTEST_SYNC_TO_TARGET]) // Test enabled
+                if (settings.TelescopeTests[TelescopeTester.SYNC_TO_TARGET]) // Test enabled
                 {
                     await PutNoParameters("SyncToTarget", null);
                 }
                 else // Test omitted
                 {
-                    LogInformation($"PUT {TelescopeTester.TELTEST_SYNC_TO_TARGET}", "Test omitted due to Conform configuration setting", null);
+                    LogInformation($"PUT {TelescopeTester.SYNC_TO_TARGET}", "Test omitted due to Conform configuration setting", null);
                 }
 
                 // Set tracking to FALSE for Alt/Az slews
                 await CallApi("False", "Tracking", HttpMethod.Put, ParamTrackingFalse, HttpStatusCode200);
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_ALTAZ_ASYNC]) // Test enabled
+                if (settings.TelescopeTests[TelescopeTester.SLEW_TO_ALTAZ_ASYNC]) // Test enabled
                 {
                     try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "60"; }
                     try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "60"; }
@@ -1310,11 +1310,11 @@ namespace ConformU
                 }
                 else // Test omitted
                 {
-                    LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_ALTAZ_ASYNC}", "Test omitted due to Conform configuration setting", null);
+                    LogInformation($"PUT {TelescopeTester.SLEW_TO_ALTAZ_ASYNC}", "Test omitted due to Conform configuration setting", null);
                 }
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.TELTEST_SLEW_TO_ALTAZ]) // Test enabled
+                if (settings.TelescopeTests[TelescopeTester.SLEW_TO_ALTAZ]) // Test enabled
                 {
                     try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
                     try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
@@ -1325,11 +1325,11 @@ namespace ConformU
                 }
                 else // Test omitted
                 {
-                    LogInformation($"PUT {TelescopeTester.TELTEST_SLEW_TO_ALTAZ}", "Test omitted due to Conform configuration setting", null);
+                    LogInformation($"PUT {TelescopeTester.SLEW_TO_ALTAZ}", "Test omitted due to Conform configuration setting", null);
                 }
 
                 if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.TELTEST_SYNC_TO_ALTAZ]) // Test enabled
+                if (settings.TelescopeTests[TelescopeTester.SYNC_TO_ALTAZ]) // Test enabled
                 {
                     try { parameter1 = telescope.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
                     try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
@@ -1337,7 +1337,7 @@ namespace ConformU
                 }
                 else // Test omitted
                 {
-                    LogInformation($"PUT {TelescopeTester.TELTEST_SYNC_TO_ALTAZ}", "Test omitted due to Conform configuration setting", null);
+                    LogInformation($"PUT {TelescopeTester.SYNC_TO_ALTAZ}", "Test omitted due to Conform configuration setting", null);
                 }
                 LogBlankLine();
 

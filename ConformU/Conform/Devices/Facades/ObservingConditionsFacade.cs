@@ -9,13 +9,13 @@ namespace ConformU
 
         #region Interface implementation
 
-        public double AveragePeriod { get => FunctionNoParameters<double>(() => driver.AveragePeriod); set => Method1Parameter((i) => driver.AveragePeriod = i, value); }
+        public double AveragePeriod { get => FunctionNoParameters<double>(() => Driver.AveragePeriod); set => Method1Parameter((i) => Driver.AveragePeriod = i, value); }
 
         public double CloudCover
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.CloudCover);
+                return FunctionNoParameters<double>(() => Driver.CloudCover);
             }
         }
 
@@ -23,7 +23,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.DewPoint);
+                return FunctionNoParameters<double>(() => Driver.DewPoint);
             }
         }
 
@@ -31,7 +31,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.Humidity);
+                return FunctionNoParameters<double>(() => Driver.Humidity);
             }
         }
 
@@ -39,7 +39,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.Pressure);
+                return FunctionNoParameters<double>(() => Driver.Pressure);
             }
         }
 
@@ -47,7 +47,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.RainRate);
+                return FunctionNoParameters<double>(() => Driver.RainRate);
             }
         }
 
@@ -55,7 +55,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.SkyBrightness);
+                return FunctionNoParameters<double>(() => Driver.SkyBrightness);
             }
         }
 
@@ -63,7 +63,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.SkyQuality);
+                return FunctionNoParameters<double>(() => Driver.SkyQuality);
             }
         }
 
@@ -71,7 +71,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.StarFWHM);
+                return FunctionNoParameters<double>(() => Driver.StarFWHM);
             }
         }
 
@@ -79,7 +79,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.SkyTemperature);
+                return FunctionNoParameters<double>(() => Driver.SkyTemperature);
             }
         }
 
@@ -87,7 +87,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.Temperature);
+                return FunctionNoParameters<double>(() => Driver.Temperature);
             }
         }
 
@@ -95,7 +95,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.WindDirection);
+                return FunctionNoParameters<double>(() => Driver.WindDirection);
             }
         }
 
@@ -103,7 +103,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.WindGust);
+                return FunctionNoParameters<double>(() => Driver.WindGust);
             }
         }
 
@@ -111,23 +111,23 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.WindSpeed);
+                return FunctionNoParameters<double>(() => Driver.WindSpeed);
             }
         }
 
         public void Refresh()
         {
-            MethodNoParameters(() => driver.Refresh());
+            MethodNoParameters(() => Driver.Refresh());
         }
 
-        public string SensorDescription(string PropertyName)
+        public string SensorDescription(string propertyName)
         {
-            return Function1Parameter<string>((i) => driver.SensorDescription(i), PropertyName);
+            return Function1Parameter<string>((i) => Driver.SensorDescription(i), propertyName);
         }
 
-        public double TimeSinceLastUpdate(string PropertyName)
+        public double TimeSinceLastUpdate(string propertyName)
         {
-            return Function1Parameter<double>((i) => driver.TimeSinceLastUpdate(i), PropertyName);
+            return Function1Parameter<double>((i) => Driver.TimeSinceLastUpdate(i), propertyName);
         }
 
         #endregion

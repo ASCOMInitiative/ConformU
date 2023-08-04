@@ -7,14 +7,14 @@ namespace ConformU
 {
     public class TrackingRatesFacade : ITrackingRates, IEnumerable, IEnumerator, IDisposable
     {
-        private readonly DriveRate[] m_TrackingRates;
-        private int _pos = -1;
+        private readonly DriveRate[] mTrackingRates;
+        private int pos = -1;
 
         // Default constructor - Internal prevents public creation instances.
         internal TrackingRatesFacade(dynamic driver, TelescopeFacade telescopeFacade)
         {
             // Initialise to an empty array
-            m_TrackingRates = Array.Empty<DriveRate>();
+            mTrackingRates = Array.Empty<DriveRate>();
 
             // Assign the TrackinRates response to an IEnumerable variable
             IEnumerable trackingRates = telescopeFacade.FunctionNoParameters<IEnumerable>(() => driver.TrackingRates);
@@ -23,8 +23,8 @@ namespace ConformU
             int nextArrayPosition = 0;
             foreach (DriveRate rate in trackingRates)
             {
-                Array.Resize<DriveRate>(ref m_TrackingRates, nextArrayPosition + 1); // Resize the array to add one more entry (always 1 more than the array element position, which is 0 based).
-                m_TrackingRates[nextArrayPosition] = rate; // Store the rate in the new array entry
+                Array.Resize<DriveRate>(ref mTrackingRates, nextArrayPosition + 1); // Resize the array to add one more entry (always 1 more than the array element position, which is 0 based).
+                mTrackingRates[nextArrayPosition] = rate; // Store the rate in the new array entry
                 nextArrayPosition++; // Increment the rate counter
             }
         }
@@ -33,12 +33,12 @@ namespace ConformU
 
         public int Count
         {
-            get { return m_TrackingRates.Length; }
+            get { return mTrackingRates.Length; }
         }
 
         public IEnumerator GetEnumerator()
         {
-            _pos = -1; //Reset pointer as this is assumed by .NET enumeration
+            pos = -1; //Reset pointer as this is assumed by .NET enumeration
             return this as IEnumerator;
         }
 
@@ -48,7 +48,7 @@ namespace ConformU
             get
             {
                 if (index < 1 || index > this.Count) throw new ASCOM.InvalidValueException("TrackingRates.this", index.ToString(CultureInfo.CurrentCulture), string.Format(CultureInfo.CurrentCulture, "1 to {0}", this.Count));
-                return m_TrackingRates[index - 1];// 1-based
+                return mTrackingRates[index - 1];// 1-based
             }
         }
         #endregion
@@ -57,21 +57,21 @@ namespace ConformU
 
         public bool MoveNext()
         {
-            if (++_pos >= m_TrackingRates.Length) return false;
+            if (++pos >= mTrackingRates.Length) return false;
             return true;
         }
 
         public void Reset()
         {
-            _pos = -1;
+            pos = -1;
         }
 
         public object Current
         {
             get
             {
-                if (_pos < 0 || _pos >= m_TrackingRates.Length) throw new System.InvalidOperationException();
-                return m_TrackingRates[_pos];
+                if (pos < 0 || pos >= mTrackingRates.Length) throw new System.InvalidOperationException();
+                return mTrackingRates[pos];
             }
         }
 
@@ -80,7 +80,7 @@ namespace ConformU
             get
             {
                 if (index < 1 || index > this.Count) throw new ASCOM.InvalidValueException("TrackingRates.this", index.ToString(CultureInfo.CurrentCulture), string.Format(CultureInfo.CurrentCulture, "1 to {0}", this.Count));
-                return m_TrackingRates[index - 1]; // 1-based
+                return mTrackingRates[index - 1]; // 1-based
             }
         }
 
@@ -112,7 +112,7 @@ namespace ConformU
 
         IEnumerator ITrackingRates.GetEnumerator()
         {
-            _pos = -1; //Reset pointer as this is assumed by .NET enumeration
+            pos = -1; //Reset pointer as this is assumed by .NET enumeration
             return this as IEnumerator;
         }
         #endregion

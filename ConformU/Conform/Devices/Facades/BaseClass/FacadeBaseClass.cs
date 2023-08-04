@@ -17,16 +17,16 @@ namespace ConformU
     public class FacadeBaseClass : IAscomDeviceV2, IDisposable
     {
         private const int DRIVER_LOAD_TIMEOUT = 5; // Seconds to wait for the driver to load
-        private readonly bool LOG_ENABLED = false; // Enable debug logging of this class
+        private readonly bool logEnabled = false; // Enable debug logging of this class
         //private readonly bool LOG_DISABLED = false; // Enable debug logging of this class
 
-        internal dynamic driver; // COM driver object
-        internal readonly Settings settings; // Conform configuration settings
-        internal readonly ConformLogger logger;
+        internal dynamic Driver; // COM driver object
+        internal readonly Settings Settings; // Conform configuration settings
+        internal readonly ConformLogger Logger;
         private bool disposedValue;
 
 #if WINDOWS
-        internal DriverHostForm driverHostForm;
+        internal DriverHostForm DriverHostForm;
 
         /// <summary>
         /// Commands to start the COM driver hosting environment
@@ -36,19 +36,19 @@ namespace ConformU
         private void DriverOnSeparateThread(object arg)
         {
             // Create the sandbox host form
-            if (LOG_ENABLED) logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"About to create driver host form");
-            driverHostForm = new DriverHostForm(logger)
+            if (logEnabled) Logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"About to create driver host form");
+            DriverHostForm = new DriverHostForm(Logger)
             {
                 ShowInTaskbar = false
             }; // Create the form
-            if (LOG_ENABLED) logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Created driver host form, starting driver host environment for {settings.ComDevice.ProgId} on thread {Environment.CurrentManagedThreadId}");
+            if (logEnabled) Logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Created driver host form, starting driver host environment for {Settings.ComDevice.ProgId} on thread {Environment.CurrentManagedThreadId}");
 
             // Start the message loop on this thread to bring the form to life
-            Application.Run(driverHostForm);
+            Application.Run(DriverHostForm);
 
             // The form has closed
-            if (LOG_ENABLED) logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Environment for driver host {settings.ComDevice.ProgId} shut down on thread {Environment.CurrentManagedThreadId}");
-            driverHostForm.Dispose();
+            if (logEnabled) Logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Environment for driver host {Settings.ComDevice.ProgId} shut down on thread {Environment.CurrentManagedThreadId}");
+            DriverHostForm.Dispose();
         }
 #endif
 
@@ -56,12 +56,12 @@ namespace ConformU
 
         public FacadeBaseClass(Settings conformSettings, ConformLogger logger)
         {
-            settings = conformSettings;
-            this.logger = logger;
+            Settings = conformSettings;
+            this.Logger = logger;
             try
             {
 #if WINDOWS
-                if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Using COM host form to create driver : {settings.ComDevice.ProgId}. This is thread: {Environment.CurrentManagedThreadId}");
+                if (logEnabled) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Using COM host form to create driver : {Settings.ComDevice.ProgId}. This is thread: {Environment.CurrentManagedThreadId}");
 
                 // Create a new thread to host the sandbox form
                 Thread driverThread = new(DriverOnSeparateThread);
@@ -70,7 +70,7 @@ namespace ConformU
 
                 // Start the sandbox form thread
                 driverThread.Start(this);
-                if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Thread {driverThread.ManagedThreadId} started successfully for {settings.ComDevice.ProgId}. This is thread: {Environment.CurrentManagedThreadId}");
+                if (logEnabled) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Thread {driverThread.ManagedThreadId} started successfully for {Settings.ComDevice.ProgId}. This is thread: {Environment.CurrentManagedThreadId}");
 
                 // Wait for the sandbox form to load or timeout
                 Stopwatch sw = Stopwatch.StartNew();
@@ -78,13 +78,13 @@ namespace ConformU
                 {
                     Thread.Sleep(20);
                     Application.DoEvents();
-                } while ((driverHostForm == null) & (sw.ElapsedMilliseconds < DRIVER_LOAD_TIMEOUT * 1000));
-                if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Sandbox form creation complete.");
+                } while ((DriverHostForm == null) & (sw.ElapsedMilliseconds < DRIVER_LOAD_TIMEOUT * 1000));
+                if (logEnabled) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Sandbox form creation complete.");
 
                 // Test whether the form loaded OK
-                if (driverHostForm is null) // Form did not create OK in a timely manner
+                if (DriverHostForm is null) // Form did not create OK in a timely manner
                 {
-                    throw new Exception($"It took more than {DRIVER_LOAD_TIMEOUT} seconds to create the sandbox Form for driver {settings.ComDevice.ProgId}.");
+                    throw new Exception($"It took more than {DRIVER_LOAD_TIMEOUT} seconds to create the sandbox Form for driver {Settings.ComDevice.ProgId}.");
                 }
 
                 // Wait for the sandbox form to run it's form load event handler
@@ -93,78 +93,78 @@ namespace ConformU
                 {
                     Thread.Sleep(20);
                     Application.DoEvents();
-                } while ((driverHostForm.FormInitialised == false) & (sw.ElapsedMilliseconds < DRIVER_LOAD_TIMEOUT * 1000));
-                if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Sandbox form initialisation complete.");
+                } while ((DriverHostForm.FormInitialised == false) & (sw.ElapsedMilliseconds < DRIVER_LOAD_TIMEOUT * 1000));
+                if (logEnabled) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Sandbox form initialisation complete.");
 
                 // Test whether the form initialised OK
-                if (driverHostForm.FormInitialised == false) // Form did not initialise in a timely manner
+                if (DriverHostForm.FormInitialised == false) // Form did not initialise in a timely manner
                 {
-                    throw new Exception($"It took more than {DRIVER_LOAD_TIMEOUT} seconds to create the sandbox Form for driver {settings.ComDevice.ProgId}.");
+                    throw new Exception($"It took more than {DRIVER_LOAD_TIMEOUT} seconds to create the sandbox Form for driver {Settings.ComDevice.ProgId}.");
                 }
 
                 // Create the driver on the newly initialised form
-                if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Sandbox form created OK, about to create driver {settings.ComDevice.ProgId}");
-                driverHostForm.CreateDriver(settings.ComDevice.ProgId, ref driver);
-                if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Created driver {settings.ComDevice.ProgId}");
+                if (logEnabled) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Sandbox form created OK, about to create driver {Settings.ComDevice.ProgId}");
+                DriverHostForm.CreateDriver(Settings.ComDevice.ProgId, ref Driver);
+                if (logEnabled) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Created driver {Settings.ComDevice.ProgId}");
 #endif
-                if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Initialisation completed OK");
+                if (logEnabled) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Initialisation completed OK");
             }
             catch (Exception ex)
             {
-                if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass", MessageLevel.Error, $"Exception creating driver: {ex}");
+                if (logEnabled) logger?.LogMessage("FacadeBaseClass", MessageLevel.Error, $"Exception creating driver: {ex}");
                 throw;
             }
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Entered Dispose class, Disposing: {disposing}, Disposed value: {disposedValue}, Driver is null: {driver is null}.");
+            if (logEnabled) Logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Entered Dispose class, Disposing: {disposing}, Disposed value: {disposedValue}, Driver is null: {Driver is null}.");
             if (!disposedValue)
             {
                 if (disposing)
                 {
-                    switch (settings.DeviceTechnology)
+                    switch (Settings.DeviceTechnology)
                     {
                         case DeviceTechnology.Alpaca:
                             try
                             {
-                                if (settings.DisplayMethodCalls) if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"About to set Connected False.");
-                                driver.Connected = false;
+                                if (Settings.DisplayMethodCalls) if (logEnabled) Logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"About to set Connected False.");
+                                Driver.Connected = false;
                             }
                             catch { }
 
                             try
                             {
-                                if (settings.DisplayMethodCalls) if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"About to call Dispose method.");
-                                driver.Dispose();
+                                if (Settings.DisplayMethodCalls) if (logEnabled) Logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"About to call Dispose method.");
+                                Driver.Dispose();
                             }
                             catch { }
                             break;
 
                         case DeviceTechnology.COM:
                             int remainingObjectCount, loopCount;
-                            if (driver is not null)
+                            if (Driver is not null)
                             {
                                 // Set Connected to false
                                 try
                                 {
                                     //if (settings.DisplayMethodCalls) if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"About to set Connected False.");
-                                    Method1Parameter((i) => driver.Connected = i, false);
+                                    Method1Parameter((i) => Driver.Connected = i, false);
                                 }
                                 catch (Exception ex)
                                 {
-                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception setting Connected false: \r\n{ex}");
+                                    Logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception setting Connected false: \r\n{ex}");
                                 }
 
                                 // Dispose of the driver
                                 try
                                 {
                                     //if (settings.DisplayMethodCalls) if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"About to call Dispose method.");
-                                    MethodNoParameters(() => driver.Dispose());
+                                    MethodNoParameters(() => Driver.Dispose());
                                 }
                                 catch (Exception ex)
                                 {
-                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception disposing driver: \r\n{ex}");
+                                    Logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception disposing driver: \r\n{ex}");
                                 }
 
                                 // Fully remove the COM object
@@ -174,14 +174,14 @@ namespace ConformU
                                     do
                                     {
                                         loopCount += 1;
-                                        remainingObjectCount = Marshal.ReleaseComObject(driver);
-                                        logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
+                                        remainingObjectCount = Marshal.ReleaseComObject(Driver);
+                                        Logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
                                     }
                                     while ((remainingObjectCount > 0) & (loopCount <= 20));
                                 }
                                 catch (Exception ex)
                                 {
-                                    logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception releasing COM object: \r\n{ex}");
+                                    Logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception releasing COM object: \r\n{ex}");
                                 }
                             }
 
@@ -193,12 +193,12 @@ namespace ConformU
                                 Application.Exit();
                                 //if (LOG_ENABLED) logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"COM facade application ended.");
 #endif
-                                driver = null;
+                                Driver = null;
                                 GC.Collect();
                             }
                             catch (Exception ex)
                             {
-                                logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception ending application: \r\n{ex}");
+                                Logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Exception ending application: \r\n{ex}");
                             }
 
                             break;
@@ -221,135 +221,135 @@ namespace ConformU
 
         internal void MethodNoParameters(Action action)
         {
-            if (LOG_ENABLED) logger?.LogMessage("MethodNoParameters", MessageLevel.Debug, $"About to call driverHostForm.ActionNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
+            if (logEnabled) Logger?.LogMessage("MethodNoParameters", MessageLevel.Debug, $"About to call driverHostForm.ActionNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
 #if WINDOWS
-            if (driverHostForm.InvokeRequired)
+            if (DriverHostForm.InvokeRequired)
             {
-                if (LOG_ENABLED) logger?.LogMessage("MethodNoParameters", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.MethodNoParameters(action) because we are on thread {Environment.CurrentManagedThreadId}");
-                driverHostForm.Invoke(() => { driverHostForm.ActionNoParameters(action); });
+                if (logEnabled) Logger?.LogMessage("MethodNoParameters", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.MethodNoParameters(action) because we are on thread {Environment.CurrentManagedThreadId}");
+                DriverHostForm.Invoke(() => { DriverHostForm.ActionNoParameters(action); });
             }
             else
             {
-                if (LOG_ENABLED) logger?.LogMessage("MethodNoParameters", MessageLevel.Debug, $"NO INVOKE REQUIRED to call driverHostForm.MethodNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
-                driverHostForm.ActionNoParameters(action);
+                if (logEnabled) Logger?.LogMessage("MethodNoParameters", MessageLevel.Debug, $"NO INVOKE REQUIRED to call driverHostForm.MethodNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
+                DriverHostForm.ActionNoParameters(action);
             }
 #else
             action();
 #endif
-            if (LOG_ENABLED) logger?.LogMessage("MethodNoParameters", MessageLevel.Debug, $"Returned from driverHostForm.ActionNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
+            if (logEnabled) Logger?.LogMessage("MethodNoParameters", MessageLevel.Debug, $"Returned from driverHostForm.ActionNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
         }
 
         internal void Method1Parameter(Action<object> action, object parameter1)
         {
-            if (LOG_ENABLED) logger?.LogMessage("Method1Parameter", MessageLevel.Debug, $"About to call driverHostForm.Action1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
+            if (logEnabled) Logger?.LogMessage("Method1Parameter", MessageLevel.Debug, $"About to call driverHostForm.Action1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
 
 #if WINDOWS
-            if (driverHostForm.InvokeRequired)
+            if (DriverHostForm.InvokeRequired)
             {
-                if (LOG_ENABLED) logger?.LogMessage("Method1Parameter", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.Method1Parameter(action) because we are on thread {Environment.CurrentManagedThreadId}");
-                driverHostForm.Invoke(() => { driverHostForm.Action1Parameter(action, parameter1); });
+                if (logEnabled) Logger?.LogMessage("Method1Parameter", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.Method1Parameter(action) because we are on thread {Environment.CurrentManagedThreadId}");
+                DriverHostForm.Invoke(() => { DriverHostForm.Action1Parameter(action, parameter1); });
             }
             else
             {
-                if (LOG_ENABLED) logger?.LogMessage("Method1Parameter", MessageLevel.Debug, $"NO INVOKE REQUIRED to call driverHostForm.Method1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
-                driverHostForm.Action1Parameter(action, parameter1);
+                if (logEnabled) Logger?.LogMessage("Method1Parameter", MessageLevel.Debug, $"NO INVOKE REQUIRED to call driverHostForm.Method1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
+                DriverHostForm.Action1Parameter(action, parameter1);
             }
 #else
             action(parameter1);
 #endif
-            if (LOG_ENABLED) logger?.LogMessage("Method1Parameter", MessageLevel.Debug, $"Returned from driverHostForm.Action1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
+            if (logEnabled) Logger?.LogMessage("Method1Parameter", MessageLevel.Debug, $"Returned from driverHostForm.Action1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
         }
 
         internal void Method2Parameters(Action<object, object> action, object parameter1, object parameter2)
         {
-            if (LOG_ENABLED) logger?.LogMessage("Method2Parameters", MessageLevel.Debug, $"About to call driverHostForm.Action2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
+            if (logEnabled) Logger?.LogMessage("Method2Parameters", MessageLevel.Debug, $"About to call driverHostForm.Action2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
 
 #if WINDOWS
-            if (driverHostForm.InvokeRequired)
+            if (DriverHostForm.InvokeRequired)
             {
-                if (LOG_ENABLED) logger?.LogMessage("Method2Parameters", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.Method2Parameters(action) because we are on thread {Environment.CurrentManagedThreadId}");
-                driverHostForm.Invoke(() => { driverHostForm.Action2Parameters(action, parameter1, parameter2); });
+                if (logEnabled) Logger?.LogMessage("Method2Parameters", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.Method2Parameters(action) because we are on thread {Environment.CurrentManagedThreadId}");
+                DriverHostForm.Invoke(() => { DriverHostForm.Action2Parameters(action, parameter1, parameter2); });
             }
             else
             {
-                if (LOG_ENABLED) logger?.LogMessage("Method2Parameters", MessageLevel.Debug, $"NO INVOKE REQUIRED to call driverHostForm.Method2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
-                driverHostForm.Action2Parameters(action, parameter1, parameter2);
+                if (logEnabled) Logger?.LogMessage("Method2Parameters", MessageLevel.Debug, $"NO INVOKE REQUIRED to call driverHostForm.Method2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
+                DriverHostForm.Action2Parameters(action, parameter1, parameter2);
             }
 #else
             action(parameter1, parameter2);
 #endif
-            if (LOG_ENABLED) logger?.LogMessage("Method2Parameters", MessageLevel.Debug, $"Returned from driverHostForm.Action2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
+            if (logEnabled) Logger?.LogMessage("Method2Parameters", MessageLevel.Debug, $"Returned from driverHostForm.Action2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
         }
 
         internal T FunctionNoParameters<T>(Func<T> action)
         {
-            if (LOG_ENABLED) logger?.LogMessage("FunctionNoParameters", MessageLevel.Debug, $"About to call driverHostForm.FuncNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
+            if (logEnabled) Logger?.LogMessage("FunctionNoParameters", MessageLevel.Debug, $"About to call driverHostForm.FuncNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
 
 #if WINDOWS
             T returnValue;
 
-            if (driverHostForm.InvokeRequired)
+            if (DriverHostForm.InvokeRequired)
             {
-                if (LOG_ENABLED) logger?.LogMessage("FunctionNoParameters", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.FuncNoParameters(action) because we are on thread {Environment.CurrentManagedThreadId}");
-                returnValue = driverHostForm.Invoke(() => { return driverHostForm.FuncNoParameters(action); });
+                if (logEnabled) Logger?.LogMessage("FunctionNoParameters", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.FuncNoParameters(action) because we are on thread {Environment.CurrentManagedThreadId}");
+                returnValue = DriverHostForm.Invoke(() => { return DriverHostForm.FuncNoParameters(action); });
             }
             else
             {
-                if (LOG_ENABLED) logger?.LogMessage("FunctionNoParameters", MessageLevel.Debug, $"NO INVOKE REQUIRED to call driverHostForm.FuncNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
-                returnValue = driverHostForm.FuncNoParameters(action);
+                if (logEnabled) Logger?.LogMessage("FunctionNoParameters", MessageLevel.Debug, $"NO INVOKE REQUIRED to call driverHostForm.FuncNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
+                returnValue = DriverHostForm.FuncNoParameters(action);
             }
 #else
             T returnValue = action();
 #endif
-            if (LOG_ENABLED) logger?.LogMessage("FunctionNoParameters", MessageLevel.Debug, $"Returned from driverHostForm.FuncNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
+            if (logEnabled) Logger?.LogMessage("FunctionNoParameters", MessageLevel.Debug, $"Returned from driverHostForm.FuncNoParameters(action) on thread {Environment.CurrentManagedThreadId}");
             return returnValue;
         }
 
         internal T Function1Parameter<T>(Func<object, T> action, object parameter1)
         {
-            if (LOG_ENABLED) logger?.LogMessage("Function1Parameter", MessageLevel.Debug, $"About to call driverHostForm.Func1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
+            if (logEnabled) Logger?.LogMessage("Function1Parameter", MessageLevel.Debug, $"About to call driverHostForm.Func1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
 
 #if WINDOWS
             T returnValue;
 
-            if (driverHostForm.InvokeRequired)
+            if (DriverHostForm.InvokeRequired)
             {
-                if (LOG_ENABLED) logger?.LogMessage("Function1Parameter", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.Function1Parameter(action) because we are on thread {Environment.CurrentManagedThreadId}");
-                returnValue = driverHostForm.Invoke(() => { return driverHostForm.Func1Parameter(action, parameter1); });
+                if (logEnabled) Logger?.LogMessage("Function1Parameter", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.Function1Parameter(action) because we are on thread {Environment.CurrentManagedThreadId}");
+                returnValue = DriverHostForm.Invoke(() => { return DriverHostForm.Func1Parameter(action, parameter1); });
             }
             else
             {
-                if (LOG_ENABLED) logger?.LogMessage("Function1Parameter", MessageLevel.Debug, $"NO INVOKE REQUIRED to call driverHostForm.Function1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
-                returnValue = driverHostForm.Func1Parameter(action, parameter1);
+                if (logEnabled) Logger?.LogMessage("Function1Parameter", MessageLevel.Debug, $"NO INVOKE REQUIRED to call driverHostForm.Function1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
+                returnValue = DriverHostForm.Func1Parameter(action, parameter1);
             }
 #else
             T returnValue = action(parameter1);
 #endif
-            if (LOG_ENABLED) logger?.LogMessage("Function1Parameter", MessageLevel.Debug, $"Returned from driverHostForm.Func1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
+            if (logEnabled) Logger?.LogMessage("Function1Parameter", MessageLevel.Debug, $"Returned from driverHostForm.Func1Parameter(action) on thread {Environment.CurrentManagedThreadId}");
             return returnValue;
         }
 
         internal T Function2Parameters<T>(Func<object, object, T> action, object parameter1, object parameter2)
         {
-            if (LOG_ENABLED) logger?.LogMessage("Function2Parameters", MessageLevel.Debug, $"About to call driverHostForm.Func2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
+            if (logEnabled) Logger?.LogMessage("Function2Parameters", MessageLevel.Debug, $"About to call driverHostForm.Func2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
 
 #if WINDOWS
             T returnValue;
 
-            if (driverHostForm.InvokeRequired)
+            if (DriverHostForm.InvokeRequired)
             {
-                if (LOG_ENABLED) logger?.LogMessage("Function2Parameters", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.Function2Parameters(action) because we are on thread {Environment.CurrentManagedThreadId}");
-                returnValue = driverHostForm.Invoke(() => { return driverHostForm.Func2Parameters(action, parameter1, parameter2); });
+                if (logEnabled) Logger?.LogMessage("Function2Parameters", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.Function2Parameters(action) because we are on thread {Environment.CurrentManagedThreadId}");
+                returnValue = DriverHostForm.Invoke(() => { return DriverHostForm.Func2Parameters(action, parameter1, parameter2); });
             }
             else
             {
-                if (LOG_ENABLED) logger?.LogMessage("Function2Parameters", MessageLevel.Debug, $"NO INVOKE REQUIRED to call driverHostForm.Function2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
-                returnValue = driverHostForm.Func2Parameters<T>(action, parameter1, parameter2);
+                if (logEnabled) Logger?.LogMessage("Function2Parameters", MessageLevel.Debug, $"NO INVOKE REQUIRED to call driverHostForm.Function2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
+                returnValue = DriverHostForm.Func2Parameters<T>(action, parameter1, parameter2);
             }
 #else
             T returnValue = action(parameter1, parameter2);
 #endif
-            if (LOG_ENABLED) logger?.LogMessage("Function2Parameters", MessageLevel.Debug, $"Returned from driverHostForm.Func2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
+            if (logEnabled) Logger?.LogMessage("Function2Parameters", MessageLevel.Debug, $"Returned from driverHostForm.Func2Parameters(action) on thread {Environment.CurrentManagedThreadId}");
             return returnValue;
         }
 
@@ -361,11 +361,11 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.Connected);
+                return FunctionNoParameters<bool>(() => Driver.Connected);
             }
             set
             {
-                Method1Parameter((i) => driver.Connected = i, value);
+                Method1Parameter((i) => Driver.Connected = i, value);
             }
         }
 
@@ -373,7 +373,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<string>(() => driver.Description);
+                return FunctionNoParameters<string>(() => Driver.Description);
             }
         }
 
@@ -381,7 +381,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<string>(() => driver.DriverInfo);
+                return FunctionNoParameters<string>(() => Driver.DriverInfo);
             }
         }
 
@@ -389,7 +389,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<string>(() => driver.DriverVersion);
+                return FunctionNoParameters<string>(() => Driver.DriverVersion);
             }
         }
 
@@ -397,7 +397,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<short>(() => driver.InterfaceVersion);
+                return FunctionNoParameters<short>(() => Driver.InterfaceVersion);
             }
         }
 
@@ -405,7 +405,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<string>(() => driver.Name);
+                return FunctionNoParameters<string>(() => Driver.Name);
             }
         }
 
@@ -413,48 +413,48 @@ namespace ConformU
         {
             get
             {
-                return (FunctionNoParameters<IEnumerable>(() => driver.SupportedActions)).Cast<string>().ToList();
+                return (FunctionNoParameters<IEnumerable>(() => Driver.SupportedActions)).Cast<string>().ToList();
             }
         }
 
-        public string Action(string ActionName, string ActionParameters)
+        public string Action(string actionName, string actionParameters)
         {
-            return Function2Parameters<string>((i, j) => driver.Action(i, j), ActionName, ActionParameters);
+            return Function2Parameters<string>((i, j) => Driver.Action(i, j), actionName, actionParameters);
         }
 
-        public void CommandBlind(string Command, bool Raw = false)
+        public void CommandBlind(string command, bool raw = false)
         {
-            Method2Parameters((i, j) => driver.CommandBlind(i, j), Command, Raw);
+            Method2Parameters((i, j) => Driver.CommandBlind(i, j), command, raw);
         }
 
-        public bool CommandBool(string Command, bool Raw = false)
+        public bool CommandBool(string command, bool raw = false)
         {
-            return Function2Parameters<bool>((i, j) => driver.CommandBool(i, j), Command, Raw);
+            return Function2Parameters<bool>((i, j) => Driver.CommandBool(i, j), command, raw);
         }
 
-        public string CommandString(string Command, bool Raw = false)
+        public string CommandString(string command, bool raw = false)
         {
-            return Function2Parameters<string>((i, j) => driver.CommandString(i, j), Command, Raw);
+            return Function2Parameters<string>((i, j) => Driver.CommandString(i, j), command, raw);
         }
 
         public void SetupDialog()
         {
-            MethodNoParameters(() => driver.SetupDialog());
+            MethodNoParameters(() => Driver.SetupDialog());
         }
 
         #endregion
 
         #region IAscomDeviceV2 members
 
-        public void Connect() => MethodNoParameters(() => driver.Connect());
+        public void Connect() => MethodNoParameters(() => Driver.Connect());
 
-        public void Disconnect() => MethodNoParameters(() => driver.Disconnect());
+        public void Disconnect() => MethodNoParameters(() => Driver.Disconnect());
 
         public bool Connecting
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.Connecting);
+                return FunctionNoParameters<bool>(() => Driver.Connecting);
             }
         }
 
@@ -462,7 +462,7 @@ namespace ConformU
         {
             get
             {
-                dynamic deviceStateDynamic = FunctionNoParameters<IEnumerable>(() => driver.DeviceState);
+                dynamic deviceStateDynamic = FunctionNoParameters<IEnumerable>(() => Driver.DeviceState);
 
                 List<IStateValue> deviceState = new List<IStateValue>();
 

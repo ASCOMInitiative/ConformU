@@ -14,7 +14,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<string>(() => driver.VideoCaptureDeviceName);
+                return FunctionNoParameters<string>(() => Driver.VideoCaptureDeviceName);
             }
         }
 
@@ -22,7 +22,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.ExposureMax);
+                return FunctionNoParameters<double>(() => Driver.ExposureMax);
             }
         }
 
@@ -30,7 +30,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.ExposureMin);
+                return FunctionNoParameters<double>(() => Driver.ExposureMin);
             }
         }
 
@@ -38,7 +38,7 @@ namespace ConformU
         {
             get
             {
-                return (VideoCameraFrameRate)FunctionNoParameters<object>(() => driver.FrameRate);
+                return (VideoCameraFrameRate)FunctionNoParameters<object>(() => Driver.FrameRate);
             }
         }
 
@@ -47,7 +47,7 @@ namespace ConformU
             get
             {
                 List<double> returnValue = new();
-                var gains = FunctionNoParameters<object>(() => driver.SupportedIntegrationRates);
+                var gains = FunctionNoParameters<object>(() => Driver.SupportedIntegrationRates);
                 foreach (double o in (IList)gains)
                 {
                     returnValue.Add(o);
@@ -57,7 +57,7 @@ namespace ConformU
             }
         }
 
-        public int IntegrationRate { get => FunctionNoParameters<int>(() => driver.IntegrationRate); set => Method1Parameter((i) => driver.IntegrationRate = i, value); }
+        public int IntegrationRate { get => FunctionNoParameters<int>(() => Driver.IntegrationRate); set => Method1Parameter((i) => Driver.IntegrationRate = i, value); }
 
         public IVideoFrame LastVideoFrame
         {
@@ -67,17 +67,17 @@ namespace ConformU
                 try
                 {
                     // Get the last VideoFrame
-                    dynamic lastFrame = FunctionNoParameters<dynamic>(() => driver.LastVideoFrame);
-                    logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Got last frame from driver");
+                    dynamic lastFrame = FunctionNoParameters<dynamic>(() => Driver.LastVideoFrame);
+                    Logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Got last frame from driver");
                     // Create and populate the correct metadata return type
                     List<KeyValuePair<string, string>> imageMetaData = new();
                     foreach (var pair in lastFrame.ImageMetadata)
                     {
-                        logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Found pair: {pair.Key()}, {pair.Value()}");
+                        Logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Found pair: {pair.Key()}, {pair.Value()}");
                         imageMetaData.Add(new KeyValuePair<string, string>(pair.Key(), pair.Value()));
                     }
                     // Create a new frame with the correct parameter types
-                    logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Creating frame");
+                    Logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Creating frame");
 
                     object imageArray;
                     byte[] previewBitmap;
@@ -91,7 +91,7 @@ namespace ConformU
                     }
                     catch (System.Exception ex)
                     {
-                        logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting ImageArray, supplying default value: null\r\n{ex}");
+                        Logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting ImageArray, supplying default value: null\r\n{ex}");
                         imageArray = null;
                     }
 
@@ -101,7 +101,7 @@ namespace ConformU
                     }
                     catch (System.Exception ex)
                     {
-                        logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting PreviewBitmap, supplying default value: byte[10]\r\n{ex}");
+                        Logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting PreviewBitmap, supplying default value: byte[10]\r\n{ex}");
                         previewBitmap = new byte[10];
                     }
 
@@ -111,7 +111,7 @@ namespace ConformU
                     }
                     catch (System.Exception ex)
                     {
-                        logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting FrameNumber, supplying default value: 0\r\n{ex}");
+                        Logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting FrameNumber, supplying default value: 0\r\n{ex}");
                         frameNumber = 0;
                     }
 
@@ -121,7 +121,7 @@ namespace ConformU
                     }
                     catch (System.Exception ex)
                     {
-                        logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting ExposureDuration, supplying default value: 0.0\r\n{ex}");
+                        Logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting ExposureDuration, supplying default value: 0.0\r\n{ex}");
                         exposureDuration = 0.0;
                     }
 
@@ -131,19 +131,19 @@ namespace ConformU
                     }
                     catch (System.Exception ex)
                     {
-                        logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting ExposureStartTime, supplying default value: empty string\r\n{ex}");
+                        Logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception when setting ExposureStartTime, supplying default value: empty string\r\n{ex}");
                         exposureStartTime = "";
                     }
 
                     frame = new(imageArray, previewBitmap, frameNumber, exposureDuration, exposureStartTime, imageMetaData);
-                    logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Created frame");
+                    Logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Created frame");
 
                 }
                 catch (System.Exception ex)
                 {
-                    logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception\r\n{ex}");
+                    Logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Exception\r\n{ex}");
                 }
-                logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Returning frame");
+                Logger.LogMessage("VideoFacade.LastVideoFrame", MessageLevel.Debug, $"Returning frame");
 
                 // Return the new frame in place of the original
                 return frame;
@@ -154,7 +154,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<string>(() => driver.SensorName);
+                return FunctionNoParameters<string>(() => Driver.SensorName);
             }
         }
 
@@ -162,7 +162,7 @@ namespace ConformU
         {
             get
             {
-                return (SensorType)FunctionNoParameters<object>(() => driver.SensorType);
+                return (SensorType)FunctionNoParameters<object>(() => Driver.SensorType);
             }
         }
 
@@ -170,7 +170,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<int>(() => driver.Width);
+                return FunctionNoParameters<int>(() => Driver.Width);
             }
         }
 
@@ -178,7 +178,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<int>(() => driver.Height);
+                return FunctionNoParameters<int>(() => Driver.Height);
             }
         }
 
@@ -186,7 +186,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.PixelSizeX);
+                return FunctionNoParameters<double>(() => Driver.PixelSizeX);
             }
         }
 
@@ -194,7 +194,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<double>(() => driver.PixelSizeY);
+                return FunctionNoParameters<double>(() => Driver.PixelSizeY);
             }
         }
 
@@ -202,7 +202,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<int>(() => driver.BitDepth);
+                return FunctionNoParameters<int>(() => Driver.BitDepth);
             }
         }
 
@@ -210,7 +210,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<string>(() => driver.VideoCodec);
+                return FunctionNoParameters<string>(() => Driver.VideoCodec);
             }
         }
 
@@ -218,7 +218,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<string>(() => driver.VideoFileFormat);
+                return FunctionNoParameters<string>(() => Driver.VideoFileFormat);
             }
         }
 
@@ -226,7 +226,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<int>(() => driver.VideoFramesBufferSize);
+                return FunctionNoParameters<int>(() => Driver.VideoFramesBufferSize);
             }
         }
 
@@ -234,7 +234,7 @@ namespace ConformU
         {
             get
             {
-                return (VideoCameraState)FunctionNoParameters<object>(() => driver.CameraState);
+                return (VideoCameraState)FunctionNoParameters<object>(() => Driver.CameraState);
             }
         }
 
@@ -242,7 +242,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<short>(() => driver.GainMax);
+                return FunctionNoParameters<short>(() => Driver.GainMax);
             }
         }
 
@@ -250,18 +250,18 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<short>(() => driver.GainMin);
+                return FunctionNoParameters<short>(() => Driver.GainMin);
             }
         }
 
-        public short Gain { get => FunctionNoParameters<short>(() => driver.Gain); set => Method1Parameter((i) => driver.Gain = i, value); }
+        public short Gain { get => FunctionNoParameters<short>(() => Driver.Gain); set => Method1Parameter((i) => Driver.Gain = i, value); }
 
         public IList<string> Gains
         {
             get
             {
                 List<string> returnValue = new();
-                var gains = FunctionNoParameters<object>(() => driver.Gains);
+                var gains = FunctionNoParameters<object>(() => Driver.Gains);
                 foreach (string o in (IList)gains)
                 {
                     returnValue.Add(o);
@@ -275,7 +275,7 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<short>(() => driver.GammaMax);
+                return FunctionNoParameters<short>(() => Driver.GammaMax);
             }
         }
 
@@ -283,18 +283,18 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<short>(() => driver.GammaMin);
+                return FunctionNoParameters<short>(() => Driver.GammaMin);
             }
         }
 
-        public short Gamma { get => FunctionNoParameters<short>(() => driver.Gamma); set => Method1Parameter((i) => driver.Gamma = i, value); }
+        public short Gamma { get => FunctionNoParameters<short>(() => Driver.Gamma); set => Method1Parameter((i) => Driver.Gamma = i, value); }
 
         public IList<string> Gammas
         {
             get
             {
                 List<string> returnValue = new();
-                var gains = FunctionNoParameters<object>(() => driver.Gammas);
+                var gains = FunctionNoParameters<object>(() => Driver.Gammas);
                 foreach (string o in (IList)gains)
                 {
                     returnValue.Add(o);
@@ -309,18 +309,18 @@ namespace ConformU
         {
             get
             {
-                return FunctionNoParameters<bool>(() => driver.CanConfigureDeviceProperties);
+                return FunctionNoParameters<bool>(() => Driver.CanConfigureDeviceProperties);
             }
         }
 
-        public string StartRecordingVideoFile(string PreferredFileName)
+        public string StartRecordingVideoFile(string preferredFileName)
         {
-            return Function1Parameter<string>((i) => driver.StartRecordingVideoFile(i), PreferredFileName);
+            return Function1Parameter<string>((i) => Driver.StartRecordingVideoFile(i), preferredFileName);
         }
 
         public void StopRecordingVideoFile()
         {
-            MethodNoParameters(() => driver.StopRecordingVideoFile());
+            MethodNoParameters(() => Driver.StopRecordingVideoFile());
         }
 
         public void ConfigureDeviceProperties()
