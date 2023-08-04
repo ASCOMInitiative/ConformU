@@ -1283,91 +1283,91 @@ namespace ConformU
                         {
                             case 0.0:
                                 {
-                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel0,
+                                    LogMsg($"SetSwitchValue Offset: {offset,4:P0}", msgLevel0,
                                         $"  Set and read match: {testValue2}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.01:
                                 {
-                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel1,
+                                    LogMsg($"SetSwitchValue Offset: {offset,4:P0}", msgLevel1,
                                         $"   Set/Read differ by up to 1% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.1:
                                 {
-                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                    LogMsg($"SetSwitchValue Offset: {offset,4:P0}", msgLevel2,
                                         $"   Set/Read differ by 1-10% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.2:
                                 {
-                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                    LogMsg($"SetSwitchValue Offset: {offset,4:P0}", msgLevel2,
                                         $"  Set/Read differ by 10-20% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.3:
                                 {
-                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                    LogMsg($"SetSwitchValue Offset: {offset,4:P0}", msgLevel2,
                                         $"  Set/Read differ by 20-30% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.4:
                                 {
-                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                    LogMsg($"SetSwitchValue Offset: {offset,4:P0}", msgLevel2,
                                         $"  Set/Read differ by 30-40% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.5:
                                 {
-                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                    LogMsg($"SetSwitchValue Offset: {offset,4:P0}", msgLevel2,
                                         $"  Set/Read differ by 40-50% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.6:
                                 {
-                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                    LogMsg($"SetSwitchValue Offset: {offset,4:P0}", msgLevel2,
                                         $"  Set/Read differ by 50-60% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.7:
                                 {
-                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                    LogMsg($"SetSwitchValue Offset: {offset,4:P0}", msgLevel2,
                                         $"  Set/Read differ by 60-70% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.8:
                                 {
-                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                    LogMsg($"SetSwitchValue Offset: {offset,4:P0}", msgLevel2,
                                         $"  Set/Read differ by 70-80% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 0.9:
                                 {
-                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                    LogMsg($"SetSwitchValue Offset: {offset,4:P0}", msgLevel2,
                                         $"  Set/Read differ by 80-90% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             case object _ when 0.0 <= Math.Abs(lSwitchValue - testValue2) && Math.Abs(lSwitchValue - testValue2) <= switchStep * 1.0:
                                 {
-                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                    LogMsg($"SetSwitchValue Offset: {offset,4:P0}", msgLevel2,
                                         $"  Set/Read differ by 90-100% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }
 
                             default:
                                 {
-                                    LogMsg($"SetSwitchValue Offset: {offset.ToString("P0").PadLeft(4)}", msgLevel2,
+                                    LogMsg($"SetSwitchValue Offset: {offset,4:P0}", msgLevel2,
                                         $"  Set/Read differ by >100% of SwitchStep. Set: {testValue2}, Read: {lSwitchValue}");
                                     break;
                                 }

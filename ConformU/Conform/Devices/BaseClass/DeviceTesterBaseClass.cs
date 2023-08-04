@@ -668,16 +668,14 @@ namespace ConformU
                     IEnumerable<KeyValuePair<string, bool>> missingProperties = casedPropertyNames.Where(x => x.Value == false);
 
                     // Test whether any properties were not found
-                    if (missingProperties.Count() == 0) // All properties were supplied
-                    {
-                        LogOk("DeviceState", $"Found all expected operational properties");
-                    }
-                    else // One or more properties were missing
-                    {
+                    if (missingProperties.Any()) // One or more properties were missing
                         foreach (KeyValuePair<string, bool> item in missingProperties)
                         {
                             LogInfo("DeviceState", $"Operational property {item.Key} was not included in the DeviceState response.");
                         }
+                    else // All properties were supplied
+                    {
+                        LogOk("DeviceState", $"Found all expected operational properties");
                     }
 
                 }

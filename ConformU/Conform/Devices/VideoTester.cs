@@ -129,7 +129,7 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    if (videoDevice is not null) videoDevice.Dispose();
+                    videoDevice?.Dispose();
                     videoDevice = null;
                 }
             }

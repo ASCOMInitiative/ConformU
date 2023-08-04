@@ -141,7 +141,7 @@ namespace ConformU
                 // Create a blank line at the start of the console log
                 Console.WriteLine("");
 
-                string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
+                string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString().ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
 
                 LogText("", $"Connecting to device: {settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} through URL: {clientHostAddress}");
                 LogBlankLine();
@@ -369,15 +369,15 @@ namespace ConformU
             // Test primary URL structure: /api/v1/ if configured to do so
             if (settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure)
             {
-                await SendToDevice("GET Description", $"Bad Alpaca URL base element (api = apx)\"", $"/apx/v1/{settings.DeviceType.Value.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                await SendToDevice("GET Description", $"Bad Alpaca URL base element (api = apx)\"", $"/apx/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
                 if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await SendToDevice("GET Description", $"Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.Value.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                await SendToDevice("GET Description", $"Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
                 if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await SendToDevice("GET Description", $"Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.Value.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                await SendToDevice("GET Description", $"Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
                 if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await SendToDevice("GET Description", $"Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.Value.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                await SendToDevice("GET Description", $"Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
                 if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await SendToDevice("GET Description", $"Bad Alpaca URL version element (v2)", $"/api/v2/{settings.DeviceType.Value.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                await SendToDevice("GET Description", $"Bad Alpaca URL version element (v2)", $"/api/v2/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
                 if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
 
                 // Test bad POST HTTP methods
@@ -398,17 +398,17 @@ namespace ConformU
             }
 
             // Test remaining Alpaca URL structure /devicetype/devicenumber and accept any 4XX status as a correct rejection
-            await SendToDevice("GET Description", $"Bad Alpaca URL device type (capitalised {settings.DeviceType.Value.ToString(CultureInfo.InvariantCulture).ToUpper()})", $"/api/v1/{settings.DeviceType.Value.ToString(CultureInfo.InvariantCulture).ToUpper()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+            await SendToDevice("GET Description", $"Bad Alpaca URL device type (capitalised {settings.DeviceType.Value.ToString().ToUpper()})", $"/api/v1/{settings.DeviceType.Value.ToString().ToUpper()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
             await SendToDevice("GET Description", $"Bad Alpaca URL device type (baddevicetype)", $"/api/v1/baddevicetype/0/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendToDevice("GET Description", $"Bad Alpaca URL device number (-1)", $"/api/v1/{settings.DeviceType.Value.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/-1/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+            await SendToDevice("GET Description", $"Bad Alpaca URL device number (-1)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/-1/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendToDevice("GET Description", $"Bad Alpaca URL device number (99999)", $"/api/v1/{settings.DeviceType.Value.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/99999/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+            await SendToDevice("GET Description", $"Bad Alpaca URL device number (99999)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/99999/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendToDevice("GET Description", $"Bad Alpaca URL device number (A)", $"/api/v1/{settings.DeviceType.Value.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/A/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+            await SendToDevice("GET Description", $"Bad Alpaca URL device number (A)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/A/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendToDevice("GET Description", $"Bad Alpaca URL method name (descrip)", $"/api/v1/{settings.DeviceType.Value.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/descrip", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+            await SendToDevice("GET Description", $"Bad Alpaca URL method name (descrip)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/descrip", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
 
             // Test GET Connected
@@ -1738,7 +1738,7 @@ namespace ConformU
             string methodLowerCase = method.ToLowerInvariant();
             string httpMethodUpperCase = httpMethod.ToString().ToUpperInvariant();
 
-            string url = $"/api/v1/{settings.DeviceType.Value.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}";
+            string url = $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}";
             await SendToDevice($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation, badlyCasedTransactionIdName, acceptInvalidValueError);
         }
 
@@ -1770,7 +1770,7 @@ namespace ConformU
 
             try
             {
-                string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
+                string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString().ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
 
                 // Create the URI for this transaction and apply it to the request, adding "client id" and "transaction number" query parameters
                 UriBuilder transactionUri = new($"{clientHostAddress}{url}");

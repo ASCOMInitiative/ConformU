@@ -213,6 +213,7 @@ namespace ConformU
         {
             // Do not change this code. Put clean-up code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion
@@ -464,7 +465,7 @@ namespace ConformU
             {
                 dynamic deviceStateDynamic = FunctionNoParameters<IEnumerable>(() => Driver.DeviceState);
 
-                List<IStateValue> deviceState = new List<IStateValue>();
+                List<IStateValue> deviceState = new();
 
                 foreach (dynamic device in deviceStateDynamic)
                 {
