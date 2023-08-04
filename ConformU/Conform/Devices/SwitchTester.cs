@@ -474,19 +474,19 @@ namespace ConformU
                                                     LogOk("SwitchStep ", "  The switch range is an integer multiple of the step size.");
                                                     break;
 
-                                                case object _ when 0M <= Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) && Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) <= Convert.ToDecimal(switchStep / 100):
+                                                case object o when 0M <= Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) && Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) <= Convert.ToDecimal(switchStep / 100):
                                                     LogInfo("SwitchStep ", "  The switch range is within 1% of being an integer multiple of the step size.");
                                                     break;
 
-                                                case object _ when 0M <= Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) && Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) <= Convert.ToDecimal(switchStep / 10):
+                                                case object o when 0M <= Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) && Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) <= Convert.ToDecimal(switchStep / 10):
                                                     LogIssue("SwitchStep ", "  The switch range is not an integer multiple of the step size, but is within 10%.");
                                                     break;
 
-                                                case object _ when 0M <= Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) && Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) <= Convert.ToDecimal(switchStep / 5):
+                                                case object o when 0M <= Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) && Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) <= Convert.ToDecimal(switchStep / 5):
                                                     LogIssue("SwitchStep ", "  The switch range is not an integer multiple of the step size, but is within 20%.");
                                                     break;
 
-                                                case object _ when 0M <= Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) && Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) <= Convert.ToDecimal(switchStep / 2):
+                                                case object o when 0M <= Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) && Math.Abs(decimal.Subtract(Convert.ToDecimal(switchMaximum), Convert.ToDecimal(switchMinimum)) % Convert.ToDecimal(switchStep)) <= Convert.ToDecimal(switchStep / 2):
                                                     LogIssue("SwitchStep ", "  The switch range is not an integer multiple of the step size, but is within 50%.");
                                                     break;
 
@@ -605,11 +605,11 @@ namespace ConformU
                                             WaitForReadDelay("GetSwitchValue");
                                             switch (getSwitchValue)
                                             {
-                                                case object _ when getSwitchValue == switchMinimum:
+                                                case object o when Math.Abs(getSwitchValue - switchMinimum) < getSwitchValue * 0.0001:
                                                     LogOk("SetSwitch ", "  GetSwitchValue returned MINIMUM_VALUE after SetSwitch(False)");
                                                     break;
 
-                                                case object _ when switchMinimum * 0.99 <= getSwitchValue && getSwitchValue <= switchMinimum * 1.01:
+                                                case object o when switchMinimum * 0.99 <= getSwitchValue && getSwitchValue <= switchMinimum * 1.01:
                                                     LogOk("SetSwitch ", "  GetSwitchValue returned a value within 1% of MINIMUM_VALUE after SetSwitch(False)");
                                                     break;
 
@@ -654,11 +654,11 @@ namespace ConformU
                                             WaitForReadDelay("GetSwitchValue");
                                             switch (getSwitchValue)
                                             {
-                                                case object _ when getSwitchValue == switchMaximum:
+                                                case object o when Math.Abs(getSwitchValue - switchMaximum) < getSwitchValue*0.0001:
                                                     LogOk("SetSwitch ", "  GetSwitchValue returned MAXIMUM_VALUE after SetSwitch(True)");
                                                     break;
 
-                                                case object _ when switchMaximum * 0.99 <= switchMaximum && switchMaximum <= switchMaximum * 1.01:
+                                                case object o when switchMaximum * 0.99 <= switchMaximum && switchMaximum <= switchMaximum * 1.01:
                                                     LogOk("SetSwitch ", "  GetSwitchValue returned a value within 1% of MAXIMUM_VALUE after SetSwitch(True)");
                                                     break;
 
@@ -762,12 +762,12 @@ namespace ConformU
 
                                                 switch (getSwitchValue)
                                                 {
-                                                    case object _ when getSwitchValue == switchMinimum:
+                                                    case object o when Math.Abs(getSwitchValue - switchMinimum) < getSwitchValue * 0.0001:
                                                         LogOk("SetSwitchValue", "  GetSwitchValue returned MINIMUM_VALUE after SetSwitchValue(MINIMUM_VALUE)");
                                                         setSwitchValueMinOk = true;
                                                         break;
 
-                                                    case object _ when switchMinimum * 0.99 <= getSwitchValue && getSwitchValue <= switchMinimum * 1.01:
+                                                    case object o when switchMinimum * 0.99 <= getSwitchValue && getSwitchValue <= switchMinimum * 1.01:
                                                         LogOk("SetSwitchValue", "  GetSwitchValue returned a value within 1% of MINIMUM_VALUE after SetSwitchValue(MINIMUM_VALUE)");
                                                         setSwitchValueMinOk = true;
                                                         break;
@@ -853,12 +853,6 @@ namespace ConformU
                                                         LogIssue("SetSwitchValue ",
                                                             $"  GetSwitchValue did not return MAXIMUM_VALUE after SetSwitchValue(MAXIMUM_VALUE): {getSwitchValue}");
                                                         break;
-                                                }
-                                                if (getSwitchValue == switchMaximum)
-                                                {
-                                                }
-                                                else
-                                                {
                                                 }
                                             }
                                             else
@@ -966,8 +960,7 @@ namespace ConformU
                             catch (Exception ex)
                             {
                                 if ((i >= 0) & (i < maxSwitch))
-                                    LogIssue("GetSwitchName ",
-                                        $"Mandatory method GetSwitchName threw an exception: {ex}");
+                                    LogIssue("GetSwitchName ", $"Mandatory method GetSwitchName threw an exception: {ex}");
                                 else
                                     LogDebug("GetSwitchName ", $"Exception: {ex}");
                             }
