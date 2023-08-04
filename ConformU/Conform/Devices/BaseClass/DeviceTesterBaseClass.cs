@@ -950,7 +950,7 @@ namespace ConformU
         /// Get error codes.
         /// </summary>
         /// <param name="p_ProgID">The ProgID.</param>
-        internal void CheckInitialise()
+        public virtual void CheckInitialise()
         {
             SetTest(""); // Clear status messages
             SetAction("");

@@ -262,7 +262,7 @@ namespace ConformU
             CheckCommonMethods(telescopeDevice, DeviceTypes.Telescope);
         }
 
-        public new void CheckInitialise()
+        public override void CheckInitialise()
         {
             unchecked
             {
@@ -367,7 +367,7 @@ namespace ConformU
                 }
             }
 
-            CheckInitialise();
+            base.CheckInitialise();
         }
 
         public override void CreateDevice()

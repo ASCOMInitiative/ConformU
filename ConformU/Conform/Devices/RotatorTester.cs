@@ -83,7 +83,7 @@ namespace ConformU
 
         #region Code
 
-        public new void CheckInitialise()
+        public override void CheckInitialise()
         {
             // Set the error type numbers according to the standards adopted by individual authors.
             // Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
@@ -102,7 +102,7 @@ namespace ConformU
                         }
                 }
             }
-
+            base.CheckInitialise();
         }
 
         public override void CreateDevice()
