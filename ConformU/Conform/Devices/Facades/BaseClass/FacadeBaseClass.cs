@@ -291,7 +291,7 @@ namespace ConformU
             if (DriverHostForm.InvokeRequired)
             {
                 if (logEnabled) Logger?.LogMessage("FunctionNoParameters", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.FuncNoParameters(action) because we are on thread {Environment.CurrentManagedThreadId}");
-                returnValue = DriverHostForm.Invoke(() => { return DriverHostForm.FuncNoParameters(action); });
+                returnValue = DriverHostForm.Invoke(() => DriverHostForm.FuncNoParameters(action));
             }
             else
             {
@@ -315,7 +315,7 @@ namespace ConformU
             if (DriverHostForm.InvokeRequired)
             {
                 if (logEnabled) Logger?.LogMessage("Function1Parameter", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.Function1Parameter(action) because we are on thread {Environment.CurrentManagedThreadId}");
-                returnValue = DriverHostForm.Invoke(() => { return DriverHostForm.Func1Parameter(action, parameter1); });
+                returnValue = DriverHostForm.Invoke(() => DriverHostForm.Func1Parameter(action, parameter1));
             }
             else
             {
@@ -339,7 +339,7 @@ namespace ConformU
             if (DriverHostForm.InvokeRequired)
             {
                 if (logEnabled) Logger?.LogMessage("Function2Parameters", MessageLevel.Debug, $"INVOKE REQUIRED to call driverHostForm.Function2Parameters(action) because we are on thread {Environment.CurrentManagedThreadId}");
-                returnValue = DriverHostForm.Invoke(() => { return DriverHostForm.Func2Parameters(action, parameter1, parameter2); });
+                returnValue = DriverHostForm.Invoke(() => DriverHostForm.Func2Parameters(action, parameter1, parameter2));
             }
             else
             {

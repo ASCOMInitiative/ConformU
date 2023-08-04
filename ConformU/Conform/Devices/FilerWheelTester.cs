@@ -556,7 +556,7 @@ namespace ConformU
                 // Wait for the reported position to match the required position
                 Stopwatch sw = Stopwatch.StartNew();
                 LogCallToDriver(testName, "About to get Position property repeatedly");
-                WaitWhile($"Moving to position {position}", () => { return filterWheel.Position != position; }, 100, settings.FilterWheelTimeout);
+                WaitWhile($"Moving to position {position}", () => filterWheel.Position != position, 100, settings.FilterWheelTimeout);
 
                 // Record the duration of the wait
                 duration = sw.Elapsed.TotalSeconds;
@@ -576,7 +576,7 @@ namespace ConformU
 
                 // Add a 1 second wait so as not to push the filter wheel too hard
                 sw.Restart();
-                WaitWhile($"Waiting for wheel to stabilise at position {position}", () => { return sw.ElapsedMilliseconds < 1000; }, 500, 1);
+                WaitWhile($"Waiting for wheel to stabilise at position {position}", () => sw.ElapsedMilliseconds < 1000, 500, 1);
             }
             catch (Exception ex)
             {

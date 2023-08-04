@@ -547,7 +547,8 @@ namespace ConformU
 
                 await PutTwoParameters("StartExposure", "Duration", settings.CameraExposureDuration.ToString(), "Light", "False", () =>
                 {
-                    WaitWhile("StartExposure", () => { return camera.CameraState == CameraState.Exposing; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    WaitWhile("StartExposure", () => camera.CameraState == CameraState.Exposing, 500,
+                        settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
 
@@ -600,8 +601,6 @@ namespace ConformU
 
         private async Task TestCoverCalibrator()
         {
-            string parameter1 = "";
-
             using (AlpacaCoverCalibrator coverCalibrator = AlpacaClient.GetDevice<AlpacaCoverCalibrator>(settings.AlpacaDevice))
             {
                 try { coverCalibrator.Connected = true; } catch { }
@@ -616,32 +615,33 @@ namespace ConformU
                 // Test Methods
                 await PutNoParameters("CalibratorOff", () =>
                 {
-                    WaitWhile("CalibratorOff", () => { return coverCalibrator.CalibratorState == CalibratorStatus.NotReady; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    WaitWhile("CalibratorOff", () => coverCalibrator.CalibratorState == CalibratorStatus.NotReady, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
 
+                var parameter1 = "";
                 try { parameter1 = (coverCalibrator.MaxBrightness / 2).ToString(); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("CalibratorOn", "Brightness", parameter1, () =>
                 {
-                    WaitWhile("CalibratorOn", () => { return coverCalibrator.CalibratorState == CalibratorStatus.NotReady; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    WaitWhile("CalibratorOn", () => coverCalibrator.CalibratorState == CalibratorStatus.NotReady, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
 
                 await PutNoParameters("OpenCover", () =>
                 {
-                    WaitWhile("OpenCover", () => { return coverCalibrator.CoverState == CoverStatus.Moving; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    WaitWhile("OpenCover", () => coverCalibrator.CoverState == CoverStatus.Moving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
 
                 await PutNoParameters("HaltCover", () =>
                 {
-                    WaitWhile("HaltCover", () => { return coverCalibrator.CoverState == CoverStatus.Moving; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    WaitWhile("HaltCover", () => coverCalibrator.CoverState == CoverStatus.Moving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
 
                 await PutNoParameters("CloseCover", () =>
                 {
-                    WaitWhile("CloseCover", () => { return coverCalibrator.CoverState == CoverStatus.Moving; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    WaitWhile("CloseCover", () => coverCalibrator.CoverState == CoverStatus.Moving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
 
             CoverEnd:
@@ -683,13 +683,13 @@ namespace ConformU
                 // Test Methods
                 await PutNoParameters("AbortSlew", () =>
                 {
-                    WaitWhile("AbortSlew", () => { return dome.Slewing == true; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    WaitWhile("AbortSlew", () => dome.Slewing == true, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
 
                 await PutNoParameters("FindHome", () =>
                 {
-                    WaitWhile("FindHome", () => { return dome.Slewing == true; }, 500, settings.DomeAzimuthMovementTimeout, null);
+                    WaitWhile("FindHome", () => dome.Slewing == true, 500, settings.DomeAzimuthMovementTimeout, null);
                 });
                 WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome azimuth movement delay");
                 if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
@@ -699,7 +699,7 @@ namespace ConformU
                 {
                     await PutNoParameters("OpenShutter", () =>
                     {
-                        WaitWhile("OpenShutter", () => { return dome.ShutterStatus == ShutterState.Opening; }, 500, settings.DomeShutterMovementTimeout, null);
+                        WaitWhile("OpenShutter", () => dome.ShutterStatus == ShutterState.Opening, 500, settings.DomeShutterMovementTimeout, null);
                     });
                     WaitFor(settings.DomeStabilisationWaitTime * 1000, "open shutter delay");
                     if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
@@ -714,7 +714,7 @@ namespace ConformU
                     try { parameter1 = dome.Altitude.ToString(); } catch (Exception) { parameter1 = "45"; }
                     await PutOneParameter("SlewToAltitude", "Altitude", parameter1, () =>
                     {
-                        WaitWhile("SlewToAltitude", () => { return dome.ShutterStatus == ShutterState.Opening; }, 500, settings.DomeAltitudeMovementTimeout, null);
+                        WaitWhile("SlewToAltitude", () => dome.ShutterStatus == ShutterState.Opening, 500, settings.DomeAltitudeMovementTimeout, null);
                     });
                     WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome altitude movement delay");
                     if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
@@ -727,7 +727,7 @@ namespace ConformU
                 try { parameter1 = dome.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
                 await PutOneParameter("SlewToAzimuth", "Azimuth", parameter1, () =>
                 {
-                    WaitWhile("SlewToAzimuth", () => { return dome.Slewing == true; }, 500, settings.DomeAzimuthMovementTimeout, null);
+                    WaitWhile("SlewToAzimuth", () => dome.Slewing == true, 500, settings.DomeAzimuthMovementTimeout, null);
                 });
                 WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome azimuth movement delay");
                 if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
@@ -735,7 +735,7 @@ namespace ConformU
                 try { parameter1 = dome.Azimuth.ToString(); } catch (Exception) { parameter1 = "45"; }
                 await PutOneParameter("SyncToAzimuth", "Azimuth", parameter1, () =>
                 {
-                    WaitWhile("SyncToAzimuth", () => { return dome.Slewing == true; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    WaitWhile("SyncToAzimuth", () => dome.Slewing == true, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
 
                 // Test property that can only be tested with the shutter open
@@ -751,14 +751,14 @@ namespace ConformU
             DomeEnd:
                 await PutNoParameters("CloseShutter", () =>
                 {
-                    WaitWhile("CloseShutter", () => { return dome.ShutterStatus == ShutterState.Closing; }, 500, settings.DomeShutterMovementTimeout, null);
+                    WaitWhile("CloseShutter", () => dome.ShutterStatus == ShutterState.Closing, 500, settings.DomeShutterMovementTimeout, null);
                 });
                 WaitFor(settings.DomeStabilisationWaitTime * 1000, "close shutter delay");
                 if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
 
                 await PutNoParameters("Park", () =>
                 {
-                    WaitWhile("Park", () => { return dome.Slewing == true; }, 500, settings.DomeAzimuthMovementTimeout, null);
+                    WaitWhile("Park", () => dome.Slewing == true, 500, settings.DomeAzimuthMovementTimeout, null);
                 });
                 WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome azimuth movement delay");
                 if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
@@ -787,7 +787,7 @@ namespace ConformU
                 try { parameter1 = filterWheel.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("Position", "Position", parameter1, () =>
                 {
-                    WaitWhile("Position", () => { return filterWheel.Position == -1; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    WaitWhile("Position", () => filterWheel.Position == -1, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
 
             FilterWheelEnd:
@@ -822,14 +822,14 @@ namespace ConformU
                 // Methods
                 await PutNoParameters("Halt", () =>
                 {
-                    WaitWhile("Halt", () => { return focuser.IsMoving; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    WaitWhile("Halt", () => focuser.IsMoving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto FocuserEnd; // Exit early if required
 
                 try { parameter1 = focuser.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("Move", "Position", parameter1, () =>
                 {
-                    WaitWhile("Move", () => { return focuser.IsMoving; }, 500, settings.FocuserTimeout, null);
+                    WaitWhile("Move", () => focuser.IsMoving, 500, settings.FocuserTimeout, null);
                 });
 
             FocuserEnd:
@@ -904,35 +904,35 @@ namespace ConformU
                 // Test methods
                 await PutNoParameters("Halt", () =>
                 {
-                    WaitWhile("Halt", () => { return rotator.IsMoving; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    WaitWhile("Halt", () => rotator.IsMoving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto RotatorEnd; // Exit early if required
 
                 try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("Move", "Position", parameter1, () =>
                 {
-                    WaitWhile("Move", () => { return rotator.IsMoving; }, 500, settings.RotatorTimeout, null);
+                    WaitWhile("Move", () => rotator.IsMoving, 500, settings.RotatorTimeout, null);
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto RotatorEnd; // Exit early if required
 
                 try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("MoveAbsolute", "Position", parameter1, () =>
                 {
-                    WaitWhile("MoveAbsolute", () => { return rotator.IsMoving; }, 500, settings.RotatorTimeout, null);
+                    WaitWhile("MoveAbsolute", () => rotator.IsMoving, 500, settings.RotatorTimeout, null);
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto RotatorEnd; // Exit early if required
 
                 try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("MoveMechanical", "Position", parameter1, () =>
                 {
-                    WaitWhile("MoveMechanical", () => { return rotator.IsMoving; }, 500, settings.RotatorTimeout, null);
+                    WaitWhile("MoveMechanical", () => rotator.IsMoving, 500, settings.RotatorTimeout, null);
                 });
                 if (applicationCancellationToken.IsCancellationRequested) goto RotatorEnd; // Exit early if required
 
                 try { parameter1 = rotator.Position.ToString(); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("Sync", "Position", parameter1, () =>
                 {
-                    WaitWhile("Sync", () => { return rotator.IsMoving; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    WaitWhile("Sync", () => rotator.IsMoving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                 });
 
             RotatorEnd:
@@ -1149,7 +1149,7 @@ namespace ConformU
                 {
                     SetStatus("Parking scope...");
                     await PutNoParameters("Park", null);
-                    WaitWhile("Park", () => { return telescope.Slewing == true; }, 500, settings.TelescopeMaximumSlewTime, null);
+                    WaitWhile("Park", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
 
                     await PutNoParameters("SetPark", null);
                     await PutNoParameters("Unpark", null);
@@ -1164,7 +1164,7 @@ namespace ConformU
                 {
                     SetStatus("Finding home...");
                     await PutNoParameters("FindHome", null);
-                    WaitWhile("FindHome", () => { return telescope.Slewing == true; }, 500, settings.TelescopeMaximumSlewTime, null);
+                    WaitWhile("FindHome", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
                 }
                 else // Test omitted
                 {
@@ -1207,7 +1207,7 @@ namespace ConformU
                 {
                     await PutTwoParameters("PulseGuide", "Direction", "0", "Duration", "0", () =>
                     {
-                        WaitWhile("PulseGuide", () => { return telescope.IsPulseGuiding == true; }, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                        WaitWhile("PulseGuide", () => telescope.IsPulseGuiding == true, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                     });
                 }
                 else // Test omitted
@@ -1222,7 +1222,7 @@ namespace ConformU
                     try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "70"; }
                     await PutTwoParameters("SlewToCoordinatesAsync", "RightAscension", parameter1, "Declination", parameter2, () =>
                     {
-                        WaitWhile("SlewToCoordinatesAsync", () => { return telescope.Slewing == true; }, 500, settings.TelescopeMaximumSlewTime, null);
+                        WaitWhile("SlewToCoordinatesAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
                     });
                 }
                 else // Test omitted
@@ -1237,7 +1237,7 @@ namespace ConformU
                     try { parameter2 = telescope.Declination.ToString(); } catch (Exception) { parameter2 = "80"; }
                     await PutTwoParameters("SlewToCoordinates", "RightAscension", parameter1, "Declination", parameter2, () =>
                     {
-                        WaitWhile("SlewToCoordinates", () => { return telescope.Slewing == true; }, 500, settings.TelescopeMaximumSlewTime, null);
+                        WaitWhile("SlewToCoordinates", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
                     });
                 }
                 else // Test omitted
@@ -1252,7 +1252,7 @@ namespace ConformU
                     try { telescope.TargetDeclination = telescope.Declination; } catch { }
                     await PutNoParameters("SlewToTargetAsync", () =>
                     {
-                        WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.TelescopeMaximumSlewTime, null);
+                        WaitWhile("SlewToTargetAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
                     });
                 }
                 else // Test omitted
@@ -1265,7 +1265,7 @@ namespace ConformU
                 {
                     await PutNoParameters("SlewToTarget", () =>
                     {
-                        WaitWhile("SlewToTarget", () => { return telescope.Slewing == true; }, 500, settings.TelescopeMaximumSlewTime, null);
+                        WaitWhile("SlewToTarget", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
                     });
                 }
                 else // Test omitted
@@ -1305,7 +1305,7 @@ namespace ConformU
                     try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "60"; }
                     await PutTwoParameters("SlewToAltAzAsync", "Azimuth", parameter1, "Altitude", parameter2, () =>
                     {
-                        WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.TelescopeMaximumSlewTime, null);
+                        WaitWhile("SlewToTargetAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
                     });
                 }
                 else // Test omitted
@@ -1320,7 +1320,7 @@ namespace ConformU
                     try { parameter2 = telescope.Altitude.ToString(); } catch (Exception) { parameter2 = "45"; }
                     await PutTwoParameters("SlewToAltAz", "Azimuth", parameter1, "Altitude", parameter2, () =>
                     {
-                        WaitWhile("SlewToTargetAsync", () => { return telescope.Slewing == true; }, 500, settings.TelescopeMaximumSlewTime, null);
+                        WaitWhile("SlewToTargetAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
                     });
                 }
                 else // Test omitted

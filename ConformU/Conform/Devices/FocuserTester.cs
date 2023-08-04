@@ -715,14 +715,14 @@ namespace ConformU
                 LogCallToDriver(testName, "About to call Move method");
                 focuser.Move(mPositionOrg); // Return to original position
                                              // Wait for asynchronous move to finish
-                WaitWhile($"Moving back to starting position", () => { return focuser.IsMoving; }, 500, settings.FocuserTimeout, () => { return $"{focuser.Position} / {mPositionOrg}"; });
+                WaitWhile($"Moving back to starting position", () => focuser.IsMoving, 500, settings.FocuserTimeout, () => $"{focuser.Position} / {mPositionOrg}");
             }
             else
             {
                 LogCallToDriver(testName, "About to call Move method");
                 focuser.Move(-mPosition); // Return to original position
                                            // Wait for asynchronous move to finish
-                WaitWhile($"Moving back to starting position", () => { return focuser.IsMoving; }, 500, settings.FocuserTimeout);
+                WaitWhile($"Moving back to starting position", () => focuser.IsMoving, 500, settings.FocuserTimeout);
             }
         }
 
@@ -769,11 +769,11 @@ namespace ConformU
                         LogInfo(testName, $"The move was assumed to be synchronous because the Move method duration exceeded Conform's built-in sync/async test time of {MOVE_SYNC_TEST_TIME / 1000:0.000} seconds.");
                         if (mAbsolute)
                         {
-                            WaitWhile($"Moving focuser", () => { return focuser.IsMoving; }, 500, settings.FocuserTimeout, () => { return $"{focuser.Position} / {newPosition}"; }); // Wait for move to complete
+                            WaitWhile($"Moving focuser", () => focuser.IsMoving, 500, settings.FocuserTimeout, () => $"{focuser.Position} / {newPosition}"); // Wait for move to complete
                         }
                         else // Relative focuser that doesn't report position
                         {
-                            WaitWhile($"Moving focuser", () => { return focuser.IsMoving; }, 500, settings.FocuserTimeout); // Wait for move to complete
+                            WaitWhile($"Moving focuser", () => focuser.IsMoving, 500, settings.FocuserTimeout); // Wait for move to complete
                         }
                     }
                     else
@@ -786,12 +786,12 @@ namespace ConformU
                     LogCallToDriver(testName, "About to get IsMoving and Position properties repeatedly");
                     if (mAbsolute)
                     {
-                        WaitWhile($"Moving focuser", () => { return focuser.IsMoving; }, 500, settings.FocuserTimeout, () => { return $"{focuser.Position} / {newPosition}"; });
+                        WaitWhile($"Moving focuser", () => focuser.IsMoving, 500, settings.FocuserTimeout, () => $"{focuser.Position} / {newPosition}");
                         LogDebug(testName, $"Final position: {focuser.Position}, IsMoving: {focuser.IsMoving}");
                     }
                     else // Relative focuser that doesn't report position
                     {
-                        WaitWhile($"Moving focuser", () => { return focuser.IsMoving; }, 500, settings.FocuserTimeout); // Wait for move to complete
+                        WaitWhile($"Moving focuser", () => focuser.IsMoving, 500, settings.FocuserTimeout); // Wait for move to complete
                     }
 
 

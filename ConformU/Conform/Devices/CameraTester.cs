@@ -2754,11 +2754,7 @@ LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                     {
                         LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
                         Stopwatch sw = Stopwatch.StartNew();
-                        WaitWhile(GetAction(), () =>
-                        {
-                            // Wait while the camera is exposing and is not in an error state
-                            return (camera.CameraState != CameraState.Exposing) & (camera.CameraState != CameraState.Error);
-                        }, 500, settings.CameraWaitTimeout);
+                        WaitWhile(GetAction(), () => (camera.CameraState != CameraState.Exposing) & (camera.CameraState != CameraState.Error), 500, settings.CameraWaitTimeout);
                     }
                     catch (TimeoutException ex)
                     {
@@ -2799,11 +2795,7 @@ LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                         sw.Restart();
                         Stopwatch swOverall = Stopwatch.StartNew();
 
-                        WaitWhile($"Waiting for exposure to complete", () =>
-                        {
-                            // Wait for the camera state to be something other than CamerraStates.Exposing
-                            return camera.CameraState == CameraState.Exposing;
-                        }, 500, settings.CameraWaitTimeout, () =>
+                        WaitWhile($"Waiting for exposure to complete", () => camera.CameraState == CameraState.Exposing, 500, settings.CameraWaitTimeout, () =>
                         {
                             // Create a progress status message
                             bool reportedError = false;
@@ -2874,11 +2866,7 @@ LogCallToDriver("ConformanceCheck", "About to get ImageReady");
                         // Wait for camera to become idle
 LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
 
-                        WaitWhile("Waiting for camera idle state, reading/downloading image", () =>
-                        {
-                            // Wait until the camera state is idle or error
-                            return (camera.CameraState != CameraState.Idle) & (camera.CameraState != CameraState.Error);
-                        }, 500, settings.CameraWaitTimeout);
+                        WaitWhile("Waiting for camera idle state, reading/downloading image", () => (camera.CameraState != CameraState.Idle) & (camera.CameraState != CameraState.Error), 500, settings.CameraWaitTimeout);
 
                         if (ApplicationCancellationToken.IsCancellationRequested) // Exit if required
                         {
@@ -2910,10 +2898,7 @@ LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
 LogCallToDriver("ConformanceCheck", "About to get CameraState multiple times");
 
                         // Wait until ImageReady is true or the camera is in the error state
-                        WaitWhile("Waiting for image ready", () =>
-                        {
-                            return !camera.ImageReady & (camera.CameraState != CameraState.Error);
-                        }, 500, settings.CameraWaitTimeout);
+                        WaitWhile("Waiting for image ready", () => !camera.ImageReady & (camera.CameraState != CameraState.Error), 500, settings.CameraWaitTimeout);
                     }
                     catch (TimeoutException)
                     {
@@ -3558,7 +3543,7 @@ LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {pDirection}");
                         {
                             LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding multiple times");
                             Stopwatch sw = Stopwatch.StartNew();
-                            WaitWhile($"Guiding {pDirection}", () => { return camera.IsPulseGuiding; }, 500, 3, () => { return $"{sw.Elapsed.TotalSeconds:0.0} / {CAMERA_PULSE_DURATION / 1000:0.0} seconds"; }); LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
+                            WaitWhile($"Guiding {pDirection}", () => camera.IsPulseGuiding, 500, 3, () => $"{sw.Elapsed.TotalSeconds:0.0} / {CAMERA_PULSE_DURATION / 1000:0.0} seconds"); LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
                             if (!camera.IsPulseGuiding)
                                 LogOk("PulseGuide " + pDirection.ToString(), "Asynchronous pulse guide found OK");
                             else

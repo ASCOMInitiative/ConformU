@@ -759,7 +759,7 @@ namespace ConformU
                     LogCallToDriver("Connect", "About to call Connect() method");
                     TimeMethod("Connect", () => BaseClassDevice.Connect());
                     LogCallToDriver("Connect", "About to get Connecting property repeatedly");
-                    WaitWhile("Connecting to device", () => { return BaseClassDevice.Connecting; }, SLEEP_TIME, settings.ConnectDisconnectTimeout);
+                    WaitWhile("Connecting to device", () => BaseClassDevice.Connecting, SLEEP_TIME, settings.ConnectDisconnectTimeout);
                 }
                 else // Connection already in progress so ignore this connect request
                 {
@@ -808,7 +808,7 @@ namespace ConformU
                     LogCallToDriver("Disconnect", "About to call Disconnect() method");
                     TimeMethod("Disconnect", () => BaseClassDevice.Disconnect());
                     LogCallToDriver("Disconnect", "About to get Connecting property repeatedly");
-                    WaitWhile("Disconnecting from device", () => { return BaseClassDevice.Connecting; }, SLEEP_TIME, settings.ConnectDisconnectTimeout);
+                    WaitWhile("Disconnecting from device", () => BaseClassDevice.Connecting, SLEEP_TIME, settings.ConnectDisconnectTimeout);
                 }
                 else // Connection already in progress so ignore this connect request
                 {

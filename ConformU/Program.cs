@@ -384,11 +384,7 @@ namespace ConformU
                 #region Command handlers
 
                 // ROOT COPMMAND handler - Starts the GUI or displays version information
-                rootCommand.SetHandler((bool version) =>
-                {
-                    // Return a task with the required return code
-                    return Task.FromResult(RootCommandHandler(version));
-                }, versionOption);
+                rootCommand.SetHandler((bool version) => Task.FromResult(RootCommandHandler(version)), versionOption);
 
                 // CONFORMANCE USING SETTINGS COPMMAND handler
                 conformanceUsingSettingsCommand.SetHandler((file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
@@ -515,11 +511,7 @@ namespace ConformU
                 }, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption);
 
                 // START AS GUI COMMAND handler
-                startAsGuiCommand.SetHandler((file, path, results, settings, debugDiscovery, debugStartUp) =>
-                {
-                    // Return a task with the required return code
-                    return Task.FromResult(StartGuiHandler(file, path, debugStartUp, debugDiscovery, results, settings));
-                }, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption);
+                startAsGuiCommand.SetHandler((file, path, results, settings, debugDiscovery, debugStartUp) => Task.FromResult(StartGuiHandler(file, path, debugStartUp, debugDiscovery, results, settings)), logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption);
 
                 #endregion
 

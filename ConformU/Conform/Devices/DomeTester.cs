@@ -479,7 +479,7 @@ namespace ConformU
                 LogCallToDriver(pName, "About to get Slewing property");
                 if (domeDevice.Slewing)
                 {
-                    DomeWaitForSlew(settings.DomeAltitudeMovementTimeout, () => { return $"{domeDevice.Altitude:00} / {pAltitude:00} degrees"; }); if (cancellationToken.IsCancellationRequested) return;
+                    DomeWaitForSlew(settings.DomeAltitudeMovementTimeout, () => $"{domeDevice.Altitude:00} / {pAltitude:00} degrees"); if (cancellationToken.IsCancellationRequested) return;
                     LogOk(pName + " " + pAltitude, "Asynchronous slew OK");
                 }
                 else
@@ -529,7 +529,7 @@ namespace ConformU
                 LogCallToDriver(pName, "About to get Slewing property");
                 if (domeDevice.Slewing)
                 {
-                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout, () => { return $"{domeDevice.Azimuth:000} / {pAzimuth:000} degrees"; }); if (cancellationToken.IsCancellationRequested) return;
+                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout, () => $"{domeDevice.Azimuth:000} / {pAzimuth:000} degrees"); if (cancellationToken.IsCancellationRequested) return;
                     LogOk(pName + " " + pAzimuth, "Asynchronous slew OK");
                 }
                 else
@@ -565,7 +565,7 @@ namespace ConformU
             DateTime lStartTime;
             lStartTime = DateTime.Now;
 
-            WaitWhile(GetAction(), () => { return domeDevice.Slewing; }, 500, Convert.ToInt32(pTimeOut), reportingFunction);
+            WaitWhile(GetAction(), () => domeDevice.Slewing, 500, Convert.ToInt32(pTimeOut), reportingFunction);
 
             SetStatus("");
             if ((DateTime.Now.Subtract(lStartTime).TotalSeconds > pTimeOut))
@@ -875,7 +875,7 @@ namespace ConformU
                                         //    SetStatus("Slewing Status: " + domeDevice.Slewing);
                                         //}
                                         //while (domeDevice.Slewing & !cancellationToken.IsCancellationRequested);
-                                        WaitWhile("Finding home", () => { return domeDevice.Slewing; }, 500, settings.DomeAzimuthMovementTimeout);
+                                        WaitWhile("Finding home", () => domeDevice.Slewing, 500, settings.DomeAzimuthMovementTimeout);
 
                                     }
                                     if (!cancellationToken.IsCancellationRequested)
@@ -959,7 +959,7 @@ namespace ConformU
                                         //    SetStatus("Slewing Status: " + domeDevice.Slewing);
                                         //}
                                         //while (domeDevice.Slewing & !cancellationToken.IsCancellationRequested);
-                                        WaitWhile("Parking", () => { return domeDevice.Slewing; }, 500, settings.DomeAzimuthMovementTimeout);
+                                        WaitWhile("Parking", () => domeDevice.Slewing, 500, settings.DomeAzimuthMovementTimeout);
 
                                     }
                                     if (!cancellationToken.IsCancellationRequested)
@@ -1438,7 +1438,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("DomeShutterWait", "About to get ShutterStatus property multiple times");
-                WaitWhile($"Waiting for shutter state {pRequiredStatus}", () => { return (domeDevice.ShutterStatus != pRequiredStatus); }, 500, settings.DomeShutterMovementTimeout);
+                WaitWhile($"Waiting for shutter state {pRequiredStatus}", () => (domeDevice.ShutterStatus != pRequiredStatus), 500, settings.DomeShutterMovementTimeout);
 
                 if ((domeDevice.ShutterStatus == pRequiredStatus)) returnValue = true; // All worked so return True
 
@@ -1560,7 +1560,7 @@ namespace ConformU
             if (settings.DomeStabilisationWaitTime > 0)
             {
                 Stopwatch sw = Stopwatch.StartNew();
-                WaitWhile("Waiting for dome to stabilise", () => { return sw.Elapsed.TotalSeconds < settings.DomeStabilisationWaitTime; }, 500, settings.DomeStabilisationWaitTime);
+                WaitWhile("Waiting for dome to stabilise", () => sw.Elapsed.TotalSeconds < settings.DomeStabilisationWaitTime, 500, settings.DomeStabilisationWaitTime);
             }
         }
     }

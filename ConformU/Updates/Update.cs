@@ -131,7 +131,7 @@ namespace ConformU
             try
             {
                 logger?.LogMessage("CheckForUpdates", MessageLevel.Debug, "Getting release details");
-                Releases = await Task.Run(() => { return GitHubReleases.GetReleases("ASCOMInitiative", "ConformU"); });
+                Releases = await Task.Run(() => GitHubReleases.GetReleases("ASCOMInitiative", "ConformU"));
                 SetProperties(logger);
                 logger?.LogMessage("CheckForUpdates", MessageLevel.Debug, $"Found {Releases.Count} releases");
 

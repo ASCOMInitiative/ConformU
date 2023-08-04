@@ -302,7 +302,7 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
                             asynchronousOpenTime = 0.0;
 
                             // Wait until the cover is no longer moving
-                            WaitWhile("Opening", () => { return coverCalibratorDevice.CoverState == CoverStatus.Moving; }, 500, 60);
+                            WaitWhile("Opening", () => coverCalibratorDevice.CoverState == CoverStatus.Moving, 500, 60);
                             if (cancellationToken.IsCancellationRequested)
                                 return;
 
@@ -357,7 +357,7 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
                         {
                             canAsynchronousOpen = true;
                             // Wait until the cover is no longer moving
-                            WaitWhile("Closing", () => { return coverCalibratorDevice.CoverState == CoverStatus.Moving; }, 500, 60);
+                            WaitWhile("Closing", () => coverCalibratorDevice.CoverState == CoverStatus.Moving, 500, 60);
                             if (cancellationToken.IsCancellationRequested)
                                 return;
 
@@ -621,7 +621,7 @@ LogCallToDriver("CalibratorOff", "About to call Brightness property");
                         else // Asynchronous call
                         {
                             // Wait until the calibrator is off 
-                            WaitWhile("Cooling down", () => { return coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady; }, 500, 60);
+                            WaitWhile("Cooling down", () => coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady, 500, 60);
                             if (cancellationToken.IsCancellationRequested)
                                 return;
 
@@ -700,7 +700,7 @@ LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
                     else // Asynchronous call
                     {
                         // Wait until the cover is no longer moving
-                        WaitWhile("Warming up", () => { return coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady; }, 500, 60);
+                        WaitWhile("Warming up", () => coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady, 500, 60);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 

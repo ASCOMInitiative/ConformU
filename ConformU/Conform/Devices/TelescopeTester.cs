@@ -456,7 +456,7 @@ namespace ConformU
                                 LogCallToDriver("Mount Safety", "About to call Unpark method");
                                 telescopeDevice.Unpark();
                                 LogCallToDriver("Mount Safety", "About to get AtPark property repeatedly");
-                                WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                WaitWhile("Waiting for scope to unpark", () => telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                 LogInfo("Mount Safety", "Scope was parked, so it has been unparked for testing");
                             }
@@ -490,7 +490,7 @@ namespace ConformU
                         LogCallToDriver("Mount Safety", "About to call Unpark method");
                         telescopeDevice.Unpark();
                         LogCallToDriver("Mount Safety", "About to get AtPark property repeatedly");
-                        WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                        WaitWhile("Waiting for scope to unpark", () => telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                         LogOk("Mount Safety", "Scope has been unparked for testing");
                     }
@@ -2594,7 +2594,7 @@ namespace ConformU
 
                                     // Wait for the park to complete
                                     LogCallToDriver("Park", "About to get AtPark property repeatedly...");
-                                    WaitWhile("Waiting for scope to park", () => { return !telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                    WaitWhile("Waiting for scope to park", () => !telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                     // Test outcome
                                     if (telescopeDevice.AtPark)
@@ -2611,7 +2611,7 @@ namespace ConformU
 
                                             // Wait for the park to complete
                                             LogCallToDriver("Park", "About to get AtPark property repeatedly...");
-                                            WaitWhile("Waiting for scope to park", () => { return !telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                            WaitWhile("Waiting for scope to park", () => !telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                             // Test outcome
                                             if (telescopeDevice.AtPark)
@@ -2736,7 +2736,7 @@ namespace ConformU
                                             LogCallToDriver("Unpark", "About to call Unpark method");
                                             telescopeDevice.Unpark();
                                             LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
-                                            WaitWhile("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                            WaitWhile("Waiting for scope to unpark when parked", () => telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                             // Validate unparking
                                             if (!telescopeDevice.AtPark) // Scope unparked OK
@@ -2760,7 +2760,7 @@ namespace ConformU
                                                     LogCallToDriver("Unpark", "About to call Unpark method");
                                                     telescopeDevice.Unpark();
                                                     LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
-                                                    WaitWhile("Waiting for scope to unpark when parked", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                                    WaitWhile("Waiting for scope to unpark when parked", () => telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                                     // Validate unparking
                                                     if (!telescopeDevice.AtPark) // Scope remained unparked
@@ -2801,7 +2801,7 @@ namespace ConformU
                                             LogCallToDriver("Unpark", "About to call Unpark method");
                                             telescopeDevice.Unpark();
                                             LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
-                                            WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                            WaitWhile("Waiting for scope to unpark", () => telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                             LogIssue("Unpark", "No exception thrown by Unpark when CanUnpark is false");
                                         }
@@ -2839,7 +2839,7 @@ namespace ConformU
                             LogCallToDriver("Park", "About to get AtPark property repeatedly...");
 
                             // Wait for the park to complete
-                            WaitWhile("Waiting for scope to park", () => { return !telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                            WaitWhile("Waiting for scope to park", () => !telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
                             if (cancellationToken.IsCancellationRequested) return;
 
                             SetStatus("Scope parked");
@@ -2858,7 +2858,7 @@ namespace ConformU
                                 LogCallToDriver("UnPark", "About to call UnPark method");
                                 telescopeDevice.Unpark();
                                 LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
-                                WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                WaitWhile("Waiting for scope to unpark", () => telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                 LogOk("UnPark", "CanPark is false and CanUnPark is true; no exception generated as expected");
                             }
@@ -2874,7 +2874,7 @@ namespace ConformU
                                 LogCallToDriver("UnPark", "About to call UnPark method");
                                 telescopeDevice.Unpark();
                                 LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
-                                WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                WaitWhile("Waiting for scope to unpark", () => telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
                                 LogIssue("UnPark", "CanPark and CanUnPark are false but no exception was generated on use");
                             }
@@ -5016,7 +5016,7 @@ namespace ConformU
                                 LogCallToDriver("Parked:" + pName, "About to call FindHome method");
                                 telescopeDevice.FindHome();
                                 // Wait for mount to find home
-                                WaitWhile("Waiting for mount to home...", () => { return !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
+                                WaitWhile("Waiting for mount to home...", () => !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000), 200, settings.TelescopeMaximumSlewTime);
                                 break;
                             }
 
@@ -5640,7 +5640,7 @@ namespace ConformU
                                     telescopeDevice.FindHome();
 
                                     // Wait for mount to find home
-                                    WaitWhile("Waiting for mount to home...", () => { return !telescopeDevice.AtHome; }, 200, settings.TelescopeMaximumSlewTime); LogCallToDriver(testName, "About to get AtHome property");
+                                    WaitWhile("Waiting for mount to home...", () => !telescopeDevice.AtHome, 200, settings.TelescopeMaximumSlewTime); LogCallToDriver(testName, "About to get AtHome property");
 
                                     // Validate FindHome outcome
                                     if (telescopeDevice.AtHome)
@@ -5661,7 +5661,7 @@ namespace ConformU
                                         telescopeDevice.Unpark(); // Unpark it ready for further tests
 
                                         LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
-                                        WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                        WaitWhile("Waiting for scope to unpark", () => telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
                                     }
                                 }
                                 else // Interface version 1
@@ -5669,12 +5669,12 @@ namespace ConformU
                                     SetAction("Waiting for mount to home"); LogCallToDriver(testName, "About to call FindHome method");
                                     telescopeDevice.FindHome();
                                     // Wait for mount to find home
-                                    WaitWhile("Waiting for mount to home...", () => { return !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
+                                    WaitWhile("Waiting for mount to home...", () => !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000), 200, settings.TelescopeMaximumSlewTime);
 
                                     LogOk(testName, "Found home OK."); LogCallToDriver(testName, "About to call Unpark method");
                                     telescopeDevice.Unpark();
                                     LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
-                                    WaitWhile("Waiting for scope to unpark", () => { return telescopeDevice.AtPark; }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                    WaitWhile("Waiting for scope to unpark", () => telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
                                 } // Make sure we are still  unparked!
 
                                 break;
@@ -5725,7 +5725,7 @@ namespace ConformU
                                         if (telescopeDevice.IsPulseGuiding)
                                         {
                                             LogCallToDriver(testName, "About to get IsPulseGuiding property multiple times");
-                                            WaitWhile("Pulse guiding Eastwards", () => { return telescopeDevice.IsPulseGuiding; }, SLEEP_TIME, PULSEGUIDE_TIMEOUT_TIME); LogCallToDriver(testName, "About to get IsPulseGuiding property");
+                                            WaitWhile("Pulse guiding Eastwards", () => telescopeDevice.IsPulseGuiding, SLEEP_TIME, PULSEGUIDE_TIMEOUT_TIME); LogCallToDriver(testName, "About to get IsPulseGuiding property");
                                             if (!telescopeDevice.IsPulseGuiding)
                                             {
                                                 LogOk(testName, "Asynchronous pulse guide found OK");
@@ -5957,7 +5957,7 @@ namespace ConformU
                                 LogCallToDriver(testName, "About to call FindHome method");
                                 telescopeDevice.FindHome();
                                 // Wait for mount to find home
-                                WaitWhile("Waiting for mount to home...", () => { return !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000); }, 200, settings.TelescopeMaximumSlewTime);
+                                WaitWhile("Waiting for mount to home...", () => !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000), 200, settings.TelescopeMaximumSlewTime);
                                 break;
                             }
 
@@ -7125,7 +7125,7 @@ namespace ConformU
             LogDebug(testName, $"Starting wait for slew.");
 
             LogCallToDriver(testName, "About to get Slewing property multiple times");
-            WaitWhile(actionMessage, () => { return telescopeDevice.Slewing | (sw.Elapsed.TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION); }, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+            WaitWhile(actionMessage, () => telescopeDevice.Slewing | (sw.Elapsed.TotalSeconds <= WAIT_FOR_SLEW_MINIMUM_DURATION), SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
             LogDebug(testName, $"Completed wait for slew.");
         }
@@ -7749,7 +7749,7 @@ namespace ConformU
             double initialDecCoordinate = telescopeDevice.Declination; LogCallToDriver(logName, $"About to call PulseGuide. Direction: {direction}, Duration: {pulseGuideDuration * 1000}ms.");
             telescopeDevice.PulseGuide(direction, pulseGuideDuration * 1000);
 
-            WaitWhile($"Pulse guiding {direction} at HA {ha:+0.0;-0.0;+0.0}", () => { return telescopeDevice.IsPulseGuiding; }, SLEEP_TIME, pulseGuideDuration); LogCallToDriver(logName, "About to get RightAscension property");
+            WaitWhile($"Pulse guiding {direction} at HA {ha:+0.0;-0.0;+0.0}", () => telescopeDevice.IsPulseGuiding, SLEEP_TIME, pulseGuideDuration); LogCallToDriver(logName, "About to get RightAscension property");
             double finalRaCoordinate = telescopeDevice.RightAscension; LogCallToDriver(logName, "About to get Declination property");
             double finalDecCoordinate = telescopeDevice.Declination;
 
