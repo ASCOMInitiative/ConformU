@@ -19,9 +19,6 @@ using static ConformU.Globals;
 using System.Text.RegularExpressions;
 using ASCOM.Common;
 using ASCOM.Common.Alpaca;
-using System.Reflection.Metadata;
-using System.Runtime.CompilerServices;
-using System.Linq;
 
 namespace ConformU
 {
