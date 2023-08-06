@@ -618,9 +618,13 @@
         @*Switch configuration*@
         <RadzenTabsItem Text="Switch">
             <h4 style="margin-top: 10px">Timeouts</h4>
-            <p>These settings control how much delay is added after reading or writing to a switch to enable it to settle.</p>
+            <p>These settings control the maximum time to wait for an asynchrous operation to complete and how much delay is added after reading or writing a switch so that it can settle.</p>
 
             <div style="margin-top:20px" class="row">
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchAsyncTimeout" TValue="int" Min="1" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.SwitchAsyncTimeout)) />
+                <p style="margin-left: 20px;margin-top: 5px;">Switch asynchronous operation timeout (seconds).</p>
+            </div>
+            <div class="row">
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchReadDelay" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.SwitchReadDelay)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Switch read delay (ms).</p>
             </div>
@@ -743,6 +747,7 @@
     private int switchReadDelay;
     private int switchWriteDelay;
     private int switchExtendedNumberTestRange;
+    private int switchAsyncTimeout;
 
     // Telescope test configuration
     private IEnumerable<string> telescopeTests;
@@ -789,6 +794,7 @@
         RotatorTimeout,
         SwitchReadDelay,
         SwitchWriteDelay,
+        SwitchAsyncTimeout,
         SwitchExtendedNumberTestRange,
         TelescopePulseGuideTolerance,
         TelescopeSlewTolerance,
@@ -1003,6 +1009,10 @@
                 settings.ConnectDisconnectTimeout = newValue;
                 break;
 
+            case NumericConfigurationItem.SwitchAsyncTimeout:
+                settings.SwitchAsyncTimeout = newValue;
+                break;
+
             default:
                 throw new InvalidValueException($"OnIntegerItemChange - Unknown numeric configuration item: {numericConfigurationItem}");
         }
@@ -1206,6 +1216,7 @@
         switchExtendedNumberTestRange = settings.SwitchExtendedNumberTestRange;
         switchReadDelay = settings.SwitchReadDelay;
         switchWriteDelay = settings.SwitchWriteDelay;
+        switchAsyncTimeout = settings.SwitchAsyncTimeout;
 
         // Alpaca configuration
         alpacaDiscoveryEnabled = settings.AlpacaConfiguration.DiscoveryEnabled;

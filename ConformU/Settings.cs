@@ -35,7 +35,7 @@ namespace ConformU
         #region Conform test configuration
 
         // Conform application configuration 
-        [FullTestValue(false)]
+        [MandatoryInFullTest(false)]
         public bool DisplayMethodCalls { get; set; } = false;
 
         public bool UpdateCheck { get; set; } = true;
@@ -44,20 +44,20 @@ namespace ConformU
         public int ConnectDisconnectTimeout { get; set; } = 5;
 
         // Debug output switches
-        [FullTestValue(false)]
+        [MandatoryInFullTest(false)]
         public bool Debug { get; set; } = false;
 
-        [FullTestValue(false)]
+        [MandatoryInFullTest(false)]
         public bool TraceDiscovery { get; set; } = false;
 
-        [FullTestValue(false)]
+        [MandatoryInFullTest(false)]
         public bool TraceAlpacaCalls { get; set; } = false;
 
         // Conformance test configuration 
-        [FullTestValue(true)]
+        [MandatoryInFullTest(true)]
         public bool TestProperties { get; set; } = true;
 
-        [FullTestValue(true)]
+        [MandatoryInFullTest(true)]
         public bool TestMethods { get; set; } = true;
 
         public bool TestPerformance { get; set; } = false;
@@ -160,25 +160,25 @@ namespace ConformU
             { TelescopeTester.SYNC_TO_ALTAZ, true }
         };
 
-        [FullTestValue(true)]
+        [MandatoryInFullTest(true)]
         public bool TelescopeExtendedRateOffsetTests { get; set; } = true;
 
-        [FullTestValue(true)]
+        [MandatoryInFullTest(true)]
         public bool TelescopeFirstUseTests { get; set; } = true;
 
-        [FullTestValue(true)]
+        [MandatoryInFullTest(true)]
         public bool TestSideOfPierRead { get; set; } = false;
 
-        [FullTestValue(true)]
+        [MandatoryInFullTest(true)]
         public bool TestSideOfPierWrite { get; set; } = false;
 
-        [FullTestValue(true)]
+        [MandatoryInFullTest(true)]
         public bool TelescopeExtendedPulseGuideTests { get; set; } = true;
 
-        [FullTestValue(true)]
+        [MandatoryInFullTest(true)]
         public bool TelescopeExtendedMoveAxisTests { get; set; } = true;
 
-        [FullTestValue(true)]
+        [MandatoryInFullTest(true)]
         public bool TelescopeExtendedSiteTests { get; set; } = true;
 
         public double TelescopePulseGuideTolerance { get; set; } = 1; // Arc-seconds
@@ -189,9 +189,9 @@ namespace ConformU
         // Camera test configuration
         public int CameraMaxBinX { get; set; } = 0;
         public int CameraMaxBinY { get; set; } = 0;
-        [FullTestValue(true)]
+        [MandatoryInFullTest(true)]
         public bool CameraFirstUseTests { get; set; } = true;
-        [FullTestValue(true)]
+        [MandatoryInFullTest(true)]
         public bool CameraTestImageArrayVariant { get; set; } = true;
         public double CameraExposureDuration { get; set; } = 2.0;
         public int CameraXMax { get; set; } = 0;
@@ -207,7 +207,7 @@ namespace ConformU
         /// Dome stabilisation time (seconds)
         /// </summary>
         public int DomeStabilisationWaitTime { get; set; } = 10;
-        [FullTestValue(true)]
+        [MandatoryInFullTest(true)]
         public bool DomeOpenShutter { get; set; } = false;
         public double DomeSlewTolerance { get; set; } = 1.0; // Degrees
 
@@ -226,11 +226,12 @@ namespace ConformU
         public int RotatorTimeout { get; set; } = 60;
 
         // Switch test configuration
-        [FullTestValue(true)]
+        [MandatoryInFullTest(true)]
         public bool SwitchEnableSet { get; set; } = false;
         public int SwitchReadDelay { get; set; } = 500; // Milliseconds
         public int SwitchWriteDelay { get; set; } = 3000; // Milliseconds
         public int SwitchExtendedNumberTestRange { get; set; } = 100;
+        public int SwitchAsyncTimeout { get; set; } = 10; // Seconds;
 
         #endregion
 

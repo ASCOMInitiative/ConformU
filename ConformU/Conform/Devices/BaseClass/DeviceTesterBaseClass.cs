@@ -31,7 +31,6 @@ namespace ConformU
         internal const double PERF_LOOP_TIME = 5.0; // Performance loop run time in seconds
         internal const int SLEEP_TIME = 500; // Loop time for testing whether slewing has completed
         internal const int WAITFOR_UPDATE_INTERVAL = 500; // Time in milliseconds between updates in the WaitFor method
-        internal const int WAITWHILE_EXTRA_WAIT_TIME = 2; // Additional time to wait after the expected run time before raising a TimeoutException (seconds)
 
         // Class not registered COM exception error number
         internal const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
@@ -1187,7 +1186,7 @@ namespace ConformU
 
             // Create a timeout cancellation token source that times out after the required timeout period
             CancellationTokenSource timeoutCts = new();
-            timeoutCts.CancelAfter(TimeSpan.FromSeconds(Convert.ToDouble(timeoutSeconds) + WAITWHILE_EXTRA_WAIT_TIME * (Convert.ToDouble(pollInterval) / 1000.0))); // Allow two poll intervals beyond the timeout time to prevent early termination
+            timeoutCts.CancelAfter(TimeSpan.FromSeconds(Convert.ToDouble(timeoutSeconds)));
 
             // Combine the provided cancellation token parameter with the new timeout cancellation token
             CancellationTokenSource combinedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, ApplicationCancellationToken);
@@ -1219,14 +1218,26 @@ namespace ConformU
                         SetStatus(statusString());
 
                 }
-            } //while (waitFunction() & !combinedCts.Token.IsCancellationRequested) ;
+            }
+
+            LogDebug(nameof(WaitWhile), $"The Wait completed - WaitFunction: {waitFunction()}, Timeout cancelled: {timeoutCts.Token.IsCancellationRequested}, " +
+                                        $"Application cancelled: {ApplicationCancellationToken.IsCancellationRequested}, Combined cancelled: {combinedCts.Token.IsCancellationRequested}.");
 
             // Test whether the operation timed out
             if (timeoutCts.IsCancellationRequested) // The operation did time out
             {
-                //  Log the timeout and throw an exception to cancel the operation
-                LogDebug("WaitUntil", $"The {actionName} operation timed out after {timeoutSeconds} seconds.");
-                throw new TimeoutException($"The \"{actionName}\" operation exceeded its {timeoutSeconds} second timeout.");
+                // Make a final test of the wait function in case the operation completed between poll intervals
+                if (waitFunction()) // The wait function remains True
+                {
+                    //  The wait function is still True so log the timeout and throw an exception to cancel the operation
+                    LogDebug(nameof(WaitWhile), $"The {actionName} operation timed out after {timeoutSeconds} seconds.");
+                    throw new TimeoutException($"The \"{actionName}\" operation exceeded its {timeoutSeconds} second timeout.");
+                }
+                else // The wait function is False
+                {
+                    // The wait function transitioned to False after the last poll iknterval and before the timeout so this is a successful wait
+                    // No action required
+                }
             }
 
             SetStatus("");
@@ -1239,41 +1250,41 @@ namespace ConformU
             LogTestOnly("");
         }
 
-        internal void LogTestOnly(string pTest)
+        internal void LogTestOnly(string test)
         {
-            tl?.LogMessage(pTest, MessageLevel.TestOnly, "");
+            tl?.LogMessage(test, MessageLevel.TestOnly, "");
         }
 
-        internal void LogTestAndMessage(string pTest, string pMsg)
+        internal void LogTestAndMessage(string test, string message)
         {
-            tl?.LogMessage(pTest, MessageLevel.TestAndMessage, pMsg);
+            tl?.LogMessage(test, MessageLevel.TestAndMessage, message);
         }
 
-        internal void LogOk(string pTest, string pMsg)
+        internal void LogOk(string test, string message)
         {
-            tl?.LogMessage(pTest, MessageLevel.OK, pMsg);
+            tl?.LogMessage(test, MessageLevel.OK, message);
         }
 
-        internal void LogDebug(string pTest, string pMsg)
+        internal void LogDebug(string test, string message)
         {
-            tl?.LogMessage(pTest, MessageLevel.Debug, pMsg);
+            tl?.LogMessage(test, MessageLevel.Debug, message);
         }
 
-        internal void LogInfo(string pTest, string pMsg)
+        internal void LogInfo(string test, string message)
         {
-            tl?.LogMessage(pTest, MessageLevel.Info, pMsg);
+            tl?.LogMessage(test, MessageLevel.Info, message);
         }
 
-        internal void LogIssue(string pTest, string pMsg)
+        internal void LogIssue(string test, string message)
         {
-            conformResults.Issues.Add(new System.Collections.Generic.KeyValuePair<string, string>(pTest, pMsg));
-            tl?.LogMessage(pTest, MessageLevel.Issue, pMsg);
+            conformResults.Issues.Add(new System.Collections.Generic.KeyValuePair<string, string>(test, message));
+            tl?.LogMessage(test, MessageLevel.Issue, message);
         }
 
-        internal void LogError(string pTest, string pMsg)
+        internal void LogError(string test, string message)
         {
-            conformResults.Errors.Add(new System.Collections.Generic.KeyValuePair<string, string>(pTest, pMsg));
-            tl?.LogMessage(pTest, MessageLevel.Error, pMsg);
+            conformResults.Errors.Add(new System.Collections.Generic.KeyValuePair<string, string>(test, message));
+            tl?.LogMessage(test, MessageLevel.Error, message);
         }
 
         internal void LogMsg(string testName, MessageLevel messageLevel, string message)

@@ -2693,7 +2693,7 @@ namespace ConformU
                     cancellationTokenSource.Cancel();
 
                     // Log an issue because of the timeout
-                    LogIssue(testName, $"StartExposure {(expectedErrorMessage == "" ? "" : $"{expectedErrorMessage} ")}did not return within the timeout period: {requiredDuration + WAITWHILE_EXTRA_WAIT_TIME} seconds.");
+                    LogIssue(testName, $"StartExposure {(expectedErrorMessage == "" ? "" : $"{expectedErrorMessage} ")}did not return within the timeout period: {settings.CameraWaitTimeout} seconds.");
 
                     // Provide a warning about possible application corruption
                     LogNewLine();

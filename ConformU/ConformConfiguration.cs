@@ -362,7 +362,7 @@ namespace ConformU
             foreach (var property in settingsProperties)
             {
                 // Extract the IncludeInFullTest attribute if present
-                FullTestValueAttribute attribute = property.GetCustomAttribute<FullTestValueAttribute>();
+                MandatoryInFullTestAttribute attribute = property.GetCustomAttribute<MandatoryInFullTestAttribute>();
 
                 // If present set the property to its "full settings" value contained in the attribute
                 if (attribute != null)
@@ -384,7 +384,7 @@ namespace ConformU
             foreach (var property in alpacaConfigurationProperties)
             {
                 // Extract the IncludeInFullTest attribute if present
-                FullTestValueAttribute attribute = property.GetCustomAttribute<FullTestValueAttribute>();
+                MandatoryInFullTestAttribute attribute = property.GetCustomAttribute<MandatoryInFullTestAttribute>();
 
                 // If present set the property to its "full settings" value contained in the attribute
                 if (attribute != null)
