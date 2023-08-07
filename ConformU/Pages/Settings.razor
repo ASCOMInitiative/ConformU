@@ -647,6 +647,10 @@
                 <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchExtendedNumberTestRange" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.SwitchExtendedNumberTestRange)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Extended switch number test range.</p>
             </div>
+            <div class="row" style="margin-top:14px; margin-left:4px;">
+                <RadzenCheckBox Name="CHKSWITCHTESTOFFSETS" @bind-Value=@switchTestOffsets TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.SwitchTestOffsets)) />
+                <RadzenLabel Text="Allow switches to be set and changed." Component="CHKSWITCHTESTOFFSETS" Style="margin-left: 5px;" />
+            </div>
         </RadzenTabsItem>
 
     </Tabs>
@@ -748,6 +752,7 @@
     private int switchWriteDelay;
     private int switchExtendedNumberTestRange;
     private int switchAsyncTimeout;
+    private bool switchTestOffsets;
 
     // Telescope test configuration
     private IEnumerable<string> telescopeTests;
@@ -805,31 +810,32 @@
     private enum CheckBoxConfigurationItem
     {
         Debug,
-        DisplayCalls,
-        DomeOpenShutter,
-        SwitchEnableSet,
-        UpdateCheck,
         AlpacaDiscoveryResolveName,
         AlpacaDiscoveryUseIpV4,
         AlpacaDiscoveryUseIpV6,
-        StrictCasing,
-        TraceDiscovery,
-        TraceAlpacaCalls,
         CameraFirstUseTests,
+        DisplayCalls,
         DiscoveryEnabled,
-        TelescopeFirstUseTests,
+        DomeOpenShutter,
         GoHomeOnDeviceSelection,
-        RunAs32Bit,
         ProtocolShowSuccessResponses,
         ProtocolReportNotImplementedErrors,
         ProtocolTestPrimaryUrlStructure,
+        RunAs32Bit,
         SideOfPierRead,
         SideOfPierWrite,
+        StrictCasing,
+        SwitchEnableSet,
+        SwitchTestOffsets,
+        TelescopeFirstUseTests,
+        TraceAlpacaCalls,
+        TraceDiscovery,
         TrustUserGeneratedSslCertificates,
-        TelescopeExtendedRateOffsetTests,
-        TelescopeExtendedPulseGuideTests,
         TelescopeExtendedMoveAxisTests,
+        TelescopeExtendedPulseGuideTests,
+        TelescopeExtendedRateOffsetTests,
         TelescopeExtendedSiteTests,
+        UpdateCheck,
     }
 
     private enum BoolConfigurationItem
@@ -1127,6 +1133,9 @@
                 settings.TelescopeExtendedSiteTests = chkExtendedSiteTests;
                 break;
 
+            case CheckBoxConfigurationItem.SwitchTestOffsets:
+                settings.SwitchTestOffsets = switchTestOffsets;
+                break;
             default:
                 throw new InvalidValueException($"OnCheckboxChange - Unknown checkbox name: {name}");
         }
@@ -1217,6 +1226,7 @@
         switchReadDelay = settings.SwitchReadDelay;
         switchWriteDelay = settings.SwitchWriteDelay;
         switchAsyncTimeout = settings.SwitchAsyncTimeout;
+        switchTestOffsets = settings.SwitchTestOffsets;
 
         // Alpaca configuration
         alpacaDiscoveryEnabled = settings.AlpacaConfiguration.DiscoveryEnabled;

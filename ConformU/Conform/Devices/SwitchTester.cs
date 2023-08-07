@@ -914,10 +914,19 @@ namespace ConformU
                                         // Test some positions of the multi-state switch between the minimum and maximum values
                                         if (getSwitchValueOk & setSwitchValueMinOk & setSwitchValueMaxOk & IsGoodValue(switchRange) & IsGoodValue(switchStep))
                                         {
-                                            TestSetSwitchValue(i, 0.0, switchMinimum, switchMaximum, switchRange, switchStep); if (cancellationToken.IsCancellationRequested) return;
-                                            TestSetSwitchValue(i, 0.25, switchMinimum, switchMaximum, switchRange, switchStep); if (cancellationToken.IsCancellationRequested) return;
-                                            TestSetSwitchValue(i, 0.5, switchMinimum, switchMaximum, switchRange, switchStep); if (cancellationToken.IsCancellationRequested) return;
-                                            TestSetSwitchValue(i, 0.75, switchMinimum, switchMaximum, switchRange, switchStep); if (cancellationToken.IsCancellationRequested) return;
+                                            // Only test offsets if configured to do so
+                                            if (settings.SwitchTestOffsets)
+                                            {
+                                                TestSetSwitchValue(i, 0.0, switchMinimum, switchMaximum, switchRange, switchStep); if (cancellationToken.IsCancellationRequested) return;
+                                                TestSetSwitchValue(i, 0.25, switchMinimum, switchMaximum, switchRange, switchStep); if (cancellationToken.IsCancellationRequested) return;
+                                                TestSetSwitchValue(i, 0.5, switchMinimum, switchMaximum, switchRange, switchStep); if (cancellationToken.IsCancellationRequested) return;
+                                                TestSetSwitchValue(i, 0.75, switchMinimum, switchMaximum, switchRange, switchStep); if (cancellationToken.IsCancellationRequested) return;
+                                            }
+                                            else
+                                            {
+                                                LogConfigurationAlert("Offset tests skipped due to Conform configuration.");
+                                                LogInfo("SetSwitchValue", "Offset tests skipped due to Conform configuration.");
+                                            }
                                         }
                                         else
                                         {
@@ -1106,6 +1115,22 @@ namespace ConformU
                                                     switchDevice.SetAsync(i, getSwitch); // Return to the original state
                                                     LogCallToDriver("SetAsync", $"  About to call StateChangeComplete({i} multiple times.");
                                                     WaitWhile($"SetAsync({i}, false)", () => !switchDevice.StateChangeComplete(i), ASYNC_POLL_INTERVAL, settings.SwitchAsyncTimeout);
+
+                                                    if (getSwitchOk)
+                                                    {
+                                                        LogCallToDriver("SetAsync", $"  About to call GetSwitch({i}) method");
+                                                        SetAction($"GetSwitch");
+                                                        bool restoredSwitch = switchDevice.GetSwitch(i);
+
+                                                        // Make sure we got back the value that we set
+                                                        if (restoredSwitch == getSwitch)
+                                                            LogOk("SetAsync ", $"  Successfully restored switch value: {getSwitch}");
+                                                        else
+                                                            LogIssue("SetAsync ", $"  GetSwitch read {restoredSwitch} after SetAsync({getSwitch})");
+                                                        WaitForReadDelay("GetSwitch");
+                                                    }
+                                                    else
+                                                        LogInfo("SetAsync ", "  Skipping GetSwitch confirmation because of an issue with the GetSwitch method");
                                                 }
                                                 else
                                                 {
@@ -1114,6 +1139,22 @@ namespace ConformU
                                                     switchDevice.SetAsync(i, false); // Set to false
                                                     LogCallToDriver("SetAsync", $"  About to call StateChangeComplete({i} multiple times.");
                                                     WaitWhile($"SetAsync({i}, false)", () => !switchDevice.StateChangeComplete(i), ASYNC_POLL_INTERVAL, settings.SwitchAsyncTimeout);
+                                              
+                                                    if (getSwitchOk)
+                                                    {
+                                                        LogCallToDriver("SetAsync", $"  About to call GetSwitch({i}) method");
+                                                        SetAction($"GetSwitch");
+                                                        bool restoredSwitch = switchDevice.GetSwitch(i);
+
+                                                        // Make sure we got back the value that we set
+                                                        if (restoredSwitch == false)
+                                                            LogOk("SetAsync ", $"  Successfully restored switch value: {getSwitch}");
+                                                        else
+                                                            LogIssue("SetAsync ", $"  GetSwitch read {restoredSwitch} after SetAsync({false})");
+                                                        WaitForReadDelay("GetSwitch");
+                                                    }
+                                                    else
+                                                        LogInfo("SetAsync ", "  Skipping GetSwitch confirmation because of an issue with the GetSwitch method");
                                                 }
 
                                                 setSwitchOk = true;

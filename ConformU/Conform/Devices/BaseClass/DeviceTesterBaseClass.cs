@@ -1220,24 +1220,32 @@ namespace ConformU
                 }
             }
 
-            LogDebug(nameof(WaitWhile), $"The Wait completed - WaitFunction: {waitFunction()}, Timeout cancelled: {timeoutCts.Token.IsCancellationRequested}, " +
-                                        $"Application cancelled: {ApplicationCancellationToken.IsCancellationRequested}, Combined cancelled: {combinedCts.Token.IsCancellationRequested}.");
+            bool currentWaitFunctionValue = waitFunction();
 
-            // Test whether the operation timed out
-            if (timeoutCts.IsCancellationRequested) // The operation did time out
+            LogDebug(nameof(WaitWhile), $"The Wait completed - WaitFunction: {currentWaitFunctionValue}, Timeout cancelled: {timeoutCts.Token.IsCancellationRequested}, " +
+                                        $"Application cancelled: {ApplicationCancellationToken.IsCancellationRequested}, Combined cancelled: {combinedCts.Token.IsCancellationRequested}.");
+            if (currentWaitFunctionValue)
             {
-                // Make a final test of the wait function in case the operation completed between poll intervals
-                if (waitFunction()) // The wait function remains True
+                // Test whether the operation timed out
+                if (timeoutCts.IsCancellationRequested) // The operation did time out
                 {
-                    //  The wait function is still True so log the timeout and throw an exception to cancel the operation
-                    LogDebug(nameof(WaitWhile), $"The {actionName} operation timed out after {timeoutSeconds} seconds.");
-                    throw new TimeoutException($"The \"{actionName}\" operation exceeded its {timeoutSeconds} second timeout.");
+                    // Make a final test of the wait function in case the operation completed between poll intervals
+                    if (waitFunction()) // The wait function remains True
+                    {
+                        //  The wait function is still True so log the timeout and throw an exception to cancel the operation
+                        LogDebug(nameof(WaitWhile), $"The {actionName} operation timed out after {timeoutSeconds} seconds.");
+                        throw new TimeoutException($"The \"{actionName}\" operation exceeded its {timeoutSeconds} second timeout.");
+                    }
+                    else // The wait function is False
+                    {
+                        // The wait function transitioned to False after the last poll iknterval and before the timeout so this is a successful wait
+                        // No action required
+                    }
                 }
-                else // The wait function is False
-                {
-                    // The wait function transitioned to False after the last poll iknterval and before the timeout so this is a successful wait
-                    // No action required
-                }
+            }
+            else
+            {
+                LogDebug(nameof(WaitWhile), $"WaitFunction is FALSE - Operation completed successfully");
             }
 
             SetStatus("");

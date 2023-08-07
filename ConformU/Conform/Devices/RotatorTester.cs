@@ -150,16 +150,17 @@ namespace ConformU
                                 throw new ASCOM.InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComAccessMechanic}");
                         }
 
-                        LogInfo("CreateDevice", "Successfully created driver");
-                        SetDevice(mRotator, DeviceTypes.Rotator); // Assign the driver to the base class
-
-                        SetFullStatus("Create device", "Waiting for driver to stabilise", "");
-                        WaitFor(1000, 100);
                         break;
 
                     default:
                         throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
+
+                LogInfo("CreateDevice", "Successfully created driver");
+                SetDevice(mRotator, DeviceTypes.Rotator); // Assign the driver to the base class
+
+                SetFullStatus("Create device", "Waiting for driver to stabilise", "");
+                WaitFor(1000, 100);
             }
             catch (COMException exCom) when (exCom.ErrorCode == REGDB_E_CLASSNOTREG)
             {
@@ -921,7 +922,7 @@ namespace ConformU
                     }
                 }
                 else if (IsInvalidValueException(pName, ex)) // This is expected to fail because a bad position was used
-                                                              // Test for an InvalidValueException and handle if found
+                                                             // Test for an InvalidValueException and handle if found
                 {
                     HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "", pExpectErrorMsg);
                 }

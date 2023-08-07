@@ -232,6 +232,8 @@ namespace ConformU
         public int SwitchWriteDelay { get; set; } = 3000; // Milliseconds
         public int SwitchExtendedNumberTestRange { get; set; } = 100;
         public int SwitchAsyncTimeout { get; set; } = 10; // Seconds;
+        [MandatoryInFullTest(true)]
+        public bool SwitchTestOffsets { get; set; } = true;
 
         #endregion
 

@@ -364,7 +364,7 @@ namespace ConformU
                     focuser.TempComp = true;
                     LogOk("TempComp Write", "Successfully turned temperature compensation on");
                     mTempCompTrueOk = true; // Set to true to indicate TempComp can be successfully set to True
-                                             // Turn compensation off
+                                            // Turn compensation off
                     LogCallToDriver("TempComp Write", "About to set TempComp property");
                     focuser.TempComp = false;
                     LogOk("TempComp Write", "Successfully turned temperature compensation off");
@@ -479,48 +479,35 @@ namespace ConformU
             SetTest("Focuser Move");
             if (mTempCompTrueOk)
             {
-                switch (GetInterfaceVersion())
+                // Select the correct test strategy based on interface version
+                if (GetInterfaceVersion() < 3)// Original test method for IFocuserV2 and earlier devices
                 {
-                    case 0:
-                    case 1:
-                    case 2: // Original test method for IFocuserV2 and earlier devices
-                        {
-                            try
-                            {
-                                LogCallToDriver("Move - TempComp True", "About to set TempComp property");
-                                focuser.TempComp = true;
-                                MoveFocuser("Move - TempComp True", true); // Report any deviation from the expected position
-                                LogIssue("Move - TempComp True", "TempComp is True but no exception is thrown by the Move Method - See Focuser.TempComp entry in Platform help file");
-                            }
-                            catch (Exception ex)
-                            {
-                                HandleInvalidOperationExceptionAsOk("", MemberType.Method, Required.MustBeImplemented, ex, "TempComp is True but incorrect exception was thrown by the Move Method", "InvalidOperation Exception correctly raised as expected");
-                            }
+                    try
+                    {
+                        LogCallToDriver("Move - TempComp True", "About to set TempComp property");
+                        focuser.TempComp = true;
+                        MoveFocuser("Move - TempComp True", true); // Report any deviation from the expected position
+                        LogIssue("Move - TempComp True", "TempComp is True but no exception is thrown by the Move Method - See Focuser.TempComp entry in Platform help file");
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleInvalidOperationExceptionAsOk("", MemberType.Method, Required.MustBeImplemented, ex, "TempComp is True but incorrect exception was thrown by the Move Method", "InvalidOperation Exception correctly raised as expected");
+                    }
 
-                            break;
-                        }
+                }
+                else // Test method for revised IFocuserV3 and later behaviour introduced in Platform 6.4
+                {
+                    try
+                    {
+                        LogCallToDriver("Move - TempComp True V3", "About to set TempComp property");
+                        focuser.TempComp = true;
+                        MoveFocuser("Move - TempComp True V3", false); // Ignore any focuser position movement because all bets are off when temperature compensation is enabled
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleException("Move - TempComp True V3", MemberType.Method, Required.Mandatory, ex, "");
+                    }
 
-                    case 3: // Test method for revised IFocuserV3 behaviour introduced in Platform 6.4
-                        {
-                            try
-                            {
-                                LogCallToDriver("Move - TempComp True V3", "About to set TempComp property");
-                                focuser.TempComp = true;
-                                MoveFocuser("Move - TempComp True V3", false); // Ignore any focuser position movement because all bets are off when temperature compensation is enabled
-                            }
-                            catch (Exception ex)
-                            {
-                                HandleException("Move - TempComp True V3", MemberType.Method, Required.Mandatory, ex, "");
-                            }
-
-                            break;
-                        }
-
-                    default:
-                        {
-                            LogIssue("Move - TempComp True", string.Format("Unknown interface version returned {0}, Move test with temperature compensation enabled skipped.", GetInterfaceVersion()));
-                            break;
-                        }
                 }
                 if (cancellationToken.IsCancellationRequested) return;
 
@@ -712,14 +699,14 @@ namespace ConformU
             {
                 LogCallToDriver(testName, "About to call Move method");
                 focuser.Move(mPositionOrg); // Return to original position
-                                             // Wait for asynchronous move to finish
+                                            // Wait for asynchronous move to finish
                 WaitWhile($"Moving back to starting position", () => focuser.IsMoving, 500, settings.FocuserTimeout, () => $"{focuser.Position} / {mPositionOrg}");
             }
             else
             {
                 LogCallToDriver(testName, "About to call Move method");
                 focuser.Move(-mPosition); // Return to original position
-                                           // Wait for asynchronous move to finish
+                                          // Wait for asynchronous move to finish
                 WaitWhile($"Moving back to starting position", () => focuser.IsMoving, 500, settings.FocuserTimeout);
             }
         }
