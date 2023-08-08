@@ -16,9 +16,9 @@ namespace ConformU
         private double averageperiod, dewPoint, humidity, windDirection, windSpeed;
 
         // Variables to indicate whether each function is or is not implemented to that it is possible to check that for any given sensor, all three either are or are not implemented
-        private readonly Dictionary<string, bool> sensorIsImplemented = new();
-        private readonly Dictionary<string, bool> sensorHasDescription = new();
-        private readonly Dictionary<string, bool> sensorHasTimeOfLastUpdate = new();
+        private readonly List<string> sensorIsImplemented = new();
+        private readonly List<string> sensorHasDescription = new();
+        private readonly List<string> sensorHasTimeOfLastUpdate = new();
 
         private const double ABSOLUTE_ZERO = -273.15;
         private const double WATER_BOILING_POINT = 100.0;
@@ -45,7 +45,21 @@ namespace ConformU
         private const string PROPERTY_TIMESINCELASTUPDATE = "TimeSinceLastUpdate";
 
         // List of valid ObservingConditions sensor properties
-        private readonly List<string> validSensors = new() { PROPERTY_CLOUDCOVER, PROPERTY_DEWPOINT, PROPERTY_HUMIDITY, PROPERTY_PRESSURE, PROPERTY_RAINRATE, PROPERTY_SKYBRIGHTNESS, PROPERTY_SKYQUALITY, PROPERTY_SKYTEMPERATURE, PROPERTY_STARFWHM, PROPERTY_TEMPERATURE, PROPERTY_WINDDIRECTION, PROPERTY_WINDGUST, PROPERTY_WINDSPEED };
+        private readonly List<string> validSensors = new() {
+            PROPERTY_CLOUDCOVER,
+            PROPERTY_DEWPOINT,
+            PROPERTY_HUMIDITY,
+            PROPERTY_PRESSURE,
+            PROPERTY_RAINRATE,
+            PROPERTY_SKYBRIGHTNESS,
+            PROPERTY_SKYQUALITY,
+            PROPERTY_SKYTEMPERATURE,
+            PROPERTY_STARFWHM,
+            PROPERTY_TEMPERATURE,
+            PROPERTY_WINDDIRECTION,
+            PROPERTY_WINDGUST,
+            PROPERTY_WINDSPEED
+        };
 
         // Helper variables
         private IObservingConditionsV2 mObservingConditions;
@@ -64,7 +78,7 @@ namespace ConformU
             SkyBrightness,
             SkyQuality,
             SkyTemperature,
-            StarFwhm,
+            StarFWHM,
             Temperature,
             WindDirection,
             WindGust,
@@ -107,14 +121,6 @@ namespace ConformU
         {
             settings = conformConfiguration.Settings;
             this.logger = logger;
-            foreach (string sensorName in validSensors)
-            {
-                sensorIsImplemented[sensorName] = false;
-                sensorHasDescription[sensorName] = false;
-                sensorHasTimeOfLastUpdate[sensorName] = false;
-
-            }
-
         }
 
         // IDisposable
@@ -305,7 +311,7 @@ namespace ConformU
             TestDouble(PROPERTY_RAINRATE, ObservingConditionsProperty.RainRate, 0.0, 20000.0, Required.Optional);
             TestDouble(PROPERTY_SKYBRIGHTNESS, ObservingConditionsProperty.SkyBrightness, 0.0, 1000000.0, Required.Optional);
             TestDouble(PROPERTY_SKYQUALITY, ObservingConditionsProperty.SkyQuality, -20.0, 30.0, Required.Optional);
-            TestDouble(PROPERTY_STARFWHM, ObservingConditionsProperty.StarFwhm, 0.0, 1000.0, Required.Optional);
+            TestDouble(PROPERTY_STARFWHM, ObservingConditionsProperty.StarFWHM, 0.0, 1000.0, Required.Optional);
             TestDouble(PROPERTY_SKYTEMPERATURE, ObservingConditionsProperty.SkyTemperature, ABSOLUTE_ZERO, WATER_BOILING_POINT, Required.Optional);
             TestDouble(PROPERTY_TEMPERATURE, ObservingConditionsProperty.Temperature, ABSOLUTE_ZERO, WATER_BOILING_POINT, Required.Optional);
             windDirection = TestDouble(PROPERTY_WINDDIRECTION, ObservingConditionsProperty.WindDirection, 0.0, 360.0, Required.Optional);
@@ -324,16 +330,12 @@ namespace ConformU
 
         public override void CheckMethods()
         {
-            double lastUpdateTimeDewPoint, lastUpdateTimeHumidity;
-
-            string sensorDescriptionDewPoint, sensorDescriptionHumidity;
-
             // TimeSinceLastUpdate
             TestDouble(PROPERTY_LATESTUPDATETIME, ObservingConditionsProperty.TimeSinceLastUpdateLatest, -1.0, double.MaxValue, Required.Mandatory);
 
             TestDouble(PROPERTY_CLOUDCOVER, ObservingConditionsProperty.TimeSinceLastUpdateCloudCover, -1.0, double.MaxValue, Required.Optional);
-            lastUpdateTimeDewPoint = TestDouble(PROPERTY_DEWPOINT, ObservingConditionsProperty.TimeSinceLastUpdateDewPoint, -1.0, double.MaxValue, Required.Optional);
-            lastUpdateTimeHumidity = TestDouble(PROPERTY_HUMIDITY, ObservingConditionsProperty.TimeSinceLastUpdateHumidity, -1.0, double.MaxValue, Required.Optional);
+            double lastUpdateTimeDewPoint = TestDouble(PROPERTY_DEWPOINT, ObservingConditionsProperty.TimeSinceLastUpdateDewPoint, -1.0, double.MaxValue, Required.Optional);
+            double lastUpdateTimeHumidity = TestDouble(PROPERTY_HUMIDITY, ObservingConditionsProperty.TimeSinceLastUpdateHumidity, -1.0, double.MaxValue, Required.Optional);
 
             if ((IsGoodValue(lastUpdateTimeDewPoint) & IsGoodValue(lastUpdateTimeHumidity)))
                 LogOk("DewPoint & Humidity", "Dew point and humidity are both implemented per the interface specification");
@@ -342,6 +344,7 @@ namespace ConformU
             else
                 LogIssue("DewPoint & Humidity", "One of Dew point or humidity is implemented and the other is not. Both must be implemented or both must not be implemented per the interface specification");
 
+            // Test property values
             TestDouble(PROPERTY_PRESSURE, ObservingConditionsProperty.TimeSinceLastUpdatePressure, double.MinValue, double.MaxValue, Required.Optional);
             TestDouble(PROPERTY_RAINRATE, ObservingConditionsProperty.TimeSinceLastUpdateRainRate, double.MinValue, double.MaxValue, Required.Optional);
             TestDouble(PROPERTY_SKYBRIGHTNESS, ObservingConditionsProperty.TimeSinceLastUpdateSkyBrightness, double.MinValue, double.MaxValue, Required.Optional);
@@ -353,7 +356,7 @@ namespace ConformU
             TestDouble(PROPERTY_WINDGUST, ObservingConditionsProperty.TimeSinceLastUpdateWindGust, double.MinValue, double.MaxValue, Required.Optional);
             TestDouble(PROPERTY_WINDSPEED, ObservingConditionsProperty.TimeSinceLastUpdateWindSpeed, double.MinValue, double.MaxValue, Required.Optional);
 
-            // Refresh
+            // Test the Refresh method
             try
             {
                 LogCallToDriver("AveragePeriod Write", "About to call Refresh method");
@@ -365,14 +368,14 @@ namespace ConformU
                 HandleException("Refresh", MemberType.Method, Required.Optional, ex, "");
             }
 
-            // SensorDescrtiption
+            // Test SensorDescrtiption
             TestSensorDescription(PROPERTY_CLOUDCOVER, ObservingConditionsProperty.SensorDescriptionCloudCover, int.MaxValue, Required.Optional);
-            sensorDescriptionDewPoint = TestSensorDescription(PROPERTY_DEWPOINT, ObservingConditionsProperty.SensorDescriptionDewPoint, int.MaxValue, Required.Optional);
-            sensorDescriptionHumidity = TestSensorDescription(PROPERTY_HUMIDITY, ObservingConditionsProperty.SensorDescriptionHumidity, int.MaxValue, Required.Optional);
+            string sensorDescriptionDewPoint = TestSensorDescription(PROPERTY_DEWPOINT, ObservingConditionsProperty.SensorDescriptionDewPoint, int.MaxValue, Required.Optional);
+            string sensorDescriptionHumidity = TestSensorDescription(PROPERTY_HUMIDITY, ObservingConditionsProperty.SensorDescriptionHumidity, int.MaxValue, Required.Optional);
 
-            if (((sensorDescriptionDewPoint == null) & (sensorDescriptionHumidity == null)))
+            if ((sensorDescriptionDewPoint is null) & (sensorDescriptionHumidity is null))
                 LogOk("DewPoint & Humidity", "Dew point and humidity are both not implemented per the interface specification");
-            else if (((!(sensorDescriptionDewPoint == null)) & (!(sensorDescriptionHumidity == null))))
+            else if ((sensorDescriptionDewPoint is not null) & (sensorDescriptionHumidity is not null))
                 LogOk("DewPoint & Humidity", "Dew point and humidity are both implemented per the interface specification");
             else
                 LogIssue("DewPoint & Humidity", "One of Dew point or humidity is implemented and the other is not. Both must be implemented or both must not be implemented per the interface specification");
@@ -392,15 +395,20 @@ namespace ConformU
             foreach (string sensorName in validSensors)
             {
                 LogDebug("Consistency", $"Sensor name: {sensorName}");
-                if ((sensorIsImplemented[sensorName] & sensorHasDescription[sensorName] & sensorHasTimeOfLastUpdate[sensorName]))
+                if (sensorIsImplemented.Contains(sensorName) & sensorHasDescription.Contains(sensorName) & sensorHasTimeOfLastUpdate.Contains(sensorName))
                     LogOk($"Consistency - {sensorName}", "Sensor value, description and time since last update are all implemented as required by the specification");
-                else if (((!sensorIsImplemented[sensorName]) & (!sensorHasDescription[sensorName]) & (!sensorHasTimeOfLastUpdate[sensorName])))
+                else if (!sensorIsImplemented.Contains(sensorName) & !sensorHasDescription.Contains(sensorName) & !sensorHasTimeOfLastUpdate.Contains(sensorName))
                     LogOk($"Consistency - {sensorName}", "Sensor value, description and time since last update are all not implemented as required by the specification");
                 else
                 {
                     LogIssue($"Consistency - {sensorName}",
-                        $"Sensor value is implemented: {sensorIsImplemented[sensorName]}, Sensor description is implemented: {sensorHasDescription[sensorName]}, Sensor time since last update is implemented: {sensorHasTimeOfLastUpdate[sensorName]}");
+                        $"Sensor {sensorName} value is implemented: {sensorIsImplemented.Contains(sensorName)}, Sensor description is implemented: {sensorHasDescription.Contains(sensorName)}, Sensor time since last update is implemented: {sensorHasTimeOfLastUpdate.Contains(sensorName)}");
                     LogInfo($"Consistency - {sensorName}", "The ASCOM specification requires that sensor value, description and time since last update must either all be implemented or all not be implemented.");
+
+                    foreach (string sn in sensorIsImplemented)
+                    {
+                        LogDebug(sensorName, $"Sensor is implemented: {sn}");
+                    }
                 }
             }
         }
@@ -442,217 +450,144 @@ namespace ConformU
             return !double.IsNaN(value);
         }
 
-        private double TestDouble(string pNmae, ObservingConditionsProperty pType, double pMin, double pMax, Required pMandatory)
+        private double TestDouble(string propertyNmae, ObservingConditionsProperty enumName, double pMin, double pMax, Required pMandatory)
         {
-            string methodName, sensorName;
             double returnValue;
             int retryCount = 0;
             bool readOk = false;
             MemberType methodType = MemberType.Property;
             bool unexpectedError = false;
 
-            // Create a text version of the calling method name
-            try
-            {
-                methodName = pType.ToString(); // & " Read"
-            }
-            catch (Exception)
-            {
-                methodName = "?????? Read";
-            }
-            if (methodName.StartsWith(PROPERTY_TIMESINCELASTUPDATE))
-            {
-                sensorName = methodName[PROPERTY_TIMESINCELASTUPDATE.Length..];
-                LogCallToDriver(methodName, $"About to call TimeSinceLastUpdate({sensorName}) method");
-            }
-            else
-            {
-                sensorName = methodName;
-                LogCallToDriver(methodName, $"About to get {sensorName} property");
-            }
-            LogDebug("returnValue", $"methodName: {methodName}, SensorName: {sensorName}");
-            sensorHasTimeOfLastUpdate[sensorName] = false;
-
             do
             {
                 try
                 {
                     returnValue = BAD_VALUE;
-                    switch (pType)
+                    switch (enumName)
                     {
+                        #region Primary properties
+
                         case ObservingConditionsProperty.AveragePeriod:
-                            {
-                                methodType = MemberType.Property; returnValue = mObservingConditions.AveragePeriod;
-                                break;
-                            }
+                            methodType = MemberType.Property; returnValue = mObservingConditions.AveragePeriod;
+                            break;
 
                         case ObservingConditionsProperty.CloudCover:
-                            {
-                                methodType = MemberType.Property; returnValue = mObservingConditions.CloudCover;
-                                break;
-                            }
+                            methodType = MemberType.Property; returnValue = mObservingConditions.CloudCover;
+                            break;
 
                         case ObservingConditionsProperty.DewPoint:
-                            {
-                                methodType = MemberType.Property; returnValue = mObservingConditions.DewPoint;
-                                break;
-                            }
+                            methodType = MemberType.Property; returnValue = mObservingConditions.DewPoint;
+                            break;
 
                         case ObservingConditionsProperty.Humidity:
-                            {
-                                methodType = MemberType.Property; returnValue = mObservingConditions.Humidity;
-                                break;
-                            }
+                            methodType = MemberType.Property; returnValue = mObservingConditions.Humidity;
+                            break;
 
                         case ObservingConditionsProperty.Pressure:
-                            {
-                                methodType = MemberType.Property; returnValue = mObservingConditions.Pressure;
-                                break;
-                            }
+                            methodType = MemberType.Property; returnValue = mObservingConditions.Pressure;
+                            break;
 
                         case ObservingConditionsProperty.RainRate:
-                            {
-                                methodType = MemberType.Property; returnValue = mObservingConditions.RainRate;
-                                break;
-                            }
+                            methodType = MemberType.Property; returnValue = mObservingConditions.RainRate;
+                            break;
 
                         case ObservingConditionsProperty.SkyBrightness:
-                            {
-                                methodType = MemberType.Property; returnValue = mObservingConditions.SkyBrightness;
-                                break;
-                            }
+                            methodType = MemberType.Property; returnValue = mObservingConditions.SkyBrightness;
+                            break;
 
                         case ObservingConditionsProperty.SkyQuality:
-                            {
-                                methodType = MemberType.Property; returnValue = mObservingConditions.SkyQuality;
-                                break;
-                            }
+                            methodType = MemberType.Property; returnValue = mObservingConditions.SkyQuality;
+                            break;
 
-                        case ObservingConditionsProperty.StarFwhm:
-                            {
-                                methodType = MemberType.Property; returnValue = mObservingConditions.StarFWHM;
-                                break;
-                            }
+                        case ObservingConditionsProperty.StarFWHM:
+                            methodType = MemberType.Property; returnValue = mObservingConditions.StarFWHM;
+                            break;
 
                         case ObservingConditionsProperty.SkyTemperature:
-                            {
-                                methodType = MemberType.Property; returnValue = mObservingConditions.SkyTemperature;
-                                break;
-                            }
+                            methodType = MemberType.Property; returnValue = mObservingConditions.SkyTemperature;
+                            break;
 
                         case ObservingConditionsProperty.Temperature:
-                            {
-                                methodType = MemberType.Property; returnValue = mObservingConditions.Temperature;
-                                break;
-                            }
+                            methodType = MemberType.Property; returnValue = mObservingConditions.Temperature;
+                            break;
 
                         case ObservingConditionsProperty.WindDirection:
-                            {
-                                methodType = MemberType.Property; returnValue = mObservingConditions.WindDirection;
-                                break;
-                            }
+                            methodType = MemberType.Property; returnValue = mObservingConditions.WindDirection;
+                            break;
 
                         case ObservingConditionsProperty.WindGust:
-                            {
-                                methodType = MemberType.Property; returnValue = mObservingConditions.WindGust;
-                                break;
-                            }
+                            methodType = MemberType.Property; returnValue = mObservingConditions.WindGust;
+                            break;
 
                         case ObservingConditionsProperty.WindSpeed:
-                            {
-                                methodType = MemberType.Property; returnValue = mObservingConditions.WindSpeed;
-                                break;
-                            }
+                            methodType = MemberType.Property; returnValue = mObservingConditions.WindSpeed;
+                            break;
+
+                        #endregion
+
+                        #region Time since last update
 
                         case ObservingConditionsProperty.TimeSinceLastUpdateLatest:
-                            {
-                                methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate("");
-                                break;
-                            }
+                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate("");
+                            break;
 
                         case ObservingConditionsProperty.TimeSinceLastUpdateCloudCover:
-                            {
-                                methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_CLOUDCOVER);
-                                break;
-                            }
+                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_CLOUDCOVER);
+                            break;
 
                         case ObservingConditionsProperty.TimeSinceLastUpdateDewPoint:
-                            {
-                                methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_DEWPOINT);
-                                break;
-                            }
+                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_DEWPOINT);
+                            break;
 
                         case ObservingConditionsProperty.TimeSinceLastUpdateHumidity:
-                            {
-                                methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_HUMIDITY);
-                                break;
-                            }
+                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_HUMIDITY);
+                            break;
 
                         case ObservingConditionsProperty.TimeSinceLastUpdatePressure:
-                            {
-                                methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_PRESSURE);
-                                break;
-                            }
+                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_PRESSURE);
+                            break;
 
                         case ObservingConditionsProperty.TimeSinceLastUpdateRainRate:
-                            {
-                                methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_RAINRATE);
-                                break;
-                            }
+                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_RAINRATE);
+                            break;
 
                         case ObservingConditionsProperty.TimeSinceLastUpdateSkyBrightness:
-                            {
-                                methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_SKYBRIGHTNESS);
-                                break;
-                            }
+                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_SKYBRIGHTNESS);
+                            break;
 
                         case ObservingConditionsProperty.TimeSinceLastUpdateSkyQuality:
-                            {
-                                methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_SKYQUALITY);
-                                break;
-                            }
+                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_SKYQUALITY);
+                            break;
 
                         case ObservingConditionsProperty.TimeSinceLastUpdateStarFwhm:
-                            {
-                                methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_STARFWHM);
-                                break;
-                            }
+                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_STARFWHM);
+                            break;
 
                         case ObservingConditionsProperty.TimeSinceLastUpdateSkyTemperature:
-                            {
-                                methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_SKYTEMPERATURE);
-                                break;
-                            }
+                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_SKYTEMPERATURE);
+                            break;
 
                         case ObservingConditionsProperty.TimeSinceLastUpdateTemperature:
-                            {
-                                methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_TEMPERATURE);
-                                break;
-                            }
+                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_TEMPERATURE);
+                            break;
 
                         case ObservingConditionsProperty.TimeSinceLastUpdateWindDirection:
-                            {
-                                methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_WINDDIRECTION);
-                                break;
-                            }
+                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_WINDDIRECTION);
+                            break;
 
                         case ObservingConditionsProperty.TimeSinceLastUpdateWindGust:
-                            {
-                                methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_WINDGUST);
-                                break;
-                            }
+                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_WINDGUST);
+                            break;
 
                         case ObservingConditionsProperty.TimeSinceLastUpdateWindSpeed:
-                            {
-                                methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_WINDSPEED);
-                                break;
-                            }
+                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_WINDSPEED);
+                            break;
+
+                        #endregion
 
                         default:
-                            {
-                                LogIssue(methodName, $"returnValue: Unknown test type - {pType}");
-                                break;
-                            }
+                            LogError(propertyNmae, $"TestDouble - Unknown test type - {enumName}");
+                            break;
                     }
 
                     readOk = true;
@@ -660,195 +595,93 @@ namespace ConformU
                     // Successfully retrieved a value so check validity
                     switch (returnValue)
                     {
-                        case object _ when returnValue < pMin:
-                            {
-                                LogIssue(methodName, $"Invalid value (below minimum expected - {pMin}): {returnValue}");
-                                break;
-                            }
+                        case var _ when returnValue < pMin:
+                            LogIssue(propertyNmae, $"Invalid value (below minimum expected - {pMin}): {returnValue}");
+                            break;
 
-                        case object _ when returnValue > pMax:
-                            {
-                                LogIssue(methodName, $"Invalid value (above maximum expected - {pMax}): {returnValue}");
-                                break;
-                            }
+                        case var _ when returnValue > pMax:
+                            LogIssue(propertyNmae, $"Invalid value (above maximum expected - {pMax}): {returnValue}");
+                            break;
 
                         default:
-                            {
-                                LogOk(methodName, returnValue.ToString());
-                                break;
-                            }
+                            LogOk(enumName.ToString(), returnValue.ToString());
+                            break;
                     }
 
-                    if (methodName.StartsWith(PROPERTY_TIMESINCELASTUPDATE))
-                        sensorHasTimeOfLastUpdate[sensorName] = true;
+                    // Record that a value was returned
+                    if (enumName.ToString().StartsWith(PROPERTY_TIMESINCELASTUPDATE)) 
+                    {
+                        sensorHasTimeOfLastUpdate.Add(propertyNmae);
+                        LogDebug(enumName.ToString(), $"Added {propertyNmae} to sensorHasTimeOfLastUpdate list");
+                    }
                     else
-                        sensorIsImplemented[sensorName] = true;
+                    {
+                        sensorIsImplemented.Add(propertyNmae);
+                        LogDebug(propertyNmae, $"Added {propertyNmae} to sensorIsImplemented list");
+                    }
                 }
                 catch (Exception ex)
                 {
-                    if (IsInvalidOperationException(pNmae, ex))
+                    if (IsInvalidOperationException(propertyNmae, ex))
                     {
                         returnValue = BAD_VALUE;
                         retryCount += 1;
-                        LogInfo(methodName,
-                            $"Sensor not ready, received InvalidOperationException, waiting {settings.ObservingConditionsRetryTime} second to retry. Attempt {retryCount} out of {settings.ObservingConditionsMaxRetries}");
+                        LogInfo(propertyNmae, $"Sensor not ready, received InvalidOperationException, waiting {settings.ObservingConditionsRetryTime} second to retry. Attempt {retryCount} out of {settings.ObservingConditionsMaxRetries}");
                         WaitFor(settings.ObservingConditionsRetryTime * 1000);
                     }
                     else
                     {
                         unexpectedError = true;
                         returnValue = BAD_VALUE;
-                        HandleException(methodName, methodType, pMandatory, ex, "");
+                        HandleException(propertyNmae, methodType, pMandatory, ex, "");
                     }
                 }
             }
             while (!readOk & (retryCount <= settings.ObservingConditionsMaxRetries) & !unexpectedError); // Lower than minimum value// Higher than maximum value
 
             if ((!readOk) & (!unexpectedError))
-                LogInfo(methodName,
-                    $"InvalidOperationException persisted for longer than {settings.ObservingConditionsMaxRetries * settings.ObservingConditionsRetryTime} seconds.");
+                LogInfo(propertyNmae, $"InvalidOperationException persisted for longer than {settings.ObservingConditionsMaxRetries * settings.ObservingConditionsRetryTime} seconds.");
             return returnValue;
 
         }
 
-        private string TestSensorDescription(string pName, ObservingConditionsProperty pType, int pMaxLength, Required pMandatory)
+        private string TestSensorDescription(string propertyName, ObservingConditionsProperty enumName, int pMaxLength, Required pMandatory)
         {
-            string methodName, returnValue;
-
-            // Create a text version of the calling method name
+            string returnValue = null;
             try
             {
-                methodName = pType.ToString(); // & " Read"
-            }
-            catch (Exception)
-            {
-                methodName = "?????? Read";
-            }
-
-            sensorHasDescription[pName] = false;
-
-            returnValue = null;
-            try
-            {
-                LogCallToDriver(methodName, $"About to call SensorDescription({pName}) method");
-                switch (pType)
-                {
-                    case ObservingConditionsProperty.SensorDescriptionCloudCover:
-                        {
-                            returnValue = mObservingConditions.SensorDescription(PROPERTY_CLOUDCOVER);
-                            break;
-                        }
-
-                    case ObservingConditionsProperty.SensorDescriptionDewPoint:
-                        {
-                            returnValue = mObservingConditions.SensorDescription(PROPERTY_DEWPOINT);
-                            break;
-                        }
-
-                    case ObservingConditionsProperty.SensorDescriptionHumidity:
-                        {
-                            returnValue = mObservingConditions.SensorDescription(PROPERTY_HUMIDITY);
-                            break;
-                        }
-
-                    case ObservingConditionsProperty.SensorDescriptionPressure:
-                        {
-                            returnValue = mObservingConditions.SensorDescription(PROPERTY_PRESSURE);
-                            break;
-                        }
-
-                    case ObservingConditionsProperty.SensorDescriptionRainRate:
-                        {
-                            returnValue = mObservingConditions.SensorDescription(PROPERTY_RAINRATE);
-                            break;
-                        }
-
-                    case ObservingConditionsProperty.SensorDescriptionSkyBrightness:
-                        {
-                            returnValue = mObservingConditions.SensorDescription(PROPERTY_SKYBRIGHTNESS);
-                            break;
-                        }
-
-                    case ObservingConditionsProperty.SensorDescriptionSkyQuality:
-                        {
-                            returnValue = mObservingConditions.SensorDescription(PROPERTY_SKYQUALITY);
-                            break;
-                        }
-
-                    case ObservingConditionsProperty.SensorDescriptionStarFwhm:
-                        {
-                            returnValue = mObservingConditions.SensorDescription(PROPERTY_STARFWHM);
-                            break;
-                        }
-
-                    case ObservingConditionsProperty.SensorDescriptionSkyTemperature:
-                        {
-                            returnValue = mObservingConditions.SensorDescription(PROPERTY_SKYTEMPERATURE);
-                            break;
-                        }
-
-                    case ObservingConditionsProperty.SensorDescriptionTemperature:
-                        {
-                            returnValue = mObservingConditions.SensorDescription(PROPERTY_TEMPERATURE);
-                            break;
-                        }
-
-                    case ObservingConditionsProperty.SensorDescriptionWindDirection:
-                        {
-                            returnValue = mObservingConditions.SensorDescription(PROPERTY_WINDDIRECTION);
-                            break;
-                        }
-
-                    case ObservingConditionsProperty.SensorDescriptionWindGust:
-                        {
-                            returnValue = mObservingConditions.SensorDescription(PROPERTY_WINDGUST);
-                            break;
-                        }
-
-                    case ObservingConditionsProperty.SensorDescriptionWindSpeed:
-                        {
-                            returnValue = mObservingConditions.SensorDescription(PROPERTY_WINDSPEED);
-                            break;
-                        }
-
-                    default:
-                        {
-                            LogIssue(methodName, $"TestString: Unknown test type - {pType}");
-                            break;
-                        }
-                }
-
+                LogCallToDriver(enumName.ToString(), $"About to call SensorDescription({propertyName}) method");
+                returnValue = mObservingConditions.SensorDescription(propertyName);
                 // Successfully retrieved a value
                 switch (returnValue)
                 {
-                    case object _ when returnValue == null:
+                    case null:
                         {
-                            LogIssue(methodName, "The driver did not return any string at all: Nothing (VB), null (C#)");
+                            LogIssue(enumName.ToString(), "The driver did not return any string at all: Nothing (VB), null (C#)");
                             break;
                         }
 
-                    case object _ when returnValue == "":
+                    case "":
                         {
-                            LogOk(methodName, "The driver returned an empty string: \"\"");
+                            LogOk(enumName.ToString(), "The driver returned an empty string: \"\"");
                             break;
                         }
 
                     default:
                         {
                             if (returnValue.Length <= pMaxLength)
-                                LogOk(methodName, returnValue);
+                                LogOk(enumName.ToString(), returnValue);
                             else
-                                LogIssue(methodName,
-                                    $"String exceeds {pMaxLength} characters maximum length - {returnValue}");
+                                LogIssue(enumName.ToString(), $"String exceeds {pMaxLength} characters maximum length - {returnValue}");
                             break;
                         }
                 }
 
-                sensorHasDescription[pName] = true;
+                sensorHasDescription.Add(propertyName);
             }
             catch (Exception ex)
             {
-                HandleException(methodName, MemberType.Method, pMandatory, ex, "");
+                HandleException(enumName.ToString(), MemberType.Method, pMandatory, ex, "");
                 returnValue = null;
             }
             return returnValue;

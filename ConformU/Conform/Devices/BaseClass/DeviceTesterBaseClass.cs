@@ -727,7 +727,7 @@ namespace ConformU
             LogDebug("Connect", $"Interface version: {GetInterfaceVersion()}");
 
             // Use Connect /Disconnect if present
-            if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.Telescope, GetInterfaceVersion()))
+            if (DeviceCapabilities.HasConnectAndDeviceState(baseClassDeviceType, GetInterfaceVersion()))
             {
                 LogCallToDriver("Connect", "About to get Connecting property");
                 if (!baseClassDevice.Connecting) // No connection / disconnection is in progress
