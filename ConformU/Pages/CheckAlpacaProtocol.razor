@@ -2,6 +2,7 @@
 
 @implements IDisposable
 @using System.Threading;
+@using System.Diagnostics
 
 @inject ConformLogger logger
 @inject ConformConfiguration configuration
@@ -92,8 +93,6 @@
 
     async void StartCheckAlpacaProtocol()
     {
-        int numberOfErrosAndIssue = -99990;
-
         try
         {
             // Set the operation in progress flag and refresh state throughout the page and navigation menu.
@@ -106,7 +105,7 @@
             if (!string.IsNullOrEmpty(validationMessage)) // There is a configuration issue so present an error message
             {
                 // Find the current position of the start button in the viewport
-                BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "StartButton");
+                BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", applicationCancellationToken, "StartButton");
                 int x = (int)(result.Left);
                 int y = (int)(result.Top) + 100;
 
@@ -152,7 +151,7 @@
                             catch (Exception ex)
                             {
                                 logger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
-                                returnCode= -99998;
+                                returnCode = -99998;
                             }
                             return returnCode;
                         }, applicationCancellationToken);
@@ -165,7 +164,7 @@
                         // Wait for the task to complete.
                         logger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting conformance task completion");
                         await conformanceTestTask;
-                        numberOfErrosAndIssue= conformanceTestTask.Result;
+                        int numberOfErrosAndIssue = conformanceTestTask.Result;
                         logger.LogMessage("StartTest", MessageLevel.Debug, $"Conformance task completed. Number of issues and errors: {numberOfErrosAndIssue}");
 
                         tester.Dispose();
@@ -184,8 +183,16 @@
         }
         catch (Exception ex)
         {
-            try { logger.LogMessage("INDEX.RAZOR-StartTest", MessageLevel.Error, $"{ex}"); } catch (Exception) { throw; }
-            try { Console.WriteLine($"INDEX.RAZOR-StartTest Exception: {ex}"); } catch (Exception) { throw; }
+            try { logger.LogMessage("INDEX.RAZOR-StartTest", MessageLevel.Error, $"{ex}"); }
+            catch
+            {
+                // ignored
+            }
+            try { Console.WriteLine($@"INDEX.RAZOR-StartTest Exception: {ex}"); }
+            catch
+            {
+                // ignored
+            }
         }
         finally
         {
@@ -195,7 +202,6 @@
             try
             {
                 await JS.InvokeVoidAsync("ScrollToBottom", "ProtocolLog");
-
             }
             catch { }
         }
@@ -260,7 +266,7 @@
     ///    <param name = "padding" > Number of characters to which the message should be right padded</param>
     private async void LogMessage(string method, TestOutcome outcome, string message, string contextMessage = null)
     {
-        string methodString, outcomeString;
+        string outcomeString;
 
         switch (outcome)
         {
@@ -282,9 +288,9 @@
             default:
                 throw new Exception($"Unknown test outcome type: {outcome}");
         }
-        methodString = $"{method.PadRight(ExtensionMethods.COLUMN_WIDTH)}{outcomeString.PadRight(ExtensionMethods.OUTCOME_WIDTH)}";
+        string methodString = $"{method,-ExtensionMethods.COLUMN_WIDTH}{outcomeString,-ExtensionMethods.OUTCOME_WIDTH}";
 
-        // Write to the logger
+    // Write to the logger
         logger?.LogMessage(methodString, message);
         if (contextMessage is not null) logger?.LogMessage("", contextMessage);
 
@@ -302,7 +308,10 @@
             await InvokeAsync(() => { StateHasChanged(); });
             await JS.InvokeVoidAsync("ScrollToBottom", "ProtocolLog");
         }
-        catch { }
+        catch
+        {
+            // ignored
+        }
     }
 
     /// <summary>
@@ -369,7 +378,10 @@
             WindowResized(new object(), blazorProWindowSize);
             //logger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
         }
-        catch { }
+        catch
+        {
+            // ignored
+        }
     }
 
     // This method will be called when the window resizes.

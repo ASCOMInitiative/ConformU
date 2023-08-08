@@ -647,7 +647,7 @@ namespace ConformU
 
         private string TestSensorDescription(string propertyName, ObservingConditionsProperty enumName, int pMaxLength, Required pMandatory)
         {
-            string returnValue = null;
+            string returnValue;
             try
             {
                 LogCallToDriver(enumName.ToString(), $"About to call SensorDescription({propertyName}) method");

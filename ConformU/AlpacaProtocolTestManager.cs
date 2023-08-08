@@ -1,6 +1,7 @@
 ﻿// Ignore Spelling: Cts Obs XX
 
 using ASCOM.Alpaca.Clients;
+using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.Alpaca;
 using ASCOM.Common.DeviceInterfaces;
@@ -35,6 +36,14 @@ namespace ConformU
         private readonly List<string> issueMessages;
         private readonly List<string> informationMessages;
         private readonly List<string> errorMessages;
+
+        internal enum TestOutcome
+        {
+            OK,
+            Info,
+            Issue,
+            Error
+        }
 
         #region New and Dispose
 
@@ -121,14 +130,6 @@ namespace ConformU
         internal List<CheckProtocolParameter> ParamTrackingFalse = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Tracking", "False") };
 
         #endregion
-
-        internal enum TestOutcome
-        {
-            OK,
-            Info,
-            Issue,
-            Error
-        }
 
         #region Alpaca protocol test management
 
@@ -438,23 +439,49 @@ namespace ConformU
             if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
         }
 
+        private async Task TestConnect(IAscomDeviceV2 device)
+        {
+            // First get the interface version
+            int interfaceVersion = await GetInterfaceVersion();
+
+            // Test Connect and Disconnect if the device supports it
+            if (DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, interfaceVersion))
+            {
+                // Call the Disconnect() method
+                await PutNoParameters("Disconnect", null);
+                WaitWhile("Disconnecing", () => device.Connecting, 500, settings.ConnectDisconnectTimeout, null);
+
+                // Call the Connect() method
+                await PutNoParameters("Connect", null);
+                WaitWhile("Connecing", () => device.Connecting, 500, settings.ConnectDisconnectTimeout, null);
+
+                // Test Connecting
+                await GetNoParameters("Connecting");
+
+                // TestDeviceState
+                await GetNoParameters("DeviceState");
+            }
+        }
+
         #endregion
 
         #region Device specific tests
 
         private async Task TestCamera()
         {
-            string parameter1 = "";
-
             using (AlpacaCamera camera = AlpacaClient.GetDevice<AlpacaCamera>(settings.AlpacaDevice))
             {
                 // Connect to the selected camera to ensure we get correct values
                 try { camera.Connected = true; } catch { }
 
+                // Test Connect and Disconnect
+                await TestConnect(camera);
+
                 // Test properties that don't require an image to have been taken
                 await GetNoParameters("BayerOffsetX");
                 await GetNoParameters("BayerOffsetY");
                 await GetNoParameters("BinX");
+                string parameter1 = "";
                 try { parameter1 = camera.BinX.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
                 await PutOneParameter("BinX", "BinX", parameter1, null);
                 await GetNoParameters("BinY");
@@ -606,6 +633,9 @@ namespace ConformU
             {
                 try { coverCalibrator.Connected = true; } catch { }
 
+                // Test Connect and Disconnect
+                await TestConnect(coverCalibrator);
+
                 // Test properties
                 await GetNoParameters("Brightness");
                 await GetNoParameters("CalibratorState");
@@ -657,6 +687,9 @@ namespace ConformU
             using (AlpacaDome dome = AlpacaClient.GetDevice<AlpacaDome>(settings.AlpacaDevice))
             {
                 try { dome.Connected = true; } catch { }
+
+                // Test Connect and Disconnect
+                await TestConnect(dome);
 
                 // Test properties
                 await GetNoParameters("AtHome");
@@ -779,6 +812,9 @@ namespace ConformU
             {
                 try { filterWheel.Connected = true; } catch { }
 
+                // Test Connect and Disconnect
+                await TestConnect(filterWheel);
+
                 // Test properties
                 await GetNoParameters("FocusOffsets");
                 await GetNoParameters("Names");
@@ -803,6 +839,9 @@ namespace ConformU
             using (AlpacaFocuser focuser = AlpacaClient.GetDevice<AlpacaFocuser>(settings.AlpacaDevice))
             {
                 try { focuser.Connected = true; } catch { }
+
+                // Test Connect and Disconnect
+                await TestConnect(focuser);
 
                 // Test properties
                 await GetNoParameters("Absolute");
@@ -846,6 +885,9 @@ namespace ConformU
             {
                 try { observingConditions.Connected = true; } catch { }
 
+                // Test Connect and Disconnect
+                await TestConnect(observingConditions);
+
                 // Test properties
                 await GetNoParameters("AveragePeriod");
                 try { parameter1 = observingConditions.AveragePeriod.ToString(CultureInfo.InvariantCulture); } catch { }
@@ -874,7 +916,25 @@ namespace ConformU
                 if (applicationCancellationToken.IsCancellationRequested) goto ObsConEnd; // Exit early if required
 
                 await GetOneParameter("SensorDescription", "SensorName", "Pressure");
+
+                int startingIssueCount = issueMessages.Count;
+
                 await GetOneParameter("TimeSinceLastUpdate", "SensorName", "Pressure");
+
+                int pressureIssues = issueMessages.Count - startingIssueCount;
+
+                await GetOneParameter("TimeSinceLastUpdate", "SensorName", "");
+
+                // Add information messages to explain how TimeSinceLastUpdate has failed
+                if (pressureIssues > 0)
+                {
+                    LogInformation("TimeSinceLastUpdate", $"Failed when retrieving the last update time for the Pressure sensor (SensorName = \"Pressure\").", null);
+                }
+
+                if (issueMessages.Count - pressureIssues - startingIssueCount > 0)
+                {
+                    LogInformation("TimeSinceLastUpdate", $"Failed when retrieving the last update time for all sensors (SensorName = \"\").", null);
+                }
 
             ObsConEnd:
                 try { observingConditions.Connected = false; } catch { }
@@ -888,6 +948,9 @@ namespace ConformU
             using (AlpacaRotator rotator = AlpacaClient.GetDevice<AlpacaRotator>(settings.AlpacaDevice))
             {
                 try { rotator.Connected = true; } catch { }
+
+                // Test Connect and Disconnect
+                await TestConnect(rotator);
 
                 // Test properties
                 await GetNoParameters("CanReverse");
@@ -947,6 +1010,9 @@ namespace ConformU
 
             try { safetyMonitor.Connected = true; } catch { }
 
+            // Test Connect and Disconnect
+            await TestConnect(safetyMonitor);
+
             // Test properties
             await GetNoParameters("IsSafe");
 
@@ -956,11 +1022,12 @@ namespace ConformU
 
         private async Task TestSwitch()
         {
-            string parameter1;
-
             using (AlpacaSwitch switchDevice = AlpacaClient.GetDevice<AlpacaSwitch>(settings.AlpacaDevice))
             {
                 try { switchDevice.Connected = true; } catch { }
+
+                // Test Connect and Disconnect
+                await TestConnect(switchDevice);
 
                 // Test properties
                 await GetNoParameters("MaxSwitch");
@@ -979,7 +1046,14 @@ namespace ConformU
                 await GetOneParameter("MaxSwitchValue", "Id", "0");
                 if (applicationCancellationToken.IsCancellationRequested) goto SwitchEnd; // Exit early if required
 
+                if (DeviceCapabilities.HasAsyncSwitch(switchDevice.InterfaceVersion))
+                {
+                    // Test CanAsync
+                    await GetOneParameter("CanAsync", "Id", "0");
+                }
+
                 // Test methods
+                string parameter1;
                 if (settings.SwitchEnableSet) // Test enabled
                 {
                     try { parameter1 = switchDevice.GetSwitch(0).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
@@ -1030,6 +1104,9 @@ namespace ConformU
             using (AlpacaTelescope telescope = AlpacaClient.GetDevice<AlpacaTelescope>(settings.AlpacaDevice))
             {
                 try { telescope.Connected = true; } catch { }
+
+                // Test Connect and Disconnect
+                await TestConnect(telescope);
 
                 // Test properties
                 await GetNoParameters("AlignmentMode");
@@ -1742,15 +1819,358 @@ namespace ConformU
             await SendToDevice($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation, badlyCasedTransactionIdName, acceptInvalidValueError);
         }
 
+        private async Task<int> GetInterfaceVersion()
+        {
+            string url = $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/interfaceversion";
+
+            string ascomOutcome = null;
+            IntResponse deviceResponse = new(); // Parsed JSON response
+
+            bool hasClientTransactionId = false;
+            uint returnedClientTransactionId = 0;
+            uint expectedClientTransactionId = 0; // The expected ClientTransactionID round trip value
+            uint returnedServerTransactionId = 0;
+            AlpacaErrors returnedErrorNumber = AlpacaErrors.AlpacaNoError;
+            string returnedErrorMessage = "";
+            string messagePrefix = "";
+            string testName = "GET InterfaceVersion";
+            List<HttpStatusCode> expectedCodes = HttpStatusCode200;
+            List<CheckProtocolParameter> parameters = ParamsOk;
+            bool ignoreApplicationCancellation = false;
+            bool badlyCasedTransactionIdName = false;
+            bool acceptInvalidValueError = false;
+
+            HttpMethod httpMethod = HttpMethod.Get;
+
+            if (expectedCodes is null)
+            {
+                throw new ArgumentNullException(nameof(expectedCodes));
+            }
+
+            try
+            {
+                string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString().ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
+
+                // Create the URI for this transaction and apply it to the request, adding "client id" and "transaction number" query parameters
+                UriBuilder transactionUri = new($"{clientHostAddress}{url}");
+
+                HttpRequestMessage request;
+
+                #region Prepare and send request
+
+                // Prepare HTTP GET and PUT requests
+                if (httpMethod == HttpMethod.Get) // HTTP GET methods
+                {
+                    // Add to the query string any further required parameters for HTTP GET methods
+                    if (parameters.Count > 0)
+                    {
+                        foreach (CheckProtocolParameter parameter in parameters)
+                        {
+                            transactionUri.Query = $"{transactionUri.Query}&{parameter.ParameterName}={parameter.ParameterValue}".TrimStart('&');
+
+                            // Test whether we have a correctly cased ClientTransactionID parameter and if so flag this because the value should round-trip OK
+                            if (parameter.ParameterName.ToUpperInvariant() == "ClientTransactionID".ToUpperInvariant())
+                            {
+                                // Record that we have a valid ClientTransactionID parameter name
+                                hasClientTransactionId = true;
+
+                                // Extract the expected value if possible. 0 indicates no value or an invalid value which is not expected to round trip
+                                _ = UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionId);
+                                TL.LogMessage(testName, MessageLevel.Debug, $"{messagePrefix} - Input ClientTransactionID value: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionId}");
+                            }
+                        }
+                    }
+
+                    // Create a new request based on the transaction Uri
+                    request = new HttpRequestMessage(httpMethod, transactionUri.Uri);
+
+                } // Prepare GET requests
+                else // Prepare PUT and all other HTTP method requests
+                {
+                    // Create a new request based on the transaction Uri
+                    request = new HttpRequestMessage(httpMethod, transactionUri.Uri);
+
+                    // Add all parameters to the request body as form URL encoded content
+                    if (parameters.Count > 0)
+                    {
+                        Dictionary<string, string> formParameters = new();
+                        foreach (CheckProtocolParameter parameter in parameters)
+                        {
+                            formParameters.Add(parameter.ParameterName, parameter.ParameterValue);
+
+                            // Test whether we have a correctly cased ClientTransactionID parameter and if so flag this because the value should round-trip OK
+                            if (parameter.ParameterName.ToUpperInvariant() == "ClientTransactionID".ToUpperInvariant())
+                            {
+                                // Record that we have a ClientTransactionID parameter name, which may or may not be correctly cased
+                                hasClientTransactionId = true;
+
+                                // Test whether the parameter name is correctly cased
+                                if (parameter.ParameterName == "ClientTransactionID") // It is correctly cased
+                                {
+                                    // Extract the expected value if possible. 0 indicates no value or an invalid value which is not expected to round trip
+                                    _ = UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionId);
+                                    TL.LogMessage(testName, MessageLevel.Debug, $"{messagePrefix} - Input ClientTransactionID name is correctly cased: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionId}");
+
+                                }
+                                else // It is not correctly cased.
+                                {
+                                    expectedClientTransactionId = 0;
+                                    TL.LogMessage(testName, MessageLevel.Debug, $"{messagePrefix} - Input ClientTransactionID name is NOT correctly cased: {parameter.ParameterValue}, Expected value: {expectedClientTransactionId}");
+                                }
+                            }
+                        }
+
+                        FormUrlEncodedContent formUrlParameters = new(formParameters);
+                        request.Content = formUrlParameters;
+                    }
+                } // Prepare PUT requests
+
+                // Create a cancellation token source that either respects or ignores the application cancellation state
+                CancellationTokenSource requestCancellationTokenSource;
+                if (ignoreApplicationCancellation) // Ignore application cancellation state (used for commands that must be sent under all circumstances e.g. setting Connected to False)
+                {
+                    requestCancellationTokenSource = new CancellationTokenSource();
+                }
+                else // Respect the application cancellation state
+                {
+                    // Ignore this request if the application is already cancelled
+                    if (applicationCancellationToken.IsCancellationRequested) return 0;
+
+                    // Create a combined cancellation taken that will trigger when either the application is cancelled or the request times out.
+                    requestCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(applicationCancellationTokenSource.Token);
+                }
+
+                // Set the token source to time out after the specified interval
+                requestCancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(settings.AlpacaConfiguration.LongResponseTimeout));
+
+                // Send the request to the remote device and wait for the response
+                HttpResponseMessage httpResponse = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, requestCancellationTokenSource.Token);
+
+                #endregion
+
+                // Get the device response
+                string responseString = await httpResponse.Content.ReadAsStringAsync();
+
+                #region Process successful HTTP status = 200 responses
+
+                // If the call was successful at an HTTP level (Status = 200) check whether there was an ASCOM error reported in the returned JSON
+                if ((httpResponse.StatusCode == HttpStatusCode.OK) & (!responseString.Contains("<!DOCTYPE")))
+                {
+                    // Response should be either a JSON or an ImageBytes response
+                    try
+                    {
+                        // Handle the response, which will be either JSON or ImageBytes
+                        if (!httpResponse.Content.Headers.ContentType.MediaType.Contains(AlpacaConstants.IMAGE_BYTES_MIME_TYPE, StringComparison.InvariantCultureIgnoreCase)) // Should be a JSON response
+                        {
+
+                            // Parse the common device values from the JSON response into a Response class
+                            deviceResponse = JsonSerializer.Deserialize<IntResponse>(responseString);
+
+                            // Save the parsed response values
+                            returnedClientTransactionId = deviceResponse.ClientTransactionID;
+                            returnedServerTransactionId = deviceResponse.ServerTransactionID;
+                            returnedErrorNumber = deviceResponse.ErrorNumber;
+                            returnedErrorMessage = deviceResponse.ErrorMessage;
+
+                        } // Handle a JSON response
+                        else // Should be an ImageBytes binary response
+                        {
+                            // Convert the string response to a byte array
+                            byte[] bytes = Encoding.ASCII.GetBytes(responseString);
+
+                            // Get the metadata version
+                            int metadataVersion = bytes.GetMetadataVersion();
+
+                            // Handle version number possibilities
+                            switch (metadataVersion)
+                            {
+                                case 1: // The only valid version at present
+                                    LogOk(testName, $"{messagePrefix} - The expected ImageBytes metadata version was returned: {metadataVersion}", null);
+                                    break;
+
+                                default: // All other values
+                                    LogIssue(testName, $"{messagePrefix} - An unexpected ImageBytes metadata version was returned: {metadataVersion}, Expected: 1", null);
+                                    break;
+                            }
+
+                            // Get the metadata from the response bytes
+                            ArrayMetadataV1 metadata = bytes.GetMetadataV1();
+
+                            // Save the response values in the returned metadata
+                            returnedClientTransactionId = metadata.ClientTransactionID;
+                            returnedServerTransactionId = metadata.ServerTransactionID;
+                            returnedErrorNumber = metadata.ErrorNumber;
+
+                            // Get the error message if required
+                            if (returnedErrorNumber != AlpacaErrors.AlpacaNoError)
+                            {
+                                returnedErrorMessage = bytes.GetErrrorMessage();
+                            }
+
+                            // Set a useful response string because otherwise we will get the enormous number of AlpacaBytes binary values encoded as a string
+                            responseString = $"ClientTransactionID: {returnedClientTransactionId}, ServerTransactionID: {returnedServerTransactionId}, ErrorNumber: {returnedErrorNumber}, ErrorMessage: '{returnedErrorMessage}'";
+
+                        } // Handle an ImageBytes response
+                    }
+                    catch (Exception ex)
+                    {
+                        LogIssue(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) but could not de-serialise the returned JSON string. Exception message: {ex.Message}", responseString);
+                        LogBlankLine();
+                        return 0;
+                    }
+                }
+
+                #endregion
+
+                #region Determine success or failure of the test
+
+                // Test whether the ClientTransactionID round tripped OK
+                if (hasClientTransactionId & (httpResponse.StatusCode == HttpStatusCode.OK)) // A client transaction ID parameter was sent and the transaction was processed OK
+                {
+                    // Test whether the expected value was returned
+                    if (returnedClientTransactionId == expectedClientTransactionId) // Round tripped OK
+                    {
+                        LogOk(testName, $"{messagePrefix} - The expected ClientTransactionID was returned: {returnedClientTransactionId}", null);
+                    }
+                    else // Did not round trip OK
+                    {
+                        // Handle responses to a badly cased ClientTransactionID FORM parameter
+                        if (badlyCasedTransactionIdName) // This transaction does contain a badly cased ClientTransactionID FORM parameter
+                        {
+                            // Check whether the expected value of 0 was returned. 
+                            if (returnedClientTransactionId == 0) // Got the expected value of 0
+                            {
+                                LogOk(testName, $"{messagePrefix} - The ClientTransactionID was round-tripped as expected. Sent value: {expectedClientTransactionId}, Returned value: {returnedClientTransactionId}", null);
+                            }
+                            else // Got some value other than expected value of 0
+                            {
+                                LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {returnedClientTransactionId}, Expected: {expectedClientTransactionId}", null);
+                            }
+                        }
+                        else // This transaction does not contain a badly cased ClientTransactionID FORM parameter so report an issue
+                        {
+                            LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {returnedClientTransactionId}, Expected: {expectedClientTransactionId}", null);
+                        }
+                    }
+                }
+
+                // Test whether a valid ServerTransactionID value was returned
+                if (httpResponse.StatusCode == HttpStatusCode.OK) // We got an HTTP 200 OK status
+                {
+                    if (returnedServerTransactionId >= 1)  // Valid ServerTransactionID
+                    {
+                        LogOk(testName, $"{messagePrefix} - The ServerTransactionID was 1 or greater: {returnedServerTransactionId}", null);
+                    }
+                    else // Invalid ServerTransactionID
+                    {
+                        LogIssue(testName, $"{messagePrefix} - An unexpected ServerTransactionID was returned: {returnedServerTransactionId}, Expected: 1 or greater", null);
+                    }
+                }
+
+                // Test whether the device reported an error
+                if ((returnedErrorNumber != 0) | (returnedErrorMessage != "")) // An error was returned
+                {
+                    // Create a message indicating what went wrong.
+                    try
+                    {
+                        // Only report not implemented errors if configured to do so
+                        if ((returnedErrorNumber == AlpacaErrors.NotImplemented) & !settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors)
+                        {
+                            // Do nothing because we are not reporting not implemented errors
+                        }
+                        else
+                        {
+                            ascomOutcome =
+                                $"Device returned a {returnedErrorNumber} error (0x{returnedErrorNumber:X}) for client transaction: {returnedClientTransactionId}, server transaction: {returnedServerTransactionId}. Error message: {returnedErrorMessage}";
+                        }
+                    }
+                    catch (Exception) // Handle possibility of a non-ASCOM error number
+                    {
+                        ascomOutcome =
+                            $"Device returned error number 0x{returnedErrorNumber:X} for client transaction: {returnedClientTransactionId}, server transaction: {returnedServerTransactionId}. Error message: {returnedErrorMessage}";
+                    }
+                }
+
+                // Check whether any specific HTTP status codes are expected
+                if (expectedCodes.Count > 0) // One or more codes that indicate a successful test are expected
+                {
+                    // Check whether we got an expected or unexpected status code
+                    if (expectedCodes.Contains(httpResponse.StatusCode)) // We got one of the expected outcomes
+                    {
+                        // Check whether we got a 200 OK status or something else
+                        if (httpResponse.StatusCode == HttpStatusCode.OK) // Received a 200 OK status
+                        {
+                            // Log an OK outcome if there was no contextual message or an Information if there was
+                            if (string.IsNullOrEmpty(ascomOutcome)) // No contextual message
+                            {
+                                LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
+                            }
+                            else // Does have a contextual message
+                            {
+                                LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected but the device reported an ASCOM error:", ascomOutcome);
+                            }
+                        }
+                        else // Received a status code other than 200 OK
+                        {
+                            LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
+                        }
+                    }
+                    else // Unexpected outcome
+                    {
+                        // Test whether we got an InvalidValue error and are going to accept that
+                        if ((httpResponse.StatusCode == HttpStatusCode.OK) & acceptInvalidValueError & (deviceResponse.ErrorNumber == AlpacaErrors.InvalidValue)) // We are going to accept an InvalidValue error
+                        {
+                            LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) and an invalid value error: {deviceResponse.ErrorMessage}", responseString);
+                        }
+                        else // Did not get the expected response so log this as an issue
+                        {
+                            string expectedCodeList = "";
+                            foreach (HttpStatusCode statusCode in expectedCodes)
+                            {
+                                expectedCodeList += $"{(int)statusCode} ({statusCode}), ";
+                            }
+                            expectedCodeList = expectedCodeList.TrimEnd(' ', ',');
+
+                            LogIssue(testName,
+                                $"{messagePrefix} - Expected HTTP status{(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString);
+
+                            LogBlankLine();
+                        }
+                    }
+                }
+                else // There are no expected codes, which indicates that any code is acceptable
+                {
+                    LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode})", responseString);
+                }
+
+                #endregion
+
+            }
+            catch (TaskCanceledException)
+            {
+                LogError(testName, $"{messagePrefix} - The HTTP request was cancelled", null);
+            }
+            catch (HttpRequestException ex)
+            {
+                LogError(testName, $"{messagePrefix} - {ex.Message}", null);
+            }
+            catch (Exception ex)
+            {
+                LogError(testName, $"{messagePrefix} - {ex}", null);
+            }
+
+            return deviceResponse.Value;
+        }
+
         private async Task SendToDevice(string testName,
-                                        string messagePrefix,
-                                        string url,
-                                        HttpMethod httpMethod,
-                                        List<CheckProtocolParameter> parameters,
-                                        List<HttpStatusCode> expectedCodes,
-                                        bool ignoreApplicationCancellation = false,
-                                        bool badlyCasedTransactionIdName = false,
-                                        bool acceptInvalidValueError = false)
+                                string messagePrefix,
+                                string url,
+                                HttpMethod httpMethod,
+                                List<CheckProtocolParameter> parameters,
+                                List<HttpStatusCode> expectedCodes,
+                                bool ignoreApplicationCancellation = false,
+                                bool badlyCasedTransactionIdName = false,
+                                bool acceptInvalidValueError = false)
         {
             string ascomOutcome = null;
             CancellationTokenSource requestCancellationTokenSource;
@@ -2079,6 +2499,7 @@ namespace ConformU
                 LogError(testName, $"{messagePrefix} - {ex}", null);
             }
         }
+
 
         #endregion
 
