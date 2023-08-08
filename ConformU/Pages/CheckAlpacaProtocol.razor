@@ -29,8 +29,8 @@
     AlpacaProtocolTestManager tester;
     Task<int> conformanceTestTask;
 
-    object screenLogLockObject = new object();
-    object statusLockObject = new object();
+    readonly object screenLogLockObject = new object();
+    readonly object statusLockObject = new object();
 
     // Cancellation management
     CancellationTokenSource applicationCancellationTokenSource;
@@ -61,7 +61,7 @@
         applicationCancellationToken = applicationCancellationTokenSource.Token;
     }
 
-    protected async override void OnAfterRender(bool firstRender)
+    protected override async void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
@@ -435,7 +435,7 @@
     /// </summary>
     /// <param name="source"></param>
     /// <param name="e"></param>
-    async public void OutputChanged(object sender, MessageEventArgs e)
+    public async void OutputChanged(object sender, MessageEventArgs e)
     {
         try
         {

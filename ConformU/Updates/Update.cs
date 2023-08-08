@@ -126,7 +126,7 @@ namespace ConformU
             }
         }
 
-        internal async static Task CheckForUpdates(ConformLogger logger = null)
+        internal static async Task CheckForUpdates(ConformLogger logger = null)
         {
             try
             {

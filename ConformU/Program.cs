@@ -36,11 +36,11 @@ namespace ConformU
 
 #if WINDOWS
         [LibraryImport("kernel32.dll")]
-        static internal partial IntPtr GetConsoleWindow();
+        internal static partial IntPtr GetConsoleWindow();
 
         [LibraryImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        static internal partial bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        internal static partial bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
         private const int SW_SHOWMINIMIZED = 2;
 #endif

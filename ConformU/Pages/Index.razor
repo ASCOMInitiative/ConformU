@@ -155,7 +155,7 @@
     }
 
 
-    protected async override void OnAfterRender(bool firstRender)
+    protected override async void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
@@ -335,7 +335,7 @@
     /// </summary>
     /// <param name="source"></param>
     /// <param name="e"></param>
-    async public void OutputChanged(object sender, MessageEventArgs e)
+    public async void OutputChanged(object sender, MessageEventArgs e)
     {
         try
         {

@@ -40,7 +40,7 @@
     const int COLUMN_OVERALL = COLUMN_WIDTH + COLUMN_PADDING;
 
     #region Blazor lifetime event handlers
-    protected async override void OnAfterRender(bool firstRender)
+    protected override async void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
