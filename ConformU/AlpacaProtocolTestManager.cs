@@ -1,7 +1,4 @@
-﻿// Ignore Spelling: Cts Obs XX
-
-using ASCOM.Alpaca.Clients;
-using ASCOM.Com.DriverAccess;
+﻿using ASCOM.Alpaca.Clients;
 using ASCOM.Common;
 using ASCOM.Common.Alpaca;
 using ASCOM.Common.DeviceInterfaces;
@@ -449,11 +446,11 @@ namespace ConformU
             {
                 // Call the Disconnect() method
                 await PutNoParameters("Disconnect", null);
-                WaitWhile("Disconnecing", () => device.Connecting, 500, settings.ConnectDisconnectTimeout, null);
+                WaitWhile("Disconnecting", () => device.Connecting, 500, settings.ConnectDisconnectTimeout, null);
 
                 // Call the Connect() method
                 await PutNoParameters("Connect", null);
-                WaitWhile("Connecing", () => device.Connecting, 500, settings.ConnectDisconnectTimeout, null);
+                WaitWhile("Connecting", () => device.Connecting, 500, settings.ConnectDisconnectTimeout, null);
 
                 // Test Connecting
                 await GetNoParameters("Connecting");
@@ -1749,7 +1746,7 @@ namespace ConformU
         /// <param name="parameterName2"></param>
         /// <param name="parameterValue2"></param>
         /// <returns></returns>
-        /// <remarks>These shoul all fail.</remarks>
+        /// <remarks>These should all fail.</remarks>
         private async Task TestBadIdValues(string method, HttpMethod httpMethod, string parameterName1, string parameterValue1, string parameterName2, string parameterValue2)
         {
             List<CheckProtocolParameter> parameters;

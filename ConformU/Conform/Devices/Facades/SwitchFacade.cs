@@ -1,5 +1,4 @@
 ﻿using ASCOM.Common.DeviceInterfaces;
-using System.Xml.Linq;
 
 namespace ConformU
 {
