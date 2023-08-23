@@ -305,7 +305,7 @@ namespace ConformU
 
         public PointingState DestinationSideOfPier(double rightAscension, double declination)
         {
-            return Function2Parameters<PointingState>((i, j) => Driver.DestinationSideOfPier(i, j), rightAscension, declination);
+            return Function2Parameters((i, j) => (PointingState)Driver.DestinationSideOfPier(i, j), rightAscension, declination);
         }
 
         public void FindHome()

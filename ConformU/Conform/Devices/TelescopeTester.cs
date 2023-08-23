@@ -4099,7 +4099,7 @@ namespace ConformU
 
                                     if (showOutcome)
                                     {
-                                        LogTestAndMessage(testName, "           Altitude    Azimuth");
+                                        LogTestAndMessage(testName, "             Altitude       Azimuth");
                                         LogTestAndMessage(testName, $"Original:  {currentAlt.ToDMS()}   {FormatAzimuth(currentAz)}");
                                         LogTestAndMessage(testName, $"Sync to:   {syncAlt.ToDMS()}   {FormatAzimuth(syncAz)}");
                                         LogTestAndMessage(testName, $"New:       {newAlt.ToDMS()}   {FormatAzimuth(newAz)}");
@@ -7944,10 +7944,11 @@ namespace ConformU
         /// <param name="direction">Guide direction: North, South, East or West</param>
         private void TestPulseGuideDirection(double ha, GuideDirection direction)
         {
-            const int pulseGuideDuration = 5; // Pulse guide test duration (Seconds)
+            const int PULSE_GUIDE_DURATION = 5; // Pulse guide test duration (Seconds)
+            const int PULSE_GUIDE_TIMEOUT = PULSE_GUIDE_DURATION + 5; // Add 5 seconds of timeout allowance
 
-            double expectedDecChange = guideRateDeclination * pulseGuideDuration; // Degrees
-            double expectedRaChange = guideRateRightAscension * pulseGuideDuration / (15.0 * SIDEREAL_SECONDS_TO_SI_SECONDS); // Hours - 15 converts from 360 degrees = 24 hours, SIDEREAL_RATE converts from change in SI hours to change in sidereal hours
+            double expectedDecChange = guideRateDeclination * PULSE_GUIDE_DURATION; // Degrees
+            double expectedRaChange = guideRateRightAscension * PULSE_GUIDE_DURATION / (15.0 * SIDEREAL_SECONDS_TO_SI_SECONDS); // Hours - 15 converts from 360 degrees = 24 hours, SIDEREAL_RATE converts from change in SI hours to change in sidereal hours
 
             // Handle direction reverse for south and west vs north and east
             if (direction == GuideDirection.South)
@@ -7963,10 +7964,10 @@ namespace ConformU
 
             LogDebug(logName, $"Test guiding direction: {direction}, RA change tolerance: {changeToleranceRa} ({changeToleranceRa.ToHMS()}, {changeToleranceRa.ToDMS()}), Declination change tolerance: {changeToleranceDec} ({changeToleranceDec.ToDMS()}, {changeToleranceDec.ToHMS()})"); LogCallToDriver(logName, "About to get RightAscension property");
             double initialRaCoordinate = telescopeDevice.RightAscension; LogCallToDriver(logName, "About to get Declination property");
-            double initialDecCoordinate = telescopeDevice.Declination; LogCallToDriver(logName, $"About to call PulseGuide. Direction: {direction}, Duration: {pulseGuideDuration * 1000}ms.");
-            telescopeDevice.PulseGuide(direction, pulseGuideDuration * 1000);
+            double initialDecCoordinate = telescopeDevice.Declination; LogCallToDriver(logName, $"About to call PulseGuide. Direction: {direction}, Duration: {PULSE_GUIDE_DURATION * 1000}ms.");
+            telescopeDevice.PulseGuide(direction, PULSE_GUIDE_DURATION * 1000);
 
-            WaitWhile($"Pulse guiding {direction} at HA {ha:+0.0;-0.0;+0.0}", () => telescopeDevice.IsPulseGuiding, SLEEP_TIME, pulseGuideDuration); LogCallToDriver(logName, "About to get RightAscension property");
+            WaitWhile($"Pulse guiding {direction} at HA {ha:+0.0;-0.0;+0.0}", () => telescopeDevice.IsPulseGuiding, SLEEP_TIME, PULSE_GUIDE_TIMEOUT); LogCallToDriver(logName, "About to get RightAscension property");
             double finalRaCoordinate = telescopeDevice.RightAscension; LogCallToDriver(logName, "About to get Declination property");
             double finalDecCoordinate = telescopeDevice.Declination;
 
