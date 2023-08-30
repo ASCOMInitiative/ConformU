@@ -520,7 +520,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DeviceState", "About to get property DeviceState");
-                    IList<IStateValue> deviceState = baseClassDevice.DeviceState;
+                    List<StateValue> deviceState = baseClassDevice.DeviceState;
 
                     int numberOfItems = 0;
                     foreach (var item in deviceState)

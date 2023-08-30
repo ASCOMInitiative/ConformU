@@ -459,13 +459,13 @@ namespace ConformU
             }
         }
 
-        public IList<IStateValue> DeviceState
+        public List<StateValue> DeviceState
         {
             get
             {
                 dynamic deviceStateDynamic = FunctionNoParameters<IEnumerable>(() => Driver.DeviceState);
 
-                List<IStateValue> deviceState = new();
+                List<StateValue> deviceState = new();
 
                 foreach (dynamic device in deviceStateDynamic)
                 {
