@@ -163,10 +163,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.109-rc.54" />
-		<PackageReference Include="ASCOM.Com.Components" Version="1.0.109-rc.54" />
+		<PackageReference Include="ASCOM.Alpaca.Components" Version="1.0.109-rc.56" />
+		<PackageReference Include="ASCOM.Com.Components" Version="1.0.109-rc.56" />
 		<PackageReference Include="ASCOM.Exception.Library" Version="6.6.2-rc.3725" />
-		<PackageReference Include="ASCOM.Tools" Version="1.0.109-rc.54" />
+		<PackageReference Include="ASCOM.Tools" Version="1.0.109-rc.56" />
 		<PackageReference Include="Blazorise.Bootstrap" Version="1.2.3" />
 		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.2.3" />
 		<PackageReference Include="Blazorise.TreeView" Version="1.2.3" />

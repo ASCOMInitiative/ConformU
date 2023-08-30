@@ -472,7 +472,10 @@ namespace ConformU
                     deviceState.Add(new StateValue(device.Name, device.Value));
                 }
 
-                return deviceState;
+                // Clean the returned values to make sure they are of the correct types
+                List<StateValue> cleaned = OperationalStateProperty.Clean(deviceState, Settings.DeviceType.Value, Logger);
+
+                return cleaned;
             }
         }
 
