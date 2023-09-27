@@ -142,7 +142,7 @@ namespace ConformU
 
                 string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString().ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
 
-                LogText("", $"Connecting to device: {settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} through URL: {clientHostAddress}");
+                LogLine($"Connecting to device: {settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} through URL: {clientHostAddress}");
                 LogBlankLine();
                 // Remove any old client, if present
                 httpClient?.Dispose();
@@ -219,10 +219,19 @@ namespace ConformU
                 {
                     try
                     {
+                        if (!settings.AlpacaConfiguration.ProtocolShowOkMessages)
+                        {
+                            LogLine($"OK messages are suppressed, they can be enabled through the Alpaca and COM settings page.");
+                            LogBlankLine();
+                            LogLine($"Connecting to device...");
+                        }
                         // Set Connected true to start the test
                         await CallApi("True", "Connected", HttpMethod.Put, ParamConnectedTrue, HttpStatusCode200);
-                        LogBlankLine();
-
+                        if (settings.AlpacaConfiguration.ProtocolShowOkMessages)
+                            LogBlankLine();
+                        else
+                            LogLine($"Successfully connected to device, testing...");
+                        
                         // Test common members
                         await TestCommon();
 
@@ -280,8 +289,14 @@ namespace ConformU
                     }
 
                     // Finally set Connected false
-                    LogBlankLine();
+                    if (!settings.AlpacaConfiguration.ProtocolShowOkMessages) 
+                        LogBlankLine();
+
                     await CallApi("False", "Connected", HttpMethod.Put, ParamConnectedFalse, HttpStatusCode200, true);
+
+                    if (!settings.AlpacaConfiguration.ProtocolShowOkMessages)
+                        LogLine($"Successfully disconnected from device.");
+
                 }
                 catch (Exception ex)
                 {
@@ -1764,27 +1779,11 @@ namespace ConformU
             if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
             await CallApi("ClientTransactionID is negative", method, httpMethod, parameters, HttpStatusCode400, acceptInvalidValueError: true);
 
-            // Test text ClienClientTransactionIDtId value
+            // Test text ClienClientTransactionID value
             parameters = new List<CheckProtocolParameter>(ParamTransactionIdString);
             if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
             if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
             await CallApi("ClientTransactionID is a string", method, httpMethod, parameters, HttpStatusCode400, acceptInvalidValueError: true);
-        }
-
-        private async Task CallApi(string messagePrefix,
-                                   string method,
-                                   HttpMethod httpMethod,
-                                   List<CheckProtocolParameter> parameters,
-                                   List<HttpStatusCode> expectedCodes,
-                                   bool ignoreApplicationCancellation = false,
-                                   bool badlyCasedTransactionIdName = false,
-                                   bool acceptInvalidValueError = false)
-        {
-            string methodLowerCase = method.ToLowerInvariant();
-            string httpMethodUpperCase = httpMethod.ToString().ToUpperInvariant();
-
-            string url = $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}";
-            await SendToDevice($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation, badlyCasedTransactionIdName, acceptInvalidValueError);
         }
 
         private async Task<int> GetInterfaceVersion()
@@ -2128,6 +2127,22 @@ namespace ConformU
             }
 
             return deviceResponse.Value;
+        }
+
+        private async Task CallApi(string messagePrefix,
+                                   string method,
+                                   HttpMethod httpMethod,
+                                   List<CheckProtocolParameter> parameters,
+                                   List<HttpStatusCode> expectedCodes,
+                                   bool ignoreApplicationCancellation = false,
+                                   bool badlyCasedTransactionIdName = false,
+                                   bool acceptInvalidValueError = false)
+        {
+            string methodLowerCase = method.ToLowerInvariant();
+            string httpMethodUpperCase = httpMethod.ToString().ToUpperInvariant();
+
+            string url = $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}";
+            await SendToDevice($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation, badlyCasedTransactionIdName, acceptInvalidValueError);
         }
 
         private async Task SendToDevice(string testName,
@@ -2737,15 +2752,21 @@ namespace ConformU
         /// <param name = "message" > Message to log</param>
         private void LogOk(string method, string message, string contextMessage)
         {
-            if (settings.AlpacaConfiguration.ProtocolShowSuccessResponses)
+            // Only display OK messages if configured to do so
+            if (settings.AlpacaConfiguration.ProtocolShowOkMessages)
             {
-                LogMessage(method, TestOutcome.OK, message, contextMessage);
+                // Test whether to include JSON responses in the log
+                if (settings.AlpacaConfiguration.ProtocolShowSuccessResponses)
+                {
+                    // Include JSON responses
+                    LogMessage(method, TestOutcome.OK, message, contextMessage);
+                }
+                else
+                {
+                    // Do not include JSON responses
+                    LogMessage(method, TestOutcome.OK, message);
+                }
             }
-            else
-            {
-                LogMessage(method, TestOutcome.OK, message);
-            }
-
         }
 
         /// <summary>

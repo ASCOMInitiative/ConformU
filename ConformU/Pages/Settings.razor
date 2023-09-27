@@ -263,6 +263,14 @@
                         <RadzenCheckBox Name="CHKTESTPRIMARYURLSTRUCTURE" @bind-Value=@chkProtocolTestPrimaryUrlStructure TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolTestPrimaryUrlStructure)) />
                         <RadzenLabel Text="Test primary URL structure" Component="CHKTESTPRIMARYURLSTRUCTURE" Style="margin-left: 20px;" />
                     </div>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHKSTRICTCHECKS" @bind-Value=@chkProtocolStrictChecks TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolStrictChecks)) />
+                        <RadzenLabel Text="Strict ID casing checks (Only for Alpaca simulators)" Component="CHKSTRICTCHECKS" Style="margin-left: 20px;" />
+                    </div>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHKOKMESSAGES" @bind-Value=@chkProtocolShowOkMessages TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolShowOkMessages)) />
+                        <RadzenLabel Text="Show protocol OK messages" Component="CHKSCHKOKMESSAGESTRICTCHECKS" Style="margin-left: 20px;" />
+                    </div>
                 </RadzenCard>
 
                 @if (OperatingSystem.IsWindows())
@@ -705,6 +713,8 @@
     private bool chkProtocolReportNotImplementedErrors;
     private bool chkProtocolTestPrimaryUrlStructure;
     private bool chkTrustUserGeneratedSslCertificates;
+    private bool chkProtocolStrictChecks;
+    private bool chkProtocolShowOkMessages;
 
     // Camera test configuration
     private int cameraXMax;
@@ -821,6 +831,8 @@
         ProtocolShowSuccessResponses,
         ProtocolReportNotImplementedErrors,
         ProtocolTestPrimaryUrlStructure,
+        ProtocolStrictChecks,
+        ProtocolShowOkMessages,
         RunAs32Bit,
         SideOfPierRead,
         SideOfPierWrite,
@@ -1136,6 +1148,15 @@
             case CheckBoxConfigurationItem.SwitchTestOffsets:
                 settings.SwitchTestOffsets = switchTestOffsets;
                 break;
+
+            case CheckBoxConfigurationItem.ProtocolStrictChecks:
+                settings.AlpacaConfiguration.ProtocolStrictChecks = chkProtocolStrictChecks;
+                break;
+
+            case CheckBoxConfigurationItem.ProtocolShowOkMessages:
+                settings.AlpacaConfiguration.ProtocolShowOkMessages = chkProtocolShowOkMessages;
+                break;
+
             default:
                 throw new InvalidValueException($"OnCheckboxChange - Unknown checkbox name: {name}");
         }
@@ -1244,6 +1265,8 @@
         chkProtocolReportNotImplementedErrors = settings.AlpacaConfiguration.ProtocolReportNotImplementedErrors;
         chkProtocolTestPrimaryUrlStructure = settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure;
         chkTrustUserGeneratedSslCertificates = settings.AlpacaConfiguration.TrustUserGeneratedSslCertificates;
+        chkProtocolStrictChecks = settings.AlpacaConfiguration.ProtocolStrictChecks;
+        chkProtocolShowOkMessages = settings.AlpacaConfiguration.ProtocolShowOkMessages;
     }
 
     private void SaveConfiguration()
