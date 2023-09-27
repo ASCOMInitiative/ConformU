@@ -39,7 +39,8 @@ namespace ConformU
             OK,
             Info,
             Issue,
-            Error
+            Error,
+            Debug
         }
 
         #region New and Dispose
@@ -216,63 +217,68 @@ namespace ConformU
                 // Run the protocol test
                 try
                 {
-                    // Set Connected true to start the test
-                    await CallApi("True", "Connected", HttpMethod.Put, ParamConnectedTrue, HttpStatusCode200);
-                    LogBlankLine();
-                    if (applicationCancellationToken.IsCancellationRequested) goto EndOfTest; // Exit if user has pushed the STOP button
-
-                    // Test common members
-                    await TestCommon();
-                    if (applicationCancellationToken.IsCancellationRequested) goto EndOfTest; // Exit if user has pushed the STOP button
-
-                    // Test device specific members
-                    switch (settings.DeviceType)
+                    try
                     {
-                        case DeviceTypes.Camera:
-                            await TestCamera();
-                            break;
+                        // Set Connected true to start the test
+                        await CallApi("True", "Connected", HttpMethod.Put, ParamConnectedTrue, HttpStatusCode200);
+                        LogBlankLine();
 
-                        case DeviceTypes.CoverCalibrator:
-                            await TestCoverCalibrator();
-                            break;
+                        // Test common members
+                        await TestCommon();
 
-                        case DeviceTypes.Dome:
-                            await TestDome();
-                            break;
+                        // Test device specific members
+                        switch (settings.DeviceType)
+                        {
+                            case DeviceTypes.Camera:
+                                await TestCamera();
+                                break;
 
-                        case DeviceTypes.FilterWheel:
-                            await TestFilterWheel();
-                            break;
+                            case DeviceTypes.CoverCalibrator:
+                                await TestCoverCalibrator();
+                                break;
 
-                        case DeviceTypes.Focuser:
-                            await TestFocuser();
-                            break;
+                            case DeviceTypes.Dome:
+                                await TestDome();
+                                break;
 
-                        case DeviceTypes.ObservingConditions:
-                            await TestObservingConditions();
-                            break;
+                            case DeviceTypes.FilterWheel:
+                                await TestFilterWheel();
+                                break;
 
-                        case DeviceTypes.Rotator:
-                            await TestRotator();
-                            break;
+                            case DeviceTypes.Focuser:
+                                await TestFocuser();
+                                break;
 
-                        case DeviceTypes.SafetyMonitor:
-                            await TestSafetyMonitor();
-                            break;
+                            case DeviceTypes.ObservingConditions:
+                                await TestObservingConditions();
+                                break;
 
-                        case DeviceTypes.Switch:
-                            await TestSwitch();
-                            break;
+                            case DeviceTypes.Rotator:
+                                await TestRotator();
+                                break;
 
-                        case DeviceTypes.Telescope:
-                            await TestTelescope();
-                            break;
+                            case DeviceTypes.SafetyMonitor:
+                                await TestSafetyMonitor();
+                                break;
 
-                        default:
-                            throw new Exception($"Unknown device type: {settings.DeviceType}");
+                            case DeviceTypes.Switch:
+                                await TestSwitch();
+                                break;
+
+                            case DeviceTypes.Telescope:
+                                await TestTelescope();
+                                break;
+
+                            default:
+                                throw new Exception($"Unknown device type: {settings.DeviceType}");
+                        }
+
+                    }
+                    catch (TestCancelledException)
+                    {
+                        // Ignore exceptions arising because the user cancelled the test and return to the caller.
                     }
 
-                EndOfTest:
                     // Finally set Connected false
                     LogBlankLine();
                     await CallApi("False", "Connected", HttpMethod.Put, ParamConnectedFalse, HttpStatusCode200, true);
@@ -364,76 +370,56 @@ namespace ConformU
             List<CheckProtocolParameter> ParamConnectedNumeric = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "123456") };
             List<CheckProtocolParameter> ParamConnectedString = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "asdqwe") };
 
-            // Test primary URL structure: /api/v1/ if configured to do so
-            if (settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure)
+            try
             {
-                await SendToDevice("GET Description", $"Bad Alpaca URL base element (api = apx)\"", $"/apx/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
-                if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await SendToDevice("GET Description", $"Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
-                if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await SendToDevice("GET Description", $"Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
-                if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await SendToDevice("GET Description", $"Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
-                if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await SendToDevice("GET Description", $"Bad Alpaca URL version element (v2)", $"/api/v2/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
-                if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+                // Test primary URL structure: /api/v1/ if configured to do so
+                if (settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure)
+                {
+                    await SendToDevice("GET Description", $"Bad Alpaca URL base element (api = apx)\"", $"/apx/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                    await SendToDevice("GET Description", $"Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                    await SendToDevice("GET Description", $"Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                    await SendToDevice("GET Description", $"Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                    await SendToDevice("GET Description", $"Bad Alpaca URL version element (v2)", $"/api/v2/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
 
-                // Test bad POST HTTP methods
-                await CallApi("True", "Connected", HttpMethod.Post, ParamConnectedTrue, HttpStatusCodeAny);
-                if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await CallApi("Value empty", "Connected", HttpMethod.Post, ParamConnectedEmpty, HttpStatusCodeAny);
-                if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await CallApi("Number", "Connected", HttpMethod.Post, ParamConnectedNumeric, HttpStatusCodeAny);
-                if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+                    // Test bad POST HTTP methods
+                    await CallApi("True", "Connected", HttpMethod.Post, ParamConnectedTrue, HttpStatusCodeAny);
+                    await CallApi("Value empty", "Connected", HttpMethod.Post, ParamConnectedEmpty, HttpStatusCodeAny);
+                    await CallApi("Number", "Connected", HttpMethod.Post, ParamConnectedNumeric, HttpStatusCodeAny);
 
-                // Test bad DELETE HTTP methods
-                await CallApi("True", "Connected", HttpMethod.Delete, ParamConnectedTrue, HttpStatusCodeAny);
-                if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await CallApi("Empty", "Connected", HttpMethod.Delete, ParamConnectedEmpty, HttpStatusCodeAny);
-                if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-                await CallApi("Number", "Connected", HttpMethod.Delete, ParamConnectedNumeric, HttpStatusCodeAny);
-                if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+                    // Test bad DELETE HTTP methods
+                    await CallApi("True", "Connected", HttpMethod.Delete, ParamConnectedTrue, HttpStatusCodeAny);
+                    await CallApi("Empty", "Connected", HttpMethod.Delete, ParamConnectedEmpty, HttpStatusCodeAny);
+                    await CallApi("Number", "Connected", HttpMethod.Delete, ParamConnectedNumeric, HttpStatusCodeAny);
+                }
+
+                // Test remaining Alpaca URL structure /devicetype/devicenumber and accept any 4XX status as a correct rejection
+                await SendToDevice("GET Description", $"Bad Alpaca URL device type (capitalised {settings.DeviceType.Value.ToString().ToUpper()})", $"/api/v1/{settings.DeviceType.Value.ToString().ToUpper()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+                await SendToDevice("GET Description", $"Bad Alpaca URL device type (baddevicetype)", $"/api/v1/baddevicetype/0/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+                await SendToDevice("GET Description", $"Bad Alpaca URL device number (-1)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/-1/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+                await SendToDevice("GET Description", $"Bad Alpaca URL device number (99999)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/99999/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+                await SendToDevice("GET Description", $"Bad Alpaca URL device number (A)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/A/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+                await SendToDevice("GET Description", $"Bad Alpaca URL method name (descrip)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/descrip", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+
+                // Test GET Connected
+                await GetNoParameters("Connected");
+
+                // Test bad PUT Connected values
+                await CallApi("Bad parameter value - Empty string", "Connected", HttpMethod.Put, ParamConnectedEmpty, HttpStatusCode400, acceptInvalidValueError: true);
+                await CallApi("Bad parameter value - Number", "Connected", HttpMethod.Put, ParamConnectedNumeric, HttpStatusCode400, acceptInvalidValueError: true);
+                await CallApi("Bad parameter value - Meaningless string", "Connected", HttpMethod.Put, ParamConnectedString, HttpStatusCode400, acceptInvalidValueError: true);
+
+                // Test GET remaining common members
+                await GetNoParameters("Description");
+                await GetNoParameters("DriverInfo");
+                await GetNoParameters("DriverVersion");
+                await GetNoParameters("InterfaceVersion");
+                await GetNoParameters("Name");
+                await GetNoParameters("SupportedActions");
             }
-
-            // Test remaining Alpaca URL structure /devicetype/devicenumber and accept any 4XX status as a correct rejection
-            await SendToDevice("GET Description", $"Bad Alpaca URL device type (capitalised {settings.DeviceType.Value.ToString().ToUpper()})", $"/api/v1/{settings.DeviceType.Value.ToString().ToUpper()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendToDevice("GET Description", $"Bad Alpaca URL device type (baddevicetype)", $"/api/v1/baddevicetype/0/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendToDevice("GET Description", $"Bad Alpaca URL device number (-1)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/-1/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendToDevice("GET Description", $"Bad Alpaca URL device number (99999)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/99999/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendToDevice("GET Description", $"Bad Alpaca URL device number (A)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/A/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await SendToDevice("GET Description", $"Bad Alpaca URL method name (descrip)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/descrip", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-
-            // Test GET Connected
-            await GetNoParameters("Connected");
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-
-            // Test bad PUT Connected values
-            await CallApi("Bad parameter value - Empty string", "Connected", HttpMethod.Put, ParamConnectedEmpty, HttpStatusCode400, acceptInvalidValueError: true);
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await CallApi("Bad parameter value - Number", "Connected", HttpMethod.Put, ParamConnectedNumeric, HttpStatusCode400, acceptInvalidValueError: true);
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await CallApi("Bad parameter value - Meaningless string", "Connected", HttpMethod.Put, ParamConnectedString, HttpStatusCode400, acceptInvalidValueError: true);
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-
-            // Test GET remaining common members
-            await GetNoParameters("Description");
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await GetNoParameters("DriverInfo");
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await GetNoParameters("DriverVersion");
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await GetNoParameters("InterfaceVersion");
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await GetNoParameters("Name");
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
-            await GetNoParameters("SupportedActions");
-            if (applicationCancellationToken.IsCancellationRequested) return; // Exit if user has pushed the STOP button
+            catch (TestCancelledException)
+            {
+                // Ignore exceptions arising because the user cancelled the test and return to the caller.
+            }
         }
 
         private async Task TestConnect(IAscomDeviceV2 device)
@@ -468,155 +454,150 @@ namespace ConformU
         {
             using (AlpacaCamera camera = AlpacaClient.GetDevice<AlpacaCamera>(settings.AlpacaDevice))
             {
-                // Connect to the selected camera to ensure we get correct values
-                try { camera.Connected = true; } catch { }
-
-                // Test Connect and Disconnect
-                await TestConnect(camera);
-
-                // Test properties that don't require an image to have been taken
-                await GetNoParameters("BayerOffsetX");
-                await GetNoParameters("BayerOffsetY");
-                await GetNoParameters("BinX");
-                string parameter1 = "";
-                try { parameter1 = camera.BinX.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("BinX", "BinX", parameter1, null);
-                await GetNoParameters("BinY");
-                try { parameter1 = camera.BinY.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("BinY", "BinY", parameter1, null);
-                await GetNoParameters("CameraState");
-                await GetNoParameters("CameraXSize");
-                await GetNoParameters("CameraYSize");
-                await GetNoParameters("CanAbortExposure");
-                await GetNoParameters("CanAsymmetricBin");
-                if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
-
-                await GetNoParameters("CanFastReadout");
-                await GetNoParameters("CanGetCoolerPower");
-                await GetNoParameters("CanPulseGuide");
-                await GetNoParameters("CanSetCCDTemperature");
-                await GetNoParameters("CanStopExposure");
-                await GetNoParameters("CCDTemperature");
-                await GetNoParameters("CoolerOn");
-                try { parameter1 = camera.CoolerOn.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "False"; }
-                await PutOneParameter("CoolerOn", "CoolerOn", parameter1, null);
-                await GetNoParameters("CoolerPower");
-                await GetNoParameters("ElectronsPerADU");
-                await GetNoParameters("ExposureMax");
-                await GetNoParameters("ExposureMin");
-                await GetNoParameters("ExposureResolution");
-                await GetNoParameters("FastReadout");
-                try { parameter1 = camera.FastReadout.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "False"; }
-                await PutOneParameter("FastReadout", "FastReadout", parameter1, null);
-                await GetNoParameters("FullWellCapacity");
-                await GetNoParameters("Gain");
-                try { parameter1 = camera.Gain.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("Gain", "Gain", parameter1, null);
-                if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
-
-                await GetNoParameters("GainMax");
-                await GetNoParameters("GainMin");
-                await GetNoParameters("Gains");
-                await GetNoParameters("HasShutter");
-                await GetNoParameters("HeatSinkTemperature");
-                await GetNoParameters("ImageReady");
-                await GetNoParameters("IsPulseGuiding");
-                await GetNoParameters("MaxADU");
-                await GetNoParameters("MaxBinX");
-                await GetNoParameters("MaxBinY");
-                await GetNoParameters("NumX");
-                try { parameter1 = camera.NumX.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("NumX", "NumX", camera.NumX.ToString(CultureInfo.InvariantCulture), null);
-                await GetNoParameters("NumY");
-                try { parameter1 = camera.NumY.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("NumY", "NumY", camera.NumY.ToString(CultureInfo.InvariantCulture), null);
-                await GetNoParameters("Offset");
-                try { parameter1 = camera.Offset.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("Offset", "Offset", parameter1, null);
-                if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
-
-                await GetNoParameters("OffsetMax");
-                await GetNoParameters("OffsetMin");
-                await GetNoParameters("Offsets");
-                await GetNoParameters("PercentCompleted");
-                await GetNoParameters("PixelSizeX");
-                await GetNoParameters("PixelSizeY");
-                await GetNoParameters("ReadoutMode");
-                try { parameter1 = camera.ReadoutMode.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("ReadoutMode", "ReadoutMode", parameter1, null);
-                await GetNoParameters("ReadoutModes");
-                await GetNoParameters("SensorName");
-                await GetNoParameters("SensorType");
-                await GetNoParameters("SetCCDTemperature");
-                try { parameter1 = camera.SetCCDTemperature.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("SetCCDTemperature", "SetCCDTemperature", parameter1, null);
-                await GetNoParameters("StartX");
-                if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
-
-                try { parameter1 = camera.StartX.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("StartX", "StartX", parameter1, null);
-                await GetNoParameters("StartY");
-                try { parameter1 = camera.StartY.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("StartY", "StartY", parameter1, null);
-                await GetNoParameters("SubExposureDuration");
-                try { parameter1 = camera.SubExposureDuration.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("SubExposureDuration", "SubExposureDuration", parameter1, null);
-                if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
-
-                // Test methods
-                await PutNoParameters("AbortExposure", null);
-                if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
-
-                await PutTwoParameters("PulseGuide", "Direction", ((int)GuideDirection.North).ToString(CultureInfo.InvariantCulture), "Duration", "1", null);
-                if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
-
-                await PutTwoParameters("StartExposure", "Duration", settings.CameraExposureDuration.ToString(CultureInfo.InvariantCulture), "Light", "False", () =>
+                try
                 {
-                    WaitWhile("StartExposure", () => camera.CameraState == CameraState.Exposing, 500,
-                        settings.AlpacaConfiguration.StandardResponseTimeout, null);
-                });
-                if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
 
-                await PutNoParameters("StopExposure", null);
-                if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
+                    // Connect to the selected camera to ensure we get correct values
+                    try { camera.Connected = true; } catch { }
 
-                // Test properties that require an image to have been taken first
+                    // Test Connect and Disconnect
+                    await TestConnect(camera);
 
-                // Add a base 64 hand-off header, if configured to do, so because this will speed up the JSON transfer by avoiding transmission of the entire image as JSON.
-                if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.Base64HandOff) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
-                {
-                    httpClient.DefaultRequestHeaders.Add(AlpacaConstants.BASE64_HANDOFF_HEADER, new string[] { AlpacaConstants.BASE64_HANDOFF_SUPPORTED });
+                    // Test properties that don't require an image to have been taken
+                    await GetNoParameters("BayerOffsetX");
+                    await GetNoParameters("BayerOffsetY");
+                    await GetNoParameters("BinX");
+                    string parameter1 = "";
+                    try { parameter1 = camera.BinX.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("BinX", "BinX", parameter1, null);
+                    await GetNoParameters("BinY");
+                    try { parameter1 = camera.BinY.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("BinY", "BinY", parameter1, null);
+                    await GetNoParameters("CameraState");
+                    await GetNoParameters("CameraXSize");
+                    await GetNoParameters("CameraYSize");
+                    await GetNoParameters("CanAbortExposure");
+                    await GetNoParameters("CanAsymmetricBin");
+
+                    await GetNoParameters("CanFastReadout");
+                    await GetNoParameters("CanGetCoolerPower");
+                    await GetNoParameters("CanPulseGuide");
+                    await GetNoParameters("CanSetCCDTemperature");
+                    await GetNoParameters("CanStopExposure");
+                    await GetNoParameters("CCDTemperature");
+                    await GetNoParameters("CoolerOn");
+                    try { parameter1 = camera.CoolerOn.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "False"; }
+                    await PutOneParameter("CoolerOn", "CoolerOn", parameter1, null);
+                    await GetNoParameters("CoolerPower");
+                    await GetNoParameters("ElectronsPerADU");
+                    await GetNoParameters("ExposureMax");
+                    await GetNoParameters("ExposureMin");
+                    await GetNoParameters("ExposureResolution");
+                    await GetNoParameters("FastReadout");
+                    try { parameter1 = camera.FastReadout.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "False"; }
+                    await PutOneParameter("FastReadout", "FastReadout", parameter1, null);
+                    await GetNoParameters("FullWellCapacity");
+                    await GetNoParameters("Gain");
+                    try { parameter1 = camera.Gain.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("Gain", "Gain", parameter1, null);
+
+                    await GetNoParameters("GainMax");
+                    await GetNoParameters("GainMin");
+                    await GetNoParameters("Gains");
+                    await GetNoParameters("HasShutter");
+                    await GetNoParameters("HeatSinkTemperature");
+                    await GetNoParameters("ImageReady");
+                    await GetNoParameters("IsPulseGuiding");
+                    await GetNoParameters("MaxADU");
+                    await GetNoParameters("MaxBinX");
+                    await GetNoParameters("MaxBinY");
+                    await GetNoParameters("NumX");
+                    try { parameter1 = camera.NumX.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("NumX", "NumX", camera.NumX.ToString(CultureInfo.InvariantCulture), null);
+                    await GetNoParameters("NumY");
+                    try { parameter1 = camera.NumY.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("NumY", "NumY", camera.NumY.ToString(CultureInfo.InvariantCulture), null);
+                    await GetNoParameters("Offset");
+                    try { parameter1 = camera.Offset.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("Offset", "Offset", parameter1, null);
+
+                    await GetNoParameters("OffsetMax");
+                    await GetNoParameters("OffsetMin");
+                    await GetNoParameters("Offsets");
+                    await GetNoParameters("PercentCompleted");
+                    await GetNoParameters("PixelSizeX");
+                    await GetNoParameters("PixelSizeY");
+                    await GetNoParameters("ReadoutMode");
+                    try { parameter1 = camera.ReadoutMode.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("ReadoutMode", "ReadoutMode", parameter1, null);
+                    await GetNoParameters("ReadoutModes");
+                    await GetNoParameters("SensorName");
+                    await GetNoParameters("SensorType");
+                    await GetNoParameters("SetCCDTemperature");
+                    try { parameter1 = camera.SetCCDTemperature.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("SetCCDTemperature", "SetCCDTemperature", parameter1, null);
+                    await GetNoParameters("StartX");
+
+                    try { parameter1 = camera.StartX.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("StartX", "StartX", parameter1, null);
+                    await GetNoParameters("StartY");
+                    try { parameter1 = camera.StartY.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("StartY", "StartY", parameter1, null);
+                    await GetNoParameters("SubExposureDuration");
+                    try { parameter1 = camera.SubExposureDuration.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("SubExposureDuration", "SubExposureDuration", parameter1, null);
+
+                    // Test methods
+                    await PutNoParameters("AbortExposure", null);
+                    await PutTwoParameters("PulseGuide", "Direction", ((int)GuideDirection.North).ToString(CultureInfo.InvariantCulture), "Duration", "1", null);
+                    await PutTwoParameters("StartExposure", "Duration", settings.CameraExposureDuration.ToString(CultureInfo.InvariantCulture), "Light", "False", () =>
+                    {
+                        WaitWhile("StartExposure", () => camera.CameraState == CameraState.Exposing, 500,
+                            settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    });
+                    await PutNoParameters("StopExposure", null);
+
+                    // Test properties that require an image to have been taken first
+
+                    // Add a base 64 hand-off header, if configured to do, so because this will speed up the JSON transfer by avoiding transmission of the entire image as JSON.
+                    if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.Base64HandOff) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
+                    {
+                        httpClient.DefaultRequestHeaders.Add(AlpacaConstants.BASE64_HANDOFF_HEADER, new string[] { AlpacaConstants.BASE64_HANDOFF_SUPPORTED });
+                    }
+
+                    // Add an ImageBytes header, if configured to do, so because this will speed up the JSON transfer by avoiding transmission of the entire image as JSON.
+                    if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.ImageBytes) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
+                    {
+                        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(AlpacaConstants.IMAGE_BYTES_MIME_TYPE));
+                    }
+
+                    SetStatus("Getting ImageArray...");
+                    await GetNoParameters("ImageArray");
+
+
+                    SetStatus("Getting ImageArrayVariant...");
+                    await GetNoParameters("ImageArrayVariant");
+
+                    // Remove any added fast image download headers
+                    if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.Base64HandOff) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
+                    {
+                        httpClient.DefaultRequestHeaders.Remove(AlpacaConstants.BASE64_HANDOFF_HEADER);
+                    }
+                    if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.ImageBytes) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
+                    {
+                        httpClient.DefaultRequestHeaders.Accept.Clear();
+                        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(AlpacaConstants.APPLICATION_JSON_MIME_TYPE));
+                    }
+
+                    SetStatus("");
+
+                    await GetNoParameters("LastExposureDuration");
+                    await GetNoParameters("LastExposureStartTime");
                 }
-
-                // Add an ImageBytes header, if configured to do, so because this will speed up the JSON transfer by avoiding transmission of the entire image as JSON.
-                if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.ImageBytes) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
+                catch (TestCancelledException)
                 {
-                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(AlpacaConstants.IMAGE_BYTES_MIME_TYPE));
+                    // Ignore exceptions arising because the user cancelled the test and return to the caller.
                 }
-
-                SetStatus("Getting ImageArray...");
-                await GetNoParameters("ImageArray");
-                if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
-
-                SetStatus("Getting ImageArrayVariant...");
-                await GetNoParameters("ImageArrayVariant");
-
-                // Remove any added fast image download headers
-                if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.Base64HandOff) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
-                {
-                    httpClient.DefaultRequestHeaders.Remove(AlpacaConstants.BASE64_HANDOFF_HEADER);
-                }
-                if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.ImageBytes) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
-                {
-                    httpClient.DefaultRequestHeaders.Accept.Clear();
-                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(AlpacaConstants.APPLICATION_JSON_MIME_TYPE));
-                }
-
-                SetStatus("");
-                if (applicationCancellationToken.IsCancellationRequested) goto CameraEnd; // Exit early if required
-
-                await GetNoParameters("LastExposureDuration");
-                await GetNoParameters("LastExposureStartTime");
 
             CameraEnd:
                 try { camera.Connected = false; } catch { }
@@ -628,49 +609,49 @@ namespace ConformU
         {
             using (AlpacaCoverCalibrator coverCalibrator = AlpacaClient.GetDevice<AlpacaCoverCalibrator>(settings.AlpacaDevice))
             {
-                try { coverCalibrator.Connected = true; } catch { }
-
-                // Test Connect and Disconnect
-                await TestConnect(coverCalibrator);
-
-                // Test properties
-                await GetNoParameters("Brightness");
-                await GetNoParameters("CalibratorState");
-                await GetNoParameters("CoverState");
-                await GetNoParameters("MaxBrightness");
-                if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
-
-                // Test Methods
-                await PutNoParameters("CalibratorOff", () =>
+                try
                 {
-                    WaitWhile("CalibratorOff", () => coverCalibrator.CalibratorState == CalibratorStatus.NotReady, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
-                });
-                if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
+                    try { coverCalibrator.Connected = true; } catch { }
 
-                var parameter1 = "";
-                try { parameter1 = (coverCalibrator.MaxBrightness / 2).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("CalibratorOn", "Brightness", parameter1, () =>
-                {
-                    WaitWhile("CalibratorOn", () => coverCalibrator.CalibratorState == CalibratorStatus.NotReady, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
-                });
-                if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
+                    // Test Connect and Disconnect
+                    await TestConnect(coverCalibrator);
 
-                await PutNoParameters("OpenCover", () =>
-                {
-                    WaitWhile("OpenCover", () => coverCalibrator.CoverState == CoverStatus.Moving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
-                });
-                if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
+                    // Test properties
+                    await GetNoParameters("Brightness");
+                    await GetNoParameters("CalibratorState");
+                    await GetNoParameters("CoverState");
+                    await GetNoParameters("MaxBrightness");
 
-                await PutNoParameters("HaltCover", () =>
-                {
-                    WaitWhile("HaltCover", () => coverCalibrator.CoverState == CoverStatus.Moving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
-                });
-                if (applicationCancellationToken.IsCancellationRequested) goto CoverEnd; // Exit early if required
+                    // Test Methods
+                    await PutNoParameters("CalibratorOff", () =>
+                    {
+                        WaitWhile("CalibratorOff", () => coverCalibrator.CalibratorState == CalibratorStatus.NotReady, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    });
 
-                await PutNoParameters("CloseCover", () =>
+                    var parameter1 = "";
+                    try { parameter1 = (coverCalibrator.MaxBrightness / 2).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("CalibratorOn", "Brightness", parameter1, () =>
+                    {
+                        WaitWhile("CalibratorOn", () => coverCalibrator.CalibratorState == CalibratorStatus.NotReady, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    });
+
+                    await PutNoParameters("OpenCover", () =>
+                    {
+                        WaitWhile("OpenCover", () => coverCalibrator.CoverState == CoverStatus.Moving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    });
+                    await PutNoParameters("HaltCover", () =>
+                    {
+                        WaitWhile("HaltCover", () => coverCalibrator.CoverState == CoverStatus.Moving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    });
+                    await PutNoParameters("CloseCover", () =>
+                    {
+                        WaitWhile("CloseCover", () => coverCalibrator.CoverState == CoverStatus.Moving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    });
+                }
+                catch (TestCancelledException)
                 {
-                    WaitWhile("CloseCover", () => coverCalibrator.CoverState == CoverStatus.Moving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
-                });
+                    // Ignore exceptions arising because the user cancelled the test and return to the caller.
+                }
 
             CoverEnd:
                 try { coverCalibrator.Connected = false; } catch { }
@@ -683,119 +664,114 @@ namespace ConformU
 
             using (AlpacaDome dome = AlpacaClient.GetDevice<AlpacaDome>(settings.AlpacaDevice))
             {
-                try { dome.Connected = true; } catch { }
-
-                // Test Connect and Disconnect
-                await TestConnect(dome);
-
-                // Test properties
-                await GetNoParameters("AtHome");
-                await GetNoParameters("AtPark");
-                await GetNoParameters("Azimuth");
-                await GetNoParameters("CanFindHome");
-                await GetNoParameters("CanPark");
-                await GetNoParameters("CanSetAltitude");
-                await GetNoParameters("CanSetAzimuth");
-                await GetNoParameters("CanSetPark");
-                if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
-
-                await GetNoParameters("CanSetShutter");
-                await GetNoParameters("CanSlave");
-                await GetNoParameters("CanSyncAzimuth");
-                await GetNoParameters("ShutterStatus");
-
-                await GetNoParameters("Slaved");
-                try { parameter1 = dome.Slaved.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
-                await PutOneParameter("Slaved", "Slaved", parameter1, null);
-
-                await GetNoParameters("Slewing");
-                if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
-
-                // Test Methods
-                await PutNoParameters("AbortSlew", () =>
+                try
                 {
-                    WaitWhile("AbortSlew", () => dome.Slewing == true, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
-                });
-                if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
+                    try { dome.Connected = true; } catch { }
 
-                await PutNoParameters("FindHome", () =>
-                {
-                    WaitWhile("FindHome", () => dome.Slewing == true, 500, settings.DomeAzimuthMovementTimeout, null);
-                });
-                WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome azimuth movement delay");
-                if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
+                    // Test Connect and Disconnect
+                    await TestConnect(dome);
 
-                // Only open the shutter if configured to do so
-                if (settings.DomeOpenShutter)
-                {
-                    await PutNoParameters("OpenShutter", () =>
+                    // Test properties
+                    await GetNoParameters("AtHome");
+                    await GetNoParameters("AtPark");
+                    await GetNoParameters("Azimuth");
+                    await GetNoParameters("CanFindHome");
+                    await GetNoParameters("CanPark");
+                    await GetNoParameters("CanSetAltitude");
+                    await GetNoParameters("CanSetAzimuth");
+                    await GetNoParameters("CanSetPark");
+                    await GetNoParameters("CanSetShutter");
+                    await GetNoParameters("CanSlave");
+                    await GetNoParameters("CanSyncAzimuth");
+                    await GetNoParameters("ShutterStatus");
+                    await GetNoParameters("Slaved");
+                    try { parameter1 = dome.Slaved.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
+                    await PutOneParameter("Slaved", "Slaved", parameter1, null);
+
+                    await GetNoParameters("Slewing");
+
+                    // Test Methods
+                    await PutNoParameters("AbortSlew", () =>
                     {
-                        WaitWhile("OpenShutter", () => dome.ShutterStatus == ShutterState.Opening, 500, settings.DomeShutterMovementTimeout, null);
+                        WaitWhile("AbortSlew", () => dome.Slewing == true, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
                     });
-                    WaitFor(settings.DomeStabilisationWaitTime * 1000, "open shutter delay");
-                    if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
-                }
-                else
-                {
-                    LogInformation($"PUT OpenShutter", "Test omitted due to Conform configuration setting", null);
-                }
-
-                if (settings.DomeOpenShutter)
-                {
-                    try { parameter1 = dome.Altitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
-                    await PutOneParameter("SlewToAltitude", "Altitude", parameter1, () =>
+                    await PutNoParameters("FindHome", () =>
                     {
-                        WaitWhile("SlewToAltitude", () => dome.ShutterStatus == ShutterState.Opening, 500, settings.DomeAltitudeMovementTimeout, null);
+                        WaitWhile("FindHome", () => dome.Slewing == true, 500, settings.DomeAzimuthMovementTimeout, null);
                     });
-                    WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome altitude movement delay");
-                    if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
+                    WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome azimuth movement delay");
+
+                    // Only open the shutter if configured to do so
+                    if (settings.DomeOpenShutter)
+                    {
+                        await PutNoParameters("OpenShutter", () =>
+                        {
+                            WaitWhile("OpenShutter", () => dome.ShutterStatus == ShutterState.Opening, 500, settings.DomeShutterMovementTimeout, null);
+                        });
+                        WaitFor(settings.DomeStabilisationWaitTime * 1000, "open shutter delay");
+
+                    }
+                    else
+                    {
+                        LogInformation($"PUT OpenShutter", "Test omitted due to Conform configuration setting", null);
+                    }
+
+                    if (settings.DomeOpenShutter)
+                    {
+                        try { parameter1 = dome.Altitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
+                        await PutOneParameter("SlewToAltitude", "Altitude", parameter1, () =>
+                        {
+                            WaitWhile("SlewToAltitude", () => dome.ShutterStatus == ShutterState.Opening, 500, settings.DomeAltitudeMovementTimeout, null);
+                        });
+                        WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome altitude movement delay");
+
+                    }
+                    else
+                    {
+                        LogInformation($"PUT SlewToAltitude", "Test omitted due to Conform configuration setting", null);
+                    }
+
+                    try { parameter1 = dome.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
+                    await PutOneParameter("SlewToAzimuth", "Azimuth", parameter1, () =>
+                    {
+                        WaitWhile("SlewToAzimuth", () => dome.Slewing == true, 500, settings.DomeAzimuthMovementTimeout, null);
+                    });
+                    WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome azimuth movement delay");
+
+                    try { parameter1 = dome.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
+                    await PutOneParameter("SyncToAzimuth", "Azimuth", parameter1, () =>
+                    {
+                        WaitWhile("SyncToAzimuth", () => dome.Slewing == true, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    });
+
+                    // Test property that can only be tested with the shutter open
+                    if (settings.DomeOpenShutter)
+                    {
+                        await GetNoParameters("Altitude");
+                    }
+                    else
+                    {
+                        LogInformation($"GET Altitude", "Test omitted due to Conform configuration setting", null);
+                    }
+
+                    await PutNoParameters("CloseShutter", () =>
+                    {
+                        WaitWhile("CloseShutter", () => dome.ShutterStatus == ShutterState.Closing, 500, settings.DomeShutterMovementTimeout, null);
+                    });
+                    WaitFor(settings.DomeStabilisationWaitTime * 1000, "close shutter delay");
+
+                    await PutNoParameters("Park", () =>
+                    {
+                        WaitWhile("Park", () => dome.Slewing == true, 500, settings.DomeAzimuthMovementTimeout, null);
+                    });
+                    WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome azimuth movement delay");
+
+                    await PutNoParameters("SetPark", null);
                 }
-                else
+                catch (TestCancelledException)
                 {
-                    LogInformation($"PUT SlewToAltitude", "Test omitted due to Conform configuration setting", null);
+                    // Ignore exceptions arising because the user cancelled the test and return to the caller.
                 }
-
-                try { parameter1 = dome.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
-                await PutOneParameter("SlewToAzimuth", "Azimuth", parameter1, () =>
-                {
-                    WaitWhile("SlewToAzimuth", () => dome.Slewing == true, 500, settings.DomeAzimuthMovementTimeout, null);
-                });
-                WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome azimuth movement delay");
-                if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
-
-                try { parameter1 = dome.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
-                await PutOneParameter("SyncToAzimuth", "Azimuth", parameter1, () =>
-                {
-                    WaitWhile("SyncToAzimuth", () => dome.Slewing == true, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
-                });
-
-                // Test property that can only be tested with the shutter open
-                if (settings.DomeOpenShutter)
-                {
-                    await GetNoParameters("Altitude");
-                }
-                else
-                {
-                    LogInformation($"GET Altitude", "Test omitted due to Conform configuration setting", null);
-                }
-
-            DomeEnd:
-                await PutNoParameters("CloseShutter", () =>
-                {
-                    WaitWhile("CloseShutter", () => dome.ShutterStatus == ShutterState.Closing, 500, settings.DomeShutterMovementTimeout, null);
-                });
-                WaitFor(settings.DomeStabilisationWaitTime * 1000, "close shutter delay");
-                if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
-
-                await PutNoParameters("Park", () =>
-                {
-                    WaitWhile("Park", () => dome.Slewing == true, 500, settings.DomeAzimuthMovementTimeout, null);
-                });
-                WaitFor(settings.DomeStabilisationWaitTime * 1000, "dome azimuth movement delay");
-                if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
-
-                await PutNoParameters("SetPark", null);
-                if (applicationCancellationToken.IsCancellationRequested) goto DomeEnd; // Exit early if required
 
                 try { dome.Connected = false; } catch { }
             }
@@ -807,22 +783,28 @@ namespace ConformU
 
             using (AlpacaFilterWheel filterWheel = AlpacaClient.GetDevice<AlpacaFilterWheel>(settings.AlpacaDevice))
             {
-                try { filterWheel.Connected = true; } catch { }
-
-                // Test Connect and Disconnect
-                await TestConnect(filterWheel);
-
-                // Test properties
-                await GetNoParameters("FocusOffsets");
-                await GetNoParameters("Names");
-                await GetNoParameters("Position");
-                if (applicationCancellationToken.IsCancellationRequested) goto FilterWheelEnd; // Exit early if required
-
-                try { parameter1 = filterWheel.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("Position", "Position", parameter1, () =>
+                try
                 {
-                    WaitWhile("Position", () => filterWheel.Position == -1, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
-                });
+                    try { filterWheel.Connected = true; } catch { }
+
+                    // Test Connect and Disconnect
+                    await TestConnect(filterWheel);
+
+                    // Test properties
+                    await GetNoParameters("FocusOffsets");
+                    await GetNoParameters("Names");
+                    await GetNoParameters("Position");
+
+                    try { parameter1 = filterWheel.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("Position", "Position", parameter1, () =>
+                    {
+                        WaitWhile("Position", () => filterWheel.Position == -1, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    });
+                }
+                catch (TestCancelledException)
+                {
+                    // Ignore exceptions arising because the user cancelled the test and return to the caller.
+                }
 
             FilterWheelEnd:
                 try { filterWheel.Connected = false; } catch { }
@@ -835,39 +817,44 @@ namespace ConformU
 
             using (AlpacaFocuser focuser = AlpacaClient.GetDevice<AlpacaFocuser>(settings.AlpacaDevice))
             {
-                try { focuser.Connected = true; } catch { }
-
-                // Test Connect and Disconnect
-                await TestConnect(focuser);
-
-                // Test properties
-                await GetNoParameters("Absolute");
-                await GetNoParameters("IsMoving");
-                await GetNoParameters("MaxIncrement");
-                await GetNoParameters("MaxStep");
-                await GetNoParameters("Position");
-                await GetNoParameters("StepSize");
-                if (applicationCancellationToken.IsCancellationRequested) goto FocuserEnd; // Exit early if required
-
-                await GetNoParameters("TempComp");
-                try { parameter1 = focuser.TempComp.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
-                await PutOneParameter("TempComp", "TempComp", parameter1, null);
-
-                await GetNoParameters("TempCompAvailable");
-                await GetNoParameters("Temperature");
-
-                // Methods
-                await PutNoParameters("Halt", () =>
+                try
                 {
-                    WaitWhile("Halt", () => focuser.IsMoving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
-                });
-                if (applicationCancellationToken.IsCancellationRequested) goto FocuserEnd; // Exit early if required
+                    try { focuser.Connected = true; } catch { }
 
-                try { parameter1 = focuser.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("Move", "Position", parameter1, () =>
+                    // Test Connect and Disconnect
+                    await TestConnect(focuser);
+
+                    // Test properties
+                    await GetNoParameters("Absolute");
+                    await GetNoParameters("IsMoving");
+                    await GetNoParameters("MaxIncrement");
+                    await GetNoParameters("MaxStep");
+                    await GetNoParameters("Position");
+                    await GetNoParameters("StepSize");
+
+                    await GetNoParameters("TempComp");
+                    try { parameter1 = focuser.TempComp.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
+                    await PutOneParameter("TempComp", "TempComp", parameter1, null);
+
+                    await GetNoParameters("TempCompAvailable");
+                    await GetNoParameters("Temperature");
+
+                    // Methods
+                    await PutNoParameters("Halt", () =>
+                    {
+                        WaitWhile("Halt", () => focuser.IsMoving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    });
+
+                    try { parameter1 = focuser.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("Move", "Position", parameter1, () =>
+                    {
+                        WaitWhile("Move", () => focuser.IsMoving, 500, settings.FocuserTimeout, null);
+                    });
+                }
+                catch (TestCancelledException)
                 {
-                    WaitWhile("Move", () => focuser.IsMoving, 500, settings.FocuserTimeout, null);
-                });
+                    // Ignore exceptions arising because the user cancelled the test and return to the caller.
+                }
 
             FocuserEnd:
                 try { focuser.Connected = false; } catch { }
@@ -880,57 +867,57 @@ namespace ConformU
 
             using (AlpacaObservingConditions observingConditions = AlpacaClient.GetDevice<AlpacaObservingConditions>(settings.AlpacaDevice))
             {
-                try { observingConditions.Connected = true; } catch { }
-
-                // Test Connect and Disconnect
-                await TestConnect(observingConditions);
-
-                // Test properties
-                await GetNoParameters("AveragePeriod");
-                try { parameter1 = observingConditions.AveragePeriod.ToString(CultureInfo.InvariantCulture); } catch { }
-                await PutOneParameter("AveragePeriod", "AveragePeriod", parameter1, null);
-                await GetNoParameters("CloudCover");
-                await GetNoParameters("DewPoint");
-                await GetNoParameters("Humidity");
-                if (applicationCancellationToken.IsCancellationRequested) goto ObsConEnd; // Exit early if required
-
-                await GetNoParameters("Pressure");
-                await GetNoParameters("RainRate");
-                await GetNoParameters("SkyBrightness");
-                await GetNoParameters("SkyQuality");
-                await GetNoParameters("SkyTemperature");
-                if (applicationCancellationToken.IsCancellationRequested) goto ObsConEnd; // Exit early if required
-
-                await GetNoParameters("StarFWHM");
-                await GetNoParameters("Temperature");
-                await GetNoParameters("WindDirection");
-                await GetNoParameters("WindGust");
-                await GetNoParameters("WindSpeed");
-                if (applicationCancellationToken.IsCancellationRequested) goto ObsConEnd; // Exit early if required
-
-                // Methods
-                await PutNoParameters("Refresh", null);
-                if (applicationCancellationToken.IsCancellationRequested) goto ObsConEnd; // Exit early if required
-
-                await GetOneParameter("SensorDescription", "SensorName", "Pressure");
-
-                int startingIssueCount = issueMessages.Count;
-
-                await GetOneParameter("TimeSinceLastUpdate", "SensorName", "Pressure");
-
-                int pressureIssues = issueMessages.Count - startingIssueCount;
-
-                await GetOneParameter("TimeSinceLastUpdate", "SensorName", "");
-
-                // Add information messages to explain how TimeSinceLastUpdate has failed
-                if (pressureIssues > 0)
+                try
                 {
-                    LogInformation("TimeSinceLastUpdate", $"Failed when retrieving the last update time for the Pressure sensor (SensorName = \"Pressure\").", null);
+                    try { observingConditions.Connected = true; } catch { }
+
+                    // Test Connect and Disconnect
+                    await TestConnect(observingConditions);
+
+                    // Test properties
+                    await GetNoParameters("AveragePeriod");
+                    try { parameter1 = observingConditions.AveragePeriod.ToString(CultureInfo.InvariantCulture); } catch { }
+                    await PutOneParameter("AveragePeriod", "AveragePeriod", parameter1, null);
+                    await GetNoParameters("CloudCover");
+                    await GetNoParameters("DewPoint");
+                    await GetNoParameters("Humidity");
+                    await GetNoParameters("Pressure");
+                    await GetNoParameters("RainRate");
+                    await GetNoParameters("SkyBrightness");
+                    await GetNoParameters("SkyQuality");
+                    await GetNoParameters("SkyTemperature");
+                    await GetNoParameters("StarFWHM");
+                    await GetNoParameters("Temperature");
+                    await GetNoParameters("WindDirection");
+                    await GetNoParameters("WindGust");
+                    await GetNoParameters("WindSpeed");
+
+                    // Methods
+                    await PutNoParameters("Refresh", null);
+                    await GetOneParameter("SensorDescription", "SensorName", "Pressure");
+
+                    int startingIssueCount = issueMessages.Count;
+
+                    await GetOneParameter("TimeSinceLastUpdate", "SensorName", "Pressure");
+
+                    int pressureIssues = issueMessages.Count - startingIssueCount;
+
+                    await GetOneParameter("TimeSinceLastUpdate", "SensorName", "");
+
+                    // Add information messages to explain how TimeSinceLastUpdate has failed
+                    if (pressureIssues > 0)
+                    {
+                        LogInformation("TimeSinceLastUpdate", $"Failed when retrieving the last update time for the Pressure sensor (SensorName = \"Pressure\").", null);
+                    }
+
+                    if (issueMessages.Count - pressureIssues - startingIssueCount > 0)
+                    {
+                        LogInformation("TimeSinceLastUpdate", $"Failed when retrieving the last update time for all sensors (SensorName = \"\").", null);
+                    }
                 }
-
-                if (issueMessages.Count - pressureIssues - startingIssueCount > 0)
+                catch (TestCancelledException)
                 {
-                    LogInformation("TimeSinceLastUpdate", $"Failed when retrieving the last update time for all sensors (SensorName = \"\").", null);
+                    // Ignore exceptions arising because the user cancelled the test and return to the caller.
                 }
 
             ObsConEnd:
@@ -944,57 +931,59 @@ namespace ConformU
 
             using (AlpacaRotator rotator = AlpacaClient.GetDevice<AlpacaRotator>(settings.AlpacaDevice))
             {
-                try { rotator.Connected = true; } catch { }
-
-                // Test Connect and Disconnect
-                await TestConnect(rotator);
-
-                // Test properties
-                await GetNoParameters("CanReverse");
-                await GetNoParameters("IsMoving");
-                await GetNoParameters("MechanicalPosition");
-                await GetNoParameters("Position");
-                await GetNoParameters("Reverse");
-                if (applicationCancellationToken.IsCancellationRequested) goto RotatorEnd; // Exit early if required
-
-                try { parameter1 = rotator.Reverse.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
-                await PutOneParameter("Reverse", "Reverse", parameter1, null);
-                await GetNoParameters("StepSize");
-                await GetNoParameters("TargetPosition");
-
-                // Test methods
-                await PutNoParameters("Halt", () =>
+                try
                 {
-                    WaitWhile("Halt", () => rotator.IsMoving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
-                });
-                if (applicationCancellationToken.IsCancellationRequested) goto RotatorEnd; // Exit early if required
+                    try { rotator.Connected = true; } catch { }
 
-                try { parameter1 = rotator.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("Move", "Position", parameter1, () =>
-                {
-                    WaitWhile("Move", () => rotator.IsMoving, 500, settings.RotatorTimeout, null);
-                });
-                if (applicationCancellationToken.IsCancellationRequested) goto RotatorEnd; // Exit early if required
+                    // Test Connect and Disconnect
+                    await TestConnect(rotator);
 
-                try { parameter1 = rotator.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("MoveAbsolute", "Position", parameter1, () =>
-                {
-                    WaitWhile("MoveAbsolute", () => rotator.IsMoving, 500, settings.RotatorTimeout, null);
-                });
-                if (applicationCancellationToken.IsCancellationRequested) goto RotatorEnd; // Exit early if required
+                    // Test properties
+                    await GetNoParameters("CanReverse");
+                    await GetNoParameters("IsMoving");
+                    await GetNoParameters("MechanicalPosition");
+                    await GetNoParameters("Position");
+                    await GetNoParameters("Reverse");
 
-                try { parameter1 = rotator.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("MoveMechanical", "Position", parameter1, () =>
-                {
-                    WaitWhile("MoveMechanical", () => rotator.IsMoving, 500, settings.RotatorTimeout, null);
-                });
-                if (applicationCancellationToken.IsCancellationRequested) goto RotatorEnd; // Exit early if required
+                    try { parameter1 = rotator.Reverse.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
+                    await PutOneParameter("Reverse", "Reverse", parameter1, null);
+                    await GetNoParameters("StepSize");
+                    await GetNoParameters("TargetPosition");
 
-                try { parameter1 = rotator.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
-                await PutOneParameter("Sync", "Position", parameter1, () =>
+                    // Test methods
+                    await PutNoParameters("Halt", () =>
+                    {
+                        WaitWhile("Halt", () => rotator.IsMoving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    });
+
+                    try { parameter1 = rotator.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("Move", "Position", parameter1, () =>
+                    {
+                        WaitWhile("Move", () => rotator.IsMoving, 500, settings.RotatorTimeout, null);
+                    });
+
+                    try { parameter1 = rotator.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("MoveAbsolute", "Position", parameter1, () =>
+                    {
+                        WaitWhile("MoveAbsolute", () => rotator.IsMoving, 500, settings.RotatorTimeout, null);
+                    });
+
+                    try { parameter1 = rotator.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("MoveMechanical", "Position", parameter1, () =>
+                    {
+                        WaitWhile("MoveMechanical", () => rotator.IsMoving, 500, settings.RotatorTimeout, null);
+                    });
+
+                    try { parameter1 = rotator.Position.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "1"; }
+                    await PutOneParameter("Sync", "Position", parameter1, () =>
+                    {
+                        WaitWhile("Sync", () => rotator.IsMoving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    });
+                }
+                catch (TestCancelledException)
                 {
-                    WaitWhile("Sync", () => rotator.IsMoving, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
-                });
+                    // Ignore exceptions arising because the user cancelled the test and return to the caller.
+                }
 
             RotatorEnd:
                 try { rotator.Connected = false; } catch { }
@@ -1004,14 +993,20 @@ namespace ConformU
         private async Task TestSafetyMonitor()
         {
             using AlpacaSafetyMonitor safetyMonitor = AlpacaClient.GetDevice<AlpacaSafetyMonitor>(settings.AlpacaDevice);
+            try
+            {
+                try { safetyMonitor.Connected = true; } catch { }
 
-            try { safetyMonitor.Connected = true; } catch { }
+                // Test Connect and Disconnect
+                await TestConnect(safetyMonitor);
 
-            // Test Connect and Disconnect
-            await TestConnect(safetyMonitor);
-
-            // Test properties
-            await GetNoParameters("IsSafe");
+                // Test properties
+                await GetNoParameters("IsSafe");
+            }
+            catch (TestCancelledException)
+            {
+                // Ignore exceptions arising because the user cancelled the test and return to the caller.
+            }
 
             // Disconnect
             try { safetyMonitor.Connected = false; } catch { }
@@ -1021,72 +1016,75 @@ namespace ConformU
         {
             using (AlpacaSwitch switchDevice = AlpacaClient.GetDevice<AlpacaSwitch>(settings.AlpacaDevice))
             {
-                try { switchDevice.Connected = true; } catch { }
-
-                // Test Connect and Disconnect
-                await TestConnect(switchDevice);
-
-                // Test properties
-                await GetNoParameters("MaxSwitch");
-                await GetOneParameter("CanWrite", "Id", "0");
-                await GetOneParameter("GetSwitch", "Id", "0");
-                WaitFor(settings.SwitchReadDelay, "switch read delay");
-
-                await GetOneParameter("GetSwitchDescription", "Id", "0");
-                if (applicationCancellationToken.IsCancellationRequested) goto SwitchEnd; // Exit early if required
-
-                await GetOneParameter("GetSwitchName", "Id", "0");
-                await GetOneParameter("GetSwitchValue", "Id", "0");
-                WaitFor(settings.SwitchReadDelay, "switch read delay");
-
-                await GetOneParameter("MinSwitchValue", "Id", "0");
-                await GetOneParameter("MaxSwitchValue", "Id", "0");
-                if (applicationCancellationToken.IsCancellationRequested) goto SwitchEnd; // Exit early if required
-
-                if (DeviceCapabilities.HasAsyncSwitch(switchDevice.InterfaceVersion))
+                try
                 {
-                    // Test CanAsync
-                    await GetOneParameter("CanAsync", "Id", "0");
-                }
+                    try { switchDevice.Connected = true; } catch { }
 
-                // Test methods
-                string parameter1;
-                if (settings.SwitchEnableSet) // Test enabled
-                {
-                    try { parameter1 = switchDevice.GetSwitch(0).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
-                    await PutTwoParameters("SetSwitch", "Id", "0", "State", parameter1, null);
-                    WaitFor(settings.SwitchWriteDelay, "switch write delay");
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT SetSwitch", "Test omitted due to Conform configuration setting", null);
-                }
-                if (applicationCancellationToken.IsCancellationRequested) goto SwitchEnd; // Exit early if required
+                    // Test Connect and Disconnect
+                    await TestConnect(switchDevice);
+
+                    // Test properties
+                    await GetNoParameters("MaxSwitch");
+                    await GetOneParameter("CanWrite", "Id", "0");
+                    await GetOneParameter("GetSwitch", "Id", "0");
+                    WaitFor(settings.SwitchReadDelay, "switch read delay");
+
+                    await GetOneParameter("GetSwitchDescription", "Id", "0");
+
+                    await GetOneParameter("GetSwitchName", "Id", "0");
+                    await GetOneParameter("GetSwitchValue", "Id", "0");
+                    WaitFor(settings.SwitchReadDelay, "switch read delay");
+
+                    await GetOneParameter("MinSwitchValue", "Id", "0");
+                    await GetOneParameter("MaxSwitchValue", "Id", "0");
+
+                    if (DeviceCapabilities.HasAsyncSwitch(switchDevice.InterfaceVersion))
+                    {
+                        // Test CanAsync
+                        await GetOneParameter("CanAsync", "Id", "0");
+                    }
+
+                    // Test methods
+                    string parameter1;
+                    if (settings.SwitchEnableSet) // Test enabled
+                    {
+                        try { parameter1 = switchDevice.GetSwitch(0).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
+                        await PutTwoParameters("SetSwitch", "Id", "0", "State", parameter1, null);
+                        WaitFor(settings.SwitchWriteDelay, "switch write delay");
+                    }
+                    else // Test omitted
+                    {
+                        LogInformation($"PUT SetSwitch", "Test omitted due to Conform configuration setting", null);
+                    }
 
 
-                if (settings.SwitchEnableSet) // Test enabled
-                {
-                    try { parameter1 = switchDevice.GetSwitchName(0).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "Unknown name"; }
-                    await PutTwoParameters("SetSwitchName", "Id", "0", "Name", parameter1, null, testParameter2BadValue: false);
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT SetSwitchName", "Test omitted due to Conform configuration setting", null);
-                }
-                if (applicationCancellationToken.IsCancellationRequested) goto SwitchEnd; // Exit early if required
+                    if (settings.SwitchEnableSet) // Test enabled
+                    {
+                        try { parameter1 = switchDevice.GetSwitchName(0).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "Unknown name"; }
+                        await PutTwoParameters("SetSwitchName", "Id", "0", "Name", parameter1, null, testParameter2BadValue: false);
+                    }
+                    else // Test omitted
+                    {
+                        LogInformation($"PUT SetSwitchName", "Test omitted due to Conform configuration setting", null);
+                    }
 
-                if (settings.SwitchEnableSet) // Test enabled
-                {
-                    try { parameter1 = switchDevice.GetSwitchValue(0).ToString(CultureInfo.InvariantCulture); } catch (Exception) { try { parameter1 = switchDevice.MinSwitchValue(0).ToString(CultureInfo.InvariantCulture); } catch { parameter1 = "0.0"; } }
-                    await PutTwoParameters("SetSwitchValue", "Id", "0", "Value", parameter1, null);
-                    WaitFor(settings.SwitchWriteDelay, "switch write delay");
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT SetSwitchValue", "Test omitted due to Conform configuration setting", null);
-                }
+                    if (settings.SwitchEnableSet) // Test enabled
+                    {
+                        try { parameter1 = switchDevice.GetSwitchValue(0).ToString(CultureInfo.InvariantCulture); } catch (Exception) { try { parameter1 = switchDevice.MinSwitchValue(0).ToString(CultureInfo.InvariantCulture); } catch { parameter1 = "0.0"; } }
+                        await PutTwoParameters("SetSwitchValue", "Id", "0", "Value", parameter1, null);
+                        WaitFor(settings.SwitchWriteDelay, "switch write delay");
+                    }
+                    else // Test omitted
+                    {
+                        LogInformation($"PUT SetSwitchValue", "Test omitted due to Conform configuration setting", null);
+                    }
 
-                await GetOneParameter("SwitchStep", "Id", "0");
+                    await GetOneParameter("SwitchStep", "Id", "0");
+                }
+                catch (TestCancelledException)
+                {
+                    // Ignore exceptions arising because the user cancelled the test and return to the caller.
+                }
 
             SwitchEnd:
                 try { switchDevice.Connected = false; } catch { }
@@ -1100,321 +1098,294 @@ namespace ConformU
 
             using (AlpacaTelescope telescope = AlpacaClient.GetDevice<AlpacaTelescope>(settings.AlpacaDevice))
             {
-                try { telescope.Connected = true; } catch { }
-
-                // Test Connect and Disconnect
-                await TestConnect(telescope);
-
-                // Test properties
-                await GetNoParameters("AlignmentMode");
-                await GetNoParameters("Altitude");
-                await GetNoParameters("ApertureArea");
-                await GetNoParameters("ApertureDiameter");
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-
-                await GetNoParameters("AtHome");
-                await GetNoParameters("AtPark");
-                await GetNoParameters("Azimuth");
-                await GetNoParameters("CanPark");
-                await GetNoParameters("CanPulseGuide");
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-
-                await GetNoParameters("CanSetDeclinationRate");
-                await GetNoParameters("CanSetGuideRates");
-                await GetNoParameters("CanSetPark");
-                await GetNoParameters("CanSetPierSide");
-                await GetNoParameters("CanSetTracking");
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-
-                await GetNoParameters("CanSlew");
-                await GetNoParameters("CanSlewAltAz");
-                await GetNoParameters("CanSlewAltAzAsync");
-                await GetNoParameters("CanSync");
-                await GetNoParameters("CanSyncAltAz");
-                await GetNoParameters("CanUnpark");
-                await GetNoParameters("Declination");
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-
-                await GetNoParameters("DeclinationRate");
-                try { parameter1 = telescope.DeclinationRate.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
-                await PutOneParameter("DeclinationRate", "DeclinationRate", parameter1, null);
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                await GetNoParameters("DoesRefraction");
-                try { parameter1 = telescope.DoesRefraction.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
-                await PutOneParameter("DoesRefraction", "DoesRefraction", parameter1, null);
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                await GetNoParameters("EquatorialSystem");
-                await GetNoParameters("FocalLength");
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                await GetNoParameters("GuideRateDeclination");
-                try { parameter1 = telescope.GuideRateDeclination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
-                await PutOneParameter("GuideRateDeclination", "GuideRateDeclination", parameter1, null);
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                await GetNoParameters("GuideRateRightAscension");
-                try { parameter1 = telescope.GuideRateRightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
-                await PutOneParameter("GuideRateRightAscension", "GuideRateRightAscension", parameter1, null);
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                await GetNoParameters("IsPulseGuiding");
-                await GetNoParameters("RightAscension");
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                await GetNoParameters("RightAscensionRate");
-                try { parameter1 = telescope.RightAscensionRate.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
-                await PutOneParameter("RightAscensionRate", "RightAscensionRate", parameter1, null);
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                await GetNoParameters("SideOfPier");
-                try { parameter1 = ((int)telescope.SideOfPier).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0"; }
-                await PutOneParameter("SideOfPier", "SideOfPier", parameter1, null);
-
-                await GetNoParameters("SiderealTime");
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                await GetNoParameters("SiteElevation");
-                try { parameter1 = telescope.SiteElevation.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
-                await PutOneParameter("SiteElevation", "SiteElevation", parameter1, null);
-
-                await GetNoParameters("SiteLatitude");
-                try { parameter1 = telescope.SiteLatitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
-                await PutOneParameter("SiteLatitude", "SiteLatitude", parameter1, null);
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                await GetNoParameters("SiteLongitude");
-                try { parameter1 = telescope.SiteLongitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
-                await PutOneParameter("SiteLongitude", "SiteLongitude", parameter1, null);
-
-                await GetNoParameters("Slewing");
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                await GetNoParameters("SlewSettleTime");
-                try { parameter1 = telescope.SlewSettleTime.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0"; }
-                await PutOneParameter("SlewSettleTime", "SlewSettleTime", parameter1, null);
-
-                try { parameter1 = telescope.TargetDeclination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
-                await PutOneParameter("TargetDeclination", "TargetDeclination", parameter1, null);
-                await GetNoParameters("TargetDeclination");
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                try { parameter1 = telescope.TargetRightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
-                await PutOneParameter("TargetRightAscension", "TargetRightAscension", parameter1, null);
-                await GetNoParameters("TargetRightAscension");
-
-                await GetNoParameters("Tracking");
-                try { parameter1 = telescope.Tracking.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
-                await PutOneParameter("Tracking", "Tracking", parameter1, null);
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                await GetNoParameters("TrackingRate");
-                try { parameter1 = ((int)telescope.TrackingRate).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0"; }
-                await PutOneParameter("TrackingRate", "TrackingRate", parameter1, null);
-
-                await GetNoParameters("UTCDate"); // Date format:                                                                   yyyy-MM-ddTHH:mm:ss.fffffffZ
-                try { parameter1 = telescope.UTCDate.ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ"); } catch (Exception) { parameter1 = @"2022-12-04T17:45:31.1234567Z"; }
-                await PutOneParameter("UTCDate", "UTCDate", parameter1, null);
-
-                // Test Methods
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.PARK_UNPARK]) // Test enabled
+                try
                 {
-                    SetStatus("Parking scope...");
-                    await PutNoParameters("Park", null);
-                    WaitWhile("Park", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
+                    try { telescope.Connected = true; } catch { }
 
-                    await PutNoParameters("SetPark", null);
-                    await PutNoParameters("Unpark", null);
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT {TelescopeTester.PARK_UNPARK}", "Test omitted due to Conform configuration setting", null);
-                }
+                    // Test Connect and Disconnect
+                    await TestConnect(telescope);
 
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.FIND_HOME]) // Test enabled
-                {
-                    SetStatus("Finding home...");
-                    await PutNoParameters("FindHome", null);
-                    WaitWhile("FindHome", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT {TelescopeTester.FIND_HOME}", "Test omitted due to Conform configuration setting", null);
-                }
+                    // Test properties
+                    await GetNoParameters("AlignmentMode");
+                    await GetNoParameters("Altitude");
+                    await GetNoParameters("ApertureArea");
+                    await GetNoParameters("ApertureDiameter");
+                    await GetNoParameters("AtHome");
+                    await GetNoParameters("AtPark");
+                    await GetNoParameters("Azimuth");
+                    await GetNoParameters("CanPark");
+                    await GetNoParameters("CanPulseGuide");
+                    await GetNoParameters("CanSetDeclinationRate");
+                    await GetNoParameters("CanSetGuideRates");
+                    await GetNoParameters("CanSetPark");
+                    await GetNoParameters("CanSetPierSide");
+                    await GetNoParameters("CanSetTracking");
+                    await GetNoParameters("CanSlew");
+                    await GetNoParameters("CanSlewAltAz");
+                    await GetNoParameters("CanSlewAltAzAsync");
+                    await GetNoParameters("CanSync");
+                    await GetNoParameters("CanSyncAltAz");
+                    await GetNoParameters("CanUnpark");
+                    await GetNoParameters("Declination");
+                    await GetNoParameters("DeclinationRate");
 
-                // Set tracking to TRUE for RA/Dec slews
-                await CallApi("True", "Tracking", HttpMethod.Put, ParamTrackingTrue, HttpStatusCode200);
+                    try { parameter1 = telescope.DeclinationRate.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
+                    await PutOneParameter("DeclinationRate", "DeclinationRate", parameter1, null);
 
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.ABORT_SLEW]) // Test enabled
-                {
-                    await PutNoParameters("AbortSlew", null);
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT {TelescopeTester.ABORT_SLEW}", "Test omitted due to Conform configuration setting", null);
-                }
+                    await GetNoParameters("DoesRefraction");
+                    try { parameter1 = telescope.DoesRefraction.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
+                    await PutOneParameter("DoesRefraction", "DoesRefraction", parameter1, null);
 
-                await GetOneParameter("AxisRates", "Axis", "0");
-                await GetOneParameter("CanMoveAxis", "Axis", "0");
+                    await GetNoParameters("EquatorialSystem");
+                    await GetNoParameters("FocalLength");
 
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                try { parameter1 = telescope.RightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "21.0"; }
-                try { parameter2 = telescope.Declination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "70"; }
-                await GetTwoParameters("DestinationSideOfPier", "RightAscension", parameter1, "Declination", parameter2);
+                    await GetNoParameters("GuideRateDeclination");
+                    try { parameter1 = telescope.GuideRateDeclination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
+                    await PutOneParameter("GuideRateDeclination", "GuideRateDeclination", parameter1, null);
 
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.MOVE_AXIS]) // Test enabled
-                {
-                    await PutTwoParameters("MoveAxis", "Axis", "0", "Rate", "0.0", null);
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT {TelescopeTester.MOVE_AXIS}", "Test omitted due to Conform configuration setting", null);
-                }
+                    await GetNoParameters("GuideRateRightAscension");
+                    try { parameter1 = telescope.GuideRateRightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
+                    await PutOneParameter("GuideRateRightAscension", "GuideRateRightAscension", parameter1, null);
 
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.PULSE_GUIDE]) // Test enabled
-                {
-                    await PutTwoParameters("PulseGuide", "Direction", "0", "Duration", "0", () =>
+                    await GetNoParameters("IsPulseGuiding");
+                    await GetNoParameters("RightAscension");
+
+                    await GetNoParameters("RightAscensionRate");
+                    try { parameter1 = telescope.RightAscensionRate.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
+                    await PutOneParameter("RightAscensionRate", "RightAscensionRate", parameter1, null);
+
+                    await GetNoParameters("SideOfPier");
+                    try { parameter1 = ((int)telescope.SideOfPier).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0"; }
+                    await PutOneParameter("SideOfPier", "SideOfPier", parameter1, null);
+
+                    await GetNoParameters("SiderealTime");
+
+                    await GetNoParameters("SiteElevation");
+                    try { parameter1 = telescope.SiteElevation.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
+                    await PutOneParameter("SiteElevation", "SiteElevation", parameter1, null);
+
+                    await GetNoParameters("SiteLatitude");
+                    try { parameter1 = telescope.SiteLatitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
+                    await PutOneParameter("SiteLatitude", "SiteLatitude", parameter1, null);
+
+                    await GetNoParameters("SiteLongitude");
+                    try { parameter1 = telescope.SiteLongitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
+                    await PutOneParameter("SiteLongitude", "SiteLongitude", parameter1, null);
+
+                    await GetNoParameters("Slewing");
+
+                    await GetNoParameters("SlewSettleTime");
+                    try { parameter1 = telescope.SlewSettleTime.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0"; }
+                    await PutOneParameter("SlewSettleTime", "SlewSettleTime", parameter1, null);
+
+                    try { parameter1 = telescope.TargetDeclination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
+                    await PutOneParameter("TargetDeclination", "TargetDeclination", parameter1, null);
+                    await GetNoParameters("TargetDeclination");
+
+                    try { parameter1 = telescope.TargetRightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0.0"; }
+                    await PutOneParameter("TargetRightAscension", "TargetRightAscension", parameter1, null);
+                    await GetNoParameters("TargetRightAscension");
+
+                    await GetNoParameters("Tracking");
+                    try { parameter1 = telescope.Tracking.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "false"; }
+                    await PutOneParameter("Tracking", "Tracking", parameter1, null);
+
+                    await GetNoParameters("TrackingRate");
+                    try { parameter1 = ((int)telescope.TrackingRate).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0"; }
+                    await PutOneParameter("TrackingRate", "TrackingRate", parameter1, null);
+
+                    await GetNoParameters("UTCDate"); // Date format:                                                                   yyyy-MM-ddTHH:mm:ss.fffffffZ
+                    try { parameter1 = telescope.UTCDate.ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ"); } catch (Exception) { parameter1 = @"2022-12-04T17:45:31.1234567Z"; }
+                    await PutOneParameter("UTCDate", "UTCDate", parameter1, null);
+
+                    // Test Methods
+
+                    if (settings.TelescopeTests[TelescopeTester.PARK_UNPARK]) // Test enabled
                     {
-                        WaitWhile("PulseGuide", () => telescope.IsPulseGuiding == true, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
-                    });
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT {TelescopeTester.PULSE_GUIDE}", "Test omitted due to Conform configuration setting", null);
-                }
+                        SetStatus("Parking scope...");
+                        await PutNoParameters("Park", null);
+                        WaitWhile("Park", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
 
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.SLEW_TO_COORDINATES_ASYNC]) // Test enabled
-                {
+                        await PutNoParameters("SetPark", null);
+                        await PutNoParameters("Unpark", null);
+                    }
+                    else // Test omitted
+                    {
+                        LogInformation($"PUT {TelescopeTester.PARK_UNPARK}", "Test omitted due to Conform configuration setting", null);
+                    }
+
+                    if (settings.TelescopeTests[TelescopeTester.FIND_HOME]) // Test enabled
+                    {
+                        SetStatus("Finding home...");
+                        await PutNoParameters("FindHome", null);
+                        WaitWhile("FindHome", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
+                    }
+                    else // Test omitted
+                    {
+                        LogInformation($"PUT {TelescopeTester.FIND_HOME}", "Test omitted due to Conform configuration setting", null);
+                    }
+
+                    // Set tracking to TRUE for RA/Dec slews
+                    await CallApi("True", "Tracking", HttpMethod.Put, ParamTrackingTrue, HttpStatusCode200);
+
+                    if (settings.TelescopeTests[TelescopeTester.ABORT_SLEW]) // Test enabled
+                    {
+                        await PutNoParameters("AbortSlew", null);
+                    }
+                    else // Test omitted
+                    {
+                        LogInformation($"PUT {TelescopeTester.ABORT_SLEW}", "Test omitted due to Conform configuration setting", null);
+                    }
+
+                    await GetOneParameter("AxisRates", "Axis", "0");
+                    await GetOneParameter("CanMoveAxis", "Axis", "0");
+
                     try { parameter1 = telescope.RightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "21.0"; }
                     try { parameter2 = telescope.Declination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "70"; }
-                    await PutTwoParameters("SlewToCoordinatesAsync", "RightAscension", parameter1, "Declination", parameter2, () =>
+                    await GetTwoParameters("DestinationSideOfPier", "RightAscension", parameter1, "Declination", parameter2);
+
+                    if (settings.TelescopeTests[TelescopeTester.MOVE_AXIS]) // Test enabled
                     {
-                        WaitWhile("SlewToCoordinatesAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
-                    });
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT {TelescopeTester.SLEW_TO_COORDINATES_ASYNC}", "Test omitted due to Conform configuration setting", null);
-                }
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.SLEW_TO_COORDINATES]) // Test enabled
-                {
-                    try { parameter1 = telescope.RightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "12.0"; }
-                    try { parameter2 = telescope.Declination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "80"; }
-                    await PutTwoParameters("SlewToCoordinates", "RightAscension", parameter1, "Declination", parameter2, () =>
+                        await PutTwoParameters("MoveAxis", "Axis", "0", "Rate", "0.0", null);
+                    }
+                    else // Test omitted
                     {
-                        WaitWhile("SlewToCoordinates", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
-                    });
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT {TelescopeTester.SLEW_TO_COORDINATES}", "Test omitted due to Conform configuration setting", null);
-                }
+                        LogInformation($"PUT {TelescopeTester.MOVE_AXIS}", "Test omitted due to Conform configuration setting", null);
+                    }
 
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.SLEW_TO_TARGET_ASYNC]) // Test enabled
-                {
-                    try { telescope.TargetRightAscension = telescope.RightAscension; } catch { }
-                    try { telescope.TargetDeclination = telescope.Declination; } catch { }
-                    await PutNoParameters("SlewToTargetAsync", () =>
+                    if (settings.TelescopeTests[TelescopeTester.PULSE_GUIDE]) // Test enabled
                     {
-                        WaitWhile("SlewToTargetAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
-                    });
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT {TelescopeTester.SLEW_TO_TARGET_ASYNC}", "Test omitted due to Conform configuration setting", null);
-                }
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.SLEW_TO_TARGET]) // Test enabled
-                {
-                    await PutNoParameters("SlewToTarget", () =>
+                        await PutTwoParameters("PulseGuide", "Direction", "0", "Duration", "0", () =>
+                        {
+                            WaitWhile("PulseGuide", () => telescope.IsPulseGuiding == true, 500, settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                        });
+                    }
+                    else // Test omitted
                     {
-                        WaitWhile("SlewToTarget", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
-                    });
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT {TelescopeTester.SLEW_TO_TARGET}", "Test omitted due to Conform configuration setting", null);
-                }
+                        LogInformation($"PUT {TelescopeTester.PULSE_GUIDE}", "Test omitted due to Conform configuration setting", null);
+                    }
 
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.SYNC_TO_COORDINATES]) // Test enabled
-                {
-                    try { parameter1 = telescope.RightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
-                    try { parameter2 = telescope.Declination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "45"; }
-                    await PutTwoParameters("SyncToCoordinates", "RightAscension", parameter1, "Declination", parameter2, null);
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT {TelescopeTester.SYNC_TO_COORDINATES}", "Test omitted due to Conform configuration setting", null);
-                }
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.SYNC_TO_TARGET]) // Test enabled
-                {
-                    await PutNoParameters("SyncToTarget", null);
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT {TelescopeTester.SYNC_TO_TARGET}", "Test omitted due to Conform configuration setting", null);
-                }
-
-                // Set tracking to FALSE for Alt/Az slews
-                await CallApi("False", "Tracking", HttpMethod.Put, ParamTrackingFalse, HttpStatusCode200);
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.SLEW_TO_ALTAZ_ASYNC]) // Test enabled
-                {
-                    try { parameter1 = telescope.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "60"; }
-                    try { parameter2 = telescope.Altitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "60"; }
-                    await PutTwoParameters("SlewToAltAzAsync", "Azimuth", parameter1, "Altitude", parameter2, () =>
+                    if (settings.TelescopeTests[TelescopeTester.SLEW_TO_COORDINATES_ASYNC]) // Test enabled
                     {
-                        WaitWhile("SlewToTargetAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
-                    });
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT {TelescopeTester.SLEW_TO_ALTAZ_ASYNC}", "Test omitted due to Conform configuration setting", null);
-                }
-
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.SLEW_TO_ALTAZ]) // Test enabled
-                {
-                    try { parameter1 = telescope.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
-                    try { parameter2 = telescope.Altitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "45"; }
-                    await PutTwoParameters("SlewToAltAz", "Azimuth", parameter1, "Altitude", parameter2, () =>
+                        try { parameter1 = telescope.RightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "21.0"; }
+                        try { parameter2 = telescope.Declination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "70"; }
+                        await PutTwoParameters("SlewToCoordinatesAsync", "RightAscension", parameter1, "Declination", parameter2, () =>
+                        {
+                            WaitWhile("SlewToCoordinatesAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
+                        });
+                    }
+                    else // Test omitted
                     {
-                        WaitWhile("SlewToTargetAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
-                    });
-                }
-                else // Test omitted
-                {
-                    LogInformation($"PUT {TelescopeTester.SLEW_TO_ALTAZ}", "Test omitted due to Conform configuration setting", null);
-                }
+                        LogInformation($"PUT {TelescopeTester.SLEW_TO_COORDINATES_ASYNC}", "Test omitted due to Conform configuration setting", null);
+                    }
 
-                if (applicationCancellationToken.IsCancellationRequested) goto TelescopeEnd;
-                if (settings.TelescopeTests[TelescopeTester.SYNC_TO_ALTAZ]) // Test enabled
-                {
-                    try { parameter1 = telescope.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
-                    try { parameter2 = telescope.Altitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "45"; }
-                    await PutTwoParameters("SyncToAltAz", "Azimuth", parameter1, "Altitude", parameter2, null);
+                    if (settings.TelescopeTests[TelescopeTester.SLEW_TO_COORDINATES]) // Test enabled
+                    {
+                        try { parameter1 = telescope.RightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "12.0"; }
+                        try { parameter2 = telescope.Declination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "80"; }
+                        await PutTwoParameters("SlewToCoordinates", "RightAscension", parameter1, "Declination", parameter2, () =>
+                        {
+                            WaitWhile("SlewToCoordinates", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
+                        });
+                    }
+                    else // Test omitted
+                    {
+                        LogInformation($"PUT {TelescopeTester.SLEW_TO_COORDINATES}", "Test omitted due to Conform configuration setting", null);
+                    }
+
+                    if (settings.TelescopeTests[TelescopeTester.SLEW_TO_TARGET_ASYNC]) // Test enabled
+                    {
+                        try { telescope.TargetRightAscension = telescope.RightAscension; } catch { }
+                        try { telescope.TargetDeclination = telescope.Declination; } catch { }
+                        await PutNoParameters("SlewToTargetAsync", () =>
+                        {
+                            WaitWhile("SlewToTargetAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
+                        });
+                    }
+                    else // Test omitted
+                    {
+                        LogInformation($"PUT {TelescopeTester.SLEW_TO_TARGET_ASYNC}", "Test omitted due to Conform configuration setting", null);
+                    }
+
+                    if (settings.TelescopeTests[TelescopeTester.SLEW_TO_TARGET]) // Test enabled
+                    {
+                        await PutNoParameters("SlewToTarget", () =>
+                        {
+                            WaitWhile("SlewToTarget", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
+                        });
+                    }
+                    else // Test omitted
+                    {
+                        LogInformation($"PUT {TelescopeTester.SLEW_TO_TARGET}", "Test omitted due to Conform configuration setting", null);
+                    }
+
+                    if (settings.TelescopeTests[TelescopeTester.SYNC_TO_COORDINATES]) // Test enabled
+                    {
+                        try { parameter1 = telescope.RightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
+                        try { parameter2 = telescope.Declination.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "45"; }
+                        await PutTwoParameters("SyncToCoordinates", "RightAscension", parameter1, "Declination", parameter2, null);
+                    }
+                    else // Test omitted
+                    {
+                        LogInformation($"PUT {TelescopeTester.SYNC_TO_COORDINATES}", "Test omitted due to Conform configuration setting", null);
+                    }
+
+                    if (settings.TelescopeTests[TelescopeTester.SYNC_TO_TARGET]) // Test enabled
+                    {
+                        await PutNoParameters("SyncToTarget", null);
+                    }
+                    else // Test omitted
+                    {
+                        LogInformation($"PUT {TelescopeTester.SYNC_TO_TARGET}", "Test omitted due to Conform configuration setting", null);
+                    }
+
+                    // Set tracking to FALSE for Alt/Az slews
+                    await CallApi("False", "Tracking", HttpMethod.Put, ParamTrackingFalse, HttpStatusCode200);
+
+                    if (settings.TelescopeTests[TelescopeTester.SLEW_TO_ALTAZ_ASYNC]) // Test enabled
+                    {
+                        try { parameter1 = telescope.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "60"; }
+                        try { parameter2 = telescope.Altitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "60"; }
+                        await PutTwoParameters("SlewToAltAzAsync", "Azimuth", parameter1, "Altitude", parameter2, () =>
+                        {
+                            WaitWhile("SlewToTargetAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
+                        });
+                    }
+                    else // Test omitted
+                    {
+                        LogInformation($"PUT {TelescopeTester.SLEW_TO_ALTAZ_ASYNC}", "Test omitted due to Conform configuration setting", null);
+                    }
+
+                    if (settings.TelescopeTests[TelescopeTester.SLEW_TO_ALTAZ]) // Test enabled
+                    {
+                        try { parameter1 = telescope.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
+                        try { parameter2 = telescope.Altitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "45"; }
+                        await PutTwoParameters("SlewToAltAz", "Azimuth", parameter1, "Altitude", parameter2, () =>
+                        {
+                            WaitWhile("SlewToTargetAsync", () => telescope.Slewing == true, 500, settings.TelescopeMaximumSlewTime, null);
+                        });
+                    }
+                    else // Test omitted
+                    {
+                        LogInformation($"PUT {TelescopeTester.SLEW_TO_ALTAZ}", "Test omitted due to Conform configuration setting", null);
+                    }
+
+                    if (settings.TelescopeTests[TelescopeTester.SYNC_TO_ALTAZ]) // Test enabled
+                    {
+                        try { parameter1 = telescope.Azimuth.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "45"; }
+                        try { parameter2 = telescope.Altitude.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter2 = "45"; }
+                        await PutTwoParameters("SyncToAltAz", "Azimuth", parameter1, "Altitude", parameter2, null);
+                    }
+                    else // Test omitted
+                    {
+                        LogInformation($"PUT {TelescopeTester.SYNC_TO_ALTAZ}", "Test omitted due to Conform configuration setting", null);
+                    }
+                    LogBlankLine();
                 }
-                else // Test omitted
+                catch (TestCancelledException)
                 {
-                    LogInformation($"PUT {TelescopeTester.SYNC_TO_ALTAZ}", "Test omitted due to Conform configuration setting", null);
+                    // Ignore exceptions arising because the user cancelled the test and return to the caller.
                 }
-                LogBlankLine();
 
             TelescopeEnd:
                 // Set tracking to FALSE
@@ -1873,7 +1844,7 @@ namespace ConformU
 
                                 // Extract the expected value if possible. 0 indicates no value or an invalid value which is not expected to round trip
                                 _ = UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionId);
-                                TL.LogMessage(testName, MessageLevel.Debug, $"{messagePrefix} - Input ClientTransactionID value: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionId}");
+                                LogDebug(testName, $"{messagePrefix} - Input ClientTransactionID value: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionId}");
                             }
                         }
                     }
@@ -1906,13 +1877,13 @@ namespace ConformU
                                 {
                                     // Extract the expected value if possible. 0 indicates no value or an invalid value which is not expected to round trip
                                     _ = UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionId);
-                                    TL.LogMessage(testName, MessageLevel.Debug, $"{messagePrefix} - Input ClientTransactionID name is correctly cased: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionId}");
+                                    LogDebug(testName, $"{messagePrefix} - Input ClientTransactionID name is correctly cased: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionId}");
 
                                 }
                                 else // It is not correctly cased.
                                 {
                                     expectedClientTransactionId = 0;
-                                    TL.LogMessage(testName, MessageLevel.Debug, $"{messagePrefix} - Input ClientTransactionID name is NOT correctly cased: {parameter.ParameterValue}, Expected value: {expectedClientTransactionId}");
+                                    LogDebug(testName, $"{messagePrefix} - Input ClientTransactionID name is NOT correctly cased: {parameter.ParameterValue}, Expected value: {expectedClientTransactionId}");
                                 }
                             }
                         }
@@ -2180,6 +2151,17 @@ namespace ConformU
             AlpacaErrors returnedErrorNumber = AlpacaErrors.AlpacaNoError;
             string returnedErrorMessage = "";
 
+            // Do not attempt to process the request if the test has been cancelled
+            LogDebug(testName, $"Ignore cancellation: {ignoreApplicationCancellation} - Test is cancelled: {applicationCancellationToken.IsCancellationRequested}");
+            if (!ignoreApplicationCancellation)
+            {
+                if (applicationCancellationToken.IsCancellationRequested)
+                {
+                    LogDebug(testName, $"THROWING TestCancelledException");
+                    throw new TestCancelledException();
+                }
+            }
+
             if (expectedCodes is null)
             {
                 throw new ArgumentNullException(nameof(expectedCodes));
@@ -2214,7 +2196,7 @@ namespace ConformU
 
                                 // Extract the expected value if possible. 0 indicates no value or an invalid value which is not expected to round trip
                                 _ = UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionID);
-                                TL.LogMessage(testName, MessageLevel.Debug, $"{messagePrefix} - Input ClientTransactionID value: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionID}");
+                                LogDebug(testName, $"{messagePrefix} - Input ClientTransactionID value: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionID}");
                             }
                         }
                     }
@@ -2247,13 +2229,13 @@ namespace ConformU
                                 {
                                     // Extract the expected value if possible. 0 indicates no value or an invalid value which is not expected to round trip
                                     _ = UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionID);
-                                    TL.LogMessage(testName, MessageLevel.Debug, $"{messagePrefix} - Input ClientTransactionID name is correctly cased: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionID}");
+                                    LogDebug(testName, $"{messagePrefix} - Input ClientTransactionID name is correctly cased: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionID}");
 
                                 }
                                 else // It is not correctly cased.
                                 {
                                     expectedClientTransactionID = 0;
-                                    TL.LogMessage(testName, MessageLevel.Debug, $"{messagePrefix} - Input ClientTransactionID name is NOT correctly cased: {parameter.ParameterValue}, Expected value: {expectedClientTransactionID}");
+                                    LogDebug(testName, $"{messagePrefix} - Input ClientTransactionID name is NOT correctly cased: {parameter.ParameterValue}, Expected value: {expectedClientTransactionID}");
                                 }
                             }
                         }
@@ -2299,6 +2281,8 @@ namespace ConformU
                         // Handle the response, which will be either JSON or ImageBytes
                         if (!httpResponse.Content.Headers.ContentType.MediaType.Contains(AlpacaConstants.IMAGE_BYTES_MIME_TYPE, StringComparison.InvariantCultureIgnoreCase)) // Should be a JSON response
                         {
+                            // Write the received string to the log as debug content
+                            LogDebug(testName, $"{messagePrefix} - JSON response: {responseString[..Math.Min(responseString.Length, 250)]}");
 
                             // Parse the common device values from the JSON response into a Response class
                             deviceResponse = JsonSerializer.Deserialize<Response>(responseString);
@@ -2352,6 +2336,7 @@ namespace ConformU
                     catch (Exception ex)
                     {
                         LogIssue(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) but could not de-serialise the returned JSON string. Exception message: {ex.Message}", responseString);
+                        LogDebug(testName, $"Exception parsing JSON:\r\n{ex}");
                         LogBlankLine();
                         return;
                     }
@@ -2711,8 +2696,13 @@ namespace ConformU
                 case TestOutcome.Issue:
                     outcomeString = "ISSUE";
                     break;
+
                 case TestOutcome.Error:
                     outcomeString = "ERROR";
+                    break;
+
+                case TestOutcome.Debug:
+                    outcomeString = "DEBUG";
                     break;
 
                 default:
@@ -2789,6 +2779,17 @@ namespace ConformU
         {
             LogMessage(method, TestOutcome.Info, message, contextMessage);
             informationMessages.Add($"{method} ==> {message} {(string.IsNullOrEmpty(contextMessage) ? "" : $"\r\n  Response: {contextMessage}")}\r\n"); //
+        }
+
+        /// <summary>
+        /// Log a debug message
+        /// </summary>
+        /// <param name="method"> Calling method name</param>
+        ///<param name = "message" > Message to log</param>
+        private void LogDebug(string method, string message)
+        {
+            if (settings.Debug)
+                LogMessage(method, TestOutcome.Debug, message, null);
         }
 
         /// <summary>

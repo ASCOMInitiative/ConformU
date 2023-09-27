@@ -48,7 +48,8 @@
         OK,
         Info,
         Issue,
-        Error
+        Error,
+        Debug
     }
 
     #region Blazor lifetime event handlers
@@ -58,8 +59,6 @@
         state.UiHasChanged += OnUiHasChanged;
         settings = configuration.Settings;
         StartCheckAlpacaProtocol();
-        applicationCancellationTokenSource = new CancellationTokenSource();
-        applicationCancellationToken = applicationCancellationTokenSource.Token;
     }
 
     protected override async void OnAfterRender(bool firstRender)
@@ -88,6 +87,7 @@
             LogLine($"STOP button pressed... stopping tests");
             LogBlankLine();
             applicationCancellationTokenSource.Cancel();
+            LogDebug("StopTest", $"After cancelling - applicationCancellationToken.IsCancellationRequested: {applicationCancellationToken.IsCancellationRequested}");
         });
     }
 
@@ -207,45 +207,6 @@
         }
     }
 
-    /// <summary>
-    /// Start an Alpaca protocol check
-    ///</summary>
-    internal void StartCheckAlpacaProtocolOriginal()
-    {
-        try
-        {
-            // Create a new application cancellation token
-            applicationCancellationTokenSource = new CancellationTokenSource();
-            applicationCancellationToken = applicationCancellationTokenSource.Token;
-
-            // Clear the screen
-            ClearLogScreen();
-
-            // Make sure we only test Alpaca devices
-            if (configuration.Settings.DeviceTechnology == DeviceTechnology.Alpaca)
-            {
-                //Initialise Status field
-                SetStatus("Testing for Alpaca protocol violations...");
-
-                // Start the task to run the Alpaca protocol test
-                LogText("StartCheckAlpacaProtocol", $"Starting check...");
-                LogBlankLine();
-
-                // Start the test
-                //Task.Run(async () => { await TestAlpacaProtocol(); });
-            }
-            else
-            {
-                //Initialise Status field
-                SetStatus("Selected device is not an Alpaca device");
-            }
-        }
-        catch (Exception ex)
-        {
-            LogMessage("StartCheckAlpacaProtocol", TestOutcome.Error, $"Exception: {ex}");
-        }
-    }
-
     #endregion
 
     #region Logging and window resize
@@ -281,8 +242,13 @@
             case TestOutcome.Issue:
                 outcomeString = "ISSUE";
                 break;
+
             case TestOutcome.Error:
                 outcomeString = "ERROR";
+                break;
+
+            case TestOutcome.Debug:
+                outcomeString = "DEBUG";
                 break;
 
             default:
@@ -290,7 +256,7 @@
         }
         string methodString = $"{method,-ExtensionMethods.COLUMN_WIDTH}{outcomeString,-ExtensionMethods.OUTCOME_WIDTH}";
 
-    // Write to the logger
+        // Write to the logger
         logger?.LogMessage(methodString, message);
         if (contextMessage is not null) logger?.LogMessage("", contextMessage);
 
@@ -315,21 +281,14 @@
     }
 
     /// <summary>
-    /// Log an unformatted message to the screen and log file
+    /// Log a debug message
     /// </summary>
-    /// <param name="method"></param>
-    /// <param name="message"></param>
-    private async void LogText(string method, string message)
+    /// <param name="method"> Calling method name</param>
+    ///<param name = "message" > Message to log</param>
+    private void LogDebug(string method, string message)
     {
-        logger?.LogMessage(method, message);
-        screenLog = (screenLog + $"\r\n{message}").Trim(new char[] { '\r', '\n' });
-
-        try
-        {
-            await InvokeAsync(() => { StateHasChanged(); });
-            await JS.InvokeVoidAsync("ScrollToBottom", "ProtocolLog");
-        }
-        catch { }
+        if (settings.Debug)
+            LogMessage(method, TestOutcome.Debug, message, null);
     }
 
     /// <summary>
@@ -339,7 +298,7 @@
     private void LogLine(string message)
     {
         logger?.LogMessage(message, "");
-        screenLog = $"{screenLog}\r\n{message}";
+        //screenLog = $"{screenLog}\r\n{message}";
     }
 
     /// <summary>
