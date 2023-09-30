@@ -468,7 +468,7 @@ namespace ConformU
 
         private async Task TestCamera()
         {
-            using (AlpacaCamera camera = AlpacaClient.GetDevice<AlpacaCamera>(settings.AlpacaDevice))
+            using (AlpacaCamera camera = AlpacaClient.GetDevice<AlpacaCamera>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.ConformuVersion))
             {
                 try
                 {
@@ -622,7 +622,7 @@ namespace ConformU
 
         private async Task TestCoverCalibrator()
         {
-            using (AlpacaCoverCalibrator coverCalibrator = AlpacaClient.GetDevice<AlpacaCoverCalibrator>(settings.AlpacaDevice))
+            using (AlpacaCoverCalibrator coverCalibrator = AlpacaClient.GetDevice<AlpacaCoverCalibrator>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.ConformuVersion))
             {
                 try
                 {
@@ -676,7 +676,7 @@ namespace ConformU
         {
             string parameter1 = "";
 
-            using (AlpacaDome dome = AlpacaClient.GetDevice<AlpacaDome>(settings.AlpacaDevice))
+            using (AlpacaDome dome = AlpacaClient.GetDevice<AlpacaDome>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.ConformuVersion))
             {
                 try
                 {
@@ -795,7 +795,7 @@ namespace ConformU
         {
             string parameter1 = "";
 
-            using (AlpacaFilterWheel filterWheel = AlpacaClient.GetDevice<AlpacaFilterWheel>(settings.AlpacaDevice))
+            using (AlpacaFilterWheel filterWheel = AlpacaClient.GetDevice<AlpacaFilterWheel>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.ConformuVersion))
             {
                 try
                 {
@@ -828,7 +828,7 @@ namespace ConformU
         {
             string parameter1 = "";
 
-            using (AlpacaFocuser focuser = AlpacaClient.GetDevice<AlpacaFocuser>(settings.AlpacaDevice))
+            using (AlpacaFocuser focuser = AlpacaClient.GetDevice<AlpacaFocuser>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.ConformuVersion))
             {
                 try
                 {
@@ -877,7 +877,7 @@ namespace ConformU
         {
             string parameter1 = "0.0";
 
-            using (AlpacaObservingConditions observingConditions = AlpacaClient.GetDevice<AlpacaObservingConditions>(settings.AlpacaDevice))
+            using (AlpacaObservingConditions observingConditions = AlpacaClient.GetDevice<AlpacaObservingConditions>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.ConformuVersion))
             {
                 try
                 {
@@ -940,7 +940,7 @@ namespace ConformU
         {
             string parameter1 = "";
 
-            using (AlpacaRotator rotator = AlpacaClient.GetDevice<AlpacaRotator>(settings.AlpacaDevice))
+            using (AlpacaRotator rotator = AlpacaClient.GetDevice<AlpacaRotator>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.ConformuVersion))
             {
                 try
                 {
@@ -1002,29 +1002,31 @@ namespace ConformU
 
         private async Task TestSafetyMonitor()
         {
-            using AlpacaSafetyMonitor safetyMonitor = AlpacaClient.GetDevice<AlpacaSafetyMonitor>(settings.AlpacaDevice);
-            try
+            using (AlpacaSafetyMonitor safetyMonitor = AlpacaClient.GetDevice<AlpacaSafetyMonitor>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.ConformuVersion))
             {
-                try { safetyMonitor.Connected = true; } catch { }
+                try
+                {
+                    try { safetyMonitor.Connected = true; } catch { }
 
-                // Test Connect and Disconnect
-                await TestConnect(safetyMonitor);
+                    // Test Connect and Disconnect
+                    await TestConnect(safetyMonitor);
 
-                // Test properties
-                await GetNoParameters("IsSafe");
+                    // Test properties
+                    await GetNoParameters("IsSafe");
+                }
+                catch (TestCancelledException)
+                {
+                    // Ignore exceptions arising because the user cancelled the test and return to the caller.
+                }
+
+                // Disconnect
+                try { safetyMonitor.Connected = false; } catch { }
             }
-            catch (TestCancelledException)
-            {
-                // Ignore exceptions arising because the user cancelled the test and return to the caller.
-            }
-
-            // Disconnect
-            try { safetyMonitor.Connected = false; } catch { }
         }
 
         private async Task TestSwitch()
         {
-            using (AlpacaSwitch switchDevice = AlpacaClient.GetDevice<AlpacaSwitch>(settings.AlpacaDevice))
+            using (AlpacaSwitch switchDevice = AlpacaClient.GetDevice<AlpacaSwitch>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.ConformuVersion))
             {
                 try
                 {
@@ -1105,7 +1107,7 @@ namespace ConformU
             string parameter1 = "";
             string parameter2 = "";
 
-            using (AlpacaTelescope telescope = AlpacaClient.GetDevice<AlpacaTelescope>(settings.AlpacaDevice))
+            using (AlpacaTelescope telescope = AlpacaClient.GetDevice<AlpacaTelescope>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.ConformuVersion))
             {
                 try
                 {
@@ -2292,21 +2294,83 @@ namespace ConformU
                 // Get the device response
                 string responseString = await httpResponse.Content.ReadAsStringAsync();
 
+                // Lig the received response
+                LogDebug(testName, $"HTTP Status code: {httpResponse.StatusCode}");
+                LogDebug(testName, $"Media type: {httpResponse.Content.Headers.ContentType.MediaType}");
+                LogDebug(testName, $"JSON response length: {responseString.Length}");
+                LogDebug(testName, $"JSON response: #####{responseString[..Math.Min(responseString.Length, 250)]}#####");
+
                 #region Process successful HTTP status = 200 responses
 
                 // If the call was successful at an HTTP level (Status = 200) check whether there was an ASCOM error reported in the returned JSON
                 if ((httpResponse.StatusCode == HttpStatusCode.OK) & (!responseString.Contains("<!DOCTYPE")))
                 {
-                    // Response should be either a JSON or an ImageBytes response
+                    // Response should be either a JSON or an ImageBytes response so get the media type to determine which, assuming JSON if no content type is returned
                     try
                     {
-                        // Handle the response, which will be either JSON or ImageBytes
-                        if (!httpResponse.Content.Headers.ContentType.MediaType.Contains(AlpacaConstants.IMAGE_BYTES_MIME_TYPE, StringComparison.InvariantCultureIgnoreCase)) // Should be a JSON response
+                        MediaTypeHeaderValue contentType; // Variable to hold the returned media type, if any.
+                        try
                         {
-                            // Write the received string to the log as debug content
-                            LogDebug(testName, $"{messagePrefix} - JSON response: {responseString[..Math.Min(responseString.Length, 250)]}");
+                            LogDebug(testName, $"About to read content type...");
+                            contentType = httpResponse.Content.Headers.ContentType;
+
+                            // Test whether the response has a content type
+                            if (contentType is not null) // Response has a content type
+                            {
+                                LogDebug(testName, $"Got content type OK: {contentType}");
+                            }
+                            else // Response does not have a content type
+                            {
+                                // Apply a default empty string value so that later tests succeed.
+                                LogDebug(testName, $"Content type is null, setting content type to empty string!");
+                                contentType = new MediaTypeHeaderValue("");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogDebug(testName, $"Exception reading content type:\r\n{ex}");
+                            contentType = new MediaTypeHeaderValue("");
+                        }
+
+                        // Handle the response, which will be either JSON or ImageBytes
+                        LogDebug(testName, $"About to test content type...");
+                        if (!contentType.ToString().Contains(AlpacaConstants.IMAGE_BYTES_MIME_TYPE, StringComparison.InvariantCultureIgnoreCase)) // Should be a JSON response
+                        {
+                            LogDebug(testName, $"Processing JSON response");
+                            try
+                            {
+                                LogDebug(testName, $"Test 1 - About to de-serialise supplied response...");
+                                deviceResponse = JsonSerializer.Deserialize<Response>(responseString);
+                                LogDebug(testName, $"Test 1 - De-serialised OK!");
+                            }
+                            catch (Exception ex)
+                            {
+                                LogDebug(testName, $"Test 1 - Exception parsing JSON as supplied:\r\n{ex}");
+                            }
+                            try
+                            {
+                                LogDebug(testName, $"Test 2 - Removing CrLf...");
+                                string cleanedResponseString = responseString.Replace("\r", null);
+                                cleanedResponseString = cleanedResponseString.Replace("\n", null);
+
+                                LogDebug(testName, $"Test 2 - Removing multiple spaces...");
+                                for (int i = 0; i < 6; i++)
+                                {
+                                    cleanedResponseString = cleanedResponseString.Replace("  ", null);
+                                }
+                                LogDebug(testName, $"JSON response cleaned: #####{cleanedResponseString[..Math.Min(cleanedResponseString.Length, 250)]}#####");
+
+                                LogDebug(testName, $"Test 2 - About to de-serialise cleaned response...");
+                                deviceResponse = JsonSerializer.Deserialize<Response>(cleanedResponseString);
+                                LogDebug(testName, $"Test 2 - De-serialised OK!");
+                            }
+                            catch (Exception ex)
+                            {
+                                LogDebug(testName, $"Test 2 - Exception parsing cleaned JSON with stripped CrLf and spaces:\r\n{ex}");
+                            }
 
                             // Parse the common device values from the JSON response into a Response class
+                            LogDebug(testName, $"About to de-serialise response...");
                             deviceResponse = JsonSerializer.Deserialize<Response>(responseString);
 
                             // Save the parsed response values
@@ -2318,6 +2382,7 @@ namespace ConformU
                         } // Handle a JSON response
                         else // Should be an ImageBytes binary response
                         {
+                            LogDebug(testName, $"Processing ImageBytes response");
                             // Convert the string response to a byte array
                             byte[] bytes = Encoding.ASCII.GetBytes(responseString);
 
