@@ -85,6 +85,7 @@ namespace ConformU
         private readonly List<HttpStatusCode> HttpStatusCodeAny = new();
         private readonly List<HttpStatusCode> HttpStatusCode200 = new() { HttpStatusCode.OK };
         private readonly List<HttpStatusCode> HttpStatusCode400 = new() { HttpStatusCode.BadRequest };
+        private readonly List<HttpStatusCode> HttpStatusCode200And400 = new() { HttpStatusCode.OK, HttpStatusCode.BadRequest };
 
         private readonly List<HttpStatusCode> HttpStatusCode4XX = new() { HttpStatusCode.BadRequest, HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized, HttpStatusCode.PaymentRequired, HttpStatusCode.Forbidden,
                                                      HttpStatusCode.NotFound, HttpStatusCode.MethodNotAllowed, HttpStatusCode.NotAcceptable, HttpStatusCode.ProxyAuthenticationRequired, HttpStatusCode.Conflict, HttpStatusCode.Gone };
@@ -116,7 +117,7 @@ namespace ConformU
         internal List<CheckProtocolParameter> ParamTransactionIdNegative = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", "-67890") };
 
         // ClientID and ClientTransactionID values non-numeric string
-        internal List<CheckProtocolParameter> ParamClientIDString = new() { new CheckProtocolParameter("ClientID", "asdasd"), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
+        internal List<CheckProtocolParameter> ParamClientIDNonNumeric = new() { new CheckProtocolParameter("ClientID", "NASDAQ"), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
         internal List<CheckProtocolParameter> ParamTransactionIdString = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", "qweqwe") };
 
         // Set Connected True and False
@@ -219,7 +220,7 @@ namespace ConformU
                 {
                     try
                     {
-                        if (!settings.AlpacaConfiguration.ProtocolShowOkMessages)
+                        if (settings.AlpacaConfiguration.ProtocolMessageLevel != ProtocolMessageLevel.All)
                         {
                             LogLine($"OK messages are suppressed, they can be enabled through the Alpaca and COM settings page.");
                             LogBlankLine();
@@ -227,11 +228,11 @@ namespace ConformU
                         }
                         // Set Connected true to start the test
                         await CallApi("True", "Connected", HttpMethod.Put, ParamConnectedTrue, HttpStatusCode200);
-                        if (settings.AlpacaConfiguration.ProtocolShowOkMessages)
+                        if (settings.AlpacaConfiguration.ProtocolMessageLevel == ProtocolMessageLevel.All)
                             LogBlankLine();
                         else
                             LogLine($"Successfully connected to device, testing...");
-                        
+
                         // Test common members
                         await TestCommon();
 
@@ -289,12 +290,12 @@ namespace ConformU
                     }
 
                     // Finally set Connected false
-                    if (!settings.AlpacaConfiguration.ProtocolShowOkMessages) 
+                    if (settings.AlpacaConfiguration.ProtocolMessageLevel != ProtocolMessageLevel.All)
                         LogBlankLine();
 
                     await CallApi("False", "Connected", HttpMethod.Put, ParamConnectedFalse, HttpStatusCode200, true);
 
-                    if (!settings.AlpacaConfiguration.ProtocolShowOkMessages)
+                    if (settings.AlpacaConfiguration.ProtocolMessageLevel != ProtocolMessageLevel.All)
                         LogLine($"Successfully disconnected from device.");
 
                 }
@@ -614,7 +615,6 @@ namespace ConformU
                     // Ignore exceptions arising because the user cancelled the test and return to the caller.
                 }
 
-            CameraEnd:
                 try { camera.Connected = false; } catch { }
 
             }
@@ -668,7 +668,6 @@ namespace ConformU
                     // Ignore exceptions arising because the user cancelled the test and return to the caller.
                 }
 
-            CoverEnd:
                 try { coverCalibrator.Connected = false; } catch { }
             }
         }
@@ -821,7 +820,6 @@ namespace ConformU
                     // Ignore exceptions arising because the user cancelled the test and return to the caller.
                 }
 
-            FilterWheelEnd:
                 try { filterWheel.Connected = false; } catch { }
             }
         }
@@ -871,7 +869,6 @@ namespace ConformU
                     // Ignore exceptions arising because the user cancelled the test and return to the caller.
                 }
 
-            FocuserEnd:
                 try { focuser.Connected = false; } catch { }
             }
         }
@@ -935,7 +932,6 @@ namespace ConformU
                     // Ignore exceptions arising because the user cancelled the test and return to the caller.
                 }
 
-            ObsConEnd:
                 try { observingConditions.Connected = false; } catch { }
             }
         }
@@ -1000,7 +996,6 @@ namespace ConformU
                     // Ignore exceptions arising because the user cancelled the test and return to the caller.
                 }
 
-            RotatorEnd:
                 try { rotator.Connected = false; } catch { }
             }
         }
@@ -1101,7 +1096,6 @@ namespace ConformU
                     // Ignore exceptions arising because the user cancelled the test and return to the caller.
                 }
 
-            SwitchEnd:
                 try { switchDevice.Connected = false; } catch { }
             }
         }
@@ -1402,7 +1396,6 @@ namespace ConformU
                     // Ignore exceptions arising because the user cancelled the test and return to the caller.
                 }
 
-            TelescopeEnd:
                 // Set tracking to FALSE
                 await CallApi("False", "Tracking", HttpMethod.Put, ParamTrackingFalse, HttpStatusCode200);
 
@@ -1736,54 +1729,67 @@ namespace ConformU
         private async Task TestBadIdValues(string method, HttpMethod httpMethod, string parameterName1, string parameterValue1, string parameterName2, string parameterValue2)
         {
             List<CheckProtocolParameter> parameters;
+            List<HttpStatusCode> allowedStatus;
+
+            // Set acceptable HTTP status codes depending on whether or not we are in strict mode.
+            if (settings.AlpacaConfiguration.ProtocolStrictChecks)
+            {
+                // Strict mode so only accept HTTP 400 error status outcomes
+                allowedStatus = HttpStatusCode400;
+            }
+            else
+            {
+                // Tolerant mode where we accept 200 success status as well as 400 error status outcomes
+                allowedStatus = HttpStatusCode200And400;
+            }
 
             // Test empty ClientID value
             parameters = new List<CheckProtocolParameter>(ParamClientIDEmpty);
             if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
             if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-            await CallApi("ClientID is empty", method, httpMethod, parameters, HttpStatusCode400, acceptInvalidValueError: true);
+            await CallApi("ClientID is empty", method, httpMethod, parameters, allowedStatus, acceptInvalidValueError: true);
 
             // Test white space ClientID value
             parameters = new List<CheckProtocolParameter>(ParamClientIDWhiteSpace);
             if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
             if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-            await CallApi("ClientID is white space", method, httpMethod, parameters, HttpStatusCode400, acceptInvalidValueError: true);
+            await CallApi("ClientID is white space", method, httpMethod, parameters, allowedStatus, acceptInvalidValueError: true);
 
             // Test negative ClientID value
             parameters = new List<CheckProtocolParameter>(ParamClientIDNegative);
             if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
             if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-            await CallApi("ClientID is negative", method, httpMethod, parameters, HttpStatusCode400, acceptInvalidValueError: true);
+            await CallApi("ClientID is negative", method, httpMethod, parameters, allowedStatus, acceptInvalidValueError: true);
 
-            // Test text ClientID value
-            parameters = new List<CheckProtocolParameter>(ParamClientIDString);
+            // Test non-numeric ClientID value
+            parameters = new List<CheckProtocolParameter>(ParamClientIDNonNumeric);
             if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
             if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-            await CallApi("ClientID is a string", method, httpMethod, parameters, HttpStatusCode400, acceptInvalidValueError: true);
+            await CallApi("ClientID is not numeric", method, httpMethod, parameters, allowedStatus, acceptInvalidValueError: true);
 
             // Test empty ClientTransactionID value
             parameters = new List<CheckProtocolParameter>(ParamTransactionIdEmpty);
             if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
             if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-            await CallApi("ClientTransactionID is empty", method, httpMethod, parameters, HttpStatusCode400, acceptInvalidValueError: true);
+            await CallApi("ClientTransactionID is empty", method, httpMethod, parameters, allowedStatus, acceptInvalidValueError: true);
 
             // Test white space ClientTransactionID value
             parameters = new List<CheckProtocolParameter>(ParamTransactionIdWhiteSpace);
             if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
             if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-            await CallApi("ClientTransactionID is white space", method, httpMethod, parameters, HttpStatusCode400, acceptInvalidValueError: true);
+            await CallApi("ClientTransactionID is white space", method, httpMethod, parameters, allowedStatus, acceptInvalidValueError: true);
 
             // Test negative ClientTransactionID value
             parameters = new List<CheckProtocolParameter>(ParamTransactionIdNegative);
             if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
             if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-            await CallApi("ClientTransactionID is negative", method, httpMethod, parameters, HttpStatusCode400, acceptInvalidValueError: true);
+            await CallApi("ClientTransactionID is negative", method, httpMethod, parameters, allowedStatus, acceptInvalidValueError: true);
 
             // Test text ClienClientTransactionID value
             parameters = new List<CheckProtocolParameter>(ParamTransactionIdString);
             if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
             if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-            await CallApi("ClientTransactionID is a string", method, httpMethod, parameters, HttpStatusCode400, acceptInvalidValueError: true);
+            await CallApi("ClientTransactionID is a string", method, httpMethod, parameters, allowedStatus, acceptInvalidValueError: true);
         }
 
         private async Task<int> GetInterfaceVersion()
@@ -2239,19 +2245,20 @@ namespace ConformU
                                 // Record that we have a ClientTransactionID parameter name, which may or may not be correctly cased
                                 hasClientTransactionID = true;
 
-                                // Test whether the parameter name is correctly cased
-                                if (parameter.ParameterName == "ClientTransactionID") // It is correctly cased
-                                {
-                                    // Extract the expected value if possible. 0 indicates no value or an invalid value which is not expected to round trip
-                                    _ = UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionID);
-                                    LogDebug(testName, $"{messagePrefix} - Input ClientTransactionID name is correctly cased: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionID}");
+                                // Extract the expected value if possible. 0 indicates no value or an invalid value which is not expected to round trip
+                                _ = UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionID);
+                                LogDebug(testName, $"{messagePrefix} - Input ClientTransactionID name is correctly cased: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionID}");
 
-                                }
-                                else // It is not correctly cased.
-                                {
-                                    expectedClientTransactionID = 0;
-                                    LogDebug(testName, $"{messagePrefix} - Input ClientTransactionID name is NOT correctly cased: {parameter.ParameterValue}, Expected value: {expectedClientTransactionID}");
-                                }
+                                // Test whether the parameter name is correctly cased
+                                //if (parameter.ParameterName == "ClientTransactionID") // It is correctly cased
+                                //{
+
+                                //}
+                                //else // It is not correctly cased.
+                                //{
+                                //    expectedClientTransactionID = 0;
+                                //    LogDebug(testName, $"{messagePrefix} - Input ClientTransactionID name is NOT correctly cased: {parameter.ParameterValue}, Expected value: {expectedClientTransactionID}");
+                                //}
                             }
                         }
 
@@ -2364,27 +2371,47 @@ namespace ConformU
                 // Test whether the ClientTransactionID round tripped OK
                 if (hasClientTransactionID & (httpResponse.StatusCode == HttpStatusCode.OK)) // A client transaction ID parameter was sent and the transaction was processed OK
                 {
-                    // Test whether the expected value was returned
-                    if (returnedClientTransactionID == expectedClientTransactionID) // Round tripped OK
+                    // Test whether this transaction has an incorrectly cased ClientTransactionID key
+                    if (badlyCasedTransactionIdName) // This transaction does contain a badly cased ClientTransactionID FORM parameter key
                     {
-                        LogOk(testName, $"{messagePrefix} - The expected ClientTransactionID was returned: {returnedClientTransactionID}", null);
-                    }
-                    else // Did not round trip OK
-                    {
-                        // Handle responses to a badly cased ClientTransactionID FORM parameter
-                        if (badlyCasedTransactionIdName) // This transaction does contain a badly cased ClientTransactionID FORM parameter
+                        // Test whether or not we are running in strict mode
+                        if (settings.AlpacaConfiguration.ProtocolStrictChecks) // Running in strict mode
                         {
                             // Check whether the expected value of 0 was returned. 
                             if (returnedClientTransactionID == 0) // Got the expected value of 0
                             {
-                                LogOk(testName, $"{messagePrefix} - The ClientTransactionID was round-tripped as expected. Sent value: {expectedClientTransactionID}, Returned value: {returnedClientTransactionID}", null);
+                                LogOk(testName, $"{messagePrefix} - The returned ClientTransactionID was 0 as expected.", null);
                             }
                             else // Got some value other than expected value of 0
                             {
                                 LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {returnedClientTransactionID}, Expected: {expectedClientTransactionID}", null);
                             }
                         }
-                        else // This transaction does not contain a badly cased ClientTransactionID FORM parameter so report an issue
+                        else // Running in tolerant mode
+                        {
+                            // Check whether the expected value of 0 was returned. 
+                            if (returnedClientTransactionID == 0) // Got the expected value of 0
+                            {
+                                LogOk(testName, $"{messagePrefix} - The returned ClientTransactionID was 0 as expected.", null);
+                            }
+                            else if (returnedClientTransactionID == expectedClientTransactionID) // Tolerate the device returning the transaction id as sent
+                            {
+                                LogInformation(testName, $"{messagePrefix} - The ClientTransactionID was round-tripped suggesting that the device did not treat it as case sensitive. Sent value: {expectedClientTransactionID}, Returned value: {returnedClientTransactionID}", null);
+                            }
+                            else // Got some value other than expected value of 0
+                            {
+                                LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {returnedClientTransactionID}, Expected: {expectedClientTransactionID}", null);
+                            }
+                        }
+                    }
+                    else // Normal transaction that does not contain a badly cased ClientTransactionID FORM parameter key
+                    {
+                        // Test whether the expected value was returned
+                        if (returnedClientTransactionID == expectedClientTransactionID) // Round tripped OK
+                        {
+                            LogOk(testName, $"{messagePrefix} - The expected ClientTransactionID was returned: {returnedClientTransactionID}", null);
+                        }
+                        else // Did not round trip OK
                         {
                             LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {returnedClientTransactionID}, Expected: {expectedClientTransactionID}", null);
                         }
@@ -2392,9 +2419,21 @@ namespace ConformU
                 }
 
                 // Test whether a valid ServerTransactionID value was returned
-                if (httpResponse.StatusCode == HttpStatusCode.OK) // We got an HTTP 200 OK status
+                if (httpResponse.StatusCode == HttpStatusCode.OK) // We got an HTTP 200 OK status so check the ServerTransactionID value
                 {
-                    if (returnedServerTransactionID >= 1)  // Valid ServerTransactionID
+                    if (returnedServerTransactionID == 0)
+                    {
+                        // Determine whether we are using strict checking
+                        if (settings.AlpacaConfiguration.ProtocolStrictChecks) // Strict checking is enabled
+                        {
+                            LogIssue(testName, $"{messagePrefix} - An unexpected ServerTransactionID was returned: {returnedServerTransactionID}, Expected: 1 or greater", null);
+                        }
+                        else // Tolerant checking is enabled
+                        {
+                            LogOk(testName, $"{messagePrefix} - The device either did not return a ServerTransactionID key or returned a ServerTransactionID key with a value of zero", null);
+                        }
+                    }
+                    else if (returnedServerTransactionID >= 1)  // Valid ServerTransactionID
                     {
                         LogOk(testName, $"{messagePrefix} - The ServerTransactionID was 1 or greater: {returnedServerTransactionID}", null);
                     }
@@ -2753,7 +2792,7 @@ namespace ConformU
         private void LogOk(string method, string message, string contextMessage)
         {
             // Only display OK messages if configured to do so
-            if (settings.AlpacaConfiguration.ProtocolShowOkMessages)
+            if (settings.AlpacaConfiguration.ProtocolMessageLevel == ProtocolMessageLevel.All)
             {
                 // Test whether to include JSON responses in the log
                 if (settings.AlpacaConfiguration.ProtocolShowSuccessResponses)
@@ -2798,8 +2837,12 @@ namespace ConformU
         ///<param name = "message" > Message to log</param>
         private void LogInformation(string method, string message, string contextMessage)
         {
-            LogMessage(method, TestOutcome.Info, message, contextMessage);
-            informationMessages.Add($"{method} ==> {message} {(string.IsNullOrEmpty(contextMessage) ? "" : $"\r\n  Response: {contextMessage}")}\r\n"); //
+            // Only display Information messages if configured to do so
+            if ((settings.AlpacaConfiguration.ProtocolMessageLevel == ProtocolMessageLevel.Information) || (settings.AlpacaConfiguration.ProtocolMessageLevel == ProtocolMessageLevel.Issue))
+            {
+                LogMessage(method, TestOutcome.Info, message, contextMessage);
+                informationMessages.Add($"{method} ==> {message} {(string.IsNullOrEmpty(contextMessage) ? "" : $"\r\n  Response: {contextMessage}")}\r\n"); //
+            }
         }
 
         /// <summary>

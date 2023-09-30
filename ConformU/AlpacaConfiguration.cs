@@ -30,6 +30,6 @@ namespace ConformU
         public bool ProtocolReportNotImplementedErrors { get; set; } = false;
         public bool ProtocolTestPrimaryUrlStructure { get; set; } = false;
         public bool ProtocolStrictChecks { get; set; } = false;
-        public bool ProtocolShowOkMessages { get; set; } = false;
+        public ProtocolMessageLevel ProtocolMessageLevel { get; set; } = ProtocolMessageLevel.Information;
     }
 }

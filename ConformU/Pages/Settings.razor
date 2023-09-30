@@ -252,24 +252,39 @@
                     <p>&nbsp;</p>
                     <h4 style="color: #479cc8;">Check Alpaca Protocol</h4>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
-                        <RadzenCheckBox Name="CHKSHOWSUCCESSRESPONSES" @bind-Value=@chkProtocolShowSuccessResponses TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolShowSuccessResponses)) />
-                        <RadzenLabel Text="Show success responses" Component="CHKSHOWSUCCESSRESPONSES" Style="margin-left: 20px;" />
-                    </div>
-                    <div class="row" style="margin-top:14px; margin-left:4px;">
-                        <RadzenCheckBox Name="CHRREPORTNOTIMPLEMENTED" @bind-Value=@chkProtocolReportNotImplementedErrors TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolReportNotImplementedErrors)) />
-                        <RadzenLabel Text="Report ASCOM not implemented errors" Component="CHRREPORTNOTIMPLEMENTED" Style="margin-left: 20px;" />
+                        <RadzenCheckBox Name="CHKSTRICTCHECKS" @bind-Value=@chkProtocolStrictChecks TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolStrictChecks)) />
+                        <RadzenLabel Text="Strict ID casing checks" Component="CHKSTRICTCHECKS" Style="margin-left: 20px;" />
                     </div>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKTESTPRIMARYURLSTRUCTURE" @bind-Value=@chkProtocolTestPrimaryUrlStructure TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolTestPrimaryUrlStructure)) />
                         <RadzenLabel Text="Test primary URL structure" Component="CHKTESTPRIMARYURLSTRUCTURE" Style="margin-left: 20px;" />
                     </div>
+
+
                     <div class="row" style="margin-top:14px; margin-left:4px;">
-                        <RadzenCheckBox Name="CHKSTRICTCHECKS" @bind-Value=@chkProtocolStrictChecks TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolStrictChecks)) />
-                        <RadzenLabel Text="Strict ID casing checks (Only for Alpaca simulators)" Component="CHKSTRICTCHECKS" Style="margin-left: 20px;" />
+                        <RadzenDropDown @bind-Value=@protocolMessageLevel
+                                        Style="width:15em"
+                                        Data="protocolMessageLevels"
+                                        TextProperty="Key"
+                                        ValueProperty="Value"
+                                        TValue="ProtocolMessageLevel"
+                                        AllowClear="false"
+                                        Multiple="false"
+                                        MaxSelectedLabels="1"
+                                        Name="DROP2"
+                                        Change=@(args => OnMessageLevelChange(args)) />
+                        <RadzenLabel Text="Message display level" Component="DROP2" Style="margin-left: 20px;margin-top:5px" />
+                    </div>
+
+
+
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CHKSHOWSUCCESSRESPONSES" Disabled=false @bind-Value=@chkProtocolShowSuccessResponses TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolShowSuccessResponses)) />
+                        <RadzenLabel Text="Show JSON responses for OK messages" Component="CHKSHOWSUCCESSRESPONSES" Style="margin-left: 20px;" />
                     </div>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
-                        <RadzenCheckBox Name="CHKOKMESSAGES" @bind-Value=@chkProtocolShowOkMessages TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolShowOkMessages)) />
-                        <RadzenLabel Text="Show protocol OK messages" Component="CHKSCHKOKMESSAGESTRICTCHECKS" Style="margin-left: 20px;" />
+                        <RadzenCheckBox Name="CHRREPORTNOTIMPLEMENTED" @bind-Value=@chkProtocolReportNotImplementedErrors TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.ProtocolReportNotImplementedErrors)) />
+                        <RadzenLabel Text="Report ASCOM not implemented errors" Component="CHRREPORTNOTIMPLEMENTED" Style="margin-left: 20px;" />
                     </div>
                 </RadzenCard>
 
@@ -692,6 +707,12 @@
             new KeyValuePair<string, ServiceType>("HTTP", ServiceType.Http),
             new KeyValuePair<string, ServiceType>("HTTPS", ServiceType.Https)
         };
+    private List<KeyValuePair<string, ProtocolMessageLevel>> protocolMessageLevels = new()
+        {
+            new KeyValuePair<string, ProtocolMessageLevel>("Issue, Information and OK", ProtocolMessageLevel.All),
+            new KeyValuePair<string, ProtocolMessageLevel>("Issue and Information", ProtocolMessageLevel.Information),
+            new KeyValuePair<string, ProtocolMessageLevel>("Issue", ProtocolMessageLevel.Issue)
+        };
     private bool isWindowsOs;
     private int connectDisconnectTimeout;
 
@@ -714,7 +735,7 @@
     private bool chkProtocolTestPrimaryUrlStructure;
     private bool chkTrustUserGeneratedSslCertificates;
     private bool chkProtocolStrictChecks;
-    private bool chkProtocolShowOkMessages;
+    private ProtocolMessageLevel protocolMessageLevel;
 
     // Camera test configuration
     private int cameraXMax;
@@ -832,7 +853,6 @@
         ProtocolReportNotImplementedErrors,
         ProtocolTestPrimaryUrlStructure,
         ProtocolStrictChecks,
-        ProtocolShowOkMessages,
         RunAs32Bit,
         SideOfPierRead,
         SideOfPierWrite,
@@ -1153,10 +1173,6 @@
                 settings.AlpacaConfiguration.ProtocolStrictChecks = chkProtocolStrictChecks;
                 break;
 
-            case CheckBoxConfigurationItem.ProtocolShowOkMessages:
-                settings.AlpacaConfiguration.ProtocolShowOkMessages = chkProtocolShowOkMessages;
-                break;
-
             default:
                 throw new InvalidValueException($"OnCheckboxChange - Unknown checkbox name: {name}");
         }
@@ -1266,7 +1282,7 @@
         chkProtocolTestPrimaryUrlStructure = settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure;
         chkTrustUserGeneratedSslCertificates = settings.AlpacaConfiguration.TrustUserGeneratedSslCertificates;
         chkProtocolStrictChecks = settings.AlpacaConfiguration.ProtocolStrictChecks;
-        chkProtocolShowOkMessages = settings.AlpacaConfiguration.ProtocolShowOkMessages;
+        protocolMessageLevel = settings.AlpacaConfiguration.ProtocolMessageLevel;
     }
 
     private void SaveConfiguration()
@@ -1293,6 +1309,13 @@
     {
         ServiceType serviceType = (ServiceType)serviceMode;
         settings.AlpacaConfiguration.AccessServiceType = serviceType;
+        SaveConfiguration();
+    }
+
+    private void OnMessageLevelChange(object messageLevel)
+    {
+        ProtocolMessageLevel messageLevelType = (ProtocolMessageLevel)messageLevel;
+        settings.AlpacaConfiguration.ProtocolMessageLevel = messageLevelType;
         SaveConfiguration();
     }
 

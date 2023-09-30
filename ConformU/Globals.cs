@@ -74,6 +74,13 @@
         TestOnly = 6
     }
 
+    public enum ProtocolMessageLevel
+    {
+        All,
+        Information,
+        Issue
+    }
+
     #endregion
 
 }
