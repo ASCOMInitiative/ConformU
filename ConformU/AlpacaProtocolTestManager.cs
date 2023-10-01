@@ -1934,58 +1934,14 @@ namespace ConformU
                     // Response should be either a JSON or an ImageBytes response
                     try
                     {
-                        // Handle the response, which will be either JSON or ImageBytes
-                        if (!httpResponse.Content.Headers.ContentType.MediaType.Contains(AlpacaConstants.IMAGE_BYTES_MIME_TYPE, StringComparison.InvariantCultureIgnoreCase)) // Should be a JSON response
-                        {
+                        // Parse the common device values from the JSON response into a Response class
+                        deviceResponse = JsonSerializer.Deserialize<IntResponse>(responseString);
 
-                            // Parse the common device values from the JSON response into a Response class
-                            deviceResponse = JsonSerializer.Deserialize<IntResponse>(responseString);
-
-                            // Save the parsed response values
-                            returnedClientTransactionId = deviceResponse.ClientTransactionID;
-                            returnedServerTransactionId = deviceResponse.ServerTransactionID;
-                            returnedErrorNumber = deviceResponse.ErrorNumber;
-                            returnedErrorMessage = deviceResponse.ErrorMessage;
-
-                        } // Handle a JSON response
-                        else // Should be an ImageBytes binary response
-                        {
-                            // Convert the string response to a byte array
-                            byte[] bytes = Encoding.ASCII.GetBytes(responseString);
-
-                            // Get the metadata version
-                            int metadataVersion = bytes.GetMetadataVersion();
-
-                            // Handle version number possibilities
-                            switch (metadataVersion)
-                            {
-                                case 1: // The only valid version at present
-                                    LogOk(testName, $"{messagePrefix} - The expected ImageBytes metadata version was returned: {metadataVersion}", null);
-                                    break;
-
-                                default: // All other values
-                                    LogIssue(testName, $"{messagePrefix} - An unexpected ImageBytes metadata version was returned: {metadataVersion}, Expected: 1", null);
-                                    break;
-                            }
-
-                            // Get the metadata from the response bytes
-                            ArrayMetadataV1 metadata = bytes.GetMetadataV1();
-
-                            // Save the response values in the returned metadata
-                            returnedClientTransactionId = metadata.ClientTransactionID;
-                            returnedServerTransactionId = metadata.ServerTransactionID;
-                            returnedErrorNumber = metadata.ErrorNumber;
-
-                            // Get the error message if required
-                            if (returnedErrorNumber != AlpacaErrors.AlpacaNoError)
-                            {
-                                returnedErrorMessage = bytes.GetErrrorMessage();
-                            }
-
-                            // Set a useful response string because otherwise we will get the enormous number of AlpacaBytes binary values encoded as a string
-                            responseString = $"ClientTransactionID: {returnedClientTransactionId}, ServerTransactionID: {returnedServerTransactionId}, ErrorNumber: {returnedErrorNumber}, ErrorMessage: '{returnedErrorMessage}'";
-
-                        } // Handle an ImageBytes response
+                        // Save the parsed response values
+                        returnedClientTransactionId = deviceResponse.ClientTransactionID;
+                        returnedServerTransactionId = deviceResponse.ServerTransactionID;
+                        returnedErrorNumber = deviceResponse.ErrorNumber;
+                        returnedErrorMessage = deviceResponse.ErrorMessage;
                     }
                     catch (Exception ex)
                     {
@@ -2174,6 +2130,9 @@ namespace ConformU
             AlpacaErrors returnedErrorNumber = AlpacaErrors.AlpacaNoError;
             string returnedErrorMessage = "";
 
+            const string DEFAULT_CONTENT_TYPE = "application/json";
+            const string DEFAULT_ENCODING = "UTF-8";
+
             // Do not attempt to process the request if the test has been cancelled
             LogDebug(testName, $"Ignore cancellation: {ignoreApplicationCancellation} - Test is cancelled: {applicationCancellationToken.IsCancellationRequested}");
             if (!ignoreApplicationCancellation)
@@ -2296,7 +2255,6 @@ namespace ConformU
 
                 // Lig the received response
                 LogDebug(testName, $"HTTP Status code: {httpResponse.StatusCode}");
-                LogDebug(testName, $"Media type: {httpResponse.Content.Headers.ContentType.MediaType}");
                 LogDebug(testName, $"JSON response length: {responseString.Length}");
                 LogDebug(testName, $"JSON response: #####{responseString[..Math.Min(responseString.Length, 250)]}#####");
 
@@ -2323,13 +2281,13 @@ namespace ConformU
                             {
                                 // Apply a default empty string value so that later tests succeed.
                                 LogDebug(testName, $"Content type is null, setting content type to empty string!");
-                                contentType = new MediaTypeHeaderValue("");
+                                contentType = new MediaTypeHeaderValue(DEFAULT_CONTENT_TYPE, DEFAULT_ENCODING);
                             }
                         }
                         catch (Exception ex)
                         {
                             LogDebug(testName, $"Exception reading content type:\r\n{ex}");
-                            contentType = new MediaTypeHeaderValue("");
+                            contentType = new MediaTypeHeaderValue(DEFAULT_CONTENT_TYPE, DEFAULT_ENCODING);
                         }
 
                         // Handle the response, which will be either JSON or ImageBytes
@@ -2337,37 +2295,6 @@ namespace ConformU
                         if (!contentType.ToString().Contains(AlpacaConstants.IMAGE_BYTES_MIME_TYPE, StringComparison.InvariantCultureIgnoreCase)) // Should be a JSON response
                         {
                             LogDebug(testName, $"Processing JSON response");
-                            try
-                            {
-                                LogDebug(testName, $"Test 1 - About to de-serialise supplied response...");
-                                deviceResponse = JsonSerializer.Deserialize<Response>(responseString);
-                                LogDebug(testName, $"Test 1 - De-serialised OK!");
-                            }
-                            catch (Exception ex)
-                            {
-                                LogDebug(testName, $"Test 1 - Exception parsing JSON as supplied:\r\n{ex}");
-                            }
-                            try
-                            {
-                                LogDebug(testName, $"Test 2 - Removing CrLf...");
-                                string cleanedResponseString = responseString.Replace("\r", null);
-                                cleanedResponseString = cleanedResponseString.Replace("\n", null);
-
-                                LogDebug(testName, $"Test 2 - Removing multiple spaces...");
-                                for (int i = 0; i < 6; i++)
-                                {
-                                    cleanedResponseString = cleanedResponseString.Replace("  ", null);
-                                }
-                                LogDebug(testName, $"JSON response cleaned: #####{cleanedResponseString[..Math.Min(cleanedResponseString.Length, 250)]}#####");
-
-                                LogDebug(testName, $"Test 2 - About to de-serialise cleaned response...");
-                                deviceResponse = JsonSerializer.Deserialize<Response>(cleanedResponseString);
-                                LogDebug(testName, $"Test 2 - De-serialised OK!");
-                            }
-                            catch (Exception ex)
-                            {
-                                LogDebug(testName, $"Test 2 - Exception parsing cleaned JSON with stripped CrLf and spaces:\r\n{ex}");
-                            }
 
                             // Parse the common device values from the JSON response into a Response class
                             LogDebug(testName, $"About to de-serialise response...");
@@ -2594,6 +2521,7 @@ namespace ConformU
             catch (HttpRequestException ex)
             {
                 LogError(testName, $"{messagePrefix} - {ex.Message}", null);
+                LogDebug(testName, $"{ex}");
             }
             catch (Exception ex)
             {
