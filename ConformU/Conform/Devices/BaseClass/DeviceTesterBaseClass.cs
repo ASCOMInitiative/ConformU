@@ -773,9 +773,19 @@ namespace ConformU
             }
             else // Historic synchronous behaviour
             {
-                SetAction("Waiting for Connected to become True");
-                LogCallToDriver("Connected", "About to set Connected property");
-                baseClassDevice.Connected = true;
+                // Handle connection to devices 
+                if (DeviceCapabilities.HasConnected(baseClassDeviceType, GetInterfaceVersion())) // All devices and interfaces except IFocuserV1
+                {
+                    SetAction("Waiting for Connected to become True");
+                    LogCallToDriver("Connected", "About to set Connected property");
+                    baseClassDevice.Connected = true;
+                    SetAction("Device has connected");
+                }
+                else // IFocuserV1, which we can't test because the Link method is not available in ASCOM Library methods.
+                { 
+                    LogError("Connected",$"The focuser returned interface version: {GetInterfaceVersion()}, Conform Universal can only test focusers that implement IFocuserV2 or later.");
+                    throw new InvalidOperationException($"Unable to test focuser IFocuserV{GetInterfaceVersion()} devices.");
+                }
             }
 
             // Make sure that the value set is reflected in Connected GET
