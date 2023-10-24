@@ -391,11 +391,11 @@ namespace ConformU
                 // Test primary URL structure: /api/v1/ if configured to do so
                 if (settings.AlpacaConfiguration.ProtocolTestPrimaryUrlStructure)
                 {
-                    await SendToDevice("GET Description", $"Bad Alpaca URL base element (api = apx)\"", $"/apx/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
-                    await SendToDevice("GET Description", $"Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
-                    await SendToDevice("GET Description", $"Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
-                    await SendToDevice("GET Description", $"Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
-                    await SendToDevice("GET Description", $"Bad Alpaca URL version element (v2)", $"/api/v2/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny);
+                    await SendToDevice("GET Description", $"Bad Alpaca URL base element (api = apx)\"", $"/apx/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny, badUri: true);
+                    await SendToDevice("GET Description", $"Bad Alpaca URL version element (no v)", $"/api/1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny, badUri: true);
+                    await SendToDevice("GET Description", $"Bad Alpaca URL version element (no number)", $"/api/v/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny, badUri: true);
+                    await SendToDevice("GET Description", $"Bad Alpaca URL version element (capital V)", $"/api/V1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny, badUri: true);
+                    await SendToDevice("GET Description", $"Bad Alpaca URL version element (v2)", $"/api/v2/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCodeAny, badUri: true);
 
                     // Test bad POST HTTP methods
                     await CallApi("True", "Connected", HttpMethod.Post, ParamConnectedTrue, HttpStatusCodeAny);
@@ -409,12 +409,12 @@ namespace ConformU
                 }
 
                 // Test remaining Alpaca URL structure /devicetype/devicenumber and accept any 4XX status as a correct rejection
-                await SendToDevice("GET Description", $"Bad Alpaca URL device type (capitalised {settings.DeviceType.Value.ToString().ToUpper()})", $"/api/v1/{settings.DeviceType.Value.ToString().ToUpper()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
-                await SendToDevice("GET Description", $"Bad Alpaca URL device type (baddevicetype)", $"/api/v1/baddevicetype/0/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
-                await SendToDevice("GET Description", $"Bad Alpaca URL device number (-1)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/-1/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
-                await SendToDevice("GET Description", $"Bad Alpaca URL device number (99999)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/99999/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
-                await SendToDevice("GET Description", $"Bad Alpaca URL device number (A)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/A/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
-                await SendToDevice("GET Description", $"Bad Alpaca URL method name (descrip)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/descrip", HttpMethod.Get, ParamsOk, HttpStatusCode4XX);
+                await SendToDevice("GET Description", $"Bad Alpaca URL device type (capitalised {settings.DeviceType.Value.ToString().ToUpper()})", $"/api/v1/{settings.DeviceType.Value.ToString().ToUpper()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX, badUri: true);
+                await SendToDevice("GET Description", $"Bad Alpaca URL device type (baddevicetype)", $"/api/v1/baddevicetype/0/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX, badUri: true);
+                await SendToDevice("GET Description", $"Bad Alpaca URL device number (-1)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/-1/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX, badUri: true);
+                await SendToDevice("GET Description", $"Bad Alpaca URL device number (99999)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/99999/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX, badUri: true);
+                await SendToDevice("GET Description", $"Bad Alpaca URL device number (A)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/A/description", HttpMethod.Get, ParamsOk, HttpStatusCode4XX, badUri: true);
+                await SendToDevice("GET Description", $"Bad Alpaca URL method name (descrip)", $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/descrip", HttpMethod.Get, ParamsOk, HttpStatusCode4XX, badUri: true);
 
                 // Test GET Connected
                 await GetNoParameters("Connected");
@@ -1761,7 +1761,7 @@ namespace ConformU
             parameters = new List<CheckProtocolParameter>(ParamClientIDNegative);
             if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
             if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-            await CallApi("ClientID is negative", method, httpMethod, parameters, allowedStatus, acceptInvalidValueError: true);
+            await CallApi("ClientID is negative", method, httpMethod, parameters, allowedStatus, acceptInvalidValueError: true, negativeIds: true);
 
             // Test non-numeric ClientID value
             parameters = new List<CheckProtocolParameter>(ParamClientIDNonNumeric);
@@ -1785,7 +1785,7 @@ namespace ConformU
             parameters = new List<CheckProtocolParameter>(ParamTransactionIdNegative);
             if (parameterName1 is not null) parameters.Add(new CheckProtocolParameter(parameterName1, parameterValue1));
             if (parameterName2 is not null) parameters.Add(new CheckProtocolParameter(parameterName2, parameterValue2));
-            await CallApi("ClientTransactionID is negative", method, httpMethod, parameters, allowedStatus, acceptInvalidValueError: true);
+            await CallApi("ClientTransactionID is negative", method, httpMethod, parameters, allowedStatus, acceptInvalidValueError: true, negativeIds: true);
 
             // Test text ClienClientTransactionID value
             parameters = new List<CheckProtocolParameter>(ParamTransactionIdString);
@@ -2100,13 +2100,14 @@ namespace ConformU
                                    List<HttpStatusCode> expectedCodes,
                                    bool ignoreApplicationCancellation = false,
                                    bool badlyCasedTransactionIdName = false,
-                                   bool acceptInvalidValueError = false)
+                                   bool acceptInvalidValueError = false,
+                                   bool negativeIds = false)
         {
             string methodLowerCase = method.ToLowerInvariant();
             string httpMethodUpperCase = httpMethod.ToString().ToUpperInvariant();
 
             string url = $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}";
-            await SendToDevice($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation, badlyCasedTransactionIdName, acceptInvalidValueError);
+            await SendToDevice($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation, badlyCasedTransactionIdName, acceptInvalidValueError, negativeIds: negativeIds);
         }
 
         private async Task SendToDevice(string testName,
@@ -2117,7 +2118,9 @@ namespace ConformU
                                 List<HttpStatusCode> expectedCodes,
                                 bool ignoreApplicationCancellation = false,
                                 bool badlyCasedTransactionIdName = false,
-                                bool acceptInvalidValueError = false)
+                                bool acceptInvalidValueError = false,
+                                bool badUri = false,
+                                bool negativeIds = false)
         {
             string ascomOutcome = null;
             CancellationTokenSource requestCancellationTokenSource;
@@ -2347,6 +2350,23 @@ namespace ConformU
 
                         } // Handle an ImageBytes response
                     }
+                    catch (JsonException ex)
+                    {
+                        // Could not parse the device JSON so check whether this may be permissible
+                        if (!settings.AlpacaConfiguration.ProtocolStrictChecks & negativeIds) // We are in tolerant mode and are making a check with a negative ID
+                        {
+                            // Report an error
+                            LogInformation(testName, $"{messagePrefix} - Could not parse the returned JSON. Possibly the device returned the supplied negative ID value, which is not a valid unsigned integer value.", null);
+                            LogDebug(testName, $"{ex}");
+                        }
+                        else
+                        {
+                            // Report an error
+                            LogError(testName, $"{messagePrefix} - {ex.Message}", null);
+                            LogDebug(testName, $"{ex}");
+                        }
+                    }
+
                     catch (Exception ex)
                     {
                         LogIssue(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) but could not de-serialise the returned JSON string. Exception message: {ex.Message}", responseString);
@@ -2520,12 +2540,23 @@ namespace ConformU
             }
             catch (HttpRequestException ex)
             {
-                LogError(testName, $"{messagePrefix} - {ex.Message}", null);
-                LogDebug(testName, $"{ex}");
+                // Handle exceptions from expected bad URIs
+                if (badUri) // Bad URI
+                {
+                    LogOk(testName, $"{messagePrefix} - Host rejected the bad URI.", null);
+                    LogDebug(testName, $"{ex}");
+                }
+                else // Good URI
+                {
+                    // Report an error
+                    LogError(testName, $"{messagePrefix} - {ex.Message}", null);
+                    LogDebug(testName, $"{ex}");
+                }
             }
             catch (Exception ex)
             {
-                LogError(testName, $"{messagePrefix} - {ex}", null);
+                LogError(testName, $"{messagePrefix} - {ex.Message}", null);
+                LogDebug(testName, $"{ex}");
             }
         }
 
