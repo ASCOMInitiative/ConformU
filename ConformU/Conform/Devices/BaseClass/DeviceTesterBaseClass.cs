@@ -782,8 +782,8 @@ namespace ConformU
                     SetAction("Device has connected");
                 }
                 else // IFocuserV1, which we can't test because the Link method is not available in ASCOM Library methods.
-                { 
-                    LogError("Connected",$"The focuser returned interface version: {GetInterfaceVersion()}, Conform Universal can only test focusers that implement IFocuserV2 or later.");
+                {
+                    LogError("Connected", $"The focuser returned interface version: {GetInterfaceVersion()}, Conform Universal can only test focusers that implement IFocuserV2 or later.");
                     throw new InvalidOperationException($"Unable to test focuser IFocuserV{GetInterfaceVersion()} devices.");
                 }
             }
@@ -1575,17 +1575,25 @@ namespace ConformU
             {
                 LogIssue(memberName, "Received a PropertyNotImplementedException instead of a MethodNotImplementedException");
             }
-            else if (ex is ASCOM.NotImplementedException)
+            else if (ex is NotImplementedException)
             {
-                // ASCOM.NotImplementedException is expected if received from the cross platform library DriverAccess module, otherwise it is an issue, so test for this condition.
-                if ((settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM)) // We are testing a COM device using the cross platform DriverAccess module so report OK.
+                // Determine whether we are testing an Alpaca or a COM device
+                if (settings.DeviceTechnology == DeviceTechnology.Alpaca) // We are testing an ALpaca device
                 {
-                    LogOk(memberName, "Received a NotImplementedException from DriverAccess as expected");
+                    // NotImplementedException is expected from an Alpaca device so flag as OK
+                    LogOk(memberName, "Received a NotImplementedException from an Alpaca device as expected");
                 }
-                else // We are NOT testing a COM device using the cross platform DriverAccess module so report an issue.
+                else // We are testing a COM device
                 {
-                    LogIssue(memberName,
-                        $"Received a NotImplementedException instead of a {((typeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException")}");
+                    // ASCOM.NotImplementedException is expected if received from the cross platform library DriverAccess module, otherwise it is an issue, so test for this condition.
+                    if ((settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM)) // We are testing a COM device using the cross platform DriverAccess module so report OK.
+                    {
+                        LogOk(memberName, "Received a NotImplementedException from DriverAccess as expected");
+                    }
+                    else // We are NOT testing a COM device using the cross platform DriverAccess module so report an issue.
+                    {
+                        LogIssue(memberName, $"Received a NotImplementedException instead of a {((typeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException")}");
+                    }
                 }
             }
             else if (ex is System.NotImplementedException)
