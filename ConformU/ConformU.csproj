@@ -18,7 +18,7 @@
 	</Target>
 	<Target Name="WriteInformationVersion" AfterTargets="CopyFilesToOutputDirectory">
 		<PropertyGroup>
-			<InfoVersion>$(InformationalVersion)</InfoVersion>
+			<InfoVersion>$(ProductMajor).$(ProductMinor).$(ProductPatch)$(ProductPreReleaseSeparator)$(ProductPreRelease)+$(BuildNumber)</InfoVersion>
 		</PropertyGroup>
 
 		<WriteLinesToFile File="$(PublishDir)..\InformationVersion.txt" Overwrite="true" Lines="$(InfoVersion)" />
