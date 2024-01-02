@@ -735,7 +735,7 @@ namespace ConformU
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogDebug("SetSwitch", $"Exception generated - Switch can write: {switchCanWrite}, IsMethodNotImplementedException: {IsMethodNotImplementedException(ex)}, IsNotImplementedException: {IsNotImplementedException(ex)}, COM Access mechanic: {settings.ComConfiguration.ComAccessMechanic}, Device Technology: {settings.DeviceTechnology}");
+                                        LogDebug("SetSwitch", $"Exception thrown - Switch can write: {switchCanWrite}, IsMethodNotImplementedException: {IsMethodNotImplementedException(ex)}, IsNotImplementedException: {IsNotImplementedException(ex)}, COM Access mechanic: {settings.ComConfiguration.ComAccessMechanic}, Device Technology: {settings.DeviceTechnology}");
                                         if (switchCanWrite)
                                         {
                                             LogIssue("SetSwitch", $"Exception: {ex.Message}");
@@ -744,11 +744,11 @@ namespace ConformU
                                         else if (IsMethodNotImplementedException(ex))
                                             LogOk("SetSwitch", "  CanWrite is False and MethodNotImplementedException was thrown");
                                         // Determine whether we are testing a COM device using the cross platform DriverAccess module and, if so, test for the NotimplementedExceptionso that it returns.
-                                        else if ((settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM))
+                                        else if (settings.DeviceTechnology == DeviceTechnology.Alpaca | (settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM))
                                         {
                                             if (IsNotImplementedException(ex)) // Got a NotImplementedException, which is OK
                                             {
-                                                LogOk("SetSwitch", "  CanWrite is False and NotImplementedException was thrown by DriverAccess");
+                                                LogOk("SetSwitch", "  CanWrite is False and a NotImplementedException was thrown");
                                             }
                                             else // Got some other exception, which is an issue.
                                             {
@@ -962,7 +962,7 @@ namespace ConformU
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogDebug("SetSwitchValue", $"EXCEPTION GENERATED - Switch can write: {switchCanWrite}, IsMethodNotImplementedException: {IsMethodNotImplementedException(ex)}, IsNotImplementedException: {IsNotImplementedException(ex)}, COM Access mechanic: {settings.ComConfiguration.ComAccessMechanic}, Device Technology: {settings.DeviceTechnology}");
+                                        LogDebug("SetSwitchValue", $"Exception thrown - Switch can write: {switchCanWrite}, IsMethodNotImplementedException: {IsMethodNotImplementedException(ex)}, IsNotImplementedException: {IsNotImplementedException(ex)}, COM Access mechanic: {settings.ComConfiguration.ComAccessMechanic}, Device Technology: {settings.DeviceTechnology}");
                                         if (switchCanWrite)
                                         {
                                             LogIssue("SetSwitchValue", $"Exception: {ex.Message}");
@@ -971,11 +971,11 @@ namespace ConformU
                                         else if (IsMethodNotImplementedException(ex))
                                             LogOk("SetSwitchValue", "  CanWrite is False and MethodNotImplementedException was thrown");
                                         // Determine whether we are testing a COM device using the cross platform DriverAccess module and, if so, test for the NotimplementedExceptionso that it returns.
-                                        else if ((settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM))
+                                        else if (settings.DeviceTechnology == DeviceTechnology.Alpaca | (settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM))
                                         {
                                             if (IsNotImplementedException(ex)) // Got a NotImplementedException, which is OK
                                             {
-                                                LogOk("SetSwitchValue", "  CanWrite is False and NotImplementedException was thrown by DriverAccess");
+                                                LogOk("SetSwitchValue", "  CanWrite is False and a NotImplementedException was thrown");
                                             }
                                             else // Got some other exception, which is an issue.
                                             {
@@ -1139,7 +1139,7 @@ namespace ConformU
                                                     switchDevice.SetAsync(i, false); // Set to false
                                                     LogCallToDriver("SetAsync", $"  About to call StateChangeComplete({i} multiple times.");
                                                     WaitWhile($"SetAsync({i}, false)", () => !switchDevice.StateChangeComplete(i), ASYNC_POLL_INTERVAL, settings.SwitchAsyncTimeout);
-                                              
+
                                                     if (getSwitchOk)
                                                     {
                                                         LogCallToDriver("SetAsync", $"  About to call GetSwitch({i}) method");
@@ -1191,11 +1191,11 @@ namespace ConformU
                                                 else if (IsMethodNotImplementedException(ex))
                                                     LogOk("SetAsync ", "  CanWrite is False and MethodNotImplementedException was thrown");
                                                 // Determine whether we are testing a COM device using the cross platform DriverAccess module and, if so, test for the NotimplementedExceptionso that it returns.
-                                                else if ((settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM))
+                                                else if (settings.DeviceTechnology == DeviceTechnology.Alpaca | (settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM))
                                                 {
                                                     if (IsNotImplementedException(ex)) // Got a NotImplementedException, which is OK
                                                     {
-                                                        LogOk("SetAsync ", "  CanWrite is False and NotImplementedException was thrown by DriverAccess");
+                                                        LogOk("SetAsync ", "  CanWrite is False and NotImplementedException was thrown");
                                                     }
                                                     else // Got some other exception, which is an issue.
                                                     {
@@ -1401,11 +1401,11 @@ namespace ConformU
                                                 else if (IsMethodNotImplementedException(ex))
                                                     LogOk("SetAsyncValue", "  CanWrite is False and MethodNotImplementedException was thrown");
                                                 // Determine whether we are testing a COM device using the cross platform DriverAccess module and, if so, test for the NotimplementedExceptionso that it returns.
-                                                else if ((settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM))
+                                                else if (settings.DeviceTechnology == DeviceTechnology.Alpaca | (settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM))
                                                 {
                                                     if (IsNotImplementedException(ex)) // Got a NotImplementedException, which is OK
                                                     {
-                                                        LogOk("SetAsyncValue", "  CanWrite is False and NotImplementedException was thrown by DriverAccess");
+                                                        LogOk("SetAsyncValue", "  CanWrite is False and a NotImplementedException was thrown");
                                                     }
                                                     else // Got some other exception, which is an issue.
                                                     {
@@ -1421,7 +1421,7 @@ namespace ConformU
                                             }
                                         }
                                         else
-                                            LogInfo("SetAsync/SetAsyncValue", "Skipping asynchropnous method tests because the switch cannot write or doesn't support asynchronous operation.");
+                                            LogInfo("SetAsync/SetAsyncValue", "Skipping asynchronous method tests because the switch cannot write or doesn't support asynchronous operation.");
                                     }
                                 }
                                 else
