@@ -1985,7 +1985,7 @@ namespace ConformU
                             // Now do a sense check on the received value
                             LogOk("SiderealTime", siderealTimeScope.ToHMS());
                             lTimeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom); // Get time difference between scope and PC
-                                                                                                // Process edge cases where the two clocks are on either side of 0:0:0/24:0:0
+                                                                                               // Process edge cases where the two clocks are on either side of 0:0:0/24:0:0
                             if (siderealTimeAscom > 23.0d & siderealTimeAscom < 23.999d & siderealTimeScope > 0.0d & siderealTimeScope < 1.0d)
                             {
                                 lTimeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom + 24.0d);
@@ -7675,39 +7675,56 @@ namespace ConformU
                             if (rate != 0.0)
                             {
                                 // Now test the actual amount of movement
-                                if (axis == Axis.Ra)
+                                if (axis == Axis.Ra) // Right ascension axis
                                 {
-                                    TestOffsetRate(testName, -9.0, rate, 0.0);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return success;
+                                    // Only test if the right ascension rate can be set
+                                    if (canSetRightAscensionRate) // Right ascension rate can be set
+                                    {
+                                        TestOffsetRate(testName, -9.0, rate, 0.0);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return success;
 
-                                    TestOffsetRate(testName, +3.0, rate, 0.0);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return success;
+                                        TestOffsetRate(testName, +3.0, rate, 0.0);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return success;
 
-                                    TestOffsetRate(testName, +9.0, rate, 0.0);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return success;
+                                        TestOffsetRate(testName, +9.0, rate, 0.0);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return success;
 
-                                    TestOffsetRate(testName, -3.0, rate, 0.0);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return success;
+                                        TestOffsetRate(testName, -3.0, rate, 0.0);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return success;
+                                    }
+                                    else // Right ascension rate can not be set
+                                    {
+                                        LogInfo(testName, "Skipping extended RightAscensionRate tests because CanSetRightAscensionRate is false.");
+                                    }
                                 }
-                                else
+                                else // Declination axis
                                 {
-                                    TestOffsetRate(testName, -9.0, 0.0, rate);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return success;
+                                    // Only test if the declination rate can be set
+                                    if (canSetDeclinationRate) // Declination rate can be set
+                                    {
+                                        TestOffsetRate(testName, -9.0, 0.0, rate);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return success;
 
-                                    TestOffsetRate(testName, +3.0, 0.0, rate);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return success;
+                                        TestOffsetRate(testName, +3.0, 0.0, rate);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return success;
 
-                                    TestOffsetRate(testName, +9.0, 0.0, rate);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return success;
+                                        TestOffsetRate(testName, +9.0, 0.0, rate);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return success;
 
-                                    TestOffsetRate(testName, -3.0, 0.0, rate);
+                                        TestOffsetRate(testName, -3.0, 0.0, rate);
+                                    }
+                                    else // Declination rate can not be set
+                                    {
+                                        LogInfo(testName, "Skipping extended DeclinationRate tests because CanSetDeclinationRate is false.");
+                                    }
+
                                 }
                             }
                         }
@@ -7843,21 +7860,47 @@ namespace ConformU
                 LogDebug(testName, $"Testing Primary rate: {expectedRaRate}, Secondary rate: {expectedDeclinationRate}, SideofPier: {telescopeDevice.SideOfPier}");
             }
 
-            // Start of test
+            // Get the telescope's start of test state
             LogCallToDriver(testName, "About to get RightAscension property");
-            double priStart = telescopeDevice.RightAscension; LogCallToDriver(testName, "About to get Declination property");
-            double secStart = telescopeDevice.Declination; LogCallToDriver(testName, "About to set RightAscensionRate property");
-            telescopeDevice.RightAscensionRate = expectedRaRate * SIDEREAL_SECONDS_TO_SI_SECONDS; LogCallToDriver(testName, "About to set DeclinationRate property");
-            telescopeDevice.DeclinationRate = expectedDeclinationRate;
+            double priStart = telescopeDevice.RightAscension;
+
+            LogCallToDriver(testName, "About to get Declination property");
+            double secStart = telescopeDevice.Declination;
+
+            // Set the rate offsets to the supplied test values
+            if (canSetRightAscensionRate)
+            {
+                LogCallToDriver(testName, "About to set RightAscensionRate property");
+                telescopeDevice.RightAscensionRate = expectedRaRate * SIDEREAL_SECONDS_TO_SI_SECONDS;
+            }
+            else
+            {
+                expectedRaRate = 0.0;
+            }
+            if (canSetDeclinationRate)
+            {
+                LogCallToDriver(testName, "About to set DeclinationRate property");
+                telescopeDevice.DeclinationRate = expectedDeclinationRate;
+            }
+            else
+            {
+                expectedDeclinationRate = 0.0;
+            }
 
             WaitFor(Convert.ToInt32(testDuration * 1000));
 
+            // Get the telescope's end of test state
+            LogCallToDriver(testName, "About to get RightAscension property");
             double priEnd = telescopeDevice.RightAscension;
+
+            LogCallToDriver(testName, "About to get Declination property");
             double secEnd = telescopeDevice.Declination;
 
             // Restore previous state
             LogCallToDriver(testName, "About to set RightAscensionRate property");
-            telescopeDevice.RightAscensionRate = 0.0; LogCallToDriver(testName, "About to set DeclinationRate property");
+            telescopeDevice.RightAscensionRate = 0.0;
+
+            LogCallToDriver(testName, "About to set DeclinationRate property");
             telescopeDevice.DeclinationRate = 0.0;
 
             LogDebug(testName, $"Start      - : {priStart.ToHMS()}, {secStart.ToDMS()}");
@@ -7871,9 +7914,24 @@ namespace ConformU
             double actualSecRate = (secEnd - secStart) / testDuration * 60.0 * 60.0;
 
             LogDebug(testName, $"Actual primary rate: {actualPriRate}, Expected rate: {expectedRaRate}, Ratio: {actualPriRate / expectedRaRate}, Actual secondary rate: {actualSecRate}, Expected rate: {expectedDeclinationRate}, Ratio: {actualSecRate / expectedDeclinationRate}");
-            TestDouble(testName, "RightAscensionRate", actualPriRate, expectedRaRate);
-            TestDouble(testName, "DeclinationRate   ", actualSecRate, expectedDeclinationRate);
 
+            if (canSetRightAscensionRate)
+            {
+                TestDouble(testName, "RightAscensionRate", actualPriRate, expectedRaRate);
+            }
+            else
+            {
+                LogInfo(testName, "Right ascension rate test omitted because CanSetRightAscensionRate is false");
+            }
+
+            if (canSetDeclinationRate)
+            {
+                TestDouble(testName, "DeclinationRate   ", actualSecRate, expectedDeclinationRate);
+            }
+            else
+            {
+                LogInfo(testName, "Declination rate test omitted because CanSetDeclinationRate is false");
+            }
             LogDebug("", "");
         }
 
