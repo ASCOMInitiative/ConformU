@@ -40,7 +40,7 @@ AppSupportURL={#MyAppSupportURL}
 AppUpdatesURL={#MyAppUpdatesURL}
 AppVerName={#MyAppName}
 AppVersion={#MyAppVersion}
-ArchitecturesInstallIn64BitMode=x64
+ArchitecturesInstallIn64BitMode=x64 arm64
 Compression=lzma2/max
 DefaultDirName={autopf}\ASCOM\ConformU
 DefaultGroupName=ASCOMConformUniversal
@@ -96,23 +96,29 @@ Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 
 [Files]
-; 64bit OS - Install the 64bit app
-Source: "..\publish\ConformU64\*.exe"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
-Source: "..\publish\ConformU64\*.dll"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
-Source: "..\publish\ConformU64\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode
-Source: "..\publish\ConformU64\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
+; ARM 64bit OS - Install the 64bit app
+Source: "..\publish\ConformUArm64\*.exe"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode and IsARM64
+Source: "..\publish\ConformUArm64\*.dll"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode and IsARM64
+Source: "..\publish\ConformUArm64\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode and IsARM64
+Source: "..\publish\ConformUArm64\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode and IsARM64
 
-; 64bit OS - Install the 32bit app
-Source: "..\publish\ConformU86\*.exe"; DestDir: "{app}\32bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
-Source: "..\publish\ConformU86\*.dll"; DestDir: "{app}\32bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
-Source: "..\publish\ConformU86\*"; DestDir: "{app}\32bit"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode
-Source: "..\publish\ConformU86\wwwroot\*"; DestDir: "{app}\32bit\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
+; Intel 64bit OS - Install the 64bit app
+Source: "..\publish\ConformUx64\*.exe"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode and IsX64
+Source: "..\publish\ConformUx64\*.dll"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode and IsX64
+Source: "..\publish\ConformUx64\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode and IsX64
+Source: "..\publish\ConformUx64\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode and IsX64
 
-; 32bit OS - Install the 32bit app
-Source: "..\publish\ConformU86\*.exe"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: not Is64BitInstallMode
-Source: "..\publish\ConformU86\*.dll"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: not Is64BitInstallMode
-Source: "..\publish\ConformU86\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: not Is64BitInstallMode
-Source: "..\publish\ConformU86\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: not Is64BitInstallMode
+; Intel 64bit OS - Install the 32bit app
+Source: "..\publish\ConformUx86\*.exe"; DestDir: "{app}\32bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
+Source: "..\publish\ConformUx86\*.dll"; DestDir: "{app}\32bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
+Source: "..\publish\ConformUx86\*"; DestDir: "{app}\32bit"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode
+Source: "..\publish\ConformUx86\wwwroot\*"; DestDir: "{app}\32bit\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode
+
+; Intel 32bit OS - Install the 32bit app
+Source: "..\publish\ConformUx86\*.exe"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: IsX86 and not Is64BitInstallMode
+Source: "..\publish\ConformUx86\*.dll"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: IsX86 and not Is64BitInstallMode
+Source: "..\publish\ConformUx86\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: IsX86 and not Is64BitInstallMode
+Source: "..\publish\ConformUx86\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsX86 and not Is64BitInstallMode
 
 [Icons]
 Name: "{autoprograms}\ASCOM Conform Universal"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\ASCOM.ico"
