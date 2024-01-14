@@ -2,6 +2,7 @@
 using ASCOM.Common;
 using ASCOM.Common.Alpaca;
 using ASCOM.Common.DeviceInterfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -142,8 +143,10 @@ namespace ConformU
                 Console.WriteLine("");
 
                 string clientHostAddress = $"{settings.AlpacaDevice.ServiceType.ToString().ToLowerInvariant()}://{settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort}";
+                LogLine($"Check Alpaca Protocol - Conform Universal {Update.ConformuVersionDisplayString}");
+                LogBlankLine();
 
-                LogLine($"Connecting to device: {settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} through URL: {clientHostAddress}");
+                LogLine($"Test {settings.DeviceType} device: {settings.AlpacaDevice.AscomDeviceName} - {settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} through URL: {clientHostAddress}");
                 LogBlankLine();
                 // Remove any old client, if present
                 httpClient?.Dispose();
@@ -231,7 +234,12 @@ namespace ConformU
                         if (settings.AlpacaConfiguration.ProtocolMessageLevel == ProtocolMessageLevel.All)
                             LogBlankLine();
                         else
+                        {
                             LogLine($"Successfully connected to device, testing...");
+                            LogBlankLine();
+                        }
+                        int interfaceVersion = await GetInterfaceVersion();
+                        LogLine($"Device exposes interface version {interfaceVersion}");
 
                         // Test common members
                         await TestCommon();
