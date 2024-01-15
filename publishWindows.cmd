@@ -13,12 +13,16 @@ cd
 MSBuild "ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Rebuild
 echo *** Completed Build
 
+echo *** Publishing Windows ARM 64bit
+dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r win-arm64 --framework net8.0-windows --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true -o ./publish/ConformUArm64/
+echo *** Completed 64bit publish
+
 echo *** Publishing Windows 64bit
-dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r win-x64 --framework net8.0-windows --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true -o ./publish/ConformU64/
+dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r win-x64   --framework net8.0-windows --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true -o ./publish/ConformUx64/
 echo *** Completed 64bit publish
 
 echo *** Publishing Windows 32bit
-dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r win-x86 --framework net8.0-windows --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true -o ./publish/ConformU86/
+dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r win-x86   --framework net8.0-windows --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true -o ./publish/ConformUx86/
 echo *** Completed 32bit publish
 
 editbin /LARGEADDRESSAWARE ./publish/ConformU86/Conformu.exe
