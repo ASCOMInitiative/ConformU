@@ -1232,8 +1232,9 @@ namespace ConformU
 
             bool currentWaitFunctionValue = waitFunction();
 
-            LogDebug(nameof(WaitWhile), $"The Wait completed - WaitFunction: {currentWaitFunctionValue}, Timeout cancelled: {timeoutCts.Token.IsCancellationRequested}, " +
-                                        $"Application cancelled: {ApplicationCancellationToken.IsCancellationRequested}, Combined cancelled: {combinedCts.Token.IsCancellationRequested}.");
+            LogDebug(nameof(WaitWhile), $"The Wait completed - Wait was successful: {!currentWaitFunctionValue}, " +
+                $"Timeout cancelled: {timeoutCts.Token.IsCancellationRequested}, Application cancelled: {ApplicationCancellationToken.IsCancellationRequested}, " +
+                $"Combined cancelled: {combinedCts.Token.IsCancellationRequested}.");
             if (currentWaitFunctionValue)
             {
                 // Test whether the operation timed out
@@ -1248,14 +1249,14 @@ namespace ConformU
                     }
                     else // The wait function is False
                     {
-                        // The wait function transitioned to False after the last poll iknterval and before the timeout so this is a successful wait
+                        // The wait function transitioned to False after the last poll interval and before the timeout so this is a successful wait
                         // No action required
                     }
                 }
             }
             else
             {
-                LogDebug(nameof(WaitWhile), $"WaitFunction is FALSE - Operation completed successfully");
+                //LogDebug(nameof(WaitWhile), $"WaitFunction is FALSE - Operation completed successfully");
             }
 
             SetStatus("");

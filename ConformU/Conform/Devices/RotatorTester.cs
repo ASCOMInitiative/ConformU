@@ -4,6 +4,7 @@ using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using ASCOM.Tools;
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -20,11 +21,11 @@ namespace ConformU
         private const float ROTATOR_POSITION_UNKNOWN = float.NaN; // Define a constant to represent position unknown. Used when restoring rotator position after testing.
 
         // Rotator variables
-        private bool mCanReadIsMoving, canReadPosition, mCanReadTargetPosition, mCanReadStepSize;
-        private bool mCanReverse, mIsMoving;
-        private float mRotatorStepSize, mRotatorPosition, mechanicalPosition;
-        private bool mReverse;
-        private bool mLastMoveWasAsync;
+        private bool canReadIsMoving, canReadPosition, canReadTargetPosition, canReadStepSize;
+        private bool canReverse, isMoving;
+        private float rotatorStepSize, rotatorPosition, mechanicalPosition;
+        private bool reverse;
+        private bool lastMoveWasAsync;
         private bool canReadMechanicalPosition;
         private float initialPosiiton = ROTATOR_POSITION_UNKNOWN;
         private float initialMechanicalPosiiton = ROTATOR_POSITION_UNKNOWN;
@@ -34,12 +35,12 @@ namespace ConformU
         private readonly Settings settings;
         private readonly ConformLogger logger;
 
-        private IRotatorV4 mRotator;
+        private IRotatorV4 rotator;
 
         #endregion
 
         #region Enums
-        private enum RotatorPropertyMethod
+        private enum RotatorMember
         {
             Position,
             TargetPosition,
@@ -69,8 +70,8 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    mRotator?.Dispose();
-                    mRotator = null;
+                    rotator?.Dispose();
+                    rotator = null;
                 }
             }
 
@@ -113,7 +114,7 @@ namespace ConformU
                 {
                     case DeviceTechnology.Alpaca:
                         LogInfo("CreateDevice", $"Creating Alpaca device: IP address: {settings.AlpacaDevice.IpAddress}, IP Port: {settings.AlpacaDevice.IpPort}, Alpaca device number: {settings.AlpacaDevice.AlpacaDeviceNumber}");
-                        mRotator = new AlpacaRotator(
+                        rotator = new AlpacaRotator(
                                                     settings.AlpacaConfiguration.AccessServiceType,
                                                     settings.AlpacaDevice.IpAddress,
                                                     settings.AlpacaDevice.IpPort,
@@ -138,12 +139,12 @@ namespace ConformU
                         {
                             case ComAccessMechanic.Native:
                                 LogInfo("CreateDevice", $"Creating Native COM device: {settings.ComDevice.ProgId}");
-                                mRotator = new RotatorFacade(settings, logger);
+                                rotator = new RotatorFacade(settings, logger);
                                 break;
 
                             case ComAccessMechanic.DriverAccess:
                                 LogInfo("CreateDevice", $"Creating DRIVERACCESS device: {settings.ComDevice.ProgId}");
-                                mRotator = new Rotator(settings.ComDevice.ProgId);
+                                rotator = new Rotator(settings.ComDevice.ProgId);
                                 break;
 
                             default:
@@ -157,7 +158,7 @@ namespace ConformU
                 }
 
                 LogInfo("CreateDevice", "Successfully created driver");
-                SetDevice(mRotator, DeviceTypes.Rotator); // Assign the driver to the base class
+                SetDevice(rotator, DeviceTypes.Rotator); // Assign the driver to the base class
 
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);
@@ -180,8 +181,8 @@ namespace ConformU
             try
             {
                 LogCallToDriver("CanReverse", "About to get CanReverse property");
-                mCanReverse = mRotator.CanReverse;
-                LogOk("CanReverse", mCanReverse.ToString());
+                canReverse = rotator.CanReverse;
+                LogOk("CanReverse", canReverse.ToString());
             }
             catch (Exception ex)
             {
@@ -191,7 +192,6 @@ namespace ConformU
 
         public override void PreRunCheck()
         {
-
             // Initialise to the unknown position value
             initialPosiiton = ROTATOR_POSITION_UNKNOWN;
 
@@ -199,7 +199,7 @@ namespace ConformU
             LogCallToDriver("PreRun Check", "About to call Halt method");
             try
             {
-                mRotator.Halt();
+                rotator.Halt();
             }
             catch
             {
@@ -211,9 +211,9 @@ namespace ConformU
                 SetTest("Pre-run check");
                 SetAction($"Waiting up to {settings.RotatorTimeout} seconds for rotator to stop moving");
                 LogCallToDriver("PreRun Check", "About to get IsMoving property repeatedly");
-                RotatorWait(RotatorPropertyMethod.Move, "Ensuring that movement is stopped", 0, 0);
+                RotatorWait(RotatorMember.Move, "Ensuring that movement is stopped", 0, 0);
 
-                if (!mRotator.IsMoving)
+                if (!rotator.IsMoving)
                 {
                     LogOk("Pre-run Check", "Rotator is stationary");
 
@@ -221,14 +221,14 @@ namespace ConformU
                     try
                     {
                         LogCallToDriver("PreRun Check", "About to get Position property");
-                        initialPosiiton = mRotator.Position;
+                        initialPosiiton = rotator.Position;
                         LogOk("Pre-run Check", $"Rotator initial position: {initialPosiiton}");
 
                         // Attempt to get the rotator's current mechanical position. If this fails the initial mechanical position will be set to unknown value.
                         try
                         {
                             LogCallToDriver("PreRun Check", "About to get MechanicalPosition property");
-                            initialMechanicalPosiiton = mRotator.MechanicalPosition;
+                            initialMechanicalPosiiton = rotator.MechanicalPosition;
                             initialSyncOffset = (float)Utilities.Range((double)(initialPosiiton - initialMechanicalPosiiton), -180.0, true, 180.0, true);
                             LogOk("Pre-run Check", $"Rotator initial mechanical position: {initialMechanicalPosiiton}, Initial sync offset: {initialSyncOffset}");
                         }
@@ -266,7 +266,7 @@ namespace ConformU
                 {
                     // Get the current position
                     LogCallToDriver("Post-run Check", $"About to get Position property");
-                    currentPosition = mRotator.Position;
+                    currentPosition = rotator.Position;
                     LogOk("Post-run Check", $"Current position: {currentPosition}");
 
                     // Restore the original sync offset, if possible, for IRotatorV3 and later devices
@@ -277,19 +277,19 @@ namespace ConformU
                         {
                             // Get the current mechanical position
                             LogCallToDriver("Post-run Check", $"About to get MechanicalPosition property");
-                            currentMechanicalPosition = mRotator.MechanicalPosition;
+                            currentMechanicalPosition = rotator.MechanicalPosition;
                             LogOk("Post-run Check", $"Current mechanical position: {currentMechanicalPosition}");
 
                             syncPosition = (float)Utilities.Range((double)(currentMechanicalPosition + initialSyncOffset), 0.0, true, 360.0, false);
                             LogOk("Post-run Check", $"New sync position: {syncPosition}");
 
                             LogCallToDriver("Post-run Check", $"About to call Sync method. Position: {syncPosition}");
-                            mRotator.Sync(syncPosition);
+                            rotator.Sync(syncPosition);
                             LogOk("Post-run Check", $"Completed Sync ({initialSyncOffset} degrees) from position: {currentPosition} to {syncPosition}");
 
                             // Re-get the current position because the sync will have changed it
                             LogCallToDriver("Post-run Check", $"About to get Position property");
-                            currentPosition = mRotator.Position;
+                            currentPosition = rotator.Position;
                             LogOk("Post-run Check", $"New current position: {currentPosition}");
                         }
                     }
@@ -299,12 +299,12 @@ namespace ConformU
 
                     // Move to the starting position
                     LogCallToDriver("Post-run Check", $"About to move by {relativeMovement} to {initialPosiiton}");
-                    mRotator.Move(relativeMovement);
+                    rotator.Move(relativeMovement);
 
                     // Wait for the move to complete
-                    RotatorWait(RotatorPropertyMethod.Move, "Restoring original position", relativeMovement, currentPosition);
+                    RotatorWait(RotatorMember.Move, "Restoring original position", relativeMovement, currentPosition);
 
-                    if (!mRotator.IsMoving)
+                    if (!rotator.IsMoving)
                         LogOk("Post-run Check", $"Rotator starting position successfully restored to {initialPosiiton}");
                     else
                         LogError("Post-run Check", $"Unable to restore rotator starting position, the rotator is still moving after {settings.RotatorTimeout} seconds. Could IsMoving be stuck on?");
@@ -321,18 +321,18 @@ namespace ConformU
             // IsMoving - Optional (V1,V2), Mandatory (V3)
             try
             {
-                mCanReadIsMoving = false;
+                canReadIsMoving = false;
                 LogCallToDriver("IsMoving", "About to get IsMoving property");
-                mIsMoving = mRotator.IsMoving;
-                mCanReadIsMoving = true; // Can read OK, doesn't generate an exception
-                if (mIsMoving)
+                isMoving = rotator.IsMoving;
+                canReadIsMoving = true; // Can read OK, doesn't generate an exception
+                if (isMoving)
                 {
                     LogIssue("IsMoving", "IsMoving is True before any movement has been commanded!");
                     LogInfo("IsMoving", "Further tests have been skipped");
                 }
                 else
                 {
-                    LogOk("IsMoving", mIsMoving.ToString());
+                    LogOk("IsMoving", isMoving.ToString());
                 }
             }
             catch (Exception ex)
@@ -351,17 +351,17 @@ namespace ConformU
                 return;
 
             // Position - Optional (V1,V2), Mandatory (V3)
-            mRotatorPosition = RotatorPropertyTestSingle(RotatorPropertyMethod.Position, "Position", 0.0f, 360.0f, Required.Mandatory);
+            rotatorPosition = RotatorPropertyTestSingle(RotatorMember.Position, "Position", 0.0f, 360.0f, Required.Mandatory);
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // TargetPosition - Optional (V1,V2), Mandatory (V3)
-            RotatorPropertyTestSingle(RotatorPropertyMethod.TargetPosition, "TargetPosition", 0.0f, 360.0f, Required.Mandatory);
+            RotatorPropertyTestSingle(RotatorMember.TargetPosition, "TargetPosition", 0.0f, 360.0f, Required.Mandatory);
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // StepSize - Optional (V1,V2 and V3)
-            mRotatorStepSize = RotatorPropertyTestSingle(RotatorPropertyMethod.StepSize, "StepSize", 0.0f, 360.0f, Required.Optional);
+            rotatorStepSize = RotatorPropertyTestSingle(RotatorMember.StepSize, "StepSize", 0.0f, 360.0f, Required.Optional);
             if (cancellationToken.IsCancellationRequested)
                 return;
 
@@ -369,10 +369,10 @@ namespace ConformU
             try
             {
                 LogCallToDriver("Reverse", "About to get Reverse property");
-                mReverse = mRotator.Reverse;
-                if (mCanReverse)
+                reverse = rotator.Reverse;
+                if (canReverse)
                 {
-                    LogOk("Reverse Read", mReverse.ToString());
+                    LogOk("Reverse Read", reverse.ToString());
                 }
                 else
                 {
@@ -383,7 +383,7 @@ namespace ConformU
             {
                 if (GetInterfaceVersion() < 3) // Can be optional in IRotatorV1 and V2
                 {
-                    if (mCanReverse)
+                    if (canReverse)
                     {
                         HandleException("Reverse Read", MemberType.Property, Required.MustBeImplemented, ex, "when CanReverse is True");
                     }
@@ -404,20 +404,20 @@ namespace ConformU
             // Reverse Write - Optional if CanReverse is False, Mandatory if CanReverse is True (V1,V2), Mandatory (V3)
             try
             {
-                if (mReverse) // Try and set reverse to the opposite state
+                if (reverse) // Try and set reverse to the opposite state
                 {
                     LogCallToDriver("Reverse", "About to set Reverse property");
-                    mRotator.Reverse = false;
+                    rotator.Reverse = false;
                 }
                 else
                 {
                     LogCallToDriver("Reverse", "About to set Reverse property");
-                    mRotator.Reverse = true;
+                    rotator.Reverse = true;
                 }
 
                 LogCallToDriver("Reverse", "About to set Reverse property");
-                mRotator.Reverse = mReverse; // Restore original value
-                if (mCanReverse)
+                rotator.Reverse = reverse; // Restore original value
+                if (canReverse)
                 {
                     LogOk("Reverse Write", "Reverse state successfully changed and restored");
                 }
@@ -430,7 +430,7 @@ namespace ConformU
             {
                 if (GetInterfaceVersion() < 3) // Can be optional in IRotatorV1 and V2
                 {
-                    if (mCanReverse)
+                    if (canReverse)
                     {
                         HandleException("Reverse Write", MemberType.Property, Required.MustBeImplemented, ex, "when CanReverse is True");
                     }
@@ -452,7 +452,7 @@ namespace ConformU
                 {
                     canReadMechanicalPosition = false;
                     LogCallToDriver("MechanicalPosition", "About to set MechanicalPosition property");
-                    mechanicalPosition = mRotator.MechanicalPosition;
+                    mechanicalPosition = rotator.MechanicalPosition;
                     canReadMechanicalPosition = true; // Can read mechanical position OK, doesn't generate an exception
 
                     // Successfully retrieved a value
@@ -480,7 +480,7 @@ namespace ConformU
                     // For information show the sync offset, if possible, using OFFSET = SKYPOSITION - MECHANICALPOSITION
                     if (canReadPosition) // Can read synced position and mechanical position
                     {
-                        LogInfo("MechanicalPosition", $"Rotator sync offset: {mRotatorPosition - mechanicalPosition}");
+                        LogInfo("MechanicalPosition", $"Rotator sync offset: {rotatorPosition - mechanicalPosition}");
                     }
                 }
                 catch (Exception ex)
@@ -490,7 +490,7 @@ namespace ConformU
             }
         }
 
-        private float RotatorPropertyTestSingle(RotatorPropertyMethod pType, string pName, float pMin, float pMax, Required requiredIRotatorV3State)
+        private float RotatorPropertyTestSingle(RotatorMember pType, string pName, float pMin, float pMax, Required requiredIRotatorV3State)
         {
             float rotatorPropertyTestSingleRet = default;
             Required requiredState;
@@ -511,27 +511,27 @@ namespace ConformU
                 LogCallToDriver(pName, $"About to get {pName} property");
                 switch (pType)
                 {
-                    case RotatorPropertyMethod.Position:
+                    case RotatorMember.Position:
                         {
                             canReadPosition = false;
-                            rotatorPropertyTestSingleRet = mRotator.Position;
+                            rotatorPropertyTestSingleRet = rotator.Position;
                             canReadPosition = true; // Can read position OK, doesn't generate an exception
                             break;
                         }
 
-                    case RotatorPropertyMethod.StepSize:
+                    case RotatorMember.StepSize:
                         {
-                            mCanReadStepSize = false;
-                            rotatorPropertyTestSingleRet = mRotator.StepSize;
-                            mCanReadStepSize = true;
+                            canReadStepSize = false;
+                            rotatorPropertyTestSingleRet = rotator.StepSize;
+                            canReadStepSize = true;
                             break;
                         }
 
-                    case RotatorPropertyMethod.TargetPosition:
+                    case RotatorMember.TargetPosition:
                         {
-                            mCanReadTargetPosition = false;
-                            rotatorPropertyTestSingleRet = mRotator.TargetPosition;
-                            mCanReadTargetPosition = true;
+                            canReadTargetPosition = false;
+                            rotatorPropertyTestSingleRet = rotator.TargetPosition;
+                            canReadTargetPosition = true;
                             break;
                         }
 
@@ -574,13 +574,13 @@ namespace ConformU
         public override void CheckMethods()
         {
             LogCallToDriver("AccessChecks", "About to get Connected property");
-            LogDebug("CheckMethods", $"Rotator is connected: {mRotator.Connected}");
+            LogDebug("CheckMethods", $"Rotator is connected: {rotator.Connected}");
 
             // Halt - Optional (V1,V2 and V3)
             try
             {
                 LogCallToDriver("Halt", $"About to call Halt method");
-                mRotator.Halt();
+                rotator.Halt();
                 LogOk("Halt", "Halt command successful");
             }
             catch (Exception ex)
@@ -592,22 +592,22 @@ namespace ConformU
                 return;
 
             // MoveAbsolute - Optional (V1,V2), Mandatory (V3)
-            RotatorMoveTest(RotatorPropertyMethod.MoveAbsolute, "MoveAbsolute", 45.0f, "");
+            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 45.0f, "");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            RotatorMoveTest(RotatorPropertyMethod.MoveAbsolute, "MoveAbsolute", 135.0f, "");
+            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 135.0f, "");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            RotatorMoveTest(RotatorPropertyMethod.MoveAbsolute, "MoveAbsolute", 225.0f, "");
+            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 225.0f, "");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            RotatorMoveTest(RotatorPropertyMethod.MoveAbsolute, "MoveAbsolute", 315.0f, "");
+            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 315.0f, "");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            RotatorMoveTest(RotatorPropertyMethod.MoveAbsolute, "MoveAbsolute", (float)-405.0d, "Movement to large negative angle -405 degrees");
+            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", (float)-405.0d, "Movement to large negative angle -405 degrees");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            RotatorMoveTest(RotatorPropertyMethod.MoveAbsolute, "MoveAbsolute", 405.0f, "Movement to large positive angle 405 degrees");
+            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 405.0f, "Movement to large positive angle 405 degrees");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
@@ -621,10 +621,10 @@ namespace ConformU
             RelativeMoveTest(130.0f);
             if (cancellationToken.IsCancellationRequested)
                 return;
-            RotatorMoveTest(RotatorPropertyMethod.Move, "Move", (float)-375.0d, "Movement to large negative angle -375 degrees");
+            RotatorMoveTest(RotatorMember.Move, "Move", (float)-375.0d, "Movement to large negative angle -375 degrees");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            RotatorMoveTest(RotatorPropertyMethod.Move, "Move", 375.0f, "Movement to large positive angle 375 degrees");
+            RotatorMoveTest(RotatorMember.Move, "Move", 375.0f, "Movement to large positive angle 375 degrees");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
@@ -636,22 +636,22 @@ namespace ConformU
                 {
                     if (canReadMechanicalPosition & canReadPosition)
                     {
-                        RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 45.0f, "");
+                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 45.0f, "");
                         if (cancellationToken.IsCancellationRequested)
                             return;
-                        RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 135.0f, "");
+                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 135.0f, "");
                         if (cancellationToken.IsCancellationRequested)
                             return;
-                        RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 225.0f, "");
+                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 225.0f, "");
                         if (cancellationToken.IsCancellationRequested)
                             return;
-                        RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 315.0f, "");
+                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 315.0f, "");
                         if (cancellationToken.IsCancellationRequested)
                             return;
-                        RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", -405.0f, "Movement to large negative angle -405 degrees");
+                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", -405.0f, "Movement to large negative angle -405 degrees");
                         if (cancellationToken.IsCancellationRequested)
                             return;
-                        RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 405.0f, "Movement to large positive angle 405 degrees");
+                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 405.0f, "Movement to large positive angle 405 degrees");
                         if (cancellationToken.IsCancellationRequested)
                             return;
                     }
@@ -704,17 +704,17 @@ namespace ConformU
         private void RotatorSynctest(float syncAngle, float mechanicalAngle)
         {
             float syncAngleDifference;
-            RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "Sync", mechanicalAngle, "");
+            RotatorMoveTest(RotatorMember.MoveMechanical, "Sync", mechanicalAngle, "");
             if (cancellationToken.IsCancellationRequested)
                 return;
             try
             {
                 LogCallToDriver("Sync", $"About to call Sync method");
-                mRotator.Sync(syncAngle);
+                rotator.Sync(syncAngle);
                 LogOk("Sync", "Synced OK");
 
                 // Check that Position and MechanicalPosition are now the same
-                syncAngleDifference = mRotator.Position - syncAngle;
+                syncAngleDifference = rotator.Position - syncAngle;
                 if (Math.Abs(syncAngleDifference) < ROTATOR_POSITION_TOLERANCE)
                 {
                     LogOk("Sync", $"Rotator Position has synced to {syncAngle} OK.");
@@ -730,209 +730,262 @@ namespace ConformU
             }
         }
 
-        private void RotatorMoveTest(RotatorPropertyMethod pType, string pName, float pValue, string pExpectErrorMsg)
+        private void RotatorMoveTest(RotatorMember moveMethod, string memberName, float requiredPosition, string expectedErrorMsg)
         {
-            float lRotatorStartPosition = default, rotatorPosition;
-            double lOkLimit, lPositionOffset;
-            LogCallToDriver(pName, $"About to get Position property");
-            LogDebug("RotatorMoveTest", $"Start value, position: {pValue:0.000} {mRotator.Position:0.000}");
+            float rotatorStartPosition = 0.0f, rotatorPositionAfterMove = ROTATOR_POSITION_UNKNOWN;
+            double okLimit, positionOffset;
 
-            SetTest(pName);
+            SetTest(memberName);
             SetAction("Setting position");
+
+            memberName = $"{memberName} {requiredPosition}";
+            if (settings.Debug)
+                LogNewLine();
+
             try
             {
                 // Move to requested position
-                switch (pType)
+                Stopwatch sw = Stopwatch.StartNew();
+                switch (moveMethod)
                 {
-                    case RotatorPropertyMethod.Move:
+                    case RotatorMember.Move:
+                        if (canReadPosition) // Get us to a starting point of 10 degrees
                         {
-                            LogDebug("RotatorMoveTest", $"Reading rotator start position: {canReadPosition}");
-                            if (canReadPosition) // Get us to a starting point of 10 degrees
-                            {
-                                LogCallToDriver(pName, $"About to get Position property");
-                                lRotatorStartPosition = mRotator.Position;
-                            }
-
-                            LogDebug("RotatorMoveTest", "Starting relative move");
-                            LogCallToDriver(pName, $"About to call Move method");
-                            mRotator.Move(pValue);
-                            LogDebug("RotatorMoveTest", "Starting relative move");
-                            break;
+                            LogCallToDriver(memberName, $"About to get Position property");
+                            rotatorStartPosition = rotator.Position;
+                            LogDebug(memberName, $"The rotator is currently at position: {rotator.Position:0.000}, the test position is: {requiredPosition:0.000}");
+                        }
+                        else
+                        {
+                            rotatorStartPosition = 0.0F;
+                            LogDebug(memberName, $"Can't read the current rotator position - assuming 0.0, the test position is: {requiredPosition:0.000}");
                         }
 
-                    case RotatorPropertyMethod.MoveAbsolute:
+                        LogDebug(memberName, "Starting relative move");
+                        LogCallToDriver(memberName, $"About to call Move method");
+                        rotator.Move(requiredPosition);
+                        LogDebug(memberName, $"Returned from Move method in {sw.Elapsed.TotalSeconds:0.000} seconds.");
+                        break;
+
+                    case RotatorMember.MoveAbsolute:
+                        if (canReadPosition) // Get us to a starting point of 10 degrees
                         {
-                            LogDebug("RotatorMoveTest", "Starting absolute move");
-                            lRotatorStartPosition = 0.0f;
-                            LogCallToDriver(pName, $"About to call MoveAbsolute method");
-                            mRotator.MoveAbsolute(pValue);
-                            LogDebug("RotatorMoveTest", "Completed absolute move");
-                            break;
+                            LogCallToDriver(memberName, $"About to get Position property");
+                            rotatorStartPosition = rotator.Position;
+                            LogDebug(memberName, $"The rotator is currently at position: {rotator.Position:0.000}, the test position is: {requiredPosition:0.000}");
+                        }
+                        else
+                        {
+                            rotatorStartPosition = 0.0F;
+                            LogDebug(memberName, $"Can't read the current rotator position - assuming 0.0, the test position is: {requiredPosition:0.000}");
                         }
 
-                    case RotatorPropertyMethod.MoveMechanical:
+                        LogDebug(memberName, "Starting absolute move");
+                        LogCallToDriver(memberName, $"About to call MoveAbsolute method");
+                        rotator.MoveAbsolute(requiredPosition);
+                        LogDebug(memberName, $"Returned from MoveAbsolute method in {sw.Elapsed.TotalSeconds:0.000} seconds.");
+                        break;
+
+                    case RotatorMember.MoveMechanical:
+                        if (canReadMechanicalPosition) // Get us to a starting point of 10 degrees
                         {
-                            LogDebug("RotatorMoveTest", "Starting mechanical move");
-                            lRotatorStartPosition = 0.0f;
-                            LogCallToDriver(pName, $"About to call MoveMechanical method");
-                            mRotator.MoveMechanical(pValue);
-                            LogDebug("RotatorMoveTest", "Completed mechanical move");
-                            break;
+                            LogCallToDriver(memberName, $"About to get MechanicalPosition property");
+                            rotatorStartPosition = rotator.MechanicalPosition;
+                            LogDebug(memberName, $"The rotator is currently at mechanical position: {rotator.MechanicalPosition:0.000}, the test position is: {requiredPosition:0.000}");
                         }
+                        else
+                        {
+                            rotatorStartPosition = 0.0F;
+                            LogDebug(memberName, $"Can't read the current rotator mechanical position - assuming 0.0, the test position is: {requiredPosition:0.000}");
+                        }
+
+                        LogDebug(memberName, "Starting mechanical move");
+                        LogCallToDriver(memberName, $"About to call MoveMechanical method");
+                        rotator.MoveMechanical(requiredPosition);
+                        LogDebug(memberName, $"Returned from MoveMechanical method in {sw.Elapsed.TotalSeconds:0.000} seconds.");
+                        break;
 
                     default:
+                        LogIssue(memberName, $"RotatorMoveTest: Unknown test type - {moveMethod}");
+                        break;
+                }
+
+                // Wait for movement to stop
+                RotatorWait(moveMethod, memberName, requiredPosition, rotatorStartPosition);
+
+                // Report outcome
+                switch (moveMethod)
+                {
+                    case RotatorMember.Move:
+                        if (lastMoveWasAsync) // Asynchronous move
                         {
-                            LogIssue(pName, $"RotatorMoveTest: Unknown test type - {pType}");
-                            break;
+                            if (canReadPosition)
+                            {
+                                LogCallToDriver(memberName, $"About to get Position property");
+                                rotatorPositionAfterMove = rotator.Position;
+                                LogDebug(memberName, $"Asynchronous move completed. Rotator position: {rotatorPositionAfterMove} degrees");
+                            }
+                            else
+                            {
+                                LogOk(memberName, "Asynchronous move completed");
+                            }
                         }
-                }
-
-                RotatorWait(pType, pName, pValue, lRotatorStartPosition);
-                if (mLastMoveWasAsync) // Asynchronous move
-                {
-                    switch (pType)
-                    {
-                        case RotatorPropertyMethod.Move:
+                        else // Synchronous move
+                        {
+                            if (canReadPosition) // Can read position
                             {
-                                if (canReadPosition)
-                                {
-                                    LogCallToDriver(pName, $"About to get Position property");
-                                    LogOk(pName, $"Asynchronous move successful - moved by {pValue} degrees to: {mRotator.Position} degrees");
-                                }
-                                else
-                                {
-                                    LogOk(pName, "Asynchronous move successful");
-                                }
-
-                                break;
+                                LogCallToDriver(memberName, $"About to get Position property");
+                                rotatorPositionAfterMove = rotator.Position;
+                                LogDebug(memberName, $"Synchronous move completed. Rotator position: {rotatorPositionAfterMove} degrees");
                             }
-
-                        case RotatorPropertyMethod.MoveMechanical:
+                            else // Cannot read position
                             {
-                                break;
+                                LogOk(memberName, "Synchronous move completed");
                             }
+                        }
+                        break;
 
-                        case RotatorPropertyMethod.MoveAbsolute:
+                    case RotatorMember.MoveMechanical:
+                        if (lastMoveWasAsync) // Asynchronous move
+                        {
+                            if (canReadMechanicalPosition)
                             {
-                                if (canReadPosition)
-                                {
-                                    LogCallToDriver(pName, $"About to get Position property");
-                                    LogOk(pName, $"Asynchronous move successful to: {mRotator.Position} degrees");
-                                }
-                                else
-                                {
-                                    LogOk(pName, "Asynchronous move successful");
-                                }
-
-                                break;
+                                LogCallToDriver(memberName, $"About to get MechanicalPosition property");
+                                rotatorPositionAfterMove = rotator.MechanicalPosition;
+                                LogDebug(memberName, $"Asynchronous mechanical move completed. Rotator mechanical position: {rotatorPositionAfterMove} degrees");
                             }
-                    }
-                }
-                else if (canReadPosition) // Synchronous move
-                {
-                    LogCallToDriver(pName, $"About to get Position property");
-                    LogOk(pName, $"Synchronous move successful to: {mRotator.Position} degrees");
-                }
-                else
-                {
-                    LogOk(pName, "Synchronous move successful");
+                            else
+                            {
+                                LogOk(memberName, "Asynchronous mechanical move completed.");
+                            }
+                        }
+                        else // Synchronous move
+                        {
+                            if (canReadPosition) // Can read position
+                            {
+                                LogCallToDriver(memberName, $"About to get MechanicalPosition property");
+                                rotatorPositionAfterMove = rotator.MechanicalPosition;
+                                LogDebug(memberName, $"Synchronous mechanical move completed. Rotator mechanical position: {rotatorPositionAfterMove} degrees");
+                            }
+                            else // Cannot read position
+                            {
+                                LogOk(memberName, "Synchronous mechanical move completed");
+                            }
+                        }
+                        break;
+
+                    case RotatorMember.MoveAbsolute:
+                        if (lastMoveWasAsync) // Asynchronous move
+                        {
+                            if (canReadPosition)
+                            {
+                                LogCallToDriver(memberName, $"About to get Position property");
+                                rotatorPositionAfterMove = rotator.Position;
+                                LogDebug(memberName, $"Asynchronous absolute move completed. Rotator position: {rotatorPositionAfterMove} degrees");
+                            }
+                            else
+                            {
+                                LogOk(memberName, "Asynchronous absolute move completed.");
+                            }
+                        }
+                        else // Synchronous move
+                        {
+                            if (canReadPosition) // Can read position
+                            {
+                                LogCallToDriver(memberName, $"About to get Position property");
+                                rotatorPositionAfterMove = rotator.Position;
+                                LogDebug(memberName, $"Synchronous absolute move completed. Rotator position: {rotatorPositionAfterMove} degrees");
+                            }
+                            else // Cannot read position
+                            {
+                                LogOk(memberName, "Synchronous absolute move completed");
+                            }
+                        }
+                        break;
                 }
 
                 // Now test whether we got to where we expected to go
-                if (canReadPosition)
+                if (rotatorPosition != ROTATOR_POSITION_UNKNOWN) // We were able to read the rotator's position or mechanical position
                 {
-                    if (mCanReadStepSize)
+                    if (canReadStepSize)
                     {
-                        lOkLimit = 1.1d * mRotatorStepSize; // Set to 110% of step size to allow tolerance on reporting within 1 step of required location
+                        okLimit = 1.1d * rotatorStepSize; // Set to 110% of step size to allow tolerance on reporting within 1 step of required location
                     }
                     else
                     {
-                        lOkLimit = ROTATOR_OK_TOLERANCE;
+                        okLimit = ROTATOR_OK_TOLERANCE;
                     }
 
-                    LogCallToDriver(pName, $"About to get Position property");
-                    LogDebug($"{pName}1",
-                        $"Position, value, start, tolerance: {mRotator.Position:0.000} {pValue:0.000} {lRotatorStartPosition:0.000} {lOkLimit:0.000}");
-                    LogCallToDriver(pName, $"About to get Position property");
-                    rotatorPosition = mRotator.Position;
                     if (GetInterfaceVersion() < 3) // Interface V1 and V2 behaviour
                     {
-                        if (rotatorPosition < 0.0d)
-                            LogInfo(pName, "Rotator supports angles < 0.0");
-                        if (rotatorPosition > 360.0d)
-                            LogInfo(pName, "Rotator supports angles > 360.0");
+                        if (rotatorPositionAfterMove < 0.0d)
+                            LogInfo(memberName, "Rotator supports angles < 0.0");
+                        if (rotatorPositionAfterMove > 360.0d)
+                            LogInfo(memberName, "Rotator supports angles > 360.0");
                     }
-                    else if (rotatorPosition < 0.0d | rotatorPosition >= 360.0d) // Interface V3 behaviour (Position must be 0..359.99999...)
-                        LogIssue(pName, $"Rotator position {rotatorPosition:0.000} is outside the valid range: 0.0 to 359.99999...");
+                    else if (rotatorPositionAfterMove < 0.0d | rotatorPositionAfterMove >= 360.0d) // Interface V3 behaviour (Position must be 0..359.99999...)
+                        LogIssue(memberName, $"Rotator position {rotatorPositionAfterMove:0.000} is outside the valid range: 0.0 to 359.99999...");
 
-                    // Get the relevant position value
-                    if (pType == RotatorPropertyMethod.MoveMechanical) // Use the MechanicalPosition property
-                    {
-                        LogCallToDriver(pName, $"About to get MechanicalPosition property");
-                        rotatorPosition = mRotator.MechanicalPosition;
-                    }
-                    else // Use the Position property for all other methods
-                    {
-                        LogCallToDriver(pName, $"About to get Position property");
-                        rotatorPosition = mRotator.Position;
-                    }
+                    LogDebug($"{memberName}", $"Confirming that the rotator moved where commanded - Required position: {requiredPosition:0.000}, Actual position: {rotatorPositionAfterMove:0.000}, Starting position: {rotatorStartPosition:0.000}, Tolerance: {okLimit:0.000}");
+
                     // Calculate the position offset from the required position
-                    lPositionOffset = Math.Abs((720.0d + rotatorPosition - (pValue + lRotatorStartPosition)) % 360.0d); // Account for rotator positions that report < 0.0 or > 360.0 degrees
-                    if (lPositionOffset > 180.0d)
-                        lPositionOffset = 360.0d - lPositionOffset; // Cope with positions that return just under the expected value
-                    switch (Math.Abs(lPositionOffset))
+
+                    if (moveMethod == RotatorMember.Move)
+                    {
+                        positionOffset = Math.Abs((720.0d + rotatorPositionAfterMove - (requiredPosition + rotatorStartPosition)) % 360.0d); // Account for rotator positions that report < 0.0 or > 360.0 degrees
+                    }
+                    else
+                    {
+                        positionOffset = Math.Abs((720.0d + rotatorPositionAfterMove - requiredPosition) % 360.0d); // Account for rotator positions that report < 0.0 or > 360.0 degrees
+                    }
+
+                    if (positionOffset > 180.0d)
+                        positionOffset = 360.0d - positionOffset; // Cope with positions that return just under the expected value
+                    switch (Math.Abs(positionOffset))
                     {
                         case 0.0d:
-                            {
-                                LogOk(pName, $"Rotator is at the expected position: {rotatorPosition}");
-                                break;
-                            }
+                            LogOk(memberName, $"Rotator is at the expected position: {rotatorPositionAfterMove}");
+                            break;
 
-                        case var @case when 0.0d <= @case && @case <= lOkLimit:
-                            {
-                                LogOk(pName, $"Rotator is within {lOkLimit:0.000)} {((lPositionOffset <= 1.0d) ? " degree" : " degrees")} of the expected position: {rotatorPosition}");
-                                break;
-                            }
+                        case var @case when 0.0d <= @case && @case <= okLimit:
+                            LogOk(memberName, $"Rotator is within {okLimit:0.000)} {((positionOffset <= 1.0d) ? " degree" : " degrees")} of the expected position: {rotatorPositionAfterMove}");
+                            break;
 
                         case var case1 when 0.0d <= case1 && case1 <= ROTATOR_INFO_TOLERANCE:
-                            {
-                                LogInfo(pName, $"Rotator is {lPositionOffset:0.000} degrees from expected position: {rotatorPosition}");
-                                break;
-                            }
+                            LogInfo(memberName, $"Rotator is {positionOffset:0.000} degrees from expected position: {rotatorPositionAfterMove}");
+                            break;
 
                         default:
-                            {
-                                LogIssue(pName, $"Rotator is {lPositionOffset:0.000} degrees from expected position {rotatorPosition}, which is more than the conformance value of {ROTATOR_INFO_TOLERANCE:0.0} degrees");
-                                break;
-                            }
+                            LogIssue(memberName, $"Rotator is {positionOffset:0.000} degrees from expected position {rotatorPositionAfterMove}, which is more than the conformance value of {ROTATOR_INFO_TOLERANCE:0.0} degrees");
+                            break;
                     }
                 }
             }
             catch (Exception ex)
             {
-                if (string.IsNullOrEmpty(pExpectErrorMsg)) // Test for normal behaviour
+                if (string.IsNullOrEmpty(expectedErrorMsg)) // Test for normal behaviour
                 {
                     if (GetInterfaceVersion() < 3)
                     {
-                        HandleException(pName, MemberType.Method, Required.Optional, ex, "");
+                        HandleException(memberName, MemberType.Method, Required.Optional, ex, "");
                     }
                     else
                     {
-                        HandleException(pName, MemberType.Method, Required.Mandatory, ex, "");
+                        HandleException(memberName, MemberType.Method, Required.Mandatory, ex, "");
                     }
                 }
-                else if (IsInvalidValueException(pName, ex)) // This is expected to fail because a bad position was used
-                                                             // Test for an InvalidValueException and handle if found
+                else if (IsInvalidValueException(memberName, ex)) // This is expected to fail because a bad position was used
+                                                                  // Test for an InvalidValueException and handle if found
                 {
-                    HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "", pExpectErrorMsg);
+                    HandleInvalidValueExceptionAsOk(memberName, MemberType.Method, Required.Mandatory, ex, "", expectedErrorMsg);
                 }
                 else if (GetInterfaceVersion() < 3) // Some other type of exception occurred
                 {
-                    HandleException(pName, MemberType.Method, Required.Optional, ex, "");
+                    HandleException(memberName, MemberType.Method, Required.Optional, ex, "");
                 }
                 else
                 {
-                    HandleException(pName, MemberType.Method, Required.Mandatory, ex, "");
+                    HandleException(memberName, MemberType.Method, Required.Mandatory, ex, "");
                 }
             }
 
@@ -941,81 +994,78 @@ namespace ConformU
             SetTest("");
         }
 
-        private void RotatorWait(RotatorPropertyMethod pType, string pName, float pValue, float pRotatorStartPosition)
+        private void RotatorWait(RotatorMember moveMethod, string memberName, float positionValue, float rotatorStartPosition)
         {
-            LogDebug("RotatorWait", "Entered RotatorWait");
-            if (mCanReadIsMoving) // Can read IsMoving so test for asynchronous and synchronous behaviour
-            {
-                LogDebug("RotatorWait", "Can Read IsMoving OK");
-                LogCallToDriver(pName, $"About to get IsMoving property");
-                if (mRotator.IsMoving)
-                {
-                    LogDebug("RotatorWait", "Rotator is moving, waiting for move to complete");
-                    SetTest(pName);
-                    SetAction("Waiting for move to complete");
-                    LogCallToDriver(pName, $"About to get Position and IsMoving properties repeatedly");
-                    switch (pType)
-                    {
-                        case RotatorPropertyMethod.Move:
-                            {
-                                WaitWhile($"Moving by {pValue:000} degrees", () => mRotator.IsMoving, 500, settings.RotatorTimeout, () => $"{Math.Abs(mRotator.Position - pRotatorStartPosition):000} / {Math.Abs(pValue % 360.0):000} relative");
-                                break;
-                            }
+            Stopwatch stopwatch = Stopwatch.StartNew();
 
-                        case RotatorPropertyMethod.MoveMechanical:
-                        case RotatorPropertyMethod.MoveAbsolute:
-                            {
-                                WaitWhile($"Moving to {pValue:000} degrees", () => mRotator.IsMoving, 500, settings.RotatorTimeout, () => $"{Math.Abs(mRotator.Position - pRotatorStartPosition):000} / {Math.Abs((pValue - pRotatorStartPosition) % 360.0):000} absolute");
-                                break;
-                            }
+            if (canReadIsMoving) // Can read IsMoving so test for asynchronous and synchronous behaviour
+            {
+                LogCallToDriver(memberName, $"About to get IsMoving property");
+                if (rotator.IsMoving)
+                {
+                    LogDebug(memberName, "RotatorWait - Rotator is moving, waiting for move to complete");
+                    SetTest(memberName);
+                    SetAction("Waiting for move to complete");
+
+                    LogCallToDriver(memberName, $"About to get Position and IsMoving properties repeatedly");
+                    switch (moveMethod)
+                    {
+                        case RotatorMember.Move:
+                            WaitWhile($"Moving by {positionValue:000} degrees", () => rotator.IsMoving, 500, settings.RotatorTimeout, () => $"{Math.Abs(rotator.Position - rotatorStartPosition):000} / {Math.Abs(positionValue % 360.0):000} relative");
+                            break;
+
+                        case RotatorMember.MoveMechanical:
+                        case RotatorMember.MoveAbsolute:
+                            WaitWhile($"Moving to {positionValue:000} degrees", () => rotator.IsMoving, 500, settings.RotatorTimeout, () => $"{Math.Abs(rotator.Position - rotatorStartPosition):000} / {Math.Abs((positionValue - rotatorStartPosition) % 360.0):000} absolute");
+                            break;
 
                         default:
-                            {
-                                WaitWhile("Waiting for move to complete", () => mRotator.IsMoving, 500, settings.RotatorTimeout, null);
-                                break;
-                            }
+                            WaitWhile("Waiting for move to complete", () => rotator.IsMoving, 500, settings.RotatorTimeout, null);
+                            break;
                     }
 
-                    LogDebug("RotatorWait", "Rotator has stopped moving");
                     SetAction("");
-                    mLastMoveWasAsync = true;
+                    lastMoveWasAsync = true;
                 }
                 else
                 {
-                    mLastMoveWasAsync = false;
+                    lastMoveWasAsync = false;
                 }
             }
-            else // Can only test for synchronous move
+            else // Can not read IsMoving so we can only test for synchronous movement
             {
-                LogDebug("RotatorWait", "Cannot Read IsMoving");
-                mLastMoveWasAsync = false;
+                LogDebug(memberName, "Cannot Read IsMoving");
+                lastMoveWasAsync = false;
             }
+
+            LogDebug(memberName, $"Time spent waiting for move to complete: {stopwatch.Elapsed.TotalSeconds:0.000} seconds");
         }
 
-        private void RelativeMoveTest(float pRelativeStepSize)
+        private void RelativeMoveTest(float relativeStepSize)
         {
-            float lTarget;
+            float target;
             if (canReadPosition)
             {
                 LogCallToDriver("Move", $"About to get Position property");
-                if (mRotator.Position < pRelativeStepSize) // Set a value that should succeed OK
+                if (rotator.Position < relativeStepSize) // Set a value that should succeed OK
                 {
-                    lTarget = pRelativeStepSize;
+                    target = relativeStepSize;
                 }
                 else
                 {
-                    lTarget = -pRelativeStepSize;
+                    target = -relativeStepSize;
                 }
             }
             else
             {
-                lTarget = pRelativeStepSize;
+                target = relativeStepSize;
             }
 
-            RotatorMoveTest(RotatorPropertyMethod.Move, "Move", lTarget, "");
+            RotatorMoveTest(RotatorMember.Move, "Move", target, "");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            RotatorMoveTest(RotatorPropertyMethod.Move, "Move", -lTarget, "");
+
+            RotatorMoveTest(RotatorMember.Move, "Move", -target, "");
             if (cancellationToken.IsCancellationRequested)
                 return;
             // Should now be back where we started
@@ -1027,7 +1077,7 @@ namespace ConformU
             // Position
             if (canReadPosition)
             {
-                RotatorPerformanceTest(RotatorPropertyMethod.Position, "Position");
+                RotatorPerformanceTest(RotatorMember.Position, "Position");
             }
             else
             {
@@ -1035,9 +1085,9 @@ namespace ConformU
             }
 
             // TargetPosition
-            if (mCanReadTargetPosition)
+            if (canReadTargetPosition)
             {
-                RotatorPerformanceTest(RotatorPropertyMethod.TargetPosition, "TargetPosition");
+                RotatorPerformanceTest(RotatorMember.TargetPosition, "TargetPosition");
             }
             else
             {
@@ -1045,9 +1095,9 @@ namespace ConformU
             }
 
             // StepSize
-            if (mCanReadStepSize)
+            if (canReadStepSize)
             {
-                RotatorPerformanceTest(RotatorPropertyMethod.StepSize, "StepSize");
+                RotatorPerformanceTest(RotatorMember.StepSize, "StepSize");
             }
             else
             {
@@ -1055,9 +1105,9 @@ namespace ConformU
             }
 
             // IsMoving
-            if (mCanReadIsMoving)
+            if (canReadIsMoving)
             {
-                RotatorPerformanceTest(RotatorPropertyMethod.IsMoving, "IsMoving");
+                RotatorPerformanceTest(RotatorMember.IsMoving, "IsMoving");
             }
             else
             {
@@ -1084,45 +1134,48 @@ namespace ConformU
             }
         }
 
-        private void RotatorPerformanceTest(RotatorPropertyMethod pType, string pName)
+        private void RotatorPerformanceTest(RotatorMember pType, string pName)
         {
-            DateTime lStartTime;
-            double lCount, lLastElapsedTime, lElapsedTime;
-            float lSingle;
-            bool lBoolean;
-            double lRate;
+            DateTime startTime;
+            double count, lastElapsedTime, elapsedTime;
+            float single;
+            bool boolean;
+            double rate;
+
             SetAction(pName);
+
             try
             {
-                lStartTime = DateTime.Now;
-                lCount = 0.0d;
-                lLastElapsedTime = 0.0d;
+                startTime = DateTime.Now;
+                count = 0.0d;
+                lastElapsedTime = 0.0d;
+
                 do
                 {
-                    lCount += 1.0d;
+                    count += 1.0d;
                     switch (pType)
                     {
-                        case RotatorPropertyMethod.Position:
+                        case RotatorMember.Position:
                             {
-                                lSingle = mRotator.Position;
+                                single = rotator.Position;
                                 break;
                             }
 
-                        case RotatorPropertyMethod.TargetPosition:
+                        case RotatorMember.TargetPosition:
                             {
-                                lSingle = mRotator.TargetPosition;
+                                single = rotator.TargetPosition;
                                 break;
                             }
 
-                        case RotatorPropertyMethod.StepSize:
+                        case RotatorMember.StepSize:
                             {
-                                lSingle = mRotator.StepSize;
+                                single = rotator.StepSize;
                                 break;
                             }
 
-                        case RotatorPropertyMethod.IsMoving:
+                        case RotatorMember.IsMoving:
                             {
-                                lBoolean = mRotator.IsMoving;
+                                boolean = rotator.IsMoving;
                                 break;
                             }
 
@@ -1133,40 +1186,41 @@ namespace ConformU
                             }
                     }
 
-                    lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
-                    if (lElapsedTime > lLastElapsedTime + 1.0d)
+                    elapsedTime = DateTime.Now.Subtract(startTime).TotalSeconds;
+                    if (elapsedTime > lastElapsedTime + 1.0d)
                     {
-                        SetStatus($"{lCount} transactions in {lElapsedTime:0} seconds");
-                        lLastElapsedTime = lElapsedTime;
+                        SetStatus($"{count} transactions in {elapsedTime:0} seconds");
+                        lastElapsedTime = elapsedTime;
                         if (cancellationToken.IsCancellationRequested)
                             return;
                     }
                 }
-                while (lElapsedTime <= PERF_LOOP_TIME);
-                lRate = lCount / lElapsedTime;
-                switch (lRate)
+                while (elapsedTime <= PERF_LOOP_TIME);
+
+                rate = count / elapsedTime;
+                switch (rate)
                 {
                     case var @case when @case > 10.0d:
                         {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                            LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
                             break;
                         }
 
                     case var case1 when 2.0d <= case1 && case1 <= 10.0d:
                         {
-                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
+                            LogOk(pName, $"Transaction rate: {rate:0.0} per second");
                             break;
                         }
 
                     case var case2 when 1.0d <= case2 && case2 <= 2.0d:
                         {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                            LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                            LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
                             break;
                         }
                 }
