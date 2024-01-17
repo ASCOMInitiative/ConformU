@@ -1540,8 +1540,10 @@ namespace ConformU
         protected void HandleException(string memberName, MemberType typeOfMember, Required isRequired, Exception ex, string userMessage)
         {
 
-            // Handle PropertyNotImplemented exceptions from properties and MethodNotImplemented exceptions from methods
-            if (IsPropertyNotImplementedException(ex) & typeOfMember == MemberType.Property | IsMethodNotImplementedException(ex) & typeOfMember == MemberType.Method)
+            // Handle PropertyNotImplemented exceptions from properties and MethodNotImplemented exceptions from methods and NotImplementedExceptions from Alpaca devices
+            if (IsPropertyNotImplementedException(ex) & typeOfMember == MemberType.Property |
+                IsMethodNotImplementedException(ex) & typeOfMember == MemberType.Method |
+                IsNotImplementedException(ex) & settings.DeviceTechnology == DeviceTechnology.Alpaca)
             {
                 switch (isRequired)
                 {
