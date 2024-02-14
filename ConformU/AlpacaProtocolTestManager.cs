@@ -2870,7 +2870,7 @@ namespace ConformU
         private void LogInformation(string method, string message, string contextMessage)
         {
             // Only display Information messages if configured to do so
-            if ((settings.AlpacaConfiguration.ProtocolMessageLevel == ProtocolMessageLevel.Information) || (settings.AlpacaConfiguration.ProtocolMessageLevel == ProtocolMessageLevel.Issue))
+            if ((settings.AlpacaConfiguration.ProtocolMessageLevel == ProtocolMessageLevel.Information) || (settings.AlpacaConfiguration.ProtocolMessageLevel == ProtocolMessageLevel.All))
             {
                 LogMessage(method, TestOutcome.Info, message, contextMessage);
                 informationMessages.Add($"{method} ==> {message} {(string.IsNullOrEmpty(contextMessage) ? "" : $"\r\n  Response: {contextMessage}")}\r\n"); //
