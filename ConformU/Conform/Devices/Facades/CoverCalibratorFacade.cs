@@ -70,7 +70,7 @@ namespace ConformU
 
         #region ICoverCalibratorV2 implementation
 
-        public bool CalibratorReady
+        public bool CalibratorChanging
         {
             get
             {

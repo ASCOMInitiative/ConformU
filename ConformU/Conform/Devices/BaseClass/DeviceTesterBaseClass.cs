@@ -549,7 +549,7 @@ namespace ConformU
                             casedPropertyNames.Add(nameof(ICoverCalibratorV2.Brightness), false);
                             casedPropertyNames.Add(nameof(ICoverCalibratorV2.CalibratorState), false);
                             casedPropertyNames.Add(nameof(ICoverCalibratorV2.CoverState), false);
-                            casedPropertyNames.Add(nameof(ICoverCalibratorV2.CalibratorReady), false);
+                            casedPropertyNames.Add(nameof(ICoverCalibratorV2.CalibratorChanging), false);
                             casedPropertyNames.Add(nameof(ICoverCalibratorV2.CoverMoving), false);
                             break;
 
@@ -699,7 +699,6 @@ namespace ConformU
 
         public int GetInterfaceVersion()
         {
-
             try
             {
                 if (baseInterfaceVersion.HasValue)

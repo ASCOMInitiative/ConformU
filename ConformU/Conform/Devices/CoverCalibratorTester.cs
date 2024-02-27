@@ -14,7 +14,9 @@ namespace ConformU
         private enum RequiredProperty
         {
             CalibratorState,
-            CoverState
+            CoverState,
+            CalibratorChanging,
+            CoverMoving
         }
 
         private enum PerformanceProperty
@@ -25,6 +27,8 @@ namespace ConformU
 
         private CoverStatus coverState;
         private CalibratorStatus calibratorState;
+        private bool calibratorChanging;
+        private bool coverMoving;
         private bool canAsynchronousOpen;
         private double asynchronousOpenTime;
         private double asynchronousCloseTime;
@@ -33,6 +37,8 @@ namespace ConformU
         private bool coverStateOk;
         private bool brightnessOk;
         private bool maxBrightnessOk;
+        private bool coverMovingOk;
+        private bool calibratorChangingOk;
 
         // Helper variables
         private ICoverCalibratorV2 coverCalibratorDevice;
@@ -185,9 +191,10 @@ namespace ConformU
                 try
                 {
                     maxBrightness = 0; // Initialise to a 'bad' value
-LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
+                    LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
                     maxBrightness = coverCalibratorDevice.MaxBrightness;
 
+                    LogCallToDriver("MaxBrightness", "About to call CalibratorState property");
                     if (!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotPresent))
                     {
                         if (maxBrightness >= 1)
@@ -203,6 +210,7 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
                 }
                 catch (Exception ex)
                 {
+                    LogCallToDriver("MaxBrightness", "About to call CalibratorState property");
                     if (coverCalibratorDevice.CalibratorState == CalibratorStatus.NotPresent)
                         HandleException("MaxBrightness", MemberType.Property, Required.MustNotBeImplemented, ex, "CalibratorStatus is 'NotPresent'");
                     else
@@ -225,6 +233,7 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
                     brightness = coverCalibratorDevice.Brightness;
                     brightnessOk = true;
 
+                    LogCallToDriver("MaxBrightness", "About to call CalibratorState property");
                     if (!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotPresent))
                     {
                         if (brightness >= 0)
@@ -247,6 +256,7 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
                 }
                 catch (Exception ex)
                 {
+                    LogCallToDriver("MaxBrightness", "About to call CalibratorState property");
                     if (coverCalibratorDevice.CalibratorState == CalibratorStatus.NotPresent)
                         HandleException("Brightness", MemberType.Property, Required.MustNotBeImplemented, ex, "CalibratorStatus is 'NotPresent'");
                     else
@@ -255,6 +265,13 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
             }
             else
                 LogIssue("Brightness", $"Test skipped because CalibratorState returned an exception");
+
+            // If this is an ICoverCalibratorV2 interface or later device test the CalibratorChanging and CoverOpening properties
+            if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.CoverCalibrator, GetInterfaceVersion()))
+            {
+                calibratorChangingOk = RequiredPropertiesTest(RequiredProperty.CalibratorChanging, "CalibratorChanging");
+                coverMovingOk = RequiredPropertiesTest(RequiredProperty.CoverMoving, "CoverMoving");
+            }
 
             if (coverStateOk & calibratorStateOk)
             {
@@ -275,51 +292,76 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
             SetTest("OpenCover");
             if (coverStateOk)
             {
-                try
+                if (coverState != CoverStatus.Moving)
                 {
-                    LogCallToDriver("OpenCover", "About to call OpenCover method");
-                    startTime = DateTime.Now;
-
-                    coverCalibratorDevice.OpenCover();
-                    if (!(coverState == CoverStatus.NotPresent))
+                    try
                     {
-                        if (!(coverCalibratorDevice.CoverState == CoverStatus.Moving)) // Synchronous open
-                        {
-                            canAsynchronousOpen = false;
-                            if (coverCalibratorDevice.CoverState == CoverStatus.Open)
-                                LogOk("OpenCover", $"OpenCover was successful. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
-                            else
-                                LogIssue("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
-                        }
-                        else // Asynchronous open
-                        {
-                            canAsynchronousOpen = true;
-                            asynchronousOpenTime = 0.0;
+                        startTime = DateTime.Now;
 
-                            // Wait until the cover is no longer moving
-                            WaitWhile("Opening", () => coverCalibratorDevice.CoverState == CoverStatus.Moving, 500, 60);
-                            if (cancellationToken.IsCancellationRequested)
-                                return;
+                        LogCallToDriver("OpenCover", "About to call OpenCover method");
+                        coverCalibratorDevice.OpenCover();
 
-                            if (coverCalibratorDevice.CoverState == CoverStatus.Open)
+                        if (!(coverState == CoverStatus.NotPresent))
+                        {
+                            LogCallToDriver("OpenCover", "About to call CoverState property");
+                            if (!(coverCalibratorDevice.CoverState == CoverStatus.Moving)) // Synchronous open
                             {
-                                asynchronousOpenTime = DateTime.Now.Subtract(startTime).TotalSeconds;
-                                LogOk("OpenCover", $"OpenCover was successful. The asynchronous open took {asynchronousOpenTime:0.0} seconds");
+                                canAsynchronousOpen = false;
+                                LogCallToDriver("OpenCover", "About to call CoverState property");
+                                if (coverCalibratorDevice.CoverState == CoverStatus.Open)
+                                    LogOk("OpenCover", $"OpenCover was successful. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                                else
+                                    LogIssue("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                             }
-                            else
-                                LogIssue("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The asynchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                            else // Asynchronous open
+                            {
+                                canAsynchronousOpen = true;
+                                asynchronousOpenTime = 0.0;
+
+                                // if this is a Platform 7 or later device test CoverMoving
+                                if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.CoverCalibrator, GetInterfaceVersion()))
+                                {
+                                    LogCallToDriver("OpenCover", "About to call CoverMoving property");
+                                    if (!coverCalibratorDevice.CoverMoving)
+                                        LogIssue("OpenCover", "CoverMoving is false while the cover is moving");
+                                }
+
+                                // Wait until the cover is no longer moving
+                                WaitWhile("Opening", () => coverCalibratorDevice.CoverState == CoverStatus.Moving, 500, 60);
+                                if (cancellationToken.IsCancellationRequested)
+                                    return;
+
+                                LogCallToDriver("OpenCover", "About to call CoverState property");
+                                if (coverCalibratorDevice.CoverState == CoverStatus.Open)
+                                {
+                                    asynchronousOpenTime = DateTime.Now.Subtract(startTime).TotalSeconds;
+                                    LogOk("OpenCover", $"OpenCover was successful. The asynchronous open took {asynchronousOpenTime:0.0} seconds");
+                                }
+                                else
+                                    LogIssue("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The asynchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+
+                                // if this is a Platform 7 or later device test CoverMoving
+                                if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.CoverCalibrator, GetInterfaceVersion()))
+                                {
+                                    LogCallToDriver("OpenCover", "About to call CoverMoving property");
+                                    if (coverCalibratorDevice.CoverMoving)
+                                        LogIssue("OpenCover", "CoverMoving is true when the cover has opened.");
+                                }
+                            }
                         }
+                        else
+                            LogIssue("OpenCover", $"CoverStatus is 'NotPresent' but OpenCover did not throw a MethodNotImplementedException.");
                     }
-                    else
-                        LogIssue("OpenCover", $"CoverStatus is 'NotPresent' but OpenCover did not throw a MethodNotImplementedException.");
+                    catch (Exception ex)
+                    {
+                        if (coverState == CoverStatus.NotPresent)
+                            HandleException("OpenCover", MemberType.Method, Required.MustNotBeImplemented, ex, "CoverStatus is 'NotPresent'");
+                        else
+                            HandleException("OpenCover", MemberType.Method, Required.MustBeImplemented, ex, "CoverStatus indicates the device has cover capability");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    if (coverState == CoverStatus.NotPresent)
-                        HandleException("OpenCover", MemberType.Method, Required.MustNotBeImplemented, ex, "CoverStatus is 'NotPresent'");
-                    else
-                        HandleException("OpenCover", MemberType.Method, Required.MustBeImplemented, ex, "CoverStatus indicates the device has cover capability");
-                }
+                else
+                    LogIssue("OpenCover", $"Test skipped because CoverState says the cover is already moving - CoverState: {coverState}");
             }
             else
                 LogIssue("OpenCover", $"Test skipped because CoverState returned an exception");
@@ -331,50 +373,75 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
             SetTest("CloseCover");
             if (coverStateOk)
             {
-                try
+                if (coverState != CoverStatus.Moving)
                 {
-                    LogCallToDriver("CloseCover", "About to call CloseCover method");
-                    startTime = DateTime.Now;
-                    asynchronousCloseTime = 0.0;
-
-                    coverCalibratorDevice.CloseCover();
-                    if (!(coverState == CoverStatus.NotPresent)) // Synchronous close
+                    try
                     {
-                        if (!(coverCalibratorDevice.CoverState == CoverStatus.Moving))
-                        {
-                            canAsynchronousOpen = false;
-                            if (coverCalibratorDevice.CoverState == CoverStatus.Closed)
-                                LogOk("CloseCover", $"CloseCover was successful. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
-                            else
-                                LogIssue("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
-                        }
-                        else // Asynchronous close
-                        {
-                            canAsynchronousOpen = true;
-                            // Wait until the cover is no longer moving
-                            WaitWhile("Closing", () => coverCalibratorDevice.CoverState == CoverStatus.Moving, 500, 60);
-                            if (cancellationToken.IsCancellationRequested)
-                                return;
+                        startTime = DateTime.Now;
+                        asynchronousCloseTime = 0.0;
 
-                            if (coverCalibratorDevice.CoverState == CoverStatus.Closed)
+                        LogCallToDriver("CloseCover", "About to call CloseCover method");
+                        coverCalibratorDevice.CloseCover();
+                        if (!(coverState == CoverStatus.NotPresent)) // Synchronous close
+                        {
+                            LogCallToDriver("CloseCover", "About to call CoverState property");
+                            if (!(coverCalibratorDevice.CoverState == CoverStatus.Moving))
                             {
-                                asynchronousCloseTime = DateTime.Now.Subtract(startTime).TotalSeconds;
-                                LogOk("CloseCover", $"CloseCover was successful. The asynchronous close took {asynchronousCloseTime:0.0} seconds");
+                                canAsynchronousOpen = false;
+                                LogCallToDriver("CloseCover", "About to call CoverState property");
+                                if (coverCalibratorDevice.CoverState == CoverStatus.Closed)
+                                    LogOk("CloseCover", $"CloseCover was successful. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                                else
+                                    LogIssue("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                             }
-                            else
-                                LogIssue("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The asynchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+                            else // Asynchronous close
+                            {
+                                canAsynchronousOpen = true;
+
+                                // if this is a Platform 7 or later device test CoverMoving
+                                if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.CoverCalibrator, GetInterfaceVersion()))
+                                {
+                                    LogCallToDriver("CloseCover", "About to call CoverMoving property");
+                                    if (!coverCalibratorDevice.CoverMoving)
+                                        LogIssue("CloseCover", "CoverMoving is false while the cover is moving");
+                                }
+
+                                // Wait until the cover is no longer moving
+                                WaitWhile("Closing", () => coverCalibratorDevice.CoverState == CoverStatus.Moving, 500, 60);
+                                if (cancellationToken.IsCancellationRequested)
+                                    return;
+
+                                LogCallToDriver("CloseCover", "About to call CoverState property");
+                                if (coverCalibratorDevice.CoverState == CoverStatus.Closed)
+                                {
+                                    asynchronousCloseTime = DateTime.Now.Subtract(startTime).TotalSeconds;
+                                    LogOk("CloseCover", $"CloseCover was successful. The asynchronous close took {asynchronousCloseTime:0.0} seconds");
+                                }
+                                else
+                                    LogIssue("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The asynchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+
+                                // if this is a Platform 7 or later device test CoverMoving
+                                if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.CoverCalibrator, GetInterfaceVersion()))
+                                {
+                                    LogCallToDriver("CloseCover", "About to call CoverMoving property");
+                                    if (coverCalibratorDevice.CoverMoving)
+                                        LogIssue("CloseCover", "CoverMoving is true when the cover has closed.");
+                                }
+                            }
                         }
+                        else
+                            LogIssue("CloseCover", $"CoverStatus is 'NotPresent' but CloseCover did not throw a MethodNotImplementedException.");
                     }
-                    else
-                        LogIssue("CloseCover", $"CoverStatus is 'NotPresent' but CloseCover did not throw a MethodNotImplementedException.");
+                    catch (Exception ex)
+                    {
+                        if (coverState == CoverStatus.NotPresent)
+                            HandleException("CloseCover", MemberType.Method, Required.MustNotBeImplemented, ex, "CoverStatus is 'NotPresent'");
+                        else
+                            HandleException("CloseCover", MemberType.Method, Required.MustBeImplemented, ex, "CoverStatus indicates the device has cover capability");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    if (coverState == CoverStatus.NotPresent)
-                        HandleException("CloseCover", MemberType.Method, Required.MustNotBeImplemented, ex, "CoverStatus is 'NotPresent'");
-                    else
-                        HandleException("CloseCover", MemberType.Method, Required.MustBeImplemented, ex, "CoverStatus indicates the device has cover capability");
-                }
+                else
+                    LogIssue("CloseCover", $"Test skipped because CoverState says the cover is already moving - CoverState: {coverState}");
             }
             else
                 LogIssue("CloseCover", $"Test skipped because CoverState returned an exception");
@@ -394,7 +461,7 @@ LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
                         {
 
                             // Initiate a cover open first
-LogCallToDriver("HaltCover", "About to call OpenCover method");
+                            LogCallToDriver("HaltCover", "About to call OpenCover method");
                             SetAction("Opening cover so that it can be halted");
                             coverCalibratorDevice.OpenCover();
 
@@ -407,17 +474,27 @@ LogCallToDriver("HaltCover", "About to call OpenCover method");
                                 try
                                 {
                                     // Issue a halt command
-LogCallToDriver("HaltCover", "About to call HaltCover method");
                                     SetAction("Halting cover");
                                     SetStatus("Waiting for Halt to complete");
+
+                                    LogCallToDriver("HaltCover", "About to call HaltCover method");
                                     coverCalibratorDevice.HaltCover();
-                                    SetStatus("Halt completed");
+                                    SetStatus("HaltCover command completed");
 
                                     // Confirm that the cover is no longer moving
-                                    if (!(coverCalibratorDevice.CoverState == CoverStatus.Moving))
+                                    LogCallToDriver("HaltCover", "About to call CoverState property");
+                                    if (coverCalibratorDevice.CoverState != CoverStatus.Moving)
                                         LogOk("HaltCover", "Cover is no longer moving after issuing the HaltCover command");
                                     else
                                         LogIssue("HaltCover", "Cover is still moving after issuing the HaltCover command");
+
+                                    // if this is a Platform 7 or later device test CoverMoving
+                                    if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.CoverCalibrator, GetInterfaceVersion()))
+                                    {
+                                        LogCallToDriver("HaltCover", "About to call CoverMoving property");
+                                        if (coverCalibratorDevice.CoverMoving)
+                                            LogIssue("HaltCover", "CoverMoving is true when the cover has closed.");
+                                    }
                                 }
                                 catch (Exception ex)
                                 {
@@ -434,7 +511,7 @@ LogCallToDriver("HaltCover", "About to call HaltCover method");
                         try
                         {
                             // Since the cover opens synchronously the HaltCover method should return a MethodNotImplementedException
-LogCallToDriver("HaltCover", "About to call HaltCover method");
+                            LogCallToDriver("HaltCover", "About to call HaltCover method");
                             coverCalibratorDevice.HaltCover();
                             LogIssue("HaltCover", "The cover operates synchronously but did not throw a MethodNotImplementedException in response to the HaltCover command");
                         }
@@ -469,122 +546,127 @@ LogCallToDriver("HaltCover", "About to call HaltCover method");
             SetTest("CalibratorOn");
             if (calibratorStateOk)
             {
-                if (!(calibratorState == CalibratorStatus.NotPresent))
+                if (calibratorState != CalibratorStatus.NotReady)
                 {
-                    if (maxBrightnessOk & brightnessOk)
+                    if (!(calibratorState == CalibratorStatus.NotPresent))
                     {
-                        TestCalibratorOn(-1); // Test for invalid value -1
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-
-                        TestCalibratorOn(0); // Test for zero brightness
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-
-                        switch (maxBrightness)
+                        if (maxBrightnessOk & brightnessOk)
                         {
-                            case 1 // Simple on/ off device
-                           :
-                                {
-                                    TestCalibratorOn(1);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-                                    break;
-                                }
-
-                            case 2 // Two brightness level device
-                     :
-                                {
-                                    TestCalibratorOn(1);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-
-                                    TestCalibratorOn(2);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-                                    break;
-                                }
-
-                            case 3 // Three brightness level device
-                     :
-                                {
-                                    TestCalibratorOn(1);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-
-                                    TestCalibratorOn(2);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-
-                                    TestCalibratorOn(3);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-                                    break;
-                                }
-
-                            case 4 // Four brightness level device
-                     :
-                                {
-                                    TestCalibratorOn(1);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-
-                                    TestCalibratorOn(2);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-
-                                    TestCalibratorOn(3);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-
-                                    TestCalibratorOn(4);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-                                    break;
-                                }
-
-                            default:
-                                {
-                                    TestCalibratorOn((int)Math.Ceiling(((maxBrightness + 1.0) / 4.0) - 1.0)); // Round up to ensure that this value is least 1 so there is some level of brightness
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-
-                                    TestCalibratorOn((int)Math.Floor(((maxBrightness + 1.0) / 2.0) - 1.0));
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-
-                                    TestCalibratorOn((int)Math.Floor(((maxBrightness + 1.0) * 3.0 / 4.0) - 1.0)); // Round down to ensure that this value is different to the maxBrightness value
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-
-                                    TestCalibratorOn(maxBrightness);
-                                    if (cancellationToken.IsCancellationRequested)
-                                        return;
-                                    break;
-                                }
-                        }
-
-                        if (maxBrightness < int.MaxValue)
-                        {
-                            TestCalibratorOn(maxBrightness + 1); // Test for invalid value of MaxBrightness + 1
+                            TestCalibratorOn(-1); // Test for invalid value -1
                             if (cancellationToken.IsCancellationRequested)
                                 return;
+
+                            TestCalibratorOn(0); // Test for zero brightness
+                            if (cancellationToken.IsCancellationRequested)
+                                return;
+
+                            switch (maxBrightness)
+                            {
+                                case 1 // Simple on/ off device
+                               :
+                                    {
+                                        TestCalibratorOn(1);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
+                                        break;
+                                    }
+
+                                case 2 // Two brightness level device
+                         :
+                                    {
+                                        TestCalibratorOn(1);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
+
+                                        TestCalibratorOn(2);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
+                                        break;
+                                    }
+
+                                case 3 // Three brightness level device
+                         :
+                                    {
+                                        TestCalibratorOn(1);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
+
+                                        TestCalibratorOn(2);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
+
+                                        TestCalibratorOn(3);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
+                                        break;
+                                    }
+
+                                case 4 // Four brightness level device
+                         :
+                                    {
+                                        TestCalibratorOn(1);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
+
+                                        TestCalibratorOn(2);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
+
+                                        TestCalibratorOn(3);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
+
+                                        TestCalibratorOn(4);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
+                                        break;
+                                    }
+
+                                default:
+                                    {
+                                        TestCalibratorOn((int)Math.Ceiling(((maxBrightness + 1.0) / 4.0) - 1.0)); // Round up to ensure that this value is least 1 so there is some level of brightness
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
+
+                                        TestCalibratorOn((int)Math.Floor(((maxBrightness + 1.0) / 2.0) - 1.0));
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
+
+                                        TestCalibratorOn((int)Math.Floor(((maxBrightness + 1.0) * 3.0 / 4.0) - 1.0)); // Round down to ensure that this value is different to the maxBrightness value
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
+
+                                        TestCalibratorOn(maxBrightness);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
+                                        break;
+                                    }
+                            }
+
+                            if (maxBrightness < int.MaxValue)
+                            {
+                                TestCalibratorOn(maxBrightness + 1); // Test for invalid value of MaxBrightness + 1
+                                if (cancellationToken.IsCancellationRequested)
+                                    return;
+                            }
+                            else
+                                LogInfo("CalibratorOn", $"Test of a high invalid brightness value skipped because MaxBrightness is set to the largest positive integer value.");
                         }
                         else
-                            LogInfo("CalibratorOn", $"Test of a high invalid brightness value skipped because MaxBrightness is set to the largest positive integer value.");
+                            LogIssue("CalibratorOn", $"Brightness tests skipped because one of the Brightness or MaxBrightness properties returned an invalid value or threw an exception.");
                     }
                     else
-                        LogIssue("CalibratorOn", $"Brightness tests skipped because one of the Brightness or MaxBrightness properties returned an invalid value or threw an exception.");
+                    {
+                        TestCalibratorOn(1);
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+                    }
                 }
                 else
-                {
-                    TestCalibratorOn(1);
-                    if (cancellationToken.IsCancellationRequested)
-                        return;
-                }
+                    LogIssue("CalibratorOn", $"Tests skipped because CalibratorState says the calibrator is not ready - CalibratorState: {calibratorState}");
             }
             else
-                LogIssue("CalibratorOn", $"Brightness tests skipped because the CoverState property returned an invalid value or threw an exception.");
+                LogIssue("CalibratorOn", $"Brightness tests skipped because the CalibratorState property returned an invalid value or threw an exception.");
 
             // Test CalibratorOff
             SetTest("CalibratorOff");
@@ -604,17 +686,35 @@ LogCallToDriver("HaltCover", "About to call HaltCover method");
                                 LogOk("CalibratorOff", $"CalibratorOff was successful. The synchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
 
                                 // Confirm that Brightness returns to zero when calibrator is turned off
-LogCallToDriver("CalibratorOff", "About to call Brightness property");
+                                LogCallToDriver("CalibratorOff", "About to call Brightness property");
                                 if (coverCalibratorDevice.Brightness == 0)
                                     LogOk("CalibratorOff", $"Brightness is set to zero when the calibrator is turned off");
                                 else
                                     LogIssue("CalibratorOff", $"Brightness is not set to zero when the calibrator is turned off");
+
+                                // if this is a Platform 7 or later device test CalibratorChanging
+                                if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.CoverCalibrator, GetInterfaceVersion()))
+                                {
+                                    // Confirm that CalibratorChanging is False
+                                    LogCallToDriver("CalibratorOff", $"About to call CalibratorChanging property.");
+                                    if (coverCalibratorDevice.CalibratorChanging)
+                                        LogIssue("CalibratorOff", $"The CalibratorChanging property returned true while CalibratorState returned CalibratorStatus.Ready.");
+                                }
                             }
                             else
                                 LogIssue("CalibratorOff", $"CalibratorOff was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Off'. The synchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         }
                         else // Asynchronous call
                         {
+                            // if this is a Platform 7 or later device test CalibratorChanging
+                            if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.CoverCalibrator, GetInterfaceVersion()))
+                            {
+                                // Make sure that CalibratorChanging is true
+                                LogCallToDriver("CalibratorOff", $"About to call CalibratorChanging property.");
+                                if (!coverCalibratorDevice.CalibratorChanging)
+                                    LogIssue("CalibratorOff", $"Asynchronous change: The CalibratorChanging property returned false while CalibratroState returned {calibratorState}.");
+                            }
+
                             // Wait until the calibrator is off 
                             WaitWhile("Cooling down", () => coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady, 500, 60);
                             if (cancellationToken.IsCancellationRequested)
@@ -625,7 +725,7 @@ LogCallToDriver("CalibratorOff", "About to call Brightness property");
                                 LogOk("CalibratorOff", $"CalibratorOff was successful. The asynchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
 
                                 // Confirm that Brightness returns to zero when calibrator is turned off
-LogCallToDriver("CalibratorOff", "About to call Brightness property");
+                                LogCallToDriver("CalibratorOff", "About to call Brightness property");
                                 if (coverCalibratorDevice.Brightness == 0)
                                     LogOk("CalibratorOff", $"Brightness is set to zero when the calibrator is turned off");
                                 else
@@ -633,6 +733,15 @@ LogCallToDriver("CalibratorOff", "About to call Brightness property");
                             }
                             else
                                 LogIssue("CalibratorOff", $"CalibratorOff was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Off'. The asynchronous action took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+
+                            // if this is a Platform 7 or later device test CalibratorChanging
+                            if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.CoverCalibrator, GetInterfaceVersion()))
+                            {
+                                // Make sure that CalibratorChanging is false
+                                LogCallToDriver("CalibratorOff", $"About to call CalibratorChanging property.");
+                                if (coverCalibratorDevice.CalibratorChanging)
+                                    LogIssue("CalibratorOff", $"Asynchronous change: The CalibratorChanging property returned true while CalibratroState returned {calibratorState}.");
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -668,43 +777,76 @@ LogCallToDriver("CalibratorOff", "About to call Brightness property");
             {
                 try
                 {
-                    startTime = DateTime.Now; LogCallToDriver("CalibratorOn", $"About to call CalibratorOn method with brightness: {requestedBrightness}");
+                    startTime = DateTime.Now; 
                     SetAction($"Setting calibrator to brightness {requestedBrightness}");
+
+                    LogCallToDriver("CalibratorOn", $"About to call CalibratorOn method with brightness: {requestedBrightness}");
                     coverCalibratorDevice.CalibratorOn(requestedBrightness);
 
-                    if (!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady)) // Synchronous call
+                    LogCallToDriver("CalibratorOn", "About to call CalibratorState property");
+                    calibratorState = coverCalibratorDevice.CalibratorState;
+                    if (calibratorState != CalibratorStatus.NotReady) // Synchronous call
                     {
                         if ((requestedBrightness < 0) | (requestedBrightness > maxBrightness))
                             LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} should have thrown an InvalidValueException but did not.");
-                        else if (coverCalibratorDevice.CalibratorState == CalibratorStatus.Ready)
+                        else if (calibratorState == CalibratorStatus.Ready)
                         {
                             LogOk("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was successful. The synchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
 
                             // Confirm that the brightness value is what was set
-LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
+                            LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
                             returnedBrightness = coverCalibratorDevice.Brightness;
 
                             if (returnedBrightness == requestedBrightness)
                                 LogOk("CalibratorOn", $"The Brightness property does return the value that was set");
                             else
                                 LogIssue("CalibratorOn", $"The Brightness property value: {returnedBrightness} does not match the value that was set: {requestedBrightness}");
+
+                            // if this is a Platform 7 or later device test CalibratorChanging
+                            if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.CoverCalibrator, GetInterfaceVersion()))
+                            {
+                                // Confirm that CalibratorChanging is False
+                                LogCallToDriver("CalibratorOn", $"About to call CalibratorChanging property.");
+                                if (coverCalibratorDevice.CalibratorChanging)
+                                    LogIssue("CalibratorOn", $"The CalibratorChanging property returned true while CalibratorState returned CalibratorStatus.Ready.");
+                            }
                         }
                         else
                             LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Ready'. The synchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                     }
                     else // Asynchronous call
                     {
+                        // if this is a Platform 7 or later device test CalibratorChanging
+                        if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.CoverCalibrator, GetInterfaceVersion()))
+                        {
+                            // Make sure that CalibratorChanging is true
+                            LogCallToDriver("CalibratorOn", $"About to call CalibratorChanging property.");
+                            if (!coverCalibratorDevice.CalibratorChanging)
+                                LogIssue("CalibratorOn", $"Asynchronous change: The CalibratorChanging property returned false while CalibratroState returned {calibratorState}.");
+                        }
+
                         // Wait until the cover is no longer moving
+                        LogCallToDriver("CalibratorOn", "About to call CalibratorState property multiple times");
                         WaitWhile("Warming up", () => coverCalibratorDevice.CalibratorState == CalibratorStatus.NotReady, 500, 60);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
+                        LogCallToDriver("CalibratorOn", "About to call CalibratorState property");
                         if ((requestedBrightness < 0) | (requestedBrightness > maxBrightness))
                             LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} should have thrown an InvalidValueException but did not.");
                         else if (coverCalibratorDevice.CalibratorState == CalibratorStatus.Ready)
                             LogOk("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was successful. The asynchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
                         else
                             LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Ready'. The asynchronous operation took {DateTime.Now.Subtract(startTime).TotalSeconds:0.0} seconds");
+
+                        // if this is a Platform 7 or later device test CalibratorChanging
+                        if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.CoverCalibrator, GetInterfaceVersion()))
+                        {
+                            // Make sure that CalibratorChanging is false
+                            LogCallToDriver("CalibratorOn", $"About to call CalibratorChanging property.");
+                            if (coverCalibratorDevice.CalibratorChanging)
+                                LogIssue("CalibratorOn", $"Asynchronous change: The CalibratorChanging property returned true while CalibratroState returned {calibratorState}.");
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -733,7 +875,6 @@ LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
                     HandleException("CalibratorOn", MemberType.Method, Required.MustNotBeImplemented, ex, "CalibratorStatus is 'NotPresent'");
                 }
         }
-
 
         public override void CheckPerformance()
         {
@@ -776,27 +917,33 @@ LogCallToDriver("CalibratorOn", $"About to call Brightness property.");
                 switch (propertyToTest)
                 {
                     case RequiredProperty.CalibratorState:
-                        {
-                            LogCallToDriver("CalibratorState", "About to call CalibratorState property");
-                            calibratorState = coverCalibratorDevice.CalibratorState;
-                            LogOk(propertyName, calibratorState.ToString());
-                            break;
-                        }
+                        LogCallToDriver("CalibratorState", "About to call CalibratorState property");
+                        calibratorState = coverCalibratorDevice.CalibratorState;
+                        LogOk(propertyName, calibratorState.ToString());
+                        break;
 
                     case RequiredProperty.CoverState:
-                        {
-                            LogCallToDriver("CoverState", "About to call CoverState property");
-                            coverState = coverCalibratorDevice.CoverState;
-                            LogOk(propertyName, coverState.ToString());
-                            break;
-                        }
+                        LogCallToDriver("CoverState", "About to call CoverState property");
+                        coverState = coverCalibratorDevice.CoverState;
+                        LogOk(propertyName, coverState.ToString());
+                        break;
+
+                    case RequiredProperty.CalibratorChanging:
+                        LogCallToDriver("CalibratorChanging", "About to call CalibratorChanging property");
+                        calibratorChanging = coverCalibratorDevice.CalibratorChanging;
+                        LogOk(propertyName, calibratorChanging.ToString());
+                        break;
+
+                    case RequiredProperty.CoverMoving:
+                        LogCallToDriver("CoverMoving", "About to call CoverMoving property");
+                        coverMoving = coverCalibratorDevice.CoverMoving;
+                        LogOk(propertyName, coverMoving.ToString());
+                        break;
 
                     default:
-                        {
-                            testWasSuccessful = false; // Flag that an issue occurred
-                            LogIssue(propertyName, $"RequiredPropertiesTest: Unknown test type {propertyToTest}");
-                            break;
-                        }
+                        testWasSuccessful = false; // Flag that an issue occurred
+                        LogIssue(propertyName, $"RequiredPropertiesTest: Unknown test type {propertyToTest}");
+                        break;
                 }
             }
             catch (Exception ex)
