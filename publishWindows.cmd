@@ -25,7 +25,7 @@ echo *** Publishing Windows 32bit
 dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r win-x86   --framework net8.0-windows --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true -o ./publish/ConformUx86/
 echo *** Completed 32bit publish
 
-editbin /LARGEADDRESSAWARE ./publish/ConformU86/Conformu.exe
+editbin /LARGEADDRESSAWARE .\publish\ConformUx86\conformu.exe
 echo *** Completed setting large address aware flag on 32bit EXE
 
 echo *** Creating Windows installer
