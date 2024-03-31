@@ -185,6 +185,8 @@ namespace ConformU
         public double TelescopeSlewTolerance { get; set; } = 10.0; // Arc-seconds
         public int TelescopeMaximumSlewTime { get; set; } = 300; // Seconds
         public double TelescopeRateOffsetTestDuration { get; set; } = 10; // Seconds
+        public double TelescopeRateOffsetTestLowValue { get; set; } = 0.05; // ArcSeconds per SI second
+        public double TelescopeRateOffsetTestHighValue { get; set; } = 40.0; // ArcSeconds per SI second
 
         // Camera test configuration
         public int CameraMaxBinX { get; set; } = 0;

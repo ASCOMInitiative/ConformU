@@ -417,11 +417,41 @@
                                        Format="0.0"
                         @bind-Value="@telescopeRateOffsetTestDuration"
                                        TValue="double"
-                                       Min="1"
+                                       Min="1.0m"
                                        Max="3600"
-                                       Step="1"
+                                       Step="0.1"
                                        Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.TelescopeRateOffsetTestDuration)) />
                         <RadzenLabel Text="Extended rate offset test duration (seconds)"
+                                     Component="RATEOFFSETTESTDURATION"
+                                     Style="margin-left: 20px;margin-top:26px; margin-right: 20px" />
+                    </div>
+
+                    <div class="row">
+                        <RadzenNumeric Name="RATEOFFSETTESTVALUELOW"
+                                       Style="margin-top: 20px; margin-left:20px; width: 6em"
+                                       Format="0.000"
+                        @bind-Value="@telescopeRateOffsetTestValueLow"
+                                       TValue="double"
+                                       Min="0.001m"
+                                       Max="9999"
+                                       Step="0.1"
+                                       Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.TelescopeRateOffsetTestValueLow)) />
+                        <RadzenLabel Text="Extended rate offset test value low (arc-seconds per second)"
+                                     Component="RATEOFFSETTESTDURATION"
+                                     Style="margin-left: 20px;margin-top:26px; margin-right: 20px" />
+                    </div>
+
+                    <div class="row">
+                        <RadzenNumeric Name="RATEOFFSETTESTVALUEHIGH"
+                                       Style="margin-top: 20px; margin-left:20px; width: 6em"
+                                       Format="0.000"
+                                       @bind-Value="@telescopeRateOffsetTestValueHigh"
+                                       TValue="double"
+                                       Min="0.001m"
+                                       Max="9999"
+                                       Step="0.1"
+                                       Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.TelescopeRateOffsetTestValueHigh)) />
+                        <RadzenLabel Text="Extended rate offset test value high (arc-seconds per second)"
                                      Component="RATEOFFSETTESTDURATION"
                                      Style="margin-left: 20px;margin-top:26px; margin-right: 20px" />
                     </div>
@@ -799,6 +829,8 @@
     private bool chkExtendedMoveAxisTests;
     private bool chkExtendedSiteTests;
     private double telescopeRateOffsetTestDuration;
+    private double telescopeRateOffsetTestValueLow;
+    private double telescopeRateOffsetTestValueHigh;
 
     #region Enums
 
@@ -835,7 +867,9 @@
         TelescopePulseGuideTolerance,
         TelescopeSlewTolerance,
         TelescopeMaximumSlewTime,
-        TelescopeRateOffsetTestDuration
+        TelescopeRateOffsetTestDuration,
+        TelescopeRateOffsetTestValueLow,
+        TelescopeRateOffsetTestValueHigh
     }
 
     private enum CheckBoxConfigurationItem
@@ -943,6 +977,14 @@
 
             case NumericConfigurationItem.TelescopeRateOffsetTestDuration:
                 settings.TelescopeRateOffsetTestDuration = newValue;
+                break;
+
+            case NumericConfigurationItem.TelescopeRateOffsetTestValueLow:
+                settings.TelescopeRateOffsetTestLowValue = newValue;
+                break;
+
+            case NumericConfigurationItem.TelescopeRateOffsetTestValueHigh:
+                settings.TelescopeRateOffsetTestHighValue = newValue;
                 break;
 
             default:
@@ -1224,6 +1266,8 @@
         chkExtendedMoveAxisTests = settings.TelescopeExtendedMoveAxisTests;
         chkExtendedSiteTests = settings.TelescopeExtendedSiteTests;
         telescopeRateOffsetTestDuration = settings.TelescopeRateOffsetTestDuration;
+        telescopeRateOffsetTestValueLow = settings.TelescopeRateOffsetTestLowValue;
+        telescopeRateOffsetTestValueHigh = settings.TelescopeRateOffsetTestHighValue;
 
         // Camera tests
         cameraTestMaxBinX = settings.CameraMaxBinX;

@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -63,6 +64,7 @@ namespace ConformU
         private const double SIDEREAL_SECONDS_TO_SI_SECONDS = 0.99726956631945; // Based on earth sidereal rotation period of 23 hours 56 minutes 4.09053 seconds
         private const double SIDEREAL_RATE = 15.0 / SIDEREAL_SECONDS_TO_SI_SECONDS; //Arc-seconds per SI second
         private const double SITE_ELEVATION_TEST_VALUE = 2385.0; //Arbitrary site elevation write test value
+        private const double ARC_SECONDS_TO_RA_SECONDS = 1.0 / 15.0; // Convert angular movement to time based movement
 
         private bool canFindHome, canPark, canPulseGuide, canSetDeclinationRate, canSetGuideRates, canSetPark, canSetPierside, canSetRightAscensionRate;
         private bool canSetTracking, canSlew, canSlewAltAz, canSlewAltAzAsync, canSlewAsync, canSync, canSyncAltAz, canUnpark;
@@ -891,7 +893,7 @@ namespace ConformU
                 return;
 
             // DeclinationRate Write - Optional
-            if (GetInterfaceVersion() > 1)
+            if (GetInterfaceVersion() > 1) // ITelescopeV2 and later
             {
                 if (canSetDeclinationRate) // Any value is acceptable
                 {
@@ -903,23 +905,56 @@ namespace ConformU
                         LogInfo("DeclinationRate Write", $"Configured offset test duration: {settings.TelescopeRateOffsetTestDuration} seconds.");
                     }
 
-                    if (TestRaDecRate("DeclinationRate Write", "Set rate to 0.0", Axis.Dec, 0.0d, true))
+                    if (TestRaDecRate("DeclinationRate Write", "Set rate to   0.000", Axis.Dec, 0.0d, true))
                     {
-                        TestRaDecRate("DeclinationRate Write", "Set rate to 1.5", Axis.Dec, 1.5d, true);
+                        TestRaDecRate("DeclinationRate Write", $"Set rate to {settings.TelescopeRateOffsetTestLowValue,7:+0.000;-0.000;+0.000}", Axis.Dec, settings.TelescopeRateOffsetTestLowValue, true);
+                        if (cancellationToken.IsCancellationRequested) //
+                            return;
+
+                        TestRaDecRate("DeclinationRate Write", $"Set rate to {-settings.TelescopeRateOffsetTestLowValue,7:+0.000;-0.000;+0.000}", Axis.Dec, -settings.TelescopeRateOffsetTestLowValue, true);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
-                        TestRaDecRate("DeclinationRate Write", "Set rate to -1.5", Axis.Dec, -1.5d, true);
+                        TestRaDecRate("DeclinationRate Write", $"Set rate to {settings.TelescopeRateOffsetTestHighValue,7:+0.000;-0.000;+0.000}", Axis.Dec, settings.TelescopeRateOffsetTestHighValue, true);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
-                        TestRaDecRate("DeclinationRate Write", "Set rate to 7.5", Axis.Dec, 7.5d, true);
+                        TestRaDecRate("DeclinationRate Write", $"Set rate to {-settings.TelescopeRateOffsetTestHighValue,7:+0.000;-0.000;+0.000}", Axis.Dec, -settings.TelescopeRateOffsetTestHighValue, true);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
-                        TestRaDecRate("DeclinationRate Write", "Set rate to -7.5", Axis.Dec, -7.5d, true);
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
+                        if (TestRaDecRate("DeclinationRate Write", "Set rate to   0.000", Axis.Dec, 0.0d, true))
+                            if (cancellationToken.IsCancellationRequested)
+                                return;
+
+                        // Run the extended rate offset tests if configured to do so.
+                        if (settings.TelescopeExtendedRateOffsetTests)
+                        {
+                            // Only test if the declination rate can be set
+                            if (canSetDeclinationRate) // Declination rate can be set
+                            {
+                                TestDeclinationOffsetRates("DeclinationRate Write", -9.0);
+                                if (cancellationToken.IsCancellationRequested)
+                                    return;
+
+                                TestDeclinationOffsetRates("DeclinationRate Write", 3.0);
+                                if (cancellationToken.IsCancellationRequested)
+                                    return;
+
+                                TestDeclinationOffsetRates("DeclinationRate Write", 9.0);
+                                if (cancellationToken.IsCancellationRequested)
+                                    return;
+
+                                TestDeclinationOffsetRates("DeclinationRate Write", -3.0);
+                                if (cancellationToken.IsCancellationRequested)
+                                    return;
+
+                            }
+                            else // Declination rate can not be set
+                            {
+                                LogInfo("DeclinationRate Write", "Skipping extended DeclinationRate tests because CanSetDeclinationRate is false.");
+                            }
+                        }
 
                         TestRaDecRate("DeclinationRate Write", "Reset rate to 0.0", Axis.Dec, 0.0d, false); // Reset the rate to zero, skipping the slewing test
                     }
@@ -938,7 +973,7 @@ namespace ConformU
                     }
                 }
             }
-            else
+            else // ITelescopeV1
             {
                 try
                 {
@@ -1380,23 +1415,55 @@ namespace ConformU
                         LogInfo("RightAscensionRate Write", $"Configured offset test duration: {settings.TelescopeRateOffsetTestDuration} seconds.");
                     }
 
-                    if (TestRaDecRate("RightAscensionRate Write", "Set rate to 0.0", Axis.Ra, 0.0d, true))
+                    if (TestRaDecRate("RightAscensionRate Write", "Set rate to   0.000", Axis.Ra, 0.0d, true))
                     {
-                        TestRaDecRate("RightAscensionRate Write", "Set rate to 0.1", Axis.Ra, 0.1d, true);
+                        TestRaDecRate("RightAscensionRate Write", $"Set rate to {settings.TelescopeRateOffsetTestLowValue * ARC_SECONDS_TO_RA_SECONDS,7:+0.000;-0.000;+0.000}", Axis.Ra, settings.TelescopeRateOffsetTestLowValue * ARC_SECONDS_TO_RA_SECONDS, true);
+                        if (cancellationToken.IsCancellationRequested) //
+                            return;
+
+                        TestRaDecRate("RightAscensionRate Write", $"Set rate to {-settings.TelescopeRateOffsetTestLowValue * ARC_SECONDS_TO_RA_SECONDS,7:+0.000;-0.000;+0.000}", Axis.Ra, -settings.TelescopeRateOffsetTestLowValue * ARC_SECONDS_TO_RA_SECONDS, true);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
-                        TestRaDecRate("RightAscensionRate Write", "Set rate to -0.1", Axis.Ra, -0.1d, true);
+                        TestRaDecRate("RightAscensionRate Write", $"Set rate to {settings.TelescopeRateOffsetTestHighValue * ARC_SECONDS_TO_RA_SECONDS,7:+0.000;-0.000;+0.000}", Axis.Ra, settings.TelescopeRateOffsetTestHighValue * ARC_SECONDS_TO_RA_SECONDS, true);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
-                        TestRaDecRate("RightAscensionRate Write", "Set rate to 0.5", Axis.Ra, 0.5d, true);
+                        TestRaDecRate("RightAscensionRate Write", $"Set rate to {-settings.TelescopeRateOffsetTestHighValue * ARC_SECONDS_TO_RA_SECONDS,7:+0.000;-0.000;+0.000}", Axis.Ra, -settings.TelescopeRateOffsetTestHighValue * ARC_SECONDS_TO_RA_SECONDS, true);
                         if (cancellationToken.IsCancellationRequested)
                             return;
 
-                        TestRaDecRate("RightAscensionRate Write", "Set rate to -0.5", Axis.Ra, -0.5d, true);
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
+                        if (TestRaDecRate("RightAscensionRate Write", "Set rate to   0.000", Axis.Ra, 0.0d, true))
+                            if (cancellationToken.IsCancellationRequested)
+                                return;
+
+                        // Run the extended rate offset tests if configured to do so.
+                        if (settings.TelescopeExtendedRateOffsetTests)
+                        {
+                            // Only test if the right ascension rate can be set
+                            if (canSetRightAscensionRate) // Right ascension rate can be set
+                            {
+                                TestRAOffsetRates("RightAscensionRate Write", -9.0);
+                                if (cancellationToken.IsCancellationRequested)
+                                    return;
+
+                                TestRAOffsetRates("RightAscensionRate Write", 3.0);
+                                if (cancellationToken.IsCancellationRequested)
+                                    return;
+
+                                TestRAOffsetRates("RightAscensionRate Write", 9.0);
+                                if (cancellationToken.IsCancellationRequested)
+                                    return;
+
+                                TestRAOffsetRates("RightAscensionRate Write", -3.0);
+                                if (cancellationToken.IsCancellationRequested)
+                                    return;
+                            }
+                            else // Right ascension rate can not be set
+                            {
+                                LogInfo("RightAscensionRate Write", "Skipping extended RightAscensionRate tests because CanSetRightAscensionRate is false.");
+                            }
+                        }
 
                         TestRaDecRate("RightAscensionRate Write", "Reset rate to 0.0", Axis.Ra, 0.0d, false); // Reset the rate to zero, skipping the slewing test
                     }
@@ -5703,7 +5770,7 @@ namespace ConformU
                                 double targetRa = Utilities.ConditionRA(telescopeDevice.SiderealTime - targetHa);
 
                                 // Calculate the target declination
-                                double targetDeclination = GetTestDeclination(testName, targetRa);
+                                double targetDeclination = GetTestDeclinationLessThan65(testName, targetRa);
                                 LogDebug(testName, $"Slewing to HA: {targetHa.ToHMS()} (RA: {targetRa.ToHMS()}), Dec: {targetDeclination.ToDMS()}");
 
                                 // Slew to the target coordinates
@@ -7598,6 +7665,15 @@ namespace ConformU
             Dec
         }
 
+        /// <summary>
+        /// Test whether the offset rate can be set successfully
+        /// </summary>
+        /// <param name="testName">Test name</param>
+        /// <param name="description">Test description</param>
+        /// <param name="axis">RA or Dec axis</param>
+        /// <param name="rate">Offset rate to be set</param>
+        /// <param name="includeSlewiingTest">Flag indicating whether the Slewing property should be tested to confirm that it is false.</param>
+        /// <returns>True if the rate could be set</returns>
         private bool TestRaDecRate(string testName, string description, Axis axis, double rate, bool includeSlewiingTest)
         {
             // Initialise the outcome to false
@@ -7607,14 +7683,14 @@ namespace ConformU
             try
             {
                 // Tracking must be enabled for this test so make sure that it is enabled
-                LogCallToDriver(testName, $"{description} - About to get Slewing property");
+                LogCallToDriver(testName, $"{description} - About to get Tracking property");
                 tracking = telescopeDevice.Tracking;
 
                 // Test whether we are tracking and if not enable this if possible, abort the test if tracking cannot be set True
                 if (!tracking)
                 {
-                    // We are not tracking so test whether Tracking can be set
-
+                    // We are not tracking so test whether Tracking can be set and abandon test if this is not possible.
+                    // Tracking will be enabled by the SlewToCoordinates() method when called.
                     if (!canSetTracking)
                     {
                         LogIssue(testName, $"{description} - Test abandoned because {RateOffsetName(axis)} is true but Tracking is false and CanSetTracking is also false.");
@@ -7663,79 +7739,21 @@ namespace ConformU
                         offsetRate = telescopeDevice.DeclinationRate; LogCallToDriver(testName, $"{description} - About to get the Slewing property");
                     slewing = telescopeDevice.Slewing;
 
-                    if (offsetRate == rate & !slewing)
+                    // Check the rate assignment outcome
+                    if (offsetRate == rate & !slewing) // Success - The rate has been correctly set and the mount reports that Slewing is False
                     {
-                        LogOk(testName, $"{description} - successfully set rate to {offsetRate}");
+                        LogOk(testName, $"{description} - successfully set rate to {offsetRate,7:+0.000;-0.000;+0.000}");
                         success = true;
-
-                        // Run the extended rate offset tests if configured to do so.
-                        if (settings.TelescopeExtendedRateOffsetTests)
-                        {
-                            // Only test movement when the requested rate is not 0.0
-                            if (rate != 0.0)
-                            {
-                                // Now test the actual amount of movement
-                                if (axis == Axis.Ra) // Right ascension axis
-                                {
-                                    // Only test if the right ascension rate can be set
-                                    if (canSetRightAscensionRate) // Right ascension rate can be set
-                                    {
-                                        TestOffsetRate(testName, -9.0, rate, 0.0);
-                                        if (cancellationToken.IsCancellationRequested)
-                                            return success;
-
-                                        TestOffsetRate(testName, +3.0, rate, 0.0);
-                                        if (cancellationToken.IsCancellationRequested)
-                                            return success;
-
-                                        TestOffsetRate(testName, +9.0, rate, 0.0);
-                                        if (cancellationToken.IsCancellationRequested)
-                                            return success;
-
-                                        TestOffsetRate(testName, -3.0, rate, 0.0);
-                                        if (cancellationToken.IsCancellationRequested)
-                                            return success;
-                                    }
-                                    else // Right ascension rate can not be set
-                                    {
-                                        LogInfo(testName, "Skipping extended RightAscensionRate tests because CanSetRightAscensionRate is false.");
-                                    }
-                                }
-                                else // Declination axis
-                                {
-                                    // Only test if the declination rate can be set
-                                    if (canSetDeclinationRate) // Declination rate can be set
-                                    {
-                                        TestOffsetRate(testName, -9.0, 0.0, rate);
-                                        if (cancellationToken.IsCancellationRequested)
-                                            return success;
-
-                                        TestOffsetRate(testName, +3.0, 0.0, rate);
-                                        if (cancellationToken.IsCancellationRequested)
-                                            return success;
-
-                                        TestOffsetRate(testName, +9.0, 0.0, rate);
-                                        if (cancellationToken.IsCancellationRequested)
-                                            return success;
-
-                                        TestOffsetRate(testName, -3.0, 0.0, rate);
-                                    }
-                                    else // Declination rate can not be set
-                                    {
-                                        LogInfo(testName, "Skipping extended DeclinationRate tests because CanSetDeclinationRate is false.");
-                                    }
-
-                                }
-                            }
-                        }
                     }
-                    else
+                    else // Failed - Report what went wrong
                     {
-                        if (slewing & offsetRate == rate)
+                        if (slewing & offsetRate == rate) // The correct rate was returned but Slewing is True
                             LogIssue(testName, $"{RateOffsetName(axis)} was successfully set to {rate} but Slewing is returning True, it should return False.");
-                        if (slewing & offsetRate != rate)
+
+                        if (slewing & offsetRate != rate) // An incorrect rate was returned and Slewing is True
                             LogIssue(testName, $"{RateOffsetName(axis)} Read does not return {rate} as set, instead it returns {offsetRate}. Slewing is also returning True, it should return False.");
-                        if (!slewing & offsetRate != rate)
+
+                        if (!slewing & offsetRate != rate) // An incorrect rate was returned and Slewing is False
                             LogIssue(testName, $"{RateOffsetName(axis)} Read does not return {rate} as set, instead it returns {offsetRate}.");
                     }
                 }
@@ -7778,7 +7796,7 @@ namespace ConformU
         /// <param name="testRa">RA to use when determining the optimum declination.</param>
         /// <returns>Declination in the range -80.0 to +80.0</returns>
         /// <remarks>The returned declination will correspond to an elevation in the range 0 to 65 degrees.</remarks>
-        internal double GetTestDeclination(string testName, double testRa)
+        internal double GetTestDeclinationLessThan65(string testName, double testRa)
         {
             double testDeclination = 0.0;
             double testElevation = double.MinValue;
@@ -7827,19 +7845,160 @@ namespace ConformU
             return testDeclination;
         }
 
-        internal void TestOffsetRate(string testName, double testHa, double expectedRaRate, double expectedDeclinationRate)
+        /// <summary>
+        /// Return the declination which provides the highest elevation that is less than 65 degrees at the given RA.
+        /// </summary>
+        /// <param name="testRa">RA to use when determining the optimum declination.</param>
+        /// <returns>Declination in the range -80.0 to +80.0</returns>
+        /// <remarks>The returned declination will correspond to an elevation in the range 0 to 65 degrees.</remarks>
+        internal double GetTestDeclinationHalfwayToHorizon(string testName, double testRa)
         {
+            double testDeclination = 0.0, lowestDeclinationAboveHorizon = double.MaxValue;
+            double testElevation = double.MinValue, siteLatitude = 0.0;
+
+            // Find a test declination that yields an elevation that is as high as possible but under 65 degrees
+            // Initialise transform with site parameters
+            LogCallToDriver(testName, $"About to get SiteLatitude property");
+            siteLatitude = telescopeDevice.SiteLatitude;
+            transform.SiteLatitude = siteLatitude;
+            LogCallToDriver(testName, $"About to get SiteLongitude property");
+            transform.SiteLongitude = telescopeDevice.SiteLongitude;
+            LogCallToDriver(testName, $"About to get SiteElevation property");
+            transform.SiteElevation = telescopeDevice.SiteElevation;
+
+            // Set remaining transform parameters
+            transform.SitePressure = 1010.0;
+            transform.Refraction = false;
+
+            LogDebug("GetTestDeclination", $"TRANSFORM: Site: Latitude: {transform.SiteLatitude.ToDMS()}, Longitude: {transform.SiteLongitude.ToDMS()}, Elevation: {transform.SiteElevation}, Pressure: {transform.SitePressure}, Temperature: {transform.SiteTemperature}, Refraction: {transform.Refraction}");
+
+            // Iterate from declination -85 to +85 in steps of 10 degrees
+            Stopwatch sw = Stopwatch.StartNew();
+            for (double declination = -85.0; declination < 90.0; declination += 10.0)
+            {
+                // Set transform's topocentric coordinates
+                transform.SetTopocentric(testRa, declination);
+
+                // Retrieve the corresponding elevation
+                double elevation = transform.ElevationTopocentric;
+
+                LogDebug("GetTestDeclination", $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
+
+                // Update the lowest declination above the horizon if the sky position is above the horizon and also has a declination closer to the horizon than the current value.
+                if (elevation > 0.0)
+                {
+                    if (siteLatitude >= 0.0) // Northern hemisphere
+                    {
+                        if (declination < lowestDeclinationAboveHorizon)
+                        {
+                            lowestDeclinationAboveHorizon = declination;
+                        }
+                    }
+                    else // Southern hemisphere
+                    {
+                        if (declination > lowestDeclinationAboveHorizon)
+                        {
+                            lowestDeclinationAboveHorizon = declination;
+                        }
+                    }
+                }
+            }
+            sw.Stop();
+
+            if (testDeclination < double.MaxValue)
+            {
+                // Calculate the test declination as half way between the relevant celestial pole and the lowest declination above the horizon
+                if (siteLatitude >= 0.0) // Northern hemisphere
+                {
+                    testDeclination = 90.0 - (90.0 - lowestDeclinationAboveHorizon) / 2.0;
+                }
+                else // Southern hemisphere
+                {
+                    testDeclination = -90.0 - (-90.0 + lowestDeclinationAboveHorizon) / 2.0;
+                }
+
+                LogDebug("GetTestDeclination", $"Test RightAscension: {testRa.ToHMS()}, Lowest declination above horizon: {lowestDeclinationAboveHorizon.ToDMS()}, Test Declination: {testDeclination.ToDMS()} found in {sw.Elapsed.TotalMilliseconds:0.0}ms.");
+                // Return the test declination
+                return testDeclination;
+            }
+
+            throw new ASCOM.InvalidOperationException($"GetTestDeclination - No usable declination was found.");
+        }
+
+        internal void TestRAOffsetRates(string testName, double hourAngle)
+        {
+            // Test positive low value
+            TestOffsetRate(testName, hourAngle, Axis.Ra, settings.TelescopeRateOffsetTestLowValue * ARC_SECONDS_TO_RA_SECONDS);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            // Test negative low value
+            TestOffsetRate(testName, hourAngle, Axis.Ra, -settings.TelescopeRateOffsetTestLowValue * ARC_SECONDS_TO_RA_SECONDS);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            // Test positive high value
+            TestOffsetRate(testName, hourAngle, Axis.Ra, settings.TelescopeRateOffsetTestHighValue * ARC_SECONDS_TO_RA_SECONDS);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            // Test negative hight value
+            TestOffsetRate(testName, hourAngle, Axis.Ra, -settings.TelescopeRateOffsetTestHighValue * ARC_SECONDS_TO_RA_SECONDS);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+        }
+
+        internal void TestDeclinationOffsetRates(string testName, double hourAngle)
+        {
+            // Test positive low value
+            TestOffsetRate(testName, hourAngle, Axis.Dec, settings.TelescopeRateOffsetTestLowValue);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            // Test negative low value
+            TestOffsetRate(testName, hourAngle, Axis.Dec, -settings.TelescopeRateOffsetTestLowValue);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            // Test positive high value
+            TestOffsetRate(testName, hourAngle, Axis.Dec, settings.TelescopeRateOffsetTestHighValue);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            // Test negative hight value
+            TestOffsetRate(testName, hourAngle, Axis.Dec, -settings.TelescopeRateOffsetTestHighValue);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+        }
+
+        private void TestOffsetRate(string testName, double testHa, Axis testAxis, double expectedRate)
+        {
+            double expectedRaRate = 0.0, expectedDeclinationRate = 0.0;
+
             double testDuration = settings.TelescopeRateOffsetTestDuration; // Seconds
             double testDeclination;
 
             // Update the test name with the test hour angle
             testName = $"{testName} {testHa:+0.0;-0.0;+0.0}";
 
+            // Set the expected rates
+            switch (testAxis)
+            {
+                case Axis.Ra:
+                    expectedRaRate = expectedRate;
+                    break;
+
+                case Axis.Dec:
+                    expectedDeclinationRate = expectedRate;
+                    break;
+            }
+
+
             // Create the test RA and declination
             double testRa = Utilities.ConditionRA(telescopeDevice.SiderealTime - testHa);
             try
             {
-                testDeclination = GetTestDeclination(testName, testRa); // Get the test declination for the test RA
+                testDeclination = GetTestDeclinationHalfwayToHorizon(testName, testRa); // Get the test declination for the test RA
             }
             catch (ASCOM.InvalidOperationException ex)
             {
@@ -7868,24 +8027,11 @@ namespace ConformU
             double secStart = telescopeDevice.Declination;
 
             // Set the rate offsets to the supplied test values
-            if (canSetRightAscensionRate)
-            {
-                LogCallToDriver(testName, "About to set RightAscensionRate property");
-                telescopeDevice.RightAscensionRate = expectedRaRate * SIDEREAL_SECONDS_TO_SI_SECONDS;
-            }
-            else
-            {
-                expectedRaRate = 0.0;
-            }
-            if (canSetDeclinationRate)
-            {
-                LogCallToDriver(testName, "About to set DeclinationRate property");
-                telescopeDevice.DeclinationRate = expectedDeclinationRate;
-            }
-            else
-            {
-                expectedDeclinationRate = 0.0;
-            }
+            LogCallToDriver(testName, "About to set RightAscensionRate property");
+            telescopeDevice.RightAscensionRate = expectedRaRate * SIDEREAL_SECONDS_TO_SI_SECONDS;
+
+            LogCallToDriver(testName, "About to set DeclinationRate property");
+            telescopeDevice.DeclinationRate = expectedDeclinationRate;
 
             WaitFor(Convert.ToInt32(testDuration * 1000));
 
@@ -7915,30 +8061,16 @@ namespace ConformU
 
             LogDebug(testName, $"Actual primary rate: {actualPriRate}, Expected rate: {expectedRaRate}, Ratio: {actualPriRate / expectedRaRate}, Actual secondary rate: {actualSecRate}, Expected rate: {expectedDeclinationRate}, Ratio: {actualSecRate / expectedDeclinationRate}");
 
-            if (canSetRightAscensionRate)
-            {
-                TestDouble(testName, "RightAscensionRate", actualPriRate, expectedRaRate);
-            }
-            else
-            {
-                LogInfo(testName, "Right ascension rate test omitted because CanSetRightAscensionRate is false");
-            }
+            TestDouble(testName, $"Rate: {expectedRate,7:+0.000;-0.000;+0.000} - RightAscensionRate", actualPriRate, expectedRaRate);
+            TestDouble(testName, $"Rate: {expectedRate,7:+0.000;-0.000;+0.000} - DeclinationRate   ", actualSecRate, expectedDeclinationRate);
 
-            if (canSetDeclinationRate)
-            {
-                TestDouble(testName, "DeclinationRate   ", actualSecRate, expectedDeclinationRate);
-            }
-            else
-            {
-                LogInfo(testName, "Declination rate test omitted because CanSetDeclinationRate is false");
-            }
             LogDebug("", "");
         }
 
         private void TestDouble(string testName, string name, double actualValue, double expectedValue, double tolerance = 0.0)
         {
             // Tolerance 0 = 2%
-            const double toleranceDefault = 0.05; // 2%
+            const double toleranceDefault = 0.05; // 5%
 
             if (tolerance == 0.0)
             {
@@ -7949,22 +8081,22 @@ namespace ConformU
             {
                 if (Math.Abs(actualValue - expectedValue) <= tolerance)
                 {
-                    LogOk(testName, $"{name} is within expected tolerance. Expected: {expectedValue:+0.000;-0.000;+0.000}, Actual: {actualValue:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / tolerance):N2}%.");
+                    LogOk(testName, $"{name} is within expected tolerance. Expected: {expectedValue,7:+0.000;-0.000;+0.000}, Actual: {actualValue,7:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / tolerance):N2}%.");
                 }
                 else
                 {
-                    LogIssue(testName, $"{name} is outside the expected tolerance. Expected: {expectedValue:+0.000;-0.000;+0.000}, Actual: {actualValue:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / tolerance):N2}%, Tolerance:{tolerance * 100:N2}.");
+                    LogIssue(testName, $"{name} is outside the expected tolerance. Expected: {expectedValue,7:+0.000;-0.000;+0.000}, Actual: {actualValue,7:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / tolerance):N2}%, Tolerance:{tolerance * 100:N2}.");
                 }
             }
             else
             {
                 if (Math.Abs(Math.Abs(actualValue - expectedValue) / expectedValue) <= tolerance)
                 {
-                    LogOk(testName, $"{name} is within expected tolerance. Expected: {expectedValue:+0.000;-0.000;+0.000}, Actual: {actualValue:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%.");
+                    LogOk(testName, $"{name} is within expected tolerance. Expected: {expectedValue,7:+0.000;-0.000;+0.000}, Actual: {actualValue,7:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%.");
                 }
                 else
                 {
-                    LogIssue(testName, $"{name} is outside the expected tolerance. Expected: {expectedValue:+0.000;-0.000;+0.000}, Actual: {actualValue:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%, Tolerance:{tolerance * 100:N2}.");
+                    LogIssue(testName, $"{name} is outside the expected tolerance. Expected: {expectedValue,7:+0.000;-0.000;+0.000}, Actual: {actualValue,7:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%, Tolerance:{tolerance * 100:N2}.");
                 }
             }
         }
@@ -8175,7 +8307,7 @@ namespace ConformU
             double targetRa = Utilities.ConditionRA(telescopeDevice.SiderealTime - targetHa);
 
             // Calculate the target declination
-            double targetDeclination = GetTestDeclination("SlewToHa", targetRa);
+            double targetDeclination = GetTestDeclinationLessThan65("SlewToHa", targetRa);
             LogDebug("SlewToHa", $"Slewing to HA: {targetHa.ToHMS()} (RA: {targetRa.ToHMS()}), Dec: {targetDeclination.ToDMS()}");
 
             // Slew to the target coordinates
