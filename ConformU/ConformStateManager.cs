@@ -26,6 +26,9 @@ namespace ConformU
             }
         }
 
+        public string ScreenLog { get; set; }
+
+
         #region IDisposable support
 
         protected virtual void Dispose(bool disposing)

@@ -23,7 +23,7 @@
 </div>
 
 <h4>Conform Log</h4>
-<RadzenTextArea Id="ConformLog" Style="line-height: 18px; padding-bottom: 0px" Name="ScreenLog" @bind-Value=@screenLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
+<RadzenTextArea Id="ConformLog" Style="line-height: 18px; padding-bottom: 0px" Name="_state.ScreenLog" @bind-Value=@_state.ScreenLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
 
 <div style="display :@statusVisible">
     <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:20px; margin-right:20px; margin-top:8px" @bind-Value=@statusMessage />
@@ -33,7 +33,7 @@
     private string statusVisible = "initial";
     private bool disposedValue;
     int screenLogRows = 10;
-    string screenLog;
+    //string _state.ScreenLog;
     object screenLogLockObject = new object();
     object statusLockObject = new object();
     private string deviceDescription = "";
@@ -60,25 +60,25 @@
         {
             deviceDescription = $"COM {_configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope)}: {_configuration.Settings.DeviceName}";
         }
-
-        screenLog = _configuration.Status;
+        if (string.IsNullOrEmpty(_state.ScreenLog))
+            _state.ScreenLog = _configuration.Status;
 
         switch (_configuration.Settings.DeviceType)
         {
             case DeviceTypes.Dome:
-                screenLog += $"\r\n\r\nTo protect your equipment and the dome that is controlled by this driver:";
-                screenLog += $"\r\n1. The shutter will not open until enabled on the Dome tab in the Settings page. (Currently {(_configuration.Settings.DomeOpenShutter ? "ENABLED" : "DISABLED")}.)";
-                screenLog += $"\r\n1. A stabilisation delay is added after each movement. (Currently {_configuration.Settings.DomeStabilisationWaitTime} seconds.)";
-                screenLog += $"\r\n   The delay can also be changed on the Dome tab in the Settings page.";
+                _state.ScreenLog += $"\r\n\r\nTo protect your equipment and the dome that is controlled by this driver:";
+                _state.ScreenLog += $"\r\n1. The shutter will not open until enabled on the Dome tab in the Settings page. (Currently {(_configuration.Settings.DomeOpenShutter ? "ENABLED" : "DISABLED")}.)";
+                _state.ScreenLog += $"\r\n1. A stabilisation delay is added after each movement. (Currently {_configuration.Settings.DomeStabilisationWaitTime} seconds.)";
+                _state.ScreenLog += $"\r\n   The delay can also be changed on the Dome tab in the Settings page.";
                 break;
 
             case DeviceTypes.Switch:
-                screenLog += $"\r\n\r\nTo protect the equipment that is controlled by this Switch driver:";
-                screenLog += $"\r\n1. Write tests are disabled until enabled on the Switch tab in the Settings page. (Currently {(_configuration.Settings.SwitchEnableSet ? "ENABLED" : "DISABLED")}.)";
+                _state.ScreenLog += $"\r\n\r\nTo protect the equipment that is controlled by this Switch driver:";
+                _state.ScreenLog += $"\r\n1. Write tests are disabled until enabled on the Switch tab in the Settings page. (Currently {(_configuration.Settings.SwitchEnableSet ? "ENABLED" : "DISABLED")}.)";
                 string readDelay = $"{Convert.ToDouble(_configuration.Settings.SwitchReadDelay) / 1000.0:0.0}";
                 string writeDelay = $"{Convert.ToDouble(_configuration.Settings.SwitchWriteDelay) / 1000.0:0.0}";
-                screenLog += $"\r\n2. Delays of {readDelay} second{(readDelay == "1.0" ? "" : "s")} (read) and {writeDelay} second{(writeDelay == "1.0" ? "" : "s")} (write) will be added after each operation.";
-                screenLog += $"\r\n   The delays can also be changed on the Switch tab in the Settings page.";
+                _state.ScreenLog += $"\r\n2. Delays of {readDelay} second{(readDelay == "1.0" ? "" : "s")} (read) and {writeDelay} second{(writeDelay == "1.0" ? "" : "s")} (write) will be added after each operation.";
+                _state.ScreenLog += $"\r\n   The delays can also be changed on the Switch tab in the Settings page.";
                 break;
 
             default:
@@ -95,7 +95,7 @@
         }
         else
         {
-            screenLog += $"\r\n\r\nINVALID PRODUCT VERSION: {Update.ConformuVersion}";
+            _state.ScreenLog += $"\r\n\r\nINVALID PRODUCT VERSION: {Update.ConformuVersion}";
         }
 
 #if WINDOWS
@@ -108,10 +108,10 @@
     if (principal.IsInRole(WindowsBuiltInRole.Administrator))
     {
     // Running as admin so show a warning message on the screen
-    screenLog += ("\r\n\r\n***** CONFORM UNIVERSAL IS RUNNING WITH ADMIN PRIVILEGE!");
-    screenLog += ("\r\n\r\n***** This increases the risk that malicious individuals will target you and cause havoc in your life.");
-    screenLog += ("\r\n***** There is no need to run Conform Universal with Admin privilege, the application is fully functional in normal user mode.");
-    screenLog += ("\r\n***** Please close the application and re-open it in normal user mode.\r\n");
+    _state.ScreenLog += ("\r\n\r\n***** CONFORM UNIVERSAL IS RUNNING WITH ADMIN PRIVILEGE!");
+    _state.ScreenLog += ("\r\n\r\n***** This increases the risk that malicious individuals will target you and cause havoc in your life.");
+    _state.ScreenLog += ("\r\n***** There is no need to run Conform Universal with Admin privilege, the application is fully functional in normal user mode.");
+    _state.ScreenLog += ("\r\n***** Please close the application and re-open it in normal user mode.\r\n");
     }
     }
 
@@ -208,21 +208,21 @@
                         _conformLogger.Debug = _configuration.Settings.Debug;
 
                         // Clear the screen log
-                        screenLog = "";
+                        _state.ScreenLog = "";
 
                         // Create a task to run the conformance test
                         conformanceTestTask = new Task(() =>
+        {
+    try
     {
-        try
-        {
-            tester.TestDevice();
-        }
-        catch (Exception ex)
-        {
-            _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
-        }
+        tester.TestDevice();
+    }
+    catch (Exception ex)
+    {
+        _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
+    }
 
-    }, cancelConformToken);
+        }, cancelConformToken);
 
                         // Start the conformance test task
                         _conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
@@ -341,7 +341,7 @@
         {
             lock (screenLogLockObject)
             {
-                screenLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
+                _state.ScreenLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
             }
             await InvokeAsync(StateHasChanged);
             await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
@@ -411,18 +411,18 @@
 
                 if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
 
-                //_conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
+                //_conformLogger.LogMessage("Set_state.ScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, _state.ScreenLogRows: {_state.ScreenLogRows}, Browser: {browser}");
                 await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
             }
 
             else
             {
-                _conformLogger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"BoundingClientRectangle is NULL - No action taken.");
+                _conformLogger.LogMessage("screenLogRows", MessageLevel.Debug, $"BoundingClientRectangle is NULL - No action taken.");
             }
         }
         catch
         {
-            // _conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
+            // _conformLogger.LogMessage("Set_state.ScreenLogRows", $"Exception: \r\n{ex}");
         }
     }
 
