@@ -30,6 +30,8 @@ namespace ConformU
 
         public double ConformLogScrollTop { get; set; } = 0;
 
+        public string ProtocolLog { get; set; }
+
         #region IDisposable support
 
         protected virtual void Dispose(bool disposing)
