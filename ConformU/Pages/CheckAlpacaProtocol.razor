@@ -6,7 +6,7 @@
 
 @inject ConformLogger logger
 @inject ConformConfiguration configuration
-@inject ConformStateManager state
+@inject ConformStateManager conformState
 @inject BrowserResizeService listener
 @inject IJSRuntime JS
 @inject NotificationService notificationService
@@ -21,7 +21,7 @@
         <RadzenTextBox Name="TESTSTATUS" Placeholder="" @bind-Value=@statusText ReadOnly=true Style="width:600px;font-weight:bold;margin-right:40px;margin-bottom:10px" />
     </span>
 </div>
-<RadzenTextArea Id="ProtocolLog" Style="line-height: 18px; padding-bottom: 0px" Name="ProtocolLogName" @bind-Value=@screenLog Rows="@screenLogRows" @bind-Cols=@screenLogColumns ReadOnly=true />
+<RadzenTextArea Id="ProtocolLog" Style="line-height: 18px; padding-bottom: 0px" Name="ProtocolLogName" @bind-Value=@conformState.ProtocolLog Rows="@screenLogRows" @bind-Cols=@screenLogColumns ReadOnly=true />
 
 @code
 {
@@ -37,7 +37,6 @@
     CancellationTokenSource applicationCancellationTokenSource;
     CancellationToken applicationCancellationToken;
 
-    string screenLog = "";
     int screenLogRows;
     int screenLogColumns;
     string statusText;
@@ -56,7 +55,7 @@
 
     protected override void OnInitialized()
     {
-        state.UiHasChanged += OnUiHasChanged;
+        conformState.UiHasChanged += OnUiHasChanged;
         settings = configuration.Settings;
         StartCheckAlpacaProtocol();
     }
@@ -97,7 +96,7 @@
         {
             // Set the operation in progress flag and refresh state throughout the page and navigation menu.
             configuration.Settings.OperationInProgress = true;
-            state.RaiseUiHasChangedEvent();
+            conformState.RaiseUiHasChangedEvent();
             StateHasChanged();
 
             // Validate the supplied configuration and only start if there are no settings issues
@@ -133,7 +132,7 @@
                         logger.Debug = configuration.Settings.Debug;
 
                         // Clear the screen log
-                        screenLog = "";
+                        conformState.ProtocolLog = "";
 
                         // Add a blank line to the console log
                         Console.WriteLine("");
@@ -197,7 +196,7 @@
         finally
         {
             configuration.Settings.OperationInProgress = false;
-            state.RaiseUiHasChangedEvent();
+            conformState.RaiseUiHasChangedEvent();
             StateHasChanged();
             try
             {
@@ -216,7 +215,7 @@
     ///    </summary>
     private void ClearLogScreen()
     {
-        screenLog = "";
+        conformState.ProtocolLog = "";
     }
 
     /// <summary>
@@ -261,12 +260,12 @@
         if (contextMessage is not null) logger?.LogMessage("", contextMessage);
 
         // Reformat the text across multiple screen lines if the message does not contain HTML code. If it does contain HTML display as-is.
-        screenLog = $"{screenLog}\r\n{methodString}{message.Trim(new char[] { ' ', '\r', '\n' })}";
+        conformState.ProtocolLog = $"{conformState.ProtocolLog}\r\n{methodString}{message.Trim(new char[] { ' ', '\r', '\n' })}";
 
         // Add the context message if present
         if (contextMessage is not null)
         {
-            screenLog = screenLog + $"\r\n{new string(' ', ExtensionMethods.COLUMN_WIDTH + ExtensionMethods.OUTCOME_WIDTH)}  Response: {contextMessage}".TrimEnd(new char[] { '\r', '\n' });
+            conformState.ProtocolLog = conformState.ProtocolLog + $"\r\n{new string(' ', ExtensionMethods.COLUMN_WIDTH + ExtensionMethods.OUTCOME_WIDTH)}  Response: {contextMessage}".TrimEnd(new char[] { '\r', '\n' });
         }
 
         try
@@ -306,7 +305,7 @@
     ///    </summary>
     private void LogBlankLine()
     {
-        screenLog += $"\r\n";
+        conformState.ProtocolLog += $"\r\n";
     }
 
     /// <summary>
@@ -412,7 +411,7 @@
         {
             lock (screenLogLockObject)
             {
-                screenLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
+                conformState.ProtocolLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
             }
             await InvokeAsync(StateHasChanged);
             await JS.InvokeVoidAsync("ScrollToBottom", "ProtocolLog");
@@ -452,7 +451,7 @@
             if (disposing)
             {
                 listener.OnResize -= WindowResized;
-                state.UiHasChanged -= OnUiHasChanged;
+                conformState.UiHasChanged -= OnUiHasChanged;
             }
 
             disposedValue = true;

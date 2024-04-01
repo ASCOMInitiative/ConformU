@@ -157,6 +157,26 @@ namespace ConformU
                     aliases: new string[] { "-v", "--version" },
                     description: "Show the Conform Universal version number");
 
+                // TESTCYCLES option
+                Option<int> testCyclesOption = new(
+                    aliases: new string[] { "-c", "--testcycles" },
+                    description: "The number of test cycles to undertake");
+                testCyclesOption.SetDefaultValue(1);
+
+                // Add a validator for the number of cycles
+                testCyclesOption.AddValidator(result =>
+                {
+                    // Get the log file path
+                    int testCycles = (int)result.GetValueOrDefault();
+
+                    if (testCycles < 1) // Found an invalid number of cycles (must be 1 or greater)
+                    {
+                        // Set the error message
+                        Console.WriteLine($"\r\n{RED_TEXT}The number of test cycles must be 1 or more: {testCycles} {WHITE_TEXT}");
+                        result.ErrorMessage = $"\r\nThe number of test cycles must be 1 or more: {testCycles}";
+                    }
+                });
+
                 // DEBUG DISCOVERY option
                 Option<bool> debugDiscoveryOption = new(
                     aliases: new string[] { "-d", "--debugdiscovery" },
@@ -344,6 +364,7 @@ namespace ConformU
                 conformanceCommand.AddOption(settingsFileOption);
                 conformanceCommand.AddOption(debugDiscoveryOption);
                 conformanceCommand.AddOption(debugStartUpOption);
+                conformanceCommand.AddOption(testCyclesOption);
 
                 // ALPCA COMMAND - add arguments and options
                 alpacaProtocolCommand.AddArgument(alpacaDeviceArgument);
@@ -369,6 +390,7 @@ namespace ConformU
                 conformanceUsingSettingsCommand.AddOption(settingsFileOption);
                 conformanceUsingSettingsCommand.AddOption(debugDiscoveryOption);
                 conformanceUsingSettingsCommand.AddOption(debugStartUpOption);
+                conformanceUsingSettingsCommand.AddOption(testCyclesOption);
 
                 // START AS GUI COMMAND  - add options
                 startAsGuiCommand.AddOption(logFileNameOption);
@@ -386,7 +408,7 @@ namespace ConformU
                 rootCommand.SetHandler((bool version) => Task.FromResult(RootCommandHandler(version)), versionOption);
 
                 // CONFORMANCE USING SETTINGS COPMMAND handler
-                conformanceUsingSettingsCommand.SetHandler((file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
+                conformanceUsingSettingsCommand.SetHandler((file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp, cycles) =>
                 {
                     int returnCode = -8888;
 
@@ -394,15 +416,15 @@ namespace ConformU
                     InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
 
                     // Run the conformance test
-                    returnCode = RunConformanceTest();
+                    returnCode = RunConformanceTest(cycles);
 
                     // Return the return code
                     return Task.FromResult(returnCode);
 
-                }, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption);
+                }, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption,testCyclesOption);
 
                 // CONFORMANCE COMMAND handler
-                conformanceCommand.SetHandler((device, file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
+                conformanceCommand.SetHandler((device, file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp, cycles) =>
                 {
                     int returnCode = 0;
 
@@ -425,7 +447,7 @@ namespace ConformU
                             conformConfiguration.SetAlpacaDevice(serviceType.Value, address, port, deviceType.Value, deviceNumber);
 
                             // Run the conformance test
-                            returnCode = RunConformanceTest();
+                            returnCode = RunConformanceTest(cycles);
                             break;
 
                         case DeviceTechnology.COM:
@@ -441,7 +463,7 @@ namespace ConformU
                                 conformConfiguration.SetComDevice(device, deviceType.Value);
 
                                 // Run the conformance test
-                                returnCode = RunConformanceTest();
+                                returnCode = RunConformanceTest(cycles);
                             }
                             else // Not valid because COM is only valid on Windows OS
                             {
@@ -457,7 +479,7 @@ namespace ConformU
                     // Return the return code
                     return Task.FromResult(returnCode);
 
-                }, deviceArgument, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption);
+                }, deviceArgument, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption, testCyclesOption);
 
                 // ALPACA PROTOCOL COMMAND handler
                 alpacaProtocolCommand.SetHandler((alpacaDevice, file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
@@ -721,7 +743,7 @@ namespace ConformU
 
         #region Support code
 
-        private static int RunConformanceTest()
+        private static int RunConformanceTest(int numberOfCycles)
         {
             int returnCode;
 
@@ -742,7 +764,7 @@ namespace ConformU
             {
                 try
                 {
-                    returnCode = tester.TestDevice();
+                    returnCode = tester.TestDevice(numberOfCycles);
                 }
                 catch (Exception ex)
                 {

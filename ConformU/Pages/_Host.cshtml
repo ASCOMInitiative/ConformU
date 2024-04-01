@@ -129,5 +129,25 @@
     </script>
 
     <script>ScrollToBottom = (elementId) => { document.getElementById(elementId).scrollTop = document.getElementById(elementId).scrollHeight; };</script>
+
+    <script>
+        // Get the element's scroll position
+        function getScrollPosition(elementId) {
+            let element = document.getElementById(elementId);
+
+            return {
+                scrollTop: element.scrollTop,
+                scrollLeft: element.scrollLeft,
+                scrollHeight: element.scrollHeight,
+                clientHeight: element.clientHeight
+            };
+        }
+
+        function setScrollTop(elementId, scrollTop) {
+            let element = document.getElementById(elementId);
+            element.scrollTop = scrollTop;
+        }
+
+    </script>
 </body>
 </html>

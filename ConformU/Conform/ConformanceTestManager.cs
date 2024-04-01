@@ -163,7 +163,7 @@ namespace ConformU
             }
         }
 
-        public int TestDevice()
+        public int TestDevice(int numberOfTestCycles)
         {
             int returnCode;
 
@@ -181,7 +181,7 @@ namespace ConformU
             {
                 if (testDevice is null)
                     throw new ASCOM.InvalidOperationException("No test device has been selected.");
-                
+
                 string testStage = "Initialise";
                 testDevice.InitialiseTest();
 
@@ -211,58 +211,73 @@ namespace ConformU
 
                         try
                         {
-                            // Test common methods
-                            if (!cancellationToken.IsCancellationRequested & settings.TestProperties)
-                            {
-                                testStage = "CheckCommonMethods";
+                            // Initialise the test cycle counter
+                            int testCycleCount = 0;
 
-                                testDevice.CheckCommonMethods();
-                            }
-
-                            // Test and read Can properties
-                            if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasCanProperties)
+                            // Repeat the main tests until the required number of test cycles has been completed
+                            do
                             {
-                                TL.LogMessage("Can Properties", MessageLevel.TestOnly, "");
-                                testStage = "ReadCanProperties";
-                                testDevice.ReadCanProperties();
-                                TL.LogMessage("", MessageLevel.TestOnly, "");
-                            }
 
-                            // Carry out pre-test tasks
-                            if (!cancellationToken.IsCancellationRequested & testDevice.HasPreRunCheck)
-                            {
-                                TL.LogMessage("Pre-run Checks", MessageLevel.TestOnly, "");
-                                testStage = "PreRunCheck";
-                                testDevice.PreRunCheck();
-                                TL.LogMessage("", MessageLevel.TestOnly, "");
-                            }
+                                // Test common methods
+                                if (!cancellationToken.IsCancellationRequested & settings.TestProperties)
+                                {
+                                    testStage = "CheckCommonMethods";
 
-                            // Test properties
-                            if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasProperties)
-                            {
-                                TL.LogMessage("Properties", MessageLevel.TestOnly, "");
-                                testStage = "CheckProperties";
-                                testDevice.CheckProperties();
-                                TL.LogMessage("", MessageLevel.TestOnly, "");
-                            }
+                                    testDevice.CheckCommonMethods();
+                                }
 
-                            // Test methods
-                            if (!cancellationToken.IsCancellationRequested & settings.TestMethods & testDevice.HasMethods)
-                            {
-                                TL.LogMessage("Methods", MessageLevel.TestOnly, "");
-                                testStage = "CheckMethods";
-                                testDevice.CheckMethods();
-                                TL.LogMessage("", MessageLevel.TestOnly, ""); // Blank line
-                            }
+                                // Test and read Can properties
+                                if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasCanProperties)
+                                {
+                                    TL.LogMessage("Can Properties", MessageLevel.TestOnly, "");
+                                    testStage = "ReadCanProperties";
+                                    testDevice.ReadCanProperties();
+                                    TL.LogMessage("", MessageLevel.TestOnly, "");
+                                }
 
-                            // Test performance
-                            if (!cancellationToken.IsCancellationRequested & settings.TestPerformance & testDevice.HasPerformanceCheck)
-                            {
-                                TL.LogMessage("Performance", MessageLevel.TestOnly, "");
-                                testStage = "CheckPerformance";
-                                testDevice.CheckPerformance();
-                                TL.LogMessage("", MessageLevel.TestOnly, "");
-                            }
+                                // Carry out pre-test tasks
+                                if (!cancellationToken.IsCancellationRequested & testDevice.HasPreRunCheck)
+                                {
+                                    TL.LogMessage("Pre-run Checks", MessageLevel.TestOnly, "");
+                                    testStage = "PreRunCheck";
+                                    testDevice.PreRunCheck();
+                                    TL.LogMessage("", MessageLevel.TestOnly, "");
+                                }
+
+                                // Test properties
+                                if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasProperties)
+                                {
+                                    TL.LogMessage("Properties", MessageLevel.TestOnly, "");
+                                    testStage = "CheckProperties";
+                                    testDevice.CheckProperties();
+                                    TL.LogMessage("", MessageLevel.TestOnly, "");
+                                }
+
+                                // Test methods
+                                if (!cancellationToken.IsCancellationRequested & settings.TestMethods & testDevice.HasMethods)
+                                {
+                                    TL.LogMessage("Methods", MessageLevel.TestOnly, "");
+                                    testStage = "CheckMethods";
+                                    testDevice.CheckMethods();
+                                    TL.LogMessage("", MessageLevel.TestOnly, ""); // Blank line
+                                }
+
+                                // Test performance
+                                if (!cancellationToken.IsCancellationRequested & settings.TestPerformance & testDevice.HasPerformanceCheck)
+                                {
+                                    TL.LogMessage("Performance", MessageLevel.TestOnly, "");
+                                    testStage = "CheckPerformance";
+                                    testDevice.CheckPerformance();
+                                    TL.LogMessage("", MessageLevel.TestOnly, "");
+                                }
+
+                                // Increment the test cycle counter
+                                testCycleCount++;
+
+                                if (cancellationToken.IsCancellationRequested)
+                                    break;
+
+                            } while (testCycleCount < numberOfTestCycles); // Exit when the required number of test cycles has been completed.
 
                             // Carry out post-test tasks
                             if (!cancellationToken.IsCancellationRequested & testDevice.HasPostRunCheck)
@@ -273,6 +288,7 @@ namespace ConformU
                                 TL.LogMessage("", MessageLevel.TestOnly, ""); // Blank line
                             }
 
+                            // Disconnect from the device
                             try
                             {
                                 TL.LogMessage("Disconnect from device", MessageLevel.TestOnly, "");

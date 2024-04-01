@@ -26,8 +26,9 @@ namespace ConformU
             }
         }
 
-        public string ScreenLog { get; set; }
+        public string ConformLog { get; set; }
 
+        public double ConformLogScrollTop { get; set; } = 0;
 
         #region IDisposable support
 

@@ -2,13 +2,14 @@
 @implements IDisposable
 @using System.Threading
 @using ASCOM.Common
+@using ConformU.Conform.DataClasses
 @using Semver;
 @using System.Security.Principal;
 @inject BrowserResizeService _listener
 @inject ConformLogger _conformLogger
 @inject ConformConfiguration _configuration
-@inject ConformStateManager _state
-@inject NavigationManager _uriHelper
+@inject ConformStateManager _conformState
+@inject NavigationManager _navigationManager
 @inject IJSRuntime JS
 @* Radzen services to enable pop-up alerts  and dialogues *@
 @inject NotificationService _notificationService
@@ -17,13 +18,14 @@
 <h2 style="display: @statusVisible">Welcome to Conform Universal!</h2>
 
 <div>
-    <RadzenButton Id="StartButton" Click=@(args => StartTest()) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 130px" IsBusy=@_configuration.Settings.OperationInProgress />
+    <RadzenButton Id="StartButton" Click=@(args => StartTest(1)) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 130px" IsBusy=@_configuration.Settings.OperationInProgress />
     <RadzenButton Id="StopButton" Click=@(args => StopTest()) Text="Stop" Style="margin-bottom: 20px; margin-right: 20px; width: 130px" Disabled=@(!_configuration.Settings.OperationInProgress) />
+    <RadzenButton Id="StressTestButton" Click=@(args => StartTest(int.MaxValue)) ButtonStyle="ButtonStyle.Secondary" Text="Stress Test" Style="margin-bottom: 20px; margin-right: 20px; width: 130px" Disabled=@(_configuration.Settings.OperationInProgress) />
     <RadzenButton Id="ConfigureButton" ButtonStyle="ButtonStyle.Info" Shade="Shade.Dark" Click=@(args => GoToSelectionPage("ConfigureButton")) Text="Select Device" Style="margin-bottom: 10px; margin-right: 10px; width: 130px;" Disabled=@_configuration.Settings.OperationInProgress />
 </div>
 
 <h4>Conform Log</h4>
-<RadzenTextArea Id="ConformLog" Style="line-height: 18px; padding-bottom: 0px" Name="_state.ScreenLog" @bind-Value=@_state.ScreenLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
+<RadzenTextArea Id="ConformLog" Style="line-height: 18px; padding-bottom: 0px" Name="_conformState.ScreenLog" @bind-Value=@_conformState.ConformLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
 
 <div style="display :@statusVisible">
     <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:20px; margin-right:20px; margin-top:8px" @bind-Value=@statusMessage />
@@ -33,11 +35,11 @@
     private string statusVisible = "initial";
     private bool disposedValue;
     int screenLogRows = 10;
-    //string _state.ScreenLog;
     object screenLogLockObject = new object();
     object statusLockObject = new object();
     private string deviceDescription = "";
     string statusMessage = "";
+    private IDisposable navigationManagerRegistration;
 
     ConformanceTestManager tester;
 
@@ -49,7 +51,7 @@
     protected override async void OnInitialized()
     {
         _conformLogger.Debug = _configuration.Settings.Debug;
-        _state.UiHasChanged += OnUiHasChanged;
+        _conformState.UiHasChanged += OnUiHasChanged;
         _conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"Before Task.Run");
 
         if (_configuration.Settings.DeviceTechnology == DeviceTechnology.Alpaca)
@@ -60,25 +62,25 @@
         {
             deviceDescription = $"COM {_configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope)}: {_configuration.Settings.DeviceName}";
         }
-        if (string.IsNullOrEmpty(_state.ScreenLog))
-            _state.ScreenLog = _configuration.Status;
+        if (string.IsNullOrEmpty(_conformState.ConformLog))
+            _conformState.ConformLog = _configuration.Status;
 
         switch (_configuration.Settings.DeviceType)
         {
             case DeviceTypes.Dome:
-                _state.ScreenLog += $"\r\n\r\nTo protect your equipment and the dome that is controlled by this driver:";
-                _state.ScreenLog += $"\r\n1. The shutter will not open until enabled on the Dome tab in the Settings page. (Currently {(_configuration.Settings.DomeOpenShutter ? "ENABLED" : "DISABLED")}.)";
-                _state.ScreenLog += $"\r\n1. A stabilisation delay is added after each movement. (Currently {_configuration.Settings.DomeStabilisationWaitTime} seconds.)";
-                _state.ScreenLog += $"\r\n   The delay can also be changed on the Dome tab in the Settings page.";
+                _conformState.ConformLog += $"\r\n\r\nTo protect your equipment and the dome that is controlled by this driver:";
+                _conformState.ConformLog += $"\r\n1. The shutter will not open until enabled on the Dome tab in the Settings page. (Currently {(_configuration.Settings.DomeOpenShutter ? "ENABLED" : "DISABLED")}.)";
+                _conformState.ConformLog += $"\r\n1. A stabilisation delay is added after each movement. (Currently {_configuration.Settings.DomeStabilisationWaitTime} seconds.)";
+                _conformState.ConformLog += $"\r\n   The delay can also be changed on the Dome tab in the Settings page.";
                 break;
 
             case DeviceTypes.Switch:
-                _state.ScreenLog += $"\r\n\r\nTo protect the equipment that is controlled by this Switch driver:";
-                _state.ScreenLog += $"\r\n1. Write tests are disabled until enabled on the Switch tab in the Settings page. (Currently {(_configuration.Settings.SwitchEnableSet ? "ENABLED" : "DISABLED")}.)";
+                _conformState.ConformLog += $"\r\n\r\nTo protect the equipment that is controlled by this Switch driver:";
+                _conformState.ConformLog += $"\r\n1. Write tests are disabled until enabled on the Switch tab in the Settings page. (Currently {(_configuration.Settings.SwitchEnableSet ? "ENABLED" : "DISABLED")}.)";
                 string readDelay = $"{Convert.ToDouble(_configuration.Settings.SwitchReadDelay) / 1000.0:0.0}";
                 string writeDelay = $"{Convert.ToDouble(_configuration.Settings.SwitchWriteDelay) / 1000.0:0.0}";
-                _state.ScreenLog += $"\r\n2. Delays of {readDelay} second{(readDelay == "1.0" ? "" : "s")} (read) and {writeDelay} second{(writeDelay == "1.0" ? "" : "s")} (write) will be added after each operation.";
-                _state.ScreenLog += $"\r\n   The delays can also be changed on the Switch tab in the Settings page.";
+                _conformState.ConformLog += $"\r\n2. Delays of {readDelay} second{(readDelay == "1.0" ? "" : "s")} (read) and {writeDelay} second{(writeDelay == "1.0" ? "" : "s")} (write) will be added after each operation.";
+                _conformState.ConformLog += $"\r\n   The delays can also be changed on the Switch tab in the Settings page.";
                 break;
 
             default:
@@ -95,7 +97,7 @@
         }
         else
         {
-            _state.ScreenLog += $"\r\n\r\nINVALID PRODUCT VERSION: {Update.ConformuVersion}";
+            _conformState.ConformLog += $"\r\n\r\nINVALID PRODUCT VERSION: {Update.ConformuVersion}";
         }
 
 #if WINDOWS
@@ -108,10 +110,10 @@
     if (principal.IsInRole(WindowsBuiltInRole.Administrator))
     {
     // Running as admin so show a warning message on the screen
-    _state.ScreenLog += ("\r\n\r\n***** CONFORM UNIVERSAL IS RUNNING WITH ADMIN PRIVILEGE!");
-    _state.ScreenLog += ("\r\n\r\n***** This increases the risk that malicious individuals will target you and cause havoc in your life.");
-    _state.ScreenLog += ("\r\n***** There is no need to run Conform Universal with Admin privilege, the application is fully functional in normal user mode.");
-    _state.ScreenLog += ("\r\n***** Please close the application and re-open it in normal user mode.\r\n");
+    _conformState.ConformLog += ("\r\n\r\n***** CONFORM UNIVERSAL IS RUNNING WITH ADMIN PRIVILEGE!");
+    _conformState.ConformLog += ("\r\n\r\n***** This increases the risk that malicious individuals will target you and cause havoc in your life.");
+    _conformState.ConformLog += ("\r\n***** There is no need to run Conform Universal with Admin privilege, the application is fully functional in normal user mode.");
+    _conformState.ConformLog += ("\r\n***** Please close the application and re-open it in normal user mode.\r\n");
     }
     }
 
@@ -138,7 +140,7 @@
 
     void GoToSelectionPage(string buttonName)
     {
-        _uriHelper.NavigateTo("/DeviceSelection");
+        _navigationManager.NavigateTo("/DeviceSelection");
     }
 
     public async void OnUiHasChanged(object sender, EventArgs e)
@@ -159,20 +161,77 @@
     {
         if (firstRender)
         {
+            // Register the navigation manager callback
+            navigationManagerRegistration = _navigationManager.RegisterLocationChangingHandler(LocationChangingHandler);
+
             // Subscribe to the OnResized event. This will do work when the browser is resized.
             _listener.Init(JS);
             _listener.OnResize += WindowResized;
             await ResizeLogWindow();
+
+            // try
+            // {
+            //     ScrollPosition scrollPosition = await JS.InvokeAsync<ScrollPosition>("getScrollPosition", "ConformLog");
+            //     Console.WriteLine($"Before setting scroll top - Scroll positions Top: {scrollPosition.ScrollTop} Left: {scrollPosition.ScrollLeft} Height: {scrollPosition.ScrollHeight} Client Height: {scrollPosition.ClientHeight}");
+            // }
+            // catch (Exception ex)
+            // {
+            //     Console.WriteLine($"{ex}");
+            // }
+
+            try
+            {
+                await JS.InvokeVoidAsync("setScrollTop", "ConformLog", _conformState.ConformLogScrollTop.ToString());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"OnInitialized-setScrollTop: {ex}");
+            }
+
+            // try
+            // {
+            //     ScrollPosition scrollPosition = await JS.InvokeAsync<ScrollPosition>("getScrollPosition", "ConformLog");
+            //     Console.WriteLine($"After setting scroll top - Scroll positions Top: {scrollPosition.ScrollTop} Left: {scrollPosition.ScrollLeft} Height: {scrollPosition.ScrollHeight} Client Height: {scrollPosition.ClientHeight}");
+            // }
+            // catch (Exception ex)
+            // {
+            //     Console.WriteLine($"{ex}");
+            // }
+
         }
     }
 
-    private async void StartTest()
+    private async ValueTask LocationChangingHandler(LocationChangingContext arg)
+    {
+        //Console.WriteLine($"Location is changing...#{arg.TargetLocation}#{arg.HistoryEntryState}#{_navigationManager.BaseUri}#{string.IsNullOrEmpty(arg.TargetLocation.Substring(_navigationManager.BaseUri.Length))}");
+        try
+        {
+            if (!string.IsNullOrEmpty(arg.TargetLocation.Substring(_navigationManager.BaseUri.Length))) // Navigating away from the root page
+            {
+                ScrollPosition scrollPosition = await JS.InvokeAsync<ScrollPosition>("getScrollPosition", "ConformLog");
+                //Console.WriteLine($"Navigating away from root - Scroll positions Top: {scrollPosition.ScrollTop} Left: {scrollPosition.ScrollLeft} Height: {scrollPosition.ScrollHeight} Client Height: {scrollPosition.ClientHeight}");
+                _conformState.ConformLogScrollTop = scrollPosition.ScrollTop;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"LocationChangingHandler-getScrollPosition: {ex}");
+        }
+
+        return;
+    }
+
+    /// <summary>
+    /// Starts a Conform test that will run for the specified number of test cycles
+    /// </summary>
+    /// <param name="numberOfTestCycles">Number of test cycles.</param>
+    private async void StartTest(int numberOfTestCycles)
     {
         try
         {
             // Set the operation in progress flag and refresh _state throughout the page and navigation menu.
             _configuration.Settings.OperationInProgress = true;
-            _state.RaiseUiHasChangedEvent();
+            _conformState.RaiseUiHasChangedEvent();
             StateHasChanged();
 
             // Validate the supplied _configuration and only start if there are no settings issues
@@ -208,19 +267,19 @@
                         _conformLogger.Debug = _configuration.Settings.Debug;
 
                         // Clear the screen log
-                        _state.ScreenLog = "";
+                        _conformState.ConformLog = "";
 
                         // Create a task to run the conformance test
                         conformanceTestTask = new Task(() =>
         {
-    try
-    {
-        tester.TestDevice();
-    }
-    catch (Exception ex)
-    {
-        _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
-    }
+            try
+            {
+                tester.TestDevice(numberOfTestCycles);
+            }
+            catch (Exception ex)
+            {
+                _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
+            }
 
         }, cancelConformToken);
 
@@ -256,7 +315,7 @@
         finally
         {
             _configuration.Settings.OperationInProgress = false;
-            _state.RaiseUiHasChangedEvent();
+            _conformState.RaiseUiHasChangedEvent();
             StateHasChanged();
             try
             {
@@ -341,7 +400,7 @@
         {
             lock (screenLogLockObject)
             {
-                _state.ScreenLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
+                _conformState.ConformLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
             }
             await InvokeAsync(StateHasChanged);
             await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
@@ -411,7 +470,7 @@
 
                 if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
 
-                //_conformLogger.LogMessage("Set_state.ScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, _state.ScreenLogRows: {_state.ScreenLogRows}, Browser: {browser}");
+                //_conformLogger.LogMessage("Set_conformState.ScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, _conformState.ScreenLogRows: {_conformState.ScreenLogRows}, Browser: {browser}");
                 await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
             }
 
@@ -422,7 +481,7 @@
         }
         catch
         {
-            // _conformLogger.LogMessage("Set_state.ScreenLogRows", $"Exception: \r\n{ex}");
+            // _conformLogger.LogMessage("Set_conformState.ScreenLogRows", $"Exception: \r\n{ex}");
         }
     }
 
@@ -437,7 +496,8 @@
             if (disposing)
             {
                 _listener.OnResize -= WindowResized;
-                _state.UiHasChanged -= OnUiHasChanged;
+                _conformState.UiHasChanged -= OnUiHasChanged;
+                navigationManagerRegistration?.Dispose();
             }
 
             disposedValue = true;
