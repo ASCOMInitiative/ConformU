@@ -395,6 +395,27 @@ namespace ConformU
                         TL.LogMessage(kvp.Key, MessageLevel.TestAndMessage, kvp.Value);
                     }
                 }
+
+                if (settings.ReportTimingSummary)
+                {
+                    TL.LogMessage("", MessageLevel.TestOnly, "");
+                    //TL.LogMessage("Timing Summary", MessageLevel.TestOnly, "");
+
+                    // List the timing outcomes
+                    foreach (KeyValuePair<string, string> kvp in conformResults.Timings)
+                    {
+                        TL.LogMessage(kvp.Key, MessageLevel.TestAndMessage, kvp.Value);
+                    }
+
+                    TL.LogMessage("", MessageLevel.TestOnly, "");
+
+                    // Report the high level timing outcome
+                    if (conformResults.TimingIssuesCount == 0)
+                        TL.LogMessage("Congratulations, all members returned within the target response time!!", MessageLevel.TestOnly, "");
+                    else
+                        TL.LogMessage("One or more members took longer than the target response time.", MessageLevel.TestOnly, "");
+                }
+
                 // Add a blank line to the console output
                 Console.WriteLine("");
 

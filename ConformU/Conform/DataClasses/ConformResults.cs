@@ -6,9 +6,12 @@ namespace ConformU
     {
         public ConformResults()
         {
+            // Initialise the class
             Errors = new();
             Issues = new();
             ConfigurationAlerts= new();
+            Timings = new();
+            TimingIssuesCount = 0;
         }
 
         public int ErrorCount
@@ -35,10 +38,14 @@ namespace ConformU
             }
         }
 
+        public int TimingIssuesCount { get; set; }
+
         public List<KeyValuePair<string, string>> Errors { get; set; }
 
         public List<KeyValuePair<string, string>> Issues { get; set; }
 
         public List<KeyValuePair<string, string>> ConfigurationAlerts { get; set; }
+
+        public List<KeyValuePair<string, string>> Timings { get; set; }
     }
 }

@@ -131,6 +131,8 @@ namespace ConformU
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public DeviceTypes? DeviceType { get; set; } = null;
 
+        public bool ReportTimingSummary { get; set; } = true;
+
         #endregion
 
         #region Device test configuration

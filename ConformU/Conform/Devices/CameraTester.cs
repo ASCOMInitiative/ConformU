@@ -233,7 +233,7 @@ namespace ConformU
                         }
                 }
             }
-            LogDebug("CheckInitialise-Camera",$"Set GExNotImplemented");
+            LogDebug("CheckInitialise-Camera", $"Set GExNotImplemented");
             base.InitialiseTest();
         }
         public override void CreateDevice()
@@ -605,7 +605,7 @@ namespace ConformU
                         try
                         {
                             LogCallToDriver("ConformanceCheck", "About to set BinX");
-                            camera.BinX = (short)lBinX;
+                            TimeFuncNoParams("BinX Write", () => camera.BinX = (short)lBinX);
                             binXSetOk = true;
                         }
                         catch (Exception ex)
@@ -618,7 +618,7 @@ namespace ConformU
                         try
                         {
                             LogCallToDriver("ConformanceCheck", "About to set BinY");
-                            camera.BinY = (short)lBinY;
+                            TimeFuncNoParams("BinY Write", () => camera.BinY = (short)lBinY);
 
                             if (binXSetOk)
                                 LogOk("BinXY Write", $"Successfully set asymmetric XY binning: {lBinX} x {lBinY}");
@@ -642,7 +642,7 @@ namespace ConformU
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to set BinX");
-                        camera.BinX = (short)lBinX;
+                        TimeFuncNoParams("BinX Write", () => camera.BinX = (short)lBinX);
                         binXSetOk = true;
                     }
                     catch (Exception ex)
@@ -655,7 +655,7 @@ namespace ConformU
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to set BinY");
-                        camera.BinY = (short)lBinX;
+                        TimeFuncNoParams("BinY Write", () => camera.BinY = (short)lBinX);
                         if (binXSetOk)
                             LogOk("BinXY Write", $"Successfully set symmetric XY binning: {lBinX} x {lBinX}");
                         else
@@ -1580,7 +1580,7 @@ namespace ConformU
                     case CamPropertyType.CameraState:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CameraState");
-                            returnValue = camera.CameraState;
+                            returnValue = TimeFuncNoParams(pName, () => camera.CameraState);
                             break;
                         }
 
@@ -1605,42 +1605,45 @@ namespace ConformU
 
             try
             {
-                switch (pType)
+                TimeMethodNoParams(pName, () =>
                 {
-                    case CamPropertyType.BayerOffsetX:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get BayerOffsetX");
-                            returnValue = camera.BayerOffsetX;
-                            break;
-                        }
+                    switch (pType)
+                    {
+                        case CamPropertyType.BayerOffsetX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get BayerOffsetX");
+                                returnValue = camera.BayerOffsetX;
+                                break;
+                            }
 
-                    case CamPropertyType.BayerOffsetY:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get BayerOffsetY");
-                            returnValue = camera.BayerOffsetY;
-                            break;
-                        }
+                        case CamPropertyType.BayerOffsetY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get BayerOffsetY");
+                                returnValue = camera.BayerOffsetY;
+                                break;
+                            }
 
-                    case CamPropertyType.PercentCompleted:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get PercentCompleted");
-                            returnValue = camera.PercentCompleted;
-                            break;
-                        }
+                        case CamPropertyType.PercentCompleted:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get PercentCompleted");
+                                returnValue = camera.PercentCompleted;
+                                break;
+                            }
 
-                    case CamPropertyType.ReadoutMode:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get ReadoutMode");
-                            returnValue = camera.ReadoutMode;
-                            break;
-                        }
+                        case CamPropertyType.ReadoutMode:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get ReadoutMode");
+                                returnValue = camera.ReadoutMode;
+                                break;
+                            }
 
-                    default:
-                        {
-                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
-                            break;
-                        }
-                }
+                        default:
+                            {
+                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
+                                break;
+                            }
+                    }
+                });
                 // Successfully retrieved a value
                 switch (returnValue)
                 {
@@ -1718,98 +1721,101 @@ namespace ConformU
 
             try
             {
-                switch (pType)
+                TimeMethodNoParams(pName, () =>
                 {
-                    case CamPropertyType.BinX:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get BinX");
-                            returnValue = Convert.ToInt32(camera.BinX);
-                            break;
-                        }
+                    switch (pType)
+                    {
+                        case CamPropertyType.BinX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get BinX");
+                                returnValue = Convert.ToInt32(camera.BinX);
+                                break;
+                            }
 
-                    case CamPropertyType.BinY:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get BinY");
-                            returnValue = Convert.ToInt32(camera.BinY);
-                            break;
-                        }
+                        case CamPropertyType.BinY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get BinY");
+                                returnValue = Convert.ToInt32(camera.BinY);
+                                break;
+                            }
 
-                    case CamPropertyType.CameraState:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get CameraState");
-                            returnValue = (int)camera.CameraState;
-                            break;
-                        }
+                        case CamPropertyType.CameraState:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get CameraState");
+                                returnValue = (int)camera.CameraState;
+                                break;
+                            }
 
-                    case CamPropertyType.CameraXSize:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get CameraXSize");
-                            returnValue = camera.CameraXSize;
-                            break;
-                        }
+                        case CamPropertyType.CameraXSize:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get CameraXSize");
+                                returnValue = camera.CameraXSize;
+                                break;
+                            }
 
-                    case CamPropertyType.CameraYSize:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get CameraYSize");
-                            returnValue = camera.CameraYSize;
-                            break;
-                        }
+                        case CamPropertyType.CameraYSize:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get CameraYSize");
+                                returnValue = camera.CameraYSize;
+                                break;
+                            }
 
-                    case CamPropertyType.MaxAdu:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get MaxADU");
-                            returnValue = camera.MaxADU;
-                            break;
-                        }
+                        case CamPropertyType.MaxAdu:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get MaxADU");
+                                returnValue = camera.MaxADU;
+                                break;
+                            }
 
-                    case CamPropertyType.MaxBinX:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get MaxBinX");
-                            returnValue = camera.MaxBinX;
-                            break;
-                        }
+                        case CamPropertyType.MaxBinX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get MaxBinX");
+                                returnValue = camera.MaxBinX;
+                                break;
+                            }
 
-                    case CamPropertyType.MaxBinY:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get MaxBinY");
-                            returnValue = camera.MaxBinY;
-                            break;
-                        }
+                        case CamPropertyType.MaxBinY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get MaxBinY");
+                                returnValue = camera.MaxBinY;
+                                break;
+                            }
 
-                    case CamPropertyType.NumX:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get NumX");
-                            returnValue = camera.NumX;
-                            break;
-                        }
+                        case CamPropertyType.NumX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get NumX");
+                                returnValue = camera.NumX;
+                                break;
+                            }
 
-                    case CamPropertyType.NumY:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get NumY");
-                            returnValue = camera.NumY;
-                            break;
-                        }
+                        case CamPropertyType.NumY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get NumY");
+                                returnValue = camera.NumY;
+                                break;
+                            }
 
-                    case CamPropertyType.StartX:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get StartX");
-                            returnValue = camera.StartX;
-                            break;
-                        }
+                        case CamPropertyType.StartX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get StartX");
+                                returnValue = camera.StartX;
+                                break;
+                            }
 
-                    case CamPropertyType.StartY:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get StartY");
-                            returnValue = camera.StartY;
-                            break;
-                        }
+                        case CamPropertyType.StartY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get StartY");
+                                returnValue = camera.StartY;
+                                break;
+                            }
 
-                    default:
-                        {
-                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
-                            break;
-                        }
-                }
+                        default:
+                            {
+                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
+                                break;
+                            }
+                    }
+                });
 
                 // Successfully retrieved a value so test it
                 if (returnValue < pMin)
@@ -1858,98 +1864,101 @@ namespace ConformU
 
             try
             {
-                switch (pType)
+                TimeMethodNoParams(pName, () =>
                 {
-                    case CamPropertyType.CcdTemperature:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get CCDTemperature");
-                            returnValue = camera.CCDTemperature;
-                            break;
-                        }
+                    switch (pType)
+                    {
+                        case CamPropertyType.CcdTemperature:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get CCDTemperature");
+                                returnValue = camera.CCDTemperature;
+                                break;
+                            }
 
-                    case CamPropertyType.CoolerPower:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get CoolerPower");
-                            returnValue = camera.CoolerPower;
-                            break;
-                        }
+                        case CamPropertyType.CoolerPower:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get CoolerPower");
+                                returnValue = camera.CoolerPower;
+                                break;
+                            }
 
-                    case CamPropertyType.ElectronsPerAdu:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get ElectronsPerADU");
-                            returnValue = camera.ElectronsPerADU;
-                            break;
-                        }
+                        case CamPropertyType.ElectronsPerAdu:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get ElectronsPerADU");
+                                returnValue = camera.ElectronsPerADU;
+                                break;
+                            }
 
-                    case CamPropertyType.FullWellCapacity:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get FullWellCapacity");
-                            returnValue = camera.FullWellCapacity;
-                            break;
-                        }
+                        case CamPropertyType.FullWellCapacity:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get FullWellCapacity");
+                                returnValue = camera.FullWellCapacity;
+                                break;
+                            }
 
-                    case CamPropertyType.HeatSinkTemperature:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get HeatSinkTemperature");
-                            returnValue = camera.HeatSinkTemperature;
-                            break;
-                        }
+                        case CamPropertyType.HeatSinkTemperature:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get HeatSinkTemperature");
+                                returnValue = camera.HeatSinkTemperature;
+                                break;
+                            }
 
-                    case CamPropertyType.PixelSizeX:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get PixelSizeX");
-                            returnValue = camera.PixelSizeX;
-                            break;
-                        }
+                        case CamPropertyType.PixelSizeX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get PixelSizeX");
+                                returnValue = camera.PixelSizeX;
+                                break;
+                            }
 
-                    case CamPropertyType.PixelSizeY:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get PixelSizeY");
-                            returnValue = camera.PixelSizeY;
-                            break;
-                        }
+                        case CamPropertyType.PixelSizeY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get PixelSizeY");
+                                returnValue = camera.PixelSizeY;
+                                break;
+                            }
 
-                    case CamPropertyType.SetCcdTemperature:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get SetCCDTemperature");
-                            returnValue = camera.SetCCDTemperature;
-                            break;
-                        }
+                        case CamPropertyType.SetCcdTemperature:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get SetCCDTemperature");
+                                returnValue = camera.SetCCDTemperature;
+                                break;
+                            }
 
-                    case CamPropertyType.ExposureMax:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get ExposureMax");
-                            returnValue = camera.ExposureMax;
-                            break;
-                        }
+                        case CamPropertyType.ExposureMax:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get ExposureMax");
+                                returnValue = camera.ExposureMax;
+                                break;
+                            }
 
-                    case CamPropertyType.ExposureMin:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get ExposureMin");
-                            returnValue = camera.ExposureMin;
-                            break;
-                        }
+                        case CamPropertyType.ExposureMin:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get ExposureMin");
+                                returnValue = camera.ExposureMin;
+                                break;
+                            }
 
-                    case CamPropertyType.ExposureResolution:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get ExposureResolution");
-                            returnValue = camera.ExposureResolution;
-                            break;
-                        }
+                        case CamPropertyType.ExposureResolution:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get ExposureResolution");
+                                returnValue = camera.ExposureResolution;
+                                break;
+                            }
 
-                    case CamPropertyType.SubExposureDuration:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get SubExposureDuration");
-                            returnValue = camera.SubExposureDuration;
-                            break;
-                        }
+                        case CamPropertyType.SubExposureDuration:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get SubExposureDuration");
+                                returnValue = camera.SubExposureDuration;
+                                break;
+                            }
 
-                    default:
-                        {
-                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
-                            break;
-                        }
-                }
+                        default:
+                            {
+                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
+                                break;
+                            }
+                    }
+                });
                 // Successfully retrieved a value
                 switch (returnValue)
                 {
@@ -1987,50 +1996,54 @@ namespace ConformU
             try
             {
                 returnValue = false;
-                switch (pType)
+                TimeMethodNoParams(pName, () =>
                 {
-                    case CamPropertyType.CoolerOn:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get CoolerOn");
-                            returnValue = camera.CoolerOn;
-                            break;
-                        }
+                    switch (pType)
+                    {
+                        case CamPropertyType.CoolerOn:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get CoolerOn");
+                                returnValue = camera.CoolerOn;
+                                break;
+                            }
 
-                    case CamPropertyType.HasShutter:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get HasShutter");
-                            returnValue = camera.HasShutter;
-                            break;
-                        }
+                        case CamPropertyType.HasShutter:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get HasShutter");
+                                returnValue = camera.HasShutter;
+                                break;
+                            }
 
-                    case CamPropertyType.ImageReady:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get ImageReady");
-                            returnValue = camera.ImageReady;
-                            break;
-                        }
+                        case CamPropertyType.ImageReady:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get ImageReady");
+                                returnValue = camera.ImageReady;
+                                break;
+                            }
 
-                    case CamPropertyType.IsPulseGuiding:
-                        {
-                            mIsPulseGuidingSupported = false; LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
-                            returnValue = camera.IsPulseGuiding;
-                            mIsPulseGuidingSupported = true; // Command works properly and doesn't cause a not implemented exception
-                            break;
-                        }
+                        case CamPropertyType.IsPulseGuiding:
+                            {
+                                mIsPulseGuidingSupported = false; LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
+                                returnValue = camera.IsPulseGuiding;
+                                mIsPulseGuidingSupported = true; // Command works properly and doesn't cause a not implemented exception
+                                break;
+                            }
 
-                    case CamPropertyType.FastReadout:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get FastReadout");
-                            returnValue = camera.FastReadout;
-                            break;
-                        }
+                        case CamPropertyType.FastReadout:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get FastReadout");
+                                returnValue = camera.FastReadout;
+                                break;
+                            }
 
-                    default:
-                        {
-                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
-                            break;
-                        }
-                }
+                        default:
+                            {
+                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
+                                break;
+                            }
+                    }
+                });
+
                 // Successfully retrieved a value
                 LogOk(pName, returnValue.ToString());
             }
@@ -2046,28 +2059,32 @@ namespace ConformU
             string returnValue = "";
             try
             {
-                switch (pType)
+                TimeMethodNoParams(pName, () =>
                 {
-                    case CamPropertyType.Description:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get Description");
-                            returnValue = camera.Description;
-                            break;
-                        }
+                    switch (pType)
+                    {
+                        case CamPropertyType.Description:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get Description");
+                                returnValue = camera.Description;
+                                break;
+                            }
 
-                    case CamPropertyType.SensorName:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get SensorName");
-                            returnValue = camera.SensorName;
-                            break;
-                        }
+                        case CamPropertyType.SensorName:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get SensorName");
+                                returnValue = camera.SensorName;
+                                break;
+                            }
 
-                    default:
-                        {
-                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
-                            break;
-                        }
-                }
+                        default:
+                            {
+                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
+                                break;
+                            }
+                    }
+                });
+
                 // Successfully retrieved a value
                 switch (returnValue)
                 {
@@ -2102,36 +2119,41 @@ namespace ConformU
 
             try // OK value first
             {
-                switch (pType)
+                TimeMethodNoParams($"{pProperty} write", () =>
                 {
-                    case CamPropertyType.NumX:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to set NumX");
-                            camera.NumX = pTestOk;
-                            break;
-                        }
 
-                    case CamPropertyType.NumY:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to set NumY");
-                            camera.NumY = pTestOk;
-                            break;
-                        }
+                    switch (pType)
+                    {
+                        case CamPropertyType.NumX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to set NumX");
+                                camera.NumX = pTestOk;
+                                break;
+                            }
 
-                    case CamPropertyType.StartX:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to set StartX");
-                            camera.StartX = pTestOk;
-                            break;
-                        }
+                        case CamPropertyType.NumY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to set NumY");
+                                camera.NumY = pTestOk;
+                                break;
+                            }
 
-                    case CamPropertyType.StartY:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to set StartY");
-                            camera.StartY = pTestOk;
-                            break;
-                        }
-                }
+                        case CamPropertyType.StartX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to set StartX");
+                                camera.StartX = pTestOk;
+                                break;
+                            }
+
+                        case CamPropertyType.StartY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to set StartY");
+                                camera.StartY = pTestOk;
+                                break;
+                            }
+                    }
+                });
+
                 LogOk($"{pProperty} write", $"Successfully wrote {pTestOk}");
             }
             catch (Exception ex)
@@ -2160,7 +2182,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to call AbortExposure");
-                    camera.AbortExposure();
+                    TimeMethodNoParams("AbortExposure", camera.AbortExposure);
                     if (mCanAbortExposure)
                         LogOk("AbortExposure", "No error returned when camera is already idle");
                     else
@@ -2189,13 +2211,20 @@ namespace ConformU
             {
                 try
                 {
-                    CameraPulseGuideTest(GuideDirection.North); if (cancellationToken.IsCancellationRequested)
+                    CameraPulseGuideTest(GuideDirection.North);
+                    if (cancellationToken.IsCancellationRequested)
                         return;
-                    CameraPulseGuideTest(GuideDirection.South); if (cancellationToken.IsCancellationRequested)
+
+                    CameraPulseGuideTest(GuideDirection.South);
+                    if (cancellationToken.IsCancellationRequested)
                         return;
-                    CameraPulseGuideTest(GuideDirection.East); if (cancellationToken.IsCancellationRequested)
+
+                    CameraPulseGuideTest(GuideDirection.East);
+                    if (cancellationToken.IsCancellationRequested)
                         return;
-                    CameraPulseGuideTest(GuideDirection.West); if (cancellationToken.IsCancellationRequested)
+
+                    CameraPulseGuideTest(GuideDirection.West);
+                    if (cancellationToken.IsCancellationRequested)
                         return;
                 }
                 catch (Exception ex)
@@ -2240,7 +2269,7 @@ namespace ConformU
                 {
                     LogCallToDriver("ConformanceCheck", "About to call StopExposure");
                     SetAction("Calling StopExposure()");
-                    camera.StopExposure();
+                    TimeMethodNoParams("StopExposure", camera.StopExposure);
                     if (mCanStopExposure)
                         LogOk("StopExposure", "No error returned when camera is already idle");
                     else
@@ -2601,7 +2630,7 @@ namespace ConformU
                 {
                     try
                     {
-                        camera.StartExposure(requiredDuration, true);
+                        TimeMethodTwoParams("StartExposure", camera.StartExposure, requiredDuration, true);
 
                         // Do not respond if the task has been cancelled
                         if (!cancellationToken.IsCancellationRequested) // Task is live and has not been cancelled
@@ -3560,7 +3589,8 @@ namespace ConformU
             lStartTime = DateTime.Now;
             //SetAction("Start " + CAMERA_PULSE_DURATION / (double)1000 + " second pulse guide " + p_Direction.ToString());
             LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {pDirection}");
-            camera.PulseGuide(pDirection, CAMERA_PULSE_DURATION); // Start a 2 second pulse
+            TimeMethodTwoParams($"PulseGuide {pDirection}", camera.PulseGuide, pDirection, CAMERA_PULSE_DURATION);
+
             lEndTime = DateTime.Now;
             try
             {

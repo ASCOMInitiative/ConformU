@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using static ConformU.Globals;
@@ -35,7 +36,7 @@ namespace ConformU
         // Class not registered COM exception error number
         internal const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
 
-        private const double OPERATION_INITIATION_MAXIMUM_TIME = 1.0; // Time within which an operation initiation must complete (seconds)
+        private double targetResponseTime = 0.006; // Time within which an interface member should ideally return (seconds)
 
         #endregion
 
@@ -153,6 +154,7 @@ namespace ConformU
             tl = logger;
             this.ApplicationCancellationToken = cancellationToken;
             settings = conformConfiguration.Settings;
+            LogTiming("Timing Summary", $"The target response time is {targetResponseTime:0.000} second{(targetResponseTime == 1.0 ? "" : "s")}.");
         }
 
         private bool disposedValue = false;        // To detect redundant calls
@@ -206,7 +208,7 @@ namespace ConformU
             // InterfaceVersion - Required
             try
             {
-                switch (GetInterfaceVersion())
+                switch (TimeFuncNoParams("InterfaceVersion", () => GetInterfaceVersion()))
                 {
                     case < 1:
                         {
@@ -221,13 +223,11 @@ namespace ConformU
                             break;
                         }
                 }
-
             }
             catch (Exception ex)
             {
                 HandleException("InterfaceVersion", MemberType.Property, Required.Mandatory, ex, "");
             }
-
             if (ApplicationCancellationToken.IsCancellationRequested)
                 return;
 
@@ -237,7 +237,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Connected", "About to get property Connected");
-                    bool connected = baseClassDevice.Connected;
+                    bool connected = TimeFuncNoParams("Connected", () => baseClassDevice.Connected);
                     LogOk("Connected", connected.ToString());
                 }
                 catch (Exception ex)
@@ -255,7 +255,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Description", "About to get property Description");
-                    string description = baseClassDevice.Description;
+                    string description = TimeFuncNoParams("Description", () => baseClassDevice.Description);
                     switch (description ?? "")
                     {
                         case "":
@@ -295,7 +295,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DriverInfo", "About to get property DriverInfo");
-                    string driverInfo = baseClassDevice.DriverInfo;
+                    string driverInfo = TimeFuncNoParams("DriverInfo", () => baseClassDevice.DriverInfo);
                     switch (driverInfo ?? "")
                     {
                         case "":
@@ -326,7 +326,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DriverVersion", "About to get property DriverVersion");
-                    string driverVersion = baseClassDevice.DriverVersion;
+                    string driverVersion = TimeFuncNoParams("DriverVersion", () => baseClassDevice.DriverVersion);
                     switch (driverVersion ?? "")
                     {
                         case "":
@@ -362,7 +362,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Name", "About to get property Name");
-                    string name = baseClassDevice.Name;
+                    string name = TimeFuncNoParams("Name", () => baseClassDevice.Name);
                     switch (name ?? "")
                     {
                         case "":
@@ -395,7 +395,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("SupportedActions", "About to call method SupportedActions");
-                IList supportedActions = (IList)baseClassDevice.SupportedActions;
+                IList supportedActions = TimeFuncNoParams("SupportedActions", () => (IList)baseClassDevice.SupportedActions);
                 if (supportedActions.Count == 0)
                 {
                     LogOk("SupportedActions", "Driver returned an empty action list");
@@ -520,7 +520,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DeviceState", "About to get property DeviceState");
-                    List<StateValue> deviceState = baseClassDevice.DeviceState;
+                    List<StateValue> deviceState = TimeFuncNoParams("DeviceState", () => baseClassDevice.DeviceState);
 
                     int numberOfItems = 0;
                     foreach (var item in deviceState)
@@ -761,7 +761,7 @@ namespace ConformU
                     // Call the Connect method and wait for the device to connect
                     SetAction("Waiting for the Connect method to complete");
                     LogCallToDriver("Connect", "About to call Connect() method");
-                    TimeMethod("Connect", () => baseClassDevice.Connect());
+                    TimeMethodNoParams("Connect", () => baseClassDevice.Connect());
                     LogCallToDriver("Connect", "About to get Connecting property repeatedly");
                     WaitWhile("Connecting to device", () => baseClassDevice.Connecting, SLEEP_TIME, settings.ConnectDisconnectTimeout);
                 }
@@ -820,7 +820,7 @@ namespace ConformU
                     // Call the Connect method and wait for the device to connect
                     SetAction("Waiting for the Disconnect method to complete");
                     LogCallToDriver("Disconnect", "About to call Disconnect() method");
-                    TimeMethod("Disconnect", () => baseClassDevice.Disconnect());
+                    TimeMethodNoParams("Disconnect", () => baseClassDevice.Disconnect());
                     LogCallToDriver("Disconnect", "About to get Connecting property repeatedly");
                     WaitWhile("Disconnecting from device", () => baseClassDevice.Connecting, SLEEP_TIME, settings.ConnectDisconnectTimeout);
                 }
@@ -1299,6 +1299,12 @@ namespace ConformU
             tl?.LogMessage(test, MessageLevel.Issue, message);
         }
 
+        internal void LogTiming(string test, string message)
+        {
+            conformResults.Timings.Add(new KeyValuePair<string, string>(test, message));
+            // tl?.LogMessage(test, MessageLevel.Info, message);
+        }
+
         internal void LogError(string test, string message)
         {
             conformResults.Errors.Add(new System.Collections.Generic.KeyValuePair<string, string>(test, message));
@@ -1697,12 +1703,149 @@ namespace ConformU
                 LogTestAndMessage(test, memberName);
         }
 
-        protected void TimeMethod(string methodName, Action method)
+        #endregion
+
+        #region Timing methods and functions
+
+        /// <summary>
+        /// Execute an interface method that has no parameters and report the timing
+        /// </summary>
+        /// <param name="methodName">Name of the method within the Action</param>
+        /// <param name="method">Action representing the method being called</param>
+        protected void TimeMethodNoParams(string methodName, Action method)
         {
+            // Time the method call
             Stopwatch sw = Stopwatch.StartNew();
             method();
-            if (sw.Elapsed.TotalSeconds > OPERATION_INITIATION_MAXIMUM_TIME)
-                LogIssue(methodName, $"Operation initiation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is more than the configured maximum: {OPERATION_INITIATION_MAXIMUM_TIME:0.0} seconds.");
+            sw.Stop();
+
+            // Report the timing outcome
+            ReportTiming(methodName, sw.Elapsed.TotalSeconds);
+        }
+
+        /// <summary>
+        /// Execute an interface method that has one parameter and report the timing
+        /// </summary>
+        /// <typeparam name="T">Parameter's type</typeparam>
+        /// <param name="methodName">Name of the method within the Action</param>
+        /// <param name="method">Action representing the method being called</param>
+        /// <param name="param">Method's parameter</param>
+        protected void TimeMethodOneParam<T>(string methodName, Action<T> method, T param)
+        {
+            // Time the method call
+            Stopwatch sw = Stopwatch.StartNew();
+            method(param);
+            sw.Stop();
+
+            // Report the timing outcome
+            ReportTiming(methodName, sw.Elapsed.TotalSeconds);
+        }
+
+        /// <summary>
+        /// Execute an interface method that has two parameters and report the timing
+        /// </summary>
+        /// <typeparam name="T1">First parameter's type</typeparam>
+        /// <typeparam name="T2">Second parameter's type</typeparam>
+        /// <param name="methodName">Name of the method within the Action</param>
+        /// <param name="method">Action representing the method being called</param>
+        /// <param name="param1">Method's first parameter</param>
+        /// <param name="param2">Method's second parameter</param>
+        protected void TimeMethodTwoParams<T1, T2>(string methodName, Action<T1, T2> method, T1 param1, T2 param2)
+        {
+            // Time the method call
+            Stopwatch sw = Stopwatch.StartNew();
+            method(param1, param2);
+            sw.Stop();
+
+            // Report the timing outcome
+            ReportTiming(methodName, sw.Elapsed.TotalSeconds);
+        }
+
+        /// <summary>
+        /// Execute an interface property or function that has no parameters and report the timing
+        /// </summary>
+        /// <typeparam name="TResult">The property or function's return type</typeparam>
+        /// <param name="methodName">Name of the property or function within the Func</param>
+        /// <param name="function">Func<TResult> representing the property or function being called</param>
+        /// <returns>The property or function result.</returns>
+        internal TResult TimeFuncNoParams<TResult>(string methodName, Func<TResult> function)
+        {
+            // Time the method call
+            Stopwatch sw = Stopwatch.StartNew();
+            TResult response = function();
+            sw.Stop();
+
+            // Report the timing outcome
+            ReportTiming(methodName, sw.Elapsed.TotalSeconds);
+
+            // Return the device response
+            return response;
+        }
+
+        /// <summary>
+        /// Execute an interface property or function that has one parameter and report the timing
+        /// </summary>
+        /// <typeparam name="T1">First parameter's type</typeparam>
+        /// <typeparam name="TResult">The property or function's return type</typeparam>
+        /// <param name="methodName">Name of the property or function within the Func</param>
+        /// <param name="function">Func<TResult> representing the property or function being called</param>
+        /// <param name="param1">Method's first parameter</param>
+        /// <returns>The property or function result.</returns>
+        internal TResult TimeFuncOneParam<T1, TResult>(string methodName, Func<T1, TResult> function, T1 param1)
+        {
+            // Time the method call
+            Stopwatch sw = Stopwatch.StartNew();
+            TResult response = function(param1);
+            sw.Stop();
+
+            // Report the timing outcome
+            ReportTiming(methodName, sw.Elapsed.TotalSeconds);
+
+            // Return the device response
+            return response;
+        }
+
+        /// <summary>
+        /// Execute an interface property or function that has two parameters and report the timing
+        /// </summary>
+        /// <typeparam name="T1">First parameter's type</typeparam>
+        /// <typeparam name="T2">Second parameter's type</typeparam>
+        /// <typeparam name="TResult">The property or function's return type</typeparam>
+        /// <param name="methodName">Name of the property or function within the Func</param>
+        /// <param name="function">Func<TResult> representing the property or function being called</param>
+        /// <param name="param1">Method's first parameter</param>
+        /// <param name="param2">Method's second parameter</param>
+        /// <returns>The property or function result.</returns>
+        internal TResult TimeFuncTwoParams<T1, T2, TResult>(string methodName, Func<T1, T2, TResult> function, T1 param1, T2 param2)
+        {
+            // Time the method call
+            Stopwatch sw = Stopwatch.StartNew();
+            TResult response = function(param1, param2);
+            sw.Stop();
+
+            // Report the timing outcome
+            ReportTiming(methodName, sw.Elapsed.TotalSeconds);
+
+            // Return the device response
+            return response;
+        }
+
+        /// <summary>
+        /// Report the timing test outcome
+        /// </summary>
+        /// <param name="methodName">Name of the property or function within the Func</param>
+        /// <param name="elapsedTime">Elapsed time running the member (seconds)</param>
+        private void ReportTiming(string methodName, double elapsedTime)
+        {
+            // Determine whether the member run within the target time
+            if (elapsedTime <= targetResponseTime) // Member completed within the target time
+                LogTiming(methodName, $"{elapsedTime:0.000} seconds.");
+            else // Member took longer than the target time
+            {
+                LogTiming(methodName, $"{elapsedTime:0.000} seconds - outside the expected range.");
+                conformResults.TimingIssuesCount++;
+            }
+
         }
 
         #endregion
