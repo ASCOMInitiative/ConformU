@@ -312,11 +312,14 @@ namespace ConformU
                             }
 
                             // Display completion or "test cancelled" message
-                            if (!cancellationToken.IsCancellationRequested)
+                            if (!cancellationToken.IsCancellationRequested | (numberOfTestCycles > 1)) // Test ran to completion or it is a stress test
                             {
-                                TL.LogMessage("Conformance test has finished", MessageLevel.TestOnly, "");
+                                if (numberOfTestCycles > 1)
+                                    TL.LogMessage("Stress test has finished", MessageLevel.TestOnly, "");
+                                else
+                                    TL.LogMessage("Conformance test has finished", MessageLevel.TestOnly, "");
                             }
-                            else
+                            else // Basic conformance test that was cancelled by the STOP key.
                             {
                                 TL.LogMessage("Conformance test interrupted by STOP button or to protect the device.", MessageLevel.TestOnly, "");
 
@@ -396,24 +399,26 @@ namespace ConformU
                     }
                 }
 
-                if (settings.ReportTimingSummary)
+                if (settings.ReportGoodTimings | settings.ReportBadTimings)
                 {
-                    TL.LogMessage("", MessageLevel.TestOnly, "");
-                    //TL.LogMessage("Timing Summary", MessageLevel.TestOnly, "");
-
                     // List the timing outcomes
+                    TL.LogMessage("", MessageLevel.TestOnly, "");
+                    if (numberOfTestCycles > 1) // Stress test
+                    {
+                        TL.LogMessage($"Writing {(settings.ReportGoodTimings?(settings.ReportBadTimings?"good and bad":"good"):(settings.ReportBadTimings?"bad":"no"))} timings to the log file, please wait...", MessageLevel.TestOnly, "");
+                        TL.LogMessage("", MessageLevel.TestOnly, "");
+                    }
                     foreach (KeyValuePair<string, string> kvp in conformResults.Timings)
                     {
-                        TL.LogMessage(kvp.Key, MessageLevel.TestAndMessage, kvp.Value);
+                        TL.LogMessage(kvp.Key, MessageLevel.TestAndMessage, kvp.Value, logToScreen: numberOfTestCycles == 1);
                     }
-
-                    TL.LogMessage("", MessageLevel.TestOnly, "");
+                    TL.LogMessage("", MessageLevel.TestOnly, "", logToScreen: numberOfTestCycles == 1);
 
                     // Report the high level timing outcome
                     if (conformResults.TimingIssuesCount == 0)
                         TL.LogMessage("Congratulations, all members returned within the target response time!!", MessageLevel.TestOnly, "");
                     else
-                        TL.LogMessage("One or more members took longer than the target response time.", MessageLevel.TestOnly, "");
+                        TL.LogMessage($"{conformResults.TimingIssuesCount} member{(conformResults.TimingIssuesCount == 1 ? "" : "s")} took longer than the target response time.", MessageLevel.TestOnly, "", true);
                 }
 
                 // Add a blank line to the console output

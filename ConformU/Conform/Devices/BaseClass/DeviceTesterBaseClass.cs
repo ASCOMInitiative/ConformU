@@ -154,7 +154,8 @@ namespace ConformU
             tl = logger;
             this.ApplicationCancellationToken = cancellationToken;
             settings = conformConfiguration.Settings;
-            LogTiming("Timing Summary", $"The target response time is {targetResponseTime:0.000} second{(targetResponseTime == 1.0 ? "" : "s")}.");
+            LogTiming("Timing Summary", $"The target response time is {targetResponseTime:0.000} second{(targetResponseTime == 1.0 ? "" : "s")}. " +
+                $"{(settings.ReportGoodTimings ? (settings.ReportBadTimings ? "Logging good and bad" : "Only logging good") : (settings.ReportBadTimings ? "Only logging bad" : "Not logging any"))} timings.");
         }
 
         private bool disposedValue = false;        // To detect redundant calls
@@ -1839,13 +1840,18 @@ namespace ConformU
         {
             // Determine whether the member run within the target time
             if (elapsedTime <= targetResponseTime) // Member completed within the target time
-                LogTiming(methodName, $"{elapsedTime:0.000} seconds.");
+            {
+                if (settings.ReportGoodTimings)
+                    LogTiming($"{methodName}", $"At {DateTime.Now:HH:mm:ss.fff} ==> {elapsedTime:0.000} seconds.");
+            }
             else // Member took longer than the target time
             {
-                LogTiming(methodName, $"{elapsedTime:0.000} seconds - outside the expected range.");
-                conformResults.TimingIssuesCount++;
+                if (settings.ReportBadTimings)
+                {
+                    LogTiming($"{methodName}", $"At {DateTime.Now:HH:mm:ss.fff} ==> {elapsedTime:0.000} seconds - outside the expected range.");
+                    conformResults.TimingIssuesCount++;
+                }
             }
-
         }
 
         #endregion

@@ -224,8 +224,8 @@
     /// <summary>
     /// Starts a Conform test that will run for the specified number of test cycles
     /// </summary>
-    /// <param name="numberOfTestCycles">Number of test cycles.</param>
-    private async void StartTest(int numberOfTestCycles)
+    /// <param name="testCycles">Number of test cycles.</param>
+    private async void StartTest(int testCycles)
     {
         try
         {
@@ -272,14 +272,14 @@
                         // Create a task to run the conformance test
                         conformanceTestTask = new Task(() =>
         {
-            try
-            {
-                tester.TestDevice(numberOfTestCycles);
-            }
-            catch (Exception ex)
-            {
-                _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
-            }
+    try
+    {
+            tester.TestDevice(testCycles);
+    }
+    catch (Exception ex)
+    {
+        _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
+    }
 
         }, cancelConformToken);
 
@@ -400,7 +400,16 @@
         {
             lock (screenLogLockObject)
             {
-                _conformState.ConformLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
+                // Manage the screen log to between 1,000,000 and 900,000 characters
+                int logLength = _conformState.ConformLog.Length;
+                if (logLength > 1000000)
+                {
+                    _conformState.ConformLog = _conformState.ConformLog.Substring(900000);
+                    GC.Collect();
+                }
+
+                // Add the new log message to the screen display
+                _conformState.ConformLog += $"{e.Message}\r\n";
             }
             await InvokeAsync(StateHasChanged);
             await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");

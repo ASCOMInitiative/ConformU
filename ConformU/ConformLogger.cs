@@ -52,7 +52,7 @@ namespace ConformU
         /// <param name="id"></param>
         /// <param name="logLevel"></param>
         /// <param name="message"></param>
-        public void LogMessage(string id, MessageLevel logLevel, string message)
+        public void LogMessage(string id, MessageLevel logLevel, string message, bool logToScreen = true)
         {
             string screenMessage, messageLevel;
 
@@ -106,8 +106,9 @@ namespace ConformU
             // Write the message to the log file
             base.LogMessage(id, $"{messageLevel,MESSAGE_LEVEL_WIDTH} {message}");
 
-            // Raise the MessaegLogChanged event to Write the message to the screen
-            OnMessageLogChanged(screenMessage);
+            // Raise the MessaegLogChanged event to Write the message to the screen if required
+            if (logToScreen)
+                OnMessageLogChanged(screenMessage);
         }
 
         private void OnMessageLogChanged(string message)
@@ -166,10 +167,10 @@ namespace ConformU
         public new void LogMessage(string method, string message)
         {
             // Write the message to the console
-            Console.WriteLine($"{method}{(string.IsNullOrEmpty(method)?"":" ")}{message}");
+            Console.WriteLine($"{method}{(string.IsNullOrEmpty(method) ? "" : " ")}{message}");
 
             // Write the message to the log file
-            base.LogMessage(method,message);
+            base.LogMessage(method, message);
 
             // Raise the MessaegLogChanged event to Write the message to the screen
             OnMessageLogChanged($"{method} {message}");
