@@ -50,18 +50,15 @@
         function setTitle(title) {
             document.title = title;
         }
+
         function XXscrollToBottom(ref) {
             ref.scrollTop = ref.scrollHeight;
         }
-    </script>
 
-    <script>
         function CloseDownApplication() {
             window.open("/CloseApplication");
         }
-    </script>
 
-    <script>
         IdentifyBrowser = () => {
             var sBrowser, sUsrAg = navigator.userAgent;
 
@@ -85,9 +82,7 @@
 
             return sBrowser;
         };
-    </script>
 
-    <script>
         // Return position information for a control with the supplied element ID
         GetBoundingClientRect = (elementId) => {
             let rect = null;
@@ -101,36 +96,32 @@
             return rect;
         };
 
-
         // Return size information for the browser window
         GetBoundingWindowRect = () => {
             return new DOMRect(0,
                 0,
                 window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
-                window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight)
-                ;
+                window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
         }
-    </script>
 
-    <script>
         // Listen for page resize
-        function resizeListener(dotnethelper)
-        {
-            $(window).resize(() =>
-            {
+        function resizeListener(dotnethelper) {
+            $(window).resize(() => {
                 let browserHeight = $(window).innerHeight();
                 let browserWidth = $(window).innerWidth();
-                dotnethelper.invokeMethodAsync('SetBrowserDimensions', browserWidth, browserHeight).then(() => 
-                {
+                dotnethelper.invokeMethodAsync('SetBrowserDimensions', browserWidth, browserHeight).then(() => {
                     // success, do nothing
                 }).catch(error => { console.log("Error during browser resize: " + error); });
             });
         }
-    </script>
 
-    <script>ScrollToBottom = (elementId) => { document.getElementById(elementId).scrollTop = document.getElementById(elementId).scrollHeight; };</script>
+        // Scroll to the bottom of the page
+        function ScrollToBottom(elementId) {
+            let top = document.getElementById(elementId).scrollHeight;
+            document.getElementById(elementId).scrollTop = top;
+            return top;
+        };
 
-    <script>
         // Get the element's scroll position
         function getScrollPosition(elementId) {
             let element = document.getElementById(elementId);
@@ -143,6 +134,7 @@
             };
         }
 
+        // Set element.top for a scrollable element
         function setScrollTop(elementId, scrollTop) {
             let element = document.getElementById(elementId);
             element.scrollTop = scrollTop;

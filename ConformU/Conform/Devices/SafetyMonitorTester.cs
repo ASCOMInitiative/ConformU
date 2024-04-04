@@ -218,7 +218,7 @@ namespace ConformU
                     case RequiredProperty.PropIsSafe:
                         {
                             LogCallToDriver("IsSafe", "About to get IsSafe property");
-                            mIsSafe = TimeFuncNoParams("IsSafe", () => mSafetyMonitor.IsSafe);
+                            mIsSafe = TimeFuncNoParams("IsSafe", () => mSafetyMonitor.IsSafe,TargetTime.Status);
                             LogOk(pName, mIsSafe.ToString());
                             break;
                         }

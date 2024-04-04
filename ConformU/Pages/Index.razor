@@ -161,24 +161,12 @@
     {
         if (firstRender)
         {
-            // Register the navigation manager callback
-            navigationManagerRegistration = _navigationManager.RegisterLocationChangingHandler(LocationChangingHandler);
-
             // Subscribe to the OnResized event. This will do work when the browser is resized.
             _listener.Init(JS);
             _listener.OnResize += WindowResized;
             await ResizeLogWindow();
 
-            // try
-            // {
-            //     ScrollPosition scrollPosition = await JS.InvokeAsync<ScrollPosition>("getScrollPosition", "ConformLog");
-            //     Console.WriteLine($"Before setting scroll top - Scroll positions Top: {scrollPosition.ScrollTop} Left: {scrollPosition.ScrollLeft} Height: {scrollPosition.ScrollHeight} Client Height: {scrollPosition.ClientHeight}");
-            // }
-            // catch (Exception ex)
-            // {
-            //     Console.WriteLine($"{ex}");
-            // }
-
+            // Scroll the log window to the bottom of its contents.
             try
             {
                 await JS.InvokeVoidAsync("setScrollTop", "ConformLog", _conformState.ConformLogScrollTop.ToString());
@@ -187,38 +175,13 @@
             {
                 Console.WriteLine($"OnInitialized-setScrollTop: {ex}");
             }
-
-            // try
-            // {
-            //     ScrollPosition scrollPosition = await JS.InvokeAsync<ScrollPosition>("getScrollPosition", "ConformLog");
-            //     Console.WriteLine($"After setting scroll top - Scroll positions Top: {scrollPosition.ScrollTop} Left: {scrollPosition.ScrollLeft} Height: {scrollPosition.ScrollHeight} Client Height: {scrollPosition.ClientHeight}");
-            // }
-            // catch (Exception ex)
-            // {
-            //     Console.WriteLine($"{ex}");
-            // }
-
         }
     }
 
-    private async ValueTask LocationChangingHandler(LocationChangingContext arg)
+    [JSInvokable]
+    public static void PageAboutToBeReloaded()
     {
-        //Console.WriteLine($"Location is changing...#{arg.TargetLocation}#{arg.HistoryEntryState}#{_navigationManager.BaseUri}#{string.IsNullOrEmpty(arg.TargetLocation.Substring(_navigationManager.BaseUri.Length))}");
-        try
-        {
-            if (!string.IsNullOrEmpty(arg.TargetLocation.Substring(_navigationManager.BaseUri.Length))) // Navigating away from the root page
-            {
-                ScrollPosition scrollPosition = await JS.InvokeAsync<ScrollPosition>("getScrollPosition", "ConformLog");
-                //Console.WriteLine($"Navigating away from root - Scroll positions Top: {scrollPosition.ScrollTop} Left: {scrollPosition.ScrollLeft} Height: {scrollPosition.ScrollHeight} Client Height: {scrollPosition.ClientHeight}");
-                _conformState.ConformLogScrollTop = scrollPosition.ScrollTop;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"LocationChangingHandler-getScrollPosition: {ex}");
-        }
-
-        return;
+        Console.WriteLine("##### Page is being be refreshed #####");
     }
 
     /// <summary>
@@ -271,17 +234,17 @@
 
                         // Create a task to run the conformance test
                         conformanceTestTask = new Task(() =>
+    {
+        try
         {
-    try
-    {
             tester.TestDevice(testCycles);
-    }
-    catch (Exception ex)
-    {
-        _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
-    }
+        }
+        catch (Exception ex)
+        {
+            _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
+        }
 
-        }, cancelConformToken);
+    }, cancelConformToken);
 
                         // Start the conformance test task
                         _conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
@@ -320,7 +283,6 @@
             try
             {
                 await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
-
             }
             catch { }
         }
@@ -412,7 +374,12 @@
                 _conformState.ConformLog += $"{e.Message}\r\n";
             }
             await InvokeAsync(StateHasChanged);
-            await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
+
+            // Scroll to the bottom of the window and return the current window 'top' value.
+            int top = await JS.InvokeAsync<int>("ScrollToBottom", "ConformLog");
+
+            // Save the current top so that the scroll position can be restored after a browser page refresh or navigation to a different page.
+            _conformState.ConformLogScrollTop = top;
         }
         catch { }
     }
