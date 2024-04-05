@@ -90,7 +90,7 @@ namespace ConformU
 
         internal enum TargetTime
         {
-            Status,
+            Fast,
             Standard,
             Extended
         }
@@ -221,7 +221,7 @@ namespace ConformU
             // InterfaceVersion - Required
             try
             {
-                switch (TimeFuncNoParams("InterfaceVersion", () => GetInterfaceVersion(), TargetTime.Status))
+                switch (TimeFuncNoParams("InterfaceVersion", () => GetInterfaceVersion(), TargetTime.Fast))
                 {
                     case < 1:
                         {
@@ -250,7 +250,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Connected", "About to get property Connected");
-                    bool connected = TimeFuncNoParams("Connected", () => baseClassDevice.Connected, TargetTime.Status);
+                    bool connected = TimeFuncNoParams("Connected", () => baseClassDevice.Connected, TargetTime.Fast);
                     LogOk("Connected", connected.ToString());
                 }
                 catch (Exception ex)
@@ -268,7 +268,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Description", "About to get property Description");
-                    string description = TimeFuncNoParams("Description", () => baseClassDevice.Description, TargetTime.Status);
+                    string description = TimeFuncNoParams("Description", () => baseClassDevice.Description, TargetTime.Fast);
                     switch (description ?? "")
                     {
                         case "":
@@ -308,7 +308,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DriverInfo", "About to get property DriverInfo");
-                    string driverInfo = TimeFuncNoParams("DriverInfo", () => baseClassDevice.DriverInfo, TargetTime.Status);
+                    string driverInfo = TimeFuncNoParams("DriverInfo", () => baseClassDevice.DriverInfo, TargetTime.Fast);
                     switch (driverInfo ?? "")
                     {
                         case "":
@@ -339,7 +339,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DriverVersion", "About to get property DriverVersion");
-                    string driverVersion = TimeFuncNoParams("DriverVersion", () => baseClassDevice.DriverVersion, TargetTime.Status);
+                    string driverVersion = TimeFuncNoParams("DriverVersion", () => baseClassDevice.DriverVersion, TargetTime.Fast);
                     switch (driverVersion ?? "")
                     {
                         case "":
@@ -375,7 +375,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Name", "About to get property Name");
-                    string name = TimeFuncNoParams("Name", () => baseClassDevice.Name, TargetTime.Status);
+                    string name = TimeFuncNoParams("Name", () => baseClassDevice.Name, TargetTime.Fast);
                     switch (name ?? "")
                     {
                         case "":
@@ -408,7 +408,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("SupportedActions", "About to call method SupportedActions");
-                IList supportedActions = TimeFuncNoParams("SupportedActions", () => (IList)baseClassDevice.SupportedActions, TargetTime.Status);
+                IList supportedActions = TimeFuncNoParams("SupportedActions", () => (IList)baseClassDevice.SupportedActions, TargetTime.Fast);
                 if (supportedActions.Count == 0)
                 {
                     LogOk("SupportedActions", "Driver returned an empty action list");
@@ -533,7 +533,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DeviceState", "About to get property DeviceState");
-                    List<StateValue> deviceState = TimeFuncNoParams("DeviceState", () => baseClassDevice.DeviceState, TargetTime.Status);
+                    List<StateValue> deviceState = TimeFuncNoParams("DeviceState", () => baseClassDevice.DeviceState, TargetTime.Fast);
 
                     int numberOfItems = 0;
                     foreach (var item in deviceState)
@@ -1852,7 +1852,7 @@ namespace ConformU
         {
             switch (targetTime)
             {
-                case TargetTime.Status:
+                case TargetTime.Fast:
                     ReportTiming(methodName, elapsedTime, "FAST", statusTargetResponseTime);
                     break;
 
@@ -1875,7 +1875,7 @@ namespace ConformU
             if (elapsedTime <= targetTime) // Member completed within the target time
             {
                 if (settings.ReportGoodTimings)
-                    LogTiming($"{methodName}", $"At {DateTime.Now:HH:mm:ss.fff} {methodName,-24} {elapsedTime:0.000} seconds. {((char)0x2713)}"); // 0x2713 is the UTF16 tick character.
+                    LogTiming($"{methodName}", $"At {DateTime.Now:HH:mm:ss.fff} {methodName,-24} {elapsedTime:0.000} seconds. {((char)0x2713)} ({targetName})"); // 0x2713 is the UTF16 tick character.
             }
             else // Member took longer than the target time
             {

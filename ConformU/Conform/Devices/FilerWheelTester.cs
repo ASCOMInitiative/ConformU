@@ -186,19 +186,20 @@ namespace ConformU
 
         public override void CheckProperties()
         {
-            int[] filterOffsets;
-            int numberOfFilternames = 0, numberOfFilterOffsets = 0, filterNumber, startingFilterNumber;
+            int[] filterOffsets = default;
+            int numberOfFilternames = 0, numberOfFilterOffsets = 0, filterNumber, startingFilterNumber = default;
 
             int maxFilterNumber = 0; // The highest populated filter slot number (1 less than the number of filters)
             int halfDistanceFilterNumber = 0; // A filter slot number close to the middle of the filter wheel
 
-            string[] filterNames;
+            string[] filterNames = default;
 
             // FocusOffsets - Required - Read only
             try
             {
                 LogCallToDriver("FocusOffsets Get", "About to get FocusOffsets property");
-                filterOffsets = filterWheel.FocusOffsets;
+                TimeMethodNoParams("FocusOffsets", () => filterOffsets = filterWheel.FocusOffsets, TargetTime.Fast);
+
                 numberOfFilterOffsets = filterOffsets.Length;
                 if (numberOfFilterOffsets == 0)
                     LogIssue("FocusOffsets Get", "Found no offset values in the returned array");
@@ -227,12 +228,14 @@ namespace ConformU
             try
             {
                 LogCallToDriver("Names Get", "About to get Names property");
-                filterNames = filterWheel.Names;
+                TimeMethodNoParams("Names", () => filterNames = filterWheel.Names, TargetTime.Fast);
+
                 numberOfFilternames = filterNames.Length;
                 if (numberOfFilternames == 0)
                     LogIssue("Names Get", "Did not find any names in the returned array");
                 else
                     LogOk("Names Get", $"Found {numberOfFilternames} filter names");
+
                 filterNumber = 0;
                 foreach (var name in filterNames)
                 {
@@ -262,7 +265,8 @@ namespace ConformU
             {
                 SetTest("Position Get");
                 LogCallToDriver("Position Get", "About to get Position property");
-                startingFilterNumber = filterWheel.Position;
+                TimeMethodNoParams("Position", () => startingFilterNumber = filterWheel.Position, TargetTime.Fast);
+
                 if ((startingFilterNumber < 0) | (startingFilterNumber >= numberOfFilterOffsets))
                     LogIssue("Position Get", $"Illegal filter position returned: {startingFilterNumber}");
                 else
@@ -551,7 +555,7 @@ namespace ConformU
                 // Set the required position
                 LogCallToDriver("Position Set", $"About to set Position property {position}");
                 SetAction($"Setting position {position}");
-                filterWheel.Position = Convert.ToInt16(position);
+                TimeMethodNoParams($"Move to position {position}",()=> filterWheel.Position = Convert.ToInt16(position),TargetTime.Standard);
 
                 // Wait for the reported position to match the required position
                 Stopwatch sw = Stopwatch.StartNew();

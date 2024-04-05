@@ -632,7 +632,7 @@ namespace ConformU
                         case DomePropertyMethod.CanFindHome:
                             {
                                 LogCallToDriver(pName, "About to get CanFindHome property");
-                                mCanFindHome = TimeFuncNoParams(pName, () => domeDevice.CanFindHome, TargetTime.Status);
+                                mCanFindHome = TimeFuncNoParams(pName, () => domeDevice.CanFindHome, TargetTime.Fast);
                                 LogOk(pName, mCanFindHome.ToString());
                                 break;
                             }
@@ -773,7 +773,7 @@ namespace ConformU
                             LogIssue(pName, $"DomeMandatoryTest: Unknown test type {pType}");
                             break;
                     }
-                }, TargetTime.Status);
+                }, TargetTime.Fast);
             }
             catch (Exception ex)
             {
@@ -790,7 +790,7 @@ namespace ConformU
                     case DomePropertyMethod.Altitude:
                         mCanReadAltitude = false;
                         LogCallToDriver(pName, "About to get Altitude property");
-                        TimeMethodNoParams(pName, () => mAltitude = domeDevice.Altitude, TargetTime.Status);
+                        TimeMethodNoParams(pName, () => mAltitude = domeDevice.Altitude, TargetTime.Fast);
                         mCanReadAltitude = true;
                         LogOk(pName, mAltitude.ToString());
                         break;
@@ -798,7 +798,7 @@ namespace ConformU
                     case DomePropertyMethod.AtHome:
                         mCanReadAtHome = false;
                         LogCallToDriver(pName, "About to get AtHome property");
-                        TimeMethodNoParams(pName, () => mAtHome = domeDevice.AtHome, TargetTime.Status);
+                        TimeMethodNoParams(pName, () => mAtHome = domeDevice.AtHome, TargetTime.Fast);
                         mCanReadAtHome = true;
                         LogOk(pName, mAtHome.ToString());
                         break;
@@ -806,7 +806,7 @@ namespace ConformU
                     case DomePropertyMethod.AtPark:
                         mCanReadAtPark = false;
                         LogCallToDriver(pName, "About to get AtPark property");
-                        TimeMethodNoParams(pName, () => mAtPark = domeDevice.AtPark, TargetTime.Status);
+                        TimeMethodNoParams(pName, () => mAtPark = domeDevice.AtPark, TargetTime.Fast);
                         mCanReadAtPark = true;
                         LogOk(pName, mAtPark.ToString());
                         break;
@@ -814,7 +814,7 @@ namespace ConformU
                     case DomePropertyMethod.Azimuth:
                         mCanReadAzimuth = false;
                         LogCallToDriver(pName, "About to get Azimuth property");
-                        TimeMethodNoParams(pName, () => mAzimuth = domeDevice.Azimuth, TargetTime.Status);
+                        TimeMethodNoParams(pName, () => mAzimuth = domeDevice.Azimuth, TargetTime.Fast);
                         mCanReadAzimuth = true;
                         LogOk(pName, mAzimuth.ToString());
                         break;
@@ -822,7 +822,7 @@ namespace ConformU
                     case DomePropertyMethod.ShutterStatus:
                         mCanReadShutterStatus = false;
                         LogCallToDriver(pName, "About to get ShutterStatus property");
-                        TimeMethodNoParams(pName, () => mShutterStatus = domeDevice.ShutterStatus, TargetTime.Status);
+                        TimeMethodNoParams(pName, () => mShutterStatus = domeDevice.ShutterStatus, TargetTime.Fast);
                         mCanReadShutterStatus = true;
                         LogOk(pName, mShutterStatus.ToString());
                         break;
