@@ -418,7 +418,9 @@ namespace ConformU
                     if (conformResults.TimingIssuesCount == 0)
                         TL.LogMessage("Congratulations, all members returned within the target response time!!", MessageLevel.TestOnly, "");
                     else
-                        TL.LogMessage($"{conformResults.TimingIssuesCount} member{(conformResults.TimingIssuesCount == 1 ? "" : "s")} took longer than the target response time.", MessageLevel.TestOnly, "", true);
+                        TL.LogMessage($"{conformResults.TimingIssuesCount} member{(conformResults.TimingIssuesCount == 1 ? "" : "s")} " +
+                            $"took longer than {(conformResults.TimingIssuesCount == 1 ? "its" : "their")} target response " +
+                            $"time{(conformResults.TimingIssuesCount == 1 ? "" : "s")}.", MessageLevel.TestOnly, "", true);
                 }
 
                 // Add a blank line to the console output

@@ -29,7 +29,7 @@ namespace ConformU
         private static string[] commandLineArguments;
         private static List<string> argList;
         private static ConformLogger conformLogger;
-        private static ConformStateManager conformStateManager;
+        private static SessionState conformStateManager;
         private static ConformConfiguration conformConfiguration;
 
         #region Windows DLL imports
@@ -685,7 +685,7 @@ namespace ConformU
             return 0;
         }
 
-        public static IHostBuilder CreateHostBuilder(ConformLogger conformLogger, ConformStateManager conformStateManager, ConformConfiguration conformConfiguration, string[] args)
+        public static IHostBuilder CreateHostBuilder(ConformLogger conformLogger, SessionState conformStateManager, ConformConfiguration conformConfiguration, string[] args)
         {
             IHostBuilder builder = null;
 

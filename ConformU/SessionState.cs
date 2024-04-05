@@ -2,12 +2,12 @@
 
 namespace ConformU
 {
-    public class ConformStateManager : IDisposable
+    public class SessionState : IDisposable
     {
         private bool disposedValue;
         private readonly ConformLogger TL;
 
-        public ConformStateManager(ConformLogger logger)
+        public SessionState(ConformLogger logger)
         {
             TL = logger;
             TL?.LogMessage("ConformStateManager", MessageLevel.Debug, "Service started");
@@ -28,7 +28,13 @@ namespace ConformU
 
         public string ConformLog { get; set; }
 
+        /// <summary>
+        /// Current value of the main ConformLog window scroll position
+        /// </summary>
+        /// <remarks>Used to restore the scroll position when the user does a browser refresh or returns to the home page.</remarks>
         public double ConformLogScrollTop { get; set; } = 0;
+
+        public bool SafetyWarningDisplayed { get; set; } = false;
 
         public string ProtocolLog { get; set; }
 

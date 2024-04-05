@@ -11,7 +11,7 @@
 @inject ConformLogger conformLogger
 @* Shared configuration object *@
 @inject ConformConfiguration configuration
-@inject ConformStateManager state
+@inject SessionState state
 @* Radzen notification service to enable pop-up alerts *@
 @inject NotificationService notificationService
 @* JavaScript runtime reference *@
@@ -29,7 +29,7 @@
                     AllowFiltering="false"
                     Data=@validAscomdDeviceTypes
                     TValue="string"
-                    PopupStyle = "max-height:600px;overflow-x:hidden"
+                    PopupStyle="max-height:600px;overflow-x:hidden"
                     @bind-Value=@selectedDeviceTypeString
                     Change=@(args => OnDeviceTypeChange(args)) />
 </div>
@@ -257,12 +257,12 @@
         switch (configuration.Settings.DeviceTechnology)
         {
             case DeviceTechnology.Alpaca: // Alpaca device selected
-                // Start an Alpaca discovery to populate the Alpaca device list if configured to do so
+                                          // Start an Alpaca discovery to populate the Alpaca device list if configured to do so
                 StartDiscovery();
                 break;
 
             case DeviceTechnology.COM: // COM device selected
-                // Switch to COM tab
+                                       // Switch to COM tab
                 selectedTabIndex = COM_TAB_NUMBER;
 
                 // Populate the COM tab with available drivers
@@ -270,7 +270,7 @@
                 break;
 
             case DeviceTechnology.NotSelected: // No device selected
-                // Start an Alpaca discovery to populate the Alpaca device list if configured to do so
+                                               // Start an Alpaca discovery to populate the Alpaca device list if configured to do so
                 StartDiscovery();
                 break;
 
@@ -303,6 +303,9 @@
 
     void OnDeviceTypeChange(object value)
     {
+        // Reset the flag that indicates whether the device type safety warning has been displayed
+        state.SafetyWarningDisplayed = false;
+
         SaveConfiguration();
 
         switch (selectedTabNumber)

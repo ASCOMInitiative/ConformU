@@ -8,7 +8,7 @@
 @inject BrowserResizeService _listener
 @inject ConformLogger _conformLogger
 @inject ConformConfiguration _configuration
-@inject ConformStateManager _conformState
+@inject SessionState _conformState
 @inject NavigationManager _navigationManager
 @inject IJSRuntime JS
 @* Radzen services to enable pop-up alerts  and dialogues *@
@@ -65,26 +65,33 @@
         if (string.IsNullOrEmpty(_conformState.ConformLog))
             _conformState.ConformLog = _configuration.Status;
 
-        switch (_configuration.Settings.DeviceType)
+        // Display a device specific safety warning if required
+        if (!_conformState.SafetyWarningDisplayed)
         {
-            case DeviceTypes.Dome:
-                _conformState.ConformLog += $"\r\n\r\nTo protect your equipment and the dome that is controlled by this driver:";
-                _conformState.ConformLog += $"\r\n1. The shutter will not open until enabled on the Dome tab in the Settings page. (Currently {(_configuration.Settings.DomeOpenShutter ? "ENABLED" : "DISABLED")}.)";
-                _conformState.ConformLog += $"\r\n1. A stabilisation delay is added after each movement. (Currently {_configuration.Settings.DomeStabilisationWaitTime} seconds.)";
-                _conformState.ConformLog += $"\r\n   The delay can also be changed on the Dome tab in the Settings page.";
-                break;
+            switch (_configuration.Settings.DeviceType)
+            {
+                case DeviceTypes.Dome:
+                    _conformState.ConformLog += $"\r\n\r\nTo protect your equipment and the dome that is controlled by this driver:";
+                    _conformState.ConformLog += $"\r\n1. The shutter will not open until enabled on the Dome tab in the Settings page. (Currently {(_configuration.Settings.DomeOpenShutter ? "ENABLED" : "DISABLED")}.)";
+                    _conformState.ConformLog += $"\r\n1. A stabilisation delay is added after each movement. (Currently {_configuration.Settings.DomeStabilisationWaitTime} seconds.)";
+                    _conformState.ConformLog += $"\r\n   The delay can also be changed on the Dome tab in the Settings page.";
+                    break;
 
-            case DeviceTypes.Switch:
-                _conformState.ConformLog += $"\r\n\r\nTo protect the equipment that is controlled by this Switch driver:";
-                _conformState.ConformLog += $"\r\n1. Write tests are disabled until enabled on the Switch tab in the Settings page. (Currently {(_configuration.Settings.SwitchEnableSet ? "ENABLED" : "DISABLED")}.)";
-                string readDelay = $"{Convert.ToDouble(_configuration.Settings.SwitchReadDelay) / 1000.0:0.0}";
-                string writeDelay = $"{Convert.ToDouble(_configuration.Settings.SwitchWriteDelay) / 1000.0:0.0}";
-                _conformState.ConformLog += $"\r\n2. Delays of {readDelay} second{(readDelay == "1.0" ? "" : "s")} (read) and {writeDelay} second{(writeDelay == "1.0" ? "" : "s")} (write) will be added after each operation.";
-                _conformState.ConformLog += $"\r\n   The delays can also be changed on the Switch tab in the Settings page.";
-                break;
+                case DeviceTypes.Switch:
+                    _conformState.ConformLog += $"\r\n\r\nTo protect the equipment that is controlled by this Switch driver:";
+                    _conformState.ConformLog += $"\r\n1. Write tests are disabled until enabled on the Switch tab in the Settings page. (Currently {(_configuration.Settings.SwitchEnableSet ? "ENABLED" : "DISABLED")}.)";
+                    string readDelay = $"{Convert.ToDouble(_configuration.Settings.SwitchReadDelay) / 1000.0:0.0}";
+                    string writeDelay = $"{Convert.ToDouble(_configuration.Settings.SwitchWriteDelay) / 1000.0:0.0}";
+                    _conformState.ConformLog += $"\r\n2. Delays of {readDelay} second{(readDelay == "1.0" ? "" : "s")} (read) and {writeDelay} second{(writeDelay == "1.0" ? "" : "s")} (write) will be added after each operation.";
+                    _conformState.ConformLog += $"\r\n   The delays can also be changed on the Switch tab in the Settings page.";
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
+            }
+
+            // Set the warning displayed flag
+            _conformState.SafetyWarningDisplayed = true;
         }
 
         statusMessage = $"Version {Update.ConformuVersionDisplayString}";

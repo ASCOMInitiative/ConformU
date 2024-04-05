@@ -1,7 +1,7 @@
 ﻿@inject ILogger<App> logger
 @inject IJSRuntime JsRuntime
 @inject ConformConfiguration configuration
-@inject ConformStateManager state
+@inject SessionState state
 @inject BrowserResizeService resizeListener
 @inject ConformLogger conformLogger
 @inject IJSRuntime JS
@@ -125,7 +125,7 @@ else
         /// <summary>
         /// Event handler for page initialised event
         /// </summary>
-        /// <remarks>Hook up an event handler to redisplay the page header whenever the configuraiton is changed. </remarks>
+        /// <remarks>Hook up an event handler to redisplay the page header whenever the configuration is changed. </remarks>
         protected override async Task OnInitializedAsync()
     {
         state.UiHasChanged += OnUiChanged;

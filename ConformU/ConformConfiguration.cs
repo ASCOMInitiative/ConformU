@@ -20,7 +20,7 @@ namespace ConformU
         private readonly int settingsFileVersion;
         private readonly JsonDocument appSettingsDocument = null;
 
-        private readonly ConformStateManager conformStateManager;
+        private readonly SessionState conformStateManager;
 
         #region Initialiser and Dispose
 
@@ -28,7 +28,7 @@ namespace ConformU
         /// Create a Configuration management instance and load the current settings
         /// </summary>
         /// <param name="logger">Data logger instance.</param>
-        public ConformConfiguration(ConformLogger logger, ConformStateManager conformStateManager, string configurationFile)
+        public ConformConfiguration(ConformLogger logger, SessionState conformStateManager, string configurationFile)
         {
             TL = logger;
             this.conformStateManager = conformStateManager;
