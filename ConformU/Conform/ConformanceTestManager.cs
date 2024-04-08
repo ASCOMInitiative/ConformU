@@ -416,7 +416,7 @@ namespace ConformU
 
                     // Report the high level timing outcome
                     if (conformResults.TimingIssuesCount == 0)
-                        TL.LogMessage("Congratulations, all members returned within the target response time!!", MessageLevel.TestOnly, "");
+                        TL.LogMessage("Congratulations, all members returned within their target response times!!", MessageLevel.TestOnly, "");
                     else
                         TL.LogMessage($"{conformResults.TimingIssuesCount} member{(conformResults.TimingIssuesCount == 1 ? "" : "s")} " +
                             $"took longer than {(conformResults.TimingIssuesCount == 1 ? "its" : "their")} target response " +

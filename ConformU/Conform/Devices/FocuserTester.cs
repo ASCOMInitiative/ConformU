@@ -168,7 +168,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("Absolute", "About to get Absolute property");
-                mAbsolute = focuser.Absolute;
+                TimeMethodNoParams("Absolute", () => mAbsolute = focuser.Absolute, TargetTime.Fast);
                 LogOk("Absolute", mAbsolute.ToString());
             }
             catch (Exception ex)
@@ -182,7 +182,8 @@ namespace ConformU
             {
                 LogCallToDriver("IsMoving", "About to get IsMoving property");
                 mCanReadIsMoving = false;
-                mIsMoving = focuser.IsMoving;
+                TimeMethodNoParams("IsMoving", () => mIsMoving = focuser.IsMoving, TargetTime.Fast);
+
                 if (!mIsMoving)
                 {
                     LogOk("IsMoving", mIsMoving.ToString());
@@ -201,7 +202,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("MaxStep", "About to get MaxStep property");
-                mMaxStep = focuser.MaxStep;
+                TimeMethodNoParams("MaxStep", () => mMaxStep = focuser.MaxStep, TargetTime.Fast);
                 LogOk("MaxStep", mMaxStep.ToString());
             }
             catch (Exception ex)
@@ -214,28 +215,23 @@ namespace ConformU
             try
             {
                 LogCallToDriver("MaxIncrement", "About to get MaxIncrement property");
-                mMaxIncrement = focuser.MaxIncrement;
-                // Minimum value is 1, 0 or negative must be a bad value, >maxstep is a bad value
+                TimeMethodNoParams("MaxIncrement", () => mMaxIncrement = focuser.MaxIncrement, TargetTime.Fast);
+
+                // Minimum value is 1, 0 or negative must be a bad value, > MaxStep is a bad value
                 switch (mMaxIncrement)
                 {
                     case object _ when mMaxIncrement < 1:
-                        {
-                            LogIssue("MaxIncrement", $"MaxIncrement must be at least 1, actual value: {mMaxIncrement}");
-                            break;
-                        }
+                        LogIssue("MaxIncrement", $"MaxIncrement must be at least 1, actual value: {mMaxIncrement}");
+                        break;
 
                     case object _ when mMaxIncrement > mMaxStep:
-                        {
-                            LogIssue("MaxIncrement",
-                                $"MaxIncrement is greater than MaxStep and shouldn't be: {mMaxIncrement}");
-                            break;
-                        }
+                        LogIssue("MaxIncrement",
+                            $"MaxIncrement is greater than MaxStep and shouldn't be: {mMaxIncrement}");
+                        break;
 
                     default:
-                        {
-                            LogOk("MaxIncrement", mMaxIncrement.ToString());
-                            break;
-                        }
+                        LogOk("MaxIncrement", mMaxIncrement.ToString());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -251,22 +247,17 @@ namespace ConformU
                 {
                     mAbsolutePositionOk = false;
                     LogCallToDriver("Position", "About to get Position property");
-                    mPosition = focuser.Position;
+                    TimeMethodNoParams("Position", () => mPosition = focuser.Position, TargetTime.Fast);
+
                     switch (mPosition) // Check that position is a valid value
                     {
-                        case object _ when mPosition < 0 // Lower than lowest position
-                       :
-                            {
-                                LogIssue("Position", $"Position is < 0, actual value: {mPosition}");
-                                break;
-                            }
+                        case object _ when mPosition < 0: // Lower than lowest position
+                            LogIssue("Position", $"Position is < 0, actual value: {mPosition}");
+                            break;
 
-                        case object _ when mPosition > mMaxStep // > highest position
-                 :
-                            {
-                                LogIssue("Position", $"Position is > MaxStep, actual value: {mPosition}");
-                                break;
-                            }
+                        case object _ when mPosition > mMaxStep: // > highest position
+                            LogIssue("Position", $"Position is > MaxStep, actual value: {mPosition}");
+                            break;
 
                         default:
                             {
@@ -303,18 +294,13 @@ namespace ConformU
                 mStepSize = focuser.StepSize;
                 switch (mStepSize)
                 {
-                    case object _ when mStepSize <= 0.0 // Must be >0
-                   :
-                        {
-                            LogIssue("StepSize", $"StepSize must be > 0.0, actual value: {mStepSize}");
-                            break;
-                        }
+                    case object _ when mStepSize <= 0.0: // Must be >0
+                        LogIssue("StepSize", $"StepSize must be > 0.0, actual value: {mStepSize}");
+                        break;
 
                     default:
-                        {
-                            LogOk("StepSize", mStepSize.ToString());
-                            break;
-                        }
+                        LogOk("StepSize", mStepSize.ToString());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -327,7 +313,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("TempCompAvailable", "About to get TempCompAvailable property");
-                mTempCompAvailable = focuser.TempCompAvailable;
+                TimeMethodNoParams("TempCompAvailable", () => mTempCompAvailable = focuser.TempCompAvailable, TargetTime.Fast);
                 LogOk("TempCompAvailable", mTempCompAvailable.ToString());
             }
             catch (Exception ex)
@@ -340,7 +326,8 @@ namespace ConformU
             try
             {
                 LogCallToDriver("TempComp Read", "About to get TempComp property");
-                mTempComp = focuser.TempComp;
+                TimeMethodNoParams("TempComp Read", () => mTempComp = focuser.TempComp, TargetTime.Fast);
+
                 if (mTempComp & !mTempCompAvailable)
                     LogIssue("TempComp Read", "TempComp is True when TempCompAvailable is False - this should not be so");
                 else
@@ -361,10 +348,12 @@ namespace ConformU
                     mTempCompFalseOk = false;
                     // Turn compensation on 
                     LogCallToDriver("TempComp Write", "About to set TempComp property");
-                    focuser.TempComp = true;
+                    TimeMethodNoParams("TempComp Write", () => focuser.TempComp = true, TargetTime.Standard);
+
                     LogOk("TempComp Write", "Successfully turned temperature compensation on");
                     mTempCompTrueOk = true; // Set to true to indicate TempComp can be successfully set to True
-                                            // Turn compensation off
+
+                    // Turn compensation off
                     LogCallToDriver("TempComp Write", "About to set TempComp property");
                     focuser.TempComp = false;
                     LogOk("TempComp Write", "Successfully turned temperature compensation off");
@@ -406,31 +395,24 @@ namespace ConformU
             {
                 mCanReadTemperature = false;
                 LogCallToDriver("Temperature", "About to get Temperature property");
-                mTemperature = focuser.Temperature;
+                TimeMethodNoParams("Temperature", () => mTemperature = focuser.Temperature, TargetTime.Fast);
+
                 switch (mTemperature)
                 {
-                    case object _ when mTemperature <= -50.0 // Probably a bad value
-                   :
-                        {
-                            LogIssue("Temperature",
-                                $"Temperature < -50.0, - possibly an issue, actual value: {mTemperature}");
-                            break;
-                        }
+                    case object _ when mTemperature <= -50.0: // Probably a bad value
+                        LogIssue("Temperature",
+                            $"Temperature < -50.0, - possibly an issue, actual value: {mTemperature}");
+                        break;
 
-                    case object _ when mTemperature >= 50.0 // Probably a bad value
-             :
-                        {
-                            LogIssue("Temperature",
-                                $"Temperature > 50.0, - possibly an issue, actual value: {mTemperature}");
-                            break;
-                        }
+                    case object _ when mTemperature >= 50.0: // Probably a bad value
+                        LogIssue("Temperature",
+                            $"Temperature > 50.0, - possibly an issue, actual value: {mTemperature}");
+                        break;
 
                     default:
-                        {
-                            LogOk("Temperature", mTemperature.ToString());
-                            mCanReadTemperature = true;
-                            break;
-                        }
+                        LogOk("Temperature", mTemperature.ToString());
+                        mCanReadTemperature = true;
+                        break;
                 }
             }
             catch (Exception ex)
@@ -445,7 +427,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("Halt", "About to call Halt method");
-                focuser.Halt();
+                TimeMethodNoParams("Halt", () => focuser.Halt(),TargetTime.Standard);
                 LogOk("Halt", "Focuser halted OK");
             }
             catch (Exception ex)
@@ -470,6 +452,7 @@ namespace ConformU
             {
                 HandleException("Move", MemberType.Method, Required.Mandatory, ex, "");
             }
+
             SetTest("");
             SetAction("");
             SetStatus("");
@@ -737,8 +720,9 @@ namespace ConformU
 
                 SetAction(testName);
                 startTime = DateTime.Now;
+
                 LogCallToDriver(testName, "About to call Move method");
-                focuser.Move(newPosition); // Move the focuser
+                TimeMethodNoParams($"Move to {newPosition}", () => focuser.Move(newPosition), TargetTime.Standard); // Move the focuser
                 TimeSpan duration = DateTime.Now.Subtract(startTime);
 
                 // Test whether the Move will be treated as synchronous or asynchronous
@@ -778,9 +762,6 @@ namespace ConformU
                     {
                         WaitWhile($"Moving focuser", () => focuser.IsMoving, 500, settings.FocuserTimeout); // Wait for move to complete
                     }
-
-
-                    // LogTestAndMessage(testName, "Asynchronous move completed");
                 }
             }
         }

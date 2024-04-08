@@ -463,133 +463,164 @@ namespace ConformU
                 try
                 {
                     returnValue = BAD_VALUE;
-                    switch (enumName)
+
+                    TimeMethodNoParams(enumName.ToString(), () =>
                     {
-                        #region Primary properties
+                        switch (enumName)
+                        {
+                            #region Primary properties
 
-                        case ObservingConditionsProperty.AveragePeriod:
-                            methodType = MemberType.Property; returnValue = mObservingConditions.AveragePeriod;
-                            break;
+                            case ObservingConditionsProperty.AveragePeriod:
+                                methodType = MemberType.Property;
+                                returnValue = mObservingConditions.AveragePeriod;
+                                break;
 
-                        case ObservingConditionsProperty.CloudCover:
-                            methodType = MemberType.Property; returnValue = mObservingConditions.CloudCover;
-                            break;
+                            case ObservingConditionsProperty.CloudCover:
+                                methodType = MemberType.Property;
+                                returnValue = mObservingConditions.CloudCover;
+                                break;
 
-                        case ObservingConditionsProperty.DewPoint:
-                            methodType = MemberType.Property; returnValue = mObservingConditions.DewPoint;
-                            break;
+                            case ObservingConditionsProperty.DewPoint:
+                                methodType = MemberType.Property;
+                                returnValue = mObservingConditions.DewPoint;
+                                break;
 
-                        case ObservingConditionsProperty.Humidity:
-                            methodType = MemberType.Property; returnValue = mObservingConditions.Humidity;
-                            break;
+                            case ObservingConditionsProperty.Humidity:
+                                methodType = MemberType.Property;
+                                returnValue = mObservingConditions.Humidity;
+                                break;
 
-                        case ObservingConditionsProperty.Pressure:
-                            methodType = MemberType.Property; returnValue = mObservingConditions.Pressure;
-                            break;
+                            case ObservingConditionsProperty.Pressure:
+                                methodType = MemberType.Property;
+                                returnValue = mObservingConditions.Pressure;
+                                break;
 
-                        case ObservingConditionsProperty.RainRate:
-                            methodType = MemberType.Property; returnValue = mObservingConditions.RainRate;
-                            break;
+                            case ObservingConditionsProperty.RainRate:
+                                methodType = MemberType.Property;
+                                returnValue = mObservingConditions.RainRate;
+                                break;
 
-                        case ObservingConditionsProperty.SkyBrightness:
-                            methodType = MemberType.Property; returnValue = mObservingConditions.SkyBrightness;
-                            break;
+                            case ObservingConditionsProperty.SkyBrightness:
+                                methodType = MemberType.Property;
+                                returnValue = mObservingConditions.SkyBrightness;
+                                break;
 
-                        case ObservingConditionsProperty.SkyQuality:
-                            methodType = MemberType.Property; returnValue = mObservingConditions.SkyQuality;
-                            break;
+                            case ObservingConditionsProperty.SkyQuality:
+                                methodType = MemberType.Property;
+                                returnValue = mObservingConditions.SkyQuality;
+                                break;
 
-                        case ObservingConditionsProperty.StarFWHM:
-                            methodType = MemberType.Property; returnValue = mObservingConditions.StarFWHM;
-                            break;
+                            case ObservingConditionsProperty.StarFWHM:
+                                methodType = MemberType.Property;
+                                returnValue = mObservingConditions.StarFWHM;
+                                break;
 
-                        case ObservingConditionsProperty.SkyTemperature:
-                            methodType = MemberType.Property; returnValue = mObservingConditions.SkyTemperature;
-                            break;
+                            case ObservingConditionsProperty.SkyTemperature:
+                                methodType = MemberType.Property;
+                                returnValue = mObservingConditions.SkyTemperature;
+                                break;
 
-                        case ObservingConditionsProperty.Temperature:
-                            methodType = MemberType.Property; returnValue = mObservingConditions.Temperature;
-                            break;
+                            case ObservingConditionsProperty.Temperature:
+                                methodType = MemberType.Property;
+                                returnValue = mObservingConditions.Temperature;
+                                break;
 
-                        case ObservingConditionsProperty.WindDirection:
-                            methodType = MemberType.Property; returnValue = mObservingConditions.WindDirection;
-                            break;
+                            case ObservingConditionsProperty.WindDirection:
+                                methodType = MemberType.Property;
+                                returnValue = mObservingConditions.WindDirection;
+                                break;
 
-                        case ObservingConditionsProperty.WindGust:
-                            methodType = MemberType.Property; returnValue = mObservingConditions.WindGust;
-                            break;
+                            case ObservingConditionsProperty.WindGust:
+                                methodType = MemberType.Property;
+                                returnValue = mObservingConditions.WindGust;
+                                break;
 
-                        case ObservingConditionsProperty.WindSpeed:
-                            methodType = MemberType.Property; returnValue = mObservingConditions.WindSpeed;
-                            break;
+                            case ObservingConditionsProperty.WindSpeed:
+                                methodType = MemberType.Property;
+                                returnValue = mObservingConditions.WindSpeed;
+                                break;
 
-                        #endregion
+                            #endregion
 
-                        #region Time since last update
+                            #region Time since last update
 
-                        case ObservingConditionsProperty.TimeSinceLastUpdateLatest:
-                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate("");
-                            break;
+                            case ObservingConditionsProperty.TimeSinceLastUpdateLatest:
+                                methodType = MemberType.Method;
+                                returnValue = mObservingConditions.TimeSinceLastUpdate("");
+                                break;
 
-                        case ObservingConditionsProperty.TimeSinceLastUpdateCloudCover:
-                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_CLOUDCOVER);
-                            break;
+                            case ObservingConditionsProperty.TimeSinceLastUpdateCloudCover:
+                                methodType = MemberType.Method;
+                                returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_CLOUDCOVER);
+                                break;
 
-                        case ObservingConditionsProperty.TimeSinceLastUpdateDewPoint:
-                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_DEWPOINT);
-                            break;
+                            case ObservingConditionsProperty.TimeSinceLastUpdateDewPoint:
+                                methodType = MemberType.Method;
+                                returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_DEWPOINT);
+                                break;
 
-                        case ObservingConditionsProperty.TimeSinceLastUpdateHumidity:
-                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_HUMIDITY);
-                            break;
+                            case ObservingConditionsProperty.TimeSinceLastUpdateHumidity:
+                                methodType = MemberType.Method;
+                                returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_HUMIDITY);
+                                break;
 
-                        case ObservingConditionsProperty.TimeSinceLastUpdatePressure:
-                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_PRESSURE);
-                            break;
+                            case ObservingConditionsProperty.TimeSinceLastUpdatePressure:
+                                methodType = MemberType.Method;
+                                returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_PRESSURE);
+                                break;
 
-                        case ObservingConditionsProperty.TimeSinceLastUpdateRainRate:
-                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_RAINRATE);
-                            break;
+                            case ObservingConditionsProperty.TimeSinceLastUpdateRainRate:
+                                methodType = MemberType.Method;
+                                returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_RAINRATE);
+                                break;
 
-                        case ObservingConditionsProperty.TimeSinceLastUpdateSkyBrightness:
-                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_SKYBRIGHTNESS);
-                            break;
+                            case ObservingConditionsProperty.TimeSinceLastUpdateSkyBrightness:
+                                methodType = MemberType.Method;
+                                returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_SKYBRIGHTNESS);
+                                break;
 
-                        case ObservingConditionsProperty.TimeSinceLastUpdateSkyQuality:
-                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_SKYQUALITY);
-                            break;
+                            case ObservingConditionsProperty.TimeSinceLastUpdateSkyQuality:
+                                methodType = MemberType.Method;
+                                returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_SKYQUALITY);
+                                break;
 
-                        case ObservingConditionsProperty.TimeSinceLastUpdateStarFwhm:
-                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_STARFWHM);
-                            break;
+                            case ObservingConditionsProperty.TimeSinceLastUpdateStarFwhm:
+                                methodType = MemberType.Method;
+                                returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_STARFWHM);
+                                break;
 
-                        case ObservingConditionsProperty.TimeSinceLastUpdateSkyTemperature:
-                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_SKYTEMPERATURE);
-                            break;
+                            case ObservingConditionsProperty.TimeSinceLastUpdateSkyTemperature:
+                                methodType = MemberType.Method;
+                                returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_SKYTEMPERATURE);
+                                break;
 
-                        case ObservingConditionsProperty.TimeSinceLastUpdateTemperature:
-                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_TEMPERATURE);
-                            break;
+                            case ObservingConditionsProperty.TimeSinceLastUpdateTemperature:
+                                methodType = MemberType.Method;
+                                returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_TEMPERATURE);
+                                break;
 
-                        case ObservingConditionsProperty.TimeSinceLastUpdateWindDirection:
-                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_WINDDIRECTION);
-                            break;
+                            case ObservingConditionsProperty.TimeSinceLastUpdateWindDirection:
+                                methodType = MemberType.Method;
+                                returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_WINDDIRECTION);
+                                break;
 
-                        case ObservingConditionsProperty.TimeSinceLastUpdateWindGust:
-                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_WINDGUST);
-                            break;
+                            case ObservingConditionsProperty.TimeSinceLastUpdateWindGust:
+                                methodType = MemberType.Method;
+                                returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_WINDGUST);
+                                break;
 
-                        case ObservingConditionsProperty.TimeSinceLastUpdateWindSpeed:
-                            methodType = MemberType.Method; returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_WINDSPEED);
-                            break;
+                            case ObservingConditionsProperty.TimeSinceLastUpdateWindSpeed:
+                                methodType = MemberType.Method;
+                                returnValue = mObservingConditions.TimeSinceLastUpdate(PROPERTY_WINDSPEED);
+                                break;
 
-                        #endregion
+                            #endregion
 
-                        default:
-                            LogError(propertyNmae, $"TestDouble - Unknown test type - {enumName}");
-                            break;
-                    }
-
+                            default:
+                                LogError(propertyNmae, $"TestDouble - Unknown test type - {enumName}");
+                                break;
+                        }
+                    }, TargetTime.Fast);
                     readOk = true;
 
                     // Successfully retrieved a value so check validity
@@ -609,7 +640,7 @@ namespace ConformU
                     }
 
                     // Record that a value was returned
-                    if (enumName.ToString().StartsWith(PROPERTY_TIMESINCELASTUPDATE)) 
+                    if (enumName.ToString().StartsWith(PROPERTY_TIMESINCELASTUPDATE))
                     {
                         sensorHasTimeOfLastUpdate.Add(propertyNmae);
                         LogDebug(enumName.ToString(), $"Added {propertyNmae} to sensorHasTimeOfLastUpdate list");
@@ -647,11 +678,12 @@ namespace ConformU
 
         private string TestSensorDescription(string propertyName, ObservingConditionsProperty enumName, int pMaxLength, Required pMandatory)
         {
-            string returnValue;
+            string returnValue="";
             try
             {
                 LogCallToDriver(enumName.ToString(), $"About to call SensorDescription({propertyName}) method");
-                returnValue = mObservingConditions.SensorDescription(propertyName);
+                TimeMethodNoParams(enumName.ToString(), () => returnValue = mObservingConditions.SensorDescription(propertyName), TargetTime.Fast);
+
                 // Successfully retrieved a value
                 switch (returnValue)
                 {

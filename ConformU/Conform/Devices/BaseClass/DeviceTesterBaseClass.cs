@@ -36,9 +36,9 @@ namespace ConformU
         // Class not registered COM exception error number
         internal const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
 
-        internal double standardTargetResponseTime = 0.000; // Time within which a non-status interface member should ideally return (seconds)
-        internal double statusTargetResponseTime = 1.000; // Time within which a status reporting interface member should ideally return (seconds)
-        internal double extendedTargetResponseTime = 000.0; // Time within which a long running interface member should ideally return (seconds)
+        internal double fastTargetResponseTime = 0.100; // Time within which a status reporting interface member should ideally return (seconds)
+        internal double standardTargetResponseTime = 1.000; // Time within which a non-status interface member should ideally return (seconds)
+        internal double extendedTargetResponseTime = 600.0; // Time within which a long running interface member should ideally return (seconds)
 
         #endregion
 
@@ -163,9 +163,9 @@ namespace ConformU
             tl = logger;
             this.ApplicationCancellationToken = cancellationToken;
             settings = conformConfiguration.Settings;
-            LogTiming("Timing Summary", $"FAST response target time (status reporting members): {statusTargetResponseTime:0.000} second{(statusTargetResponseTime == 1.0 ? "" : "s")}.");
-            LogTiming("Timing Summary", $"STANDARD response target time (property write and methods): {standardTargetResponseTime:0.000} second{(standardTargetResponseTime == 1.0 ? "" : "s")}. ");
-            LogTiming("Timing Summary", $"EXTENDED response target time (long running members): {extendedTargetResponseTime:0.000} second{(extendedTargetResponseTime == 1.0 ? "" : "s")}. ");
+            LogTiming("Timing Summary", $"FAST target response time: {fastTargetResponseTime:0.0} second{(fastTargetResponseTime == 1.0 ? "" : "s")}, (configuration and state reporting members).");
+            LogTiming("Timing Summary", $"STANDARD target response time: {standardTargetResponseTime:0.0} second{(standardTargetResponseTime == 1.0 ? "" : "s")}, (property write and asynchronous methods).");
+            LogTiming("Timing Summary", $"EXTENDED target response time: {extendedTargetResponseTime:0.0} second{(extendedTargetResponseTime == 1.0 ? "" : "s")}, (synchronous methods, ImageArray and ImageArrayVariant).");
             LogTiming("Timing Summary", $"The log {(settings.ReportGoodTimings ? (settings.ReportBadTimings ? "shows good and bad" : "only shows good") : (settings.ReportBadTimings ? "only shows bad" : "configuration prevents display of any"))} timings.");
             LogTiming("", $"");
         }
@@ -1853,7 +1853,7 @@ namespace ConformU
             switch (targetTime)
             {
                 case TargetTime.Fast:
-                    ReportTiming(methodName, elapsedTime, "FAST", statusTargetResponseTime);
+                    ReportTiming(methodName, elapsedTime, "FAST", fastTargetResponseTime);
                     break;
 
                 case TargetTime.Standard:
@@ -1869,19 +1869,51 @@ namespace ConformU
             }
         }
 
-        private void ReportTiming(string methodName, double elapsedTime, string targetName, double targetTime)
+        private void ReportTiming(string memberName, double elapsedTime, string targetName, double targetTime)
         {
+            int memberNamePadWidth = 24; // Set a default method name column width
+
+            switch (baseClassDeviceType)
+            {
+                case DeviceTypes.Camera:
+                    break;
+                case DeviceTypes.CoverCalibrator:
+                    memberNamePadWidth = 20;
+                    break;
+                case DeviceTypes.Dome:
+                    break;
+                case DeviceTypes.FilterWheel:
+                    break;
+                case DeviceTypes.Focuser:
+                    break;
+                case DeviceTypes.ObservingConditions:
+                    memberNamePadWidth = 33;
+                    break;
+                case DeviceTypes.Rotator:
+                    break;
+                case DeviceTypes.SafetyMonitor:
+                    break;
+                case DeviceTypes.Switch:
+                    break;
+                case DeviceTypes.Telescope:
+                    break;
+                case DeviceTypes.Video:
+                    break;
+                default:
+                    break;
+            }
+
             // Determine whether the member run within the target time
             if (elapsedTime <= targetTime) // Member completed within the target time
             {
                 if (settings.ReportGoodTimings)
-                    LogTiming($"{methodName}", $"At {DateTime.Now:HH:mm:ss.fff} {methodName,-24} {elapsedTime:0.000} seconds. {((char)0x2713)} ({targetName})"); // 0x2713 is the UTF16 tick character.
+                    LogTiming($"{memberName}", $"At {DateTime.Now:HH:mm:ss.fff} {memberName.PadRight(memberNamePadWidth)} {elapsedTime:0.000} seconds. {((char)0x2713)} ({targetName})"); // 0x2713 is the UTF16 tick character.
             }
             else // Member took longer than the target time
             {
                 if (settings.ReportBadTimings)
                 {
-                    LogTiming($"{methodName}", $"At {DateTime.Now:HH:mm:ss.fff} {methodName,-24} {elapsedTime:0.000} seconds. OUTSIDE {targetName} RESPONSE TIME TARGET: {targetTime:0.0} seconds.");
+                    LogTiming($"{memberName}", $"At {DateTime.Now:HH:mm:ss.fff} {memberName.PadRight(memberNamePadWidth)} {elapsedTime:0.000} seconds. OUTSIDE {targetName} RESPONSE TIME TARGET: {targetTime:0.0} seconds.");
                     conformResults.TimingIssuesCount++;
                 }
             }
