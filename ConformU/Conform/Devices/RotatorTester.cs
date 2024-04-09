@@ -181,7 +181,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("CanReverse", "About to get CanReverse property");
-                canReverse = rotator.CanReverse;
+                TimeMethod("CanReverse", () => canReverse = rotator.CanReverse, TargetTime.Fast);
                 LogOk("CanReverse", canReverse.ToString());
             }
             catch (Exception ex)
@@ -346,7 +346,6 @@ namespace ConformU
                     HandleException("IsMoving", MemberType.Property, Required.Mandatory, ex, "");
                 }
             }
-
             if (cancellationToken.IsCancellationRequested)
                 return;
 
@@ -369,7 +368,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("Reverse", "About to get Reverse property");
-                reverse = rotator.Reverse;
+                TimeMethod("Reverse", () => reverse = rotator.Reverse, TargetTime.Fast);
                 if (canReverse)
                 {
                     LogOk("Reverse Read", reverse.ToString());
@@ -397,7 +396,6 @@ namespace ConformU
                     HandleException("Reverse Read", MemberType.Property, Required.Mandatory, ex, "");
                 }
             }
-
             if (cancellationToken.IsCancellationRequested)
                 return;
 
@@ -407,7 +405,7 @@ namespace ConformU
                 if (reverse) // Try and set reverse to the opposite state
                 {
                     LogCallToDriver("Reverse", "About to set Reverse property");
-                    rotator.Reverse = false;
+                    TimeMethod("Reverse", () => rotator.Reverse = false, TargetTime.Standard);
                 }
                 else
                 {
@@ -444,6 +442,8 @@ namespace ConformU
                     HandleException("Reverse Write", MemberType.Property, Required.Mandatory, ex, "");
                 }
             }
+            if (cancellationToken.IsCancellationRequested)
+                return;
 
             // Test MechanicalPosition introduced in IRotatorV3
             if (GetInterfaceVersion() >= 3)
@@ -452,7 +452,7 @@ namespace ConformU
                 {
                     canReadMechanicalPosition = false;
                     LogCallToDriver("MechanicalPosition", "About to set MechanicalPosition property");
-                    mechanicalPosition = rotator.MechanicalPosition;
+                    TimeMethod("Reverse", () => mechanicalPosition = rotator.MechanicalPosition, TargetTime.Standard);
                     canReadMechanicalPosition = true; // Can read mechanical position OK, doesn't generate an exception
 
                     // Successfully retrieved a value
@@ -514,7 +514,7 @@ namespace ConformU
                     case RotatorMember.Position:
                         {
                             canReadPosition = false;
-                            rotatorPropertyTestSingleRet = rotator.Position;
+                            TimeMethod(pName, () => rotatorPropertyTestSingleRet = rotator.Position, TargetTime.Fast);
                             canReadPosition = true; // Can read position OK, doesn't generate an exception
                             break;
                         }
@@ -522,7 +522,7 @@ namespace ConformU
                     case RotatorMember.StepSize:
                         {
                             canReadStepSize = false;
-                            rotatorPropertyTestSingleRet = rotator.StepSize;
+                            TimeMethod(pName, () => rotatorPropertyTestSingleRet = rotator.StepSize, TargetTime.Fast);
                             canReadStepSize = true;
                             break;
                         }
@@ -530,7 +530,7 @@ namespace ConformU
                     case RotatorMember.TargetPosition:
                         {
                             canReadTargetPosition = false;
-                            rotatorPropertyTestSingleRet = rotator.TargetPosition;
+                            TimeMethod(pName, () => rotatorPropertyTestSingleRet = rotator.TargetPosition, TargetTime.Fast);
                             canReadTargetPosition = true;
                             break;
                         }
@@ -763,7 +763,7 @@ namespace ConformU
 
                         LogDebug(memberName, "Starting relative move");
                         LogCallToDriver(memberName, $"About to call Move method");
-                        rotator.Move(requiredPosition);
+                        TimeMethod(memberName, () => rotator.Move(requiredPosition), TargetTime.Standard);
                         LogDebug(memberName, $"Returned from Move method in {sw.Elapsed.TotalSeconds:0.000} seconds.");
                         break;
 
@@ -782,7 +782,7 @@ namespace ConformU
 
                         LogDebug(memberName, "Starting absolute move");
                         LogCallToDriver(memberName, $"About to call MoveAbsolute method");
-                        rotator.MoveAbsolute(requiredPosition);
+                        TimeMethod(memberName, () => rotator.MoveAbsolute(requiredPosition), TargetTime.Standard);
                         LogDebug(memberName, $"Returned from MoveAbsolute method in {sw.Elapsed.TotalSeconds:0.000} seconds.");
                         break;
 
@@ -801,7 +801,7 @@ namespace ConformU
 
                         LogDebug(memberName, "Starting mechanical move");
                         LogCallToDriver(memberName, $"About to call MoveMechanical method");
-                        rotator.MoveMechanical(requiredPosition);
+                        TimeMethod(memberName, () => rotator.MoveMechanical(requiredPosition), TargetTime.Standard);
                         LogDebug(memberName, $"Returned from MoveMechanical method in {sw.Elapsed.TotalSeconds:0.000} seconds.");
                         break;
 

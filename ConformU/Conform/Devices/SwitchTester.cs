@@ -230,7 +230,7 @@ namespace ConformU
                             {
                                 LogCallToDriver($"GetSwitch {i}", $"About to call GetSwitch({i}) method");
                                 SetAction($"GetSwitch");
-                                getSwitchOriginal = switchDevice.GetSwitch(i);
+                                TimeMethod("GetSwitch", () => getSwitchOriginal = switchDevice.GetSwitch(i), TargetTime.Fast);
                                 WaitForReadDelay("GetSwitch");
 
                                 LogOk($"GetSwitch {i}", $"Found switch, state: {getSwitchOriginal}");
@@ -255,7 +255,7 @@ namespace ConformU
                             {
                                 LogCallToDriver($"SetSwitch {i}", $"About to call SetSwitch({i})");
                                 SetAction($"SetSwitch {!getSwitchOriginal}");
-                                switchDevice.SetSwitch(i, !getSwitchOriginal); // Swap the switch state
+                                TimeMethod("GetSwitch", () => switchDevice.SetSwitch(i, !getSwitchOriginal), TargetTime.Standard); // Swap the switch state
                                 WaitForWriteDelay($"SetSwitch {!getSwitchOriginal}");
 
                                 setSwitchOk = true;
@@ -297,7 +297,7 @@ namespace ConformU
                             try
                             {
                                 LogCallToDriver($"GetSwitchName {i}", $"About to get switch name {i}");
-                                switchName = switchDevice.GetSwitchName(i);
+                                switchName = TimeFunc<string>("GetSwitch", () => switchDevice.GetSwitchName(i), TargetTime.Fast);
                                 if (getSwitchOk | setSwitchOk)
                                 {
                                     if (switchName == "")
@@ -369,7 +369,7 @@ namespace ConformU
                             try // Read switch name to determine whether this is a valid switch
                             {
                                 LogCallToDriver("GetSwitchName", $"About to get switch {i} name");
-                                switchName = switchDevice.GetSwitchName(i);
+                                switchName = TimeFunc<string>($"SwitchName ({i})", () => switchDevice.GetSwitchName(i), TargetTime.Fast);
                                 LogOk("GetSwitchName ", $"Found switch {i}");
                                 SetTest($"Testing switch {i}");
 
@@ -386,9 +386,9 @@ namespace ConformU
                                 // Read switch description
                                 try
                                 {
-                                    SetAction("Getting switch description"); LogCallToDriver("GetSwitchDescription",
-                                        $"  About to get switch {i} description");
-                                    string switchDescription = switchDevice.GetSwitchDescription(i);
+                                    SetAction("Getting switch description");
+                                    LogCallToDriver("GetSwitchDescription", $"  About to get switch {i} description");
+                                    string switchDescription = TimeFunc<string>($"GetSwitchDescription ({i})", () => switchDevice.GetSwitchDescription(i), TargetTime.Fast);
                                     LogOk("GetSwitchDescription ", $"  Description: {switchDescription}");
                                 }
                                 catch (Exception ex)
@@ -401,9 +401,9 @@ namespace ConformU
                                 double switchMinimum;
                                 try
                                 {
-                                    SetAction("Getting switch minimum value"); LogCallToDriver("MinSwitchValue",
-                                        $"  About to get switch {i} minimum value");
-                                    switchMinimum = switchDevice.MinSwitchValue(i);
+                                    SetAction("Getting switch minimum value");
+                                    LogCallToDriver("MinSwitchValue", $"  About to get switch {i} minimum value");
+                                    switchMinimum = TimeFunc<double>($"MinSwitchValue ({i})", () => switchDevice.MinSwitchValue(i), TargetTime.Fast);
                                     LogOk("MinSwitchValue ", $"  Minimum: {switchMinimum}");
                                 }
                                 catch (Exception ex)
@@ -418,9 +418,9 @@ namespace ConformU
                                 double switchRange;
                                 try
                                 {
-                                    SetAction("Getting switch maximum value"); LogCallToDriver("MaxSwitchValue",
-                                        $"  About to get switch {i} maximum value");
-                                    switchMaximum = switchDevice.MaxSwitchValue(i);
+                                    SetAction("Getting switch maximum value");
+                                    LogCallToDriver("MaxSwitchValue", $"  About to get switch {i} maximum value");
+                                    switchMaximum = TimeFunc<double>($"MinSwitchValue ({i})", () => switchDevice.MaxSwitchValue(i), TargetTime.Fast);
 
                                     if (IsGoodValue(switchMinimum))
                                     {
@@ -455,9 +455,8 @@ namespace ConformU
                                 // Read switch step value
                                 try
                                 {
-                                    SetAction("Getting switch step size"); LogCallToDriver("SwitchStep",
-                                        $"  About to get switch {i} step size");
-                                    switchStep = switchDevice.SwitchStep(i);
+                                    SetAction("Getting switch step size"); LogCallToDriver("SwitchStep", $"  About to get switch {i} step size");
+                                    switchStep = TimeFunc<double>($"SwitchStep ({i})", () => switchDevice.SwitchStep(i), TargetTime.Fast);
                                     LogOk("SwitchStep ", $"  Step size: {switchStep}");
 
                                     // Step must be greater than 0
@@ -527,7 +526,7 @@ namespace ConformU
                                 try
                                 {
                                     LogCallToDriver("CanWrite", $"  About to get switch {i} CanWrite status");
-                                    switchCanWrite = switchDevice.CanWrite(i);
+                                    switchCanWrite = TimeFunc<bool>($"CanWrite ({i})", () => switchDevice.CanWrite(i), TargetTime.Fast);
                                     LogOk("CanWrite ", $"  CanWrite: {switchCanWrite}");
                                 }
                                 catch (Exception ex)
@@ -545,7 +544,7 @@ namespace ConformU
                                     try
                                     {
                                         LogCallToDriver("CanAsync", $"  About to get switch {i} CanAsync status");
-                                        switchCanAsync = switchDevice.CanAsync(i);
+                                        switchCanAsync = TimeFunc<bool>($"CanAsync ({i})", () => switchDevice.CanAsync(i), TargetTime.Fast);
                                         LogDebug("CanAsync", $"CanAsync: {switchCanAsync}, CanWrite: {switchCanWrite}");
 
                                         if (switchCanWrite & switchCanAsync) // Switch can write and async - OK
@@ -576,9 +575,8 @@ namespace ConformU
                                 // Access GetSwitch and record the outcome
                                 try
                                 {
-                                    SetAction($"GetSwitch"); LogCallToDriver("GetSwitch",
-                                        $"  About to call GetSwitch({i}) method");
-                                    getSwitchOriginal = switchDevice.GetSwitch(i);
+                                    SetAction($"GetSwitch"); LogCallToDriver("GetSwitch", $"  About to call GetSwitch({i}) method");
+                                    getSwitchOriginal = TimeFunc<bool>($"GetSwitch ({i})", () => switchDevice.GetSwitch(i), TargetTime.Fast);
                                     WaitForReadDelay("GetSwitch");
 
                                     getSwitchOk = true;
@@ -594,9 +592,8 @@ namespace ConformU
                                 bool getSwitchValueOk;
                                 try
                                 {
-                                    SetAction($"GetSwitchValue"); LogCallToDriver("GetSwitchValue",
-                                        $"  About to call GetSwitchValue({i}) method");
-                                    getSwitchValueOriginal = switchDevice.GetSwitchValue(i);
+                                    SetAction($"GetSwitchValue"); LogCallToDriver("GetSwitchValue", $"  About to call GetSwitchValue({i}) method");
+                                    getSwitchValueOriginal = TimeFunc<double>($"MinSwitchValue ({i})", () => switchDevice.GetSwitchValue(i), TargetTime.Fast);
                                     WaitForReadDelay("GetSwitchValue");
                                     getSwitchValueOk = true;
                                     LogOk("GetSwitchValue ", $"  {getSwitchValueOriginal}");
@@ -618,7 +615,7 @@ namespace ConformU
                                         // Try SetSwitch(False)
                                         LogCallToDriver("SetSwitch", $"  About to call SetSwitch({i}, {false}) method");
                                         SetAction("SetSwitch False");
-                                        switchDevice.SetSwitch(i, false); // Set switch false
+                                        TimeMethod($"SetSwitch ({i})", () => switchDevice.SetSwitch(i, false), TargetTime.Standard); // Set switch false
                                         WaitForWriteDelay($"SetSwitch False");
 
                                         // Check GetSwitch
@@ -639,8 +636,7 @@ namespace ConformU
                                         // Check GetSwitchValue returns the switch minimum value
                                         if (getSwitchValueOk & IsGoodValue(switchMinimum))
                                         {
-                                            LogCallToDriver("SetSwitch",
-                                                $"  About to call GetSwitchValue({i}) method");
+                                            LogCallToDriver("SetSwitch", $"  About to call GetSwitchValue({i}) method");
                                             SetAction($"GetSwitchValue");
                                             getSwitchValue = switchDevice.GetSwitchValue(i);
                                             WaitForReadDelay("GetSwitchValue");
@@ -687,8 +683,7 @@ namespace ConformU
                                         // Check GetSwitchValue returns the switch maximum value
                                         if (getSwitchValueOk & IsGoodValue(switchMaximum))
                                         {
-                                            LogCallToDriver("SetSwitch",
-                                                $"  About to call GetSwitchValue({i}) method");
+                                            LogCallToDriver("SetSwitch", $"  About to call GetSwitchValue({i}) method");
                                             SetAction($"GetSwitchValue");
                                             getSwitchValue = switchDevice.GetSwitchValue(i);
                                             WaitForReadDelay("GetSwitchValue");
@@ -770,7 +765,7 @@ namespace ConformU
                                         {
                                             LogCallToDriver("SetSwitchValue", $"  About to call SetSwitchValue({i}, {switchMinimum}), attempting to set the minimum permissible value");
                                             SetAction($"SetSwitchValue {switchMinimum}");
-                                            switchDevice.SetSwitchValue(i, switchMinimum); // Set switch to minimum
+                                            TimeMethod($"SetSwitchValue ({i})", () => switchDevice.SetSwitchValue(i, switchMinimum), TargetTime.Standard); // Set switch to minimum
                                             WaitForWriteDelay($"SetSwitchValue {switchMinimum}");
 
                                             // Check GetSwitch
@@ -849,8 +844,7 @@ namespace ConformU
                                             // Check GetSwitch
                                             if (getSwitchOk)
                                             {
-                                                LogCallToDriver("SetSwitchValue",
-                                                    $"  About to call GetSwitch({i}) method");
+                                                LogCallToDriver("SetSwitchValue", $"  About to call GetSwitch({i}) method");
                                                 SetAction("GetSwitch");
                                                 if (switchDevice.GetSwitch(i) == true)
                                                     LogOk("SetSwitchValue", "  GetSwitch returned True after SetSwitchValue(MAXIMUM_VALUE)");
@@ -949,8 +943,7 @@ namespace ConformU
                                         }
                                         else if (IsGoodValue(switchMinimum) & IsGoodValue(switchMaximum))
                                         {
-                                            LogCallToDriver("SetSwitchValue",
-                                                $"  About to call SetSwitchValue({i}, {(switchMaximum - switchMinimum) / 2.0}), attempting to set the value to its mid-point");
+                                            LogCallToDriver("SetSwitchValue", $"  About to call SetSwitchValue({i}, {(switchMaximum - switchMinimum) / 2.0}), attempting to set the value to its mid-point");
                                             SetAction($"SetSwitchValue to midpoint {(switchMaximum - switchMinimum) / 2.0}");
                                             switchDevice.SetSwitchValue(i, (switchMaximum - switchMinimum) / 2.0); // Return to the half way state
                                             LogOk("SetSwitchValue", "  Switch has been reset to half its range");
@@ -993,17 +986,32 @@ namespace ConformU
                                     // Test the async methods if present
                                     if (DeviceCapabilities.HasAsyncSwitch(GetInterfaceVersion()))
                                     {
-                                        // Only test if the switch canb write and supports async operation
+                                        // Only test if the switch can write and supports async operation
                                         LogDebug("CanAsync", $"CanAsync: {switchCanAsync}, CanWrite: {switchCanWrite}");
                                         if (switchCanWrite & switchCanAsync)
                                         {
+                                            // Test StateChangeComplete read
+                                            try
+                                            {
+                                                bool stateChangeComplete = TimeFunc<bool>($"StateChangeComplete ({i})", () => switchDevice.StateChangeComplete(i), TargetTime.Fast);
+                                                if (stateChangeComplete)
+                                                    LogOk($"StateChangeComplete", $"True as expected");
+                                                else
+                                                    LogIssue($"StateChangeComplete", $"False but no async operation has been started");
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                LogIssue($"StateChangeComplete ({i})", $"{ex.Message}");
+                                                LogDebug($"StateChangeComplete ({i})", $"{ex}");
+                                            }
+
                                             // Test SetAsync
                                             try
                                             {
                                                 // Try SetAsync(False)
                                                 SetAction($"SetAsync False");
                                                 LogCallToDriver("SetAsync", $"  About to call SetAsync({i}, {false}) method");
-                                                switchDevice.SetAsync(i, false); // Set switch false
+                                                TimeMethod($"SetAsync ({i})", () => switchDevice.SetAsync(i, false), TargetTime.Standard); // Set switch false
                                                 LogDebug("SetAsync", $"Returned from SetAsync");
 
                                                 // Wait for the operation to complete
@@ -1036,19 +1044,16 @@ namespace ConformU
                                                     {
                                                         case object o when Math.Abs(getSwitchValue - switchMinimum) <
                                                                            getSwitchValue * 0.0001:
-                                                            LogOk("SetAsync ",
-                                                                "  GetSwitchValue returned MINIMUM_VALUE after SetAsync(False)");
+                                                            LogOk("SetAsync ", "  GetSwitchValue returned MINIMUM_VALUE after SetAsync(False)");
                                                             break;
 
                                                         case object o when switchMinimum * 0.99 <= getSwitchValue &&
                                                                            getSwitchValue <= switchMinimum * 1.01:
-                                                            LogOk("SetAsync ",
-                                                                "  GetSwitchValue returned a value within 1% of MINIMUM_VALUE after SetAsync(False)");
+                                                            LogOk("SetAsync ", "  GetSwitchValue returned a value within 1% of MINIMUM_VALUE after SetAsync(False)");
                                                             break;
 
                                                         default:
-                                                            LogIssue("SetAsync ",
-                                                                $"  GetSwitchValue did not return MINIMUM_VALUE after SetAsync(False): {getSwitchValue}");
+                                                            LogIssue("SetAsync ", $"  GetSwitchValue did not return MINIMUM_VALUE after SetAsync(False): {getSwitchValue}");
                                                             break;
                                                     }
                                                 }
@@ -1217,7 +1222,7 @@ namespace ConformU
                                                 {
                                                     LogCallToDriver("SetAsyncValue", $"  About to call SetAsyncValue({i}, {switchMinimum}), attempting to set the minimum permissible value");
                                                     SetAction($"SetAsyncValue {switchMinimum}");
-                                                    switchDevice.SetAsyncValue(i, switchMinimum); // Set switch to minimum
+                                                    TimeMethod($"SetAsyncValue ({i})", () => switchDevice.SetAsyncValue(i, switchMinimum), TargetTime.Standard); // Set switch to minimum
                                                     LogDebug("SetAsyncValue", $"Returned from SetAsyncValue");
 
                                                     // Wait for the operation to complete
@@ -1311,8 +1316,7 @@ namespace ConformU
                                                                 break;
 
                                                             default:
-                                                                LogIssue("SetAsyncValue ",
-                                                                    $"  GetSwitchValue did not return MAXIMUM_VALUE after SetAsyncValue(MAXIMUM_VALUE): {getSwitchValue}");
+                                                                LogIssue("SetAsyncValue ", $"  GetSwitchValue did not return MAXIMUM_VALUE after SetAsyncValue(MAXIMUM_VALUE): {getSwitchValue}");
                                                                 break;
                                                         }
                                                     }
@@ -1322,8 +1326,7 @@ namespace ConformU
                                                     // Now try a value above maximum
                                                     try
                                                     {
-                                                        LogCallToDriver("SetAsyncValue",
-                                                            $"  About to call SetAsyncValue({i}, {switchMaximum + 1.0}), attempting to set an invalid high value");
+                                                        LogCallToDriver("SetAsyncValue", $"  About to call SetAsyncValue({i}, {switchMaximum + 1.0}), attempting to set an invalid high value");
                                                         SetAction($"SetAsyncValue {switchMaximum + 1.0}");
                                                         switchDevice.SetAsyncValue(i, switchMaximum + 1.0);
 
@@ -1512,7 +1515,7 @@ namespace ConformU
                 {
                     case SwitchPropertyMethod.MaxSwitch:
                         canReadMaxSwitch = false;
-                        returnValue = switchDevice.MaxSwitch;
+                        TimeMethod(pName, () => returnValue = switchDevice.MaxSwitch, TargetTime.Fast);
                         break;
 
                     default:

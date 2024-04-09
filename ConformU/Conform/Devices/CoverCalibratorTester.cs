@@ -197,7 +197,7 @@ namespace ConformU
                 {
                     maxBrightness = 0; // Initialise to a 'bad' value
                     LogCallToDriver("MaxBrightness", "About to call MaxBrightness property");
-                    TimeFuncNoParams<int>("MaxBrightness", () => maxBrightness = coverCalibratorDevice.MaxBrightness, TargetTime.Fast);
+                    TimeFunc<int>("MaxBrightness", () => maxBrightness = coverCalibratorDevice.MaxBrightness, TargetTime.Fast);
 
                     LogCallToDriver("MaxBrightness", "About to call CalibratorState property");
                     if (!(coverCalibratorDevice.CalibratorState == CalibratorStatus.NotPresent))
@@ -236,7 +236,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Brightness", "About to call Brightness property");
-                    TimeFuncNoParams<int>("Brightness", () => brightness = coverCalibratorDevice.Brightness, TargetTime.Fast);
+                    TimeFunc<int>("Brightness", () => brightness = coverCalibratorDevice.Brightness, TargetTime.Fast);
                     brightnessOk = true;
 
                     LogCallToDriver("MaxBrightness", "About to call CalibratorState property");
@@ -307,7 +307,7 @@ namespace ConformU
                         sw.Restart();
 
                         LogCallToDriver("OpenCover", "About to call OpenCover method");
-                        TimeMethodNoParams("OpenCover", coverCalibratorDevice.OpenCover,TargetTime.Standard);
+                        TimeMethod("OpenCover", coverCalibratorDevice.OpenCover,TargetTime.Standard);
 
                         if (!(coverState == CoverStatus.NotPresent))
                         {
@@ -395,7 +395,7 @@ namespace ConformU
                         asynchronousCloseTime = 0.0;
 
                         LogCallToDriver("CloseCover", "About to call CloseCover method");
-                        TimeMethodNoParams("CloseCover", coverCalibratorDevice.CloseCover, TargetTime.Standard);
+                        TimeMethod("CloseCover", coverCalibratorDevice.CloseCover, TargetTime.Standard);
                         if (!(coverState == CoverStatus.NotPresent)) // Synchronous close
                         {
                             LogCallToDriver("CloseCover", "About to call CoverState property");
@@ -500,7 +500,7 @@ namespace ConformU
                                     SetStatus("Waiting for Halt to complete");
 
                                     LogCallToDriver("HaltCover", "About to call HaltCover method");
-                                    TimeMethodNoParams("HaltCover", coverCalibratorDevice.HaltCover, TargetTime.Standard);
+                                    TimeMethod("HaltCover", coverCalibratorDevice.HaltCover, TargetTime.Standard);
                                     SetStatus("HaltCover command completed");
 
                                     // Confirm that the cover is no longer moving
@@ -956,25 +956,25 @@ namespace ConformU
                 {
                     case RequiredProperty.CalibratorState:
                         LogCallToDriver("CalibratorState", "About to call CalibratorState property");
-                        TimeFuncNoParams<CalibratorStatus>(propertyName, () => calibratorState = coverCalibratorDevice.CalibratorState, TargetTime.Fast);
+                        TimeFunc<CalibratorStatus>(propertyName, () => calibratorState = coverCalibratorDevice.CalibratorState, TargetTime.Fast);
                         LogOk(propertyName, calibratorState.ToString());
                         break;
 
                     case RequiredProperty.CoverState:
                         LogCallToDriver("CoverState", "About to call CoverState property");
-                        TimeFuncNoParams<CoverStatus>(propertyName, () => coverState = coverCalibratorDevice.CoverState, TargetTime.Fast);
+                        TimeFunc<CoverStatus>(propertyName, () => coverState = coverCalibratorDevice.CoverState, TargetTime.Fast);
                         LogOk(propertyName, coverState.ToString());
                         break;
 
                     case RequiredProperty.CalibratorChanging:
                         LogCallToDriver("CalibratorChanging", "About to call CalibratorChanging property");
-                        TimeFuncNoParams<bool>(propertyName, () => calibratorChanging = coverCalibratorDevice.CalibratorChanging, TargetTime.Fast);
+                        TimeFunc<bool>(propertyName, () => calibratorChanging = coverCalibratorDevice.CalibratorChanging, TargetTime.Fast);
                         LogOk(propertyName, calibratorChanging.ToString());
                         break;
 
                     case RequiredProperty.CoverMoving:
                         LogCallToDriver("CoverMoving", "About to call CoverMoving property");
-                        TimeFuncNoParams<bool>(propertyName, () => coverMoving = coverCalibratorDevice.CoverMoving, TargetTime.Fast);
+                        TimeFunc<bool>(propertyName, () => coverMoving = coverCalibratorDevice.CoverMoving, TargetTime.Fast);
                         LogOk(propertyName, coverMoving.ToString());
                         break;
 

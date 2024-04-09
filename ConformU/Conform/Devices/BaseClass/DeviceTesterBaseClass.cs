@@ -221,7 +221,7 @@ namespace ConformU
             // InterfaceVersion - Required
             try
             {
-                switch (TimeFuncNoParams("InterfaceVersion", () => GetInterfaceVersion(), TargetTime.Fast))
+                switch (TimeFunc("InterfaceVersion", () => GetInterfaceVersion(), TargetTime.Fast))
                 {
                     case < 1:
                         {
@@ -250,7 +250,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Connected", "About to get property Connected");
-                    bool connected = TimeFuncNoParams("Connected", () => baseClassDevice.Connected, TargetTime.Fast);
+                    bool connected = TimeFunc("Connected", () => baseClassDevice.Connected, TargetTime.Fast);
                     LogOk("Connected", connected.ToString());
                 }
                 catch (Exception ex)
@@ -268,7 +268,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Description", "About to get property Description");
-                    string description = TimeFuncNoParams("Description", () => baseClassDevice.Description, TargetTime.Fast);
+                    string description = TimeFunc("Description", () => baseClassDevice.Description, TargetTime.Fast);
                     switch (description ?? "")
                     {
                         case "":
@@ -308,7 +308,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DriverInfo", "About to get property DriverInfo");
-                    string driverInfo = TimeFuncNoParams("DriverInfo", () => baseClassDevice.DriverInfo, TargetTime.Fast);
+                    string driverInfo = TimeFunc("DriverInfo", () => baseClassDevice.DriverInfo, TargetTime.Fast);
                     switch (driverInfo ?? "")
                     {
                         case "":
@@ -339,7 +339,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DriverVersion", "About to get property DriverVersion");
-                    string driverVersion = TimeFuncNoParams("DriverVersion", () => baseClassDevice.DriverVersion, TargetTime.Fast);
+                    string driverVersion = TimeFunc("DriverVersion", () => baseClassDevice.DriverVersion, TargetTime.Fast);
                     switch (driverVersion ?? "")
                     {
                         case "":
@@ -375,7 +375,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Name", "About to get property Name");
-                    string name = TimeFuncNoParams("Name", () => baseClassDevice.Name, TargetTime.Fast);
+                    string name = TimeFunc("Name", () => baseClassDevice.Name, TargetTime.Fast);
                     switch (name ?? "")
                     {
                         case "":
@@ -408,7 +408,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("SupportedActions", "About to call method SupportedActions");
-                IList supportedActions = TimeFuncNoParams("SupportedActions", () => (IList)baseClassDevice.SupportedActions, TargetTime.Fast);
+                IList supportedActions = TimeFunc("SupportedActions", () => (IList)baseClassDevice.SupportedActions, TargetTime.Fast);
                 if (supportedActions.Count == 0)
                 {
                     LogOk("SupportedActions", "Driver returned an empty action list");
@@ -533,7 +533,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DeviceState", "About to get property DeviceState");
-                    List<StateValue> deviceState = TimeFuncNoParams("DeviceState", () => baseClassDevice.DeviceState, TargetTime.Fast);
+                    List<StateValue> deviceState = TimeFunc("DeviceState", () => baseClassDevice.DeviceState, TargetTime.Fast);
 
                     int numberOfItems = 0;
                     foreach (var item in deviceState)
@@ -774,7 +774,7 @@ namespace ConformU
                     // Call the Connect method and wait for the device to connect
                     SetAction("Waiting for the Connect method to complete");
                     LogCallToDriver("Connect", "About to call Connect() method");
-                    TimeMethodNoParams("Connect", () => baseClassDevice.Connect(), TargetTime.Standard);
+                    TimeMethod("Connect", () => baseClassDevice.Connect(), TargetTime.Standard);
                     LogCallToDriver("Connect", "About to get Connecting property repeatedly");
                     WaitWhile("Connecting to device", () => baseClassDevice.Connecting, SLEEP_TIME, settings.ConnectDisconnectTimeout);
                 }
@@ -833,7 +833,7 @@ namespace ConformU
                     // Call the Connect method and wait for the device to connect
                     SetAction("Waiting for the Disconnect method to complete");
                     LogCallToDriver("Disconnect", "About to call Disconnect() method");
-                    TimeMethodNoParams("Disconnect", () => baseClassDevice.Disconnect(), TargetTime.Standard);
+                    TimeMethod("Disconnect", () => baseClassDevice.Disconnect(), TargetTime.Standard);
                     LogCallToDriver("Disconnect", "About to get Connecting property repeatedly");
                     WaitWhile("Disconnecting from device", () => baseClassDevice.Connecting, SLEEP_TIME, settings.ConnectDisconnectTimeout);
                 }
@@ -1725,7 +1725,7 @@ namespace ConformU
         /// </summary>
         /// <param name="methodName">Name of the method within the Action</param>
         /// <param name="method">Action representing the method being called</param>
-        protected void TimeMethodNoParams(string methodName, Action method, TargetTime targetTime)
+        protected void TimeMethod(string methodName, Action method, TargetTime targetTime)
         {
             // Time the method call
             Stopwatch sw = Stopwatch.StartNew();
@@ -1781,7 +1781,7 @@ namespace ConformU
         /// <param name="methodName">Name of the property or function within the Func</param>
         /// <param name="function">Func<TResult> representing the property or function being called</param>
         /// <returns>The property or function result.</returns>
-        internal TResult TimeFuncNoParams<TResult>(string methodName, Func<TResult> function, TargetTime targetTime)
+        internal TResult TimeFunc<TResult>(string methodName, Func<TResult> function, TargetTime targetTime)
         {
             // Time the method call
             Stopwatch sw = Stopwatch.StartNew();
@@ -1894,6 +1894,7 @@ namespace ConformU
                 case DeviceTypes.SafetyMonitor:
                     break;
                 case DeviceTypes.Switch:
+                    memberNamePadWidth = 25;
                     break;
                 case DeviceTypes.Telescope:
                     break;

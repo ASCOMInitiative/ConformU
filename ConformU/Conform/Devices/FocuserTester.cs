@@ -168,7 +168,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("Absolute", "About to get Absolute property");
-                TimeMethodNoParams("Absolute", () => mAbsolute = focuser.Absolute, TargetTime.Fast);
+                TimeMethod("Absolute", () => mAbsolute = focuser.Absolute, TargetTime.Fast);
                 LogOk("Absolute", mAbsolute.ToString());
             }
             catch (Exception ex)
@@ -182,7 +182,7 @@ namespace ConformU
             {
                 LogCallToDriver("IsMoving", "About to get IsMoving property");
                 mCanReadIsMoving = false;
-                TimeMethodNoParams("IsMoving", () => mIsMoving = focuser.IsMoving, TargetTime.Fast);
+                TimeMethod("IsMoving", () => mIsMoving = focuser.IsMoving, TargetTime.Fast);
 
                 if (!mIsMoving)
                 {
@@ -202,7 +202,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("MaxStep", "About to get MaxStep property");
-                TimeMethodNoParams("MaxStep", () => mMaxStep = focuser.MaxStep, TargetTime.Fast);
+                TimeMethod("MaxStep", () => mMaxStep = focuser.MaxStep, TargetTime.Fast);
                 LogOk("MaxStep", mMaxStep.ToString());
             }
             catch (Exception ex)
@@ -215,7 +215,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("MaxIncrement", "About to get MaxIncrement property");
-                TimeMethodNoParams("MaxIncrement", () => mMaxIncrement = focuser.MaxIncrement, TargetTime.Fast);
+                TimeMethod("MaxIncrement", () => mMaxIncrement = focuser.MaxIncrement, TargetTime.Fast);
 
                 // Minimum value is 1, 0 or negative must be a bad value, > MaxStep is a bad value
                 switch (mMaxIncrement)
@@ -247,7 +247,7 @@ namespace ConformU
                 {
                     mAbsolutePositionOk = false;
                     LogCallToDriver("Position", "About to get Position property");
-                    TimeMethodNoParams("Position", () => mPosition = focuser.Position, TargetTime.Fast);
+                    TimeMethod("Position", () => mPosition = focuser.Position, TargetTime.Fast);
 
                     switch (mPosition) // Check that position is a valid value
                     {
@@ -313,7 +313,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("TempCompAvailable", "About to get TempCompAvailable property");
-                TimeMethodNoParams("TempCompAvailable", () => mTempCompAvailable = focuser.TempCompAvailable, TargetTime.Fast);
+                TimeMethod("TempCompAvailable", () => mTempCompAvailable = focuser.TempCompAvailable, TargetTime.Fast);
                 LogOk("TempCompAvailable", mTempCompAvailable.ToString());
             }
             catch (Exception ex)
@@ -326,7 +326,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("TempComp Read", "About to get TempComp property");
-                TimeMethodNoParams("TempComp Read", () => mTempComp = focuser.TempComp, TargetTime.Fast);
+                TimeMethod("TempComp Read", () => mTempComp = focuser.TempComp, TargetTime.Fast);
 
                 if (mTempComp & !mTempCompAvailable)
                     LogIssue("TempComp Read", "TempComp is True when TempCompAvailable is False - this should not be so");
@@ -348,7 +348,7 @@ namespace ConformU
                     mTempCompFalseOk = false;
                     // Turn compensation on 
                     LogCallToDriver("TempComp Write", "About to set TempComp property");
-                    TimeMethodNoParams("TempComp Write", () => focuser.TempComp = true, TargetTime.Standard);
+                    TimeMethod("TempComp Write", () => focuser.TempComp = true, TargetTime.Standard);
 
                     LogOk("TempComp Write", "Successfully turned temperature compensation on");
                     mTempCompTrueOk = true; // Set to true to indicate TempComp can be successfully set to True
@@ -395,7 +395,7 @@ namespace ConformU
             {
                 mCanReadTemperature = false;
                 LogCallToDriver("Temperature", "About to get Temperature property");
-                TimeMethodNoParams("Temperature", () => mTemperature = focuser.Temperature, TargetTime.Fast);
+                TimeMethod("Temperature", () => mTemperature = focuser.Temperature, TargetTime.Fast);
 
                 switch (mTemperature)
                 {
@@ -427,7 +427,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("Halt", "About to call Halt method");
-                TimeMethodNoParams("Halt", () => focuser.Halt(),TargetTime.Standard);
+                TimeMethod("Halt", () => focuser.Halt(),TargetTime.Standard);
                 LogOk("Halt", "Focuser halted OK");
             }
             catch (Exception ex)
@@ -722,7 +722,7 @@ namespace ConformU
                 startTime = DateTime.Now;
 
                 LogCallToDriver(testName, "About to call Move method");
-                TimeMethodNoParams($"Move to {newPosition}", () => focuser.Move(newPosition), TargetTime.Standard); // Move the focuser
+                TimeMethod($"Move to {newPosition}", () => focuser.Move(newPosition), TargetTime.Standard); // Move the focuser
                 TimeSpan duration = DateTime.Now.Subtract(startTime);
 
                 // Test whether the Move will be treated as synchronous or asynchronous

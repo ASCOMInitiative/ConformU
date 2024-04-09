@@ -338,7 +338,7 @@ namespace ConformU
                     case CanType.TstCanAbortExposure:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CanAbortExposure");
-                            mCanAbortExposure = TimeFuncNoParams<bool>(pName, () => camera.CanAbortExposure, TargetTime.Fast);
+                            mCanAbortExposure = TimeFunc<bool>(pName, () => camera.CanAbortExposure, TargetTime.Fast);
                             LogOk(pName, mCanAbortExposure.ToString());
                             break;
                         }
@@ -346,7 +346,7 @@ namespace ConformU
                     case CanType.TstCanAsymmetricBin:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CanAsymmetricBin");
-                            mCanAsymmetricBin = TimeFuncNoParams<bool>(pName, () => camera.CanAsymmetricBin, TargetTime.Fast);
+                            mCanAsymmetricBin = TimeFunc<bool>(pName, () => camera.CanAsymmetricBin, TargetTime.Fast);
                             LogOk(pName, mCanAsymmetricBin.ToString());
                             break;
                         }
@@ -354,7 +354,7 @@ namespace ConformU
                     case CanType.TstCanGetCoolerPower:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CanGetCoolerPower");
-                            mCanGetCoolerPower = TimeFuncNoParams<bool>(pName, () => camera.CanGetCoolerPower, TargetTime.Fast);
+                            mCanGetCoolerPower = TimeFunc<bool>(pName, () => camera.CanGetCoolerPower, TargetTime.Fast);
                             LogOk(pName, mCanGetCoolerPower.ToString());
                             break;
                         }
@@ -362,7 +362,7 @@ namespace ConformU
                     case CanType.TstCanPulseGuide:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CanPulseGuide");
-                            mCanPulseGuide = TimeFuncNoParams<bool>(pName, () => camera.CanPulseGuide, TargetTime.Fast);
+                            mCanPulseGuide = TimeFunc<bool>(pName, () => camera.CanPulseGuide, TargetTime.Fast);
                             LogOk(pName, mCanPulseGuide.ToString());
                             break;
                         }
@@ -370,7 +370,7 @@ namespace ConformU
                     case CanType.TstCanSetCcdTemperature:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CanSetCCDTemperature");
-                            mCanSetCcdTemperature = TimeFuncNoParams<bool>(pName, () => camera.CanSetCCDTemperature, TargetTime.Fast);
+                            mCanSetCcdTemperature = TimeFunc<bool>(pName, () => camera.CanSetCCDTemperature, TargetTime.Fast);
                             LogOk(pName, mCanSetCcdTemperature.ToString());
                             break;
                         }
@@ -378,7 +378,7 @@ namespace ConformU
                     case CanType.TstCanStopExposure:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CanStopExposure");
-                            mCanStopExposure = TimeFuncNoParams<bool>(pName, () => camera.CanStopExposure, TargetTime.Fast);
+                            mCanStopExposure = TimeFunc<bool>(pName, () => camera.CanStopExposure, TargetTime.Fast);
                             LogOk(pName, mCanStopExposure.ToString());
                             break;
                         }
@@ -386,7 +386,7 @@ namespace ConformU
                     case CanType.TstCanFastReadout:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CanFastReadout");
-                            mCanFastReadout = TimeFuncNoParams<bool>(pName, () => camera.CanFastReadout, TargetTime.Fast);
+                            mCanFastReadout = TimeFunc<bool>(pName, () => camera.CanFastReadout, TargetTime.Fast);
                             LogOk(pName, mCanFastReadout.ToString());
                             break;
                         }
@@ -615,7 +615,7 @@ namespace ConformU
                         try
                         {
                             LogCallToDriver("ConformanceCheck", "About to set BinX");
-                            TimeMethodNoParams("BinX Write", () => camera.BinX = (short)lBinX, TargetTime.Standard);
+                            TimeMethod("BinX Write", () => camera.BinX = (short)lBinX, TargetTime.Standard);
                             binXSetOk = true;
                         }
                         catch (Exception ex)
@@ -628,7 +628,7 @@ namespace ConformU
                         try
                         {
                             LogCallToDriver("ConformanceCheck", "About to set BinY");
-                            TimeMethodNoParams("BinY Write", () => camera.BinY = (short)lBinY, TargetTime.Standard);
+                            TimeMethod("BinY Write", () => camera.BinY = (short)lBinY, TargetTime.Standard);
 
                             if (binXSetOk)
                                 LogOk("BinXY Write", $"Successfully set asymmetric XY binning: {lBinX} x {lBinY}");
@@ -652,7 +652,7 @@ namespace ConformU
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to set BinX");
-                        TimeMethodNoParams("BinX Write", () => camera.BinX = (short)lBinX, TargetTime.Standard);
+                        TimeMethod("BinX Write", () => camera.BinX = (short)lBinX, TargetTime.Standard);
                         binXSetOk = true;
                     }
                     catch (Exception ex)
@@ -665,7 +665,7 @@ namespace ConformU
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to set BinY");
-                        TimeMethodNoParams("BinY Write", () => camera.BinY = (short)lBinX, TargetTime.Standard);
+                        TimeMethod("BinY Write", () => camera.BinY = (short)lBinX, TargetTime.Standard);
                         if (binXSetOk)
                             LogOk("BinXY Write", $"Successfully set symmetric XY binning: {lBinX} x {lBinX}");
                         else
@@ -721,12 +721,12 @@ namespace ConformU
                     if (lOriginalCoolerState)
                     {
                         LogCallToDriver("ConformanceCheck", "About to set CoolerOn");
-                        TimeMethodNoParams("CoolerOn", () => camera.CoolerOn = false, TargetTime.Standard);
+                        TimeMethod("CoolerOn", () => camera.CoolerOn = false, TargetTime.Standard);
                     }
                     else
                     {
                         LogCallToDriver("ConformanceCheck", "About to set CoolerOn");
-                        TimeMethodNoParams("CoolerOn", () => camera.CoolerOn = true, TargetTime.Standard);
+                        TimeMethod("CoolerOn", () => camera.CoolerOn = true, TargetTime.Standard);
                     }
                     LogOk("CoolerOn Write", "Successfully changed CoolerOn state");
                 }
@@ -773,7 +773,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to get ImageArray");
-                    TimeMethodNoParams("ImageArray", () => mImageArray = (Array)camera.ImageArray, TargetTime.Extended);
+                    TimeMethod("ImageArray", () => mImageArray = (Array)camera.ImageArray, TargetTime.Extended);
                     if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
                     {
                         LogIssue("ImageArray", "No image has been taken but ImageArray has not returned an error");
@@ -802,7 +802,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to get ImageArray");
-                    TimeMethodNoParams("ImageArray", () => mImageArray = (Array)camera.ImageArray, TargetTime.Extended);
+                    TimeMethod("ImageArray", () => mImageArray = (Array)camera.ImageArray, TargetTime.Extended);
                     LogIssue("ImageArray", "ImageReady is false and no image has been taken but ImageArray has not returned an error");
                 }
                 catch (Exception ex)
@@ -827,7 +827,7 @@ namespace ConformU
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
-                        TimeMethodNoParams("ImageArrayVariant", () => mImageArrayVariant = (Array)camera.ImageArrayVariant, TargetTime.Extended);
+                        TimeMethod("ImageArrayVariant", () => mImageArrayVariant = (Array)camera.ImageArrayVariant, TargetTime.Extended);
 
                         if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
                         {
@@ -856,7 +856,7 @@ namespace ConformU
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
-                        TimeMethodNoParams("ImageArrayVariant", () => mImageArrayVariant = (Array)camera.ImageArrayVariant, TargetTime.Extended);
+                        TimeMethod("ImageArrayVariant", () => mImageArrayVariant = (Array)camera.ImageArrayVariant, TargetTime.Extended);
                         LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not returned an error");
                     }
                     catch (Exception ex)
@@ -897,7 +897,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
-                    TimeMethodNoParams("SetCCDTemperature Write", () => camera.SetCCDTemperature = 0.0, TargetTime.Standard); // Try an acceptable value
+                    TimeMethod("SetCCDTemperature Write", () => camera.SetCCDTemperature = 0.0, TargetTime.Standard); // Try an acceptable value
                     LogOk("SetCCDTemperature Write", "Successfully wrote 0.0");
 
                     // Execution only gets here if the CCD temperature can be set successfully
@@ -1017,7 +1017,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to get SensorType");
-                    TimeFuncNoParams("SensorType", () => mSensorType = (ASCOM.DeviceInterface.SensorType)camera.SensorType, TargetTime.Fast);
+                    TimeFunc("SensorType", () => mSensorType = (ASCOM.DeviceInterface.SensorType)camera.SensorType, TargetTime.Fast);
                     mCanReadSensorType = true; // Set a flag to indicate that we have got a valid SensorType value
 
                     // Successfully retrieved a value
@@ -1087,7 +1087,7 @@ namespace ConformU
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to set FastReadout");
-                        TimeMethodNoParams("FastReadout Write", () => camera.FastReadout = !mFastReadout, TargetTime.Standard);
+                        TimeMethod("FastReadout Write", () => camera.FastReadout = !mFastReadout, TargetTime.Standard);
 
                         LogCallToDriver("ConformanceCheck", "About to set FastReadout");
                         camera.FastReadout = mFastReadout;
@@ -1116,7 +1116,7 @@ namespace ConformU
                 {
                     mCanReadGainMin = false;
                     LogCallToDriver("ConformanceCheck", "About to get GainMin");
-                    TimeFuncNoParams<short>("GainMin", () => mGainMin = camera.GainMin, TargetTime.Standard);
+                    TimeFunc<short>("GainMin", () => mGainMin = camera.GainMin, TargetTime.Standard);
 
                     // Successfully retrieved a value
                     mCanReadGainMin = true;
@@ -1132,7 +1132,7 @@ namespace ConformU
                 {
                     mCanReadGainMax = false;
                     LogCallToDriver("ConformanceCheck", "About to get GainMax");
-                    TimeFuncNoParams("GainMax", () => mGainMax = camera.GainMax, TargetTime.Standard);
+                    TimeFunc("GainMax", () => mGainMax = camera.GainMax, TargetTime.Standard);
 
                     // Successfully retrieved a value
                     mCanReadGainMax = true;
@@ -1148,7 +1148,7 @@ namespace ConformU
                 {
                     mCanReadGains = false;
                     LogCallToDriver("ConformanceCheck", "About to get Gains");
-                    TimeFuncNoParams("GainMax", () => mGains = camera.Gains, TargetTime.Fast);
+                    TimeFunc("GainMax", () => mGains = camera.Gains, TargetTime.Fast);
 
                     // Successfully retrieved a value
                     mCanReadGains = true;
@@ -1171,7 +1171,7 @@ namespace ConformU
                 {
                     mCanReadGain = false; // Set default value to indicate can't read gain
                     LogCallToDriver("ConformanceCheck", "About to get Gain");
-                    TimeFuncNoParams("GainMax", () => mGain = camera.Gain, TargetTime.Fast);
+                    TimeFunc("GainMax", () => mGain = camera.Gain, TargetTime.Fast);
 
                     mCanReadGain = true; // Flag that we can read Gain OK
                     if (mCanReadGains)
@@ -1223,7 +1223,7 @@ namespace ConformU
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to set Gain");
-                        TimeMethodNoParams("Gain Write", () => camera.Gain = 0, TargetTime.Standard);
+                        TimeMethod("Gain Write", () => camera.Gain = 0, TargetTime.Standard);
                         LogIssue("Gain Write", "Writing to Gain did not return a PropertyNotImplemented error whereas this was the case for reading Gain.");
                     }
                     catch (Exception ex)
@@ -1247,7 +1247,7 @@ namespace ConformU
                             try
                             {
                                 LogCallToDriver("ConformanceCheck", "About to set Gain");
-                                TimeMethodNoParams("Gain Write", () => camera.Gain = mGainMin, TargetTime.Standard);
+                                TimeMethod("Gain Write", () => camera.Gain = mGainMin, TargetTime.Standard);
                                 LogOk("Gain Write", $"Successfully set gain minimum value {mGainMin}.");
                             }
                             catch (Exception ex)
@@ -1304,7 +1304,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to get PercentCompleted");
-                    TimeMethodNoParams("PercentCompleted", () => mPercentCompleted = camera.PercentCompleted, TargetTime.Fast);
+                    TimeMethod("PercentCompleted", () => mPercentCompleted = camera.PercentCompleted, TargetTime.Fast);
                     switch (mPercentCompleted)
                     {
                         case object _ when mPercentCompleted < 0 // Lower than minimum value
@@ -1338,7 +1338,7 @@ namespace ConformU
                 {
                     mCanReadReadoutModes = false;
                     LogCallToDriver("ConformanceCheck", "About to get ReadoutModes");
-                    TimeMethodNoParams("ReadoutModes", () => mReadoutModes = camera.ReadoutModes, TargetTime.Fast);
+                    TimeMethod("ReadoutModes", () => mReadoutModes = camera.ReadoutModes, TargetTime.Fast);
 
                     // Successfully retrieved a value
                     mCanReadReadoutModes = true;
@@ -1386,7 +1386,7 @@ namespace ConformU
                 {
                     mCanReadOffsetMin = false;
                     LogCallToDriver("ConformanceCheck", "About to get OffsetMin");
-                    TimeMethodNoParams("OffsetMin", () => mOffsetMin = camera.OffsetMin, TargetTime.Fast);
+                    TimeMethod("OffsetMin", () => mOffsetMin = camera.OffsetMin, TargetTime.Fast);
 
                     // Successfully retrieved a value
                     mCanReadOffsetMin = true;
@@ -1402,7 +1402,7 @@ namespace ConformU
                 {
                     mCanReadOffsetMax = false;
                     LogCallToDriver("ConformanceCheck", "About to get OffsetMax");
-                    TimeMethodNoParams("OffsetMax", () => mOffsetMax = camera.OffsetMax, TargetTime.Fast);
+                    TimeMethod("OffsetMax", () => mOffsetMax = camera.OffsetMax, TargetTime.Fast);
 
                     // Successfully retrieved a value
                     mCanReadOffsetMax = true;
@@ -1418,7 +1418,7 @@ namespace ConformU
                 {
                     mCanReadOffsets = false;
                     LogCallToDriver("ConformanceCheck", "About to get Offsets");
-                    TimeMethodNoParams("Offsets", () => mOffsets = camera.Offsets, TargetTime.Fast);
+                    TimeMethod("Offsets", () => mOffsets = camera.Offsets, TargetTime.Fast);
 
                     // Successfully retrieved a value
                     mCanReadOffsets = true;
@@ -1442,7 +1442,7 @@ namespace ConformU
                 {
                     mCanReadOffset = false; // Set default value to indicate can't read offset
                     LogCallToDriver("ConformanceCheck", "About to get Offset");
-                    TimeMethodNoParams("Offset", () => mOffset = camera.Offset, TargetTime.Fast);
+                    TimeMethod("Offset", () => mOffset = camera.Offset, TargetTime.Fast);
 
                     mCanReadOffset = true; // Flag that we can read Offset OK
                     if (mCanReadOffsets)
@@ -1523,7 +1523,7 @@ namespace ConformU
                                 try
                                 {
                                     LogCallToDriver("ConformanceCheck", "About to set Offset");
-                                    TimeMethodNoParams("Offset Write", () => camera.Offset = mOffsetMin, TargetTime.Standard);
+                                    TimeMethod("Offset Write", () => camera.Offset = mOffsetMin, TargetTime.Standard);
                                     LogOk("Offset Write", $"Successfully set offset minimum value {mOffsetMin}.");
                                 }
                                 catch (Exception ex)
@@ -1585,7 +1585,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to set SubExposureDuration");
-                    TimeMethodNoParams("SubExposureDuration Write", () => camera.SubExposureDuration = mSubExposureDuration, TargetTime.Standard);
+                    TimeMethod("SubExposureDuration Write", () => camera.SubExposureDuration = mSubExposureDuration, TargetTime.Standard);
                     LogOk("SubExposureDuration write", $"Successfully wrote {mSubExposureDuration}");
                 }
                 catch (Exception ex)
@@ -1605,7 +1605,7 @@ namespace ConformU
                     case CamPropertyType.CameraState:
                         {
                             LogCallToDriver("ConformanceCheck", "About to get CameraState");
-                            returnValue = TimeFuncNoParams(pName, () => camera.CameraState, TargetTime.Fast);
+                            returnValue = TimeFunc(pName, () => camera.CameraState, TargetTime.Fast);
                             break;
                         }
 
@@ -1630,7 +1630,7 @@ namespace ConformU
 
             try
             {
-                TimeMethodNoParams(pName, () =>
+                TimeMethod(pName, () =>
                 {
                     switch (pType)
                     {
@@ -1747,7 +1747,7 @@ namespace ConformU
 
             try
             {
-                TimeMethodNoParams(pName, () =>
+                TimeMethod(pName, () =>
                 {
                     switch (pType)
                     {
@@ -1890,7 +1890,7 @@ namespace ConformU
 
             try
             {
-                TimeMethodNoParams(pName, () =>
+                TimeMethod(pName, () =>
                 {
                     switch (pType)
                     {
@@ -2022,7 +2022,7 @@ namespace ConformU
             try
             {
                 returnValue = false;
-                TimeMethodNoParams(pName, () =>
+                TimeMethod(pName, () =>
                 {
                     switch (pType)
                     {
@@ -2085,7 +2085,7 @@ namespace ConformU
             string returnValue = "";
             try
             {
-                TimeMethodNoParams(pName, () =>
+                TimeMethod(pName, () =>
                 {
                     switch (pType)
                     {
@@ -2145,7 +2145,7 @@ namespace ConformU
 
             try // OK value first
             {
-                TimeMethodNoParams($"{pProperty} write", () =>
+                TimeMethod($"{pProperty} write", () =>
                 {
 
                     switch (pType)
@@ -2208,7 +2208,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to call AbortExposure");
-                    TimeMethodNoParams("AbortExposure", camera.AbortExposure, TargetTime.Standard);
+                    TimeMethod("AbortExposure", camera.AbortExposure, TargetTime.Standard);
                     if (mCanAbortExposure)
                         LogOk("AbortExposure", "No error returned when camera is already idle");
                     else
@@ -2295,7 +2295,7 @@ namespace ConformU
                 {
                     LogCallToDriver("ConformanceCheck", "About to call StopExposure");
                     SetAction("Calling StopExposure()");
-                    TimeMethodNoParams("StopExposure", camera.StopExposure, TargetTime.Standard);
+                    TimeMethod("StopExposure", camera.StopExposure, TargetTime.Standard);
                     if (mCanStopExposure)
                         LogOk("StopExposure", "No error returned when camera is already idle");
                     else
@@ -3076,7 +3076,7 @@ namespace ConformU
                     {
                         LogCallToDriver("ConformanceCheck", "About to get ImageArray");
                         sw.Restart();
-                        TimeMethodNoParams("ImageArray", () => mImageArray = (Array)camera.ImageArray, TargetTime.Extended);
+                        TimeMethod("ImageArray", () => mImageArray = (Array)camera.ImageArray, TargetTime.Extended);
                         sw.Stop();
                         // Do not respond if the task has been cancelled
                         if (!cancellationToken.IsCancellationRequested) // Task is live and has not been cancelled
@@ -3254,7 +3254,7 @@ namespace ConformU
                             // Get the variant array image
                             LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                             sw.Restart();
-                            TimeMethodNoParams("ImageArrayVariant", () => imageObject = camera.ImageArrayVariant, TargetTime.Extended);
+                            TimeMethod("ImageArrayVariant", () => imageObject = camera.ImageArrayVariant, TargetTime.Extended);
 
                             sw.Stop();
 

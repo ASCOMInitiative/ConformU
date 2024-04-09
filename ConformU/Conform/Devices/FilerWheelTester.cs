@@ -198,7 +198,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("FocusOffsets Get", "About to get FocusOffsets property");
-                TimeMethodNoParams("FocusOffsets", () => filterOffsets = filterWheel.FocusOffsets, TargetTime.Fast);
+                TimeMethod("FocusOffsets", () => filterOffsets = filterWheel.FocusOffsets, TargetTime.Fast);
 
                 numberOfFilterOffsets = filterOffsets.Length;
                 if (numberOfFilterOffsets == 0)
@@ -228,7 +228,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("Names Get", "About to get Names property");
-                TimeMethodNoParams("Names", () => filterNames = filterWheel.Names, TargetTime.Fast);
+                TimeMethod("Names", () => filterNames = filterWheel.Names, TargetTime.Fast);
 
                 numberOfFilternames = filterNames.Length;
                 if (numberOfFilternames == 0)
@@ -265,7 +265,7 @@ namespace ConformU
             {
                 SetTest("Position Get");
                 LogCallToDriver("Position Get", "About to get Position property");
-                TimeMethodNoParams("Position", () => startingFilterNumber = filterWheel.Position, TargetTime.Fast);
+                TimeMethod("Position", () => startingFilterNumber = filterWheel.Position, TargetTime.Fast);
 
                 if ((startingFilterNumber < 0) | (startingFilterNumber >= numberOfFilterOffsets))
                     LogIssue("Position Get", $"Illegal filter position returned: {startingFilterNumber}");
@@ -555,7 +555,7 @@ namespace ConformU
                 // Set the required position
                 LogCallToDriver("Position Set", $"About to set Position property {position}");
                 SetAction($"Setting position {position}");
-                TimeMethodNoParams($"Move to position {position}",()=> filterWheel.Position = Convert.ToInt16(position),TargetTime.Standard);
+                TimeMethod($"Move to position {position}",()=> filterWheel.Position = Convert.ToInt16(position),TargetTime.Standard);
 
                 // Wait for the reported position to match the required position
                 Stopwatch sw = Stopwatch.StartNew();

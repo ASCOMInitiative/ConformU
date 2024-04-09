@@ -464,7 +464,7 @@ namespace ConformU
                 {
                     returnValue = BAD_VALUE;
 
-                    TimeMethodNoParams(enumName.ToString(), () =>
+                    TimeMethod(enumName.ToString(), () =>
                     {
                         switch (enumName)
                         {
@@ -682,7 +682,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver(enumName.ToString(), $"About to call SensorDescription({propertyName}) method");
-                TimeMethodNoParams(enumName.ToString(), () => returnValue = mObservingConditions.SensorDescription(propertyName), TargetTime.Fast);
+                TimeMethod(enumName.ToString(), () => returnValue = mObservingConditions.SensorDescription(propertyName), TargetTime.Fast);
 
                 // Successfully retrieved a value
                 switch (returnValue)

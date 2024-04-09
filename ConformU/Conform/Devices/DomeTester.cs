@@ -518,7 +518,7 @@ namespace ConformU
             SetTest("SlewToAltitude");
             SetAction($"Slewing to altitude {pAltitude} degrees");
             LogCallToDriver(pName, "About to call SlewToAltitude");
-            TimeMethodNoParams(pName, () => domeDevice.SlewToAltitude(pAltitude), TargetTime.Standard);
+            TimeMethod(pName, () => domeDevice.SlewToAltitude(pAltitude), TargetTime.Standard);
 
             if (mCanReadSlewing)
             {
@@ -562,13 +562,13 @@ namespace ConformU
             {
                 mCanSlewToAzimuth = false;
                 LogCallToDriver(pName, "About to call SlewToAzimuth");
-                TimeMethodNoParams(pName, () => domeDevice.SlewToAzimuth(pAzimuth), TargetTime.Standard);
+                TimeMethod(pName, () => domeDevice.SlewToAzimuth(pAzimuth), TargetTime.Standard);
                 mCanSlewToAzimuth = true; // Command is supported and didn't generate an exception
             }
             else
             {
                 LogCallToDriver(pName, "About to call SlewToAzimuth");
-                TimeMethodNoParams(pName, () => domeDevice.SlewToAzimuth(pAzimuth), TargetTime.Standard);
+                TimeMethod(pName, () => domeDevice.SlewToAzimuth(pAzimuth), TargetTime.Standard);
             }
 
             if (mCanReadSlewing)
@@ -625,14 +625,14 @@ namespace ConformU
         {
             try
             {
-                TimeMethodNoParams(pName, () =>
+                TimeMethod(pName, () =>
                 {
                     switch (pType)
                     {
                         case DomePropertyMethod.CanFindHome:
                             {
                                 LogCallToDriver(pName, "About to get CanFindHome property");
-                                mCanFindHome = TimeFuncNoParams(pName, () => domeDevice.CanFindHome, TargetTime.Fast);
+                                mCanFindHome = TimeFunc(pName, () => domeDevice.CanFindHome, TargetTime.Fast);
                                 LogOk(pName, mCanFindHome.ToString());
                                 break;
                             }
@@ -790,7 +790,7 @@ namespace ConformU
                     case DomePropertyMethod.Altitude:
                         mCanReadAltitude = false;
                         LogCallToDriver(pName, "About to get Altitude property");
-                        TimeMethodNoParams(pName, () => mAltitude = domeDevice.Altitude, TargetTime.Fast);
+                        TimeMethod(pName, () => mAltitude = domeDevice.Altitude, TargetTime.Fast);
                         mCanReadAltitude = true;
                         LogOk(pName, mAltitude.ToString());
                         break;
@@ -798,7 +798,7 @@ namespace ConformU
                     case DomePropertyMethod.AtHome:
                         mCanReadAtHome = false;
                         LogCallToDriver(pName, "About to get AtHome property");
-                        TimeMethodNoParams(pName, () => mAtHome = domeDevice.AtHome, TargetTime.Fast);
+                        TimeMethod(pName, () => mAtHome = domeDevice.AtHome, TargetTime.Fast);
                         mCanReadAtHome = true;
                         LogOk(pName, mAtHome.ToString());
                         break;
@@ -806,7 +806,7 @@ namespace ConformU
                     case DomePropertyMethod.AtPark:
                         mCanReadAtPark = false;
                         LogCallToDriver(pName, "About to get AtPark property");
-                        TimeMethodNoParams(pName, () => mAtPark = domeDevice.AtPark, TargetTime.Fast);
+                        TimeMethod(pName, () => mAtPark = domeDevice.AtPark, TargetTime.Fast);
                         mCanReadAtPark = true;
                         LogOk(pName, mAtPark.ToString());
                         break;
@@ -814,7 +814,7 @@ namespace ConformU
                     case DomePropertyMethod.Azimuth:
                         mCanReadAzimuth = false;
                         LogCallToDriver(pName, "About to get Azimuth property");
-                        TimeMethodNoParams(pName, () => mAzimuth = domeDevice.Azimuth, TargetTime.Fast);
+                        TimeMethod(pName, () => mAzimuth = domeDevice.Azimuth, TargetTime.Fast);
                         mCanReadAzimuth = true;
                         LogOk(pName, mAzimuth.ToString());
                         break;
@@ -822,7 +822,7 @@ namespace ConformU
                     case DomePropertyMethod.ShutterStatus:
                         mCanReadShutterStatus = false;
                         LogCallToDriver(pName, "About to get ShutterStatus property");
-                        TimeMethodNoParams(pName, () => mShutterStatus = domeDevice.ShutterStatus, TargetTime.Fast);
+                        TimeMethod(pName, () => mShutterStatus = domeDevice.ShutterStatus, TargetTime.Fast);
                         mCanReadShutterStatus = true;
                         LogOk(pName, mShutterStatus.ToString());
                         break;
@@ -835,12 +835,12 @@ namespace ConformU
                                 if (mSlaved)
                                 {
                                     LogCallToDriver(pName, "About to set Slaved property");
-                                    TimeMethodNoParams(pName, () => domeDevice.Slaved = false, TargetTime.Standard);
+                                    TimeMethod(pName, () => domeDevice.Slaved = false, TargetTime.Standard);
                                 }
                                 else
                                 {
                                     LogCallToDriver(pName, "About to set Slaved property");
-                                    TimeMethodNoParams(pName, () => domeDevice.Slaved = true, TargetTime.Standard);
+                                    TimeMethod(pName, () => domeDevice.Slaved = true, TargetTime.Standard);
                                 }
                                 LogCallToDriver(pName, "About to set Slaved property");
                                 domeDevice.Slaved = mSlaved; // Restore original value
@@ -890,7 +890,7 @@ namespace ConformU
                             try
                             {
                                 LogCallToDriver(pName, "About to call FindHome method");
-                                TimeMethodNoParams(pName, () => domeDevice.FindHome(), TargetTime.Standard);
+                                TimeMethod(pName, () => domeDevice.FindHome(), TargetTime.Standard);
                                 if (mCanReadSlaved)
                                 {
                                     LogCallToDriver(pName, "About to get Slaved Property");
@@ -963,7 +963,7 @@ namespace ConformU
                             try
                             {
                                 LogCallToDriver(pName, "About to call Park method");
-                                TimeMethodNoParams(pName, () => domeDevice.Park(), TargetTime.Standard);
+                                TimeMethod(pName, () => domeDevice.Park(), TargetTime.Standard);
                                 if (mCanReadSlaved)
                                 {
                                     LogCallToDriver(pName, "About to get Slaved property");
@@ -1011,7 +1011,7 @@ namespace ConformU
                             try
                             {
                                 LogCallToDriver(pName, "About to call SetPark method");
-                                TimeMethodNoParams(pName, () => domeDevice.SetPark(), TargetTime.Standard);
+                                TimeMethod(pName, () => domeDevice.SetPark(), TargetTime.Standard);
                                 LogOk(pName, "SetPark issued OK");
                             }
                             catch (Exception ex)
@@ -1158,7 +1158,7 @@ namespace ConformU
                                         lNewAzimuth = lOriginalAzimuth + DOME_SYNC_OFFSET;
 
                                     // Sync to new azimuth
-                                    TimeMethodNoParams(pName, () => domeDevice.SyncToAzimuth(lNewAzimuth), TargetTime.Standard);
+                                    TimeMethod(pName, () => domeDevice.SyncToAzimuth(lNewAzimuth), TargetTime.Standard);
 
                                     // OK Dome hasn't moved but should now show azimuth as a new value
                                     switch (Math.Abs(lNewAzimuth - domeDevice.Azimuth))
@@ -1191,7 +1191,7 @@ namespace ConformU
                                 else
                                 {
                                     LogCallToDriver(pName, "About to call SyncToAzimuth method");
-                                    TimeMethodNoParams(pName, () => domeDevice.SyncToAzimuth(45.0), TargetTime.Standard); // Sync to an arbitrary direction
+                                    TimeMethod(pName, () => domeDevice.SyncToAzimuth(45.0), TargetTime.Standard); // Sync to an arbitrary direction
                                     LogOk(pName, "Dome successfully synced to 45 degrees but unable to read azimuth to confirm this");
                                 }
 
@@ -1386,7 +1386,7 @@ namespace ConformU
                         // Shutter is now open so close it
                         SetAction("Closing shutter");
                         LogCallToDriver(pName, "About to call CloseShutter method");
-                        TimeMethodNoParams(pName, () => domeDevice.CloseShutter(), TargetTime.Standard);
+                        TimeMethod(pName, () => domeDevice.CloseShutter(), TargetTime.Standard);
 
                         SetAction("Waiting for shutter to close");
                         LogDebug(pName, "Waiting for shutter to close");
@@ -1406,7 +1406,7 @@ namespace ConformU
                         // Shutter is now closed so open it
                         SetAction("Opening shutter");
                         LogCallToDriver(pName, "About to call OpenShutter method");
-                        TimeMethodNoParams(pName, () => domeDevice.OpenShutter(), TargetTime.Standard);
+                        TimeMethod(pName, () => domeDevice.OpenShutter(), TargetTime.Standard);
 
                         SetAction("Waiting for shutter to open");
                         LogDebug(pName, "Waiting for shutter to open");
