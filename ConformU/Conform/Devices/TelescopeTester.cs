@@ -556,6 +556,7 @@ namespace ConformU
             TelescopeCanTest(CanType.CanSetPierSide, "CanSetPierSide");
             try
             {
+                LogCallToDriver("AlignmentMode Read", "About to get AlignmentMode property");
                 if ((telescopeDevice.AlignmentMode != AlignmentMode.GermanPolar) & canSetPierside)
                     LogIssue("CanSetPierSide", "AlignmentMode is not GermanPolar but CanSetPierSide is true - contrary to ASCOM specification");
             }
@@ -593,7 +594,7 @@ namespace ConformU
             try // First read should fail!
             {
                 LogCallToDriver("TargetDeclination Read", "About to get TargetDeclination property");
-                targetDeclination = telescopeDevice.TargetDeclination;
+                targetDeclination = TimeFunc<double>("TargetDeclination Read", () => telescopeDevice.TargetDeclination, TargetTime.Fast);
             }
             catch (Exception ex)
             {
@@ -605,7 +606,7 @@ namespace ConformU
             try // First read should fail!
             {
                 LogCallToDriver("TargetRightAscension Read", "About to get TargetRightAscension property");
-                targetRightAscension = telescopeDevice.TargetRightAscension;
+                targetRightAscension = TimeFunc("TargetRightAscension Read", () => telescopeDevice.TargetRightAscension, TargetTime.Fast);
             }
             catch (Exception ex)
             {
@@ -616,7 +617,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("AlignmentMode", "About to get AlignmentMode property");
-                alignmentMode = (AlignmentMode)telescopeDevice.AlignmentMode;
+                alignmentMode = TimeFunc("AlignmentMode", () => telescopeDevice.AlignmentMode, TargetTime.Fast);
                 LogOk("AlignmentMode", alignmentMode.ToString());
             }
             catch (Exception ex)
@@ -631,7 +632,7 @@ namespace ConformU
             try
             {
                 canReadAltitide = false; LogCallToDriver("Altitude", "About to get Altitude property");
-                altitude = telescopeDevice.Altitude;
+                altitude = TimeFunc("Altitude", () => telescopeDevice.Altitude, TargetTime.Fast);
                 canReadAltitide = true; // Read successfully
                 switch (altitude)
                 {
@@ -666,7 +667,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("ApertureArea", "About to get ApertureArea property");
-                apertureArea = telescopeDevice.ApertureArea;
+                apertureArea = TimeFunc("ApertureArea", () => telescopeDevice.ApertureArea, TargetTime.Fast);
                 switch (apertureArea)
                 {
                     case var case2 when case2 < 0d:
@@ -700,7 +701,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("ApertureDiameter", "About to get ApertureDiameter property");
-                apertureDiameter = telescopeDevice.ApertureDiameter;
+                apertureDiameter = TimeFunc("ApertureDiameter", () => telescopeDevice.ApertureDiameter, TargetTime.Fast);
                 switch (apertureDiameter)
                 {
                     case var case3 when case3 < 0.0d:
@@ -736,7 +737,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("AtHome", "About to get AtHome property");
-                    atHome = telescopeDevice.AtHome;
+                    atHome = TimeFunc("AtHome", () => telescopeDevice.AtHome, TargetTime.Fast);
                     LogOk("AtHome", atHome.ToString());
                 }
                 catch (Exception ex)
@@ -759,7 +760,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("AtPark", "About to get AtPark property");
-                    atPark = telescopeDevice.AtPark;
+                    atPark = TimeFunc("AtPark", () => telescopeDevice.AtPark, TargetTime.Fast);
                     LogOk("AtPark", atPark.ToString());
                 }
                 catch (Exception ex)
@@ -780,7 +781,7 @@ namespace ConformU
             try
             {
                 canReadAzimuth = false; LogCallToDriver("Azimuth", "About to get Azimuth property");
-                azimuth = telescopeDevice.Azimuth;
+                azimuth = TimeFunc("Azimuth", () => telescopeDevice.Azimuth, TargetTime.Fast);
                 canReadAzimuth = true; // Read successfully
                 switch (azimuth)
                 {
@@ -815,7 +816,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("Declination", "About to get Declination property");
-                declination = telescopeDevice.Declination;
+                declination = TimeFunc("Declination", () => telescopeDevice.Declination, TargetTime.Fast);
                 switch (declination)
                 {
                     case var case6 when case6 < -90.0d:
@@ -844,7 +845,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("DeclinationRate Read", "About to get DeclinationRate property");
-                declinationRate = telescopeDevice.DeclinationRate;
+                declinationRate = TimeFunc("DeclinationRate Read", () => telescopeDevice.DeclinationRate, TargetTime.Fast);
                 // Read has been successful
                 if (canSetDeclinationRate) // Any value is acceptable
                 {
@@ -996,7 +997,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("DoesRefraction Read", "About to DoesRefraction get property");
-                    doesRefraction = telescopeDevice.DoesRefraction;
+                    doesRefraction = TimeFunc("DoesRefraction Read", () => telescopeDevice.DoesRefraction, TargetTime.Fast);
                     LogOk("DoesRefraction Read", doesRefraction.ToString());
                 }
                 catch (Exception ex)
@@ -1021,7 +1022,7 @@ namespace ConformU
                     try
                     {
                         LogCallToDriver("DoesRefraction Write", "About to set DoesRefraction property false");
-                        telescopeDevice.DoesRefraction = false;
+                        TimeMethod("DoesRefraction Write", () => telescopeDevice.DoesRefraction = false, TargetTime.Fast);
                         LogOk("DoesRefraction Write", "Can set DoesRefraction to False");
                     }
                     catch (Exception ex)
@@ -1058,7 +1059,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("EquatorialSystem", "About to get EquatorialSystem property");
-                    equatorialSystem = (EquatorialCoordinateType)telescopeDevice.EquatorialSystem;
+                    equatorialSystem = TimeFunc("EquatorialSystem", () => telescopeDevice.EquatorialSystem, TargetTime.Fast);
                     LogOk("EquatorialSystem", equatorialSystem.ToString());
                 }
                 catch (Exception ex)
@@ -1079,7 +1080,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("FocalLength", "About to get FocalLength property");
-                focalLength = telescopeDevice.FocalLength;
+                focalLength = TimeFunc("FocalLength", () => telescopeDevice.FocalLength, TargetTime.Fast);
                 switch (focalLength)
                 {
                     case var case9 when case9 < 0.0d:
@@ -1117,7 +1118,7 @@ namespace ConformU
                     try
                     {
                         LogCallToDriver("GuideRateDeclination Read", "About to get GuideRateDeclination property");
-                        guideRateDeclination = telescopeDevice.GuideRateDeclination; // Read guiderateDEC
+                        guideRateDeclination = TimeFunc("GuideRateDeclination Read", () => telescopeDevice.GuideRateDeclination, TargetTime.Fast); // Read guiderateDEC
 
                         if (guideRateDeclination >= 0.0)
                         {
@@ -1136,9 +1137,8 @@ namespace ConformU
 
                     try // Read OK so now try to write
                     {
-                        LogCallToDriver("GuideRateDeclination Read",
-                            $"About to set GuideRateDeclination property to {guideRateDeclination}");
-                        telescopeDevice.GuideRateDeclination = guideRateDeclination;
+                        LogCallToDriver("GuideRateDeclination Read", $"About to set GuideRateDeclination property to {guideRateDeclination}");
+                        TimeMethod("GuideRateDeclination Write", () => telescopeDevice.GuideRateDeclination = guideRateDeclination, TargetTime.Standard);
                         LogOk("GuideRateDeclination Write", "Can write Declination Guide Rate OK");
                     }
                     catch (Exception ex) // Write failed
@@ -1204,7 +1204,7 @@ namespace ConformU
                     try
                     {
                         LogCallToDriver("GuideRateRightAscension Read", "About to get GuideRateRightAscension property");
-                        guideRateRightAscension = telescopeDevice.GuideRateRightAscension; // Read guide rate RA
+                        guideRateRightAscension = TimeFunc("GuideRateRightAscension Read", () => telescopeDevice.GuideRateRightAscension, TargetTime.Fast); // Read guide rate RA
 
                         if (guideRateRightAscension >= 0.0)
                         {
@@ -1224,7 +1224,7 @@ namespace ConformU
                     {
                         LogCallToDriver("GuideRateRightAscension Read",
                             $"About to set GuideRateRightAscension property to {guideRateRightAscension}");
-                        telescopeDevice.GuideRateRightAscension = guideRateRightAscension;
+                        TimeMethod("GuideRateRightAscension Write", () => telescopeDevice.GuideRateRightAscension = guideRateRightAscension, TargetTime.Standard);
                         LogOk("GuideRateRightAscension Write", "Can set RightAscension Guide OK");
                     }
                     catch (Exception ex) // Write failed
@@ -1290,7 +1290,7 @@ namespace ConformU
                     try
                     {
                         LogCallToDriver("IsPulseGuiding", "About to get IsPulseGuiding property");
-                        isPulseGuiding = telescopeDevice.IsPulseGuiding;
+                        isPulseGuiding = TimeFunc("IsPulseGuiding", () => telescopeDevice.IsPulseGuiding, TargetTime.Fast);
                         LogOk("IsPulseGuiding", isPulseGuiding.ToString());
                     }
                     catch (Exception ex) // Read failed
@@ -1325,7 +1325,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("RightAscension", "About to get RightAscension property");
-                rightAscension = telescopeDevice.RightAscension;
+                rightAscension = TimeFunc("RightAscension", () => telescopeDevice.RightAscension, TargetTime.Fast);
                 switch (rightAscension)
                 {
                     case var case14 when case14 < 0.0d:
@@ -1355,7 +1355,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("RightAscensionRate Read", "About to get RightAscensionRate property");
-                rightAscensionRate = telescopeDevice.RightAscensionRate;
+                rightAscensionRate = TimeFunc("RightAscensionRate Read", () => telescopeDevice.RightAscensionRate, TargetTime.Fast);
                 // Read has been successful
                 if (canSetRightAscensionRate) // Any value is acceptable
                 {
@@ -1506,7 +1506,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("SiteElevation Read", "About to get SiteElevation property");
-                siteElevation = telescopeDevice.SiteElevation;
+                siteElevation = TimeFunc("SiteElevation Read", () => telescopeDevice.SiteElevation, TargetTime.Fast);
                 switch (siteElevation)
                 {
                     case var case17 when case17 < -300.0d:
@@ -1565,9 +1565,9 @@ namespace ConformU
             try
             {
                 if (siteElevation < -300.0d | siteElevation > 10000.0d)
-                    siteElevation = 1000d; LogCallToDriver("SiteElevation Write",
-                    $"About to set SiteElevation property to {siteElevation}");
-                telescopeDevice.SiteElevation = siteElevation; // Restore original value
+                    siteElevation = 1000d;
+                LogCallToDriver("SiteElevation Write", $"About to set SiteElevation property to {siteElevation}");
+                TimeMethod("SiteElevation Write", () => telescopeDevice.SiteElevation = siteElevation, TargetTime.Standard); // Restore original value
                 LogOk("SiteElevation Write", $"Current value {siteElevation}m written successfully");
             }
             catch (Exception ex)
@@ -1628,7 +1628,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("SiteLatitude Read", "About to get SiteLatitude property");
-                siteLatitude = telescopeDevice.SiteLatitude;
+                siteLatitude = TimeFunc("SiteLatitude Read", () => telescopeDevice.SiteLatitude, TargetTime.Fast);
                 switch (siteLatitude)
                 {
                     case var case19 when case19 < -90.0d:
@@ -1687,9 +1687,9 @@ namespace ConformU
             try
             {
                 if (siteLatitude < -90.0d | siteLatitude > 90.0d)
-                    siteLatitude = 45.0d; LogCallToDriver("SiteLatitude Write",
-                    $"About to set SiteLatitude property to {siteLatitude}");
-                telescopeDevice.SiteLatitude = siteLatitude; // Restore original value
+                    siteLatitude = 45.0d;
+                LogCallToDriver("SiteLatitude Write", $"About to set SiteLatitude property to {siteLatitude}");
+                TimeMethod("SiteLatitude Write", () => telescopeDevice.SiteLatitude = siteLatitude, TargetTime.Standard); // Restore original value
                 LogOk("SiteLatitude Write", $"Current value: {siteLatitude.ToDMS()} degrees written successfully");
             }
             catch (Exception ex)
@@ -1776,7 +1776,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("SiteLongitude Read", "About to get SiteLongitude property");
-                siteLongitude = telescopeDevice.SiteLongitude;
+                siteLongitude = TimeFunc("SiteLongitude Read", () => telescopeDevice.SiteLongitude, TargetTime.Fast);
                 switch (siteLongitude)
                 {
                     case var case21 when case21 < -180.0d:
@@ -1835,9 +1835,9 @@ namespace ConformU
             try // Valid value
             {
                 if (siteLongitude < -180.0d | siteLongitude > 180.0d)
-                    siteLongitude = 60.0d; LogCallToDriver("SiteLongitude Write",
-                    $"About to set SiteLongitude property to {siteLongitude}");
-                telescopeDevice.SiteLongitude = siteLongitude; // Restore original value
+                    siteLongitude = 60.0d;
+                LogCallToDriver("SiteLongitude Write", $"About to set SiteLongitude property to {siteLongitude}");
+                TimeMethod("SiteLatitude Write", () => telescopeDevice.SiteLongitude = siteLongitude, TargetTime.Standard); // Restore original value
                 LogOk("SiteLongitude Write", $"Current value {siteLongitude.ToDMS()} degrees written successfully");
             }
             catch (Exception ex)
@@ -1921,7 +1921,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("Slewing", "About to get Slewing property");
-                slewing = telescopeDevice.Slewing;
+                slewing = TimeFunc("Slewing", () => telescopeDevice.Slewing, TargetTime.Fast);
                 switch (slewing)
                 {
                     case false:
@@ -1949,7 +1949,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("SlewSettleTime Read", "About to get SlewSettleTime property");
-                slewSettleTime = telescopeDevice.SlewSettleTime;
+                slewSettleTime = TimeFunc("SlewSettleTime Read", () => telescopeDevice.SlewSettleTime, TargetTime.Fast);
                 switch (slewSettleTime)
                 {
                     case var case23 when case23 < 0:
@@ -1994,9 +1994,9 @@ namespace ConformU
             try
             {
                 if (slewSettleTime < 0)
-                    slewSettleTime = 0; LogCallToDriver("SlewSettleTime Write",
-                    $"About to set SlewSettleTime property to {slewSettleTime}");
-                telescopeDevice.SlewSettleTime = slewSettleTime; // Restore original value
+                    slewSettleTime = 0;
+                LogCallToDriver("SlewSettleTime Write", $"About to set SlewSettleTime property to {slewSettleTime}");
+                TimeMethod("SlewSettleTime Write", () => telescopeDevice.SlewSettleTime = slewSettleTime, TargetTime.Standard); // Restore original value
                 LogOk("SlewSettleTime Write", $"Legal value {slewSettleTime} seconds written successfully");
             }
             catch (Exception ex)
@@ -2013,7 +2013,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("SideOfPier Read", "About to get SideOfPier property");
-                    sideOfPier = (PointingState)telescopeDevice.SideOfPier;
+                    sideOfPier = TimeFunc("SideOfPier Read", () => telescopeDevice.SideOfPier, TargetTime.Fast);
                     LogOk("SideOfPier Read", sideOfPier.ToString());
                     canReadSideOfPier = true; // Flag that it is OK to read SideOfPier
                 }
@@ -2035,7 +2035,7 @@ namespace ConformU
             try
             {
                 canReadSiderealTime = false; LogCallToDriver("SiderealTime", "About to get SiderealTime property");
-                siderealTimeScope = telescopeDevice.SiderealTime;
+                siderealTimeScope = TimeFunc("SiderealTime", () => telescopeDevice.SiderealTime, TargetTime.Fast);
                 canReadSiderealTime = true;
                 siderealTimeAscom = (18.697374558d + 24.065709824419081d * (DateTime.UtcNow.ToOADate() + 2415018.5 - 2451545.0d) + siteLongitude / 15.0d) % 24.0d;
                 switch (siderealTimeScope)
@@ -2151,11 +2151,9 @@ namespace ConformU
                     {
                         case var case6 when case6 < -90.0d:
                         case var case7 when case7 > 90.0d:
-                            {
-                                LogIssue("TargetDeclination Read",
-                                    $"TargetDeclination is <-90 or >90 degrees: {targetDeclination.ToDMS()}");
-                                break;
-                            }
+                            LogIssue("TargetDeclination Read",
+                                $"TargetDeclination is <-90 or >90 degrees: {targetDeclination.ToDMS()}");
+                            break;
 
                         default:
                             {
@@ -2201,17 +2199,13 @@ namespace ConformU
                     {
                         case var case14 when case14 < 0.0d:
                         case var case15 when case15 >= 24.0d:
-                            {
-                                LogIssue("TargetRightAscension Read",
-                                    $"TargetRightAscension is <0 or >=24 hours: {targetRightAscension} {targetRightAscension.ToHMS()}");
-                                break;
-                            }
+                            LogIssue("TargetRightAscension Read",
+                                $"TargetRightAscension is <0 or >=24 hours: {targetRightAscension} {targetRightAscension.ToHMS()}");
+                            break;
 
                         default:
-                            {
-                                LogOk("TargetRightAscension Read", targetRightAscension.ToHMS());
-                                break;
-                            }
+                            LogOk("TargetRightAscension Read", targetRightAscension.ToHMS());
+                            break;
                     }
                 }
             }
@@ -2238,7 +2232,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("Tracking Read", "About to get Tracking property");
-                tracking = telescopeDevice.Tracking; // Read of tracking state is mandatory
+                tracking = TimeFunc("Tracking Read", () => telescopeDevice.Tracking, TargetTime.Fast); // Read of tracking state is mandatory
                 LogOk("Tracking Read", tracking.ToString());
             }
             catch (Exception ex)
@@ -2259,12 +2253,12 @@ namespace ConformU
                     if (tracking) // OK try turning tracking off
                     {
                         LogCallToDriver("Tracking Write", "About to set Tracking property false");
-                        telescopeDevice.Tracking = false;
+                        TimeMethod("Tracking Write", () => telescopeDevice.Tracking = false, TargetTime.Standard);
                     }
                     else // OK try turning tracking on
                     {
                         LogCallToDriver("Tracking Write", "About to set Tracking property true");
-                        telescopeDevice.Tracking = true;
+                        TimeMethod("Tracking Write", () => telescopeDevice.Tracking = true, TargetTime.Standard);
                     }
 
                     SetAction("Waiting for mount to stabilise");
@@ -2324,7 +2318,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("TrackingRates", "About to get TrackingRates property");
-                    lTrackingRates = telescopeDevice.TrackingRates;
+                    lTrackingRates = TimeFunc("Tracking Write", () => telescopeDevice.TrackingRates, TargetTime.Fast);
                     if (lTrackingRates is null)
                     {
                         LogDebug("TrackingRates", "ERROR: The driver did NOT return an TrackingRates object!");
@@ -2339,8 +2333,7 @@ namespace ConformU
 
                     var loopTo = lTrackingRates.Count;
                     for (int ii = 1; ii <= loopTo; ii++)
-                        LogDebug("TrackingRates Count",
-                            $"Found drive rate: {Enum.GetName(typeof(DriveRate), (lTrackingRates[ii]))}");
+                        LogDebug("TrackingRates Count", $"Found drive rate: {Enum.GetName(typeof(DriveRate), (lTrackingRates[ii]))}");
                 }
                 catch (Exception ex)
                 {
@@ -2621,14 +2614,14 @@ namespace ConformU
             try
             {
                 LogCallToDriver("UTCDate Read", "About to get UTCDate property");
-                utcDate = telescopeDevice.UTCDate; // Save starting value
+                utcDate = TimeFunc("UTCDate Read", () => telescopeDevice.UTCDate, TargetTime.Fast); // Save starting value
                 LogOk("UTCDate Read", utcDate.ToString("dd-MMM-yyyy HH:mm:ss.fff"));
 
                 try // UTCDate Write is optional since if you are using the PC time as UTCTime then you should not write to the PC clock!
                 {
                     // Try to write a new UTCDate  1 hour in the future
                     LogCallToDriver("UTCDate Write", $"About to set UTCDate property to {utcDate.AddHours(1.0d)}");
-                    telescopeDevice.UTCDate = utcDate.AddHours(1.0d);
+                    TimeMethod("UTCDate Write", () => telescopeDevice.UTCDate = utcDate.AddHours(1.0d), TargetTime.Standard);
                     LogOk("UTCDate Write", $"New UTCDate written successfully: {utcDate.AddHours(1.0d)}");
 
                     // Restore original value
@@ -2695,7 +2688,7 @@ namespace ConformU
                                     LogTestAndMessage("Park", "Parking scope...");
                                     LogCallToDriver("Park", "About to call Park method");
 
-                                    telescopeDevice.Park();
+                                    TimeMethod($"Park", () => telescopeDevice.Park(), TargetTime.Standard);
 
                                     // Wait for the park to complete
                                     LogCallToDriver("Park", "About to get AtPark property repeatedly...");
@@ -2841,7 +2834,7 @@ namespace ConformU
                                             SetStatus("Unparking scope");
 
                                             LogCallToDriver("Unpark", "About to call Unpark method");
-                                            telescopeDevice.Unpark();
+                                            TimeMethod($"Unpark", () => telescopeDevice.Unpark(), TargetTime.Standard);
                                             LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
                                             WaitWhile("Waiting for scope to unpark when parked", () => telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
 
@@ -3532,7 +3525,6 @@ namespace ConformU
                     // 3.0.0.14 - Skip these tests if unable to read SideOfPier
                     if (CanReadSideOfPier("SideOfPier Model Tests"))
                     {
-
                         // Further side of pier tests
                         LogCallToDriver("SideOfPier Model Tests", "About to get AlignmentMode property");
                         if (telescopeDevice.AlignmentMode == AlignmentMode.GermanPolar)
@@ -3541,54 +3533,38 @@ namespace ConformU
                             switch (siteLatitude)
                             {
                                 case var case6 when -SIDE_OF_PIER_INVALID_LATITUDE <= case6 && case6 <= SIDE_OF_PIER_INVALID_LATITUDE: // Refuse to handle this value because the Conform targeting logic or the mount's SideofPier flip logic may fail when the poles are this close to the horizon
+                                    LogInfo("SideOfPier Model Tests", $"Tests skipped because the site latitude is reported as {Utilities.DegreesToDMS(siteLatitude, ":", ":", "", 3)}");
+                                    LogInfo("SideOfPier Model Tests", "This places the celestial poles close to the horizon and the mount's flip logic may override Conform's expected behaviour.");
+                                    LogInfo("SideOfPier Model Tests", $"Please set the site latitude to a value within the ranges {SIDE_OF_PIER_INVALID_LATITUDE:+0.0;-0.0} to +90.0 or {(-SIDE_OF_PIER_INVALID_LATITUDE):+0.0;-0.0} to -90.0 to obtain a reliable result.");
+                                    break;
+
+                                case var case7 when -90.0d <= case7 && case7 <= 90.0d: // Normal case, just run the tests because latitude is outside the invalid range but within -90.0 to +90.0
+                                    // SideOfPier write property test - Optional
+                                    if (settings.TestSideOfPierWrite)
                                     {
-                                        LogInfo("SideOfPier Model Tests",
-                                            $"Tests skipped because the site latitude is reported as {Utilities.DegreesToDMS(siteLatitude, ":", ":", "", 3)}");
-                                        LogInfo("SideOfPier Model Tests", "This places the celestial poles close to the horizon and the mount's flip logic may override Conform's expected behaviour.");
-                                        LogInfo("SideOfPier Model Tests",
-                                            $"Please set the site latitude to a value within the ranges {SIDE_OF_PIER_INVALID_LATITUDE:+0.0;-0.0} to +90.0 or {(-SIDE_OF_PIER_INVALID_LATITUDE):+0.0;-0.0} to -90.0 to obtain a reliable result.");
-                                        break;
+                                        LogDebug("SideOfPier Model Tests", "Testing SideOfPier write...");
+                                        TelescopeOptionalMethodsTest(OptionalMethodType.SideOfPierWrite, "SideOfPier Write", canSetPierside);
+                                        if (cancellationToken.IsCancellationRequested)
+                                            return;
                                     }
 
-                                case var case7 when -90.0d <= case7 && case7 <= 90.0d: // Normal case, just run the tests barbecue latitude is outside the invalid range but within -90.0 to +90.0
-                                    {
-                                        // SideOfPier write property test - Optional
-                                        if (settings.TestSideOfPierWrite)
-                                        {
-                                            LogDebug("SideOfPier Model Tests", "Testing SideOfPier write...");
-                                            TelescopeOptionalMethodsTest(OptionalMethodType.SideOfPierWrite, "SideOfPier Write", canSetPierside);
-                                            if (cancellationToken.IsCancellationRequested)
-                                                return;
-                                        }
-
-                                        SideOfPierTests(); // Only run these for German mounts
-                                        break; // Values outside the range -90.0 to +90.0 are invalid
-                                    }
+                                    SideOfPierTests(); // Only run these for German mounts
+                                    break; // Values outside the range -90.0 to +90.0 are invalid
 
                                 default:
-                                    {
-                                        LogInfo("SideOfPier Model Tests", "Test skipped because the site latitude Is outside the range -90.0 to +90.0");
-                                        break;
-                                    }
+                                    LogInfo("SideOfPier Model Tests", "Test skipped because the site latitude Is outside the range -90.0 to +90.0");
+                                    break;
                             }
                         }
                         else
-                        {
                             LogInfo("SideOfPier Model Tests", "Test skipped because this Is Not a German equatorial mount");
-                        }
                     }
                     else
-                    {
                         LogInfo("SideOfPier Model Tests", "Tests skipped because this driver does Not support SideOfPier Read");
-                    }
                 }
                 else
-                {
-                    LogInfo("SideOfPier Model Tests",
-                        $"Skipping test as this method Is Not supported in interface V{GetInterfaceVersion()}");
-                }
+                    LogInfo("SideOfPier Model Tests", $"Skipping test as this method Is Not supported in interface V{GetInterfaceVersion()}");
             }
-
         }
 
         public override void CheckPerformance()
@@ -4208,217 +4184,191 @@ namespace ConformU
                 switch (pTest)
                 {
                     case SlewSyncType.SlewToCoordinates:
+                        LogCallToDriver(pName, "About to get Tracking property");
+                        if (canSetTracking & !telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(pName, "About to get Tracking property");
-                            if (canSetTracking & !telescopeDevice.Tracking)
-                            {
-                                LogCallToDriver(pName, "About to set Tracking property to true");
-                                telescopeDevice.Tracking = true;
-                            }
-
-                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -1.0d);
-                            targetDeclination = 1.0d;
-                            SetAction("Slewing synchronously...");
-
-                            LogCallToDriver(pName,
-                                $"About to call SlewToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
-                            telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination);
-                            LogDebug(pName, "Returned from SlewToCoordinates method");
-                            break;
+                            LogCallToDriver(pName, "About to set Tracking property to true");
+                            telescopeDevice.Tracking = true;
                         }
+
+                        targetRightAscension = TelescopeRaFromSiderealTime(pName, -1.0d);
+                        targetDeclination = 1.0d;
+                        SetAction("Slewing synchronously...");
+
+                        LogCallToDriver(pName, $"About to call SlewToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                        TimeMethod($"SlewToCoordinates", () => telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination), TargetTime.Extended);
+                        LogDebug(pName, "Returned from SlewToCoordinates method");
+                        break;
 
                     case SlewSyncType.SlewToCoordinatesAsync:
+                        LogCallToDriver(pName, "About to get Tracking property");
+                        if (canSetTracking & !telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(pName, "About to get Tracking property");
-                            if (canSetTracking & !telescopeDevice.Tracking)
-                            {
-                                LogCallToDriver(pName, "About to set Tracking property to true");
-                                telescopeDevice.Tracking = true;
-                            }
-
-                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -2.0d);
-                            targetDeclination = 2.0d;
-
-                            LogCallToDriver(pName,
-                                $"About to call SlewToCoordinatesAsync method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
-                            telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
-
-                            WaitForSlew(pName, $"Slewing to coordinates asynchronously");
-                            break;
+                            LogCallToDriver(pName, "About to set Tracking property to true");
+                            telescopeDevice.Tracking = true;
                         }
+
+                        targetRightAscension = TelescopeRaFromSiderealTime(pName, -2.0d);
+                        targetDeclination = 2.0d;
+
+                        LogCallToDriver(pName, $"About to call SlewToCoordinatesAsync method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                        TimeMethod($"SlewToCoordinatesAsync", () => telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination), TargetTime.Standard);
+
+                        WaitForSlew(pName, $"Slewing to coordinates asynchronously");
+                        break;
 
                     case SlewSyncType.SlewToTarget:
+                        LogCallToDriver(pName, "About to get Tracking property");
+                        if (canSetTracking & !telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(pName, "About to get Tracking property");
-                            if (canSetTracking & !telescopeDevice.Tracking)
-                            {
-                                LogCallToDriver(pName, "About to set Tracking property to true");
-                                telescopeDevice.Tracking = true;
-                            }
-
-                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -3.0d);
-                            targetDeclination = 3.0d;
-                            try
-                            {
-                                LogCallToDriver(pName,
-                                    $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
-                                telescopeDevice.TargetRightAscension = targetRightAscension;
-                            }
-                            catch (Exception ex)
-                            {
-                                if (pCanDoIt)
-                                {
-                                    HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex,
-                                        $"{pCanDoItName} is True but can't set TargetRightAscension");
-                                }
-                                else
-                                {
-                                    // Ignore other errors at this point as we aren't trying to test Telescope.TargetRightAscension
-                                }
-                            }
-
-                            try
-                            {
-                                LogCallToDriver(pName,
-                                    $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
-                                telescopeDevice.TargetDeclination = targetDeclination;
-                            }
-                            catch (Exception ex)
-                            {
-                                if (pCanDoIt)
-                                {
-                                    HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex,
-                                        $"{pCanDoItName} is True but can't set TargetDeclination");
-                                }
-                                else
-                                {
-                                    // Ignore other errors at this point as we aren't trying to test Telescope.TargetRightAscension
-                                }
-                            }
-
-                            SetAction("Slewing synchronously...");
-                            LogCallToDriver(pName, "About to call SlewToTarget method");
-                            telescopeDevice.SlewToTarget();
-                            break;
+                            LogCallToDriver(pName, "About to set Tracking property to true");
+                            telescopeDevice.Tracking = true;
                         }
+
+                        targetRightAscension = TelescopeRaFromSiderealTime(pName, -3.0d);
+                        targetDeclination = 3.0d;
+                        try
+                        {
+                            LogCallToDriver(pName, $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
+                            telescopeDevice.TargetRightAscension = targetRightAscension;
+                        }
+                        catch (Exception ex)
+                        {
+                            if (pCanDoIt)
+                            {
+                                HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex, $"{pCanDoItName} is True but can't set TargetRightAscension");
+                            }
+                            else
+                            {
+                                // Ignore other errors at this point as we aren't trying to test Telescope.TargetRightAscension
+                            }
+                        }
+
+                        try
+                        {
+                            LogCallToDriver(pName, $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
+                            telescopeDevice.TargetDeclination = targetDeclination;
+                        }
+                        catch (Exception ex)
+                        {
+                            if (pCanDoIt)
+                            {
+                                HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex, $"{pCanDoItName} is True but can't set TargetDeclination");
+                            }
+                            else
+                            {
+                                // Ignore other errors at this point as we aren't trying to test Telescope.TargetRightAscension
+                            }
+                        }
+
+                        SetAction("Slewing synchronously...");
+                        LogCallToDriver(pName, "About to call SlewToTarget method");
+                        TimeMethod($"SlewToTarget", () => telescopeDevice.SlewToTarget(), TargetTime.Extended);
+                        break;
 
                     case SlewSyncType.SlewToTargetAsync: // SlewToTargetAsync
+                        LogCallToDriver(pName, "About to get Tracking property");
+                        if (canSetTracking & !telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(pName, "About to get Tracking property");
-                            if (canSetTracking & !telescopeDevice.Tracking)
-                            {
-                                LogCallToDriver(pName, "About to set Tracking property to true");
-                                telescopeDevice.Tracking = true;
-                            }
-
-                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -4.0d);
-                            targetDeclination = 4.0d;
-                            try
-                            {
-                                LogCallToDriver(pName,
-                                    $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
-                                telescopeDevice.TargetRightAscension = targetRightAscension;
-                            }
-                            catch (Exception ex)
-                            {
-                                if (pCanDoIt)
-                                {
-                                    HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex,
-                                        $"{pCanDoItName} is True but can't set TargetRightAscension");
-                                }
-                                else
-                                {
-                                    // Ignore other errors at this point as we aren't trying to test Telescope.TargetRightAscension
-                                }
-                            }
-
-                            try
-                            {
-                                LogCallToDriver(pName,
-                                    $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
-                                telescopeDevice.TargetDeclination = targetDeclination;
-                            }
-                            catch (Exception ex)
-                            {
-                                if (pCanDoIt)
-                                {
-                                    HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex,
-                                        $"{pCanDoItName} is True but can't set TargetDeclination");
-                                }
-                                else
-                                {
-                                    // Ignore other errors at this point as we aren't trying to test Telescope.TargetRightAscension
-                                }
-                            }
-
-                            LogCallToDriver(pName, "About to call SlewToTargetAsync method");
-                            telescopeDevice.SlewToTargetAsync();
-
-                            WaitForSlew(pName, $"Slewing to target asynchronously");
-                            break;
+                            LogCallToDriver(pName, "About to set Tracking property to true");
+                            telescopeDevice.Tracking = true;
                         }
+
+                        targetRightAscension = TelescopeRaFromSiderealTime(pName, -4.0d);
+                        targetDeclination = 4.0d;
+                        try
+                        {
+                            LogCallToDriver(pName, $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
+                            telescopeDevice.TargetRightAscension = targetRightAscension;
+                        }
+                        catch (Exception ex)
+                        {
+                            if (pCanDoIt)
+                            {
+                                HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex, $"{pCanDoItName} is True but can't set TargetRightAscension");
+                            }
+                            else
+                            {
+                                // Ignore other errors at this point as we aren't trying to test Telescope.TargetRightAscension
+                            }
+                        }
+
+                        try
+                        {
+                            LogCallToDriver(pName, $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
+                            telescopeDevice.TargetDeclination = targetDeclination;
+                        }
+                        catch (Exception ex)
+                        {
+                            if (pCanDoIt)
+                            {
+                                HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex, $"{pCanDoItName} is True but can't set TargetDeclination");
+                            }
+                            else
+                            {
+                                // Ignore other errors at this point as we aren't trying to test Telescope.TargetRightAscension
+                            }
+                        }
+
+                        LogCallToDriver(pName, "About to call SlewToTargetAsync method");
+                        TimeMethod($"SlewToTargetAsync", () => telescopeDevice.SlewToTargetAsync(), TargetTime.Standard);
+
+                        WaitForSlew(pName, $"Slewing to target asynchronously");
+                        break;
 
                     case SlewSyncType.SlewToAltAz:
+                        LogDebug(pName, $"Tracking 1: {telescopeDevice.Tracking}");
+                        LogCallToDriver(pName, "About to get Tracking property");
+                        if (canSetTracking & telescopeDevice.Tracking)
                         {
-                            LogDebug(pName, $"Tracking 1: {telescopeDevice.Tracking}");
-                            LogCallToDriver(pName, "About to get Tracking property");
-                            if (canSetTracking & telescopeDevice.Tracking)
-                            {
-                                LogCallToDriver(pName, "About to set property Tracking to false");
-                                telescopeDevice.Tracking = false;
-                                LogDebug(pName, "Tracking turned off");
-                            }
-
-                            LogCallToDriver(pName, "About to get Tracking property");
-                            LogDebug(pName, $"Tracking 2: {telescopeDevice.Tracking}");
-                            targetAltitude = 50.0d;
-                            targetAzimuth = 150.0d;
-                            SetAction("Slewing to Alt/Az synchronously...");
-
-                            LogCallToDriver(pName,
-                                $"About to call SlewToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
-                            telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
-
-                            LogCallToDriver(pName, "About to get Tracking property");
-                            LogDebug(pName, $"Tracking 3: {telescopeDevice.Tracking}");
-                            break;
+                            LogCallToDriver(pName, "About to set property Tracking to false");
+                            telescopeDevice.Tracking = false;
+                            LogDebug(pName, "Tracking turned off");
                         }
+
+                        LogCallToDriver(pName, "About to get Tracking property");
+                        LogDebug(pName, $"Tracking 2: {telescopeDevice.Tracking}");
+                        targetAltitude = 50.0d;
+                        targetAzimuth = 150.0d;
+                        SetAction("Slewing to Alt/Az synchronously...");
+
+                        LogCallToDriver(pName, $"About to call SlewToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
+                        TimeMethod($"SlewToAltAz", () => telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude), TargetTime.Extended);
+
+                        LogCallToDriver(pName, "About to get Tracking property");
+                        LogDebug(pName, $"Tracking 3: {telescopeDevice.Tracking}");
+                        break;
 
                     case SlewSyncType.SlewToAltAzAsync:
+                        LogCallToDriver(pName, "About to get Tracking property");
+                        LogDebug(pName, $"Tracking 1: {telescopeDevice.Tracking}");
+                        LogCallToDriver(pName, "About to get Tracking property");
+                        if (canSetTracking & telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(pName, "About to get Tracking property");
-                            LogDebug(pName, $"Tracking 1: {telescopeDevice.Tracking}");
-                            LogCallToDriver(pName, "About to get Tracking property");
-                            if (canSetTracking & telescopeDevice.Tracking)
-                            {
-                                LogCallToDriver(pName, "About to set Tracking property false");
-                                telescopeDevice.Tracking = false;
-                                LogDebug(pName, "Tracking turned off");
-                            }
-
-                            LogCallToDriver(pName, "About to get Tracking property");
-                            LogDebug(pName, $"Tracking 2: {telescopeDevice.Tracking}");
-                            targetAltitude = 55.0d;
-                            targetAzimuth = 155.0d;
-
-                            LogCallToDriver(pName,
-                                $"About to call SlewToAltAzAsync method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
-                            telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
-
-                            LogCallToDriver(pName, "About to get Tracking property");
-                            LogDebug(pName, $"Tracking 3: {telescopeDevice.Tracking}");
-
-                            WaitForSlew(pName, $"Slewing to Alt/Az asynchronously");
-                            LogCallToDriver(pName, "About to get Tracking property");
-                            LogDebug(pName, $"Tracking 4: {telescopeDevice.Tracking}");
-                            break;
+                            LogCallToDriver(pName, "About to set Tracking property false");
+                            telescopeDevice.Tracking = false;
+                            LogDebug(pName, "Tracking turned off");
                         }
+
+                        LogCallToDriver(pName, "About to get Tracking property");
+                        LogDebug(pName, $"Tracking 2: {telescopeDevice.Tracking}");
+                        targetAltitude = 55.0d;
+                        targetAzimuth = 155.0d;
+
+                        LogCallToDriver(pName, $"About to call SlewToAltAzAsync method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
+                        TimeMethod($"SlewToAltAzAsync", () => telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude), TargetTime.Standard);
+
+                        LogCallToDriver(pName, "About to get Tracking property");
+                        LogDebug(pName, $"Tracking 3: {telescopeDevice.Tracking}");
+
+                        WaitForSlew(pName, $"Slewing to Alt/Az asynchronously");
+                        LogCallToDriver(pName, "About to get Tracking property");
+                        LogDebug(pName, $"Tracking 4: {telescopeDevice.Tracking}");
+                        break;
 
                     default:
-                        {
-                            LogError(pName, $"Conform:SlewTest: Unknown test type {pTest}");
-                            break;
-                        }
+                        LogError(pName, $"Conform:SlewTest: Unknown test type {pTest}");
+                        break;
                 }
 
                 if (cancellationToken.IsCancellationRequested) return;
@@ -5337,34 +5287,23 @@ namespace ConformU
                 switch (pAxis)
                 {
                     case TelescopeAxis.Primary:
-                        {
-                            LogCallToDriver(pName,
-                                $"About to call AxisRates method, Axis: {((int)TelescopeAxis.Primary)}");
-                            lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary); // Get primary axis rates
-                            break;
-                        }
+                        LogCallToDriver(pName, $"About to call AxisRates method, Axis: {((int)TelescopeAxis.Primary)}");
+                        lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary); // Get primary axis rates
+                        break;
 
                     case TelescopeAxis.Secondary:
-                        {
-                            LogCallToDriver(pName,
-                                $"About to call AxisRates method, Axis: {((int)TelescopeAxis.Secondary)}");
-                            lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary); // Get secondary axis rates
-                            break;
-                        }
+                        LogCallToDriver(pName, $"About to call AxisRates method, Axis: {((int)TelescopeAxis.Secondary)}");
+                        lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary); // Get secondary axis rates
+                        break;
 
                     case TelescopeAxis.Tertiary:
-                        {
-                            LogCallToDriver(pName,
-                                $"About to call AxisRates method, Axis: {((int)TelescopeAxis.Tertiary)}");
-                            lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary); // Get tertiary axis rates
-                            break;
-                        }
+                        LogCallToDriver(pName, $"About to call AxisRates method, Axis: {((int)TelescopeAxis.Tertiary)}");
+                        lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary); // Get tertiary axis rates
+                        break;
 
                     default:
-                        {
-                            LogIssue("TelescopeAxisRateTest", $"Unknown telescope axis: {pAxis}");
-                            break;
-                        }
+                        LogIssue("TelescopeAxisRateTest", $"Unknown telescope axis: {pAxis}");
+                        break;
                 }
 
                 try
@@ -5675,43 +5614,46 @@ namespace ConformU
         {
             try
             {
-                switch (pType)
+                TimeMethod(pName, () =>
                 {
-                    case RequiredMethodType.TstAxisrates:
-                        {
-                            break;
-                        }
-                    // This is now done by TelescopeAxisRateTest subroutine 
-                    case RequiredMethodType.TstCanMoveAxisPrimary:
-                        {
-                            LogCallToDriver(pName, $"About to call CanMoveAxis method {((int)TelescopeAxis.Primary)}");
-                            canMoveAxisPrimary = telescopeDevice.CanMoveAxis(TelescopeAxis.Primary);
-                            LogOk(pName, $"{pName} {canMoveAxisPrimary}");
-                            break;
-                        }
+                    switch (pType)
+                    {
+                        case RequiredMethodType.TstAxisrates:
+                            {
+                                break;
+                            }
+                        // This is now done by TelescopeAxisRateTest subroutine 
+                        case RequiredMethodType.TstCanMoveAxisPrimary:
+                            {
+                                LogCallToDriver(pName, $"About to call CanMoveAxis method {((int)TelescopeAxis.Primary)}");
+                                canMoveAxisPrimary = telescopeDevice.CanMoveAxis(TelescopeAxis.Primary);
+                                LogOk(pName, $"{pName} {canMoveAxisPrimary}");
+                                break;
+                            }
 
-                    case RequiredMethodType.TstCanMoveAxisSecondary:
-                        {
-                            LogCallToDriver(pName, $"About to call CanMoveAxis method {((int)TelescopeAxis.Secondary)}");
-                            canMoveAxisSecondary = telescopeDevice.CanMoveAxis(TelescopeAxis.Secondary);
-                            LogOk(pName, $"{pName} {canMoveAxisSecondary}");
-                            break;
-                        }
+                        case RequiredMethodType.TstCanMoveAxisSecondary:
+                            {
+                                LogCallToDriver(pName, $"About to call CanMoveAxis method {((int)TelescopeAxis.Secondary)}");
+                                canMoveAxisSecondary = telescopeDevice.CanMoveAxis(TelescopeAxis.Secondary);
+                                LogOk(pName, $"{pName} {canMoveAxisSecondary}");
+                                break;
+                            }
 
-                    case RequiredMethodType.TstCanMoveAxisTertiary:
-                        {
-                            LogCallToDriver(pName, $"About to call CanMoveAxis method {((int)TelescopeAxis.Tertiary)}");
-                            canMoveAxisTertiary = telescopeDevice.CanMoveAxis(TelescopeAxis.Tertiary);
-                            LogOk(pName, $"{pName} {canMoveAxisTertiary}");
-                            break;
-                        }
+                        case RequiredMethodType.TstCanMoveAxisTertiary:
+                            {
+                                LogCallToDriver(pName, $"About to call CanMoveAxis method {((int)TelescopeAxis.Tertiary)}");
+                                canMoveAxisTertiary = telescopeDevice.CanMoveAxis(TelescopeAxis.Tertiary);
+                                LogOk(pName, $"{pName} {canMoveAxisTertiary}");
+                                break;
+                            }
 
-                    default:
-                        {
-                            LogIssue(pName, $"Conform:RequiredMethodsTest: Unknown test type {pType}");
-                            break;
-                        }
-                }
+                        default:
+                            {
+                                LogIssue(pName, $"Conform:RequiredMethodsTest: Unknown test type {pType}");
+                                break;
+                            }
+                    }
+                }, TargetTime.Fast);
             }
             catch (Exception ex)
             {
@@ -5736,13 +5678,9 @@ namespace ConformU
                 {
                     // Set the test declination value depending on whether the scope is in the northern or southern hemisphere
                     if (siteLatitude > 0.0d)
-                    {
                         lTestDec = 45.0d; // Positive for the northern hemisphere
-                    }
                     else
-                    {
-                        lTestDec = -45.0d;
-                    } // Negative for the southern hemisphere
+                        lTestDec = -45.0d; // Negative for the southern hemisphere
 
                     lTestRaOffset = 3.0d; // Set the test RA offset as 3 hours from local sider5eal time
                     LogDebug(testName, string.Format("Test RA offset: {0}, Test declination: {1}", lTestRaOffset, lTestDec));
@@ -5787,7 +5725,7 @@ namespace ConformU
                                 ValidateSlewing(testName, true);
 
                                 // Now try to end the slew
-                                AbortSlew(testName);
+                                TimeMethod(testName, () => AbortSlew(testName), TargetTime.Standard);
 
                                 // Give time for the mount to stop
                                 WaitFor(1500, 100);
@@ -5815,14 +5753,14 @@ namespace ConformU
                                 // Get the DestinationSideOfPier for a target in the West i.e. for a German mount when the tube is on the East side of the pier
                                 targetRightAscension = TelescopeRaFromSiderealTime(testName, -lTestRaOffset); LogCallToDriver(testName,
                                     $"About to call DestinationSideOfPier method, RA: {targetRightAscension.ToHMS()}, Declination: {lTestDec.ToDMS()}");
-                                destinationSideOfPierEast = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, lTestDec);
+                                destinationSideOfPierEast = TimeFunc(testName, () => telescopeDevice.DestinationSideOfPier(targetRightAscension, lTestDec), TargetTime.Fast);
                                 LogDebug(testName,
                                     $"German mount - scope on the pier's East side, target in the West : {targetRightAscension.ToHMS()} {lTestDec.ToDMS()} {destinationSideOfPierEast}");
 
                                 // Get the DestinationSideOfPier for a target in the East i.e. for a German mount when the tube is on the West side of the pier
                                 targetRightAscension = TelescopeRaFromSiderealTime(testName, lTestRaOffset); LogCallToDriver(testName,
                                     $"About to call DestinationSideOfPier method, RA: {targetRightAscension.ToHMS()}, Declination: {lTestDec.ToDMS()}");
-                                destinationSideOfPierWest = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, lTestDec);
+                                destinationSideOfPierWest = TimeFunc(testName, () => telescopeDevice.DestinationSideOfPier(targetRightAscension, lTestDec), TargetTime.Fast);
                                 LogDebug(testName,
                                     $"German mount - scope on the pier's West side, target in the East: {targetRightAscension.ToHMS()} {lTestDec.ToDMS()} {destinationSideOfPierWest}");
 
@@ -5851,7 +5789,7 @@ namespace ConformU
                                 if (GetInterfaceVersion() > 1)
                                 {
                                     LogCallToDriver(testName, "About to call FindHome method");
-                                    telescopeDevice.FindHome();
+                                    TimeMethod(testName, () => telescopeDevice.FindHome(), TargetTime.Standard);
 
                                     // Wait for mount to find home
                                     WaitWhile("Waiting for mount to home...", () => !telescopeDevice.AtHome, 200, settings.TelescopeMaximumSlewTime); LogCallToDriver(testName, "About to get AtHome property");
@@ -5930,12 +5868,10 @@ namespace ConformU
                                 else // OK to test pulse guiding
                                 {
                                     SetAction("Calling PulseGuide east");
-                                    startTime = DateTime.Now; LogCallToDriver(testName,
-                                        $"About to call PulseGuide method, Direction: {((int)GuideDirection.East)}, Duration: {PULSEGUIDE_MOVEMENT_TIME * 1000}ms");
-                                    telescopeDevice.PulseGuide(GuideDirection.East, PULSEGUIDE_MOVEMENT_TIME * 1000); // Start a 2 second pulse
+                                    startTime = DateTime.Now; LogCallToDriver(testName, $"About to call PulseGuide method, Direction: {((int)GuideDirection.East)}, Duration: {PULSEGUIDE_MOVEMENT_TIME * 1000}ms");
+                                    TimeMethod($"{testName} {GuideDirection.East} {PULSEGUIDE_MOVEMENT_TIME}s", () => telescopeDevice.PulseGuide(GuideDirection.East, PULSEGUIDE_MOVEMENT_TIME * 1000), TargetTime.Standard); // Start a 2 second pulse
                                     endTime = DateTime.Now;
-                                    LogDebug(testName,
-                                        $"PulseGuide command time: {PULSEGUIDE_MOVEMENT_TIME * 1000} milliseconds, PulseGuide call duration: {endTime.Subtract(startTime).TotalMilliseconds} milliseconds");
+                                    LogDebug(testName, $"PulseGuide command time: {PULSEGUIDE_MOVEMENT_TIME * 1000} milliseconds, PulseGuide call duration: {endTime.Subtract(startTime).TotalMilliseconds} milliseconds");
                                     if (endTime.Subtract(startTime).TotalMilliseconds < PULSEGUIDE_MOVEMENT_TIME * 0.75d * 1000d) // If less than three quarters of the expected duration then assume we have returned early
                                     {
                                         LogCallToDriver(testName, "About to get IsPulseGuiding property");
@@ -5946,13 +5882,11 @@ namespace ConformU
                                             if (!telescopeDevice.IsPulseGuiding)
                                             {
                                                 LogOk(testName, "Asynchronous pulse guide found OK");
-                                                LogDebug(testName,
-                                                    $"IsPulseGuiding = True duration: {DateTime.Now.Subtract(startTime).TotalMilliseconds} milliseconds");
+                                                LogDebug(testName, $"IsPulseGuiding = True duration: {DateTime.Now.Subtract(startTime).TotalMilliseconds} milliseconds");
                                             }
                                             else
                                             {
-                                                LogIssue(testName,
-                                                    $"Asynchronous pulse guide expected but IsPulseGuiding is still TRUE {PULSEGUIDE_TIMEOUT_TIME} seconds beyond expected time");
+                                                LogIssue(testName, $"Asynchronous pulse guide expected but IsPulseGuiding is still TRUE {PULSEGUIDE_TIMEOUT_TIME} seconds beyond expected time");
                                             }
                                         }
                                         else
@@ -6014,7 +5948,7 @@ namespace ConformU
                                                     LogDebug(testName, "Scope is pierEast so flipping West");
                                                     SetAction("Flipping mount to pointing state pierWest");
                                                     LogCallToDriver(testName, $"About to set SideOfPier property to {PointingState.ThroughThePole}");
-                                                    telescopeDevice.SideOfPier = PointingState.ThroughThePole;
+                                                    TimeMethod($"{testName} {PointingState.ThroughThePole}", () => telescopeDevice.SideOfPier = PointingState.ThroughThePole, TargetTime.Standard);
 
                                                     WaitForSlew(testName, $"Moving to the pierEast pointing state asynchronously");
 
@@ -6051,7 +5985,7 @@ namespace ConformU
                                                         $"About to set SideOfPier property to {((int)PointingState.Normal)}");
 
                                                     LogCallToDriver(testName, $"About to set SideOfPier property to {PointingState.Normal}");
-                                                    telescopeDevice.SideOfPier = PointingState.Normal;
+                                                    TimeMethod($"{testName} {PointingState.Normal}", () => telescopeDevice.SideOfPier = PointingState.Normal, TargetTime.Standard);
 
                                                     WaitForSlew(testName, $"Moving to the pierWest pointing state asynchronously");
 
@@ -6170,8 +6104,8 @@ namespace ConformU
 
                         case OptionalMethodType.DestinationSideOfPier:
                             {
-                                targetRightAscension = TelescopeRaFromSiderealTime(testName, -1.0d); LogCallToDriver(testName,
-                                    $"About to call DestinationSideOfPier method, RA: {targetRightAscension.ToHMS()}, Declination: {0.0d.ToDMS()}");
+                                targetRightAscension = TelescopeRaFromSiderealTime(testName, -1.0d);
+                                LogCallToDriver(testName, $"About to call DestinationSideOfPier method, RA: {targetRightAscension.ToHMS()}, Declination: {0.0d.ToDMS()}");
                                 destinationSideOfPier = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, 0.0d);
                                 break;
                             }
@@ -6187,40 +6121,35 @@ namespace ConformU
 
                         case OptionalMethodType.MoveAxisPrimary:
                             {
-                                LogCallToDriver(testName,
-                                    $"About to call MoveAxis method for axis {((int)TelescopeAxis.Primary)} at speed 0");
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {((int)TelescopeAxis.Primary)} at speed 0");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Primary, 0.0d);
                                 break;
                             }
 
                         case OptionalMethodType.MoveAxisSecondary:
                             {
-                                LogCallToDriver(testName,
-                                    $"About to call MoveAxis method for axis {((int)TelescopeAxis.Secondary)} at speed 0");
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {((int)TelescopeAxis.Secondary)} at speed 0");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Secondary, 0.0d);
                                 break;
                             }
 
                         case OptionalMethodType.MoveAxisTertiary:
                             {
-                                LogCallToDriver(testName,
-                                    $"About to call MoveAxis method for axis {((int)TelescopeAxis.Tertiary)} at speed 0");
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {((int)TelescopeAxis.Tertiary)} at speed 0");
                                 telescopeDevice.MoveAxis(TelescopeAxis.Tertiary, 0.0d);
                                 break;
                             }
 
                         case OptionalMethodType.PulseGuide:
                             {
-                                LogCallToDriver(testName,
-                                    $"About to call PulseGuide method, Direction: {((int)GuideDirection.East)}, Duration: 0ms");
+                                LogCallToDriver(testName, $"About to call PulseGuide method, Direction: {((int)GuideDirection.East)}, Duration: 0ms");
                                 telescopeDevice.PulseGuide(GuideDirection.East, 0);
                                 break;
                             }
 
                         case OptionalMethodType.SideOfPierWrite:
                             {
-                                LogCallToDriver(testName,
-                                    $"About to set SideOfPier property to {((int)PointingState.Normal)}");
+                                LogCallToDriver(testName, $"About to set SideOfPier property to {((int)PointingState.Normal)}");
                                 telescopeDevice.SideOfPier = PointingState.Normal;
                                 break;
                             }
@@ -6261,189 +6190,193 @@ namespace ConformU
             try
             {
                 LogCallToDriver(pName, string.Format("About to get {0} property", pType.ToString()));
-                switch (pType)
+
+                TimeMethod(pName, () =>
                 {
-                    case CanType.CanFindHome:
-                        {
-                            canFindHome = telescopeDevice.CanFindHome;
-                            LogOk(pName, canFindHome.ToString());
-                            break;
-                        }
-
-                    case CanType.CanPark:
-                        {
-                            canPark = telescopeDevice.CanPark;
-                            LogOk(pName, canPark.ToString());
-                            break;
-                        }
-
-                    case CanType.CanPulseGuide:
-                        {
-                            canPulseGuide = telescopeDevice.CanPulseGuide;
-                            LogOk(pName, canPulseGuide.ToString());
-                            break;
-                        }
-
-                    case CanType.CanSetDeclinationRate:
-                        {
-                            if (GetInterfaceVersion() > 1)
+                    switch (pType)
+                    {
+                        case CanType.CanFindHome:
                             {
-                                canSetDeclinationRate = telescopeDevice.CanSetDeclinationRate;
-                                LogOk(pName, canSetDeclinationRate.ToString());
-                            }
-                            else
-                            {
-                                LogInfo("CanSetDeclinationRate",
-                                    $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                                canFindHome = telescopeDevice.CanFindHome;
+                                LogOk(pName, canFindHome.ToString());
+                                break;
                             }
 
-                            break;
-                        }
-
-                    case CanType.CanSetGuideRates:
-                        {
-                            if (GetInterfaceVersion() > 1)
+                        case CanType.CanPark:
                             {
-                                canSetGuideRates = telescopeDevice.CanSetGuideRates;
-                                LogOk(pName, canSetGuideRates.ToString());
-                            }
-                            else
-                            {
-                                LogInfo("CanSetGuideRates",
-                                    $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                                canPark = telescopeDevice.CanPark;
+                                LogOk(pName, canPark.ToString());
+                                break;
                             }
 
-                            break;
-                        }
-
-                    case CanType.CanSetPark:
-                        {
-                            canSetPark = telescopeDevice.CanSetPark;
-                            LogOk(pName, canSetPark.ToString());
-                            break;
-                        }
-
-                    case CanType.CanSetPierSide:
-                        {
-                            if (GetInterfaceVersion() > 1)
+                        case CanType.CanPulseGuide:
                             {
-                                canSetPierside = telescopeDevice.CanSetPierSide;
-                                LogOk(pName, canSetPierside.ToString());
-                            }
-                            else
-                            {
-                                LogInfo("CanSetPierSide",
-                                    $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                                canPulseGuide = telescopeDevice.CanPulseGuide;
+                                LogOk(pName, canPulseGuide.ToString());
+                                break;
                             }
 
-                            break;
-                        }
-
-                    case CanType.CanSetRightAscensionRate:
-                        {
-                            if (GetInterfaceVersion() > 1)
+                        case CanType.CanSetDeclinationRate:
                             {
-                                canSetRightAscensionRate = telescopeDevice.CanSetRightAscensionRate;
-                                LogOk(pName, canSetRightAscensionRate.ToString());
-                            }
-                            else
-                            {
-                                LogInfo("CanSetRightAscensionRate",
-                                    $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
-                            }
+                                if (GetInterfaceVersion() > 1)
+                                {
+                                    canSetDeclinationRate = telescopeDevice.CanSetDeclinationRate;
+                                    LogOk(pName, canSetDeclinationRate.ToString());
+                                }
+                                else
+                                {
+                                    LogInfo("CanSetDeclinationRate",
+                                        $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                                }
 
-                            break;
-                        }
-
-                    case CanType.CanSetTracking:
-                        {
-                            canSetTracking = telescopeDevice.CanSetTracking;
-                            LogOk(pName, canSetTracking.ToString());
-                            break;
-                        }
-
-                    case CanType.CanSlew:
-                        {
-                            canSlew = telescopeDevice.CanSlew;
-                            LogOk(pName, canSlew.ToString());
-                            break;
-                        }
-
-                    case CanType.CanSlewAltAz:
-                        {
-                            if (GetInterfaceVersion() > 1)
-                            {
-                                canSlewAltAz = telescopeDevice.CanSlewAltAz;
-                                LogOk(pName, canSlewAltAz.ToString());
-                            }
-                            else
-                            {
-                                LogInfo("CanSlewAltAz",
-                                    $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                                break;
                             }
 
-                            break;
-                        }
-
-                    case CanType.CanSlewAltAzAsync:
-                        {
-                            if (GetInterfaceVersion() > 1)
+                        case CanType.CanSetGuideRates:
                             {
-                                canSlewAltAzAsync = telescopeDevice.CanSlewAltAzAsync;
-                                LogOk(pName, canSlewAltAzAsync.ToString());
-                            }
-                            else
-                            {
-                                LogInfo("CanSlewAltAzAsync",
-                                    $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
-                            }
+                                if (GetInterfaceVersion() > 1)
+                                {
+                                    canSetGuideRates = telescopeDevice.CanSetGuideRates;
+                                    LogOk(pName, canSetGuideRates.ToString());
+                                }
+                                else
+                                {
+                                    LogInfo("CanSetGuideRates",
+                                        $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                                }
 
-                            break;
-                        }
-
-                    case CanType.CanSlewAsync:
-                        {
-                            canSlewAsync = telescopeDevice.CanSlewAsync;
-                            LogOk(pName, canSlewAsync.ToString());
-                            break;
-                        }
-
-                    case CanType.CanSync:
-                        {
-                            canSync = telescopeDevice.CanSync;
-                            LogOk(pName, canSync.ToString());
-                            break;
-                        }
-
-                    case CanType.CanSyncAltAz:
-                        {
-                            if (GetInterfaceVersion() > 1)
-                            {
-                                canSyncAltAz = telescopeDevice.CanSyncAltAz;
-                                LogOk(pName, canSyncAltAz.ToString());
-                            }
-                            else
-                            {
-                                LogInfo("CanSyncAltAz",
-                                    $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                                break;
                             }
 
-                            break;
-                        }
+                        case CanType.CanSetPark:
+                            {
+                                canSetPark = telescopeDevice.CanSetPark;
+                                LogOk(pName, canSetPark.ToString());
+                                break;
+                            }
 
-                    case CanType.CanUnPark:
-                        {
-                            canUnpark = telescopeDevice.CanUnpark;
-                            LogOk(pName, canUnpark.ToString());
-                            break;
-                        }
+                        case CanType.CanSetPierSide:
+                            {
+                                if (GetInterfaceVersion() > 1)
+                                {
+                                    canSetPierside = telescopeDevice.CanSetPierSide;
+                                    LogOk(pName, canSetPierside.ToString());
+                                }
+                                else
+                                {
+                                    LogInfo("CanSetPierSide",
+                                        $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                                }
 
-                    default:
-                        {
-                            LogIssue(pName, $"Conform:CanTest: Unknown test type {pType}");
-                            break;
-                        }
-                }
+                                break;
+                            }
+
+                        case CanType.CanSetRightAscensionRate:
+                            {
+                                if (GetInterfaceVersion() > 1)
+                                {
+                                    canSetRightAscensionRate = telescopeDevice.CanSetRightAscensionRate;
+                                    LogOk(pName, canSetRightAscensionRate.ToString());
+                                }
+                                else
+                                {
+                                    LogInfo("CanSetRightAscensionRate",
+                                        $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                                }
+
+                                break;
+                            }
+
+                        case CanType.CanSetTracking:
+                            {
+                                canSetTracking = telescopeDevice.CanSetTracking;
+                                LogOk(pName, canSetTracking.ToString());
+                                break;
+                            }
+
+                        case CanType.CanSlew:
+                            {
+                                canSlew = telescopeDevice.CanSlew;
+                                LogOk(pName, canSlew.ToString());
+                                break;
+                            }
+
+                        case CanType.CanSlewAltAz:
+                            {
+                                if (GetInterfaceVersion() > 1)
+                                {
+                                    canSlewAltAz = telescopeDevice.CanSlewAltAz;
+                                    LogOk(pName, canSlewAltAz.ToString());
+                                }
+                                else
+                                {
+                                    LogInfo("CanSlewAltAz",
+                                        $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                                }
+
+                                break;
+                            }
+
+                        case CanType.CanSlewAltAzAsync:
+                            {
+                                if (GetInterfaceVersion() > 1)
+                                {
+                                    canSlewAltAzAsync = telescopeDevice.CanSlewAltAzAsync;
+                                    LogOk(pName, canSlewAltAzAsync.ToString());
+                                }
+                                else
+                                {
+                                    LogInfo("CanSlewAltAzAsync",
+                                        $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                                }
+
+                                break;
+                            }
+
+                        case CanType.CanSlewAsync:
+                            {
+                                canSlewAsync = telescopeDevice.CanSlewAsync;
+                                LogOk(pName, canSlewAsync.ToString());
+                                break;
+                            }
+
+                        case CanType.CanSync:
+                            {
+                                canSync = telescopeDevice.CanSync;
+                                LogOk(pName, canSync.ToString());
+                                break;
+                            }
+
+                        case CanType.CanSyncAltAz:
+                            {
+                                if (GetInterfaceVersion() > 1)
+                                {
+                                    canSyncAltAz = telescopeDevice.CanSyncAltAz;
+                                    LogOk(pName, canSyncAltAz.ToString());
+                                }
+                                else
+                                {
+                                    LogInfo("CanSyncAltAz",
+                                        $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                                }
+
+                                break;
+                            }
+
+                        case CanType.CanUnPark:
+                            {
+                                canUnpark = telescopeDevice.CanUnpark;
+                                LogOk(pName, canUnpark.ToString());
+                                break;
+                            }
+
+                        default:
+                            {
+                                LogIssue(pName, $"Conform:CanTest: Unknown test type {pType}");
+                                break;
+                            }
+                    }
+                }, TargetTime.Fast);
             }
             catch (Exception ex)
             {
@@ -6491,7 +6424,7 @@ namespace ConformU
                     {
                         LogCallToDriver(testName,
                             $"About to call MoveAxis method for axis {((int)testAxis)} at speed 0");
-                        telescopeDevice.MoveAxis(testAxis, 0.0d); // Set a value of zero
+                        TimeMethod($"{testName} {testAxis} 0", () => telescopeDevice.MoveAxis(testAxis, 0.0d), TargetTime.Standard); // Set a value of zero
 
                         if (ValidateSlewing(testName, false))
                         {
@@ -6612,7 +6545,7 @@ namespace ConformU
                                 SetAction("Moving forward at minimum rate");
                                 LogCallToDriver(testName,
                                     $"About to call MoveAxis method for axis {((int)testAxis)} at speed {rateMinimum}");
-                                telescopeDevice.MoveAxis(testAxis, rateMinimum); // Set the minimum rate
+                                TimeMethod($"{testName} {testAxis} {rateMinimum}", () => telescopeDevice.MoveAxis(testAxis, rateMinimum), TargetTime.Standard); // Set the minimum rate
 
                                 // Assess outcome depending on whether or not the minimum rate was 0.0
                                 if (rateMinimum == 0.0)
@@ -6737,7 +6670,7 @@ namespace ConformU
                                 SetAction("Moving forward at maximum rate");
                                 LogCallToDriver(testName,
                                     $"About to call MoveAxis method for axis {((int)testAxis)} at speed {rateMaximum}");
-                                telescopeDevice.MoveAxis(testAxis, rateMaximum); // Set the maximum rate
+                                TimeMethod($"{testName} {testAxis} {rateMaximum}", () => telescopeDevice.MoveAxis(testAxis, rateMaximum), TargetTime.Standard); // Set the maximum rate
 
                                 // Assess outcome depending on whether or not the maximum rate was 0.0
                                 if (rateMaximum == 0.0)
@@ -7132,10 +7065,8 @@ namespace ConformU
                 }
             }
 
-            LogInfo("DestinationSideofPier",
-                $"Reported DesintationSideofPier at HA -9, +9: {TranslatePierSide((PointingState)lPierSideMinus9.DestinationSideOfPier, false)}{TranslatePierSide((PointingState)lPierSidePlus9.DestinationSideOfPier, false)}");
-            LogInfo("DestinationSideofPier",
-                $"Reported DesintationSideofPier at HA -3, +3: {TranslatePierSide((PointingState)lPierSideMinus3.DestinationSideOfPier, false)}{TranslatePierSide((PointingState)lPierSidePlus3.DestinationSideOfPier, false)}");
+            LogInfo("DestinationSideofPier", $"Reported DesintationSideofPier at HA -9, +9: {TranslatePierSide((PointingState)lPierSideMinus9.DestinationSideOfPier, false)}{TranslatePierSide((PointingState)lPierSidePlus9.DestinationSideOfPier, false)}");
+            LogInfo("DestinationSideofPier", $"Reported DesintationSideofPier at HA -3, +3: {TranslatePierSide((PointingState)lPierSideMinus3.DestinationSideOfPier, false)}{TranslatePierSide((PointingState)lPierSidePlus3.DestinationSideOfPier, false)}");
 
             // Clean up
             // 3.0.0.12 added conditional test to next line
@@ -7157,11 +7088,10 @@ namespace ConformU
 
                 // Do destination side of pier test to see what side of pier we should end up on
                 LogDebug("", "");
-                LogDebug("SOPPierTest",
-                    $"Testing RA DEC: {pRa.ToHMS()} {pDec.ToDMS()} Current pierSide: {TranslatePierSide((PointingState)telescopeDevice.SideOfPier, true)}");
+                LogDebug("SOPPierTest", $"Testing RA DEC: {pRa.ToHMS()} {pDec.ToDMS()} Current pierSide: {TranslatePierSide((PointingState)telescopeDevice.SideOfPier, true)}");
                 try
                 {
-                    lResults.DestinationSideOfPier = telescopeDevice.DestinationSideOfPier(pRa, pDec);
+                    lResults.DestinationSideOfPier = TimeFunc($"DestinatitonSideOfPier", () => telescopeDevice.DestinationSideOfPier(pRa, pDec), TargetTime.Fast);
                     LogDebug("SOPPierTest", $"Target DestinationSideOfPier: {lResults.DestinationSideOfPier}");
                 }
                 catch (COMException ex)
@@ -7169,18 +7099,14 @@ namespace ConformU
                     switch (ex.ErrorCode)
                     {
                         case var @case when @case == ErrorCodes.NotImplemented:
-                            {
-                                lResults.DestinationSideOfPier = PointingState.Unknown;
-                                LogDebug("SOPPierTest",
-                                    $"DestinationSideOfPier is not implemented setting result to: {lResults.DestinationSideOfPier}");
-                                break;
-                            }
+                            lResults.DestinationSideOfPier = PointingState.Unknown;
+                            LogDebug("SOPPierTest",
+                                $"DestinationSideOfPier is not implemented setting result to: {lResults.DestinationSideOfPier}");
+                            break;
 
                         default:
-                            {
-                                LogIssue("SOPPierTest", $"DestinationSideOfPier Exception: {ex}");
-                                break;
-                            }
+                            LogIssue("SOPPierTest", $"DestinationSideOfPier Exception: {ex}");
+                            break;
                     }
                 }
                 catch (MethodNotImplementedException) // DestinationSideOfPier not available so mark as unknown
@@ -7300,63 +7226,54 @@ namespace ConformU
             switch (testType)
             {
                 case SlewSyncType.SyncToCoordinates: // SyncToCoordinates
+                    LogCallToDriver(testName, "About to get Tracking property");
+                    if (canSetTracking & !telescopeDevice.Tracking)
                     {
-                        LogCallToDriver(testName, "About to get Tracking property");
-                        if (canSetTracking & !telescopeDevice.Tracking)
-                        {
-                            LogCallToDriver(testName, "About to set Tracking property to true");
-                            telescopeDevice.Tracking = true;
-                        }
-                        LogCallToDriver(testName,
-                            $"About to call SyncToCoordinates method, RA: {syncRa.ToHMS()}, Declination: {syncDec.ToDMS()}");
-                        telescopeDevice.SyncToCoordinates(syncRa, syncDec); // Sync to slightly different coordinates
-                        LogDebug(testName, "Completed SyncToCoordinates");
-                        break;
+                        LogCallToDriver(testName, "About to set Tracking property to true");
+                        telescopeDevice.Tracking = true;
                     }
+                    LogCallToDriver(testName, $"About to call SyncToCoordinates method, RA: {syncRa.ToHMS()}, Declination: {syncDec.ToDMS()}");
+                    TimeMethod(testName, () => telescopeDevice.SyncToCoordinates(syncRa, syncDec), TargetTime.Standard); // Sync to slightly different coordinates
+                    LogDebug(testName, "Completed SyncToCoordinates");
+                    break;
 
                 case SlewSyncType.SyncToTarget: // SyncToTarget
+                    LogCallToDriver(testName, "About to get Tracking property");
+                    if (canSetTracking & !telescopeDevice.Tracking)
                     {
-                        LogCallToDriver(testName, "About to get Tracking property");
-                        if (canSetTracking & !telescopeDevice.Tracking)
-                        {
-                            LogCallToDriver(testName, "About to set Tracking property to true");
-                            telescopeDevice.Tracking = true;
-                        }
-
-                        try
-                        {
-                            LogCallToDriver(testName, $"About to set TargetRightAscension property to {syncRa.ToHMS()}");
-                            telescopeDevice.TargetRightAscension = syncRa;
-                            LogDebug(testName, "Completed Set TargetRightAscension");
-                        }
-                        catch (Exception ex)
-                        {
-                            HandleException(testName, MemberType.Property, Required.MustBeImplemented, ex,
-                                $"{canDoItName} is True but can't set TargetRightAscension");
-                        }
-
-                        try
-                        {
-                            LogCallToDriver(testName, $"About to set TargetDeclination property to {syncDec.ToDMS()}");
-                            telescopeDevice.TargetDeclination = syncDec;
-                            LogDebug(testName, "Completed Set TargetDeclination");
-                        }
-                        catch (Exception ex)
-                        {
-                            HandleException(testName, MemberType.Property, Required.MustBeImplemented, ex,
-                                $"{canDoItName} is True but can't set TargetDeclination");
-                        }
-                        LogCallToDriver(testName, "About to call SyncToTarget method");
-                        telescopeDevice.SyncToTarget(); // Sync to slightly different coordinates
-                        LogDebug(testName, "Completed SyncToTarget");
-                        break;
+                        LogCallToDriver(testName, "About to set Tracking property to true");
+                        telescopeDevice.Tracking = true;
                     }
+
+                    try
+                    {
+                        LogCallToDriver(testName, $"About to set TargetRightAscension property to {syncRa.ToHMS()}");
+                        telescopeDevice.TargetRightAscension = syncRa;
+                        LogDebug(testName, "Completed Set TargetRightAscension");
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleException(testName, MemberType.Property, Required.MustBeImplemented, ex, $"{canDoItName} is True but can't set TargetRightAscension");
+                    }
+
+                    try
+                    {
+                        LogCallToDriver(testName, $"About to set TargetDeclination property to {syncDec.ToDMS()}");
+                        telescopeDevice.TargetDeclination = syncDec;
+                        LogDebug(testName, "Completed Set TargetDeclination");
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleException(testName, MemberType.Property, Required.MustBeImplemented, ex, $"{canDoItName} is True but can't set TargetDeclination");
+                    }
+                    LogCallToDriver(testName, "About to call SyncToTarget method");
+                    TimeMethod(testName, () => telescopeDevice.SyncToTarget(), TargetTime.Standard); // Sync to slightly different coordinates
+                    LogDebug(testName, "Completed SyncToTarget");
+                    break;
 
                 default:
-                    {
-                        LogError(testName, $"Conform:SyncTest: Unknown test type {testType}");
-                        break;
-                    }
+                    LogError(testName, $"Conform:SyncTest: Unknown test type {testType}");
+                    break;
             }
         }
 
@@ -7722,9 +7639,9 @@ namespace ConformU
 
                     // Set the appropriate offset rate
                     if (axis == Axis.Ra)
-                        telescopeDevice.RightAscensionRate = rate;
+                        TimeMethod($"{testName} {rate:#0.000}", () => telescopeDevice.RightAscensionRate = rate, TargetTime.Standard);
                     else
-                        telescopeDevice.DeclinationRate = rate;
+                        TimeMethod($"{testName} {rate:#0.000}", () => telescopeDevice.DeclinationRate = rate, TargetTime.Standard);
 
                     SetAction("Waiting for mount to settle");
                     WaitFor(1000); // Give a short wait to allow the mount to settle at the new rate
@@ -8155,7 +8072,7 @@ namespace ConformU
             LogDebug(logName, $"Test guiding direction: {direction}, RA change tolerance: {changeToleranceRa} ({changeToleranceRa.ToHMS()}, {changeToleranceRa.ToDMS()}), Declination change tolerance: {changeToleranceDec} ({changeToleranceDec.ToDMS()}, {changeToleranceDec.ToHMS()})"); LogCallToDriver(logName, "About to get RightAscension property");
             double initialRaCoordinate = telescopeDevice.RightAscension; LogCallToDriver(logName, "About to get Declination property");
             double initialDecCoordinate = telescopeDevice.Declination; LogCallToDriver(logName, $"About to call PulseGuide. Direction: {direction}, Duration: {PULSE_GUIDE_DURATION * 1000}ms.");
-            telescopeDevice.PulseGuide(direction, PULSE_GUIDE_DURATION * 1000);
+            TimeMethod($"PulseGuide {direction} {PULSE_GUIDE_DURATION}s", () => telescopeDevice.PulseGuide(direction, PULSE_GUIDE_DURATION * 1000), TargetTime.Standard);
 
             WaitWhile($"Pulse guiding {direction} at HA {ha:+0.0;-0.0;+0.0}", () => telescopeDevice.IsPulseGuiding, SLEEP_TIME, PULSE_GUIDE_TIMEOUT); LogCallToDriver(logName, "About to get RightAscension property");
             double finalRaCoordinate = telescopeDevice.RightAscension; LogCallToDriver(logName, "About to get Declination property");

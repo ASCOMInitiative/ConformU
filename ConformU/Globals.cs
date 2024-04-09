@@ -34,7 +34,7 @@
         #region Global Variables
 
         // Variables shared between the test manager and device testers        
-        internal static ConformResults conformResults;
+        internal static ConformResults conformResults= new();
 
         #endregion
 

@@ -1897,6 +1897,7 @@ namespace ConformU
                     memberNamePadWidth = 25;
                     break;
                 case DeviceTypes.Telescope:
+                    memberNamePadWidth = 42;
                     break;
                 case DeviceTypes.Video:
                     break;
