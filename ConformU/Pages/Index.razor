@@ -39,7 +39,6 @@
     object statusLockObject = new object();
     private string deviceDescription = "";
     string statusMessage = "";
-    private IDisposable navigationManagerRegistration;
 
     ConformanceTestManager tester;
 
@@ -480,7 +479,6 @@
             {
                 _listener.OnResize -= WindowResized;
                 _conformState.UiHasChanged -= OnUiHasChanged;
-                navigationManagerRegistration?.Dispose();
             }
 
             disposedValue = true;
