@@ -896,6 +896,8 @@ namespace ConformU
                     if (settings.TelescopeExtendedRateOffsetTests)
                     {
                         LogInfo("DeclinationRate Write", $"Configured offset test duration: {settings.TelescopeRateOffsetTestDuration} seconds.");
+                        LogInfo("DeclinationRate Write", $"Configured offset rate (low):  {settings.TelescopeRateOffsetTestLowValue,7:+0.000;-0.000;+0.000} arc seconds per second.");
+                        LogInfo("DeclinationRate Write", $"Configured offset rate (high): {settings.TelescopeRateOffsetTestHighValue,7:+0.000;-0.000;+0.000} arc seconds per second.");
                     }
 
                     if (TestRaDecRate("DeclinationRate Write", "Set rate to   0.000", Axis.Dec, 0.0d, true))
@@ -1409,6 +1411,8 @@ namespace ConformU
                     if (settings.TelescopeExtendedRateOffsetTests)
                     {
                         LogInfo("RightAscensionRate Write", $"Configured offset test duration: {settings.TelescopeRateOffsetTestDuration} seconds.");
+                        LogInfo("RightAscensionRate Write", $"Configured offset rate (low):  {settings.TelescopeRateOffsetTestLowValue / 15.0,7:+0.0000;-0.0000;+0.0000} RA seconds per second ({settings.TelescopeRateOffsetTestLowValue,7:+0.000;-0.000;+0.000} arc seconds per second).");
+                        LogInfo("RightAscensionRate Write", $"Configured offset rate (high): {settings.TelescopeRateOffsetTestHighValue / 15.0,7:+0.0000;-0.0000;+0.0000} RA seconds per second ({settings.TelescopeRateOffsetTestHighValue,7:+0.000;-0.000;+0.000} arc seconds per second).");
                     }
 
                     if (TestRaDecRate("RightAscensionRate Write", "Set rate to   0.000", Axis.Ra, 0.0d, true))
@@ -7676,7 +7680,9 @@ namespace ConformU
                     if (axis == Axis.Ra)
                         offsetRate = telescopeDevice.RightAscensionRate;
                     else
-                        offsetRate = telescopeDevice.DeclinationRate; LogCallToDriver(testName, $"{description} - About to get the Slewing property");
+                        offsetRate = telescopeDevice.DeclinationRate;
+                    
+                    LogCallToDriver(testName, $"{description} - About to get the Slewing property");
                     slewing = telescopeDevice.Slewing;
 
                     // Check the rate assignment outcome
@@ -8021,22 +8027,22 @@ namespace ConformU
             {
                 if (Math.Abs(actualValue - expectedValue) <= tolerance)
                 {
-                    LogOk(testName, $"{name} is within expected tolerance. Expected: {expectedValue,7:+0.000;-0.000;+0.000}, Actual: {actualValue,7:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / tolerance):N2}%.");
+                    LogOk(testName, $"{name} is within expected tolerance. Expected: {expectedValue,8:+0.0000;-0.0000;+0.0000}, Actual: {actualValue,8:+0.0000;-0.0000;+0.0000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / tolerance):N2}%.");
                 }
                 else
                 {
-                    LogIssue(testName, $"{name} is outside the expected tolerance. Expected: {expectedValue,7:+0.000;-0.000;+0.000}, Actual: {actualValue,7:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / tolerance):N2}%, Tolerance:{tolerance * 100:N2}.");
+                    LogIssue(testName, $"{name} is outside the expected tolerance. Expected: {expectedValue,8:+0.0000;-0.0000;+0.0000}, Actual: {actualValue,8:+0.0000;-0.0000;+0.0000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / tolerance):N2}%, Tolerance:{tolerance * 100:N0}%.");
                 }
             }
             else
             {
                 if (Math.Abs(Math.Abs(actualValue - expectedValue) / expectedValue) <= tolerance)
                 {
-                    LogOk(testName, $"{name} is within expected tolerance. Expected: {expectedValue,7:+0.000;-0.000;+0.000}, Actual: {actualValue,7:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%.");
+                    LogOk(testName, $"{name} is within expected tolerance. Expected: {expectedValue,8:+0.0000;-0.0000;+0.0000}, Actual: {actualValue,8:+0.0000;-0.0000;+0.0000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%.");
                 }
                 else
                 {
-                    LogIssue(testName, $"{name} is outside the expected tolerance. Expected: {expectedValue,7:+0.000;-0.000;+0.000}, Actual: {actualValue,7:+0.000;-0.000;+0.000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%, Tolerance:{tolerance * 100:N2}.");
+                    LogIssue(testName, $"{name} is outside the expected tolerance. Expected: {expectedValue,8:+0.0000;-0.0000;+0.0000}, Actual: {actualValue,8:+0.0000;-0.0000;+0.0000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%, Tolerance:{tolerance * 100:N0}%.");
                 }
             }
         }
