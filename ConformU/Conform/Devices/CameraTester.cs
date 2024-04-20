@@ -3,6 +3,7 @@ using ASCOM.Alpaca.Clients;
 using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
+using Blazorise;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -42,7 +43,7 @@ namespace ConformU
         private string mLastExposureStartTime;
         private CameraState mCameraState;
         private Array mImageArray, mImageArrayVariant;
-        private bool mIsPulseGuidingSupported; // Confirm that IsPulseGuiding command will work
+        private bool mIsPulseGuidingFunctional; // Confirm that IsPulseGuiding command will work
         private bool mCanPulseGuide;
         private bool mIsPulseGuiding;
         // ICameraV2 properties
@@ -336,66 +337,50 @@ namespace ConformU
                 switch (pType)
                 {
                     case CanType.TstCanAbortExposure:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get CanAbortExposure");
-                            mCanAbortExposure = TimeFunc<bool>(pName, () => camera.CanAbortExposure, TargetTime.Fast);
-                            LogOk(pName, mCanAbortExposure.ToString());
-                            break;
-                        }
+                        LogCallToDriver("ConformanceCheck", "About to get CanAbortExposure");
+                        mCanAbortExposure = TimeFunc<bool>(pName, () => camera.CanAbortExposure, TargetTime.Fast);
+                        LogOk(pName, mCanAbortExposure.ToString());
+                        break;
 
                     case CanType.TstCanAsymmetricBin:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get CanAsymmetricBin");
-                            mCanAsymmetricBin = TimeFunc<bool>(pName, () => camera.CanAsymmetricBin, TargetTime.Fast);
-                            LogOk(pName, mCanAsymmetricBin.ToString());
-                            break;
-                        }
+                        LogCallToDriver("ConformanceCheck", "About to get CanAsymmetricBin");
+                        mCanAsymmetricBin = TimeFunc<bool>(pName, () => camera.CanAsymmetricBin, TargetTime.Fast);
+                        LogOk(pName, mCanAsymmetricBin.ToString());
+                        break;
 
                     case CanType.TstCanGetCoolerPower:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get CanGetCoolerPower");
-                            mCanGetCoolerPower = TimeFunc<bool>(pName, () => camera.CanGetCoolerPower, TargetTime.Fast);
-                            LogOk(pName, mCanGetCoolerPower.ToString());
-                            break;
-                        }
+                        LogCallToDriver("ConformanceCheck", "About to get CanGetCoolerPower");
+                        mCanGetCoolerPower = TimeFunc<bool>(pName, () => camera.CanGetCoolerPower, TargetTime.Fast);
+                        LogOk(pName, mCanGetCoolerPower.ToString());
+                        break;
 
                     case CanType.TstCanPulseGuide:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get CanPulseGuide");
-                            mCanPulseGuide = TimeFunc<bool>(pName, () => camera.CanPulseGuide, TargetTime.Fast);
-                            LogOk(pName, mCanPulseGuide.ToString());
-                            break;
-                        }
+                        LogCallToDriver("ConformanceCheck", "About to get CanPulseGuide");
+                        mCanPulseGuide = TimeFunc<bool>(pName, () => camera.CanPulseGuide, TargetTime.Fast);
+                        LogOk(pName, mCanPulseGuide.ToString());
+                        break;
 
                     case CanType.TstCanSetCcdTemperature:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get CanSetCCDTemperature");
-                            mCanSetCcdTemperature = TimeFunc<bool>(pName, () => camera.CanSetCCDTemperature, TargetTime.Fast);
-                            LogOk(pName, mCanSetCcdTemperature.ToString());
-                            break;
-                        }
+                        LogCallToDriver("ConformanceCheck", "About to get CanSetCCDTemperature");
+                        mCanSetCcdTemperature = TimeFunc<bool>(pName, () => camera.CanSetCCDTemperature, TargetTime.Fast);
+                        LogOk(pName, mCanSetCcdTemperature.ToString());
+                        break;
 
                     case CanType.TstCanStopExposure:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get CanStopExposure");
-                            mCanStopExposure = TimeFunc<bool>(pName, () => camera.CanStopExposure, TargetTime.Fast);
-                            LogOk(pName, mCanStopExposure.ToString());
-                            break;
-                        }
+                        LogCallToDriver("ConformanceCheck", "About to get CanStopExposure");
+                        mCanStopExposure = TimeFunc<bool>(pName, () => camera.CanStopExposure, TargetTime.Fast);
+                        LogOk(pName, mCanStopExposure.ToString());
+                        break;
 
                     case CanType.TstCanFastReadout:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get CanFastReadout");
-                            mCanFastReadout = TimeFunc<bool>(pName, () => camera.CanFastReadout, TargetTime.Fast);
-                            LogOk(pName, mCanFastReadout.ToString());
-                            break;
-                        }
+                        LogCallToDriver("ConformanceCheck", "About to get CanFastReadout");
+                        mCanFastReadout = TimeFunc<bool>(pName, () => camera.CanFastReadout, TargetTime.Fast);
+                        LogOk(pName, mCanFastReadout.ToString());
+                        break;
 
                     default:
-                        {
-                            LogIssue(pName, $"Conform:CanTest: Unknown test type {pType}");
-                            break;
-                        }
+                        LogIssue(pName, $"Conform:CanTest: Unknown test type {pType}");
+                        break;
                 }
             }
             catch (Exception ex)
@@ -2049,9 +2034,10 @@ namespace ConformU
 
                         case CamPropertyType.IsPulseGuiding:
                             {
-                                mIsPulseGuidingSupported = false; LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
+                                mIsPulseGuidingFunctional = false;
+                                LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
                                 returnValue = camera.IsPulseGuiding;
-                                mIsPulseGuidingSupported = true; // Command works properly and doesn't cause a not implemented exception
+                                mIsPulseGuidingFunctional = true; // Command works properly and doesn't cause a not implemented exception
                                 break;
                             }
 
@@ -2288,7 +2274,7 @@ namespace ConformU
                 // Test whether the camera is idle, which it should be in a well behaved device
                 if (mCameraState != CameraState.Idle)
                 {
-                    LogIssue("AbortExposure", $"The camera should be idle but is not: {mCameraState}");
+                    LogIssue("StopExposure", $"The camera should be idle but is not: {mCameraState}");
                 }
 
                 try
@@ -2296,6 +2282,10 @@ namespace ConformU
                     LogCallToDriver("ConformanceCheck", "About to call StopExposure");
                     SetAction("Calling StopExposure()");
                     TimeMethod("StopExposure", camera.StopExposure, TargetTime.Standard);
+
+                    LogCallToDriver("ConformanceCheck", "About to get ImageReady repeatedly...");
+                    WaitWhile($"Waiting for exposure to stop", () => camera.ImageReady, 100, settings.CameraWaitTimeout);
+
                     if (mCanStopExposure)
                         LogOk("StopExposure", "No error returned when camera is already idle");
                     else
@@ -2421,9 +2411,11 @@ namespace ConformU
             // StartExposure - Confirm error cases
             LogNewLine();
             LogTestOnly("StartExposure error cases");
+
             // StartExposure - Negative time
-            CameraExposure("Reject Negative Duration", "Testing rejection of negative exposure duration (-1.0)", 1, 1, 0, 0, cameraXSize, cameraYSize, -1.0, "negative duration"); if (cancellationToken.IsCancellationRequested)
-                return; // Test that negative duration generates an error
+            CameraExposure("Reject Negative Duration", "Testing rejection of negative exposure duration (-1.0)", 1, 1, 0, 0, cameraXSize, cameraYSize, -1.0, "negative duration");
+            if (cancellationToken.IsCancellationRequested)
+                return;
 
             // StartExposure - Invalid Bin values
             for (i = 1; i <= maxBinX; i++)
@@ -2667,12 +2659,12 @@ namespace ConformU
                             {
                                 // Flag that the exposure was successfully initiated
                                 initiatedOk = true;
+                                LogOk("StartExposure", "Completed successfully.");
                             }
                             else
                             {
                                 LogTestAndMessage(testName, $"No error was returned when {char.ToLowerInvariant(expectedErrorMessage[0])}{expectedErrorMessage[1..]}");
-                                LogIssue(testName,
-                                    $"Expected an error and didn't get one - BinX:{requiredBinX} BinY:{requiredBinY} StartX:{requiredStartX} StartY:{requiredStartY} NumX:{requiredNumX} NumY:{requiredNumY}");
+                                LogIssue(testName, $"Expected an error and didn't get one - BinX:{requiredBinX} BinY:{requiredBinY} StartX:{requiredStartX} StartY:{requiredStartY} NumX:{requiredNumX} NumY:{requiredNumY}");
                             }
                         }
                     }
@@ -2738,7 +2730,7 @@ namespace ConformU
                             break;
 
                         case TaskStatus.RanToCompletion: // The StartExposure method completed OK within the specified timeout period.
-                                                         // No action here because the initiatedOk flag is set by the code within the task
+                            // No action here because the initiatedOk flag is set by the code within the task
                             break;
                     }
                 }
@@ -2792,12 +2784,21 @@ namespace ConformU
 
                     try
                     {
-                        if (endTime.Subtract(startTime).TotalSeconds >= requiredDuration)
+                        // Test whether the required exposure time has passed
+                        if (endTime.Subtract(startTime).TotalSeconds >= requiredDuration) // Required exposure time has elapsed
                         {
-                            LogOk(testName, $"Synchronous exposure found OK: {requiredDuration} seconds");
+                            if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion())) // Platform 7 or later device
+                            {
+                                LogIssue(testName, $"StartExposure operated synchronously: ImageReady was True and CameraState was Idle when StartExposure returned after the full exposure time: {requiredDuration} seconds.");
+                                LogInfo(testName, $"As an ICameraV4 or later device, StartExposure should have operated asynchronously: Returning quickly after setting ImageReady False, before the full exposure time has elapsed.");
+                                LogInfo(testName, $"After StartExposure has returned, the camera should continue the exposure and set ImageReady True when the exposure time has elapsed.");
+                            }
+                            else // Platform 6 or earlier device
+                                LogOk(testName, $"Synchronous exposure found OK: {requiredDuration} seconds");
+
                             CameraTestLast(requiredDuration, startTimeUtc);
                         }
-                        else
+                        else // Camera returned early before the required exposure time elapsed.
                             LogIssue(testName, "Synchronous exposure found but image was returned before exposure time was complete");
                     }
                     catch (Exception ex)
@@ -3002,39 +3003,60 @@ namespace ConformU
 
             try
             {
-                if (ApplicationCancellationToken.IsCancellationRequested) // Exit if required
+                // Exit if required
+                if (ApplicationCancellationToken.IsCancellationRequested)
                 {
                     ResetTestActionStatus();
                     return;
                 }
+
+                // Test whether or not an image was successfully recorded
                 LogCallToDriver("ConformanceCheck", "About to get ImageReady");
-                if (camera.ImageReady)
+                if (camera.ImageReady) // An image was successfully recorded
                 {
-                    LogOk(testName, $"Asynchronous exposure found OK: {requiredDuration} seconds");
+                    LogOk("ImageReady", $"ImageReady is True after a successful exposure of {requiredDuration} seconds.");
                     CameraTestLast(requiredDuration, startTimeUtc);
                 }
-                else
+                else // An image was not successfully recorded
                 {
                     // Give up because the exposure was not successful
-                    LogIssue(testName, "Test abandoned because the camera state is CameraError.");
+                    LogIssue("ImageReady", "ImageReady is False - Test abandoned because the camera reports that no image is available.");
                     ResetTestActionStatus();
                     return;
                 }
 
                 // Display a warning if ImageReady was set too early
-                if (imageReadyTooEarly)
+                if (imageReadyTooEarly) // ImageReady was set too early
                 {
-                    LogIssue(testName, "Test abandoned because ImageReady was set True before the camera completed its exposure.");
+                    LogIssue("ImageReady", "Test abandoned because ImageReady was set True before the exposure time had elapsed.");
                     ResetTestActionStatus();
                     return;
                 }
-
-                // Camera exposed OK and didn't generate an exception
-                else
+                else // Camera exposed OK and didn't generate an exception
                 {
                     exposedOk = true;
                 }
                 LogDebug(testName, $"Camera exposed image OK: {exposedOk}");
+
+                //Now check the camera state
+                CameraState cameraState = camera.CameraState;
+                switch (cameraState)
+                {
+                    case CameraState.Idle:
+                        LogOk("CameraState", $"The camera returned the camera state as Camera.Idle after exposure completed.");
+                        break;
+
+                    case CameraState.Waiting:
+                    case CameraState.Exposing:
+                    case CameraState.Reading:
+                    case CameraState.Download:
+                    case CameraState.Error:
+                        LogIssue("CameraState", $"The CameraState property returned an unexpected camera state after exposure completed: {cameraState}.");
+                        break;
+
+                    default:
+                        throw new InvalidValueException($"The camera returned an unknown camera state: {cameraState}");
+                }
             }
             catch (Exception ex)
             {
@@ -3612,71 +3634,82 @@ namespace ConformU
         }
         private void CameraPulseGuideTest(GuideDirection pDirection)
         {
-            DateTime lStartTime, lEndTime;
-            // Dim pulseGuideStatus As PulseGuideState
+            // If this is an ICameraV4 or later device pulse guiding cannot be tested without the IsPulseGuiding property being functional to support async operation
+            if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Camera, GetInterfaceVersion()))
+            {
+                if (!mIsPulseGuidingFunctional)
+                {
+                    LogIssue($"PulseGuide {pDirection}", $"Skipping this test because IsPulseGuiding returned an error or threw an exception when tested.");
+                    return;
+                }
+            }
 
-            lStartTime = DateTime.Now;
-            //SetAction("Start " + CAMERA_PULSE_DURATION / (double)1000 + " second pulse guide " + p_Direction.ToString());
+            // Start a timer to measure the duration of the PulseGuide method
+            Stopwatch duration = Stopwatch.StartNew();
+
             LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {pDirection}");
             TimeMethodTwoParams($"PulseGuide {pDirection}", camera.PulseGuide, pDirection, CAMERA_PULSE_DURATION, TargetTime.Standard);
 
-            lEndTime = DateTime.Now;
+            // Stop the duration timer
+            duration.Stop();
+
             try
             {
-                if (mIsPulseGuidingSupported)
+                // Check whether IsPulseGuiding is functional
+                if (mIsPulseGuidingFunctional) // IsPulseGuiding is functional
                 {
-                    if (lEndTime.Subtract(lStartTime).TotalMilliseconds < (CAMERA_PULSE_DURATION - 500))
+                    // Test how long the PulseGuide method took to complete
+                    if (duration.Elapsed.TotalMilliseconds < (CAMERA_PULSE_DURATION - 500)) // Completed before the required pulse guide duration (so assume asynchronous operation)
                     {
+                        // Check whether the camera is still pulse guiding 
                         LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
-                        if (camera.IsPulseGuiding)
+                        if (camera.IsPulseGuiding) // Camera is still pulse guiding
                         {
-                            LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding multiple times");
+                            // Wait for the pulse guide to complete
                             Stopwatch sw = Stopwatch.StartNew();
-                            WaitWhile($"Guiding {pDirection}", () => camera.IsPulseGuiding, 500, 3, () => $"{sw.Elapsed.TotalSeconds:0.0} / {CAMERA_PULSE_DURATION / 1000:0.0} seconds"); LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
-                            if (!camera.IsPulseGuiding)
+                            LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding multiple times");
+                            WaitWhile($"Guiding {pDirection}", () => camera.IsPulseGuiding, 500, 3, () => $"{sw.Elapsed.TotalSeconds:0.0} / {CAMERA_PULSE_DURATION / 1000:0.0} seconds");
+
+                            // Check whether the camera has now finished pulse guiding
+                            LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
+                            if (!camera.IsPulseGuiding) // The camera has finished the pulse guide
                                 LogOk($"PulseGuide {pDirection}", "Asynchronous pulse guide found OK");
-                            else
+                            else // The wait timed out and the camera is still reporting that it is pulse guiding
                                 LogIssue($"PulseGuide {pDirection}", "Asynchronous pulse guide expected but IsPulseGuiding is TRUE beyond expected time of 2 seconds");
                         }
-                        else
-                            LogIssue($"PulseGuide {pDirection}", "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE");
+                        else // Camera is not pulse guiding so the pulse guide appears to have finished early
+                            LogIssue($"PulseGuide {pDirection}", "PulseGuide returned quickly indicating an asynchronous pulse guide, but IsPulseGuiding returned FALSE before the pulse guide duration had elapsed.");
                     }
-                    else
+                    else // Completed in close to the required pulse guide time (so assume synchronous operation)
                     {
+                        // Test whether the camera is still pulse guiding
                         LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
-                        if (!camera.IsPulseGuiding)
+                        if (!camera.IsPulseGuiding) // Camera is NOT pulse guiding
                             LogOk($"PulseGuide {pDirection}", "Synchronous pulse guide found OK");
-                        else
-                            LogIssue($"PulseGuide {pDirection}", "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE");
+                        else // Camera is still pulse guiding
+                            LogIssue($"PulseGuide {pDirection}", "Synchronous pulse guide expected but IsPulseGuiding returned TRUE");
                     }
                 }
-                else
-                    switch (lEndTime.Subtract(lStartTime).TotalMilliseconds - CAMERA_PULSE_DURATION)
+                else // IsPulseGuiding is NOT functional
+                {
+                    switch (duration.Elapsed.TotalMilliseconds - CAMERA_PULSE_DURATION)
                     {
-                        case object _ when lEndTime.Subtract(lStartTime).TotalMilliseconds - CAMERA_PULSE_DURATION > CAMERA_PULSE_TOLERANCE // Duration was more than 0.5 seconds longer than expected
-                       :
-                            {
-                                LogIssue($"PulseGuide {pDirection}",
-                                    $"Synchronous pulse guide longer than expected {(CAMERA_PULSE_DURATION) / (double)1000} seconds: {lEndTime.Subtract(lStartTime).TotalSeconds} seconds");
-                                break;
-                            }
+                        // Duration was more than 0.5 seconds longer than expected
+                        case object _ when duration.Elapsed.TotalMilliseconds - CAMERA_PULSE_DURATION > CAMERA_PULSE_TOLERANCE:
+                            LogIssue($"PulseGuide {pDirection}", $"Synchronous pulse guide longer than expected {(CAMERA_PULSE_DURATION) / (double)1000} seconds: {duration.Elapsed.TotalSeconds} seconds");
+                            break;
 
-                        case object _ when lEndTime.Subtract(lStartTime).TotalMilliseconds - CAMERA_PULSE_DURATION < 20 // Duration was more than 20ms shorter than expected
-                 :
-                            {
-                                LogIssue($"PulseGuide {pDirection}",
-                                    $"Synchronous pulse guide shorter than expected {(CAMERA_PULSE_DURATION) / (double)1000} seconds: {lEndTime.Subtract(lStartTime).TotalSeconds} seconds");
-                                break;
-                            }
+                        // Duration was more than 20ms shorter than expected
+                        case object _ when duration.Elapsed.TotalMilliseconds - CAMERA_PULSE_DURATION < 20:
+                            LogIssue($"PulseGuide {pDirection}", $"Synchronous pulse guide shorter than expected {(CAMERA_PULSE_DURATION) / (double)1000} seconds: {duration.Elapsed.TotalSeconds} seconds");
+                            break;
 
+                        // All other cases
                         default:
-                            {
-                                LogOk($"PulseGuide {pDirection}",
-                                    $"Synchronous pulse guide found OK: {lEndTime.Subtract(lStartTime).TotalSeconds} seconds");
-                                break;
-                            }
+                            LogOk($"PulseGuide {pDirection}", $"Synchronous pulse guide found OK: {duration.Elapsed.TotalSeconds} seconds");
+                            break;
                     }
-
+                }
             }
             catch (TimeoutException ex)
             {
