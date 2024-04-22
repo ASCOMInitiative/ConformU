@@ -4,6 +4,7 @@ using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -31,15 +32,12 @@ namespace ConformU
         private bool calibratorChanging;
         private bool coverMoving;
         private bool canAsynchronousOpen;
-        private double asynchronousOpenTime;
-        private double asynchronousCloseTime;
+        private double coverOpenTime = 0.0;
         private int maxBrightness;
         private bool calibratorStateOk;
         private bool coverStateOk;
         private bool brightnessOk;
         private bool maxBrightnessOk;
-        private bool coverMovingOk;
-        private bool calibratorChangingOk;
 
         // Helper variables
         private ICoverCalibratorV2 coverCalibratorDevice;
@@ -48,7 +46,7 @@ namespace ConformU
         private readonly ConformLogger logger;
 
         #region New and Dispose
-        public CoverCalibratorTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(false, true, true, false, true, true, false, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
+        public CoverCalibratorTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(false, true, true, false, true, true, true, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
         {
             settings = conformConfiguration.Settings;
             cancellationToken = conformCancellationToken;
@@ -272,18 +270,21 @@ namespace ConformU
             else
                 LogIssue("Brightness", $"Test skipped because CalibratorState returned an exception");
 
-            // If this is an ICoverCalibratorV2 interface or later device test CalibratorChanging
+            // If this is an ICoverCalibratorV2 interface or later device make sure we can read CalibratorChanging
             if (DeviceCapabilities.HasCalibratorChanging(GetInterfaceVersion()))
-                calibratorChangingOk = RequiredPropertiesTest(RequiredProperty.CalibratorChanging, "CalibratorChanging");
-
-            // If this is an ICoverCalibratorV2 interface or later device test CoverMoving
-            if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()))
-                coverMovingOk = RequiredPropertiesTest(RequiredProperty.CoverMoving, "CoverMoving");
-
-
-            if (coverStateOk & calibratorStateOk)
             {
-                if (coverState == CoverStatus.NotPresent & calibratorState == CalibratorStatus.NotPresent)
+                bool calibratorChangingOk = RequiredPropertiesTest(RequiredProperty.CalibratorChanging, "CalibratorChanging");
+            }
+            // If this is an ICoverCalibratorV2 interface or later device make sure we can read CoverMoving
+            if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()))
+            {
+                bool coverMovingOk = RequiredPropertiesTest(RequiredProperty.CoverMoving, "CoverMoving");
+            }
+
+            // Check that the device implements at least one of the cover or calibrator functions
+            if (coverStateOk & calibratorStateOk) // Both cover and calibrator statuses can be read successfully
+            {
+                if (coverState == CoverStatus.NotPresent & calibratorState == CalibratorStatus.NotPresent) // Both implementations are absent so log an issue
                     LogIssue("DeviceCapabilities", "Both CoverStatus and CalibratorStatus are set to 'NotPresent' - this device won't do a lot!");
             }
         }
@@ -296,270 +297,67 @@ namespace ConformU
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            // Test OpenCover
-            SetTest("OpenCover");
-            if (coverStateOk)
+            // Check whether CoverState can be read OK
+            if (coverStateOk) // CoverState can be read OK
             {
-                if (coverState != CoverStatus.Moving)
+                switch (coverCalibratorDevice.CoverState)
                 {
-                    try
-                    {
-                        sw.Restart();
+                    // Cover is not implemented so makes sure that not implemented exceptions are thrown
+                    case CoverStatus.NotPresent:
+                        TestOpenCover();
+                        TestCloseCover();
+                        TestHaltCover();
+                        break;
 
-                        LogCallToDriver("OpenCover", "About to call OpenCover method");
-                        TimeMethod("OpenCover", coverCalibratorDevice.OpenCover,TargetTime.Standard);
+                    // Status is closed so test OpenCover first then CloseCover
+                    case CoverStatus.Closed:
+                        TestOpenCover();
+                        TestCloseCover();
+                        TestHaltCover();
+                        break;
 
-                        if (!(coverState == CoverStatus.NotPresent))
+                    // Status is moving so skip tests because this should not be the case
+                    case CoverStatus.Error:
+                    case CoverStatus.Moving:
+                        LogIssue("CoverCalibrator", $"The OpenCover, CloseCover and HaltCover tests have been skipped because CoverState reports {coverState} before the tests start.");
+                        break;
+
+                    // Status is open so test CloseCover first then OpenCover
+                    case CoverStatus.Open:
+                        TestCloseCover();
+                        TestHaltCover();
+                        TestOpenCover();
+                        break;
+
+                    // Status is unknown so try to get to the closed state and then test or abandon tests as appropriate
+                    case CoverStatus.Unknown:
+                        // Try to get to the closed state
+                        LogInfo("CoverCalibrator", $"The device reports CoverState as CoverStatus.Unknown. Conform will now test CoverClose to try to get to a known state.");
+                        TestCloseCover();
+
+                        // Test whether the cover now reports closed
+                        if (coverCalibratorDevice.CoverState == CoverStatus.Closed) // Cover reports a successful close so now test both open and close
                         {
-                            LogCallToDriver("OpenCover", "About to call CoverState property");
-                            if (!(coverCalibratorDevice.CoverState == CoverStatus.Moving)) // Synchronous open
-                            {
-                                canAsynchronousOpen = false;
-                                LogCallToDriver("OpenCover", "About to call CoverState property");
-                                if (coverCalibratorDevice.CoverState == CoverStatus.Open)
-                                    if (sw.Elapsed.TotalSeconds <= standardTargetResponseTime)
-                                        LogOk("OpenCover", $"Synchronous open: CoverState was 'Open' when the method completed: the call took {sw.Elapsed.TotalSeconds:0.0} seconds");
-                                    else
-                                    {
-                                        LogIssue("OpenCover", $"Synchronous open: CoverState was 'Open' when the OpenCover method completed but the operation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is longer than the target response time: {standardTargetResponseTime:0.0} seconds");
-                                        LogInfo("OpenCover", $"Please implement this method asynchronously: return quickly from OpenCover, set CoverMoving to true and set CoverState to Moving resetting these when movement is complete.");
-                                    }
-                                else
-                                    LogIssue("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The synchronous open took {sw.Elapsed.TotalSeconds:0.0} seconds");
-                            }
-                            else // Asynchronous open
-                            {
-                                canAsynchronousOpen = true;
-                                asynchronousOpenTime = 0.0;
-
-                                // if this is a Platform 7 or later device test CoverMoving
-                                if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()))
-                                {
-                                    LogCallToDriver("OpenCover", "About to call CoverMoving property");
-                                    if (!coverCalibratorDevice.CoverMoving)
-                                        LogIssue("OpenCover", "CoverMoving is false while the cover is moving");
-                                }
-
-                                // Wait until the cover is no longer moving
-                                WaitWhile("Opening", () => coverCalibratorDevice.CoverState == CoverStatus.Moving, 500, 60);
-                                if (cancellationToken.IsCancellationRequested)
-                                    return;
-
-                                LogCallToDriver("OpenCover", "About to call CoverState property");
-                                if (coverCalibratorDevice.CoverState == CoverStatus.Open)
-                                {
-                                    asynchronousOpenTime = sw.Elapsed.TotalSeconds;
-                                    LogOk("OpenCover", $"OpenCover was successful. The asynchronous open took {asynchronousOpenTime:0.0} seconds");
-                                }
-                                else
-                                    LogIssue("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The asynchronous open took {sw.Elapsed.TotalSeconds:0.0} seconds");
-
-                                // if this is a Platform 7 or later device test CoverMoving
-                                if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()))
-                                {
-                                    LogCallToDriver("OpenCover", "About to call CoverMoving property");
-                                    if (coverCalibratorDevice.CoverMoving)
-                                        LogIssue("OpenCover", "CoverMoving is true when the cover has opened.");
-                                }
-                            }
+                            TestOpenCover();
+                            TestCloseCover();
+                            TestHaltCover();
                         }
-                        else
-                            LogIssue("OpenCover", $"CoverStatus is 'NotPresent' but OpenCover did not throw a MethodNotImplementedException.");
-                    }
-                    catch (Exception ex)
-                    {
-                        if (coverState == CoverStatus.NotPresent)
-                            HandleException("OpenCover", MemberType.Method, Required.MustNotBeImplemented, ex, "CoverStatus is 'NotPresent'");
-                        else
-                            HandleException("OpenCover", MemberType.Method, Required.MustBeImplemented, ex, "CoverStatus indicates the device has cover capability");
-                    }
+                        else // Cover does not report closed after the close test completes
+                            LogIssue("CoverCalibrator", $"The CloseCover operation completed but the device does not report CoverState as CoverStatus.Closed. The reported state is: {coverState}.");
+                        break;
+
+                    default:
+                        throw new ASCOM.InvalidValueException($"CheckMethods - Unknown cover status value: {coverState}.");
                 }
-                else
-                    LogIssue("OpenCover", $"Test skipped because CoverState says the cover is already moving - CoverState: {coverState}");
             }
             else
-                LogIssue("OpenCover", $"Test skipped because CoverState returned an exception");
+            {
+                LogIssue("CoverCalibrator", $"The OpenCover, CloseCover and HaltCover tests have been skipped because CoverState returned an exception");
+            }
 
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            // Test CloseCover
-            SetTest("CloseCover");
-            if (coverStateOk)
-            {
-                if (coverState != CoverStatus.Moving)
-                {
-                    try
-                    {
-                        sw.Restart();
-                        asynchronousCloseTime = 0.0;
-
-                        LogCallToDriver("CloseCover", "About to call CloseCover method");
-                        TimeMethod("CloseCover", coverCalibratorDevice.CloseCover, TargetTime.Standard);
-                        if (!(coverState == CoverStatus.NotPresent)) // Synchronous close
-                        {
-                            LogCallToDriver("CloseCover", "About to call CoverState property");
-                            if (!(coverCalibratorDevice.CoverState == CoverStatus.Moving))
-                            {
-                                canAsynchronousOpen = false;
-                                LogCallToDriver("CloseCover", "About to call CoverState property");
-                                if (coverCalibratorDevice.CoverState == CoverStatus.Closed)
-                                {
-                                    if (sw.Elapsed.TotalSeconds <= standardTargetResponseTime)
-                                        LogOk("CloseCover", $"Synchronous close: CoverState was 'Closed' when the method completed: the call took {sw.Elapsed.TotalSeconds:0.0} seconds");
-                                    else
-                                    {
-                                        LogIssue("CloseCover", $"Synchronous open: CoverState was 'Closed' when the CloseCover method completed but the operation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is longer than the target response time: {standardTargetResponseTime:0.0} seconds");
-                                        LogInfo("CloseCover", $"Please implement this method asynchronously: return quickly from CloseCover, set CoverMoving to true and set CoverState to Moving; reset these when movement is complete.");
-                                    }
-                                }
-                                else
-                                    LogIssue("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The synchronous close took {sw.Elapsed.TotalSeconds:0.0} seconds");
-                            }
-                            else // Asynchronous close
-                            {
-                                canAsynchronousOpen = true;
-
-                                // if this is a Platform 7 or later device test CoverMoving
-                                if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()))
-                                {
-                                    LogCallToDriver("CloseCover", "About to call CoverMoving property");
-                                    if (!coverCalibratorDevice.CoverMoving)
-                                        LogIssue("CloseCover", "CoverMoving is false while the cover is moving");
-                                }
-
-                                // Wait until the cover is no longer moving
-                                WaitWhile("Closing", () => coverCalibratorDevice.CoverState == CoverStatus.Moving, 500, 60);
-                                if (cancellationToken.IsCancellationRequested)
-                                    return;
-
-                                LogCallToDriver("CloseCover", "About to call CoverState property");
-                                if (coverCalibratorDevice.CoverState == CoverStatus.Closed)
-                                {
-                                    asynchronousCloseTime = sw.Elapsed.TotalSeconds;
-                                    LogOk("CloseCover", $"CloseCover was successful. The asynchronous close took {asynchronousCloseTime:0.0} seconds");
-                                }
-                                else
-                                    LogIssue("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The asynchronous close took {sw.Elapsed.TotalSeconds:0.0} seconds");
-
-                                // if this is a Platform 7 or later device test CoverMoving
-                                if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()))
-                                {
-                                    LogCallToDriver("CloseCover", "About to call CoverMoving property");
-                                    if (coverCalibratorDevice.CoverMoving)
-                                        LogIssue("CloseCover", "CoverMoving is true when the cover has closed.");
-                                }
-                            }
-                        }
-                        else
-                            LogIssue("CloseCover", $"CoverStatus is 'NotPresent' but CloseCover did not throw a MethodNotImplementedException.");
-                    }
-                    catch (Exception ex)
-                    {
-                        if (coverState == CoverStatus.NotPresent)
-                            HandleException("CloseCover", MemberType.Method, Required.MustNotBeImplemented, ex, "CoverStatus is 'NotPresent'");
-                        else
-                            HandleException("CloseCover", MemberType.Method, Required.MustBeImplemented, ex, "CoverStatus indicates the device has cover capability");
-                    }
-                }
-                else
-                    LogIssue("CloseCover", $"Test skipped because CoverState says the cover is already moving - CoverState: {coverState}");
-            }
-            else
-                LogIssue("CloseCover", $"Test skipped because CoverState returned an exception");
-
-            if (cancellationToken.IsCancellationRequested)
-                return;
-
-            // Test HaltCover
-            SetTest("HaltCover");
-            if (coverStateOk)
-            {
-                if (!(coverState == CoverStatus.NotPresent)) // Cover present
-                {
-                    if (canAsynchronousOpen) // Can open asynchronously
-                    {
-                        if ((asynchronousOpenTime > 0.0) & (asynchronousCloseTime > 0.0))
-                        {
-
-                            // Initiate a cover open first
-                            LogCallToDriver("HaltCover", "About to call OpenCover method");
-                            SetAction("Opening cover so that it can be halted");
-                            coverCalibratorDevice.OpenCover();
-
-                            // Wait for half of the expected cover open time
-                            WaitFor((int)(asynchronousOpenTime * 1000.0 / 2.0));
-
-                            // Confirm that he cover is still moving
-                            if (coverCalibratorDevice.CoverState == CoverStatus.Moving)
-                            {
-                                try
-                                {
-                                    // Issue a halt command
-                                    SetAction("Halting cover");
-                                    SetStatus("Waiting for Halt to complete");
-
-                                    LogCallToDriver("HaltCover", "About to call HaltCover method");
-                                    TimeMethod("HaltCover", coverCalibratorDevice.HaltCover, TargetTime.Standard);
-                                    SetStatus("HaltCover command completed");
-
-                                    // Confirm that the cover is no longer moving
-                                    LogCallToDriver("HaltCover", "About to call CoverState property");
-                                    if (coverCalibratorDevice.CoverState != CoverStatus.Moving)
-                                        LogOk("HaltCover", "Cover is no longer moving after issuing the HaltCover command");
-                                    else
-                                        LogIssue("HaltCover", "Cover is still moving after issuing the HaltCover command");
-
-                                    // if this is a Platform 7 or later device test CoverMoving
-                                    if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()))
-                                    {
-                                        LogCallToDriver("HaltCover", "About to call CoverMoving property");
-                                        if (coverCalibratorDevice.CoverMoving)
-                                            LogIssue("HaltCover", "CoverMoving is true when the cover has closed.");
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    HandleException("HaltCover", MemberType.Method, Required.MustBeImplemented, ex, "CoverStatus indicates that the device has cover capability");
-                                }
-                            }
-                            else
-                                LogIssue("HaltCover", "Cover should have been moving after waiting for half of the previous open time, but it was not. Test abandoned");
-                        }
-                        else
-                            LogIssue("HaltCover", $"HaltCover tests skipped because either the cover could not be opened or closed successfully.");
-                    }
-                    else
-                        try
-                        {
-                            // Since the cover opens synchronously the HaltCover method should return a MethodNotImplementedException
-                            LogCallToDriver("HaltCover", "About to call HaltCover method");
-                            coverCalibratorDevice.HaltCover();
-                            LogIssue("HaltCover", "The cover operates synchronously but did not throw a MethodNotImplementedException in response to the HaltCover command");
-                        }
-                        catch (Exception ex)
-                        {
-                            if (coverState == CoverStatus.NotPresent)
-                                HandleException("HaltCover", MemberType.Method, Required.MustNotBeImplemented, ex, "CoverStatus is 'NotPresent'");
-                            else
-                                HandleException("HaltCover", MemberType.Method, Required.Optional, ex, "");
-                        }
-                }
-                else // Cover not present
-                    try
-                    {
-                        LogCallToDriver("HaltCover", "About to call HaltCover method");
-                        coverCalibratorDevice.HaltCover();
-                        // Should never get here...
-                        LogIssue("HaltCover", "CoverStatus is 'NotPresent' but HaltCover did not throw a MethodNotImplementedException");
-                    }
-                    catch (Exception ex)
-                    {
-                        HandleException("HaltCover", MemberType.Method, Required.MustNotBeImplemented, ex, "CoverStatus is 'NotPresent'");
-                    }
-            }
-            else
-                LogIssue("HaltCover", $"Test skipped because CoverState returned an exception");
 
             if (cancellationToken.IsCancellationRequested)
                 return;
@@ -800,6 +598,318 @@ namespace ConformU
             ClearStatus();
         }
 
+        public override void PostRunCheck()
+        {
+            try
+            {
+                // Attempt to close the cover
+                if (coverCalibratorDevice.CoverState != CoverStatus.NotPresent)
+                {
+                    LogInfo("PostRunCheck", "Closing the cover...");
+                    coverCalibratorDevice.CloseCover();
+                }
+
+                // if this is a Platform 7 or later device test CoverMoving
+                if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion())) // Platform 7 or later interface ==> use CoverMoving
+                {
+                    // Wait until the cover is no longer moving
+                    LogCallToDriver("PostRunCheck", "About to call CoverMoving property repeatedly...");
+                    WaitWhile("PostRunCheck", () => coverCalibratorDevice.CoverMoving, 500, 60);
+                }
+                else
+                {
+                    // Wait until the cover is no longer moving
+                    LogCallToDriver("PostRunCheck", "About to call CoverState property repeatedly...");
+                    WaitWhile("Closing", () => coverCalibratorDevice.CoverState == CoverStatus.Moving, 500, 60);
+                }
+                LogInfo("PostRunCheck", "Cover closed.");
+
+            }
+            catch (Exception ex)
+            {
+                LogIssue("PostRunCheck", $"Exception closing cover: {ex.Message}");
+                LogDebug("PostRunCheck", ex.ToString());
+            }
+        }
+
+        private void TestOpenCover()
+        {
+            SetTest("OpenCover");
+
+            try
+            {
+                Stopwatch sw = Stopwatch.StartNew();
+
+                // Open the cover with the appropriate target time: Platform 6 = Extended, Platform 7 and later = Standard
+                LogCallToDriver("OpenCover", "About to call OpenCover method");
+                TimeMethod("OpenCover", coverCalibratorDevice.OpenCover, DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()) ? TargetTime.Standard : TargetTime.Extended);
+
+                // Save the longest open time as the cover opening time
+                if (sw.Elapsed.TotalSeconds > coverOpenTime)
+                    coverOpenTime = sw.Elapsed.TotalSeconds;
+
+                // Check whether the cover is moving after OpenCover returned
+                if (CoverIsMoving("OpenCover")) //  Cover is moving after OpenCover returned ==> Asynchronous open
+                {
+                    canAsynchronousOpen = true;
+
+                    // if this is a Platform 7 or later device test CoverMoving otherwise use CoverStatus
+                    if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion())) // Platform 7 or later interface ==> use CoverMoving
+                    {
+                        // Wait until the cover is no longer moving
+                        LogCallToDriver("OpenCover", "About to call CoverMoving property repeatedly...");
+                        WaitWhile("Opening", () => coverCalibratorDevice.CoverMoving, 500, 60);
+                    }
+                    else // Platform 6 device ==> use CoverState
+                    {
+                        // Wait until the cover is no longer moving
+                        LogCallToDriver("OpenCover", "About to call CoverState property repeatedly...");
+                        WaitWhile("Opening", () => coverCalibratorDevice.CoverState == CoverStatus.Moving, 500, 60);
+                    }
+                    if (cancellationToken.IsCancellationRequested)
+                        return;
+
+                    // Check the operation outcome
+                    LogCallToDriver("OpenCover", "About to call CoverState property");
+                    if (coverCalibratorDevice.CoverState == CoverStatus.Open) // Cover reports the expected open state
+                    {
+                        coverOpenTime = sw.Elapsed.TotalSeconds;
+                        LogOk("OpenCover", $"OpenCover was successful. The asynchronous open took {coverOpenTime:0.0} seconds");
+                    }
+                    else // Cover did not report the expected open state
+                    {
+                        LogIssue("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The asynchronous open took {sw.Elapsed.TotalSeconds:0.0} seconds");
+                    }
+                }
+                else // Cover is not moving after OpenCover returned ==> Synchronous open
+                {
+                    canAsynchronousOpen = false;
+
+                    // Check whether the cover reports that it is open
+                    LogCallToDriver("OpenCover", "About to call CoverState property");
+                    if (coverCalibratorDevice.CoverState == CoverStatus.Open) // Cover reports that it opened OK
+                        if (sw.Elapsed.TotalSeconds <= (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()) ? standardTargetResponseTime : extendedTargetResponseTime)) // Cover opened synchronously within the appropriate time
+                            LogOk("OpenCover", $"Synchronous open: CoverState was 'Open' when the method completed and the call returned within the target time. The call took {sw.Elapsed.TotalSeconds:0.0} seconds");
+                        else // Cover opened synchronously but took longer than the appropriate command time
+                        {
+                            LogIssue("OpenCover", $"Synchronous open: CoverState was 'Open' when the OpenCover method completed but the operation took {sw.Elapsed.TotalSeconds:0.0} seconds, " +
+                                $"which is longer than the target response time: {(DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()) ? standardTargetResponseTime : extendedTargetResponseTime):0.0} seconds");
+                            LogInfo("OpenCover", $"Please implement this method asynchronously: return quickly from OpenCover, set CoverState to Moving and set CoverMoving to true (ICoverCalibratorV2 and later only), resetting these when movement is complete.");
+                        }
+                    else // Cover is no longer moving but reports some state other than Open
+                        LogIssue("OpenCover", $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The synchronous open took {sw.Elapsed.TotalSeconds:0.0} seconds");
+                }
+            }
+            catch (TimeoutException)
+            {
+                LogIssue("OpenCover", "The open cover operation timed out.");
+
+            }
+            catch (Exception ex)
+            {
+                if (coverState == CoverStatus.NotPresent)
+                    HandleException("OpenCover", MemberType.Method, Required.MustNotBeImplemented, ex, "CoverStatus is 'NotPresent'");
+                else
+                    HandleException("OpenCover", MemberType.Method, Required.MustBeImplemented, ex, "CoverStatus indicates the device has cover capability");
+            }
+        }
+
+        private void TestCloseCover()
+        {
+            SetTest("CloseCover");
+
+            try
+            {
+                Stopwatch sw = Stopwatch.StartNew();
+
+                // Close the cover with the appropriate target time: Platform 6 = Extended, Platform 7 and later = Standard
+                LogCallToDriver("CloseCover", "About to call CloseCover method");
+                TimeMethod("CloseCover", coverCalibratorDevice.CloseCover, DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()) ? TargetTime.Standard : TargetTime.Extended);
+
+                // Check whether the cover is moving after CloseCover returned
+                LogCallToDriver("CloseCover", "About to call CoverState property");
+                if (!CoverIsMoving("CloseCover")) // Cover is not moving after CloseCover returned ==> Synchronous close
+                {
+                    // Check whether the cover reports that it is closed
+                    LogCallToDriver("CloseCover", "About to call CoverState property");
+                    if (coverCalibratorDevice.CoverState == CoverStatus.Closed) // Cover reports that it closed OK
+                    {
+                        if (sw.Elapsed.TotalSeconds <= (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()) ? standardTargetResponseTime : extendedTargetResponseTime)) // Cover closed synchronously within the appropriate time
+                            LogOk("CloseCover", $"Synchronous close: CoverState was 'Closed' when the method completed: the call took {sw.Elapsed.TotalSeconds:0.0} seconds");
+                        else // Cover closed synchronously but took longer than the appropriate command time
+                        {
+                            LogIssue("CloseCover", $"Synchronous close: CoverState was 'Closed' when the CloseCover method completed but the operation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is longer than the target response time: {(DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()) ? standardTargetResponseTime : extendedTargetResponseTime):0.0} seconds");
+                            LogInfo("CloseCover", $"Please implement this method asynchronously: return quickly from CloseCover, set CoverState to Moving and set CoverMoving to true (ICoverCalibratorV2 and later only), resetting these when movement is complete.");
+                        }
+                    }
+                    else// Cover is no longer moving but reports some state other than Closed
+                        LogIssue("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The synchronous close took {sw.Elapsed.TotalSeconds:0.0} seconds");
+                }
+                else  // Cover is moving after CloseCover returned ==> Asynchronous close
+                {
+                    // if this is a Platform 7 or later device test CoverMoving
+                    if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion())) // Platform 7 or later interface ==> use CoverMoving
+                    {
+                        // Wait until the cover is no longer moving
+                        LogCallToDriver("CloseCover", "About to call CoverMoving property repeatedly...");
+                        WaitWhile("CloseCover", () => coverCalibratorDevice.CoverMoving, 500, 60);
+                    }
+                    else
+                    {
+                        // Wait until the cover is no longer moving
+                        LogCallToDriver("CloseCover", "About to call CoverState property repeatedly...");
+                        WaitWhile("Closing", () => coverCalibratorDevice.CoverState == CoverStatus.Moving, 500, 60);
+                    }
+                    if (cancellationToken.IsCancellationRequested)
+                        return;
+
+                    // Check the operation outcome
+                    LogCallToDriver("CloseCover", "About to call CoverState property");
+                    if (coverCalibratorDevice.CoverState == CoverStatus.Closed) // Cover reports the expected closed state
+                    {
+                        LogOk("CloseCover", $"CloseCover was successful. The asynchronous close took {sw.Elapsed.TotalSeconds:0.0} seconds");
+                    }
+                    else // Cover did not report the expected closed state
+                    {
+                        LogIssue("CloseCover", $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The asynchronous close took {sw.Elapsed.TotalSeconds:0.0} seconds");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (coverState == CoverStatus.NotPresent)
+                    HandleException("CloseCover", MemberType.Method, Required.MustNotBeImplemented, ex, "CoverStatus is 'NotPresent'");
+                else
+                    HandleException("CloseCover", MemberType.Method, Required.MustBeImplemented, ex, "CoverStatus indicates the device has cover capability");
+            }
+        }
+
+        private void TestHaltCover()
+        {
+            SetTest("HaltCover");
+
+            // Check whether a cover is implemented
+            if (!(coverState == CoverStatus.NotPresent)) // Cover is implemented
+            {
+                // Check whether the cover opens asynchronously
+                if (canAsynchronousOpen) // Does open asynchronously
+                {
+                    // Test whether the cover opened OK or malfunctioned
+                    if (coverOpenTime > 0.0) // Cover opened OK
+                    {
+                        // Initiate a cover open first
+                        LogCallToDriver("HaltCover", "About to call OpenCover method");
+                        SetAction("Opening cover so that it can be halted");
+                        coverCalibratorDevice.OpenCover();
+
+                        // Wait for half of the expected cover open time
+                        WaitFor((int)(coverOpenTime * 1000.0 / 2.0));
+
+                        // Confirm that the cover is still moving
+                        if (coverCalibratorDevice.CoverState == CoverStatus.Moving) // Cover is still moving
+                        {
+                            // Issue a halt command
+                            try
+                            {
+                                SetAction("Halting cover");
+                                SetStatus("Waiting for Halt to complete");
+
+                                LogCallToDriver("HaltCover", "About to call HaltCover method");
+                                TimeMethod("HaltCover", coverCalibratorDevice.HaltCover, TargetTime.Standard);
+                                SetStatus("HaltCover command completed");
+
+                                // Confirm that the cover is no longer moving
+                                if (!CoverIsMoving("HaltCover")) // The cover is now stationary
+                                    LogOk("HaltCover", "Cover is no longer moving after issuing the HaltCover command");
+                                else // The cover is still moving
+                                {
+                                    LogIssue("HaltCover", "The cover was still moving after return from the HaltCover command.");
+                                    LogInfo("HaltCover", "HaltCover() is expected to be a short-lived, synchronous, method that quickly stops movement.");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                HandleException("HaltCover", MemberType.Method, Required.MustBeImplemented, ex, "CoverStatus indicates that the device has cover capability");
+                            }
+                        }
+                        else // The cover should have been moving after just half of the expected open time, but was not
+                            LogIssue("HaltCover", "Cover should have been moving after waiting for half of the previous open time, but it was not. Test abandoned");
+                    }
+                    else // The cover did not open OK so skip the test
+                        LogIssue("HaltCover", $"HaltCover tests skipped because either the cover could not be opened successfully.");
+                }
+                else // The cover opens synchronously so make sure that HaltCover is not implemented
+                {
+                    try
+                    {
+                        // Since the cover opens synchronously the HaltCover method should return a MethodNotImplementedException
+                        LogCallToDriver("HaltCover", "About to call HaltCover method");
+                        coverCalibratorDevice.HaltCover();
+                        LogIssue("HaltCover", "The cover operates synchronously but did not throw a MethodNotImplementedException in response to the HaltCover command");
+                    }
+                    catch (Exception ex)
+                    {
+                        if (coverState == CoverStatus.NotPresent)
+                            HandleException("HaltCover", MemberType.Method, Required.MustNotBeImplemented, ex, "CoverStatus is 'NotPresent'");
+                        else
+                            HandleException("HaltCover", MemberType.Method, Required.Optional, ex, "");
+                    }
+                }
+            }
+            else // The cover is not implemented so make sure it throws a MethodNotImplementedException
+            {
+                try
+                {
+                    LogCallToDriver("HaltCover", "About to call HaltCover method");
+                    coverCalibratorDevice.HaltCover();
+
+                    // Should never get here because a MethodNotImplementedException should be thrown when the cover is not implemented...
+                    LogIssue("HaltCover", "CoverStatus is 'NotPresent' but HaltCover did not throw a MethodNotImplementedException");
+                }
+                catch (Exception ex)
+                {
+                    HandleException("HaltCover", MemberType.Method, Required.MustNotBeImplemented, ex, "CoverStatus is 'NotPresent'");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Determine whether the cover is moving, ensuring that the CoverMoving and CoverState properties agree in ICoverCalibratorV2 and later interfaces 
+        /// </summary>
+        /// <param name="operation"></param>
+        /// <returns></returns>
+        private bool CoverIsMoving(string operation)
+        {
+            // Get the cover state
+            LogCallToDriver(operation, "About to call CoverState property");
+            CoverStatus status = coverCalibratorDevice.CoverState;
+
+            // Check whether this is an ICoverCalibratorV2 or later interface
+            if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion())) // Fond an ICoverCalibratorV2 or later interface
+            {
+                // Get the CoverMoving value
+                LogCallToDriver(operation, "About to call CoverMoving property");
+                bool coverMoving = coverCalibratorDevice.CoverMoving;
+
+                // Test whether the values match
+                if (coverMoving & (status == CoverStatus.Moving)) // Both agree that the cover is moving
+                    return true;
+                else if (!coverMoving & (status != CoverStatus.Moving)) // Both agree tha the cover is not moving
+                    return false;
+                else // The two properties disagree
+                {
+                    // Log an issue and return the coverMoving value, which may or may not be correct!
+                    LogIssue(operation, $"CoverMoving and CoverStatus do not match: CvoerMoving: {coverMoving}, CoverState: {coverState}");
+                    return coverMoving;
+                }
+            }
+            else // Found an ICoverCalibratorV1 device
+            {
+                // Return a boolean derived from CoverStatus response
+                return status == CoverStatus.Moving;
+            }
+        }
+
         private void TestCalibratorOn(int requestedBrightness)
         {
             int returnedBrightness;
@@ -813,7 +923,7 @@ namespace ConformU
                     SetAction($"Setting calibrator to brightness {requestedBrightness}");
 
                     LogCallToDriver("CalibratorOn", $"About to call CalibratorOn method with brightness: {requestedBrightness}");
-                    TimeMethodOneParam<int>("CalibratorOn", coverCalibratorDevice.CalibratorOn, requestedBrightness,TargetTime.Standard);
+                    TimeMethodOneParam<int>("CalibratorOn", coverCalibratorDevice.CalibratorOn, requestedBrightness, TargetTime.Standard);
 
                     LogCallToDriver("CalibratorOn", "About to call CalibratorState property");
                     calibratorState = coverCalibratorDevice.CalibratorState;
