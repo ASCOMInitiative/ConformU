@@ -573,8 +573,30 @@ namespace ConformU
             TelescopeCanTest(CanType.CanSync, "CanSync");
             TelescopeCanTest(CanType.CanSyncAltAz, "CanSyncAltAz");
             TelescopeCanTest(CanType.CanUnPark, "CanUnPark");
+
+            // Make sure that Park and Unpark are either both implemented or both not implemented
             if (canUnpark & !canPark)
                 LogIssue("CanUnPark", "CanUnPark is true but CanPark is false - this does not comply with ASCOM specification");
+
+            // For Platform 7 ITelescopeV4 and later interfaces, make sure that sync and async slew methods are tied together
+            if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion()))
+            {
+                // Test whether the two equatorial slewing values are both either true or false
+                if ((canSlew & !canSlewAsync) || (!canSlew & canSlewAsync)) // The values are not tied together
+                {
+                    LogIssue("Equatorial Slewing", $"The CanSlew and CanSlewAsync properties are not tied together: CanSlew: {canSlew}, CanSlewAsync: {canSlewAsync}");
+                    LogInfo("Equatorial Slewing", $"In ITelescopeV4 and later both synchronous and asynchronous equatorial slewing methods must either be implemented or not implemented.");
+                    LogInfo("Equatorial Slewing", $"It is not permissible for one to be implemented while the other is not.");
+                }
+
+                // Test whether the two Alt/Az slewing values are both either true or false
+                if ((canSlewAltAz & !canSlewAltAzAsync) || (!canSlewAltAz & canSlewAltAzAsync)) // The values are not tied together
+                {
+                    LogIssue("Alt/Az Slewing", $"The CanSlewAltAz and CanSlewAltAzAsync properties are not tied together: CanSlewAltAz: {canSlewAltAz}, CanSlewAltAzAsync: {canSlewAltAzAsync}");
+                    LogInfo("Alt/Az Slewing", $"In ITelescopeV4 and later both synchronous and asynchronous alt/az slewing methods must either be implemented or not implemented.");
+                    LogInfo("Alt/Az Slewing", $"It is not permissible for one to be implemented while the other is not.");
+                }
+            }
         }
 
         public override void CheckProperties()
@@ -7681,7 +7703,7 @@ namespace ConformU
                         offsetRate = telescopeDevice.RightAscensionRate;
                     else
                         offsetRate = telescopeDevice.DeclinationRate;
-                    
+
                     LogCallToDriver(testName, $"{description} - About to get the Slewing property");
                     slewing = telescopeDevice.Slewing;
 
