@@ -81,6 +81,7 @@ namespace ConformU
             }
             base.InitialiseTest();
         }
+
         public override void CreateDevice()
         {
             try
@@ -257,8 +258,7 @@ namespace ConformU
             if (numberOfFilternames == numberOfFilterOffsets)
                 LogOk("Names Get", $"Number of filter offsets and number of names are the same: {numberOfFilternames}");
             else
-                LogIssue("Names Get",
-                    $"Number of filter offsets and number of names are different: {numberOfFilterOffsets} {numberOfFilternames}");
+                LogIssue("Names Get", $"Number of filter offsets and number of names are different: {numberOfFilterOffsets} {numberOfFilternames}");
 
             // Position - Required - Read
             try
@@ -280,11 +280,10 @@ namespace ConformU
             // Position - Required - Write
             SetTest("Position Set");
 
-            // Make sure some filter slots are available
-            if (numberOfFilterOffsets <= 0) // No filter slots available so exist
+            // Make sure some filter slots are available, if not exit
+            if (numberOfFilterOffsets <= 0) // No filter slots available so exit
             {
-                LogIssue("Position",
-                    $"Filter position tests skipped as number of filters appears to be 0: {numberOfFilterOffsets}");
+                LogIssue("Position", $"Filter position tests skipped as number of filters appears to be 0: {numberOfFilterOffsets}");
                 ResetTestActionStatus();
                 return;
             }
@@ -422,6 +421,7 @@ namespace ConformU
 
             ResetTestActionStatus();
         }
+
         public override void CheckPerformance()
         {
             FilterWheelPerformanceTest(FilterWheelProperties.FocusOffsets, "FocusOffsets");
@@ -447,7 +447,6 @@ namespace ConformU
                 LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
             }
         }
-
 
         private void FilterWheelPerformanceTest(FilterWheelProperties pType, string pName)
         {
@@ -553,16 +552,30 @@ namespace ConformU
             try
             {
                 // Set the required position
+                Stopwatch sw = Stopwatch.StartNew();
                 LogCallToDriver("Position Set", $"About to set Position property {position}");
                 SetAction($"Setting position {position}");
-                TimeMethod($"Move to position {position}",()=> filterWheel.Position = Convert.ToInt16(position),TargetTime.Standard);
+                TimeMethod($"Move to position {position}", () => filterWheel.Position = Convert.ToInt16(position), TargetTime.Standard);
+
+                // Check for Platform 7 requirement of asynchronous operation
+                if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.FilterWheel, GetInterfaceVersion())) // This is a Platform 7 or later interface
+                {
+                    // The operation should have either been synchronous within the standard target or asynchronous
+
+                    LogCallToDriver(testName, "About to get Position property");
+                    if (filterWheel.Position == position & sw.Elapsed.TotalSeconds > standardTargetResponseTime)
+                    {
+                        LogIssue(testName, $"The Position Set property operated synchronously and should have operated asynchronously.");
+                        LogInfo(testName, $"The device returned the expected position {position} but took longer than the standard response time: {standardTargetResponseTime} seconds.");
+                        LogInfo(testName, $"Position Set should have returned quickly and Position Get should have returned -1 while moving until the set position was achieved.");
+                    }
+                }
 
                 // Wait for the reported position to match the required position
-                Stopwatch sw = Stopwatch.StartNew();
                 LogCallToDriver(testName, "About to get Position property repeatedly");
                 WaitWhile($"Moving to position {position}", () => filterWheel.Position != position, 100, settings.FilterWheelTimeout);
 
-                // Record the duration of the wait
+                // Record the duration of the re-position
                 duration = sw.Elapsed.TotalSeconds;
 
                 // Exit if the STOP button has been pressed
