@@ -2787,7 +2787,7 @@ namespace ConformU
                         // Test whether the required exposure time has passed
                         if (endTime.Subtract(startTime).TotalSeconds >= requiredDuration) // Required exposure time has elapsed
                         {
-                            if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion())) // Platform 7 or later device
+                            if (isPlatform7OrLater) // Platform 7 or later device
                             {
                                 LogIssue(testName, $"StartExposure operated synchronously: ImageReady was True and CameraState was Idle when StartExposure returned after the full exposure time: {requiredDuration} seconds.");
                                 LogInfo(testName, $"As an ICameraV4 or later device, StartExposure should have operated asynchronously: Returning quickly after setting ImageReady False, before the full exposure time has elapsed.");
@@ -3635,7 +3635,7 @@ namespace ConformU
         private void CameraPulseGuideTest(GuideDirection pDirection)
         {
             // If this is an ICameraV4 or later device pulse guiding cannot be tested without the IsPulseGuiding property being functional to support async operation
-            if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Camera, GetInterfaceVersion()))
+            if (isPlatform7OrLater)
             {
                 if (!mIsPulseGuidingFunctional)
                 {

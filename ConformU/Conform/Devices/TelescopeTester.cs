@@ -579,7 +579,7 @@ namespace ConformU
                 LogIssue("CanUnPark", "CanUnPark is true but CanPark is false - this does not comply with ASCOM specification");
 
             // For Platform 7 ITelescopeV4 and later interfaces, make sure that sync and async slew methods are tied together
-            if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion()))
+            if (isPlatform7OrLater)
             {
                 // Test whether the two equatorial slewing values are both either true or false
                 if ((canSlew & !canSlewAsync) || (!canSlew & canSlewAsync)) // The values are not tied together
@@ -2722,10 +2722,10 @@ namespace ConformU
                                     LogTestAndMessage("Park", "Parking scope...");
                                     LogCallToDriver("Park", "About to call Park method");
 
-                                    TimeMethod($"Park", () => telescopeDevice.Park(), DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion()) ? TargetTime.Standard : TargetTime.Extended);
+                                    TimeMethod($"Park", () => telescopeDevice.Park(), isPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
 
                                     // Wait for the park to complete using Platform 6 or 7 semantics as appropriate
-                                    if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion())) // Platform 7 or later device
+                                    if (isPlatform7OrLater) // Platform 7 or later device
                                     {
                                         LogCallToDriver("Park", "About to get Slewing property repeatedly...");
                                         WaitWhile("Waiting for scope to park", () => telescopeDevice.Slewing, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -2751,7 +2751,7 @@ namespace ConformU
                                             telescopeDevice.Park();
 
                                             // Wait for the park to complete using Platform 6 or 7 semantics as appropriate
-                                            if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion())) // Platform 7 or later device
+                                            if (isPlatform7OrLater) // Platform 7 or later device
                                             {
                                                 LogCallToDriver("Park", "About to get Slewing property repeatedly...");
                                                 WaitWhile("Waiting for scope to park", () => telescopeDevice.Slewing, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -2883,10 +2883,10 @@ namespace ConformU
                                             SetStatus("Unparking scope");
 
                                             LogCallToDriver("Unpark", "About to call Unpark method");
-                                            TimeMethod($"Unpark", () => telescopeDevice.Unpark(), DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion()) ? TargetTime.Standard : TargetTime.Extended);
+                                            TimeMethod($"Unpark", () => telescopeDevice.Unpark(), isPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
 
                                             // Wait for the un park to complete using Platform 6 or 7 semantics as appropriate
-                                            if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion())) // Platform 7 or later device
+                                            if (isPlatform7OrLater) // Platform 7 or later device
                                             {
                                                 LogCallToDriver("Unpark", "About to get Slewing property repeatedly...");
                                                 WaitWhile("Waiting for scope to unpark when parked", () => telescopeDevice.Slewing, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -2922,7 +2922,7 @@ namespace ConformU
                                                     telescopeDevice.Unpark();
 
                                                     // Wait for the unpark to complete using Platform 6 or 7 semantics as appropriate
-                                                    if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion())) // Platform 7 or later device
+                                                    if (isPlatform7OrLater) // Platform 7 or later device
                                                     {
                                                         LogCallToDriver("Unpark", "About to get Slewing property repeatedly...");
                                                         WaitWhile("Waiting for scope to unpark when parked", () => telescopeDevice.Slewing, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -5863,10 +5863,10 @@ namespace ConformU
                                 LogTestAndMessage("Park", "Parking scope...");
                                 LogCallToDriver(testName, "About to call FindHome method");
 
-                                TimeMethod(testName, () => telescopeDevice.FindHome(), DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion()) ? TargetTime.Standard : TargetTime.Extended);
+                                TimeMethod(testName, () => telescopeDevice.FindHome(), isPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
 
                                 // Wait for the park to complete using Platform 6 or 7 semantics as appropriate
-                                if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion())) // Platform 7 or later device
+                                if (isPlatform7OrLater) // Platform 7 or later device
                                 {
                                     LogCallToDriver(testName, "About to get Slewing property repeatedly...");
                                     WaitWhile("Waiting for scope to home...", () => telescopeDevice.Slewing, SLEEP_TIME, settings.TelescopeMaximumSlewTime);

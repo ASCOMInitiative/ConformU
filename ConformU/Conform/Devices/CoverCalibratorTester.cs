@@ -273,13 +273,13 @@ namespace ConformU
                 LogIssue("Brightness", $"Test skipped because CalibratorState returned an exception");
 
             // If this is an ICoverCalibratorV2 interface or later device make sure we can read CalibratorChanging
-            if (DeviceCapabilities.HasCalibratorChanging(GetInterfaceVersion()))
+            if (isPlatform7OrLater)
             {
                 calibratorChangingOk = RequiredPropertiesTest(RequiredProperty.CalibratorChanging, "CalibratorChanging");
             }
 
             // If this is an ICoverCalibratorV2 interface or later device make sure we can read CoverMoving
-            if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()))
+            if (isPlatform7OrLater)
             {
                 coverMovingOk = RequiredPropertiesTest(RequiredProperty.CoverMoving, "CoverMoving");
             }
@@ -357,7 +357,7 @@ namespace ConformU
             else
             {
                 LogIssue("CoverCalibrator", $"The OpenCover, CloseCover and HaltCover tests have been skipped because the CoverState " +
-                    $"{(DeviceCapabilities.HasCalibratorChanging(GetInterfaceVersion()) ? "or CoverMoving" : "")} property returned an invalid value or threw an exception.");
+                    $"{(isPlatform7OrLater ? "or CoverMoving" : "")} property returned an invalid value or threw an exception.");
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -486,7 +486,7 @@ namespace ConformU
             else // CalibratorState or CalibratorChanging did not return a valid value
             {
                 LogIssue("CalibratorOn", $"Brightness tests skipped because the CalibratorState " +
-                    $"{(DeviceCapabilities.HasCalibratorChanging(GetInterfaceVersion()) ? "or CalibratorChanging" : "")} property returned an invalid value or threw an exception.");
+                    $"{(isPlatform7OrLater ? "or CalibratorChanging" : "")} property returned an invalid value or threw an exception.");
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -519,7 +519,7 @@ namespace ConformU
                     coverCalibratorDevice.CloseCover();
 
                     // if this is a Platform 7 or later device test CoverMoving
-                    if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion())) // Platform 7 or later interface ==> use CoverMoving
+                    if (isPlatform7OrLater) // Platform 7 or later interface ==> use CoverMoving
                     {
                         // Wait until the cover is no longer moving
                         LogCallToDriver("PostRunCheck", "About to call CoverMoving property repeatedly...");
@@ -549,7 +549,7 @@ namespace ConformU
                     coverCalibratorDevice.CalibratorOff();
 
                     // if this is a Platform 7 or later device test CoverMoving
-                    if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion())) // Platform 7 or later interface ==> use CoverMoving
+                    if (isPlatform7OrLater) // Platform 7 or later interface ==> use CoverMoving
                     {
                         // Wait until the calibrator is off
                         LogCallToDriver("PostRunCheck", "About to call CalibratorChanging property repeatedly...");
@@ -581,7 +581,7 @@ namespace ConformU
 
                 // Open the cover with the appropriate target time: Platform 6 = Extended, Platform 7 and later = Standard
                 LogCallToDriver("OpenCover", "About to call OpenCover method");
-                TimeMethod("OpenCover", coverCalibratorDevice.OpenCover, DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()) ? TargetTime.Standard : TargetTime.Extended);
+                TimeMethod("OpenCover", coverCalibratorDevice.OpenCover, isPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
 
                 // Save the longest open time as the cover opening time
                 if (sw.Elapsed.TotalSeconds > coverOpenTime)
@@ -593,7 +593,7 @@ namespace ConformU
                     canAsynchronousOpen = true;
 
                     // if this is a Platform 7 or later device test CoverMoving otherwise use CoverStatus
-                    if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion())) // Platform 7 or later interface ==> use CoverMoving
+                    if (isPlatform7OrLater) // Platform 7 or later interface ==> use CoverMoving
                     {
                         // Wait until the cover is no longer moving
                         LogCallToDriver("OpenCover", "About to call CoverMoving property repeatedly...");
@@ -627,12 +627,12 @@ namespace ConformU
                     // Check whether the cover reports that it is open
                     LogCallToDriver("OpenCover", "About to call CoverState property");
                     if (coverCalibratorDevice.CoverState == CoverStatus.Open) // Cover reports that it opened OK
-                        if (sw.Elapsed.TotalSeconds <= (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()) ? standardTargetResponseTime : extendedTargetResponseTime)) // Cover opened synchronously within the appropriate time
+                        if (sw.Elapsed.TotalSeconds <= (isPlatform7OrLater ? standardTargetResponseTime : extendedTargetResponseTime)) // Cover opened synchronously within the appropriate time
                             LogOk("OpenCover", $"Synchronous open: CoverState was 'Open' when the method completed and the call returned within the target time. The call took {sw.Elapsed.TotalSeconds:0.0} seconds");
                         else // Cover opened synchronously but took longer than the appropriate command time
                         {
                             LogIssue("OpenCover", $"Synchronous open: CoverState was 'Open' when the OpenCover method completed but the operation took {sw.Elapsed.TotalSeconds:0.0} seconds, " +
-                                $"which is longer than the target response time: {(DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()) ? standardTargetResponseTime : extendedTargetResponseTime):0.0} seconds");
+                                $"which is longer than the target response time: {(isPlatform7OrLater ? standardTargetResponseTime : extendedTargetResponseTime):0.0} seconds");
                             LogInfo("OpenCover", $"Please implement this method asynchronously: return quickly from OpenCover, set CoverState to Moving and set CoverMoving to true (ICoverCalibratorV2 and later only), resetting these when movement is complete.");
                         }
                     else // Cover is no longer moving but reports some state other than Open
@@ -663,7 +663,7 @@ namespace ConformU
 
                 // Close the cover with the appropriate target time: Platform 6 = Extended, Platform 7 and later = Standard
                 LogCallToDriver("CloseCover", "About to call CloseCover method");
-                TimeMethod("CloseCover", coverCalibratorDevice.CloseCover, DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()) ? TargetTime.Standard : TargetTime.Extended);
+                TimeMethod("CloseCover", coverCalibratorDevice.CloseCover, isPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
 
                 // Check whether the cover is moving after CloseCover returned
                 LogCallToDriver("CloseCover", "About to call CoverState property");
@@ -673,11 +673,11 @@ namespace ConformU
                     LogCallToDriver("CloseCover", "About to call CoverState property");
                     if (coverCalibratorDevice.CoverState == CoverStatus.Closed) // Cover reports that it closed OK
                     {
-                        if (sw.Elapsed.TotalSeconds <= (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()) ? standardTargetResponseTime : extendedTargetResponseTime)) // Cover closed synchronously within the appropriate time
+                        if (sw.Elapsed.TotalSeconds <= (isPlatform7OrLater ? standardTargetResponseTime : extendedTargetResponseTime)) // Cover closed synchronously within the appropriate time
                             LogOk("CloseCover", $"Synchronous close: CoverState was 'Closed' when the method completed: the call took {sw.Elapsed.TotalSeconds:0.0} seconds");
                         else // Cover closed synchronously but took longer than the appropriate command time
                         {
-                            LogIssue("CloseCover", $"Synchronous close: CoverState was 'Closed' when the CloseCover method completed but the operation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is longer than the target response time: {(DeviceCapabilities.HasCoverMoving(GetInterfaceVersion()) ? standardTargetResponseTime : extendedTargetResponseTime):0.0} seconds");
+                            LogIssue("CloseCover", $"Synchronous close: CoverState was 'Closed' when the CloseCover method completed but the operation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is longer than the target response time: {(isPlatform7OrLater ? standardTargetResponseTime : extendedTargetResponseTime):0.0} seconds");
                             LogInfo("CloseCover", $"Please implement this method asynchronously: return quickly from CloseCover, set CoverState to Moving and set CoverMoving to true (ICoverCalibratorV2 and later only), resetting these when movement is complete.");
                         }
                     }
@@ -687,7 +687,7 @@ namespace ConformU
                 else  // Cover is moving after CloseCover returned ==> Asynchronous close
                 {
                     // if this is a Platform 7 or later device test CoverMoving
-                    if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion())) // Platform 7 or later interface ==> use CoverMoving
+                    if (isPlatform7OrLater) // Platform 7 or later interface ==> use CoverMoving
                     {
                         // Wait until the cover is no longer moving
                         LogCallToDriver("CloseCover", "About to call CoverMoving property repeatedly...");
@@ -824,7 +824,7 @@ namespace ConformU
             CoverStatus status = coverCalibratorDevice.CoverState;
 
             // Check whether this is an ICoverCalibratorV2 or later interface
-            if (DeviceCapabilities.HasCoverMoving(GetInterfaceVersion())) // Fond an ICoverCalibratorV2 or later interface
+            if (isPlatform7OrLater) // Fond an ICoverCalibratorV2 or later interface
             {
                 // Get the CoverMoving value
                 LogCallToDriver(operation, "About to call CoverMoving property");
@@ -861,7 +861,7 @@ namespace ConformU
             CalibratorStatus status = coverCalibratorDevice.CalibratorState;
 
             // Check whether this is an ICoverCalibratorV2 or later interface
-            if (DeviceCapabilities.HasCalibratorChanging(GetInterfaceVersion())) // Fond an ICoverCalibratorV2 or later interface
+            if (isPlatform7OrLater) // Fond an ICoverCalibratorV2 or later interface
             {
                 // Get the CalibratorChanging value
                 LogCallToDriver(operation, "About to call CalibratorChanging property");
@@ -900,7 +900,7 @@ namespace ConformU
                     SetAction($"Setting calibrator to brightness {requestedBrightness}");
 
                     LogCallToDriver("CalibratorOn", $"About to call CalibratorOn method with brightness: {requestedBrightness}");
-                    TimeMethodOneParam<int>("CalibratorOn", coverCalibratorDevice.CalibratorOn, requestedBrightness, DeviceCapabilities.HasCalibratorChanging(GetInterfaceVersion()) ? TargetTime.Standard : TargetTime.Extended);
+                    TimeMethodOneParam<int>("CalibratorOn", coverCalibratorDevice.CalibratorOn, requestedBrightness, isPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
 
                     // Check whether the call was synchronous or asynchronous
                     if (CalibratorReady("CalibratorOn")) // Synchronous call
@@ -912,7 +912,7 @@ namespace ConformU
                         else if (calibratorState == CalibratorStatus.Ready) // A valid brightness was set and a Ready status was returned
                         {
                             // Check whether the synchronous operation completed within the expected response time
-                            if (sw.Elapsed.TotalSeconds <= (DeviceCapabilities.HasCalibratorChanging(GetInterfaceVersion()) ? standardTargetResponseTime : extendedTargetResponseTime)) // Completed within the expected response time
+                            if (sw.Elapsed.TotalSeconds <= (isPlatform7OrLater ? standardTargetResponseTime : extendedTargetResponseTime)) // Completed within the expected response time
                                 LogOk("CalibratorOn", $"Synchronous operation: CalibratorState was 'Ready' when the method completed: the call took {sw.Elapsed.TotalSeconds:0.0} seconds");
                             else // Did not complete within the expected response time
                             {
@@ -921,7 +921,7 @@ namespace ConformU
                             }
 
                             // if this is a Platform 7 or later device test CalibratorChanging to ensure its state is false
-                            if (DeviceCapabilities.HasCalibratorChanging(GetInterfaceVersion()))
+                            if (isPlatform7OrLater)
                             {
                                 // Confirm that CalibratorChanging is False
                                 LogCallToDriver("CalibratorOn", $"About to call CalibratorChanging property.");
@@ -947,7 +947,7 @@ namespace ConformU
                     else // Asynchronous call
                     {
                         // Wait for the brightness change to complete using the appropriate completion variable depending on interface version
-                        if (DeviceCapabilities.HasCalibratorChanging(GetInterfaceVersion())) // The device is Platform 7 or later
+                        if (isPlatform7OrLater) // The device is Platform 7 or later
                         {
                             // Wait until the cover is no longer moving
                             LogCallToDriver("CalibratorOn", "About to call the CalibratorChanging property multiple times");
@@ -1019,7 +1019,7 @@ namespace ConformU
                     SetAction($"Turning calibrator off");
 
                     LogCallToDriver("CalibratorOff", $"About to call CalibratorOff method");
-                    TimeMethod("CalibratorOff", coverCalibratorDevice.CalibratorOff, DeviceCapabilities.HasCalibratorChanging(GetInterfaceVersion()) ? TargetTime.Standard : TargetTime.Extended);
+                    TimeMethod("CalibratorOff", coverCalibratorDevice.CalibratorOff, isPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
 
                     // Check whether the call was synchronous or asynchronous
                     if (CalibratorReady("CalibratorOff")) // Synchronous call
@@ -1029,7 +1029,7 @@ namespace ConformU
                         if (calibratorState == CalibratorStatus.Ready) // A valid brightness was set and a Ready status was returned
                         {
                             // Check whether the synchronous operation completed within the expected response time
-                            if (sw.Elapsed.TotalSeconds <= (DeviceCapabilities.HasCalibratorChanging(GetInterfaceVersion()) ? standardTargetResponseTime : extendedTargetResponseTime)) // Completed within the expected response time
+                            if (sw.Elapsed.TotalSeconds <= (isPlatform7OrLater ? standardTargetResponseTime : extendedTargetResponseTime)) // Completed within the expected response time
                                 LogOk("CalibratorOff", $"Synchronous operation: CalibratorState was 'Ready' when the method completed: the call took {sw.Elapsed.TotalSeconds:0.0} seconds");
                             else // Did not complete within the expected response time
                             {
@@ -1038,7 +1038,7 @@ namespace ConformU
                             }
 
                             // if this is a Platform 7 or later device test CalibratorChanging to ensure its state is false
-                            if (DeviceCapabilities.HasCalibratorChanging(GetInterfaceVersion()))
+                            if (isPlatform7OrLater)
                             {
                                 // Confirm that CalibratorChanging is False
                                 LogCallToDriver("CalibratorOff", $"About to call CalibratorChanging property.");
@@ -1054,7 +1054,7 @@ namespace ConformU
                     else // Asynchronous call
                     {
                         // Wait for the brightness change to complete using the appropriate completion variable depending on interface version
-                        if (DeviceCapabilities.HasCalibratorChanging(GetInterfaceVersion())) // The device is Platform 7 or later
+                        if (isPlatform7OrLater) // The device is Platform 7 or later
                         {
                             // Wait until the cover is no longer moving
                             LogCallToDriver("CalibratorOff", "About to call the CalibratorChanging property multiple times");

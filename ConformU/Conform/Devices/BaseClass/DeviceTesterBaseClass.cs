@@ -48,6 +48,8 @@ namespace ConformU
 
         private bool hasProperties, hasCanProperties, hasMethods, hasPreRunCheck, hasPostRunCheck, hasPerformanceCheck;
         private bool hasPreConnectCheck;
+        internal bool isPlatform7OrLater;
+
         private IAscomDeviceV2 baseClassDevice;
         private DeviceTypes baseClassDeviceType;
 
@@ -738,6 +740,9 @@ namespace ConformU
             // Try to get the device's interface version
             LogDebug("Connect", $"Interface version: {GetInterfaceVersion()}");
 
+            // Set an internal indicating whether this is a Platform 7 or later device
+            isPlatform7OrLater = DeviceCapabilities.IsPlatform7OrLater(settings.DeviceType, GetInterfaceVersion());
+
             // Use Connect /Disconnect if present
             if (DeviceCapabilities.HasConnectAndDeviceState(baseClassDeviceType, GetInterfaceVersion()))
             {
@@ -808,7 +813,7 @@ namespace ConformU
                 throw new ASCOM.InvalidOperationException($"The device connected without error but Connected Get returned False.");
             }
 
-            if (DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, (short)GetInterfaceVersion()))
+            if (DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, GetInterfaceVersion()))
                 tl.LogMessage("Connect", MessageLevel.OK, "Connected to device successfully using Connect()");
             else
                 LogOk("Connected", "Connected to device successfully using Connected = True");
