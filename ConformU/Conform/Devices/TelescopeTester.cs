@@ -3076,7 +3076,23 @@ namespace ConformU
             // AbortSlew - Optional
             if (telescopeTests[ABORT_SLEW])
             {
-                TelescopeOptionalMethodsTest(OptionalMethodType.AbortSlew, "AbortSlew", true);
+                // Check whether AbortSlew throws a not implemented error when called on its own
+                try
+                {
+                    // Call AbortSlew
+                    AbortSlew("AbortSlew");
+
+                    // If we get here AbortSlew did not throw an exception so test its implementation
+                    LogDebug("AbortSlew", $"The AbortSlew command did not throw an exception");
+                    TelescopeOptionalMethodsTest(OptionalMethodType.AbortSlew, "AbortSlew", true);
+                }
+                catch (Exception ex)
+                {
+                    // AbortSlew threw an exception so process it accepting NotImplemnted exceptions
+                    LogDebug("AbortSlew", $"The AbortSlew command did throw an exception");
+                    HandleException("AbortSlew", MemberType.Method, Required.Optional, ex, "");
+                }
+
                 if (cancellationToken.IsCancellationRequested)
                     return;
             }
@@ -5770,58 +5786,65 @@ namespace ConformU
                             LogOk(testName, "AbortSlew OK when not slewing");
 
                             // If we get here the AbortSlew method is available so start a slew and then try to halt it.
-
-                            // Start a slew to HA -3.0
-                            double targetHa = -3.0;
-
-                            if (canSetTracking)
+                            // The following test relies on SlewToCoordinatesAsync so only undertake it if this method is supported
+                            if (canSlewAsync) // Async slew is supported
                             {
-                                LogCallToDriver(testName, "About to set Tracking property to true");
-                                telescopeDevice.Tracking = true; // Enable tracking for these tests
+
+                                // Start a slew to HA -3.0
+                                double targetHa = -3.0;
+
+                                if (canSetTracking)
+                                {
+                                    LogCallToDriver(testName, "About to set Tracking property to true");
+                                    telescopeDevice.Tracking = true; // Enable tracking for these tests
+                                }
+
+                                // Calculate the target RA
+                                LogCallToDriver(testName, "About to get SiderealTime property");
+                                double targetRa = Utilities.ConditionRA(telescopeDevice.SiderealTime - targetHa);
+
+                                // Calculate the target declination
+                                double targetDeclination = GetTestDeclinationLessThan65(testName, targetRa);
+                                LogDebug(testName, $"Slewing to HA: {targetHa.ToHMS()} (RA: {targetRa.ToHMS()}), Dec: {targetDeclination.ToDMS()}");
+
+                                // Slew to the target coordinates
+                                LogCallToDriver(testName, $"About to call SlewToCoordinatesAsync. RA: {targetRa.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+
+                                LogCallToDriver(testName,
+                                    $"About to call SlewToCoordinatesAsync method, RA: {targetRa.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                                telescopeDevice.SlewToCoordinatesAsync(targetRa, targetDeclination);
+
+                                // Wait for 1.5 seconds
+                                WaitFor(1500, 100);
+
+                                // Validate that the slew is still going
+                                ValidateSlewing(testName, true);
+
+                                // Now try to end the slew
+                                TimeMethod(testName, () => AbortSlew(testName), TargetTime.Standard);
+
+                                // Give time for the mount to stop
+                                WaitFor(1500, 100);
+
+                                // Make sure that slewing is now  false
+                                LogCallToDriver(testName, "About to get Slewing property");
+                                bool afterAbortSlewing = telescopeDevice.Slewing;
+
+                                // Wait for slew just in case it isn't stopped by AbortSlew...
+                                if (!afterAbortSlewing)
+                                {
+                                    LogOk(testName, "AbortSlew stopped the mount from slewing.");
+                                }
+                                else
+                                {
+                                    LogIssue(testName, "The mount is still slewing after AbortSlew.");
+                                    WaitForSlew(testName, $"AbortSlew did not stop the slew, waiting for it to finish on its own.");
+                                }
                             }
-
-                            // Calculate the target RA
-                            LogCallToDriver(testName, "About to get SiderealTime property");
-                            double targetRa = Utilities.ConditionRA(telescopeDevice.SiderealTime - targetHa);
-
-                            // Calculate the target declination
-                            double targetDeclination = GetTestDeclinationLessThan65(testName, targetRa);
-                            LogDebug(testName, $"Slewing to HA: {targetHa.ToHMS()} (RA: {targetRa.ToHMS()}), Dec: {targetDeclination.ToDMS()}");
-
-                            // Slew to the target coordinates
-                            LogCallToDriver(testName, $"About to call SlewToCoordinatesAsync. RA: {targetRa.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
-
-                            LogCallToDriver(testName,
-                                $"About to call SlewToCoordinatesAsync method, RA: {targetRa.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
-                            telescopeDevice.SlewToCoordinatesAsync(targetRa, targetDeclination);
-
-                            // Wait for 1.5 seconds
-                            WaitFor(1500, 100);
-
-                            // Validate that the slew is still going
-                            ValidateSlewing(testName, true);
-
-                            // Now try to end the slew
-                            TimeMethod(testName, () => AbortSlew(testName), TargetTime.Standard);
-
-                            // Give time for the mount to stop
-                            WaitFor(1500, 100);
-
-                            // Make sure that slewing is now  false
-                            LogCallToDriver(testName, "About to get Slewing property");
-                            bool afterAbortSlewing = telescopeDevice.Slewing;
-
-                            if (!afterAbortSlewing)
+                            else // Async slew is not supported
                             {
-                                LogOk(testName, "AbortSlew stopped the mount from slewing.");
+                                LogInfo(testName, $"Skipping the abort SlewToCoordinatesAsync test because CanSlewAsync is {canSlewAsync}.");
                             }
-                            else
-                            {
-                                LogIssue(testName, "The mount is still slewing after AbortSlew.");
-                                WaitForSlew(testName, $"AbortSlew did not stop the slew, waiting for it to finish on its own.");
-                            }
-
-                            // Wait for slew just in case it isn't stopped by AbortSlew...
                             break;
 
                         case OptionalMethodType.DestinationSideOfPier:
@@ -6235,13 +6258,11 @@ namespace ConformU
                     }
                     else if (testType == OptionalMethodType.SideOfPierWrite) // PierSide is actually a property even though I have it in the methods section!!
                     {
-                        HandleException(testName, MemberType.Property, Required.MustNotBeImplemented, ex,
-                            $"Can{testName} is False");
+                        HandleException(testName, MemberType.Property, Required.MustNotBeImplemented, ex, $"Can{testName} is False");
                     }
                     else
                     {
-                        HandleException(testName, MemberType.Method, Required.MustNotBeImplemented, ex,
-                            $"Can{testName} is False");
+                        HandleException(testName, MemberType.Method, Required.MustNotBeImplemented, ex, $"Can{testName} is False");
                     }
                 }
             }
