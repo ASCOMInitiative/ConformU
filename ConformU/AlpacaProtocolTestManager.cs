@@ -2511,12 +2511,21 @@ namespace ConformU
                             LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
                         }
                     }
-                    else // Unexpected outcome
+                    else // We got an unexpected HTTP status code outcome
                     {
-                        // Test whether we got an InvalidValue error and are going to accept that
+                        // Test whether we are going to accept the reported error anyway
                         if ((httpResponse.StatusCode == HttpStatusCode.OK) & acceptInvalidValueError & (deviceResponse.ErrorNumber == AlpacaErrors.InvalidValue)) // We are going to accept an InvalidValue error
                         {
                             LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) and an invalid value error: {deviceResponse.ErrorMessage}", responseString);
+                        }
+                        else if ((httpResponse.StatusCode == HttpStatusCode.OK) & // We got an HTTP 200 response
+                                 (deviceResponse.ErrorNumber == AlpacaErrors.NotImplemented) & // The device returned a not implemented Alpaca error
+                                 !settings.AlpacaConfiguration.ProtocolStrictChecks & // We are not in strict protocol check mode
+                                 (expectedCodes.Count == 1) & // There was only one expected HTTP response code
+                                 expectedCodes.Contains(HttpStatusCode.BadRequest) // The expected response code was 400 Bad request
+                                )
+                        {
+                            LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) and a not implemented error: {deviceResponse.ErrorMessage}", responseString);
                         }
                         else // Did not get the expected response so log this as an issue
                         {

@@ -358,7 +358,7 @@ namespace ConformU
                 TL.LogMessage("", MessageLevel.TestOnly, "");
                 if (conformResults.ErrorCount == 0 & conformResults.IssueCount == 0 & conformResults.ConfigurationAlertCount == 0 & !cancellationToken.IsCancellationRequested) // No issues - device conforms as expected
                 {
-                    TL.LogMessage("No errors, warnings or issues found: your driver passes ASCOM validation!!", MessageLevel.TestOnly, "");
+                    TL.LogMessage("Congratulations, no errors, warnings or issues found: your driver passes ASCOM validation!!", MessageLevel.TestOnly, "");
                 }
                 else // Some issues found, the device fails the conformance check
                 {
