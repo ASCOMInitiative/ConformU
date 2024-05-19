@@ -223,6 +223,13 @@ namespace ConformU
             TelescopeV2,
             TelescopeV3
         }
+
+        enum RateOffset
+        {
+            RightAscensionRate,
+            DeclinationRate
+        }
+
         #endregion
 
         #region New and Dispose
@@ -602,10 +609,10 @@ namespace ConformU
         public override void CheckProperties()
         {
             bool lOriginalTrackingState;
-            DriveRate lDriveRate;
-            double lTimeDifference;
-            ITrackingRates lTrackingRates = null;
-            dynamic lTrackingRate;
+            DriveRate driveRate;
+            double timeDifference;
+            ITrackingRates trackingRates = null;
+            dynamic trackingRate;
 
             // Test TargetDeclination and TargetRightAscension first because these tests will fail if the telescope has been slewed previously.
             // Slews can happen in the extended guide rate tests for example.
@@ -2073,19 +2080,19 @@ namespace ConformU
                         {
                             // Now do a sense check on the received value
                             LogOk("SiderealTime", siderealTimeScope.ToHMS());
-                            lTimeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom); // Get time difference between scope and PC
-                                                                                               // Process edge cases where the two clocks are on either side of 0:0:0/24:0:0
+                            timeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom); // Get time difference between scope and PC
+                                                                                              // Process edge cases where the two clocks are on either side of 0:0:0/24:0:0
                             if (siderealTimeAscom > 23.0d & siderealTimeAscom < 23.999d & siderealTimeScope > 0.0d & siderealTimeScope < 1.0d)
                             {
-                                lTimeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom + 24.0d);
+                                timeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom + 24.0d);
                             }
 
                             if (siderealTimeScope > 23.0d & siderealTimeScope < 23.999d & siderealTimeAscom > 0.0d & siderealTimeAscom < 1.0d)
                             {
-                                lTimeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom - 24.0d);
+                                timeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom - 24.0d);
                             }
 
-                            switch (lTimeDifference)
+                            switch (timeDifference)
                             {
                                 case var case27 when case27 <= 1.0d / 3600.0d: // 1 seconds
                                     {
@@ -2340,8 +2347,8 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("TrackingRates", "About to get TrackingRates property");
-                    lTrackingRates = TimeFunc("Tracking Write", () => telescopeDevice.TrackingRates, TargetTime.Fast);
-                    if (lTrackingRates is null)
+                    trackingRates = TimeFunc("Tracking Write", () => telescopeDevice.TrackingRates, TargetTime.Fast);
+                    if (trackingRates is null)
                     {
                         LogDebug("TrackingRates", "ERROR: The driver did NOT return an TrackingRates object!");
                     }
@@ -2350,26 +2357,26 @@ namespace ConformU
                         LogDebug("TrackingRates", "OK - the driver returned an TrackingRates object");
                     }
 
-                    lCount = lTrackingRates.Count; // Save count for use later if no members are returned in the for each loop test
+                    lCount = trackingRates.Count; // Save count for use later if no members are returned in the for each loop test
                     LogDebug("TrackingRates Count", lCount.ToString());
 
-                    var loopTo = lTrackingRates.Count;
+                    var loopTo = trackingRates.Count;
                     for (int ii = 1; ii <= loopTo; ii++)
-                        LogDebug("TrackingRates Count", $"Found drive rate: {Enum.GetName(typeof(DriveRate), (lTrackingRates[ii]))}");
+                        LogDebug("TrackingRates Count", $"Found drive rate: {Enum.GetName(typeof(DriveRate), (trackingRates[ii]))}");
                 }
                 catch (Exception ex)
                 {
                     HandleException("TrackingRates", MemberType.Property, Required.Mandatory, ex, "");
                 }
 
-                if (lTrackingRates is not null)
+                if (trackingRates is not null)
                 {
                     try
                     {
                         IEnumerator lEnum;
                         object lObj;
                         DriveRate lDrv;
-                        lEnum = (IEnumerator)lTrackingRates.GetEnumerator();
+                        lEnum = (IEnumerator)trackingRates.GetEnumerator();
                         if (lEnum is null)
                         {
                             LogDebug("TrackingRates Enum", "ERROR: The driver did NOT return an Enumerator object!");
@@ -2394,11 +2401,11 @@ namespace ConformU
                         lEnum = null;
 
                         // Clean up TrackingRates object
-                        if (lTrackingRates is object)
+                        if (trackingRates is object)
                         {
                             try
                             {
-                                lTrackingRates.Dispose();
+                                trackingRates.Dispose();
                             }
                             catch
                             {
@@ -2408,14 +2415,14 @@ namespace ConformU
                             {
                                 try
                                 {
-                                    Marshal.ReleaseComObject(lTrackingRates);
+                                    Marshal.ReleaseComObject(trackingRates);
                                 }
                                 catch
                                 {
                                 }
                             }
 
-                            lTrackingRates = null;
+                            trackingRates = null;
                         }
                     }
                     catch (Exception ex)
@@ -2431,13 +2438,13 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("TrackingRates", "About to get TrackingRates property");
-                    lTrackingRates = telescopeDevice.TrackingRates;
-                    LogDebug("TrackingRates", $"Read TrackingRates OK, Count: {lTrackingRates.Count}");
+                    trackingRates = telescopeDevice.TrackingRates;
+                    LogDebug("TrackingRates", $"Read TrackingRates OK, Count: {trackingRates.Count}");
                     int lRateCount = 0;
-                    foreach (DriveRate currentLDriveRate in (IEnumerable)lTrackingRates)
+                    foreach (DriveRate currentLDriveRate in (IEnumerable)trackingRates)
                     {
-                        lDriveRate = currentLDriveRate;
-                        LogTestAndMessage("TrackingRates", $"Found drive rate: {lDriveRate}");
+                        driveRate = currentLDriveRate;
+                        LogTestAndMessage("TrackingRates", $"Found drive rate: {driveRate}");
                         lRateCount += 1;
                     }
 
@@ -2472,11 +2479,11 @@ namespace ConformU
                 }
 
                 // Clean up TrackingRates object
-                if (lTrackingRates is object)
+                if (trackingRates is object)
                 {
                     try
                     {
-                        lTrackingRates.Dispose();
+                        trackingRates.Dispose();
                     }
                     catch
                     {
@@ -2486,7 +2493,7 @@ namespace ConformU
                     {
                         try
                         {
-                            Marshal.ReleaseComObject(lTrackingRates);
+                            Marshal.ReleaseComObject(trackingRates);
                         }
                         catch { }
                     }
@@ -2494,11 +2501,11 @@ namespace ConformU
 
                 // Test the TrackingRates.Dispose() method
                 LogDebug("TrackingRates", "Getting tracking rates");
-                lTrackingRates = telescopeDevice.TrackingRates;
+                trackingRates = telescopeDevice.TrackingRates;
                 try
                 {
                     LogDebug("TrackingRates", "Disposing tracking rates");
-                    lTrackingRates.Dispose();
+                    trackingRates.Dispose();
                     LogOk("TrackingRates", "Disposed tracking rates OK");
                 }
                 catch (MissingMemberException)
@@ -2516,7 +2523,7 @@ namespace ConformU
                 {
                     try
                     {
-                        Marshal.ReleaseComObject(lTrackingRates);
+                        Marshal.ReleaseComObject(trackingRates);
                     }
                     catch { }
                 }
@@ -2524,43 +2531,59 @@ namespace ConformU
                 if (cancellationToken.IsCancellationRequested)
                     return;
 
-                // TrackingRate - Test after TrackingRates so we know what the valid values are
-                // TrackingRate Read - Required
+            }
+            else
+            {
+                LogInfo("TrackingRates", $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+            }
+
+            // TrackingRate Read - Required and Write - Optional. Test after TrackingRates so we know what the valid values are
+            if (GetInterfaceVersion() > 1)
+            {
                 try
                 {
                     LogCallToDriver("TrackingRates", "About to get TrackingRates property");
-                    lTrackingRates = telescopeDevice.TrackingRates;
-                    if (lTrackingRates is object) // Make sure that we have received a TrackingRates object after the Dispose() method was called
+                    trackingRates = telescopeDevice.TrackingRates;
+
+                    // Make sure that we have received a TrackingRates object after the Dispose() method was called
+                    if (trackingRates is object) // We did get a TrackingRates object
                     {
                         LogOk("TrackingRates", "Successfully obtained a TrackingRates object after the previous TrackingRates object was disposed"); LogCallToDriver("TrackingRate Read", "About to get TrackingRate property");
-                        lTrackingRate = (DriveRate)telescopeDevice.TrackingRate;
-                        LogOk("TrackingRate Read", lTrackingRate.ToString());
+                        trackingRate = telescopeDevice.TrackingRate;
+                        LogOk("TrackingRate Read", trackingRate.ToString());
 
                         // TrackingRate Write - Optional
-                        // We can read TrackingRate so now test trying to set each tracking rate in turn
                         try
                         {
+                            // We can read TrackingRate so now test trying to set each tracking rate in turn
                             LogDebug("TrackingRate Write", "About to enumerate tracking rates object");
-                            foreach (DriveRate currentLDriveRate1 in (IEnumerable)lTrackingRates)
+                            foreach (DriveRate currentDriveRate in (IEnumerable)trackingRates)
                             {
-                                lDriveRate = currentLDriveRate1;
-                                //Application.DoEvents();
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 try
                                 {
-                                    LogCallToDriver("TrackingRate Write",
-                                        $"About to set TrackingRate property to {lDriveRate}");
-                                    telescopeDevice.TrackingRate = lDriveRate;
-                                    if (settings.DisplayMethodCalls)
-                                        if (telescopeDevice.TrackingRate == lDriveRate)
-                                        {
-                                            LogOk("TrackingRate Write", $"Successfully set drive rate: {lDriveRate}");
-                                        }
-                                        else
-                                        {
-                                            LogIssue("TrackingRate Write", $"Unable to set drive rate: {lDriveRate}");
-                                        }
+                                    // Set the tracking rate
+                                    LogCallToDriver("TrackingRate Write", $"About to set TrackingRate property to {currentDriveRate}");
+                                    telescopeDevice.TrackingRate = currentDriveRate;
+
+                                    // Make sure that the set rate is returned
+                                    LogCallToDriver("TrackingRate Write", $"About to get TrackingRate property");
+                                    if (telescopeDevice.TrackingRate == currentDriveRate)
+                                    {
+                                        LogOk("TrackingRate Write", $"Successfully set drive rate: {currentDriveRate}");
+                                    }
+                                    else
+                                    {
+                                        LogIssue("TrackingRate Write", $"Unable to set drive rate: {currentDriveRate}");
+                                    }
+
+                                    // For ITelescopeV4 and later make sure that RightAscensionRate & DeclinationRate are only usable when tracking at Sidereal rate
+                                    if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion()))
+                                    {
+                                        CheckRateOffsets(currentDriveRate,RateOffset.DeclinationRate);
+                                        CheckRateOffsets(currentDriveRate, RateOffset.RightAscensionRate);
+                                    }
                                 }
                                 catch (Exception ex)
                                 {
@@ -2605,8 +2628,8 @@ namespace ConformU
                         // Finally restore original TrackingRate
                         try
                         {
-                            LogCallToDriver("TrackingRate Write", "About to set TrackingRate property to " + lTrackingRate.ToString());
-                            telescopeDevice.TrackingRate = lTrackingRate;
+                            LogCallToDriver("TrackingRate Write", "About to set TrackingRate property to " + trackingRate.ToString());
+                            telescopeDevice.TrackingRate = trackingRate;
                         }
                         catch (Exception ex)
                         {
@@ -2625,8 +2648,7 @@ namespace ConformU
             }
             else
             {
-                LogInfo("TrackingRate",
-                    $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                LogInfo("TrackingRate", $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -3875,6 +3897,68 @@ namespace ConformU
             {
                 LogError("CheckConfiguration", $"Exception when checking Conform configuration: {ex.Message}");
                 LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
+            }
+        }
+
+        #endregion
+
+        #region Support Code
+
+        private void CheckRateOffsets(DriveRate driveRate, RateOffset testRateOffset)
+        {
+            // Check whether or not we are tracking at sidereal rate
+            if (driveRate != DriveRate.Sidereal) // We are tracking at a non-sidereal rate
+            {
+                // Get the test axis rate offset
+                LogCallToDriver("", $"About to get {testRateOffset}");
+                double currentRateOffset = (testRateOffset == RateOffset.DeclinationRate) ? telescopeDevice.DeclinationRate : telescopeDevice.RightAscensionRate;
+
+                // Check whether the reported rate offset is 0.0
+                if (currentRateOffset == 0.0) // Rate offset is 0.0
+                {
+                    LogOk("TrackingRate Write", $"{testRateOffset} is zero for drive rate: {driveRate}");
+                }
+                else // Rate offset is not 0.0
+                {
+                    LogIssue("TrackingRate Write", $"{testRateOffset} is not zero for drive rate: {driveRate}, it is: {currentRateOffset}");
+                    LogInfo("TrackingRate Write", $"In ITelescopeV4 and later, rate offsets are only valid when tracking at Sidereal rate.");
+                    LogInfo("TrackingRate Write", $"When the {driveRate} tracking rate is active, reading {testRateOffset} should return 0.0.");
+                }
+
+                // If the rate offset can be changed when tracking at sidereal rate, make sure that it cannot be set in this non-sidereal tracking rate
+                if (testRateOffset == RateOffset.DeclinationRate ? canSetDeclinationRate : canSetRightAscensionRate) // RightAscensionRate can be set when tracking at sidereal rate
+                {
+                    try
+                    {
+                        // Try to set the appropriate offset rate
+                        LogCallToDriver("", $"About to set {testRateOffset}");
+                        if (testRateOffset == RateOffset.DeclinationRate) // Testing DeclinationRate
+                            telescopeDevice.DeclinationRate = 0.1;
+                        else // Testing RightAscensionRate
+                            telescopeDevice.RightAscensionRate = 0.1;
+
+                        // Should never get here because an exception is expected
+                        LogIssue("TrackingRate Write", $"Writing to {testRateOffset} did not result in an {(settings.DeviceTechnology == DeviceTechnology.COM ? "InvalidOperationException" : "InvalidOperation  error")} but should have.");
+                        LogInfo("TrackingRate Write", $"In ITelescopeV4 and later, rate offsets are only valid when tracking at Sidereal rate.");
+                        LogInfo("TrackingRate Write", $"When the {driveRate} tracking rate is active, writing to {testRateOffset} should result in an {(settings.DeviceTechnology == DeviceTechnology.COM ? "InvalidOperationException" : "InvalidOperation  error")}.");
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ex is ASCOM.InvalidOperationException)
+                        {
+                            LogOk("TrackingRate Write", $"Attempting to set {testRateOffset} did result in an InvalidOperationException.");
+                        }
+                        else
+                        {
+                            LogIssue("TrackingRate Write", $"Attempting to set {testRateOffset} did not result in an InvalidOperationException. Instead it resulted in an {ex.GetType().Name} exception: {ex.Message}");
+                            LogDebug("TrackingRate Write", ex.ToString());
+                        }
+                    }
+                }
+            }
+            else // Tracking at sidereal rate
+            {
+                // Nothing to do here because this test is only for non-sidereal drive rates
             }
         }
 
@@ -7235,10 +7319,6 @@ namespace ConformU
             LogInfo("DestinationSideofPier", TranslatePierSide(lPierSideMinus9, false) + TranslatePierSide(lPierSidePlus9, false));
             LogInfo("DestinationSideofPier", TranslatePierSide(lPierSideMinus3, false) + TranslatePierSide(lPierSidePlus3, false));
         }
-
-        #endregion
-
-        #region Support Code
 
         private void CheckScopePosition(string testName, string functionName, double expectedRa, double expectedDec)
         {
