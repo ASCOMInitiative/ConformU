@@ -94,6 +94,8 @@ namespace ConformU
 
         #endregion
 
+        #region Conform Process
+
         public override void InitialiseTest()
         {
             // Set the error type numbers according to the standards adopted by individual authors.
@@ -1501,6 +1503,8 @@ namespace ConformU
             }
         }
 
+        #endregion
+
         #region Support code
 
         private short SwitchPropertyTestShort(SwitchPropertyMethod pType, string pName, short pMin, short pMax)
@@ -1940,6 +1944,7 @@ namespace ConformU
             else
                 LogInfo("SwitchNumber", "Skipping range tests because MaxSwitch cannot be read");
         }
+
         private void WaitForReadDelay(string message)
         {
             if (switchReadDelay > 0)

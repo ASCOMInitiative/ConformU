@@ -20,6 +20,13 @@ namespace ConformU
         private readonly List<string> sensorHasDescription = new();
         private readonly List<string> sensorHasTimeOfLastUpdate = new();
 
+        // Helper variables
+        private IObservingConditionsV2 mObservingConditions;
+        private readonly Settings settings;
+        private readonly ConformLogger logger;
+
+        #region Constants and Enums
+
         private const double ABSOLUTE_ZERO = -273.15;
         private const double WATER_BOILING_POINT = 100.0;
         private const double BAD_VALUE = double.NaN;
@@ -60,11 +67,6 @@ namespace ConformU
             PROPERTY_WINDGUST,
             PROPERTY_WINDSPEED
         };
-
-        // Helper variables
-        private IObservingConditionsV2 mObservingConditions;
-        private readonly Settings settings;
-        private readonly ConformLogger logger;
 
         private enum ObservingConditionsProperty
         {
@@ -116,6 +118,8 @@ namespace ConformU
             SensorDescriptionWindSpeed
         }
 
+        #endregion
+
         #region New and Dispose
         public ObservingConditionsTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(false, true, true, false, false, true, false, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
         {
@@ -144,6 +148,8 @@ namespace ConformU
         }
 
         #endregion
+
+        #region Conform Process
 
         public override void InitialiseTest()
         {
@@ -439,6 +445,10 @@ namespace ConformU
             }
         }
 
+        #endregion
+
+        #region Support Code
+
         /// <summary>
         ///     ''' Tests whether a double has a good value or the NaN bad value indicator
         ///     ''' </summary>
@@ -718,6 +728,8 @@ namespace ConformU
             }
             return returnValue;
         }
-    }
 
+        #endregion
+
+    }
 }

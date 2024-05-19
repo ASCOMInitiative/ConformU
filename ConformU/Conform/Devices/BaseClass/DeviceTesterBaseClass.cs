@@ -1075,7 +1075,14 @@ namespace ConformU
 
         #endregion
 
-        #region Tests for methods common to all device types
+        #region Support code common to all device types
+
+        public void SynchronousBehaviourInformation(string operation, string completionFalse,string completionTrue)
+        {
+            LogInfo(testName, $"As an I{settings.DeviceType}V{GetInterfaceVersion()} device, {operation} should have operated asynchronously: Returning quickly (less than {standardTargetResponseTime} second) after setting {completionFalse}.");
+            LogInfo(testName, $"The {settings.DeviceType} device should then continue the operation in the background and set {completionTrue} when it has completed.");
+
+        }
 
         /// <summary>
         ///Set the test, action and status in one call

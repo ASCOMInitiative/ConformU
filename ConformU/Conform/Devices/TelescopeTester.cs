@@ -19,6 +19,7 @@ namespace ConformU
     {
 
         #region Variables and Constants
+
         // TelescopeTest constants
         internal const string ABORT_SLEW = "AbortSlew";
         internal const string AXIS_RATE = "AxisRate";
@@ -265,7 +266,7 @@ namespace ConformU
 
         #endregion
 
-        #region Code
+        #region Conform Process
 
         public override void InitialiseTest()
         {
@@ -2581,7 +2582,7 @@ namespace ConformU
                                     // For ITelescopeV4 and later make sure that RightAscensionRate & DeclinationRate are only usable when tracking at Sidereal rate
                                     if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion()))
                                     {
-                                        CheckRateOffsets(currentDriveRate,RateOffset.DeclinationRate);
+                                        CheckRateOffsets(currentDriveRate, RateOffset.DeclinationRate);
                                         CheckRateOffsets(currentDriveRate, RateOffset.RightAscensionRate);
                                     }
                                 }
@@ -6056,14 +6057,19 @@ namespace ConformU
                                 startTime = DateTime.Now; LogCallToDriver(testName, $"About to call PulseGuide method, Direction: {((int)GuideDirection.East)}, Duration: {PULSEGUIDE_MOVEMENT_TIME * 1000}ms");
                                 TimeMethod($"{testName} {GuideDirection.East} {PULSEGUIDE_MOVEMENT_TIME}s", () => telescopeDevice.PulseGuide(GuideDirection.East, PULSEGUIDE_MOVEMENT_TIME * 1000), TargetTime.Standard); // Start a 2 second pulse
                                 endTime = DateTime.Now;
-                                LogDebug(testName, $"PulseGuide command time: {PULSEGUIDE_MOVEMENT_TIME * 1000} milliseconds, PulseGuide call duration: {endTime.Subtract(startTime).TotalMilliseconds} milliseconds");
-                                if (endTime.Subtract(startTime).TotalMilliseconds < PULSEGUIDE_MOVEMENT_TIME * 0.75d * 1000d) // If less than three quarters of the expected duration then assume we have returned early
+                                double pulseGuideTime = endTime.Subtract(startTime).TotalSeconds; // Seconds
+                                LogDebug(testName, $"PulseGuide command time: {PULSEGUIDE_MOVEMENT_TIME:0.0} seconds, PulseGuide call duration: {pulseGuideTime:0.0} seconds");
+
+                                // Check whether the pulse guide completed before the pulse duration. Target time depends on interface version. Standard response time for Platform 7, 75% of pulse guide time for Platform 6
+                                if (pulseGuideTime < (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion()) ? standardTargetResponseTime : PULSEGUIDE_MOVEMENT_TIME * 0.75)) // Returned in less than the synchronous limit time so treat as asynchronous
                                 {
                                     LogCallToDriver(testName, "About to get IsPulseGuiding property");
                                     if (telescopeDevice.IsPulseGuiding)
                                     {
                                         LogCallToDriver(testName, "About to get IsPulseGuiding property multiple times");
-                                        WaitWhile("Pulse guiding Eastwards", () => telescopeDevice.IsPulseGuiding, SLEEP_TIME, PULSEGUIDE_TIMEOUT_TIME); LogCallToDriver(testName, "About to get IsPulseGuiding property");
+                                        WaitWhile("Pulse guiding Eastwards", () => telescopeDevice.IsPulseGuiding, SLEEP_TIME, PULSEGUIDE_TIMEOUT_TIME);
+
+                                        LogCallToDriver(testName, "About to get IsPulseGuiding property");
                                         if (!telescopeDevice.IsPulseGuiding)
                                         {
                                             LogOk(testName, "Asynchronous pulse guide found OK");
@@ -6079,16 +6085,26 @@ namespace ConformU
                                         LogIssue(testName, "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE");
                                     }
                                 }
-                                else // Assume synchronous pulse guide and that IsPulseGuiding is false
+                                else // Took longer than the synchronous limit time so treat as synchronous
                                 {
-                                    LogCallToDriver(testName, "About to get IsPulseGuiding property");
-                                    if (!telescopeDevice.IsPulseGuiding)
+                                    // Check whether this is a Platform 7 or later interface
+                                    if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion())) // Platform 7 or later is expected
                                     {
-                                        LogOk(testName, "Synchronous pulse guide found OK");
+                                        LogIssue(testName, $"Synchronous pulse guide found. The guide took {pulseGuideTime} seconds to complete, the expected maximum time is {standardTargetResponseTime} seconds.");
+                                        LogInfo(testName, $"In ITelescopeV4 and later interfaces, PulseGuide should be implemented asynchronously: returning quickly with isMoving returning TRUE.");
+                                        LogInfo(testName, $"When guide movement is complete, IsMoving should return FALSE.");
                                     }
-                                    else
+                                    else // Platform 6 or earlier behaviour is expected
                                     {
-                                        LogIssue(testName, "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE");
+                                        LogCallToDriver(testName, "About to get IsPulseGuiding property");
+                                        if (!telescopeDevice.IsPulseGuiding)
+                                        {
+                                            LogOk(testName, "Synchronous pulse guide found OK");
+                                        }
+                                        else
+                                        {
+                                            LogIssue(testName, "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE");
+                                        }
                                     }
                                 }
                             }

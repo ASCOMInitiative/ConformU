@@ -27,12 +27,8 @@ using System.Threading;
 
 namespace ConformU
 {
-
     internal class VideoTester : DeviceTesterBaseClass
     {
-        private const int CAMERA_PULSE_DURATION = 2000; // Duration of camera pulse guide test (ms)
-        private const int CAMERA_PULSE_TOLERANCE = 300; // Tolerance for acceptable;e performance (ms)
-
         // Camera variables
         private bool canConfigureDeviceProperties, canReadSensorType, canReadGainMax, canReadGainMin;
         private bool canReadGammaMin, canReadGammaMax, canReadIntegrationRate, canReadSupportedIntegrationRates;
@@ -55,6 +51,17 @@ namespace ConformU
         private Array imageArrayAsArray;
         private dynamic imageMetadata;
         private byte[] previewBitmap;
+
+        // Helper variables
+        private IVideoV2 videoDevice;
+        private readonly CancellationToken cancellationToken;
+        private readonly Settings settings;
+        private readonly ConformLogger logger;
+
+        #region Constants and Enums
+
+        private const int CAMERA_PULSE_DURATION = 2000; // Duration of camera pulse guide test (ms)
+        private const int CAMERA_PULSE_TOLERANCE = 300; // Tolerance for acceptable;e performance (ms)
 
         private enum CanProperty
         {
@@ -105,11 +112,7 @@ namespace ConformU
             PreviewBitmap
         }
 
-        // Helper variables
-        private IVideoV2 videoDevice;
-        private readonly CancellationToken cancellationToken;
-        private readonly Settings settings;
-        private readonly ConformLogger logger;
+        #endregion
 
         #region New and Dispose
         public VideoTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(true, true, true, false, false, true, true, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
@@ -140,6 +143,8 @@ namespace ConformU
         }
 
         #endregion
+
+        #region Conform Process
 
         public override void InitialiseTest()
         {
@@ -218,33 +223,6 @@ namespace ConformU
         {
             // IVideoV1 properties
             CameraCanTest(CanProperty.CanConfigureDeviceProperties, "CanConfigureDeviceProperties");
-        }
-
-        private void CameraCanTest(CanProperty pType, string pName)
-        {
-            try
-            {
-                switch (pType)
-                {
-                    case CanProperty.CanConfigureDeviceProperties:
-                        {
-                            LogCallToDriver(pType.ToString(), "About to get CanConfigureDeviceProperties property");
-                            canConfigureDeviceProperties = videoDevice.CanConfigureDeviceProperties;
-                            LogOk(pName, canConfigureDeviceProperties.ToString());
-                            break;
-                        }
-
-                    default:
-                        {
-                            LogIssue(pName, $"Conform:CanTest: Unknown test type {pType}");
-                            break;
-                        }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogIssue(pName, $"Exception: {ex.Message}");
-            }
         }
 
         public override void CheckProperties()
@@ -564,6 +542,77 @@ namespace ConformU
                 LogInfo("", "Skipping VideoFrame contents check because of issue reading LastVideoFrame");
         }
 
+        public override void CheckMethods()
+        {
+        }
+
+        public override void CheckPerformance()
+        {
+            CameraPerformanceTest(CameraPerformance.CameraState, "CameraState");
+        }
+
+        public override void PostRunCheck()
+        {
+            try
+            {
+                videoDevice.StopRecordingVideoFile();
+            }
+            catch
+            {
+            }
+            LogOk("PostRunCheck", "Camera returned to initial cooler temperature");
+        }
+
+        public override void CheckConfiguration()
+        {
+            try
+            {
+                // Common configuration
+                if (!settings.TestProperties)
+                    LogConfigurationAlert("Property tests were omitted due to Conform configuration.");
+
+                if (!settings.TestMethods)
+                    LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
+
+            }
+            catch (Exception ex)
+            {
+                LogError("CheckConfiguration", $"Exception when checking Conform configuration: {ex.Message}");
+                LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
+            }
+        }
+
+        #endregion
+
+        #region Support Code
+
+        private void CameraCanTest(CanProperty pType, string pName)
+        {
+            try
+            {
+                switch (pType)
+                {
+                    case CanProperty.CanConfigureDeviceProperties:
+                        {
+                            LogCallToDriver(pType.ToString(), "About to get CanConfigureDeviceProperties property");
+                            canConfigureDeviceProperties = videoDevice.CanConfigureDeviceProperties;
+                            LogOk(pName, canConfigureDeviceProperties.ToString());
+                            break;
+                        }
+
+                    default:
+                        {
+                            LogIssue(pName, $"Conform:CanTest: Unknown test type {pType}");
+                            break;
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogIssue(pName, $"Exception: {ex.Message}");
+            }
+        }
+
         /// <summary>
         ///     ''' Reports whether the overall array size matches the expected size
         ///     ''' </summary>
@@ -846,6 +895,7 @@ namespace ConformU
             }
             return returnValue;
         }
+
         /// <summary>
         ///     ''' Test whether an integer is returned by a driver
         ///     ''' </summary>
@@ -1061,6 +1111,7 @@ namespace ConformU
             }
             return returnValue;
         }
+
         private bool TestBoolean(VideoProperty pType, bool pMandatory)
         {
             string methodName;
@@ -1292,34 +1343,6 @@ namespace ConformU
             }
         }
 
-        public override void CheckMethods()
-        {
-        }
-
-        public override void CheckPerformance()
-        {
-            CameraPerformanceTest(CameraPerformance.CameraState, "CameraState");
-        }
-
-        public override void CheckConfiguration()
-        {
-            try
-            {
-                // Common configuration
-                if (!settings.TestProperties)
-                    LogConfigurationAlert("Property tests were omitted due to Conform configuration.");
-
-                if (!settings.TestMethods)
-                    LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
-
-            }
-            catch (Exception ex)
-            {
-                LogError("CheckConfiguration", $"Exception when checking Conform configuration: {ex.Message}");
-                LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
-            }
-        }
-
         private void CameraPerformanceTest(CameraPerformance pType, string pName)
         {
             DateTime lStartTime;
@@ -1392,17 +1415,7 @@ namespace ConformU
             }
         }
 
-        public override void PostRunCheck()
-        {
-            try
-            {
-                videoDevice.StopRecordingVideoFile();
-            }
-            catch
-            {
-            }
-            LogOk("PostRunCheck", "Camera returned to initial cooler temperature");
-        }
-    }
+        #endregion
 
+    }
 }

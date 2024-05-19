@@ -77,6 +77,8 @@ namespace ConformU
 
         #endregion
 
+        #region Conform Process
+
         public override void InitialiseTest()
         {
             // Set the error type numbers according to the standards adopted by individual authors.
@@ -570,6 +572,41 @@ namespace ConformU
                 LogDebug("PostRunCheck", ex.ToString());
             }
         }
+
+        public override void CheckPerformance()
+        {
+            SetTest("Performance");
+
+            PerformanceTest(PerformanceProperty.CalibratorState, "CalibratorState");
+            PerformanceTest(PerformanceProperty.CoverState, "CoverState");
+
+            SetTest("");
+            SetAction("");
+            SetStatus("");
+        }
+
+        public override void CheckConfiguration()
+        {
+            try
+            {
+                // Common configuration
+                if (!settings.TestProperties)
+                    LogConfigurationAlert("Property tests were omitted due to Conform configuration.");
+
+                if (!settings.TestMethods)
+                    LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
+
+            }
+            catch (Exception ex)
+            {
+                LogError("CheckConfiguration", $"Exception when checking Conform configuration: {ex.Message}");
+                LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
+            }
+        }
+
+        #endregion
+
+        #region Support Code
 
         private void TestOpenCover()
         {
@@ -1101,37 +1138,6 @@ namespace ConformU
             }
         }
 
-        public override void CheckPerformance()
-        {
-            SetTest("Performance");
-
-            PerformanceTest(PerformanceProperty.CalibratorState, "CalibratorState");
-            PerformanceTest(PerformanceProperty.CoverState, "CoverState");
-
-            SetTest("");
-            SetAction("");
-            SetStatus("");
-        }
-
-        public override void CheckConfiguration()
-        {
-            try
-            {
-                // Common configuration
-                if (!settings.TestProperties)
-                    LogConfigurationAlert("Property tests were omitted due to Conform configuration.");
-
-                if (!settings.TestMethods)
-                    LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
-
-            }
-            catch (Exception ex)
-            {
-                LogError("CheckConfiguration", $"Exception when checking Conform configuration: {ex.Message}");
-                LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
-            }
-        }
-
         private bool RequiredPropertiesTest(RequiredProperty propertyToTest, string propertyName)
         {
             bool testWasSuccessful;
@@ -1261,5 +1267,8 @@ namespace ConformU
                 LogInfo(propertyName, $"Unable to complete test: {ex}");
             }
         }
+
+        #endregion
+
     }
 }

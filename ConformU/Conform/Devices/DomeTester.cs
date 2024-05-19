@@ -106,6 +106,8 @@ namespace ConformU
 
         #endregion
 
+        #region Conform Process
+
         public override void InitialiseTest()
         {
             // Set the error type numbers according to the standards adopted by individual authors.
@@ -194,6 +196,41 @@ namespace ConformU
                 LogDebug("CreateDevice", $"Exception thrown: {ex.Message}\r\n{ex}");
                 throw; // Re throw exception 
             }
+        }
+
+        public override void ReadCanProperties()
+        {
+            DomeMandatoryTest(DomePropertyMethod.CanFindHome, "CanFindHome");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            DomeMandatoryTest(DomePropertyMethod.CanPark, "CanPark");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            DomeMandatoryTest(DomePropertyMethod.CanSetAltitude, "CanSetAltitude");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            DomeMandatoryTest(DomePropertyMethod.CanSetAzimuth, "CanSetAzimuth");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            DomeMandatoryTest(DomePropertyMethod.CanSetPark, "CanSetPark");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            DomeMandatoryTest(DomePropertyMethod.CanSetShutter, "CanSetShutter");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            DomeMandatoryTest(DomePropertyMethod.CanSlave, "CanSlave");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            DomeMandatoryTest(DomePropertyMethod.CanSyncAzimuth, "CanSyncAzimuth");
+            if (cancellationToken.IsCancellationRequested)
+                return;
         }
 
         public override void PreRunCheck()
@@ -312,40 +349,7 @@ namespace ConformU
                     LogTestAndMessage("DomeSafety", "Open shutter check box is unchecked so shutter not opened");
             }
         }
-        public override void ReadCanProperties()
-        {
-            DomeMandatoryTest(DomePropertyMethod.CanFindHome, "CanFindHome");
-            if (cancellationToken.IsCancellationRequested)
-                return;
 
-            DomeMandatoryTest(DomePropertyMethod.CanPark, "CanPark");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-
-            DomeMandatoryTest(DomePropertyMethod.CanSetAltitude, "CanSetAltitude");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-
-            DomeMandatoryTest(DomePropertyMethod.CanSetAzimuth, "CanSetAzimuth");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-
-            DomeMandatoryTest(DomePropertyMethod.CanSetPark, "CanSetPark");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-
-            DomeMandatoryTest(DomePropertyMethod.CanSetShutter, "CanSetShutter");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-
-            DomeMandatoryTest(DomePropertyMethod.CanSlave, "CanSlave");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-
-            DomeMandatoryTest(DomePropertyMethod.CanSyncAzimuth, "CanSyncAzimuth");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-        }
         public override void CheckProperties()
         {
             if (!settings.DomeOpenShutter)
@@ -386,6 +390,7 @@ namespace ConformU
             if (cancellationToken.IsCancellationRequested)
                 return;
         }
+
         public override void CheckMethods()
         {
             DomeMandatoryTest(DomePropertyMethod.AbortSlew, "AbortSlew");
@@ -415,6 +420,7 @@ namespace ConformU
             DomeOptionalTest(DomePropertyMethod.SetPark, MemberType.Method, "SetPark");
             if (cancellationToken.IsCancellationRequested) return; // SetPark must follow Park
         }
+
         public override void CheckPerformance()
         {
             if (mCanReadAltitude)
@@ -443,6 +449,7 @@ namespace ConformU
                     return;
             }
         }
+
         public override void PostRunCheck()
         {
             if (settings.DomeOpenShutter)
@@ -511,8 +518,14 @@ namespace ConformU
             }
         }
 
+        #endregion
+
+        #region Support Code
+
         private void DomeSlewToAltitude(string pName, double pAltitude)
         {
+            Stopwatch sw = Stopwatch.StartNew();
+
             if (!settings.DomeOpenShutter) LogInfo("SlewToAltitude", "You have configured Conform not to open the shutter so the following slew may fail.");
 
             SetTest("SlewToAltitude");
@@ -520,20 +533,35 @@ namespace ConformU
             LogCallToDriver(pName, "About to call SlewToAltitude");
             TimeMethod(pName, () => domeDevice.SlewToAltitude(pAltitude), TargetTime.Standard);
 
-            if (mCanReadSlewing)
+            // Check whether Slewing can be read
+            if (mCanReadSlewing) // Slewing can be read OK
             {
+                // Check whether Slewing was set on return
                 LogCallToDriver(pName, "About to get Slewing property");
-                if (domeDevice.Slewing)
+                if (domeDevice.Slewing) // Asynchronous operation so wait for the slew to complete
                 {
                     DomeWaitForSlew(settings.DomeAltitudeMovementTimeout, () => $"{domeDevice.Altitude:00} / {pAltitude:00} degrees"); if (cancellationToken.IsCancellationRequested) return;
                     LogOk($"{pName} {pAltitude}", "Asynchronous slew OK");
                 }
-                else
+                else // Synchronous operation
                 {
-                    LogOk($"{pName} {pAltitude}", "Synchronous slew OK");
+                    // Check whether this is a Platform 7 or later device and message accordingly
+                    if (isPlatform7OrLater) // Platform 7 or later interface
+                    {
+                        if (sw.Elapsed.TotalSeconds < standardTargetResponseTime)
+
+                            LogOk($"{pName} {pAltitude}", "Synchronous slew OK");
+                        else
+                        {
+                            LogIssue($"{pName} {pAltitude}", $"Synchronous slew took {sw.Elapsed.TotalSeconds} seconds, which is longer than the standard response target: {standardTargetResponseTime} seconds.,");
+                        }
+                    }
+                    else // Platform 6 interface
+                        LogOk($"{pName} {pAltitude}", "Synchronous slew OK");
+
                 }
             }
-            else
+            else // Slewing can't be read
             {
                 LogOk($"{pName} {pAltitude}", "Can't read Slewing so assume synchronous slew OK");
             }
@@ -555,6 +583,7 @@ namespace ConformU
                 }
             }
         }
+
         private void DomeSlewToAzimuth(string pName, double pAzimuth)
         {
             SetAction($"Slewing to azimuth {pAzimuth} degrees");
@@ -607,6 +636,7 @@ namespace ConformU
             }
 
         }
+
         private void DomeWaitForSlew(double pTimeOut, Func<string> reportingFunction)
         {
             DateTime lStartTime;
@@ -621,6 +651,7 @@ namespace ConformU
                 LogInfo("DomeWaitForSlew", "Another cause of time-outs is if your Slewing Property logic is inverted or is not operating correctly.");
             }
         }
+
         private void DomeMandatoryTest(DomePropertyMethod pType, string pName)
         {
             try
@@ -780,6 +811,7 @@ namespace ConformU
                 HandleException(pName, MemberType.Property, Required.Mandatory, ex, "");
             }
         }
+
         private void DomeOptionalTest(DomePropertyMethod pType, MemberType pMemberType, string pName)
         {
             double lSlewAngle, lOriginalAzimuth, lNewAzimuth;
@@ -1245,6 +1277,7 @@ namespace ConformU
             }
             ClearStatus();
         }
+
         private void DomeShutterTest(ShutterState pRequiredFinalShutterState, string pName)
         {
             ShutterState lShutterState;
@@ -1584,5 +1617,8 @@ namespace ConformU
                 WaitWhile("Waiting for dome to stabilise", () => sw.Elapsed.TotalSeconds < settings.DomeStabilisationWaitTime, 500, settings.DomeStabilisationWaitTime);
             }
         }
+
+        #endregion
+
     }
 }

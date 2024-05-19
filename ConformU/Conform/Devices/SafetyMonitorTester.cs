@@ -64,6 +64,8 @@ namespace ConformU
 
         #endregion
 
+        #region Conform Process
+
         public override void InitialiseTest()
         {
             // Set the error type numbers according to the standards adopted by individual authors.
@@ -182,6 +184,7 @@ namespace ConformU
         {
             RequiredPropertiesTest(RequiredProperty.PropIsSafe, "IsSafe");
         }
+
         public override void CheckPerformance()
         {
             SetTest("Performance");
@@ -190,6 +193,7 @@ namespace ConformU
             SetAction("");
             SetStatus("");
         }
+
         public override void CheckConfiguration()
         {
             try
@@ -208,6 +212,10 @@ namespace ConformU
                 LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
             }
         }
+
+        #endregion
+
+        #region Support Code
 
         private void RequiredPropertiesTest(RequiredProperty pType, string pName)
         {
@@ -306,6 +314,8 @@ namespace ConformU
                 LogInfo(pName, $"Unable to complete test: {ex}");
             }
         }
-    }
 
+        #endregion
+
+    }
 }

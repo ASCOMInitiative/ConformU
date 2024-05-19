@@ -163,6 +163,28 @@ namespace ConformU
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="numberOfTestCycles"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Test process order:
+        /// 
+        /// InitialiseTest
+        /// CreateDevice
+        /// PreConnectChecks
+        /// Connect
+        /// CheckCommonMethods
+        /// ReadCanProperties
+        /// PreRunCheck
+        /// CheckProperties
+        /// CheckMethods
+        /// CheckPerformance
+        /// PostRunCheck
+        /// Disconnect
+        /// CheckConfiguration
+        /// </remarks>
         public int TestDevice(int numberOfTestCycles)
         {
             int returnCode;

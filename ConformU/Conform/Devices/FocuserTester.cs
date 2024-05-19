@@ -11,10 +11,6 @@ namespace ConformU
 {
     internal class FocuserTester : DeviceTesterBaseClass
     {
-        // Focuser moves can be synchronous or asynchronous and the duration of the Move command is used to differentiate the two behaviours.
-        // If the Move completes within the SYNC_TEST_TIME the move is considered to be asynchronous and it takes longer it will be assumed to be synchronous
-        private const int MOVE_SYNC_TEST_TIME = 1000; // Duration of a Move command beyond which the move is considered synchronous (Seconds)
-
         private enum FocuserPropertyMethod
         {
             IsMoving,
@@ -71,6 +67,8 @@ namespace ConformU
 
         #endregion
 
+        #region Conform Process
+
         public override void InitialiseTest()
         {
             // Set the error type numbers according to the standards adopted by individual authors.
@@ -93,6 +91,7 @@ namespace ConformU
             }
             base.InitialiseTest();
         }
+
         public override void CreateDevice()
         {
             try
@@ -427,7 +426,7 @@ namespace ConformU
             try
             {
                 LogCallToDriver("Halt", "About to call Halt method");
-                TimeMethod("Halt", () => focuser.Halt(),TargetTime.Standard);
+                TimeMethod("Halt", () => focuser.Halt(), TargetTime.Standard);
                 LogOk("Halt", "Focuser halted OK");
             }
             catch (Exception ex)
@@ -625,6 +624,53 @@ namespace ConformU
             }
         }
 
+        public override void CheckPerformance()
+        {
+            // Position
+            if (mAbsolutePositionOk)
+                FocuserPerformanceTest(FocuserPropertyMethod.Position, "Position");
+            else
+                LogInfo("Position", "Skipping test as property is not supported");
+
+            // IsMoving
+            if (mCanReadIsMoving)
+                FocuserPerformanceTest(FocuserPropertyMethod.IsMoving, "IsMoving");
+            else
+                LogInfo("IsMoving", "Skipping test as property is not supported");
+
+            // Temperature
+            if (mCanReadTemperature)
+                FocuserPerformanceTest(FocuserPropertyMethod.Temperature, "Temperature");
+            else
+                LogInfo("Temperature", "Skipping test as property is not supported");
+            SetAction("");
+            SetStatus("");
+            SetTest("");
+        }
+
+        public override void CheckConfiguration()
+        {
+            try
+            {
+                // Common configuration
+                if (!settings.TestProperties)
+                    LogConfigurationAlert("Property tests were omitted due to Conform configuration.");
+
+                if (!settings.TestMethods)
+                    LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
+
+            }
+            catch (Exception ex)
+            {
+                LogError("CheckConfiguration", $"Exception when checking Conform configuration: {ex.Message}");
+                LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
+            }
+        }
+
+        #endregion
+
+        #region Support Code
+
         private void MoveFocuser(string testName, bool checkMoveAccuracy)
         {
             if (mAbsolute) // Absolute focuser
@@ -632,6 +678,7 @@ namespace ConformU
                 // Save the current absolute position
                 LogCallToDriver(testName, "About to get Position property");
                 mPositionOrg = focuser.Position;
+
                 // Calculate an acceptable focus position
                 mPosition = mPositionOrg + Convert.ToInt32(mMaxStep / 10); // Move by 1/10 of the maximum focus distance outwards
                 if (mPosition >= mMaxStep)
@@ -725,30 +772,60 @@ namespace ConformU
                 TimeMethod($"Move to {newPosition}", () => focuser.Move(newPosition), TargetTime.Standard); // Move the focuser
                 TimeSpan duration = DateTime.Now.Subtract(startTime);
 
-                // Test whether the Move will be treated as synchronous or asynchronous
-                if (duration.TotalMilliseconds > MOVE_SYNC_TEST_TIME) // The Move command duration was more than the configured time, so assume a synchronous call
+                // Check whether the Move is a synchronous call or an asynchronous call where Move() exceeded the standard response time
+                if (duration.TotalSeconds > standardTargetResponseTime) // The Move command duration was more than the standard response time, so could be a synchronous call
                 {
-                    LogDebug(testName, $"Synchronous call behaviour - the call returned in {duration.TotalSeconds} seconds.");
-
-                    // Confirm that IsMoving is false
-                    LogCallToDriver(testName, "About to get IsMoving property");
-                    if (focuser.IsMoving)
+                    // Check whether this is a Platform 6 or Platform 7 device
+                    if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Focuser, GetInterfaceVersion())) // Platform 7 or later interface
                     {
-                        LogIssue(testName, $"The Move method took {duration.TotalSeconds:0.000} seconds to complete and was assumed to be synchronous, but the IsMoving property returned TRUE after the Move completed.");
-                        LogInfo(testName, $"The move was assumed to be synchronous because the Move method duration exceeded Conform's built-in sync/async test time of {MOVE_SYNC_TEST_TIME / 1000:0.000} seconds.");
-                        if (mAbsolute)
+                        LogDebug(testName, $"Platform 7 - Synchronous call behaviour - the call returned in {duration.TotalSeconds} seconds.");
+
+                        // Check whether this really is a synchronous move
+                        LogCallToDriver(testName, "About to get IsMoving property");
+                        if (focuser.IsMoving) // This is an asynchronous move but with a long initiation time
                         {
-                            WaitWhile($"Moving focuser", () => focuser.IsMoving, 500, settings.FocuserTimeout, () => $"{focuser.Position} / {newPosition}"); // Wait for move to complete
+                            LogIssue(testName, $"The Move method took {duration.TotalSeconds:0.000} seconds to complete, which exceeded Conform's standard response time of {standardTargetResponseTime:0.000} seconds.");
+
+                            // Wait for the move to complete
+                            if (mAbsolute)
+                            {
+                                WaitWhile($"Moving focuser", () => focuser.IsMoving, 500, settings.FocuserTimeout, () => $"{focuser.Position} / {newPosition}"); // Wait for move to complete
+                            }
+                            else // Relative focuser that doesn't report position
+                            {
+                                WaitWhile($"Moving focuser", () => focuser.IsMoving, 500, settings.FocuserTimeout); // Wait for move to complete
+                            }
                         }
-                        else // Relative focuser that doesn't report position
+                        else // This is a synchronous move in excess of the standard response time
                         {
-                            WaitWhile($"Moving focuser", () => focuser.IsMoving, 500, settings.FocuserTimeout); // Wait for move to complete
+                            // Log an issue because of the synchronous move
+                            LogIssue(testName, $"The focuser moved synchronously and the Move() method exceeded the standard response time of {standardTargetResponseTime:0.0} seconds.");
                         }
                     }
-                    else
-                        LogTestAndMessage(testName, "Synchronous move found");
+                    else // Platform 6 or earlier interface
+                    {
+                        LogDebug(testName, $"Synchronous call behaviour - the call returned in {duration.TotalSeconds} seconds.");
+
+                        // Confirm that IsMoving is false
+                        LogCallToDriver(testName, "About to get IsMoving property");
+                        if (focuser.IsMoving)
+                        {
+                            LogIssue(testName, $"The Move method took {duration.TotalSeconds:0.000} seconds to complete and was assumed to be synchronous, but the IsMoving property returned TRUE after the Move completed.");
+                            LogInfo(testName, $"The move was assumed to be synchronous because the Move method duration exceeded Conform's standard response time of {standardTargetResponseTime:0.000} seconds.");
+                            if (mAbsolute)
+                            {
+                                WaitWhile($"Moving focuser", () => focuser.IsMoving, 500, settings.FocuserTimeout, () => $"{focuser.Position} / {newPosition}"); // Wait for move to complete
+                            }
+                            else // Relative focuser that doesn't report position
+                            {
+                                WaitWhile($"Moving focuser", () => focuser.IsMoving, 500, settings.FocuserTimeout); // Wait for move to complete
+                            }
+                        }
+                        else
+                            LogTestAndMessage(testName, "Synchronous move found");
+                    }
                 }
-                else // Move took less than 1 second so assume an asynchronous call
+                else // Move took less than the standard response time so assume an asynchronous call
                 {
                     LogDebug(testName, $"Asynchronous call behaviour");
                     SetStatus("Waiting for asynchronous move to complete");
@@ -763,49 +840,6 @@ namespace ConformU
                         WaitWhile($"Moving focuser", () => focuser.IsMoving, 500, settings.FocuserTimeout); // Wait for move to complete
                     }
                 }
-            }
-        }
-
-        public override void CheckPerformance()
-        {
-            // Position
-            if (mAbsolutePositionOk)
-                FocuserPerformanceTest(FocuserPropertyMethod.Position, "Position");
-            else
-                LogInfo("Position", "Skipping test as property is not supported");
-
-            // IsMoving
-            if (mCanReadIsMoving)
-                FocuserPerformanceTest(FocuserPropertyMethod.IsMoving, "IsMoving");
-            else
-                LogInfo("IsMoving", "Skipping test as property is not supported");
-
-            // Temperature
-            if (mCanReadTemperature)
-                FocuserPerformanceTest(FocuserPropertyMethod.Temperature, "Temperature");
-            else
-                LogInfo("Temperature", "Skipping test as property is not supported");
-            SetAction("");
-            SetStatus("");
-            SetTest("");
-        }
-
-        public override void CheckConfiguration()
-        {
-            try
-            {
-                // Common configuration
-                if (!settings.TestProperties)
-                    LogConfigurationAlert("Property tests were omitted due to Conform configuration.");
-
-                if (!settings.TestMethods)
-                    LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
-
-            }
-            catch (Exception ex)
-            {
-                LogError("CheckConfiguration", $"Exception when checking Conform configuration: {ex.Message}");
-                LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
             }
         }
 
@@ -895,5 +929,8 @@ namespace ConformU
                 LogInfo(pName, $"Unable to complete test: {ex.Message}");
             }
         }
+
+        #endregion
+
     }
 }

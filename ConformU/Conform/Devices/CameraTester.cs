@@ -20,8 +20,8 @@ namespace ConformU
     {
         #region Constants and variables
 
-        private const int CAMERA_PULSE_DURATION = 2000; // Duration of camera pulse guide test (ms)
-        private const int CAMERA_PULSE_TOLERANCE = 300; // Tolerance for acceptable performance (ms)
+        private const int CAMERA_PULSE_DURATION_MILLISECONDS = 2000; // Duration of camera pulse guide test (ms)
+        private const int CAMERA_PULSE_TOLERANCE_MILLISECONDS = 300; // Tolerance for acceptable performance (ms)
 
         private const int MAX_BIN_X = 16; // Values of MaxBin above which warnings are given. Implemented to warn developers if they are returning "silly" values
         private const int MAX_BIN_Y = 16;
@@ -215,6 +215,8 @@ namespace ConformU
             disposedValue = true;
         }
 
+        #region Conform Process
+
         public override void InitialiseTest()
         {
             // Set the error type numbers according to the standards adopted by individual authors.
@@ -237,6 +239,7 @@ namespace ConformU
             LogDebug("CheckInitialise-Camera", $"Set GExNotImplemented");
             base.InitialiseTest();
         }
+
         public override void CreateDevice()
         {
             try
@@ -330,64 +333,7 @@ namespace ConformU
             // ICameraV2 properties
             CameraCanTest(CanType.TstCanFastReadout, "CanFastReadout");
         }
-        private void CameraCanTest(CanType pType, string pName)
-        {
-            try
-            {
-                switch (pType)
-                {
-                    case CanType.TstCanAbortExposure:
-                        LogCallToDriver("ConformanceCheck", "About to get CanAbortExposure");
-                        mCanAbortExposure = TimeFunc<bool>(pName, () => camera.CanAbortExposure, TargetTime.Fast);
-                        LogOk(pName, mCanAbortExposure.ToString());
-                        break;
 
-                    case CanType.TstCanAsymmetricBin:
-                        LogCallToDriver("ConformanceCheck", "About to get CanAsymmetricBin");
-                        mCanAsymmetricBin = TimeFunc<bool>(pName, () => camera.CanAsymmetricBin, TargetTime.Fast);
-                        LogOk(pName, mCanAsymmetricBin.ToString());
-                        break;
-
-                    case CanType.TstCanGetCoolerPower:
-                        LogCallToDriver("ConformanceCheck", "About to get CanGetCoolerPower");
-                        mCanGetCoolerPower = TimeFunc<bool>(pName, () => camera.CanGetCoolerPower, TargetTime.Fast);
-                        LogOk(pName, mCanGetCoolerPower.ToString());
-                        break;
-
-                    case CanType.TstCanPulseGuide:
-                        LogCallToDriver("ConformanceCheck", "About to get CanPulseGuide");
-                        mCanPulseGuide = TimeFunc<bool>(pName, () => camera.CanPulseGuide, TargetTime.Fast);
-                        LogOk(pName, mCanPulseGuide.ToString());
-                        break;
-
-                    case CanType.TstCanSetCcdTemperature:
-                        LogCallToDriver("ConformanceCheck", "About to get CanSetCCDTemperature");
-                        mCanSetCcdTemperature = TimeFunc<bool>(pName, () => camera.CanSetCCDTemperature, TargetTime.Fast);
-                        LogOk(pName, mCanSetCcdTemperature.ToString());
-                        break;
-
-                    case CanType.TstCanStopExposure:
-                        LogCallToDriver("ConformanceCheck", "About to get CanStopExposure");
-                        mCanStopExposure = TimeFunc<bool>(pName, () => camera.CanStopExposure, TargetTime.Fast);
-                        LogOk(pName, mCanStopExposure.ToString());
-                        break;
-
-                    case CanType.TstCanFastReadout:
-                        LogCallToDriver("ConformanceCheck", "About to get CanFastReadout");
-                        mCanFastReadout = TimeFunc<bool>(pName, () => camera.CanFastReadout, TargetTime.Fast);
-                        LogOk(pName, mCanFastReadout.ToString());
-                        break;
-
-                    default:
-                        LogIssue(pName, $"Conform:CanTest: Unknown test type {pType}");
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                HandleException(pName, MemberType.Property, Required.Mandatory, ex, "");
-            }
-        }
         public override void PreRunCheck()
         {
             int lVStringPtr, lV1, lV2, lV3;
@@ -1579,601 +1525,6 @@ namespace ConformU
                 }
             }
         }
-        private CameraState CameraPropertyTestCameraState(CamPropertyType pType, string pName)
-        {
-            CameraState returnValue = CameraState.Idle;
-
-            try
-            {
-                switch (pType)
-                {
-                    case CamPropertyType.CameraState:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get CameraState");
-                            returnValue = TimeFunc(pName, () => camera.CameraState, TargetTime.Fast);
-                            break;
-                        }
-
-                    default:
-                        {
-                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
-                            break;
-                        }
-                }
-                LogOk(pName, returnValue.ToString());
-            }
-            catch (Exception ex)
-            {
-                HandleException(pName, MemberType.Property, Required.Optional, ex, "");
-            }
-
-            return returnValue;
-        }
-        private short CameraPropertyTestShort(CamPropertyType pType, string pName, short pMin, short pMax, bool pMandatory)
-        {
-            short returnValue = 0;
-
-            try
-            {
-                TimeMethod(pName, () =>
-                {
-                    switch (pType)
-                    {
-                        case CamPropertyType.BayerOffsetX:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get BayerOffsetX");
-                                returnValue = camera.BayerOffsetX;
-                                break;
-                            }
-
-                        case CamPropertyType.BayerOffsetY:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get BayerOffsetY");
-                                returnValue = camera.BayerOffsetY;
-                                break;
-                            }
-
-                        case CamPropertyType.PercentCompleted:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get PercentCompleted");
-                                returnValue = camera.PercentCompleted;
-                                break;
-                            }
-
-                        case CamPropertyType.ReadoutMode:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get ReadoutMode");
-                                returnValue = camera.ReadoutMode;
-                                break;
-                            }
-
-                        default:
-                            {
-                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
-                                break;
-                            }
-                    }
-                }, TargetTime.Fast);
-
-                // Successfully retrieved a value
-                switch (returnValue)
-                {
-                    case object _ when returnValue < pMin // Lower than minimum value
-                   :
-                        {
-                            LogIssue(pName, $"Invalid value: {returnValue}");
-                            break;
-                        }
-
-                    case object _ when returnValue > pMax // Higher than maximum value
-             :
-                        {
-                            LogIssue(pName, $"Invalid value: {returnValue}");
-                            break;
-                        }
-
-                    default:
-                        {
-                            LogOk(pName, returnValue.ToString());
-                            break;
-                        }
-                }
-            }
-            catch (Exception ex)
-            {
-                HandleException(pName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
-            }
-
-            return returnValue;
-        }
-        private bool CameraPropertyMustNotImplemented(CamPropertyType pType, string pName)
-        {
-            short testShort; // Dummy variable to hold value that should never be returned
-            bool returnValue = true;
-
-            try
-            {
-                switch (pType)
-                {
-                    case CamPropertyType.BayerOffsetX:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get BayerOffsetX");
-                            testShort = camera.BayerOffsetX;
-                            returnValue = false; // Property should throw an exception but did not so record that fact
-                            LogIssue(pName, "Sensor type is Monochrome so this property must throw a PropertyNotImplemented error; it must not return a value");
-                            break;
-                        }
-
-                    case CamPropertyType.BayerOffsetY:
-                        {
-                            LogCallToDriver("ConformanceCheck", "About to get BayerOffsetY");
-                            testShort = camera.BayerOffsetY;
-                            returnValue = false; // Property should throw an exception but did not so record that fact
-                            LogIssue(pName, "Sensor type is Monochrome so this property must throw a PropertyNotImplemented error; it must not return a value");
-                            break;
-                        }
-
-                    default:
-                        {
-                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
-                            break;
-                        }
-                }
-            }
-            catch (Exception ex)
-            {
-                HandleException(pName, MemberType.Property, Required.MustNotBeImplemented, ex, "Sensor type is Monochrome");
-            }
-            return returnValue; // Return success indicator, True means property did thrown the exception, False means that it did not
-        }
-        private int CameraPropertyTestInteger(CamPropertyType pType, string pName, int pMin, int pMax)
-        {
-            int returnValue = 0;
-
-            try
-            {
-                TimeMethod(pName, () =>
-                {
-                    switch (pType)
-                    {
-                        case CamPropertyType.BinX:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get BinX");
-                                returnValue = Convert.ToInt32(camera.BinX);
-                                break;
-                            }
-
-                        case CamPropertyType.BinY:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get BinY");
-                                returnValue = Convert.ToInt32(camera.BinY);
-                                break;
-                            }
-
-                        case CamPropertyType.CameraState:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get CameraState");
-                                returnValue = (int)camera.CameraState;
-                                break;
-                            }
-
-                        case CamPropertyType.CameraXSize:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get CameraXSize");
-                                returnValue = camera.CameraXSize;
-                                break;
-                            }
-
-                        case CamPropertyType.CameraYSize:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get CameraYSize");
-                                returnValue = camera.CameraYSize;
-                                break;
-                            }
-
-                        case CamPropertyType.MaxAdu:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get MaxADU");
-                                returnValue = camera.MaxADU;
-                                break;
-                            }
-
-                        case CamPropertyType.MaxBinX:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get MaxBinX");
-                                returnValue = camera.MaxBinX;
-                                break;
-                            }
-
-                        case CamPropertyType.MaxBinY:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get MaxBinY");
-                                returnValue = camera.MaxBinY;
-                                break;
-                            }
-
-                        case CamPropertyType.NumX:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get NumX");
-                                returnValue = camera.NumX;
-                                break;
-                            }
-
-                        case CamPropertyType.NumY:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get NumY");
-                                returnValue = camera.NumY;
-                                break;
-                            }
-
-                        case CamPropertyType.StartX:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get StartX");
-                                returnValue = camera.StartX;
-                                break;
-                            }
-
-                        case CamPropertyType.StartY:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get StartY");
-                                returnValue = camera.StartY;
-                                break;
-                            }
-
-                        default:
-                            {
-                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
-                                break;
-                            }
-                    }
-                }, TargetTime.Fast);
-
-                // Successfully retrieved a value so test it
-                if (returnValue < pMin)
-                {
-                    LogIssue(pName, $"Invalid value below expected minimum ({pMin}): {returnValue}");
-                }
-                else if (returnValue > pMax)
-                {
-                    switch (pType) // Provide the required message depending on the property being tested
-                    {
-                        case CamPropertyType.MaxBinX // Informational message for MaxBinX
-                       :
-                            {
-                                LogInfo(pName, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_X}. Is this intended?");
-                                break;
-                            }
-
-                        case CamPropertyType.MaxBinY // Informational message for MaxBinY
-                 :
-                            {
-                                LogInfo(pName, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_Y}. Is this intended?");
-                                break;
-                            }
-
-                        default:
-                            {
-                                LogIssue(pName, $"Invalid value (expected range: {pMin} - {pMax}): {returnValue}");
-                                break;
-                            }
-                    }
-                }
-                else
-                {
-                    LogOk(pName, returnValue.ToString());
-                }
-            }
-            catch (Exception ex)
-            {
-                HandleException(pName, MemberType.Property, Required.Optional, ex, "");
-            }
-            return returnValue;
-        }
-        private double CameraPropertyTestDouble(CamPropertyType pType, string pName, double pMin, double pMax, bool pMandatory)
-        {
-            double returnValue = 0.0;
-
-            try
-            {
-                TimeMethod(pName, () =>
-                {
-                    switch (pType)
-                    {
-                        case CamPropertyType.CcdTemperature:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get CCDTemperature");
-                                returnValue = camera.CCDTemperature;
-                                break;
-                            }
-
-                        case CamPropertyType.CoolerPower:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get CoolerPower");
-                                returnValue = camera.CoolerPower;
-                                break;
-                            }
-
-                        case CamPropertyType.ElectronsPerAdu:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get ElectronsPerADU");
-                                returnValue = camera.ElectronsPerADU;
-                                break;
-                            }
-
-                        case CamPropertyType.FullWellCapacity:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get FullWellCapacity");
-                                returnValue = camera.FullWellCapacity;
-                                break;
-                            }
-
-                        case CamPropertyType.HeatSinkTemperature:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get HeatSinkTemperature");
-                                returnValue = camera.HeatSinkTemperature;
-                                break;
-                            }
-
-                        case CamPropertyType.PixelSizeX:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get PixelSizeX");
-                                returnValue = camera.PixelSizeX;
-                                break;
-                            }
-
-                        case CamPropertyType.PixelSizeY:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get PixelSizeY");
-                                returnValue = camera.PixelSizeY;
-                                break;
-                            }
-
-                        case CamPropertyType.SetCcdTemperature:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get SetCCDTemperature");
-                                returnValue = camera.SetCCDTemperature;
-                                break;
-                            }
-
-                        case CamPropertyType.ExposureMax:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get ExposureMax");
-                                returnValue = camera.ExposureMax;
-                                break;
-                            }
-
-                        case CamPropertyType.ExposureMin:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get ExposureMin");
-                                returnValue = camera.ExposureMin;
-                                break;
-                            }
-
-                        case CamPropertyType.ExposureResolution:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get ExposureResolution");
-                                returnValue = camera.ExposureResolution;
-                                break;
-                            }
-
-                        case CamPropertyType.SubExposureDuration:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get SubExposureDuration");
-                                returnValue = camera.SubExposureDuration;
-                                break;
-                            }
-
-                        default:
-                            {
-                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
-                                break;
-                            }
-                    }
-                }, TargetTime.Fast);
-                // Successfully retrieved a value
-                switch (returnValue)
-                {
-                    case double _ when returnValue < pMin // Lower than minimum value
-                   :
-                        {
-                            LogIssue(pName, $"Invalid value: {returnValue}");
-                            break;
-                        }
-
-                    case double _ when returnValue > pMax // Higher than maximum value
-             :
-                        {
-                            LogIssue(pName, $"Invalid value: {returnValue}");
-                            break;
-                        }
-
-                    default:
-                        {
-                            LogOk(pName, returnValue.ToString());
-                            break;
-                        }
-                }
-            }
-            catch (Exception ex)
-            {
-                HandleException(pName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
-            }
-            return returnValue;
-        }
-        private bool CameraPropertyTestBoolean(CamPropertyType pType, string pName, bool pMandatory)
-        {
-            bool returnValue = false;
-
-            try
-            {
-                returnValue = false;
-                TimeMethod(pName, () =>
-                {
-                    switch (pType)
-                    {
-                        case CamPropertyType.CoolerOn:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get CoolerOn");
-                                returnValue = camera.CoolerOn;
-                                break;
-                            }
-
-                        case CamPropertyType.HasShutter:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get HasShutter");
-                                returnValue = camera.HasShutter;
-                                break;
-                            }
-
-                        case CamPropertyType.ImageReady:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get ImageReady");
-                                returnValue = camera.ImageReady;
-                                break;
-                            }
-
-                        case CamPropertyType.IsPulseGuiding:
-                            {
-                                mIsPulseGuidingFunctional = false;
-                                LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
-                                returnValue = camera.IsPulseGuiding;
-                                mIsPulseGuidingFunctional = true; // Command works properly and doesn't cause a not implemented exception
-                                break;
-                            }
-
-                        case CamPropertyType.FastReadout:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get FastReadout");
-                                returnValue = camera.FastReadout;
-                                break;
-                            }
-
-                        default:
-                            {
-                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
-                                break;
-                            }
-                    }
-                }, TargetTime.Fast);
-
-                // Successfully retrieved a value
-                LogOk(pName, returnValue.ToString());
-            }
-            catch (Exception ex)
-            {
-                HandleException(pName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
-            }
-
-            return returnValue;
-        }
-        private string CameraPropertyTestString(CamPropertyType pType, string pName, int pMaxLength, bool pMandatory)
-        {
-            string returnValue = "";
-            try
-            {
-                TimeMethod(pName, () =>
-                {
-                    switch (pType)
-                    {
-                        case CamPropertyType.Description:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get Description");
-                                returnValue = camera.Description;
-                                break;
-                            }
-
-                        case CamPropertyType.SensorName:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to get SensorName");
-                                returnValue = camera.SensorName;
-                                break;
-                            }
-
-                        default:
-                            {
-                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
-                                break;
-                            }
-                    }
-                }, TargetTime.Fast);
-
-                // Successfully retrieved a value
-                switch (returnValue)
-                {
-                    case object _ when returnValue == "":
-                        {
-                            LogOk(pName, "The driver returned an empty string");
-                            break;
-                        }
-
-                    default:
-                        {
-                            if (returnValue.Length <= pMaxLength)
-                                LogOk(pName, returnValue);
-                            else
-                                LogIssue(pName,
-                                    $"String exceeds {pMaxLength} characters maximum length - {returnValue}");
-                            break;
-                        }
-                }
-            }
-            catch (Exception ex)
-            {
-                HandleException(pName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
-            }
-
-            return returnValue;
-        }
-        private void CameraPropertyWriteTest(CamPropertyType pType, string pProperty, int pTestOk)
-        {
-
-            // NOTE: Out of range values should not be tested here but later when the exposure is actually taken
-
-            try // OK value first
-            {
-                TimeMethod($"{pProperty} write", () =>
-                {
-
-                    switch (pType)
-                    {
-                        case CamPropertyType.NumX:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to set NumX");
-                                camera.NumX = pTestOk;
-                                break;
-                            }
-
-                        case CamPropertyType.NumY:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to set NumY");
-                                camera.NumY = pTestOk;
-                                break;
-                            }
-
-                        case CamPropertyType.StartX:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to set StartX");
-                                camera.StartX = pTestOk;
-                                break;
-                            }
-
-                        case CamPropertyType.StartY:
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to set StartY");
-                                camera.StartY = pTestOk;
-                                break;
-                            }
-                    }
-                }, TargetTime.Standard);
-
-                LogOk($"{pProperty} write", $"Successfully wrote {pTestOk}");
-            }
-            catch (Exception ex)
-            {
-                HandleException($"{pProperty} write", MemberType.Property, Required.MustBeImplemented, ex,
-                    $"Can't set legal value: {pTestOk}");
-            }
-        }
 
         public override void CheckMethods()
         {
@@ -2475,6 +1826,767 @@ namespace ConformU
                             return;
                     }
                 }
+            }
+        }
+
+        public override void CheckPerformance()
+        {
+            CameraPerformanceTest(CameraPerformance.CameraState, "CameraState");
+            CameraPerformanceTest(CameraPerformance.CcdTemperature, "CCDTemperature");
+            CameraPerformanceTest(CameraPerformance.CoolerPower, "CoolerPower");
+            if (mCanSetCcdTemperature)
+                CameraPerformanceTest(CameraPerformance.HeatSinkTemperature, "HeatSinkTemperature");
+            CameraPerformanceTest(CameraPerformance.ImageReady, "ImageReady");
+            if (mCanPulseGuide)
+                CameraPerformanceTest(CameraPerformance.IsPulseGuiding, "IsPulseGuiding");
+            SetAction("Exposure for ImageArray Test");
+            SetStatus("Start"); LogCallToDriver("ConformanceCheck", "About to set BinX");
+            camera.BinX = 1; LogCallToDriver("ConformanceCheck", "About to set BinY");
+            camera.BinY = 1; LogCallToDriver("ConformanceCheck", "About to set StartX");
+            camera.StartX = 0; LogCallToDriver("ConformanceCheck", "About to set StartY");
+            camera.StartY = 0; LogCallToDriver("ConformanceCheck", "About to set MaxBinX");
+            camera.NumX = camera.MaxBinX; LogCallToDriver("ConformanceCheck", "About to set MaxBinY");
+            camera.NumY = camera.MaxBinY; LogCallToDriver("ConformanceCheck", "About to call StartExposure");
+            camera.StartExposure(1, true); // 1 second exposure
+            LogCallToDriver("ConformanceCheck", "About to call ImageReady multiple times");
+            do
+                SetStatus("Waiting for ImageReady");
+            while (!camera.ImageReady);
+            SetStatus("Finished");
+            CameraPerformanceTest(CameraPerformance.ImageArray, "ImageArray");
+            CameraPerformanceTest(CameraPerformance.ImageArrayVariant, "ImageArrayVariant");
+        }
+
+        public override void PostRunCheck()
+        {
+            if (mCanAbortExposure)
+            {
+                LogCallToDriver("ConformanceCheck", "About to call AbortExposure");
+                try { camera.AbortExposure(); } catch { }
+            }
+
+            if (mCanStopExposure)
+            {
+                LogCallToDriver("ConformanceCheck", "About to call StopExposure");
+                try { camera.StopExposure(); } catch { }
+            }
+
+            if (mCanSetCcdTemperature)
+            {
+                LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
+                try
+                {
+                    camera.SetCCDTemperature = mSetCcdTemperature;
+                    LogOk("PostRunCheck", "Camera returned to initial cooler temperature");
+                }
+                catch { }
+            }
+            LogCallToDriver("ConformanceCheck", "About to set CoolerOn");
+            try { camera.CoolerOn = mCoolerOn; } catch { }
+
+            // Reset the camera image parameters to legal values
+            LogCallToDriver("ConformanceCheck", "About to set StartX");
+            try { camera.StartX = 0; } catch { }
+            LogCallToDriver("ConformanceCheck", "About to set StartY");
+            try { camera.StartY = 0; } catch { }
+            LogCallToDriver("ConformanceCheck", "About to set BinX");
+            try { camera.BinX = 1; } catch { }
+            LogCallToDriver("ConformanceCheck", "About to set BinY");
+            try { camera.BinY = 1; } catch { }
+            LogCallToDriver("ConformanceCheck", "About to set NumX");
+            try { camera.NumX = 1; } catch { }
+            LogCallToDriver("ConformanceCheck", "About to set NumY");
+            try { camera.NumY = 1; } catch { }
+        }
+
+        public override void CheckConfiguration()
+        {
+            try
+            {
+                // Common configuration
+                if (!settings.TestProperties)
+                    LogConfigurationAlert("Property tests were omitted due to Conform configuration.");
+
+                if (!settings.TestMethods)
+                    LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
+
+                // Miscellaneous configuration
+                if (!settings.CameraFirstUseTests)
+                    LogConfigurationAlert("First use tests were omitted due to Conform configuration.");
+                if (!settings.CameraTestImageArrayVariant)
+                    LogConfigurationAlert("ImageArrayVariant tests were omitted due to Conform configuration.");
+
+            }
+            catch (Exception ex)
+            {
+                LogError("CheckConfiguration", $"Exception when checking Conform configuration: {ex.Message}");
+                LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
+            }
+        }
+
+        #endregion
+
+        #region Support Code
+
+        private void CameraCanTest(CanType pType, string pName)
+        {
+            try
+            {
+                switch (pType)
+                {
+                    case CanType.TstCanAbortExposure:
+                        LogCallToDriver("ConformanceCheck", "About to get CanAbortExposure");
+                        mCanAbortExposure = TimeFunc<bool>(pName, () => camera.CanAbortExposure, TargetTime.Fast);
+                        LogOk(pName, mCanAbortExposure.ToString());
+                        break;
+
+                    case CanType.TstCanAsymmetricBin:
+                        LogCallToDriver("ConformanceCheck", "About to get CanAsymmetricBin");
+                        mCanAsymmetricBin = TimeFunc<bool>(pName, () => camera.CanAsymmetricBin, TargetTime.Fast);
+                        LogOk(pName, mCanAsymmetricBin.ToString());
+                        break;
+
+                    case CanType.TstCanGetCoolerPower:
+                        LogCallToDriver("ConformanceCheck", "About to get CanGetCoolerPower");
+                        mCanGetCoolerPower = TimeFunc<bool>(pName, () => camera.CanGetCoolerPower, TargetTime.Fast);
+                        LogOk(pName, mCanGetCoolerPower.ToString());
+                        break;
+
+                    case CanType.TstCanPulseGuide:
+                        LogCallToDriver("ConformanceCheck", "About to get CanPulseGuide");
+                        mCanPulseGuide = TimeFunc<bool>(pName, () => camera.CanPulseGuide, TargetTime.Fast);
+                        LogOk(pName, mCanPulseGuide.ToString());
+                        break;
+
+                    case CanType.TstCanSetCcdTemperature:
+                        LogCallToDriver("ConformanceCheck", "About to get CanSetCCDTemperature");
+                        mCanSetCcdTemperature = TimeFunc<bool>(pName, () => camera.CanSetCCDTemperature, TargetTime.Fast);
+                        LogOk(pName, mCanSetCcdTemperature.ToString());
+                        break;
+
+                    case CanType.TstCanStopExposure:
+                        LogCallToDriver("ConformanceCheck", "About to get CanStopExposure");
+                        mCanStopExposure = TimeFunc<bool>(pName, () => camera.CanStopExposure, TargetTime.Fast);
+                        LogOk(pName, mCanStopExposure.ToString());
+                        break;
+
+                    case CanType.TstCanFastReadout:
+                        LogCallToDriver("ConformanceCheck", "About to get CanFastReadout");
+                        mCanFastReadout = TimeFunc<bool>(pName, () => camera.CanFastReadout, TargetTime.Fast);
+                        LogOk(pName, mCanFastReadout.ToString());
+                        break;
+
+                    default:
+                        LogIssue(pName, $"Conform:CanTest: Unknown test type {pType}");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                HandleException(pName, MemberType.Property, Required.Mandatory, ex, "");
+            }
+        }
+
+        private CameraState CameraPropertyTestCameraState(CamPropertyType pType, string pName)
+        {
+            CameraState returnValue = CameraState.Idle;
+
+            try
+            {
+                switch (pType)
+                {
+                    case CamPropertyType.CameraState:
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to get CameraState");
+                            returnValue = TimeFunc(pName, () => camera.CameraState, TargetTime.Fast);
+                            break;
+                        }
+
+                    default:
+                        {
+                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
+                            break;
+                        }
+                }
+                LogOk(pName, returnValue.ToString());
+            }
+            catch (Exception ex)
+            {
+                HandleException(pName, MemberType.Property, Required.Optional, ex, "");
+            }
+
+            return returnValue;
+        }
+
+        private short CameraPropertyTestShort(CamPropertyType pType, string pName, short pMin, short pMax, bool pMandatory)
+        {
+            short returnValue = 0;
+
+            try
+            {
+                TimeMethod(pName, () =>
+                {
+                    switch (pType)
+                    {
+                        case CamPropertyType.BayerOffsetX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get BayerOffsetX");
+                                returnValue = camera.BayerOffsetX;
+                                break;
+                            }
+
+                        case CamPropertyType.BayerOffsetY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get BayerOffsetY");
+                                returnValue = camera.BayerOffsetY;
+                                break;
+                            }
+
+                        case CamPropertyType.PercentCompleted:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get PercentCompleted");
+                                returnValue = camera.PercentCompleted;
+                                break;
+                            }
+
+                        case CamPropertyType.ReadoutMode:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get ReadoutMode");
+                                returnValue = camera.ReadoutMode;
+                                break;
+                            }
+
+                        default:
+                            {
+                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
+                                break;
+                            }
+                    }
+                }, TargetTime.Fast);
+
+                // Successfully retrieved a value
+                switch (returnValue)
+                {
+                    case object _ when returnValue < pMin // Lower than minimum value
+                   :
+                        {
+                            LogIssue(pName, $"Invalid value: {returnValue}");
+                            break;
+                        }
+
+                    case object _ when returnValue > pMax // Higher than maximum value
+             :
+                        {
+                            LogIssue(pName, $"Invalid value: {returnValue}");
+                            break;
+                        }
+
+                    default:
+                        {
+                            LogOk(pName, returnValue.ToString());
+                            break;
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                HandleException(pName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
+            }
+
+            return returnValue;
+        }
+
+        private bool CameraPropertyMustNotImplemented(CamPropertyType pType, string pName)
+        {
+            short testShort; // Dummy variable to hold value that should never be returned
+            bool returnValue = true;
+
+            try
+            {
+                switch (pType)
+                {
+                    case CamPropertyType.BayerOffsetX:
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to get BayerOffsetX");
+                            testShort = camera.BayerOffsetX;
+                            returnValue = false; // Property should throw an exception but did not so record that fact
+                            LogIssue(pName, "Sensor type is Monochrome so this property must throw a PropertyNotImplemented error; it must not return a value");
+                            break;
+                        }
+
+                    case CamPropertyType.BayerOffsetY:
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to get BayerOffsetY");
+                            testShort = camera.BayerOffsetY;
+                            returnValue = false; // Property should throw an exception but did not so record that fact
+                            LogIssue(pName, "Sensor type is Monochrome so this property must throw a PropertyNotImplemented error; it must not return a value");
+                            break;
+                        }
+
+                    default:
+                        {
+                            LogIssue(pName, $"returnValue: Unknown test type - {pType}");
+                            break;
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                HandleException(pName, MemberType.Property, Required.MustNotBeImplemented, ex, "Sensor type is Monochrome");
+            }
+            return returnValue; // Return success indicator, True means property did thrown the exception, False means that it did not
+        }
+
+        private int CameraPropertyTestInteger(CamPropertyType pType, string pName, int pMin, int pMax)
+        {
+            int returnValue = 0;
+
+            try
+            {
+                TimeMethod(pName, () =>
+                {
+                    switch (pType)
+                    {
+                        case CamPropertyType.BinX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get BinX");
+                                returnValue = Convert.ToInt32(camera.BinX);
+                                break;
+                            }
+
+                        case CamPropertyType.BinY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get BinY");
+                                returnValue = Convert.ToInt32(camera.BinY);
+                                break;
+                            }
+
+                        case CamPropertyType.CameraState:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get CameraState");
+                                returnValue = (int)camera.CameraState;
+                                break;
+                            }
+
+                        case CamPropertyType.CameraXSize:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get CameraXSize");
+                                returnValue = camera.CameraXSize;
+                                break;
+                            }
+
+                        case CamPropertyType.CameraYSize:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get CameraYSize");
+                                returnValue = camera.CameraYSize;
+                                break;
+                            }
+
+                        case CamPropertyType.MaxAdu:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get MaxADU");
+                                returnValue = camera.MaxADU;
+                                break;
+                            }
+
+                        case CamPropertyType.MaxBinX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get MaxBinX");
+                                returnValue = camera.MaxBinX;
+                                break;
+                            }
+
+                        case CamPropertyType.MaxBinY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get MaxBinY");
+                                returnValue = camera.MaxBinY;
+                                break;
+                            }
+
+                        case CamPropertyType.NumX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get NumX");
+                                returnValue = camera.NumX;
+                                break;
+                            }
+
+                        case CamPropertyType.NumY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get NumY");
+                                returnValue = camera.NumY;
+                                break;
+                            }
+
+                        case CamPropertyType.StartX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get StartX");
+                                returnValue = camera.StartX;
+                                break;
+                            }
+
+                        case CamPropertyType.StartY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get StartY");
+                                returnValue = camera.StartY;
+                                break;
+                            }
+
+                        default:
+                            {
+                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
+                                break;
+                            }
+                    }
+                }, TargetTime.Fast);
+
+                // Successfully retrieved a value so test it
+                if (returnValue < pMin)
+                {
+                    LogIssue(pName, $"Invalid value below expected minimum ({pMin}): {returnValue}");
+                }
+                else if (returnValue > pMax)
+                {
+                    switch (pType) // Provide the required message depending on the property being tested
+                    {
+                        case CamPropertyType.MaxBinX // Informational message for MaxBinX
+                       :
+                            {
+                                LogInfo(pName, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_X}. Is this intended?");
+                                break;
+                            }
+
+                        case CamPropertyType.MaxBinY // Informational message for MaxBinY
+                 :
+                            {
+                                LogInfo(pName, $"{returnValue}. This is higher than Conform's test criterion: {MAX_BIN_Y}. Is this intended?");
+                                break;
+                            }
+
+                        default:
+                            {
+                                LogIssue(pName, $"Invalid value (expected range: {pMin} - {pMax}): {returnValue}");
+                                break;
+                            }
+                    }
+                }
+                else
+                {
+                    LogOk(pName, returnValue.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                HandleException(pName, MemberType.Property, Required.Optional, ex, "");
+            }
+            return returnValue;
+        }
+
+        private double CameraPropertyTestDouble(CamPropertyType pType, string pName, double pMin, double pMax, bool pMandatory)
+        {
+            double returnValue = 0.0;
+
+            try
+            {
+                TimeMethod(pName, () =>
+                {
+                    switch (pType)
+                    {
+                        case CamPropertyType.CcdTemperature:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get CCDTemperature");
+                                returnValue = camera.CCDTemperature;
+                                break;
+                            }
+
+                        case CamPropertyType.CoolerPower:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get CoolerPower");
+                                returnValue = camera.CoolerPower;
+                                break;
+                            }
+
+                        case CamPropertyType.ElectronsPerAdu:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get ElectronsPerADU");
+                                returnValue = camera.ElectronsPerADU;
+                                break;
+                            }
+
+                        case CamPropertyType.FullWellCapacity:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get FullWellCapacity");
+                                returnValue = camera.FullWellCapacity;
+                                break;
+                            }
+
+                        case CamPropertyType.HeatSinkTemperature:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get HeatSinkTemperature");
+                                returnValue = camera.HeatSinkTemperature;
+                                break;
+                            }
+
+                        case CamPropertyType.PixelSizeX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get PixelSizeX");
+                                returnValue = camera.PixelSizeX;
+                                break;
+                            }
+
+                        case CamPropertyType.PixelSizeY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get PixelSizeY");
+                                returnValue = camera.PixelSizeY;
+                                break;
+                            }
+
+                        case CamPropertyType.SetCcdTemperature:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get SetCCDTemperature");
+                                returnValue = camera.SetCCDTemperature;
+                                break;
+                            }
+
+                        case CamPropertyType.ExposureMax:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get ExposureMax");
+                                returnValue = camera.ExposureMax;
+                                break;
+                            }
+
+                        case CamPropertyType.ExposureMin:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get ExposureMin");
+                                returnValue = camera.ExposureMin;
+                                break;
+                            }
+
+                        case CamPropertyType.ExposureResolution:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get ExposureResolution");
+                                returnValue = camera.ExposureResolution;
+                                break;
+                            }
+
+                        case CamPropertyType.SubExposureDuration:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get SubExposureDuration");
+                                returnValue = camera.SubExposureDuration;
+                                break;
+                            }
+
+                        default:
+                            {
+                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
+                                break;
+                            }
+                    }
+                }, TargetTime.Fast);
+                // Successfully retrieved a value
+                switch (returnValue)
+                {
+                    case double _ when returnValue < pMin // Lower than minimum value
+                   :
+                        {
+                            LogIssue(pName, $"Invalid value: {returnValue}");
+                            break;
+                        }
+
+                    case double _ when returnValue > pMax // Higher than maximum value
+             :
+                        {
+                            LogIssue(pName, $"Invalid value: {returnValue}");
+                            break;
+                        }
+
+                    default:
+                        {
+                            LogOk(pName, returnValue.ToString());
+                            break;
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                HandleException(pName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
+            }
+            return returnValue;
+        }
+
+        private bool CameraPropertyTestBoolean(CamPropertyType pType, string pName, bool pMandatory)
+        {
+            bool returnValue = false;
+
+            try
+            {
+                returnValue = false;
+                TimeMethod(pName, () =>
+                {
+                    switch (pType)
+                    {
+                        case CamPropertyType.CoolerOn:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get CoolerOn");
+                                returnValue = camera.CoolerOn;
+                                break;
+                            }
+
+                        case CamPropertyType.HasShutter:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get HasShutter");
+                                returnValue = camera.HasShutter;
+                                break;
+                            }
+
+                        case CamPropertyType.ImageReady:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get ImageReady");
+                                returnValue = camera.ImageReady;
+                                break;
+                            }
+
+                        case CamPropertyType.IsPulseGuiding:
+                            {
+                                mIsPulseGuidingFunctional = false;
+                                LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
+                                returnValue = camera.IsPulseGuiding;
+                                mIsPulseGuidingFunctional = true; // Command works properly and doesn't cause a not implemented exception
+                                break;
+                            }
+
+                        case CamPropertyType.FastReadout:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get FastReadout");
+                                returnValue = camera.FastReadout;
+                                break;
+                            }
+
+                        default:
+                            {
+                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
+                                break;
+                            }
+                    }
+                }, TargetTime.Fast);
+
+                // Successfully retrieved a value
+                LogOk(pName, returnValue.ToString());
+            }
+            catch (Exception ex)
+            {
+                HandleException(pName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
+            }
+
+            return returnValue;
+        }
+
+        private string CameraPropertyTestString(CamPropertyType pType, string pName, int pMaxLength, bool pMandatory)
+        {
+            string returnValue = "";
+            try
+            {
+                TimeMethod(pName, () =>
+                {
+                    switch (pType)
+                    {
+                        case CamPropertyType.Description:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get Description");
+                                returnValue = camera.Description;
+                                break;
+                            }
+
+                        case CamPropertyType.SensorName:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to get SensorName");
+                                returnValue = camera.SensorName;
+                                break;
+                            }
+
+                        default:
+                            {
+                                LogIssue(pName, $"returnValue: Unknown test type - {pType}");
+                                break;
+                            }
+                    }
+                }, TargetTime.Fast);
+
+                // Successfully retrieved a value
+                switch (returnValue)
+                {
+                    case object _ when returnValue == "":
+                        {
+                            LogOk(pName, "The driver returned an empty string");
+                            break;
+                        }
+
+                    default:
+                        {
+                            if (returnValue.Length <= pMaxLength)
+                                LogOk(pName, returnValue);
+                            else
+                                LogIssue(pName,
+                                    $"String exceeds {pMaxLength} characters maximum length - {returnValue}");
+                            break;
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                HandleException(pName, MemberType.Property, pMandatory ? Required.Mandatory : Required.Optional, ex, "");
+            }
+
+            return returnValue;
+        }
+
+        private void CameraPropertyWriteTest(CamPropertyType pType, string pProperty, int pTestOk)
+        {
+
+            // NOTE: Out of range values should not be tested here but later when the exposure is actually taken
+
+            try // OK value first
+            {
+                TimeMethod($"{pProperty} write", () =>
+                {
+
+                    switch (pType)
+                    {
+                        case CamPropertyType.NumX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to set NumX");
+                                camera.NumX = pTestOk;
+                                break;
+                            }
+
+                        case CamPropertyType.NumY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to set NumY");
+                                camera.NumY = pTestOk;
+                                break;
+                            }
+
+                        case CamPropertyType.StartX:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to set StartX");
+                                camera.StartX = pTestOk;
+                                break;
+                            }
+
+                        case CamPropertyType.StartY:
+                            {
+                                LogCallToDriver("ConformanceCheck", "About to set StartY");
+                                camera.StartY = pTestOk;
+                                break;
+                            }
+                    }
+                }, TargetTime.Standard);
+
+                LogOk($"{pProperty} write", $"Successfully wrote {pTestOk}");
+            }
+            catch (Exception ex)
+            {
+                HandleException($"{pProperty} write", MemberType.Property, Required.MustBeImplemented, ex,
+                    $"Can't set legal value: {pTestOk}");
             }
         }
 
@@ -2790,8 +2902,7 @@ namespace ConformU
                             if (isPlatform7OrLater) // Platform 7 or later device
                             {
                                 LogIssue(testName, $"StartExposure operated synchronously: ImageReady was True and CameraState was Idle when StartExposure returned after the full exposure time: {requiredDuration} seconds.");
-                                LogInfo(testName, $"As an ICameraV4 or later device, StartExposure should have operated asynchronously: Returning quickly after setting ImageReady False, before the full exposure time has elapsed.");
-                                LogInfo(testName, $"After StartExposure has returned, the camera should continue the exposure and set ImageReady True when the exposure time has elapsed.");
+                                SynchronousBehaviourInformation(testName, "ImageReady False", "ImageReady True");
                             }
                             else // Platform 6 or earlier device
                                 LogOk(testName, $"Synchronous exposure found OK: {requiredDuration} seconds");
@@ -2799,7 +2910,7 @@ namespace ConformU
                             CameraTestLast(requiredDuration, startTimeUtc);
                         }
                         else // Camera returned early before the required exposure time elapsed.
-                            LogIssue(testName, "Synchronous exposure found but image was returned before exposure time was complete");
+                            LogIssue(testName, "The camera reported CameraState = CameraIdle and ImageReady = true before the requested exposure time had elapsed.");
                     }
                     catch (Exception ex)
                     {
@@ -3632,6 +3743,7 @@ namespace ConformU
                 HandleException("LastExposureStartTime", MemberType.Property, Required.Optional, ex, "");
             }
         }
+
         private void CameraPulseGuideTest(GuideDirection pDirection)
         {
             // If this is an ICameraV4 or later device pulse guiding cannot be tested without the IsPulseGuiding property being functional to support async operation
@@ -3648,7 +3760,7 @@ namespace ConformU
             Stopwatch duration = Stopwatch.StartNew();
 
             LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {pDirection}");
-            TimeMethodTwoParams($"PulseGuide {pDirection}", camera.PulseGuide, pDirection, CAMERA_PULSE_DURATION, TargetTime.Standard);
+            TimeMethodTwoParams($"PulseGuide {pDirection}", camera.PulseGuide, pDirection, CAMERA_PULSE_DURATION_MILLISECONDS, isPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
 
             // Stop the duration timer
             duration.Stop();
@@ -3656,10 +3768,10 @@ namespace ConformU
             try
             {
                 // Check whether IsPulseGuiding is functional
-                if (mIsPulseGuidingFunctional) // IsPulseGuiding is functional
+                if (mIsPulseGuidingFunctional) // IsPulseGuiding is functional - ICameraV4 and later interfaces always use this path
                 {
                     // Test how long the PulseGuide method took to complete
-                    if (duration.Elapsed.TotalMilliseconds < (CAMERA_PULSE_DURATION - 500)) // Completed before the required pulse guide duration (so assume asynchronous operation)
+                    if (duration.Elapsed.TotalSeconds < (isPlatform7OrLater ? standardTargetResponseTime : (CAMERA_PULSE_DURATION_MILLISECONDS - 500) / 1000.0)) // Completed before the required pulse guide duration (so assume asynchronous operation)
                     {
                         // Check whether the camera is still pulse guiding 
                         LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
@@ -3668,7 +3780,7 @@ namespace ConformU
                             // Wait for the pulse guide to complete
                             Stopwatch sw = Stopwatch.StartNew();
                             LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding multiple times");
-                            WaitWhile($"Guiding {pDirection}", () => camera.IsPulseGuiding, 500, 3, () => $"{sw.Elapsed.TotalSeconds:0.0} / {CAMERA_PULSE_DURATION / 1000:0.0} seconds");
+                            WaitWhile($"Guiding {pDirection}", () => camera.IsPulseGuiding, 500, 3, () => $"{sw.Elapsed.TotalSeconds:0.0} / {CAMERA_PULSE_DURATION_MILLISECONDS / 1000:0.0} seconds");
 
                             // Check whether the camera has now finished pulse guiding
                             LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");
@@ -3690,18 +3802,18 @@ namespace ConformU
                             LogIssue($"PulseGuide {pDirection}", "Synchronous pulse guide expected but IsPulseGuiding returned TRUE");
                     }
                 }
-                else // IsPulseGuiding is NOT functional
+                else // IsPulseGuiding is NOT functional - Never executed for ICameraV4 and later interfaces
                 {
-                    switch (duration.Elapsed.TotalMilliseconds - CAMERA_PULSE_DURATION)
+                    switch (duration.Elapsed.TotalMilliseconds - CAMERA_PULSE_DURATION_MILLISECONDS)
                     {
                         // Duration was more than 0.5 seconds longer than expected
-                        case object _ when duration.Elapsed.TotalMilliseconds - CAMERA_PULSE_DURATION > CAMERA_PULSE_TOLERANCE:
-                            LogIssue($"PulseGuide {pDirection}", $"Synchronous pulse guide longer than expected {(CAMERA_PULSE_DURATION) / (double)1000} seconds: {duration.Elapsed.TotalSeconds} seconds");
+                        case object _ when duration.Elapsed.TotalMilliseconds - CAMERA_PULSE_DURATION_MILLISECONDS > CAMERA_PULSE_TOLERANCE_MILLISECONDS:
+                            LogIssue($"PulseGuide {pDirection}", $"Synchronous pulse guide longer than expected {(CAMERA_PULSE_DURATION_MILLISECONDS) / (double)1000} seconds: {duration.Elapsed.TotalSeconds} seconds");
                             break;
 
                         // Duration was more than 20ms shorter than expected
-                        case object _ when duration.Elapsed.TotalMilliseconds - CAMERA_PULSE_DURATION < 20:
-                            LogIssue($"PulseGuide {pDirection}", $"Synchronous pulse guide shorter than expected {(CAMERA_PULSE_DURATION) / (double)1000} seconds: {duration.Elapsed.TotalSeconds} seconds");
+                        case object _ when duration.Elapsed.TotalMilliseconds - CAMERA_PULSE_DURATION_MILLISECONDS < 20:
+                            LogIssue($"PulseGuide {pDirection}", $"Synchronous pulse guide shorter than expected {(CAMERA_PULSE_DURATION_MILLISECONDS) / (double)1000} seconds: {duration.Elapsed.TotalSeconds} seconds");
                             break;
 
                         // All other cases
@@ -3713,38 +3825,11 @@ namespace ConformU
             }
             catch (TimeoutException ex)
             {
-                LogIssue($"PulseGuide {pDirection}", $"Timed out waiting for IsPulseGuiding to go false. It should have done this in {Convert.ToDouble(CAMERA_PULSE_DURATION) / 1000.0:0.0} seconds");
+                LogIssue($"PulseGuide {pDirection}", $"Timed out waiting for IsPulseGuiding to go false. It should have done this in {Convert.ToDouble(CAMERA_PULSE_DURATION_MILLISECONDS) / 1000.0:0.0} seconds");
                 LogDebug("PulseGuide", $"Exception detail:\r\n {ex}");
             }
         }
 
-        public override void CheckPerformance()
-        {
-            CameraPerformanceTest(CameraPerformance.CameraState, "CameraState");
-            CameraPerformanceTest(CameraPerformance.CcdTemperature, "CCDTemperature");
-            CameraPerformanceTest(CameraPerformance.CoolerPower, "CoolerPower");
-            if (mCanSetCcdTemperature)
-                CameraPerformanceTest(CameraPerformance.HeatSinkTemperature, "HeatSinkTemperature");
-            CameraPerformanceTest(CameraPerformance.ImageReady, "ImageReady");
-            if (mCanPulseGuide)
-                CameraPerformanceTest(CameraPerformance.IsPulseGuiding, "IsPulseGuiding");
-            SetAction("Exposure for ImageArray Test");
-            SetStatus("Start"); LogCallToDriver("ConformanceCheck", "About to set BinX");
-            camera.BinX = 1; LogCallToDriver("ConformanceCheck", "About to set BinY");
-            camera.BinY = 1; LogCallToDriver("ConformanceCheck", "About to set StartX");
-            camera.StartX = 0; LogCallToDriver("ConformanceCheck", "About to set StartY");
-            camera.StartY = 0; LogCallToDriver("ConformanceCheck", "About to set MaxBinX");
-            camera.NumX = camera.MaxBinX; LogCallToDriver("ConformanceCheck", "About to set MaxBinY");
-            camera.NumY = camera.MaxBinY; LogCallToDriver("ConformanceCheck", "About to call StartExposure");
-            camera.StartExposure(1, true); // 1 second exposure
-            LogCallToDriver("ConformanceCheck", "About to call ImageReady multiple times");
-            do
-                SetStatus("Waiting for ImageReady");
-            while (!camera.ImageReady);
-            SetStatus("Finished");
-            CameraPerformanceTest(CameraPerformance.ImageArray, "ImageArray");
-            CameraPerformanceTest(CameraPerformance.ImageArrayVariant, "ImageArrayVariant");
-        }
         private void CameraPerformanceTest(CameraPerformance pType, string pName)
         {
             DateTime lStartTime;
@@ -3867,73 +3952,6 @@ namespace ConformU
             }
         }
 
-        public override void PostRunCheck()
-        {
-            if (mCanAbortExposure)
-            {
-                LogCallToDriver("ConformanceCheck", "About to call AbortExposure");
-                try { camera.AbortExposure(); } catch { }
-            }
-
-            if (mCanStopExposure)
-            {
-                LogCallToDriver("ConformanceCheck", "About to call StopExposure");
-                try { camera.StopExposure(); } catch { }
-            }
-
-            if (mCanSetCcdTemperature)
-            {
-                LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
-                try
-                {
-                    camera.SetCCDTemperature = mSetCcdTemperature;
-                    LogOk("PostRunCheck", "Camera returned to initial cooler temperature");
-                }
-                catch { }
-            }
-            LogCallToDriver("ConformanceCheck", "About to set CoolerOn");
-            try { camera.CoolerOn = mCoolerOn; } catch { }
-
-            // Reset the camera image parameters to legal values
-            LogCallToDriver("ConformanceCheck", "About to set StartX");
-            try { camera.StartX = 0; } catch { }
-            LogCallToDriver("ConformanceCheck", "About to set StartY");
-            try { camera.StartY = 0; } catch { }
-            LogCallToDriver("ConformanceCheck", "About to set BinX");
-            try { camera.BinX = 1; } catch { }
-            LogCallToDriver("ConformanceCheck", "About to set BinY");
-            try { camera.BinY = 1; } catch { }
-            LogCallToDriver("ConformanceCheck", "About to set NumX");
-            try { camera.NumX = 1; } catch { }
-            LogCallToDriver("ConformanceCheck", "About to set NumY");
-            try { camera.NumY = 1; } catch { }
-        }
-
-        public override void CheckConfiguration()
-        {
-            try
-            {
-                // Common configuration
-                if (!settings.TestProperties)
-                    LogConfigurationAlert("Property tests were omitted due to Conform configuration.");
-
-                if (!settings.TestMethods)
-                    LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
-
-                // Miscellaneous configuration
-                if (!settings.CameraFirstUseTests)
-                    LogConfigurationAlert("First use tests were omitted due to Conform configuration.");
-                if (!settings.CameraTestImageArrayVariant)
-                    LogConfigurationAlert("ImageArrayVariant tests were omitted due to Conform configuration.");
-
-            }
-            catch (Exception ex)
-            {
-                LogError("CheckConfiguration", $"Exception when checking Conform configuration: {ex.Message}");
-                LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
-            }
-        }
-
         /// <summary>
         /// Release memory allocated to the large arrays on the large object heap.
         /// </summary>
@@ -3947,6 +3965,8 @@ namespace ConformU
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect(2, GCCollectionMode.Forced, true, true);
         }
-    }
 
+        #endregion
+    
+    }
 }

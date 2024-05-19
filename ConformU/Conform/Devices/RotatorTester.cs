@@ -82,7 +82,7 @@ namespace ConformU
 
         #endregion
 
-        #region Code
+        #region Conform Process
 
         public override void InitialiseTest()
         {
@@ -337,13 +337,14 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                if (GetInterfaceVersion() < 3)
+                // Check whether this is a Platform 7 or later interface
+                if (GetInterfaceVersion() < 3) // Platform 6 or earlier interface
                 {
-                    HandleException("IsMoving", MemberType.Property, Required.Optional, ex, "");
+                    HandleException("IsMoving", MemberType.Property, Required.Optional, ex, ""); // Handle as optional
                 }
-                else
+                else // Platform 7 or later interface
                 {
-                    HandleException("IsMoving", MemberType.Property, Required.Mandatory, ex, "");
+                    HandleException("IsMoving", MemberType.Property, Required.Mandatory, ex, "");  // Handle as mandatory
                 }
             }
             if (cancellationToken.IsCancellationRequested)
@@ -490,6 +491,211 @@ namespace ConformU
             }
         }
 
+        public override void CheckMethods()
+        {
+            LogCallToDriver("AccessChecks", "About to get Connected property");
+            LogDebug("CheckMethods", $"Rotator is connected: {rotator.Connected}");
+
+            // Halt - Optional (V1,V2 and V3)
+            try
+            {
+                LogCallToDriver("Halt", $"About to call Halt method");
+                rotator.Halt();
+                LogOk("Halt", "Halt command successful");
+            }
+            catch (Exception ex)
+            {
+                HandleException("Halt", MemberType.Method, Required.Optional, ex, "");
+            }
+
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            // MoveAbsolute - Optional (V1,V2), Mandatory (V3)
+            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 45.0f, "");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 135.0f, "");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 225.0f, "");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 315.0f, "");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", (float)-405.0d, "Movement to large negative angle -405 degrees");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 405.0f, "Movement to large positive angle 405 degrees");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            // Move - Optional (V1,V2), Mandatory (V3)
+            RelativeMoveTest(10.0f);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            RelativeMoveTest(40.0f);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            RelativeMoveTest(130.0f);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            RotatorMoveTest(RotatorMember.Move, "Move", (float)-375.0d, "Movement to large negative angle -375 degrees");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            RotatorMoveTest(RotatorMember.Move, "Move", 375.0f, "Movement to large positive angle 375 degrees");
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            // Test the new IRotatorV3 methods
+            if (GetInterfaceVersion() >= 3)
+            {
+                // Test the MoveMechanical method
+                try
+                {
+                    if (canReadMechanicalPosition & canReadPosition)
+                    {
+                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 45.0f, "");
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 135.0f, "");
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 225.0f, "");
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 315.0f, "");
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", -405.0f, "Movement to large negative angle -405 degrees");
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 405.0f, "Movement to large positive angle 405 degrees");
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+                    }
+                    else // Message saying we are skipping tests because we can't read required properties
+                    {
+                        LogInfo("MoveMechanical", "Skipping tests because either the MechanicalPosition or Position property cannot be read.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    HandleException("MoveMechanical", MemberType.Method, Required.Mandatory, ex, "");
+                }
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
+                // Test the Sync method
+                try
+                {
+                    if (canReadMechanicalPosition & canReadPosition) // Test new IRotaotrV3 methods
+                    {
+                        RotatorSynctest(90.0f, 90.0f); // Make sure that the rotator can be synced to its mechanical position
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+                        RotatorSynctest(120.0f, 90.0f); // Test sync to a positive offset
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+                        RotatorSynctest(60.0f, 90.0f); // Test sync to a negative offset
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+                        RotatorSynctest(00.0f, 00.0f); // Test sync to zero
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+                        RotatorSynctest(30.0f, 00.0f); // Test sync to a positive offset
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+                        RotatorSynctest(330.0f, 00.0f); // Test sync to a negative offset that is through zero
+                    }
+                    else // Message saying we are skipping tests because we can't read required properties
+                    {
+                        LogInfo("Sync", "Skipping tests because either the MechanicalPosition or Position property cannot be read.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    HandleException("Sync", MemberType.Method, Required.Mandatory, ex, "");
+                }
+            }
+        }
+
+        public override void CheckPerformance()
+        {
+            // Position
+            if (canReadPosition)
+            {
+                RotatorPerformanceTest(RotatorMember.Position, "Position");
+            }
+            else
+            {
+                LogInfo("Position", "Skipping test as property is not supported");
+            }
+
+            // TargetPosition
+            if (canReadTargetPosition)
+            {
+                RotatorPerformanceTest(RotatorMember.TargetPosition, "TargetPosition");
+            }
+            else
+            {
+                LogInfo("TargetPosition", "Skipping test as property is not supported");
+            }
+
+            // StepSize
+            if (canReadStepSize)
+            {
+                RotatorPerformanceTest(RotatorMember.StepSize, "StepSize");
+            }
+            else
+            {
+                LogInfo("StepSize", "Skipping test as property is not supported");
+            }
+
+            // IsMoving
+            if (canReadIsMoving)
+            {
+                RotatorPerformanceTest(RotatorMember.IsMoving, "IsMoving");
+            }
+            else
+            {
+                LogInfo("IsMoving", "Skipping test as property is not supported");
+            }
+        }
+
+        public override void CheckConfiguration()
+        {
+            try
+            {
+                // Common configuration
+                if (!settings.TestProperties)
+                    LogConfigurationAlert("Property tests were omitted due to Conform configuration.");
+
+                if (!settings.TestMethods)
+                    LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
+
+            }
+            catch (Exception ex)
+            {
+                LogError("CheckConfiguration", $"Exception when checking Conform configuration: {ex.Message}");
+                LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
+            }
+        }
+
+        #endregion
+
+        #region Support Code
+
         private float RotatorPropertyTestSingle(RotatorMember pType, string pName, float pMin, float pMax, Required requiredIRotatorV3State)
         {
             float rotatorPropertyTestSingleRet = default;
@@ -571,133 +777,100 @@ namespace ConformU
             return rotatorPropertyTestSingleRet;
         }
 
-        public override void CheckMethods()
+        private void RotatorPerformanceTest(RotatorMember pType, string pName)
         {
-            LogCallToDriver("AccessChecks", "About to get Connected property");
-            LogDebug("CheckMethods", $"Rotator is connected: {rotator.Connected}");
+            DateTime startTime;
+            double count, lastElapsedTime, elapsedTime;
+            float single;
+            bool boolean;
+            double rate;
 
-            // Halt - Optional (V1,V2 and V3)
+            SetAction(pName);
+
             try
             {
-                LogCallToDriver("Halt", $"About to call Halt method");
-                rotator.Halt();
-                LogOk("Halt", "Halt command successful");
+                startTime = DateTime.Now;
+                count = 0.0d;
+                lastElapsedTime = 0.0d;
+
+                do
+                {
+                    count += 1.0d;
+                    switch (pType)
+                    {
+                        case RotatorMember.Position:
+                            {
+                                single = rotator.Position;
+                                break;
+                            }
+
+                        case RotatorMember.TargetPosition:
+                            {
+                                single = rotator.TargetPosition;
+                                break;
+                            }
+
+                        case RotatorMember.StepSize:
+                            {
+                                single = rotator.StepSize;
+                                break;
+                            }
+
+                        case RotatorMember.IsMoving:
+                            {
+                                boolean = rotator.IsMoving;
+                                break;
+                            }
+
+                        default:
+                            {
+                                LogIssue(pName, $"RotatorPerformanceTest: Unknown test type {pType}");
+                                break;
+                            }
+                    }
+
+                    elapsedTime = DateTime.Now.Subtract(startTime).TotalSeconds;
+                    if (elapsedTime > lastElapsedTime + 1.0d)
+                    {
+                        SetStatus($"{count} transactions in {elapsedTime:0} seconds");
+                        lastElapsedTime = elapsedTime;
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+                    }
+                }
+                while (elapsedTime <= PERF_LOOP_TIME);
+
+                rate = count / elapsedTime;
+                switch (rate)
+                {
+                    case var @case when @case > 10.0d:
+                        {
+                            LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
+                            break;
+                        }
+
+                    case var case1 when 2.0d <= case1 && case1 <= 10.0d:
+                        {
+                            LogOk(pName, $"Transaction rate: {rate:0.0} per second");
+                            break;
+                        }
+
+                    case var case2 when 1.0d <= case2 && case2 <= 2.0d:
+                        {
+                            LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
+                            break;
+                        }
+
+                    default:
+                        {
+                            LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
+                            break;
+                        }
+                }
             }
             catch (Exception ex)
             {
-                HandleException("Halt", MemberType.Method, Required.Optional, ex, "");
-            }
-
-            if (cancellationToken.IsCancellationRequested)
-                return;
-
-            // MoveAbsolute - Optional (V1,V2), Mandatory (V3)
-            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 45.0f, "");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 135.0f, "");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 225.0f, "");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 315.0f, "");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", (float)-405.0d, "Movement to large negative angle -405 degrees");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-            RotatorMoveTest(RotatorMember.MoveAbsolute, "MoveAbsolute", 405.0f, "Movement to large positive angle 405 degrees");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-
-            // Move - Optional (V1,V2), Mandatory (V3)
-            RelativeMoveTest(10.0f);
-            if (cancellationToken.IsCancellationRequested)
-                return;
-            RelativeMoveTest(40.0f);
-            if (cancellationToken.IsCancellationRequested)
-                return;
-            RelativeMoveTest(130.0f);
-            if (cancellationToken.IsCancellationRequested)
-                return;
-            RotatorMoveTest(RotatorMember.Move, "Move", (float)-375.0d, "Movement to large negative angle -375 degrees");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-            RotatorMoveTest(RotatorMember.Move, "Move", 375.0f, "Movement to large positive angle 375 degrees");
-            if (cancellationToken.IsCancellationRequested)
-                return;
-
-            // Test the new IRotatorV3 methods
-            if (GetInterfaceVersion() >= 3)
-            {
-                // Test the MoveMechanical method
-                try
-                {
-                    if (canReadMechanicalPosition & canReadPosition)
-                    {
-                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 45.0f, "");
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 135.0f, "");
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 225.0f, "");
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 315.0f, "");
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", -405.0f, "Movement to large negative angle -405 degrees");
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-                        RotatorMoveTest(RotatorMember.MoveMechanical, "MoveMechanical", 405.0f, "Movement to large positive angle 405 degrees");
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-                    }
-                    else // Message saying we are skipping tests because we can't read required properties
-                    {
-                        LogInfo("MoveMechanical", "Skipping tests because either the MechanicalPosition or Position property cannot be read.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    HandleException("MoveMechanical", MemberType.Method, Required.Mandatory, ex, "");
-                }
-                if (cancellationToken.IsCancellationRequested)
-                    return;
-
-                // Test the Sync method
-                try
-                {
-                    if (canReadMechanicalPosition & canReadPosition) // Test new IRotaotrV3 methods
-                    {
-                        RotatorSynctest(90.0f, 90.0f); // Make sure that the rotator can be synced to its mechanical position
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-                        RotatorSynctest(120.0f, 90.0f); // Test sync to a positive offset
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-                        RotatorSynctest(60.0f, 90.0f); // Test sync to a negative offset
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-                        RotatorSynctest(00.0f, 00.0f); // Test sync to zero
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-                        RotatorSynctest(30.0f, 00.0f); // Test sync to a positive offset
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-                        RotatorSynctest(330.0f, 00.0f); // Test sync to a negative offset that is through zero
-                    }
-                    else // Message saying we are skipping tests because we can't read required properties
-                    {
-                        LogInfo("Sync", "Skipping tests because either the MechanicalPosition or Position property cannot be read.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    HandleException("Sync", MemberType.Method, Required.Mandatory, ex, "");
-                }
+                LogInfo(pName, $"Unable to complete test: {ex.Message}");
             }
         }
 
@@ -808,6 +981,22 @@ namespace ConformU
                     default:
                         LogIssue(memberName, $"RotatorMoveTest: Unknown test type - {moveMethod}");
                         break;
+                }
+
+                // Report synchronous behaviour for Platform 7 and later interfaces
+                if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Rotator, GetInterfaceVersion())) // This is a Platform 7 or later interface
+                {
+                    // Check whether IsMoving can be read
+                    if (canReadIsMoving) // IsMoving can be read
+                    {
+                        // Check whether the rotator is not moving and the Move method exceeded the standard response time
+                        if (!rotator.IsMoving & sw.Elapsed.TotalSeconds > standardTargetResponseTime) // Not moving and time > standard response time ==> synchronous behaviour so rais issue
+                        {
+                            LogIssue(memberName, $"The {memberName} method operated synchronously when it should operate asynchronously in IRotatorV4 and later devices.");
+                            LogInfo(memberName, $"The {memberName} method took {sw.Elapsed.TotalSeconds:0.0} seconds to complete, which is longer than the standard response time of {standardTargetResponseTime:0.0} seconds.");
+                            LogInfo(memberName, $"The {memberName} method should complete quickly and IsMoving should be set true until the rotator finishes movement.");
+                        }
+                    }
                 }
 
                 // Wait for movement to stop
@@ -1070,165 +1259,6 @@ namespace ConformU
                 return;
             // Should now be back where we started
 
-        }
-
-        public override void CheckPerformance()
-        {
-            // Position
-            if (canReadPosition)
-            {
-                RotatorPerformanceTest(RotatorMember.Position, "Position");
-            }
-            else
-            {
-                LogInfo("Position", "Skipping test as property is not supported");
-            }
-
-            // TargetPosition
-            if (canReadTargetPosition)
-            {
-                RotatorPerformanceTest(RotatorMember.TargetPosition, "TargetPosition");
-            }
-            else
-            {
-                LogInfo("TargetPosition", "Skipping test as property is not supported");
-            }
-
-            // StepSize
-            if (canReadStepSize)
-            {
-                RotatorPerformanceTest(RotatorMember.StepSize, "StepSize");
-            }
-            else
-            {
-                LogInfo("StepSize", "Skipping test as property is not supported");
-            }
-
-            // IsMoving
-            if (canReadIsMoving)
-            {
-                RotatorPerformanceTest(RotatorMember.IsMoving, "IsMoving");
-            }
-            else
-            {
-                LogInfo("IsMoving", "Skipping test as property is not supported");
-            }
-        }
-
-        public override void CheckConfiguration()
-        {
-            try
-            {
-                // Common configuration
-                if (!settings.TestProperties)
-                    LogConfigurationAlert("Property tests were omitted due to Conform configuration.");
-
-                if (!settings.TestMethods)
-                    LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
-
-            }
-            catch (Exception ex)
-            {
-                LogError("CheckConfiguration", $"Exception when checking Conform configuration: {ex.Message}");
-                LogDebug("CheckConfiguration", $"Exception detail:\r\n:{ex}");
-            }
-        }
-
-        private void RotatorPerformanceTest(RotatorMember pType, string pName)
-        {
-            DateTime startTime;
-            double count, lastElapsedTime, elapsedTime;
-            float single;
-            bool boolean;
-            double rate;
-
-            SetAction(pName);
-
-            try
-            {
-                startTime = DateTime.Now;
-                count = 0.0d;
-                lastElapsedTime = 0.0d;
-
-                do
-                {
-                    count += 1.0d;
-                    switch (pType)
-                    {
-                        case RotatorMember.Position:
-                            {
-                                single = rotator.Position;
-                                break;
-                            }
-
-                        case RotatorMember.TargetPosition:
-                            {
-                                single = rotator.TargetPosition;
-                                break;
-                            }
-
-                        case RotatorMember.StepSize:
-                            {
-                                single = rotator.StepSize;
-                                break;
-                            }
-
-                        case RotatorMember.IsMoving:
-                            {
-                                boolean = rotator.IsMoving;
-                                break;
-                            }
-
-                        default:
-                            {
-                                LogIssue(pName, $"RotatorPerformanceTest: Unknown test type {pType}");
-                                break;
-                            }
-                    }
-
-                    elapsedTime = DateTime.Now.Subtract(startTime).TotalSeconds;
-                    if (elapsedTime > lastElapsedTime + 1.0d)
-                    {
-                        SetStatus($"{count} transactions in {elapsedTime:0} seconds");
-                        lastElapsedTime = elapsedTime;
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
-                    }
-                }
-                while (elapsedTime <= PERF_LOOP_TIME);
-
-                rate = count / elapsedTime;
-                switch (rate)
-                {
-                    case var @case when @case > 10.0d:
-                        {
-                            LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
-                            break;
-                        }
-
-                    case var case1 when 2.0d <= case1 && case1 <= 10.0d:
-                        {
-                            LogOk(pName, $"Transaction rate: {rate:0.0} per second");
-                            break;
-                        }
-
-                    case var case2 when 1.0d <= case2 && case2 <= 2.0d:
-                        {
-                            LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
-                            break;
-                        }
-
-                    default:
-                        {
-                            LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
-                            break;
-                        }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogInfo(pName, $"Unable to complete test: {ex.Message}");
-            }
         }
 
         #endregion

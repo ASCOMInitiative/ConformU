@@ -59,6 +59,8 @@ namespace ConformU
 
         #endregion
 
+        #region Conform Process
+
         public override void InitialiseTest()
         {
             // Set the error type numbers according to the standards adopted by individual authors.
@@ -448,6 +450,10 @@ namespace ConformU
             }
         }
 
+        #endregion
+
+        #region Support Code
+
         private void FilterWheelPerformanceTest(FilterWheelProperties pType, string pName)
         {
             int[] lOffsets;
@@ -558,7 +564,7 @@ namespace ConformU
                 TimeMethod($"Move to position {position}", () => filterWheel.Position = Convert.ToInt16(position), TargetTime.Standard);
 
                 // Check for Platform 7 requirement of asynchronous operation
-                if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.FilterWheel, GetInterfaceVersion())) // This is a Platform 7 or later interface
+                if (isPlatform7OrLater) // This is a Platform 7 or later interface
                 {
                     // The operation should have either been synchronous within the standard target or asynchronous
 
@@ -567,7 +573,7 @@ namespace ConformU
                     {
                         LogIssue(testName, $"The Position Set property operated synchronously and should have operated asynchronously.");
                         LogInfo(testName, $"The device returned the expected position {position} but took longer than the standard response time: {standardTargetResponseTime} seconds.");
-                        LogInfo(testName, $"Position Set should have returned quickly and Position Get should have returned -1 while moving until the set position was achieved.");
+                        LogInfo(testName, $"Position Set should have return quickly and Position Get should return -1 while moving until the set position is achieved.");
                     }
                 }
 
@@ -603,5 +609,8 @@ namespace ConformU
             // Return the elapsed time for the move ignoring the stabilisation time added at the end
             return duration;
         }
+
+        #endregion
+
     }
 }
