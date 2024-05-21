@@ -66,6 +66,7 @@ namespace ConformU
         private const double SIDEREAL_RATE = 15.0 / SIDEREAL_SECONDS_TO_SI_SECONDS; //Arc-seconds per SI second
         private const double SITE_ELEVATION_TEST_VALUE = 2385.0; //Arbitrary site elevation write test value
         private const double ARC_SECONDS_TO_RA_SECONDS = 1.0 / 15.0; // Convert angular movement to time based movement
+        private const double TRACKING_RATE_TEST_VALUE = 0.01; // Rate offset used when testing TrackinRate (degrees per second)
 
         private bool canFindHome, canPark, canPulseGuide, canSetDeclinationRate, canSetGuideRates, canSetPark, canSetPierside, canSetRightAscensionRate;
         private bool canSetTracking, canSlew, canSlewAltAz, canSlewAltAzAsync, canSlewAsync, canSync, canSyncAltAz, canUnpark;
@@ -2553,6 +2554,15 @@ namespace ConformU
                         trackingRate = telescopeDevice.TrackingRate;
                         LogOk("TrackingRate Read", trackingRate.ToString());
 
+                        // Set up the TrackingRate Write test by attempting to set offset rates in sidereal mode
+                        try
+                        {
+                            telescopeDevice.TrackingRate = DriveRate.Sidereal;
+                            telescopeDevice.RightAscensionRate = TRACKING_RATE_TEST_VALUE / 15.0;
+                            telescopeDevice.DeclinationRate = TRACKING_RATE_TEST_VALUE;
+                        }
+                        catch { } // This is best endeavours, it doesn't matter if it fails
+
                         // TrackingRate Write - Optional
                         try
                         {
@@ -3917,7 +3927,7 @@ namespace ConformU
                 // Check whether the reported rate offset is 0.0
                 if (currentRateOffset == 0.0) // Rate offset is 0.0
                 {
-                    LogOk("TrackingRate Write", $"{testRateOffset} is zero for drive rate: {driveRate}");
+                    LogOk("TrackingRate Write", $"{testRateOffset} is zero for {driveRate} drive rate.");
                 }
                 else // Rate offset is not 0.0
                 {
@@ -3934,24 +3944,37 @@ namespace ConformU
                         // Try to set the appropriate offset rate
                         LogCallToDriver("", $"About to set {testRateOffset}");
                         if (testRateOffset == RateOffset.DeclinationRate) // Testing DeclinationRate
-                            telescopeDevice.DeclinationRate = 0.1;
+                            telescopeDevice.DeclinationRate = TRACKING_RATE_TEST_VALUE;
                         else // Testing RightAscensionRate
-                            telescopeDevice.RightAscensionRate = 0.1;
+                            telescopeDevice.RightAscensionRate = TRACKING_RATE_TEST_VALUE / 15.0;
 
                         // Should never get here because an exception is expected
-                        LogIssue("TrackingRate Write", $"Writing to {testRateOffset} did not result in an {(settings.DeviceTechnology == DeviceTechnology.COM ? "InvalidOperationException" : "InvalidOperation  error")} but should have.");
+                        LogIssue("TrackingRate Write", $"Setting {testRateOffset} in {driveRate} drive rate did not result in an {(settings.DeviceTechnology == DeviceTechnology.COM ? "InvalidOperationException" : "InvalidOperation  error")} but should have.");
                         LogInfo("TrackingRate Write", $"In ITelescopeV4 and later, rate offsets are only valid when tracking at Sidereal rate.");
                         LogInfo("TrackingRate Write", $"When the {driveRate} tracking rate is active, writing to {testRateOffset} should result in an {(settings.DeviceTechnology == DeviceTechnology.COM ? "InvalidOperationException" : "InvalidOperation  error")}.");
                     }
+                    catch (COMException ex)
+                    {
+                        // Check if this is an InvalidOperationExcception
+                        if (ex.HResult == unchecked((int)0x8004040B)) // This is a COM InvalidOperationExcception
+                        {
+                            LogOk("TrackingRate Write", $"Setting {testRateOffset} in {driveRate} drive rate resulted in a COM InvalidOperationException.");
+                        }
+                        else // This is not a COM InvalidOperationExcception
+                        {
+                            LogIssue("TrackingRate Write", $"Setting {testRateOffset} in {driveRate} drive rate did not result in an InvalidOperationException. Instead it resulted in an {ex.GetType().Name} exception: {ex.Message}");
+                            LogDebug("TrackingRate Write", ex.ToString());
+                        }
+                    }
                     catch (Exception ex)
                     {
-                        if (ex is ASCOM.InvalidOperationException)
+                        if (ex is ASCOM.InvalidOperationException) // This is an InvalidOperationExcception
                         {
-                            LogOk("TrackingRate Write", $"Attempting to set {testRateOffset} did result in an InvalidOperationException.");
+                            LogOk("TrackingRate Write", $"Setting {testRateOffset} in {driveRate} drive rate resulted in an InvalidOperationException.");
                         }
-                        else
+                        else // This is not an InvalidOperationExcception
                         {
-                            LogIssue("TrackingRate Write", $"Attempting to set {testRateOffset} did not result in an InvalidOperationException. Instead it resulted in an {ex.GetType().Name} exception: {ex.Message}");
+                            LogIssue("TrackingRate Write", $"Setting {testRateOffset} in {driveRate} drive rate did not result in an InvalidOperationException. Instead it resulted in an {ex.GetType().Name} exception: {ex.Message}");
                             LogDebug("TrackingRate Write", ex.ToString());
                         }
                     }
