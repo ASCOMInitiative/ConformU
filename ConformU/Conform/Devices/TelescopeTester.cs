@@ -7920,7 +7920,7 @@ namespace ConformU
             transform.SitePressure = 1010.0;
             transform.Refraction = false;
 
-            LogDebug("GetTestDeclination", $"TRANSFORM: Site: Latitude: {transform.SiteLatitude.ToDMS()}, Longitude: {transform.SiteLongitude.ToDMS()}, Elevation: {transform.SiteElevation}, Pressure: {transform.SitePressure}, Temperature: {transform.SiteTemperature}, Refraction: {transform.Refraction}");
+            LogDebug("GetTestDeclinationLessThan65", $"TRANSFORM: Site: Latitude: {transform.SiteLatitude.ToDMS()}, Longitude: {transform.SiteLongitude.ToDMS()}, Elevation: {transform.SiteElevation}, Pressure: {transform.SitePressure}, Temperature: {transform.SiteTemperature}, Refraction: {transform.Refraction}");
 
             // Iterate from declination -85 to +85 in steps of 10 degrees
             Stopwatch sw = Stopwatch.StartNew();
@@ -7932,7 +7932,7 @@ namespace ConformU
                 // Retrieve the corresponding elevation
                 double elevation = transform.ElevationTopocentric;
 
-                LogDebug("GetTestDeclination", $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
+                LogDebug("GetTestDeclinationLessThan65", $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
 
                 // Update the test declination if the new elevation is less that 65 degrees and also greater than the current highest elevation 
                 if ((elevation < 65.0) & (elevation > testElevation))
@@ -7942,7 +7942,7 @@ namespace ConformU
                 }
             }
             sw.Stop();
-            LogDebug("GetTestDeclination", $"Test RightAscension: {testRa.ToHMS()}, Test Declination: {testDeclination.ToDMS()} at Elevation: {testElevation.ToDMS()} found in {sw.Elapsed.TotalMilliseconds:0.0}ms.");
+            LogDebug("GetTestDeclinationLessThan65", $"Test RightAscension: {testRa.ToHMS()}, Test Declination: {testDeclination.ToDMS()} at Elevation: {testElevation.ToDMS()} found in {sw.Elapsed.TotalMilliseconds:0.0}ms.");
 
             // Throw an exception if the test elevation is below 0 degrees
             if (testElevation < 0.0)
@@ -7961,7 +7961,8 @@ namespace ConformU
         /// <remarks>The returned declination will correspond to an elevation in the range 0 to 65 degrees.</remarks>
         internal double GetTestDeclinationHalfwayToHorizon(string testName, double testRa)
         {
-            double testDeclination = 0.0, lowestDeclinationAboveHorizon = double.MaxValue;
+            double testDeclination = 0.0;
+            double lowestDeclinationAboveHorizon;
             double siteLatitude;
 
             // Find a test declination that yields an elevation that is as high as possible but under 65 degrees
@@ -7969,8 +7970,10 @@ namespace ConformU
             LogCallToDriver(testName, $"About to get SiteLatitude property");
             siteLatitude = telescopeDevice.SiteLatitude;
             transform.SiteLatitude = siteLatitude;
+
             LogCallToDriver(testName, $"About to get SiteLongitude property");
             transform.SiteLongitude = telescopeDevice.SiteLongitude;
+
             LogCallToDriver(testName, $"About to get SiteElevation property");
             transform.SiteElevation = telescopeDevice.SiteElevation;
 
@@ -7978,7 +7981,12 @@ namespace ConformU
             transform.SitePressure = 1010.0;
             transform.Refraction = false;
 
-            LogDebug("GetTestDeclination", $"TRANSFORM: Site: Latitude: {transform.SiteLatitude.ToDMS()}, Longitude: {transform.SiteLongitude.ToDMS()}, Elevation: {transform.SiteElevation}, Pressure: {transform.SitePressure}, Temperature: {transform.SiteTemperature}, Refraction: {transform.Refraction}");
+            LogDebug("GetTestDeclinationHalfwayToHorizon", $"TRANSFORM: Site: Latitude: {transform.SiteLatitude.ToDMS()}, Longitude: {transform.SiteLongitude.ToDMS()}, Elevation: {transform.SiteElevation}, Pressure: {transform.SitePressure}, Temperature: {transform.SiteTemperature}, Refraction: {transform.Refraction}");
+
+            if (siteLatitude >= 0)
+                lowestDeclinationAboveHorizon = double.MaxValue;
+            else
+                lowestDeclinationAboveHorizon = double.MinValue;
 
             // Iterate from declination -85 to +85 in steps of 10 degrees
             Stopwatch sw = Stopwatch.StartNew();
@@ -7990,7 +7998,7 @@ namespace ConformU
                 // Retrieve the corresponding elevation
                 double elevation = transform.ElevationTopocentric;
 
-                LogDebug("GetTestDeclination", $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
+                LogDebug("GetTestDeclinationHalfwayToHorizon", $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
 
                 // Update the lowest declination above the horizon if the sky position is above the horizon and also has a declination closer to the horizon than the current value.
                 if (elevation > 0.0)
@@ -7999,6 +8007,7 @@ namespace ConformU
                     {
                         if (declination < lowestDeclinationAboveHorizon)
                         {
+                            LogDebug("GetTestDeclinationHalfwayToHorizon", $"Northern hemisphere - Saving this as the lowest declination above horizon:: {declination.ToDMS()}");
                             lowestDeclinationAboveHorizon = declination;
                         }
                     }
@@ -8006,6 +8015,7 @@ namespace ConformU
                     {
                         if (declination > lowestDeclinationAboveHorizon)
                         {
+                            LogDebug("GetTestDeclinationHalfwayToHorizon", $"Southern hemisphere - Saving this as the lowest declination above horizon:: {declination.ToDMS()}");
                             lowestDeclinationAboveHorizon = declination;
                         }
                     }
@@ -8013,24 +8023,26 @@ namespace ConformU
             }
             sw.Stop();
 
-            if (testDeclination < double.MaxValue)
+            // Check whether a valid declination has been found
+            if ((lowestDeclinationAboveHorizon < 90.0) & (lowestDeclinationAboveHorizon > -90.0)) // A valid declination has been found
             {
                 // Calculate the test declination as half way between the relevant celestial pole and the lowest declination above the horizon
                 if (siteLatitude >= 0.0) // Northern hemisphere
                 {
-                    testDeclination = 90.0 - (90.0 - lowestDeclinationAboveHorizon) / 2.0;
+                    testDeclination = lowestDeclinationAboveHorizon + (90.0 - lowestDeclinationAboveHorizon) / 2.0;
                 }
                 else // Southern hemisphere
                 {
-                    testDeclination = -90.0 - (-90.0 + lowestDeclinationAboveHorizon) / 2.0;
+                    testDeclination = lowestDeclinationAboveHorizon + (-90.0 - lowestDeclinationAboveHorizon) / 2.0;
                 }
 
-                LogDebug("GetTestDeclination", $"Test RightAscension: {testRa.ToHMS()}, Lowest declination above horizon: {lowestDeclinationAboveHorizon.ToDMS()}, Test Declination: {testDeclination.ToDMS()} found in {sw.Elapsed.TotalMilliseconds:0.0}ms.");
+                LogDebug("GetTestDeclinationHalfwayToHorizon", $"Test RightAscension: {testRa.ToHMS()}, Lowest declination above horizon: {lowestDeclinationAboveHorizon.ToDMS()}, Test Declination: {testDeclination.ToDMS()} found in {sw.Elapsed.TotalMilliseconds:0.0}ms.");
                 // Return the test declination
                 return testDeclination;
             }
 
-            throw new ASCOM.InvalidOperationException($"GetTestDeclination - No usable declination was found.");
+            // A valid declination was not found so throw an error
+            throw new ASCOM.InvalidOperationException($"GetTestDeclinationHalfwayToHorizon - No usable declination was found.Lowest declination above horizon: {lowestDeclinationAboveHorizon}");
         }
 
         internal void TestRAOffsetRates(string testName, double hourAngle)
