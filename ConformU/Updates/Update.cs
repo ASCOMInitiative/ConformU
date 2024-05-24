@@ -96,7 +96,7 @@ namespace ConformU
                 if (semver is not null)
                     return $"{semver.Major}.{semver.Minor}.{semver.Patch}{(semver.Prerelease == "" ? "" : "-")}{semver.Prerelease} (Build {semver.Metadata})";
                 else
-                    return $"Unable to parse version string: {informationalVersion}!";
+                    return $"Unable to parse version string: '{informationalVersion}'";
             }
         }
         #endregion

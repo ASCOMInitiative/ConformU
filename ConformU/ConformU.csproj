@@ -24,6 +24,19 @@
 		<WriteLinesToFile File="$(PublishDir)..\InformationVersion.txt" Overwrite="true" Lines="$(InfoVersion)" />
 	</Target>
 	<PropertyGroup>
+		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+	</PropertyGroup>
+	<Target Name="AddGitShaToInformationVersion" AfterTargets="GetAssemblyVersion" Returns="InformationalVersion">
+		<Exec ConsoleToMsBuild="true" Command="git rev-parse --short HEAD">
+			<Output TaskParameter="ConsoleOutput" PropertyName="GitSha" />
+		</Exec>
+
+		<PropertyGroup>
+			<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+			<InformationalVersion>$(InformationalVersion).$(GitSha)</InformationalVersion>
+		</PropertyGroup>
+	</Target>
+	<PropertyGroup>
 		<!-- Set version numbers -->
 		<ProductMajor>2</ProductMajor>
 		<ProductMinor>2</ProductMinor>
