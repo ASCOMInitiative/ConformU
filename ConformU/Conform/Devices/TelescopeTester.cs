@@ -7912,8 +7912,10 @@ namespace ConformU
             // Find a test declination that yields an elevation that is as high as possible but under 65 degrees
             // Initialise transform with site parameters
             LogCallToDriver(testName, $"About to get SiteLatitude property");
-            transform.SiteLatitude = telescopeDevice.SiteLatitude; LogCallToDriver(testName, $"About to get SiteLongitude property");
-            transform.SiteLongitude = telescopeDevice.SiteLongitude; LogCallToDriver(testName, $"About to get SiteElevation property");
+            transform.SiteLatitude = telescopeDevice.SiteLatitude;
+            LogCallToDriver(testName, $"About to get SiteLongitude property");
+            transform.SiteLongitude = telescopeDevice.SiteLongitude;
+            LogCallToDriver(testName, $"About to get SiteElevation property");
             transform.SiteElevation = telescopeDevice.SiteElevation;
 
             // Set remaining transform parameters
@@ -7939,6 +7941,7 @@ namespace ConformU
                 {
                     testDeclination = declination;
                     testElevation = elevation;
+                    LogDebug("GetTestDeclinationLessThan65", $"Saved declination {testDeclination.ToDMS()} as having highest elevation: {testElevation.ToDMS()}");
                 }
             }
             sw.Stop();
@@ -8029,20 +8032,21 @@ namespace ConformU
                 // Calculate the test declination as half way between the relevant celestial pole and the lowest declination above the horizon
                 if (siteLatitude >= 0.0) // Northern hemisphere
                 {
-                    testDeclination = lowestDeclinationAboveHorizon + (90.0 - lowestDeclinationAboveHorizon) / 2.0;
+                    testDeclination = (lowestDeclinationAboveHorizon + 90.0) / 2.0;
+                    LogDebug("GetTestDeclinationHalfwayToHorizon", $"Northern hemisphere or equator - Test RightAscension: {testRa.ToHMS()}, Lowest declination above horizon: {lowestDeclinationAboveHorizon.ToDMS()}, Test Declination: {testDeclination.ToDMS()} found in {sw.Elapsed.TotalMilliseconds:0.0}ms.");
                 }
                 else // Southern hemisphere
                 {
-                    testDeclination = lowestDeclinationAboveHorizon + (-90.0 - lowestDeclinationAboveHorizon) / 2.0;
+                    testDeclination = (lowestDeclinationAboveHorizon - 90.0) / 2.0;
+                    LogDebug("GetTestDeclinationHalfwayToHorizon", $"Southern hemisphere - Test RightAscension: {testRa.ToHMS()}, Lowest declination above horizon: {lowestDeclinationAboveHorizon.ToDMS()}, Test Declination: {testDeclination.ToDMS()} found in {sw.Elapsed.TotalMilliseconds:0.0}ms.");
                 }
 
-                LogDebug("GetTestDeclinationHalfwayToHorizon", $"Test RightAscension: {testRa.ToHMS()}, Lowest declination above horizon: {lowestDeclinationAboveHorizon.ToDMS()}, Test Declination: {testDeclination.ToDMS()} found in {sw.Elapsed.TotalMilliseconds:0.0}ms.");
                 // Return the test declination
                 return testDeclination;
             }
 
             // A valid declination was not found so throw an error
-            throw new ASCOM.InvalidOperationException($"GetTestDeclinationHalfwayToHorizon - No usable declination was found.Lowest declination above horizon: {lowestDeclinationAboveHorizon}");
+            throw new ASCOM.InvalidOperationException($"GetTestDeclinationHalfwayToHorizon was unable to find a declination above the horizon at RA: {testRa.ToHMS()}.");
         }
 
         internal void TestRAOffsetRates(string testName, double hourAngle)
@@ -8112,7 +8116,8 @@ namespace ConformU
                     expectedDeclinationRate = expectedRate;
                     break;
             }
-
+            LogDebug(testName, $" ");
+            LogDebug(testName, $"Starting test");
 
             // Create the test RA and declination
             double testRa = Utilities.ConditionRA(telescopeDevice.SiderealTime - testHa);
@@ -8122,7 +8127,7 @@ namespace ConformU
             }
             catch (ASCOM.InvalidOperationException ex)
             {
-                LogInfo(testName, $"Test omitted because {ex.Message.ToLowerInvariant()}. This is an expected condition at latitudes close to the equator.");
+                LogInfo(testName, $"Test omitted because it was not possible to find a declination above the horizon at {testRa.ToHMS()}. This is an expected condition at latitudes close to the equator.");
                 return;
             }
 
