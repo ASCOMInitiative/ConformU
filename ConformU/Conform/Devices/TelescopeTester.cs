@@ -5337,9 +5337,11 @@ namespace ConformU
             }
         }
 
-        private void TelescopeParkedExceptionTest(ParkedExceptionType pType, string pName)
+        private void TelescopeParkedExceptionTest(ParkedExceptionType pType, string methodName)
         {
-            double lTargetRa; LogCallToDriver($"Parked:{pName}", "About to get AtPark property");
+            double targetRa;
+
+            LogCallToDriver($"Parked:{methodName}", "About to get AtPark property");
             if (telescopeDevice.AtPark) // We are still parked so test AbortSlew
             {
                 try
@@ -5347,129 +5349,150 @@ namespace ConformU
                     switch (pType)
                     {
                         case ParkedExceptionType.TstPExcepAbortSlew:
-                            {
-                                AbortSlew("Parked");
-                                break;
-                            }
+                            AbortSlew("Parked");
+                            break;
 
                         case ParkedExceptionType.TstPExcepFindHome:
-                            {
-                                LogCallToDriver($"Parked:{pName}", "About to call FindHome method");
-                                telescopeDevice.FindHome();
-                                // Wait for mount to find home
-                                WaitWhile("Waiting for mount to home...", () => !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000), 200, settings.TelescopeMaximumSlewTime);
-                                break;
-                            }
+                            LogCallToDriver($"Parked:{methodName}", "About to call FindHome method");
+                            telescopeDevice.FindHome();
+                            // Wait for mount to find home
+                            WaitWhile("Waiting for mount to home...", () => !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000), 200, settings.TelescopeMaximumSlewTime);
+                            break;
 
                         case ParkedExceptionType.TstPExcepMoveAxisPrimary:
-                            {
-                                LogCallToDriver($"Parked:{pName}", "About to call MoveAxis(Primary, 0.0) method");
-                                telescopeDevice.MoveAxis(TelescopeAxis.Primary, 0.0d);
-                                break;
-                            }
+                            LogCallToDriver($"Parked:{methodName}", "About to call MoveAxis(Primary, 0.0) method");
+                            telescopeDevice.MoveAxis(TelescopeAxis.Primary, 0.0d);
+                            break;
 
                         case ParkedExceptionType.TstPExcepMoveAxisSecondary:
-                            {
-                                LogCallToDriver($"Parked:{pName}", "About to call MoveAxis(Secondary, 0.0) method");
-                                telescopeDevice.MoveAxis(TelescopeAxis.Secondary, 0.0d);
-                                break;
-                            }
+                            LogCallToDriver($"Parked:{methodName}", "About to call MoveAxis(Secondary, 0.0) method");
+                            telescopeDevice.MoveAxis(TelescopeAxis.Secondary, 0.0d);
+                            break;
 
                         case ParkedExceptionType.TstPExcepMoveAxisTertiary:
-                            {
-                                LogCallToDriver($"Parked:{pName}", "About to call MoveAxis(Tertiary, 0.0) method");
-                                telescopeDevice.MoveAxis(TelescopeAxis.Tertiary, 0.0d);
-                                break;
-                            }
+                            LogCallToDriver($"Parked:{methodName}", "About to call MoveAxis(Tertiary, 0.0) method");
+                            telescopeDevice.MoveAxis(TelescopeAxis.Tertiary, 0.0d);
+                            break;
 
                         case ParkedExceptionType.TstPExcepPulseGuide:
-                            {
-                                LogCallToDriver($"Parked:{pName}", "About to call PulseGuide(East, 0.0) method");
-                                telescopeDevice.PulseGuide(GuideDirection.East, 0);
-                                break;
-                            }
+                            LogCallToDriver($"Parked:{methodName}", "About to call PulseGuide(East, 0.0) method");
+                            telescopeDevice.PulseGuide(GuideDirection.East, 0);
+                            break;
 
                         case ParkedExceptionType.TstPExcepSlewToCoordinates:
-                            {
-                                LogCallToDriver($"Parked:{pName}", "About to call SlewToCoordinates method");
-                                telescopeDevice.SlewToCoordinates(TelescopeRaFromSiderealTime($"Parked:{pName}", 1.0d), 0.0d);
-                                break;
-                            }
+                            LogCallToDriver($"Parked:{methodName}", "About to call SlewToCoordinates method");
+                            telescopeDevice.SlewToCoordinates(TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d), 0.0d);
+                            break;
 
                         case ParkedExceptionType.TstPExcepSlewToCoordinatesAsync:
-                            {
-                                LogCallToDriver($"Parked:{pName}", "About to call SlewToCoordinatesAsync method");
-                                telescopeDevice.SlewToCoordinatesAsync(TelescopeRaFromSiderealTime($"Parked:{pName}", 1.0d), 0.0d);
-                                WaitForSlew($"Parked:{pName}", "Slewing to coordinates asynchronously");
-                                break;
-                            }
+                            LogCallToDriver($"Parked:{methodName}", "About to call SlewToCoordinatesAsync method");
+                            telescopeDevice.SlewToCoordinatesAsync(TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d), 0.0d);
+                            WaitForSlew($"Parked:{methodName}", "Slewing to coordinates asynchronously");
+                            break;
 
                         case ParkedExceptionType.TstPExcepSlewToTarget:
-                            {
-                                lTargetRa = TelescopeRaFromSiderealTime($"Parked:{pName}", 1.0d); LogCallToDriver(
-                                    $"Parked:{pName}",
-                                    $"About to set property TargetRightAscension to {lTargetRa.ToHMS()}");
-                                telescopeDevice.TargetRightAscension = lTargetRa; LogCallToDriver($"Parked:{pName}", "About to set property TargetDeclination to 0.0");
-                                telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver($"Parked:{pName}", "About to call SlewToTarget method");
-                                telescopeDevice.SlewToTarget();
-                                break;
-                            }
+                            targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d); LogCallToDriver(
+                                $"Parked:{methodName}",
+                                $"About to set property TargetRightAscension to {targetRa.ToHMS()}");
+                            telescopeDevice.TargetRightAscension = targetRa; LogCallToDriver($"Parked:{methodName}", "About to set property TargetDeclination to 0.0");
+                            telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver($"Parked:{methodName}", "About to call SlewToTarget method");
+                            telescopeDevice.SlewToTarget();
+                            break;
 
                         case ParkedExceptionType.TstPExcepSlewToTargetAsync:
-                            {
-                                lTargetRa = TelescopeRaFromSiderealTime($"Parked:{pName}", 1.0d); LogCallToDriver(
-                                    $"Parked:{pName}", $"About to set property to {lTargetRa.ToHMS()}");
-                                telescopeDevice.TargetRightAscension = lTargetRa; LogCallToDriver($"Parked:{pName}", "About to set property to 0.0");
-                                telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver($"Parked:{pName}", "About to call method");
-                                telescopeDevice.SlewToTargetAsync();
-                                WaitForSlew($"Parked:{pName}", "Slewing to target asynchronously");
-                                break;
-                            }
+                            targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d); LogCallToDriver(
+                                $"Parked:{methodName}", $"About to set property to {targetRa.ToHMS()}");
+                            telescopeDevice.TargetRightAscension = targetRa; LogCallToDriver($"Parked:{methodName}", "About to set property to 0.0");
+                            telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver($"Parked:{methodName}", "About to call method");
+                            telescopeDevice.SlewToTargetAsync();
+                            WaitForSlew($"Parked:{methodName}", "Slewing to target asynchronously");
+                            break;
 
                         case ParkedExceptionType.TstPExcepSyncToCoordinates:
-                            {
-                                lTargetRa = TelescopeRaFromSiderealTime($"Parked:{pName}", 1.0d); LogCallToDriver(
-                                    $"Parked:{pName}",
-                                    $"About to call method, RA: {lTargetRa.ToHMS()}, Declination: 0.0");
-                                telescopeDevice.SyncToCoordinates(lTargetRa, 0.0d);
-                                break;
-                            }
+                            targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d); LogCallToDriver(
+                                $"Parked:{methodName}",
+                                $"About to call method, RA: {targetRa.ToHMS()}, Declination: 0.0");
+                            telescopeDevice.SyncToCoordinates(targetRa, 0.0d);
+                            break;
 
                         case ParkedExceptionType.TstPExcepSyncToTarget:
-                            {
-                                lTargetRa = TelescopeRaFromSiderealTime($"Parked:{pName}", 1.0d); LogCallToDriver(
-                                    $"Parked:{pName}", $"About to set property to {lTargetRa.ToHMS()}");
-                                telescopeDevice.TargetRightAscension = lTargetRa; LogCallToDriver($"Parked:{pName}", "About to set property to 0.0");
-                                telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver($"Parked:{pName}", "About to call SyncToTarget method");
-                                telescopeDevice.SyncToTarget();
-                                break;
-                            }
+                            targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d); LogCallToDriver(
+                                $"Parked:{methodName}", $"About to set property to {targetRa.ToHMS()}");
+                            telescopeDevice.TargetRightAscension = targetRa; LogCallToDriver($"Parked:{methodName}", "About to set property to 0.0");
+                            telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver($"Parked:{methodName}", "About to call SyncToTarget method");
+                            telescopeDevice.SyncToTarget();
+                            break;
 
                         default:
-                            {
-                                LogIssue($"Parked:{pName}", $"Conform:ParkedExceptionTest: Unknown test type {pType}");
-                                break;
-                            }
+                            LogError($"Parked:{methodName}", $"Conform:ParkedExceptionTest: Unknown test type {pType}");
+                            break;
                     }
 
-                    LogIssue($"Parked:{pName}", $"{pName} didn't raise an error when Parked as required");
+                    LogIssue($"Parked:{methodName}", $"{methodName} didn't raise an error when Parked as required");
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    LogOk($"Parked:{pName}", $"{pName} did raise an exception when Parked as required");
+                    // Check whether this is a Platform 7 or later device
+                    if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion())) // This is a Platform 7 or later device so expect a ParkedException
+                    {
+                        // Check whether this is a ParkedException or its COM equivalent
+                        if (IsParkedException(ex))
+                            LogOk($"Parked:{methodName}", $"{methodName} threw a ParkedException when Parked, as required. ({ex.GetType().Name} - {ex.Message})");
+                        else // Not a parked exception so report an issue
+                        {
+                            // Handle COM and .NET exceptions
+                            if (ex is COMException comException) // COM exception
+                                LogIssue($"Parked:{methodName}", $"{methodName} threw a COMException with error number 0x{comException.HResult:X8} when a ParkedException (0x80040408) was expected. Exception message: {ex.Message}");
+                            else // .NET exception
+                                LogIssue($"Parked:{methodName}", $"{methodName} threw a {ex.GetType().Name} exception when a ParkedException was expected. Exception message: {ex.Message}");
+                        }
+                    }
+                    else // Platform 6 or earlier device so accept any exception
+                        LogOk($"Parked:{methodName}", $"{methodName} threw an exception when Parked, as required. The {ex.GetType().Name} exception message was: {ex.Message}");
                 }
                 // Check that Telescope is still parked after issuing the command!
-                LogCallToDriver($"Parked:{pName}", "About to get AtPark property");
+                LogCallToDriver($"Parked:{methodName}", "About to get AtPark property");
                 if (!telescopeDevice.AtPark)
-                    LogIssue($"Parked:{pName}",
-                        $"Telescope was unparked by the {pName} command. This should not happen!");
+                    LogIssue($"Parked:{methodName}",
+                        $"Telescope was unparked by the {methodName} command. This should not happen!");
             }
             else
             {
-                LogIssue($"Parked:{pName}",
-                    $"Not parked after Telescope.Park command, {pName} when parked test skipped");
+                LogIssue($"Parked:{methodName}",
+                    $"Not parked after Telescope.Park command, {methodName} when parked test skipped");
             }
 
+        }
+
+        protected bool IsParkedException(Exception deviceException)
+        {
+            bool isParkedException = false; // Set false default value
+
+            try
+            {
+                switch (deviceException)
+                {
+                    // This is a COM exception so test whether the error code indicates that it is a parked exception
+                    case COMException exception:
+                        if (exception.ErrorCode == ErrorCodes.InvalidWhileParked) // This is a parked exception
+                            isParkedException = true;
+                        break;
+
+                    case ParkedException: // This is a parked exception
+                        isParkedException = true;
+                        break;
+
+                    default: // Unexpected type of exception so report it as a Conform error
+                        LogError("IsParkedException", $"Unsupported exception: {deviceException.GetType().Name} - {deviceException.Message}\r\n{deviceException}");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError("IsParkedException", $"Unexpected exception: {ex}");
+            }
+
+            return isParkedException;
         }
 
         private void TelescopeAxisRateTest(string pName, TelescopeAxis pAxis)
@@ -8125,7 +8148,7 @@ namespace ConformU
             {
                 testDeclination = GetTestDeclinationHalfwayToHorizon(testName, testRa); // Get the test declination for the test RA
             }
-            catch (ASCOM.InvalidOperationException ex)
+            catch (ASCOM.InvalidOperationException)
             {
                 LogInfo(testName, $"Test omitted because it was not possible to find a declination above the horizon at {testRa.ToHMS()}. This is an expected condition at latitudes close to the equator.");
                 return;
