@@ -65,7 +65,7 @@
                     <div class="row">
                         <RadzenNumeric Style="margin-left: 20px; margin-top:15px; width: 6em"
                                        Format="0.0"
-                        @bind-Value="waitTimeBeforeConformApplicationExits"
+                                       @bind-Value="waitTimeBeforeConformApplicationExits"
                                        Step="0.1"
                                        TValue="double"
                                        Min="0.1M"
@@ -79,7 +79,7 @@
                     <div class="row">
                         <RadzenNumeric Style="margin-left: 20px; margin-top:15px; width: 6em"
                                        Format="0"
-                        @bind-Value="applicationPort"
+                                       @bind-Value="applicationPort"
                                        Step="1"
                                        TValue="int"
                                        Min="0M"
@@ -93,7 +93,7 @@
                     <div class="row">
                         <RadzenNumeric Style="margin-left: 20px; margin-top:15px; width: 6em"
                                        Format="0"
-                        @bind-Value="connectDisconnectTimeout"
+                                       @bind-Value="connectDisconnectTimeout"
                                        Step="1"
                                        TValue="int"
                                        Min="1M"
@@ -109,14 +109,14 @@
                     <h4 style="color: #479cc8; margin-bottom: 0;">Additional Tracing</h4>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKTRACEDISCOVERY"
-                        @bind-Value=@chkTraceDiscovery
+                                        @bind-Value=@chkTraceDiscovery
                                         TValue="bool"
                                         Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TraceDiscovery)) />
                         <RadzenLabel Text="Trace discovery" Component="CHKTRACEDISCOVERY" Style="margin-left: 5px;" />
                     </div>
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKTRACEALPACA"
-                        @bind-Value=@chkTraceAlpacaCalls
+                                        @bind-Value=@chkTraceAlpacaCalls
                                         TValue="bool"
                                         Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TraceAlpacaCalls)) />
                         <RadzenLabel Text="Trace Alpaca calls" Component="CHKTRACEALPACA" Style="margin-left: 5px;" />
@@ -139,7 +139,7 @@
 
                     <div class="row" style="margin-top: 15px">
                         <RadzenNumeric Style="margin-left: 20px; width: 8em"
-                        @bind-Value="alpacaNumberOfDiscoveryPolls"
+                                       @bind-Value="alpacaNumberOfDiscoveryPolls"
                                        TValue="int"
                                        Min="1"
                                        Disabled=@(!alpacaDiscoveryEnabled)
@@ -150,7 +150,7 @@
                         <RadzenNumeric Style="margin-left: 20px; width: 8em "
                                        Disabled=@(!alpacaDiscoveryEnabled)
                                        Format="0.0"
-                        @bind-Value="alpacaDiscoveryPollInterval"
+                                       @bind-Value="alpacaDiscoveryPollInterval"
                                        Step="0.1"
                                        TValue="double"
                                        Min="0.1M"
@@ -160,7 +160,7 @@
                     <div class="row">
                         <RadzenNumeric Style="margin-left: 20px; width: 8em "
                                        Disabled=@(!alpacaDiscoveryEnabled)
-                        @bind-Value="alpacaDiscoveryPort"
+                                       @bind-Value="alpacaDiscoveryPort"
                                        TValue="int"
                                        Min="1"
                                        Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.AlpacaDiscoveryPort)) />
@@ -170,7 +170,7 @@
                         <RadzenNumeric Style="margin-left: 20px; width: 8em"
                                        Disabled=@(!alpacaDiscoveryEnabled)
                                        Format="0.0"
-                        @bind-Value="alpacaDiscoveryDuration"
+                                       @bind-Value="alpacaDiscoveryDuration"
                                        Step="0.1"
                                        TValue="double"
                                        Min="0.1M"
@@ -197,7 +197,7 @@
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKUSEIPV4"
                                         Disabled=@(!alpacaDiscoveryEnabled)
-                        @bind-Value=@alpacaDiscoveryUseIpV4
+                                        @bind-Value=@alpacaDiscoveryUseIpV4
                                         TValue="bool"
                                         Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV4)) />
                         <RadzenLabel Text="Use IPv4 (Default Yes)" Component="CHKUSEIPV4" Style="margin-left: 20px;" />
@@ -206,7 +206,7 @@
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKUSEIPV6"
                                         Disabled=@(!alpacaDiscoveryEnabled)
-                        @bind-Value=@alpacaDiscoveryUseIpV6
+                                        @bind-Value=@alpacaDiscoveryUseIpV6
                                         TValue="bool"
                                         Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.AlpacaDiscoveryUseIpV6)) />
                         <RadzenLabel Text="Use IPv6 (Default No)" Component="CHKUSEIPV6" Style="margin-left: 20px;" />
@@ -215,7 +215,7 @@
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKRESOLVEDNSNAMES"
                                         Disabled=@(!alpacaDiscoveryEnabled)
-                        @bind-Value=@alpacaDiscoveryResolveName
+                                        @bind-Value=@alpacaDiscoveryResolveName
                                         TValue="bool"
                                         Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.AlpacaDiscoveryResolveName)) />
                         <RadzenLabel Text="Resolve DNS names (Default No)" Component="CHKRESOLVEDNSNAMES" Style="margin-left: 20px;" />
@@ -223,7 +223,7 @@
 
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKSTRICTCASING"
-                        @bind-Value=@strictCasing
+                                        @bind-Value=@strictCasing
                                         TValue="bool"
                                         Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.StrictCasing)) />
                         <RadzenLabel Text="Use strict JSON casing (Only unset this for testing)" Component="CHKSTRICTCASING" Style="margin-left: 20px;" />
@@ -231,7 +231,7 @@
 
                     <div class="row" style="margin-top:14px; margin-left:4px;">
                         <RadzenCheckBox Name="CHKUSERCERTIFICATES"
-                        @bind-Value=@chkTrustUserGeneratedSslCertificates
+                                        @bind-Value=@chkTrustUserGeneratedSslCertificates
                                         TValue="bool"
                                         Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TrustUserGeneratedSslCertificates)) />
                         <RadzenLabel Text="Trust user generated SSL certificates." Component="CHKUSERCERTIFICATES" Style="margin-left: 20px;" />
@@ -343,7 +343,7 @@
 
                         <RadzenCheckBox Name="TELEFIRSTUSETESTS"
                                         Style="margin-top:20px;margin-left:20px"
-                        @bind-Value=@telescopeFirstUseTests
+                                        @bind-Value=@telescopeFirstUseTests
                                         TValue="bool"
                                         Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TelescopeFirstUseTests)) />
                         <RadzenLabel Text="Enable first time use tests (Target RA/DEC throw exceptions if not set.)"
@@ -352,10 +352,77 @@
                     </div>
 
                     <div class="row">
+
+                        <RadzenCheckBox Name="TELESIDEOFPIERREAD"
+                                        Style="margin-top:20px;margin-left:20px"
+                                        @bind-Value=@chkSideOfPierRead
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.SideOfPierRead)) />
+                        <RadzenLabel Text="Enable extended side of pier read tests"
+                                     Component="TELESIDEOFPIERREAD"
+                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
+                    </div>
+
+                    <div class="row">
+                        <RadzenCheckBox Name="TELESIDEOFPIERWRITE"
+                                        Style="margin-top:20px;margin-left:20px"
+                                        @bind-Value=@chkSideOfPierWrite
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.SideOfPierWrite)) />
+                        <RadzenLabel Text="Enable extended side of pier write tests"
+                                     Component="TELESIDEOFPIERWRITE"
+                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
+                    </div>
+
+                    <div class="row">
+                        <RadzenCheckBox Name="EXTENDEDRATEOFFSETTESTS"
+                                        Style="margin-top:20px;margin-left:20px"
+                                        @bind-Value=@chkExtendedRateOffsetTests
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TelescopeExtendedRateOffsetTests)) />
+                        <RadzenLabel Text="Enable extended rate offset tests"
+                                     Component="EXTENDEDRATEOFFSETTESTS"
+                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
+                    </div>
+
+                    <div class="row">
+                        <RadzenCheckBox Name="EXTENDEDPULSEGUIDETESTS"
+                                        Style="margin-top:20px;margin-left:20px"
+                                        @bind-Value=@chkExtendedPulseGuideTests
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TelescopeExtendedPulseGuideTests)) />
+                        <RadzenLabel Text="Enable extended pulse guide tests"
+                                     Component="EXTENDEDPULSEGUIDETESTS"
+                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
+                    </div>
+
+                    <div class="row">
+                        <RadzenCheckBox Name="EXTENDEDSITETESTS"
+                                        Style="margin-top:20px;margin-left:20px"
+                                        @bind-Value=@chkExtendedSiteTests
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TelescopeExtendedSiteTests)) />
+                        <RadzenLabel Text="Enable extended site property tests"
+                                     Component="EXTENDEDSITETESTS"
+                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
+                    </div>
+
+                    <div class="row">
+                        <RadzenCheckBox Name="EXTENDEDMOVEAXISTESTS"
+                                        Style="margin-top:20px;margin-left:20px"
+                                        @bind-Value=@chkExtendedMoveAxisTests
+                                        TValue="bool"
+                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TelescopeExtendedMoveAxisTests)) />
+                        <RadzenLabel Text="Enable extended move axis tests"
+                                     Component="EXTENDEDMOVEAXISTESTS"
+                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
+                    </div>
+
+                    <div class="row">
                         <RadzenNumeric Name="TELESCOPESLEWTOLERANCE"
                                        Style="margin-top: 20px; margin-left:20px; width: 6em"
                                        Format="0.00"
-                        @bind-Value="@telescopeSlewTolerance"
+                                       @bind-Value="@telescopeSlewTolerance"
                                        TValue="double"
                                        Min="0.0m"
                                        Step="0.1"
@@ -369,7 +436,7 @@
                         <RadzenNumeric Name="TELESCOPEMAXSLEWTIME"
                                        Style="margin-top: 20px;  margin-left:20px; width: 6em"
                                        Format="0"
-                        @bind-Value="@telescopeMaximumSlewTime"
+                                       @bind-Value="@telescopeMaximumSlewTime"
                                        TValue="int"
                                        Min="0"
                                        Step="1"
@@ -380,44 +447,10 @@
                     </div>
 
                     <div class="row">
-
-                        <RadzenCheckBox Name="TELESIDEOFPIERREAD"
-                                        Style="margin-top:20px;margin-left:20px"
-                        @bind-Value=@chkSideOfPierRead
-                                        TValue="bool"
-                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.SideOfPierRead)) />
-                        <RadzenLabel Text="Enable extended side of pier read tests"
-                                     Component="TELESIDEOFPIERREAD"
-                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
-                    </div>
-
-                    <div class="row">
-                        <RadzenCheckBox Name="TELESIDEOFPIERWRITE"
-                                        Style="margin-top:20px;margin-left:20px"
-                        @bind-Value=@chkSideOfPierWrite
-                                        TValue="bool"
-                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.SideOfPierWrite)) />
-                        <RadzenLabel Text="Enable extended side of pier write tests"
-                                     Component="TELESIDEOFPIERWRITE"
-                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
-                    </div>
-
-                    <div class="row">
-                        <RadzenCheckBox Name="EXTENDEDRATEOFFSETTESTS"
-                                        Style="margin-top:20px;margin-left:20px"
-                        @bind-Value=@chkExtendedRateOffsetTests
-                                        TValue="bool"
-                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TelescopeExtendedRateOffsetTests)) />
-                        <RadzenLabel Text="Enable extended rate offset tests"
-                                     Component="EXTENDEDRATEOFFSETTESTS"
-                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
-                    </div>
-
-                    <div class="row">
                         <RadzenNumeric Name="RATEOFFSETTESTDURATION"
                                        Style="margin-top: 20px; margin-left:20px; width: 6em"
                                        Format="0.0"
-                        @bind-Value="@telescopeRateOffsetTestDuration"
+                                       @bind-Value="@telescopeRateOffsetTestDuration"
                                        TValue="double"
                                        Min="1.0m"
                                        Max="3600"
@@ -432,7 +465,7 @@
                         <RadzenNumeric Name="RATEOFFSETTESTVALUELOW"
                                        Style="margin-top: 20px; margin-left:20px; width: 6em"
                                        Format="0.000"
-                        @bind-Value="@telescopeRateOffsetTestValueLow"
+                                       @bind-Value="@telescopeRateOffsetTestValueLow"
                                        TValue="double"
                                        Min="0.001m"
                                        Max="9999"
@@ -459,21 +492,10 @@
                     </div>
 
                     <div class="row">
-                        <RadzenCheckBox Name="EXTENDEDPULSEGUIDETESTS"
-                                        Style="margin-top:20px;margin-left:20px"
-                        @bind-Value=@chkExtendedPulseGuideTests
-                                        TValue="bool"
-                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TelescopeExtendedPulseGuideTests)) />
-                        <RadzenLabel Text="Enable extended pulse guide tests"
-                                     Component="EXTENDEDPULSEGUIDETESTS"
-                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
-                    </div>
-
-                    <div class="row">
                         <RadzenNumeric Name="TELESCOPEPULSEGUIDETOLERANCE"
                                        Style="margin-top: 20px; margin-left:20px; width: 6em"
                                        Format="0"
-                        @bind-Value="@telescopePulseGuideTolerance"
+                                       @bind-Value="@telescopePulseGuideTolerance"
                                        TValue="double"
                                        Min="1"
                                        Max="10"
@@ -482,28 +504,6 @@
                         <RadzenLabel Text="Pulse guide movement tolerance (Default 1, Max 10 arc-seconds)."
                                      Component="TELESCOPEPULSEGUIDETOLERANCE"
                                      Style="margin-left: 20px;margin-top:26px; margin-right: 20px" />
-                    </div>
-
-                    <div class="row">
-                        <RadzenCheckBox Name="EXTENDEDMOVEAXISTESTS"
-                                        Style="margin-top:20px;margin-left:20px"
-                        @bind-Value=@chkExtendedMoveAxisTests
-                                        TValue="bool"
-                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TelescopeExtendedMoveAxisTests)) />
-                        <RadzenLabel Text="Enable extended move axis tests"
-                                     Component="EXTENDEDMOVEAXISTESTS"
-                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
-                    </div>
-
-                    <div class="row">
-                        <RadzenCheckBox Name="EXTENDEDSITETESTS"
-                                        Style="margin-top:20px;margin-left:20px"
-                        @bind-Value=@chkExtendedSiteTests
-                                        TValue="bool"
-                                        Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.TelescopeExtendedSiteTests)) />
-                        <RadzenLabel Text="Enable extended Site property tests"
-                                     Component="EXTENDEDSITETESTS"
-                                     Style="margin-left: 20px;margin-top:20px; margin-right: 20px" />
                     </div>
 
                 </RadzenCard>
@@ -536,7 +536,7 @@
             <div class="row">
                 <RadzenCheckBox Name="CHKFIRSTUSETESTS"
                                 Style="margin-left:20px"
-                @bind-Value=@cameraFirstUseTests
+                                @bind-Value=@cameraFirstUseTests
                                 TValue="bool"
                                 Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.CameraFirstUseTests)) />
                 <RadzenLabel Text="Enable first time use tests"
@@ -548,7 +548,7 @@
             <div class="row">
                 <RadzenCheckBox Name="CHKTESTIMAGEARRAYVARIANT"
                                 Style="margin-left:20px"
-                @bind-Value=@cameraTestImageArrayVariant
+                                @bind-Value=@cameraTestImageArrayVariant
                                 TValue="bool"
                                 Change=@(args => OnBoolItemChange(args, BoolConfigurationItem.TestImageArrayVariant)) />
                 <RadzenLabel Text="Test ImageArrayVariant property"
@@ -605,7 +605,7 @@
                 <RadzenNumeric Name="DOMESLEWTOLERANCE"
                                Style="margin-left: 20px; width: 6em"
                                Format="0.00"
-                @bind-Value="@domeSlewTolerance"
+                               @bind-Value="@domeSlewTolerance"
                                TValue="double"
                                Min="0.0m"
                                Step="0.1"
