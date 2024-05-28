@@ -24,6 +24,21 @@ namespace ConformU
         private const int TEST_TRANSACTION_ID = 67890;
         private const string BAD_PARAMETER_VALUE = "asduio6fghZZ";
 
+        // Create constants representing standard Alpaca parameter names
+        private const string VALUE_PARAMETER_NAME = nameof(BoolResponse.Value);
+        private const string NAME_PARAMETER_NAME = nameof(IStateValue.Name);
+        private const string MINIMUM_PARAMETER_NAME = nameof(AxisRate.Minimum);
+        private const string MAXIMUM_PARAMETER_NAME = nameof(AxisRate.Maximum);
+        private const string TYPE_PARAMETER_NAME = nameof(ImageArrayResponseBase.Type);
+        private const string RANK_PARAMETER_NAME = nameof(ImageArrayResponseBase.Rank);
+        private const string DIMENSION0_LENGTH_PARAMETER_NAME = nameof(Base64ArrayHandOffResponse.Dimension0Length);
+        private const string DIMENSION1_LENGTH_PARAMETER_NAME = nameof(Base64ArrayHandOffResponse.Dimension1Length);
+        private const string DIMENSION2_LENGTH_PARAMETER_NAME = nameof(Base64ArrayHandOffResponse.Dimension2Length);
+        private const string ERROR_NUMBER_PARAMETER_NAME = nameof(ErrorResponse.ErrorNumber);
+        private const string ERROR_MESSAGE_PARAMETER_NAME = nameof(ErrorResponse.ErrorMessage);
+        private const string CLIENT_TRANSACTION_ID_PARAMETER_NAME = nameof(Response.ClientTransactionID);
+        private const string SERVER_TRANSACTION_ID_PARAMETER_NAME = nameof(Response.ServerTransactionID);
+
         private readonly CancellationToken applicationCancellationToken;
         private bool disposedValue;
         private readonly ConformLogger TL;
@@ -42,6 +57,14 @@ namespace ConformU
             Issue,
             Error,
             Debug
+        }
+
+        private enum AdditionalParameterCheck
+        {
+            None,
+            AxisRates,
+            DeviceState,
+            ImageArray
         }
 
         #region New and Dispose
@@ -439,6 +462,16 @@ namespace ConformU
                 await GetNoParameters("InterfaceVersion");
                 await GetNoParameters("Name");
                 await GetNoParameters("SupportedActions");
+
+                // Test DeviceState if Platform 7 or later
+                int interfaceVersion = await GetInterfaceVersion(); // First get the interface version
+
+                // Check whether this is a Platform 7 device that should have DeviceState
+                if (DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, interfaceVersion)) // has DeviceState
+                {
+                    // TestDeviceState
+                    await GetNoParameters("DeviceState", AdditionalParameterCheck.DeviceState);
+                }
             }
             catch (TestCancelledException)
             {
@@ -464,9 +497,6 @@ namespace ConformU
 
                 // Test Connecting
                 await GetNoParameters("Connecting");
-
-                // TestDeviceState
-                await GetNoParameters("DeviceState");
             }
         }
 
@@ -596,11 +626,10 @@ namespace ConformU
                     }
 
                     SetStatus("Getting ImageArray...");
-                    await GetNoParameters("ImageArray");
-
+                    await GetNoParameters("ImageArray", additionalParameterCheck: AdditionalParameterCheck.ImageArray);
 
                     SetStatus("Getting ImageArrayVariant...");
-                    await GetNoParameters("ImageArrayVariant");
+                    await GetNoParameters("ImageArrayVariant", additionalParameterCheck: AdditionalParameterCheck.ImageArray);
 
                     // Remove any added fast image download headers
                     if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.Base64HandOff) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
@@ -1213,6 +1242,8 @@ namespace ConformU
                     try { parameter1 = ((int)telescope.TrackingRate).ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "0"; }
                     await PutOneParameter("TrackingRate", "TrackingRate", parameter1, null);
 
+                    await GetNoParameters("TrackingRates");
+
                     await GetNoParameters("UTCDate"); // Date format:                                                                   yyyy-MM-ddTHH:mm:ss.fffffffZ
                     try { parameter1 = telescope.UTCDate.ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ"); } catch (Exception) { parameter1 = @"2022-12-04T17:45:31.1234567Z"; }
                     await PutOneParameter("UTCDate", "UTCDate", parameter1, null);
@@ -1256,7 +1287,7 @@ namespace ConformU
                         LogInformation($"PUT {TelescopeTester.ABORT_SLEW}", "Test omitted due to Conform configuration setting", null);
                     }
 
-                    await GetOneParameter("AxisRates", "Axis", "0");
+                    await GetOneParameter("AxisRates", "Axis", "0", additionalParameterCheck: AdditionalParameterCheck.AxisRates);
                     await GetOneParameter("CanMoveAxis", "Axis", "0");
 
                     try { parameter1 = telescope.RightAscension.ToString(CultureInfo.InvariantCulture); } catch (Exception) { parameter1 = "21.0"; }
@@ -1417,10 +1448,10 @@ namespace ConformU
 
         #region Test infrastructure
 
-        private async Task GetNoParameters(string method)
+        private async Task GetNoParameters(string method, AdditionalParameterCheck additionalParameterCheck = AdditionalParameterCheck.None)
         {
             // Test good ClientXXId name casing
-            await CallApi("Good ClientID and ClientTransactionID casing", method, HttpMethod.Get, ParamsOk, HttpStatusCode200);
+            await CallApi("Good ClientID and ClientTransactionID casing", method, HttpMethod.Get, ParamsOk, HttpStatusCode200, additionalParameterCheck: additionalParameterCheck);
 
             // Test good ClientXXId name casing with extra parameter
             await CallApi("Good ClientID and ClientTransactionID casing with additional parameter", method, HttpMethod.Get, ParamsOkPlusExtraParameter, HttpStatusCode200);
@@ -1435,14 +1466,14 @@ namespace ConformU
             await TestBadIdValues(method, HttpMethod.Get, null, null, null, null);
         }
 
-        private async Task GetOneParameter(string method, string parameterName, string parameterValue, bool testParameterBadValue = true)
+        private async Task GetOneParameter(string method, string parameterName, string parameterValue, bool testParameterBadValue = true, AdditionalParameterCheck additionalParameterCheck = AdditionalParameterCheck.None)
         {
             // Test good parameter name casing
             List<CheckProtocolParameter> goodParamCasing = new(ParamsOk)
             {
                 new CheckProtocolParameter(parameterName, parameterValue)
             };
-            await CallApi($"Parameter {parameterName} (Good casing)", method, HttpMethod.Get, goodParamCasing, HttpStatusCode200);
+            await CallApi($"Parameter {parameterName} (Good casing)", method, HttpMethod.Get, goodParamCasing, HttpStatusCode200, additionalParameterCheck: additionalParameterCheck);
 
             // Test good parameter name casing with extra parameter
             List<CheckProtocolParameter> goodParamCasingPlusExtraParameter = new(ParamsOkPlusExtraParameter)
@@ -1815,7 +1846,6 @@ namespace ConformU
             uint returnedServerTransactionId = 0;
             AlpacaErrors returnedErrorNumber = AlpacaErrors.AlpacaNoError;
             string returnedErrorMessage = "";
-            string messagePrefix = "";
             string testName = "GET InterfaceVersion";
             List<HttpStatusCode> expectedCodes = HttpStatusCode200;
             List<CheckProtocolParameter> parameters = ParamsOk;
@@ -1859,7 +1889,7 @@ namespace ConformU
 
                                 // Extract the expected value if possible. 0 indicates no value or an invalid value which is not expected to round trip
                                 _ = UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionId);
-                                LogDebug(testName, $"{messagePrefix} - Input ClientTransactionID value: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionId}");
+                                LogDebug(testName, $"Input ClientTransactionID value: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionId}");
                             }
                         }
                     }
@@ -1892,13 +1922,13 @@ namespace ConformU
                                 {
                                     // Extract the expected value if possible. 0 indicates no value or an invalid value which is not expected to round trip
                                     _ = UInt32.TryParse(parameter.ParameterValue, out expectedClientTransactionId);
-                                    LogDebug(testName, $"{messagePrefix} - Input ClientTransactionID name is correctly cased: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionId}");
+                                    LogDebug(testName, $"Input ClientTransactionID name is correctly cased: {parameter.ParameterValue}, Parsed value: {expectedClientTransactionId}");
 
                                 }
                                 else // It is not correctly cased.
                                 {
                                     expectedClientTransactionId = 0;
-                                    LogDebug(testName, $"{messagePrefix} - Input ClientTransactionID name is NOT correctly cased: {parameter.ParameterValue}, Expected value: {expectedClientTransactionId}");
+                                    LogDebug(testName, $"Input ClientTransactionID name is NOT correctly cased: {parameter.ParameterValue}, Expected value: {expectedClientTransactionId}");
                                 }
                             }
                         }
@@ -1953,7 +1983,7 @@ namespace ConformU
                     }
                     catch (Exception ex)
                     {
-                        LogIssue(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) but could not de-serialise the returned JSON string. Exception message: {ex.Message}", responseString);
+                        LogIssue(testName, $"Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) but could not de-serialise the returned JSON string. Exception message: {ex.Message}", responseString);
                         LogBlankLine();
                         return 0;
                     }
@@ -1969,7 +1999,7 @@ namespace ConformU
                     // Test whether the expected value was returned
                     if (returnedClientTransactionId == expectedClientTransactionId) // Round tripped OK
                     {
-                        LogOk(testName, $"{messagePrefix} - The expected ClientTransactionID was returned: {returnedClientTransactionId}", null);
+                        LogOk(testName, $"The expected ClientTransactionID was returned: {returnedClientTransactionId}", null);
                     }
                     else // Did not round trip OK
                     {
@@ -1979,16 +2009,16 @@ namespace ConformU
                             // Check whether the expected value of 0 was returned. 
                             if (returnedClientTransactionId == 0) // Got the expected value of 0
                             {
-                                LogOk(testName, $"{messagePrefix} - The ClientTransactionID was round-tripped as expected. Sent value: {expectedClientTransactionId}, Returned value: {returnedClientTransactionId}", null);
+                                LogOk(testName, $"The ClientTransactionID was round-tripped as expected. Sent value: {expectedClientTransactionId}, Returned value: {returnedClientTransactionId}", null);
                             }
                             else // Got some value other than expected value of 0
                             {
-                                LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {returnedClientTransactionId}, Expected: {expectedClientTransactionId}", null);
+                                LogIssue(testName, $"An unexpected ClientTransactionID was returned: {returnedClientTransactionId}, Expected: {expectedClientTransactionId}", null);
                             }
                         }
                         else // This transaction does not contain a badly cased ClientTransactionID FORM parameter so report an issue
                         {
-                            LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {returnedClientTransactionId}, Expected: {expectedClientTransactionId}", null);
+                            LogIssue(testName, $"An unexpected ClientTransactionID was returned: {returnedClientTransactionId}, Expected: {expectedClientTransactionId}", null);
                         }
                     }
                 }
@@ -1998,11 +2028,11 @@ namespace ConformU
                 {
                     if (returnedServerTransactionId >= 1)  // Valid ServerTransactionID
                     {
-                        LogOk(testName, $"{messagePrefix} - The ServerTransactionID was 1 or greater: {returnedServerTransactionId}", null);
+                        LogOk(testName, $"The ServerTransactionID was 1 or greater: {returnedServerTransactionId}", null);
                     }
                     else // Invalid ServerTransactionID
                     {
-                        LogIssue(testName, $"{messagePrefix} - An unexpected ServerTransactionID was returned: {returnedServerTransactionId}, Expected: 1 or greater", null);
+                        LogIssue(testName, $"An unexpected ServerTransactionID was returned: {returnedServerTransactionId}, Expected: 1 or greater", null);
                     }
                 }
 
@@ -2042,16 +2072,16 @@ namespace ConformU
                             // Log an OK outcome if there was no contextual message or an Information if there was
                             if (string.IsNullOrEmpty(ascomOutcome)) // No contextual message
                             {
-                                LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
+                                LogOk(testName, $"Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
                             }
                             else // Does have a contextual message
                             {
-                                LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected but the device reported an ASCOM error:", ascomOutcome);
+                                LogInformation(testName, $"Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected but the device reported an ASCOM error:", ascomOutcome);
                             }
                         }
                         else // Received a status code other than 200 OK
                         {
-                            LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
+                            LogOk(testName, $"Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
                         }
                     }
                     else // Unexpected outcome
@@ -2059,7 +2089,7 @@ namespace ConformU
                         // Test whether we got an InvalidValue error and are going to accept that
                         if ((httpResponse.StatusCode == HttpStatusCode.OK) & acceptInvalidValueError & (deviceResponse.ErrorNumber == AlpacaErrors.InvalidValue)) // We are going to accept an InvalidValue error
                         {
-                            LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) and an invalid value error: {deviceResponse.ErrorMessage}", responseString);
+                            LogOk(testName, $"Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) and an invalid value error: {deviceResponse.ErrorMessage}", responseString);
                         }
                         else // Did not get the expected response so log this as an issue
                         {
@@ -2071,7 +2101,7 @@ namespace ConformU
                             expectedCodeList = expectedCodeList.TrimEnd(' ', ',');
 
                             LogIssue(testName,
-                                $"{messagePrefix} - Expected HTTP status{(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString);
+                                $"Expected HTTP status{(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString);
 
                             LogBlankLine();
                         }
@@ -2079,7 +2109,7 @@ namespace ConformU
                 }
                 else // There are no expected codes, which indicates that any code is acceptable
                 {
-                    LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode})", responseString);
+                    LogInformation(testName, $"Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode})", responseString);
                 }
 
                 #endregion
@@ -2087,15 +2117,15 @@ namespace ConformU
             }
             catch (TaskCanceledException)
             {
-                LogError(testName, $"{messagePrefix} - The HTTP request was cancelled", null);
+                LogError(testName, $"The HTTP request was cancelled", null);
             }
             catch (HttpRequestException ex)
             {
-                LogError(testName, $"{messagePrefix} - {ex.Message}", null);
+                LogError(testName, $"{ex.Message}", null);
             }
             catch (Exception ex)
             {
-                LogError(testName, $"{messagePrefix} - {ex}", null);
+                LogError(testName, $"{ex}", null);
             }
 
             return deviceResponse.Value;
@@ -2109,13 +2139,14 @@ namespace ConformU
                                    bool ignoreApplicationCancellation = false,
                                    bool badlyCasedTransactionIdName = false,
                                    bool acceptInvalidValueError = false,
-                                   bool negativeIds = false)
+                                   bool negativeIds = false,
+                                   AdditionalParameterCheck additionalParameterCheck = AdditionalParameterCheck.None)
         {
             string methodLowerCase = method.ToLowerInvariant();
             string httpMethodUpperCase = httpMethod.ToString().ToUpperInvariant();
 
             string url = $"/api/v1/{settings.DeviceType.Value.ToString().ToLowerInvariant()}/{settings.AlpacaDevice.AlpacaDeviceNumber}/{methodLowerCase}";
-            await SendToDevice($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation, badlyCasedTransactionIdName, acceptInvalidValueError, negativeIds: negativeIds);
+            await SendToDevice($"{httpMethodUpperCase} {method}", messagePrefix, url, httpMethod, parameters, expectedCodes, ignoreApplicationCancellation, badlyCasedTransactionIdName, acceptInvalidValueError, negativeIds: negativeIds, additionalParameterCheck: additionalParameterCheck);
         }
 
         private async Task SendToDevice(string testName,
@@ -2128,7 +2159,8 @@ namespace ConformU
                                 bool badlyCasedTransactionIdName = false,
                                 bool acceptInvalidValueError = false,
                                 bool badUri = false,
-                                bool negativeIds = false)
+                                bool negativeIds = false,
+                                AdditionalParameterCheck additionalParameterCheck = AdditionalParameterCheck.None)
         {
             string ascomOutcome = null;
             CancellationTokenSource requestCancellationTokenSource;
@@ -2264,7 +2296,7 @@ namespace ConformU
                 // Get the device response
                 string responseString = await httpResponse.Content.ReadAsStringAsync();
 
-                // Lig the received response
+                // Log the received response
                 LogDebug(testName, $"HTTP Status code: {httpResponse.StatusCode}");
                 LogDebug(testName, $"JSON response length: {responseString.Length}");
                 LogDebug(testName, $"JSON response: #####{responseString[..Math.Min(responseString.Length, 250)]}#####");
@@ -2301,9 +2333,20 @@ namespace ConformU
                             contentType = new MediaTypeHeaderValue(DEFAULT_CONTENT_TYPE, DEFAULT_ENCODING);
                         }
 
+                        // Check whether this is a Base64Handoff response
+                        bool isBase64Handoff = false;
+                        try
+                        {
+                            isBase64Handoff = httpResponse.Headers.Contains(AlpacaConstants.BASE64_HANDOFF_HEADER); // Check whether the base 64 hand-off header was returned
+                        }
+                        catch (Exception ex)
+                        {
+                            LogDebug(testName, $"Exception reading base 64 header:{ex.Message}\r\n{ex}");
+                        }
+
                         // Handle the response, which will be either JSON or ImageBytes
                         LogDebug(testName, $"About to test content type...");
-                        if (!contentType.ToString().Contains(AlpacaConstants.IMAGE_BYTES_MIME_TYPE, StringComparison.InvariantCultureIgnoreCase)) // Should be a JSON response
+                        if (!contentType.ToString().Contains(AlpacaConstants.IMAGE_BYTES_MIME_TYPE, StringComparison.InvariantCultureIgnoreCase)) // This is a JSON response
                         {
                             LogDebug(testName, $"Processing JSON response");
 
@@ -2316,6 +2359,259 @@ namespace ConformU
                             returnedServerTransactionID = deviceResponse.ServerTransactionID;
                             returnedErrorNumber = deviceResponse.ErrorNumber;
                             returnedErrorMessage = deviceResponse.ErrorMessage;
+
+                            // Check casing of JSON parameters
+                            try
+                            {
+                                // Get the whole JSON string as a JSON document
+                                using (JsonDocument document = JsonDocument.Parse(responseString))
+                                {
+                                    // Get the JSON root element
+                                    JsonElement rootElement = document.RootElement;
+
+                                    // Check casing of ErrorMessage and ErrorNumber
+                                    JsonElement.ObjectEnumerator rootEnumerator = rootElement.EnumerateObject();
+                                    foreach (JsonProperty property in rootEnumerator)
+                                    {
+                                        // Check whether this is a ClientTransactionID parameter cased in any way
+                                        if (property.Name.ToLowerInvariant() == CLIENT_TRANSACTION_ID_PARAMETER_NAME.ToLowerInvariant()) // This is an ClientTransactionID parameter
+                                        {
+                                            // Check whether the property is correctly cased
+                                            if (property.Name == CLIENT_TRANSACTION_ID_PARAMETER_NAME) // Casing is correct
+                                                LogOk(testName, $"{CLIENT_TRANSACTION_ID_PARAMETER_NAME} is correctly cased", null);
+                                            else
+                                                LogIssue(testName, $"The {CLIENT_TRANSACTION_ID_PARAMETER_NAME} JSON parameter is incorrectly cased, it should be cased like this: {CLIENT_TRANSACTION_ID_PARAMETER_NAME}", responseString);
+                                        }
+
+                                        // Check whether this is a ServerTransactionId parameter cased in any way
+                                        if (property.Name.ToLowerInvariant() == SERVER_TRANSACTION_ID_PARAMETER_NAME.ToLowerInvariant()) // This is an ServerTransactionId parameter
+                                        {
+                                            // Check whether the property is correctly cased
+                                            if (property.Name == SERVER_TRANSACTION_ID_PARAMETER_NAME) // Casing is correct
+                                                LogOk(testName, $"{SERVER_TRANSACTION_ID_PARAMETER_NAME} is correctly cased", null);
+                                            else
+                                                LogIssue(testName, $"The {SERVER_TRANSACTION_ID_PARAMETER_NAME} JSON parameter is incorrectly cased, it should be cased like this: {SERVER_TRANSACTION_ID_PARAMETER_NAME}", responseString);
+                                        }
+
+                                        // Check whether this is an ErrorNumber parameter cased in any way
+                                        if (property.Name.ToLowerInvariant() == ERROR_NUMBER_PARAMETER_NAME.ToLowerInvariant()) // This is an ErrorNumber parameter
+                                        {
+                                            // Check whether the property is correctly cased
+                                            if (property.Name == ERROR_NUMBER_PARAMETER_NAME) // Casing is correct
+                                                LogOk(testName, $"{ERROR_NUMBER_PARAMETER_NAME} is correctly cased", null);
+                                            else
+                                                LogIssue(testName, $"The {ERROR_NUMBER_PARAMETER_NAME} JSON parameter is incorrectly cased, it should be cased like this: {ERROR_NUMBER_PARAMETER_NAME}", responseString);
+                                        }
+
+                                        // Check whether this is an ErrorMessage parameter cased in any way
+                                        if (property.Name.ToLowerInvariant() == ERROR_MESSAGE_PARAMETER_NAME.ToLowerInvariant()) // This is an ErrorMessage parameter
+                                        {
+                                            // Check whether the property is correctly cased
+                                            if (property.Name == ERROR_MESSAGE_PARAMETER_NAME) // Casing is correct
+                                                LogOk(testName, $"{ERROR_MESSAGE_PARAMETER_NAME} is correctly cased", null);
+                                            else
+                                                LogIssue(testName, $"The {ERROR_MESSAGE_PARAMETER_NAME} JSON parameter is incorrectly cased, it should be cased like this: {ERROR_MESSAGE_PARAMETER_NAME}", responseString);
+                                        }
+                                    }
+
+                                    // Check whether this is an HTTP GET and if so confirm that a Value element is returned plus other possible parameters
+                                    if (httpMethod == HttpMethod.Get) // This is a GET method
+                                    {
+                                        // Check whether the root element has a Value parameter
+                                        if (rootElement.TryGetProperty(VALUE_PARAMETER_NAME, out _)) // A Value parameter exists
+                                        {
+                                            LogOk(testName, $"JSON {VALUE_PARAMETER_NAME} parameter found OK", null);
+
+                                            // Get the Value property as a document element
+                                            JsonElement valueElement = rootElement.GetProperty(VALUE_PARAMETER_NAME);
+
+                                            // Check additional parameters if required
+                                            switch (additionalParameterCheck)
+                                            {
+                                                case AdditionalParameterCheck.None:
+                                                    // No additional parameters so no action required
+                                                    break;
+
+                                                case AdditionalParameterCheck.AxisRates:
+                                                    // Get an enumerator for the array of AxisRate objects
+                                                    JsonElement.ArrayEnumerator axisRatesEnumerator = valueElement.EnumerateArray();
+
+                                                    // Iterate over the device state values, getting each as a JSON document element
+                                                    int rateCount = 0;
+                                                    foreach (JsonElement axisRateElement in axisRatesEnumerator)
+                                                    {
+                                                        // Increment the rate counter
+                                                        rateCount++;
+
+                                                        // Search for a Name parameter
+                                                        if (axisRateElement.TryGetProperty(MINIMUM_PARAMETER_NAME, out _)) // Found a Minimum parameter
+                                                        {
+                                                            LogOk(testName, $"Rate {rateCount} - JSON {MINIMUM_PARAMETER_NAME} parameter found OK", null);
+                                                        }
+                                                        else // Did not find the expected Minimum parameter so log an issue
+                                                        {
+                                                            LogIssue(testName, $"Rate {rateCount} - A JSON parameter of name {MINIMUM_PARAMETER_NAME} was expected, but was not found within the returned AxisRate object: {axisRateElement}. This test is case sensitive.", responseString);
+                                                            LogInformation(testName, $"The JSON {MINIMUM_PARAMETER_NAME} parameter must exist and be cased like this: {MINIMUM_PARAMETER_NAME}.", null);
+                                                        }
+
+                                                        // Search for a Maximum parameter
+                                                        if (axisRateElement.TryGetProperty(MAXIMUM_PARAMETER_NAME, out _)) // Found a Maximum parameter
+                                                        {
+                                                            // Log the string value of the Value property
+                                                            LogOk(testName, $"Rate {rateCount} - JSON {MAXIMUM_PARAMETER_NAME} parameter found OK", null);
+                                                        }
+                                                        else // Did not find the expected Value parameter so log an issue
+                                                        {
+                                                            LogIssue(testName, $"Rate {rateCount} - A JSON parameter of name {MAXIMUM_PARAMETER_NAME} was expected, but was not found within the returned AxisRate object:{axisRateElement}. This test is case sensitive.", responseString);
+                                                            LogInformation(testName, $"The JSON {MAXIMUM_PARAMETER_NAME} parameter must exist and be cased like this: {MAXIMUM_PARAMETER_NAME}.", null);
+                                                        }
+                                                    }
+                                                    break;
+
+                                                case AdditionalParameterCheck.DeviceState:
+                                                    // Get an enumerator for the array of DeviceState objects
+                                                    JsonElement.ArrayEnumerator deviceStateEnumerator = valueElement.EnumerateArray();
+
+                                                    // Iterate over the device state values, getting each as a JSON document element
+                                                    foreach (JsonElement deviceStateElement in deviceStateEnumerator)
+                                                    {
+                                                        string propertyName = "";
+
+                                                        // Search for a Name parameter
+                                                        if (deviceStateElement.TryGetProperty(NAME_PARAMETER_NAME, out _)) // Found a name parameter
+                                                        {
+                                                            // Log the string value of the Name property
+                                                            propertyName = deviceStateElement.GetProperty(NAME_PARAMETER_NAME).GetString();
+                                                            LogOk(testName, $"{propertyName} - JSON {NAME_PARAMETER_NAME} parameter found OK", null);
+                                                        }
+                                                        else // Did not find the expected Name parameter so log an issue
+                                                        {
+                                                            LogIssue(testName, $"A JSON parameter of name {NAME_PARAMETER_NAME} was expected, but was not found within the returned DeviceState object: {deviceStateElement}. This test is case sensitive.", responseString);
+                                                            LogInformation(testName, $"The JSON {NAME_PARAMETER_NAME} parameter must exist and be cased like this: {NAME_PARAMETER_NAME}.", null);
+                                                        }
+
+                                                        // Search for a Value parameter
+                                                        if (deviceStateElement.TryGetProperty(VALUE_PARAMETER_NAME, out _)) // Found a Value parameter
+                                                        {
+                                                            // Log the string value of the Value property
+                                                            LogOk(testName, $"{propertyName} - JSON {VALUE_PARAMETER_NAME} parameter found OK", null);
+                                                        }
+                                                        else // Did not find the expected Value parameter so log an issue
+                                                        {
+                                                            LogIssue(testName, $"A JSON parameter of name {VALUE_PARAMETER_NAME} was expected, but was not found within the returned DeviceState object: {deviceStateElement}. This test is case sensitive.", responseString);
+                                                            LogInformation(testName, $"The JSON {VALUE_PARAMETER_NAME} parameter must exist and be cased like this: {VALUE_PARAMETER_NAME}.", null);
+                                                        }
+                                                    }
+                                                    break;
+
+                                                case AdditionalParameterCheck.ImageArray:
+                                                    // Check whether the root element has a Type parameter
+                                                    if (rootElement.TryGetProperty(TYPE_PARAMETER_NAME, out _)) // A Type parameter exists
+                                                    {
+                                                        LogOk(testName, $"JSON {TYPE_PARAMETER_NAME} parameter found OK", null);
+                                                    }
+                                                    else // A Type parameter can not be found. It may be missing, incorrectly spelled or mis-cased.
+                                                    {
+                                                        LogIssue(testName, $"A JSON parameter of name {TYPE_PARAMETER_NAME} was expected, but was not found in the JSON response. This test is case sensitive.", responseString);
+                                                        LogInformation(testName, $"The JSON {TYPE_PARAMETER_NAME} parameter must exist and be cased like this: {TYPE_PARAMETER_NAME}.", null);
+                                                    }
+
+                                                    // Check whether the root element has a Rank parameter
+                                                    if (rootElement.TryGetProperty(RANK_PARAMETER_NAME, out _)) // A Rank parameter exists
+                                                    {
+                                                        LogOk(testName, $"JSON {RANK_PARAMETER_NAME} parameter found OK", null);
+                                                    }
+                                                    else // A Rank parameter can not be found. It may be missing, incorrectly spelled or mis-cased.
+                                                    {
+                                                        LogIssue(testName, $"A JSON parameter of name {RANK_PARAMETER_NAME} was expected, but was not found in the JSON response. This test is case sensitive.", responseString);
+                                                        LogInformation(testName, $"The JSON {RANK_PARAMETER_NAME} parameter must exist and be cased like this: {RANK_PARAMETER_NAME}.", null);
+                                                    }
+                                                    break;
+
+                                                default:
+                                                    LogError(testName, $"Unknown AdditionalParameterCheck value: {additionalParameterCheck}", null);
+                                                    break;
+                                            }
+                                        }
+                                        else // A Value parameter can not be found. It may be missing, incorrectly spelled or mis-cased.
+                                        {
+                                            // Check whether this is a base 64 hand-off response
+                                            if (isBase64Handoff) // This is a base 64 hand-off
+                                            {
+                                                // Search for a Type parameter
+                                                if (rootElement.TryGetProperty(TYPE_PARAMETER_NAME, out _)) // A Type parameter exists
+                                                {
+                                                    // Log the Type property
+                                                    LogOk(testName, $"Base64HandOff - JSON {TYPE_PARAMETER_NAME} parameter found OK", null);
+                                                }
+                                                else // Did not find the expected Type parameter so log an issue
+                                                {
+                                                    LogIssue(testName, $"Base64HandOff - A JSON parameter of name {TYPE_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString);
+                                                    LogInformation(testName, $"The JSON {TYPE_PARAMETER_NAME} parameter must exist and be cased like this: {TYPE_PARAMETER_NAME}.", null);
+                                                }
+
+                                                // Search for a Rank parameter
+                                                if (rootElement.TryGetProperty(RANK_PARAMETER_NAME, out _)) // A Rank parameter exists
+                                                {
+                                                    // Log the Rank property
+                                                    LogOk(testName, $"Base64HandOff - JSON {RANK_PARAMETER_NAME} parameter found OK", null);
+                                                }
+                                                else // Did not find the expected Rank parameter so log an issue
+                                                {
+                                                    LogIssue(testName, $"Base64HandOff - A JSON parameter of name {RANK_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString);
+                                                    LogInformation(testName, $"The JSON {RANK_PARAMETER_NAME} parameter must exist and be cased like this: {RANK_PARAMETER_NAME}.", null);
+                                                }
+
+                                                // Search for a Dimension0 parameter
+                                                if (rootElement.TryGetProperty(DIMENSION0_LENGTH_PARAMETER_NAME, out _)) // A Dimension0 parameter exists
+                                                {
+                                                    // Log the Dimension0 property
+                                                    LogOk(testName, $"Base64HandOff - JSON {DIMENSION0_LENGTH_PARAMETER_NAME} parameter found OK", null);
+                                                }
+                                                else // Did not find the expected Dimension0 so log an issue
+                                                {
+                                                    LogIssue(testName, $"Base64HandOff - A JSON parameter of name {DIMENSION0_LENGTH_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString);
+                                                    LogInformation(testName, $"The JSON {DIMENSION0_LENGTH_PARAMETER_NAME} parameter must exist and be cased like this: {DIMENSION0_LENGTH_PARAMETER_NAME}.", null);
+                                                }
+
+                                                // Search for a Dimension1 parameter
+                                                if (rootElement.TryGetProperty(DIMENSION1_LENGTH_PARAMETER_NAME, out _)) // A Dimension1 parameter exists
+                                                {
+                                                    // Log the Dimension1 property
+                                                    LogOk(testName, $"Base64HandOff - JSON {DIMENSION1_LENGTH_PARAMETER_NAME} parameter found OK", null);
+                                                }
+                                                else // Did not find the expected Dimension1 parameter so log an issue
+                                                {
+                                                    LogIssue(testName, $"Base64HandOff - A JSON parameter of name {DIMENSION1_LENGTH_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString);
+                                                    LogInformation(testName, $"The JSON {DIMENSION1_LENGTH_PARAMETER_NAME} parameter must exist and be cased like this: {DIMENSION1_LENGTH_PARAMETER_NAME}.", null);
+                                                }
+
+                                                // Search for a Dimension2 parameter
+                                                if (rootElement.TryGetProperty(DIMENSION2_LENGTH_PARAMETER_NAME, out _)) // A Dimension2 parameter exists
+                                                {
+                                                    // Log the Dimension2 property
+                                                    LogOk(testName, $"Base64HandOff - JSON {DIMENSION2_LENGTH_PARAMETER_NAME} parameter found OK", null);
+                                                }
+                                                else // Did not find the expected Dimension2 parameter so log an issue
+                                                {
+                                                    LogIssue(testName, $"Base64HandOff - A JSON parameter of name {DIMENSION2_LENGTH_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString);
+                                                    LogInformation(testName, $"The JSON {DIMENSION2_LENGTH_PARAMETER_NAME} parameter must exist and be cased like this: {DIMENSION2_LENGTH_PARAMETER_NAME}.", null);
+                                                }
+                                            }
+                                            else // Not a base 64 hand-off response so report the missing Value parameter
+                                            {
+                                                LogIssue(testName, $"A JSON parameter of name {VALUE_PARAMETER_NAME} was expected, but was not found in the JSON response. This test is case sensitive.", responseString);
+                                                LogInformation(testName, $"The JSON {VALUE_PARAMETER_NAME} parameter must exist and be cased like this: {VALUE_PARAMETER_NAME}.", null);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                LogIssue(testName, $"Exception while parsing Alpaca response JSON: {ex.Message}", responseString);
+                                LogDebug(testName, ex.ToString());
+                            }
 
                         } // Handle a JSON response
                         else // Should be an ImageBytes binary response
@@ -2476,14 +2772,14 @@ namespace ConformU
                         }
                         else
                         {
-                            ascomOutcome =
-                                $"Device returned a {returnedErrorNumber} error (0x{returnedErrorNumber:X}) for client transaction: {returnedClientTransactionID}, server transaction: {returnedServerTransactionID}. Error message: {returnedErrorMessage}";
+                            ascomOutcome = $"Device returned a {returnedErrorNumber} error (0x{returnedErrorNumber:X}) for client transaction: {returnedClientTransactionID}, " +
+                                $"server transaction: {returnedServerTransactionID}. Error message: {returnedErrorMessage}";
                         }
                     }
                     catch (Exception) // Handle possibility of a non-ASCOM error number
                     {
-                        ascomOutcome =
-                            $"Device returned error number 0x{returnedErrorNumber:X} for client transaction: {returnedClientTransactionID}, server transaction: {returnedServerTransactionID}. Error message: {returnedErrorMessage}";
+                        ascomOutcome = $"Device returned error number 0x{returnedErrorNumber:X} for client transaction: {returnedClientTransactionID}, " +
+                            $"server transaction: {returnedServerTransactionID}. Error message: {returnedErrorMessage}";
                     }
                 }
 
@@ -2776,7 +3072,7 @@ namespace ConformU
         ///    <param name = "padding" > Number of characters to which the message should be right padded</param>
         private void LogMessage(string method, TestOutcome outcome, string message, string contextMessage = null)
         {
-            string methodString, outcomeString;
+            string methodString, outcomeString, methodStringNoOutcome;
 
             switch (outcome)
             {
@@ -2804,6 +3100,7 @@ namespace ConformU
                     throw new Exception($"Unknown test outcome type: {outcome}");
             }
             methodString = $"{method,-ExtensionMethods.COLUMN_WIDTH}{outcomeString,-ExtensionMethods.OUTCOME_WIDTH}";
+            methodStringNoOutcome = $"{method,-ExtensionMethods.COLUMN_WIDTH}{"",-ExtensionMethods.OUTCOME_WIDTH}";
 
             // Write to the logger
             TL?.LogMessage(methodString, message);
@@ -2811,7 +3108,7 @@ namespace ConformU
             // Add the context message if present
             if (contextMessage is not null)
             {
-                TL?.LogMessage(methodString, $"  Response: {contextMessage}");
+                TL?.LogMessage(methodStringNoOutcome, $"  Response: {contextMessage}");
             }
         }
 
