@@ -776,7 +776,7 @@ namespace ConformU
                 if (duration.TotalSeconds > standardTargetResponseTime) // The Move command duration was more than the standard response time, so could be a synchronous call
                 {
                     // Check whether this is a Platform 6 or Platform 7 device
-                    if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Focuser, GetInterfaceVersion())) // Platform 7 or later interface
+                    if (IsPlatform7OrLater) // Platform 7 or later interface
                     {
                         LogDebug(testName, $"Platform 7 - Synchronous call behaviour - the call returned in {duration.TotalSeconds} seconds.");
 

@@ -546,7 +546,7 @@ namespace ConformU
                 else // Synchronous operation
                 {
                     // Check whether this is a Platform 7 or later device and message accordingly
-                    if (isPlatform7OrLater) // Platform 7 or later interface
+                    if (IsPlatform7OrLater) // Platform 7 or later interface
                     {
                         if (sw.Elapsed.TotalSeconds < standardTargetResponseTime)
 

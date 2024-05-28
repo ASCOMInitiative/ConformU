@@ -984,7 +984,7 @@ namespace ConformU
                 }
 
                 // Report synchronous behaviour for Platform 7 and later interfaces
-                if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Rotator, GetInterfaceVersion())) // This is a Platform 7 or later interface
+                if (IsPlatform7OrLater) // This is a Platform 7 or later interface
                 {
                     // Check whether IsMoving can be read
                     if (canReadIsMoving) // IsMoving can be read

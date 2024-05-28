@@ -588,7 +588,7 @@ namespace ConformU
                 LogIssue("CanUnPark", "CanUnPark is true but CanPark is false - this does not comply with ASCOM specification");
 
             // For Platform 7 ITelescopeV4 and later interfaces, make sure that sync and async slew methods are tied together
-            if (isPlatform7OrLater)
+            if (IsPlatform7OrLater)
             {
                 // Test whether the two equatorial slewing values are both either true or false
                 if ((canSlew & !canSlewAsync) || (!canSlew & canSlewAsync)) // The values are not tied together
@@ -2590,7 +2590,7 @@ namespace ConformU
                                     }
 
                                     // For ITelescopeV4 and later make sure that RightAscensionRate & DeclinationRate are only usable when tracking at Sidereal rate
-                                    if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion()))
+                                    if (IsPlatform7OrLater)
                                     {
                                         CheckRateOffsets(currentDriveRate, RateOffset.DeclinationRate);
                                         CheckRateOffsets(currentDriveRate, RateOffset.RightAscensionRate);
@@ -2755,10 +2755,10 @@ namespace ConformU
                                     LogTestAndMessage("Park", "Parking scope...");
                                     LogCallToDriver("Park", "About to call Park method");
 
-                                    TimeMethod($"Park", () => telescopeDevice.Park(), isPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
+                                    TimeMethod($"Park", () => telescopeDevice.Park(), IsPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
 
                                     // Wait for the park to complete using Platform 6 or 7 semantics as appropriate
-                                    if (isPlatform7OrLater) // Platform 7 or later device
+                                    if (IsPlatform7OrLater) // Platform 7 or later device
                                     {
                                         LogCallToDriver("Park", "About to get Slewing property repeatedly...");
                                         WaitWhile("Waiting for scope to park", () => telescopeDevice.Slewing, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -2784,7 +2784,7 @@ namespace ConformU
                                             telescopeDevice.Park();
 
                                             // Wait for the park to complete using Platform 6 or 7 semantics as appropriate
-                                            if (isPlatform7OrLater) // Platform 7 or later device
+                                            if (IsPlatform7OrLater) // Platform 7 or later device
                                             {
                                                 LogCallToDriver("Park", "About to get Slewing property repeatedly...");
                                                 WaitWhile("Waiting for scope to park", () => telescopeDevice.Slewing, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -2916,10 +2916,10 @@ namespace ConformU
                                             SetStatus("Unparking scope");
 
                                             LogCallToDriver("Unpark", "About to call Unpark method");
-                                            TimeMethod($"Unpark", () => telescopeDevice.Unpark(), isPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
+                                            TimeMethod($"Unpark", () => telescopeDevice.Unpark(), IsPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
 
                                             // Wait for the un park to complete using Platform 6 or 7 semantics as appropriate
-                                            if (isPlatform7OrLater) // Platform 7 or later device
+                                            if (IsPlatform7OrLater) // Platform 7 or later device
                                             {
                                                 LogCallToDriver("Unpark", "About to get Slewing property repeatedly...");
                                                 WaitWhile("Waiting for scope to unpark when parked", () => telescopeDevice.Slewing, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -2927,7 +2927,7 @@ namespace ConformU
                                             else // Platform 6 device
                                             {
                                                 LogCallToDriver("Unpark", "About to get AtPark property repeatedly...");
-                                                WaitWhile("Waiting for scope to unpark when parked", () => !telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                                WaitWhile("Waiting for scope to unpark when parked", () => telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
                                             }
 
                                             // Validate unparking
@@ -2955,7 +2955,7 @@ namespace ConformU
                                                     telescopeDevice.Unpark();
 
                                                     // Wait for the unpark to complete using Platform 6 or 7 semantics as appropriate
-                                                    if (isPlatform7OrLater) // Platform 7 or later device
+                                                    if (IsPlatform7OrLater) // Platform 7 or later device
                                                     {
                                                         LogCallToDriver("Unpark", "About to get Slewing property repeatedly...");
                                                         WaitWhile("Waiting for scope to unpark when parked", () => telescopeDevice.Slewing, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -2963,7 +2963,7 @@ namespace ConformU
                                                     else // Platform 6 device
                                                     {
                                                         LogCallToDriver("Unpark", "About to get AtPark property repeatedly...");
-                                                        WaitWhile("Waiting for scope to unpark when parked", () => !telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
+                                                        WaitWhile("Waiting for scope to unpark when parked", () => telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
                                                     }
 
                                                     // Validate unparking
@@ -5433,7 +5433,7 @@ namespace ConformU
                 catch (Exception ex)
                 {
                     // Check whether this is a Platform 7 or later device
-                    if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion())) // This is a Platform 7 or later device so expect a ParkedException
+                    if (IsPlatform7OrLater) // This is a Platform 7 or later device so expect a ParkedException
                     {
                         // Check whether this is a ParkedException or its COM equivalent
                         if (IsParkedException(ex))
@@ -6017,10 +6017,10 @@ namespace ConformU
                                 LogTestAndMessage("Park", "Parking scope...");
                                 LogCallToDriver(testName, "About to call FindHome method");
 
-                                TimeMethod(testName, () => telescopeDevice.FindHome(), isPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
+                                TimeMethod(testName, () => telescopeDevice.FindHome(), IsPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
 
-                                // Wait for the park to complete using Platform 6 or 7 semantics as appropriate
-                                if (isPlatform7OrLater) // Platform 7 or later device
+                                // Wait for the home to complete using Platform 6 or 7 semantics as appropriate
+                                if (IsPlatform7OrLater) // Platform 7 or later device
                                 {
                                     LogCallToDriver(testName, "About to get Slewing property repeatedly...");
                                     WaitWhile("Waiting for scope to home...", () => telescopeDevice.Slewing, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -6107,7 +6107,7 @@ namespace ConformU
                                 LogDebug(testName, $"PulseGuide command time: {PULSEGUIDE_MOVEMENT_TIME:0.0} seconds, PulseGuide call duration: {pulseGuideTime:0.0} seconds");
 
                                 // Check whether the pulse guide completed before the pulse duration. Target time depends on interface version. Standard response time for Platform 7, 75% of pulse guide time for Platform 6
-                                if (pulseGuideTime < (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion()) ? standardTargetResponseTime : PULSEGUIDE_MOVEMENT_TIME * 0.75)) // Returned in less than the synchronous limit time so treat as asynchronous
+                                if (pulseGuideTime < (IsPlatform7OrLater ? standardTargetResponseTime : PULSEGUIDE_MOVEMENT_TIME * 0.75)) // Returned in less than the synchronous limit time so treat as asynchronous
                                 {
                                     LogCallToDriver(testName, "About to get IsPulseGuiding property");
                                     if (telescopeDevice.IsPulseGuiding)
@@ -6134,7 +6134,7 @@ namespace ConformU
                                 else // Took longer than the synchronous limit time so treat as synchronous
                                 {
                                     // Check whether this is a Platform 7 or later interface
-                                    if (DeviceCapabilities.IsPlatform7OrLater(DeviceTypes.Telescope, GetInterfaceVersion())) // Platform 7 or later is expected
+                                    if (IsPlatform7OrLater) // Platform 7 or later is expected
                                     {
                                         LogIssue(testName, $"Synchronous pulse guide found. The guide took {pulseGuideTime} seconds to complete, the expected maximum time is {standardTargetResponseTime} seconds.");
                                         LogInfo(testName, $"In ITelescopeV4 and later interfaces, PulseGuide should be implemented asynchronously: returning quickly with isMoving returning TRUE.");

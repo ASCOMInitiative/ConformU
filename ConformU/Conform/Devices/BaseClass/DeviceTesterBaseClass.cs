@@ -48,7 +48,6 @@ namespace ConformU
 
         private bool hasProperties, hasCanProperties, hasMethods, hasPreRunCheck, hasPostRunCheck, hasPerformanceCheck;
         private bool hasPreConnectCheck;
-        internal bool isPlatform7OrLater;
 
         private IAscomDeviceV2 baseClassDevice;
         private DeviceTypes baseClassDeviceType;
@@ -741,7 +740,7 @@ namespace ConformU
             LogDebug("Connect", $"Interface version: {GetInterfaceVersion()}");
 
             // Set an internal indicating whether this is a Platform 7 or later device
-            isPlatform7OrLater = DeviceCapabilities.IsPlatform7OrLater(settings.DeviceType, GetInterfaceVersion());
+            IsPlatform7OrLater = DeviceCapabilities.IsPlatform7OrLater(settings.DeviceType, GetInterfaceVersion());
 
             // Use Connect /Disconnect if present
             if (DeviceCapabilities.HasConnectAndDeviceState(baseClassDeviceType, GetInterfaceVersion()))
@@ -970,6 +969,8 @@ namespace ConformU
             }
         }
 
+        internal bool IsPlatform7OrLater { get; private set; }
+
         /// <summary>
         /// Get error codes.
         /// </summary>
@@ -1077,7 +1078,7 @@ namespace ConformU
 
         #region Support code common to all device types
 
-        public void SynchronousBehaviourInformation(string operation, string completionFalse,string completionTrue)
+        public void SynchronousBehaviourInformation(string operation, string completionFalse, string completionTrue)
         {
             LogInfo(testName, $"As an I{settings.DeviceType}V{GetInterfaceVersion()} device, {operation} should have operated asynchronously: Returning quickly (less than {standardTargetResponseTime} second) after setting {completionFalse}.");
             LogInfo(testName, $"The {settings.DeviceType} device should then continue the operation in the background and set {completionTrue} when it has completed.");

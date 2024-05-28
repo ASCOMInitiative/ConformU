@@ -2899,7 +2899,7 @@ namespace ConformU
                         // Test whether the required exposure time has passed
                         if (endTime.Subtract(startTime).TotalSeconds >= requiredDuration) // Required exposure time has elapsed
                         {
-                            if (isPlatform7OrLater) // Platform 7 or later device
+                            if (IsPlatform7OrLater) // Platform 7 or later device
                             {
                                 LogIssue(testName, $"StartExposure operated synchronously: ImageReady was True and CameraState was Idle when StartExposure returned after the full exposure time: {requiredDuration} seconds.");
                                 SynchronousBehaviourInformation(testName, "ImageReady False", "ImageReady True");
@@ -3747,7 +3747,7 @@ namespace ConformU
         private void CameraPulseGuideTest(GuideDirection pDirection)
         {
             // If this is an ICameraV4 or later device pulse guiding cannot be tested without the IsPulseGuiding property being functional to support async operation
-            if (isPlatform7OrLater)
+            if (IsPlatform7OrLater)
             {
                 if (!mIsPulseGuidingFunctional)
                 {
@@ -3760,7 +3760,7 @@ namespace ConformU
             Stopwatch duration = Stopwatch.StartNew();
 
             LogCallToDriver("ConformanceCheck", $"About to call PulseGuide - {pDirection}");
-            TimeMethodTwoParams($"PulseGuide {pDirection}", camera.PulseGuide, pDirection, CAMERA_PULSE_DURATION_MILLISECONDS, isPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
+            TimeMethodTwoParams($"PulseGuide {pDirection}", camera.PulseGuide, pDirection, CAMERA_PULSE_DURATION_MILLISECONDS, IsPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
 
             // Stop the duration timer
             duration.Stop();
@@ -3771,7 +3771,7 @@ namespace ConformU
                 if (mIsPulseGuidingFunctional) // IsPulseGuiding is functional - ICameraV4 and later interfaces always use this path
                 {
                     // Test how long the PulseGuide method took to complete
-                    if (duration.Elapsed.TotalSeconds < (isPlatform7OrLater ? standardTargetResponseTime : (CAMERA_PULSE_DURATION_MILLISECONDS - 500) / 1000.0)) // Completed before the required pulse guide duration (so assume asynchronous operation)
+                    if (duration.Elapsed.TotalSeconds < (IsPlatform7OrLater ? standardTargetResponseTime : (CAMERA_PULSE_DURATION_MILLISECONDS - 500) / 1000.0)) // Completed before the required pulse guide duration (so assume asynchronous operation)
                     {
                         // Check whether the camera is still pulse guiding 
                         LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");

@@ -564,7 +564,7 @@ namespace ConformU
                 TimeMethod($"Move to position {position}", () => filterWheel.Position = Convert.ToInt16(position), TargetTime.Standard);
 
                 // Check for Platform 7 requirement of asynchronous operation
-                if (isPlatform7OrLater) // This is a Platform 7 or later interface
+                if (IsPlatform7OrLater) // This is a Platform 7 or later interface
                 {
                     // The operation should have either been synchronous within the standard target or asynchronous
 
