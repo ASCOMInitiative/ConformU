@@ -303,7 +303,7 @@ namespace ConformU
                 return;
 
             // Check whether CoverState can be read OK
-            if (coverStateOk & coverMovingOk) // CoverState and CoverMoving can be read OK
+            if (coverStateOk & (IsPlatform7OrLater ? coverMovingOk : true)) // CoverState and CoverMoving can be read OK
             {
                 LogCallToDriver("CoverCalibrator", "About to get CoverState property");
                 switch (coverCalibratorDevice.CoverState)
@@ -369,7 +369,7 @@ namespace ConformU
             SetTest("CalibratorOn");
 
             // Check whether CalibratorState can be read OK
-            if (calibratorStateOk & calibratorChangingOk) // CalibratorState and CalibratorChanging did return a values
+            if (calibratorStateOk & (IsPlatform7OrLater? calibratorChangingOk:true)) // CalibratorState and CalibratorChanging did return a values
             {
                 // Check whether the calibrator is ready to accept changes
                 if (CalibratorReady("CalibratorOn")) // Calibrator is ready to accept changes
@@ -498,7 +498,7 @@ namespace ConformU
             SetTest("CalibratorOff");
 
             // Check whether CalibratorState can be read OK
-            if (calibratorStateOk & calibratorChangingOk)
+            if (calibratorStateOk & (IsPlatform7OrLater ? calibratorChangingOk : true))
             {
                 TestCalibratorOff();
             }
