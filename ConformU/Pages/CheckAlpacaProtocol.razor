@@ -57,7 +57,10 @@
     {
         conformState.UiHasChanged += OnUiHasChanged;
         settings = configuration.Settings;
-        StartCheckAlpacaProtocol();
+    
+        // AUtomatically start a check if an Alpaca device is selected
+        if (settings.DeviceTechnology == DeviceTechnology.Alpaca)
+            StartCheckAlpacaProtocol();
     }
 
     protected override async void OnAfterRender(bool firstRender)
