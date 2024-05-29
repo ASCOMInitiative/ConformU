@@ -8,7 +8,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -5892,23 +5891,17 @@ namespace ConformU
 
         private void TelescopeOptionalMethodsTest(OptionalMethodType testType, string testName, bool canTest)
         {
-            double lTestDec, lTestRaOffset;
-            IAxisRates lAxisRates = null;
+            IAxisRates axisRates = null;
 
             SetTest(testName);
-            LogDebug("TelescopeOptionalMethodsTest", $"{testType} {testName} {canTest}");
-            if (canTest) // Confirm that an error is raised if the optional command is not implemented
+            LogDebug("TelescopeOptionalMethodsTest", $"Test type: {testType}, Test name: {testName}, Can test: {canTest}");
+
+            // Check whether this method is supported by the driver
+            if (canTest) // This method is supported by the driver
             {
                 try
                 {
-                    // Set the test declination value depending on whether the scope is in the northern or southern hemisphere
-                    if (siteLatitude > 0.0d)
-                        lTestDec = 45.0d; // Positive for the northern hemisphere
-                    else
-                        lTestDec = -45.0d; // Negative for the southern hemisphere
-
-                    lTestRaOffset = 3.0d; // Set the test RA offset as 3 hours from local sider5eal time
-                    LogDebug(testName, string.Format("Test RA offset: {0}, Test declination: {1}", lTestRaOffset, lTestDec));
+                    // Process each type of test
                     switch (testType)
                     {
                         case OptionalMethodType.AbortSlew:
@@ -5935,7 +5928,7 @@ namespace ConformU
                                 double targetRa = Utilities.ConditionRA(telescopeDevice.SiderealTime - targetHa);
 
                                 // Calculate the target declination
-                                double targetDeclination = GetTestDeclinationLessThan65(testName, targetRa);
+                                targetDeclination = GetTestDeclinationLessThan65(testName, targetRa);
                                 LogDebug(testName, $"Slewing to HA: {targetHa.ToHMS()} (RA: {targetRa.ToHMS()}), Dec: {targetDeclination.ToDMS()}");
 
                                 // Slew to the target coordinates
@@ -5979,34 +5972,54 @@ namespace ConformU
                             break;
 
                         case OptionalMethodType.DestinationSideOfPier:
-                            // Get the DestinationSideOfPier for a target in the West i.e. for a German mount when the tube is on the East side of the pier
-                            targetRightAscension = TelescopeRaFromSiderealTime(testName, -lTestRaOffset); LogCallToDriver(testName,
-                                $"About to call DestinationSideOfPier method, RA: {targetRightAscension.ToHMS()}, Declination: {lTestDec.ToDMS()}");
-                            destinationSideOfPierEast = TimeFunc(testName, () => telescopeDevice.DestinationSideOfPier(targetRightAscension, lTestDec), TargetTime.Fast);
-                            LogDebug(testName,
-                                $"German mount - scope on the pier's East side, target in the West : {targetRightAscension.ToHMS()} {lTestDec.ToDMS()} {destinationSideOfPierEast}");
+                            // This test only applies to German Polar (German Equatorial) mounts
 
-                            // Get the DestinationSideOfPier for a target in the East i.e. for a German mount when the tube is on the West side of the pier
-                            targetRightAscension = TelescopeRaFromSiderealTime(testName, lTestRaOffset); LogCallToDriver(testName,
-                                $"About to call DestinationSideOfPier method, RA: {targetRightAscension.ToHMS()}, Declination: {lTestDec.ToDMS()}");
-                            destinationSideOfPierWest = TimeFunc(testName, () => telescopeDevice.DestinationSideOfPier(targetRightAscension, lTestDec), TargetTime.Fast);
-                            LogDebug(testName,
-                                $"German mount - scope on the pier's West side, target in the East: {targetRightAscension.ToHMS()} {lTestDec.ToDMS()} {destinationSideOfPierWest}");
+                            // Set the test declination value depending on whether the scope is in the northern or southern hemisphere
+                            if (siteLatitude > 0.0d)
+                                targetDeclination = 45.0d; // Positive for the northern hemisphere
+                            else
+                                targetDeclination = -45.0d; // Negative for the southern hemisphere
+
+                            // Set the hour angle offset as 2 hours from local sider5eal time
+                            double hourAngleOffset = 2.0d;
+                            LogDebug(testName, $"Test hour angle: {hourAngleOffset}, Test declination: {targetDeclination}");
+
+                            // Slew to HA +3.0 if possible. This puts the tube on the East side of the pier looking West which and, by ASCOM convention, SideofPier should report the pierEast / Normal pointing state
+                            if (canSlewAsync)
+                                SlewToHa(+3.0);
+
+                            PointingState currentSideOfPier = PointingState.Unknown;
+                            if (CanReadSideOfPier(testName))
+                            {
+                                LogCallToDriver(testName, "About to get SideOfPier");
+                                currentSideOfPier = telescopeDevice.SideOfPier;
+                            }
+
+                            // Get the DestinationSideOfPier for a target in the West (positive HA offset) i.e. for a German mount when the tube is on the East side of the pier looking West
+                            double targetRightAscensionWest = TelescopeRaFromHourAngle(testName, +hourAngleOffset);
+
+                            LogCallToDriver(testName, $"About to call DestinationSideOfPier method, RA: {targetRightAscensionWest.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                            destinationSideOfPierWest = TimeFunc(testName, () => telescopeDevice.DestinationSideOfPier(targetRightAscensionWest, targetDeclination), TargetTime.Fast);
+                            LogDebug(testName, $"Current pointing state: {currentSideOfPier} - Western target pointing state: {destinationSideOfPierWest} at RA: {targetRightAscensionWest.ToHMS()}, Declination {targetDeclination.ToDMS()} ");
+
+                            // Get the DestinationSideOfPier for a target in the East (negative HA offset) i.e. for a German mount when the tube is on the West side of the pier looking East
+                            double targetRightAscensionEast = TelescopeRaFromHourAngle(testName, -hourAngleOffset);
+                            LogCallToDriver(testName, $"About to call DestinationSideOfPier method, Target RA: {targetRightAscensionEast.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                            destinationSideOfPierEast = TimeFunc(testName, () => telescopeDevice.DestinationSideOfPier(targetRightAscensionEast, targetDeclination), TargetTime.Fast);
+                            LogDebug(testName, $"Current pointing state: {currentSideOfPier} - Eastern target pointing state: {destinationSideOfPierEast} {targetRightAscensionEast.ToHMS()} {targetDeclination.ToDMS()} ");
 
                             // Make sure that we received two valid values i.e. that neither side returned PierSide.Unknown and that the two valid returned values are not the same i.e. we got one PointingState.Normal and one PointingState.ThroughThePole
                             if (destinationSideOfPierEast == PointingState.Unknown | destinationSideOfPierWest == PointingState.Unknown)
                             {
-                                LogIssue(testName,
-                                    $"Invalid SideOfPier value received, Target in West: {destinationSideOfPierEast}, Target in East: {destinationSideOfPierWest}");
+                                LogIssue(testName, $"Unexpected SideOfPier value received (Unknown), Target in East: {destinationSideOfPierEast}, Target in West: {destinationSideOfPierWest}");
                             }
                             else if (destinationSideOfPierEast == destinationSideOfPierWest)
                             {
-                                LogIssue(testName,
-                                    $"Same value for DestinationSideOfPier received on both sides of the meridian: {((int)destinationSideOfPierEast)}");
+                                LogIssue(testName, $"Same value for DestinationSideOfPier received on both sides of the meridian - East: {destinationSideOfPierEast}, West: {destinationSideOfPierWest}");
                             }
                             else
                             {
-                                LogOk(testName, "DestinationSideOfPier is different on either side of the meridian");
+                                LogOk(testName, $"DestinationSideOfPier is different on either side of the meridian - East: {destinationSideOfPierEast}, West: {destinationSideOfPierWest}");
                             }
                             break;
 
@@ -6014,9 +6027,7 @@ namespace ConformU
                             SetAction("Homing mount...");
                             if (GetInterfaceVersion() > 1)
                             {
-                                LogTestAndMessage("Park", "Parking scope...");
                                 LogCallToDriver(testName, "About to call FindHome method");
-
                                 TimeMethod(testName, () => telescopeDevice.FindHome(), IsPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
 
                                 // Wait for the home to complete using Platform 6 or 7 semantics as appropriate
@@ -6073,22 +6084,23 @@ namespace ConformU
 
                         case OptionalMethodType.MoveAxisPrimary:
                             // Get axis rates for primary axis
-                            LogCallToDriver(testName,
-                                $"About to call AxisRates method for axis {((int)TelescopeAxis.Primary)}");
-                            lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary);
-                            TelescopeMoveAxisTest(testName, TelescopeAxis.Primary, lAxisRates);
+                            LogCallToDriver(testName, $"About to call AxisRates method for {TelescopeAxis.Primary} axis");
+                            axisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary);
+                            TelescopeMoveAxisTest(testName, TelescopeAxis.Primary, axisRates);
                             break;
 
                         case OptionalMethodType.MoveAxisSecondary:
                             // Get axis rates for secondary axis
-                            lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary);
-                            TelescopeMoveAxisTest(testName, TelescopeAxis.Secondary, lAxisRates);
+                            LogCallToDriver(testName, $"About to call AxisRates method for {TelescopeAxis.Secondary} axis");
+                            axisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary);
+                            TelescopeMoveAxisTest(testName, TelescopeAxis.Secondary, axisRates);
                             break;
 
                         case OptionalMethodType.MoveAxisTertiary:
                             // Get axis rates for tertiary axis
-                            lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary);
-                            TelescopeMoveAxisTest(testName, TelescopeAxis.Tertiary, lAxisRates);
+                            LogCallToDriver(testName, $"About to call AxisRates method for {TelescopeAxis.Tertiary} axis");
+                            axisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary);
+                            TelescopeMoveAxisTest(testName, TelescopeAxis.Tertiary, axisRates);
                             break;
 
                         case OptionalMethodType.PulseGuide:
@@ -6183,6 +6195,7 @@ namespace ConformU
 
                                 if (cancellationToken.IsCancellationRequested)
                                     return; LogCallToDriver(testName, "About to get SideOfPier property");
+
                                 switch (telescopeDevice.SideOfPier)
                                 {
                                     case PointingState.Normal: // We are on pierEast so try pierWest
@@ -6205,8 +6218,7 @@ namespace ConformU
                                                 }
                                                 else
                                                 {
-                                                    LogIssue(testName,
-                                                        $"Failed to set SideOfPier to pierWest, got: {sideOfPier}");
+                                                    LogIssue(testName, $"Failed to set SideOfPier to pierWest, got: {sideOfPier}");
                                                 }
 
                                                 if (cancellationToken.IsCancellationRequested)
@@ -6225,7 +6237,7 @@ namespace ConformU
                                             try
                                             {
                                                 LogDebug(testName, "Scope is pierWest so flipping East");
-                                                SetAction("Flipping mount to pointing state pierEast"); LogCallToDriver(testName, $"About to set SideOfPier property to {((int)PointingState.Normal)}");
+                                                SetAction("Flipping mount to pointing state pierEast");
 
                                                 LogCallToDriver(testName, $"About to set SideOfPier property to {PointingState.Normal}");
                                                 TimeMethod($"{testName} {PointingState.Normal}", () => telescopeDevice.SideOfPier = PointingState.Normal, TargetTime.Standard);
@@ -6233,15 +6245,14 @@ namespace ConformU
                                                 WaitForSlew(testName, $"Moving to the pierWest pointing state asynchronously");
 
                                                 if (cancellationToken.IsCancellationRequested)
-                                                    return; LogCallToDriver(testName, "About to get SideOfPier property");
+                                                    return;
 
                                                 LogCallToDriver(testName, "About to get SideOfPier property");
                                                 sideOfPier = telescopeDevice.SideOfPier;
                                                 if (sideOfPier == PointingState.Normal)
                                                     LogOk(testName, "Successfully flipped pierWest to pierEast");
                                                 else
-                                                    LogIssue(testName,
-                                                        $"Failed to set SideOfPier to pierEast, got: {sideOfPier}");
+                                                    LogIssue(testName, $"Failed to set SideOfPier to pierEast, got: {sideOfPier}");
                                             }
                                             catch (Exception ex)
                                             {
@@ -6259,9 +6270,10 @@ namespace ConformU
                             {
                                 try
                                 {
-                                    LogDebug(testName, "Attempting to set SideOfPier"); LogCallToDriver(testName,
-                                        $"About to set SideOfPier property to {((int)PointingState.Normal)}");
+                                    LogDebug(testName, "Attempting to set SideOfPier");
+                                    LogCallToDriver(testName, $"About to set SideOfPier property to {((int)PointingState.Normal)}");
                                     telescopeDevice.SideOfPier = PointingState.Normal;
+
                                     LogDebug(testName, "SideOfPier set OK to pierEast but should have thrown an error");
                                     WaitForSlew(testName, $"Moving to the pierWest pointing state asynchronously");
                                     LogIssue(testName, "CanSetPierSide is false but no exception was generated when set was attempted");
@@ -6275,8 +6287,10 @@ namespace ConformU
                                     WaitForSlew(testName, $"Moving to the pierWest pointing state asynchronously");
                                 } // Make sure slewing is stopped if an exception was thrown
                             }
+
                             LogCallToDriver(testName, "About to set Tracking property to false");
                             telescopeDevice.Tracking = false;
+
                             if (cancellationToken.IsCancellationRequested)
                                 return;
                             break;
@@ -6287,12 +6301,12 @@ namespace ConformU
                     }
 
                     // Clean up AxisRate object, if used
-                    if (lAxisRates is object)
+                    if (axisRates is object)
                     {
                         try
                         {
                             LogCallToDriver(testName, "About to dispose of AxisRates object");
-                            lAxisRates.Dispose();
+                            axisRates.Dispose();
 
                             LogOk(testName, "AxisRates object successfully disposed");
                         }
@@ -6305,14 +6319,14 @@ namespace ConformU
                         try
                         {
 #if WINDOWS
-                            Marshal.ReleaseComObject(lAxisRates);
+                            Marshal.ReleaseComObject(axisRates);
 #endif
                         }
                         catch
                         {
                         }
 
-                        lAxisRates = null;
+                        axisRates = null;
                     }
                     if (cancellationToken.IsCancellationRequested)
                         return;
@@ -6412,8 +6426,8 @@ namespace ConformU
                     }
                 }
             }
-            ClearStatus();
 
+            ClearStatus();
         }
 
         private void TelescopeCanTest(CanType pType, string pName)
@@ -7543,42 +7557,42 @@ namespace ConformU
             LogDebug(testName, $"Completed wait for slew.");
         }
 
-        private double TelescopeRaFromHourAngle(string testName, double pOffset)
+        private double TelescopeRaFromHourAngle(string testName, double hourAngle)
         {
-            double telescopeRaFromHourAngleRet;
+            double telescopeRa;
 
             // Handle the possibility that the mandatory SideealTime property has not been implemented
             if (canReadSiderealTime)
             {
                 // Create a legal RA based on an offset from Sidereal time
                 LogCallToDriver(testName, "About to get SiderealTime property");
-                telescopeRaFromHourAngleRet = telescopeDevice.SiderealTime - pOffset;
-                switch (telescopeRaFromHourAngleRet)
+                telescopeRa = telescopeDevice.SiderealTime - hourAngle;
+                switch (telescopeRa)
                 {
                     case var @case when @case < 0.0d: // Illegal if < 0 hours
                         {
-                            telescopeRaFromHourAngleRet += 24.0d;
+                            telescopeRa += 24.0d;
                             break;
                         }
 
                     case var case1 when case1 >= 24.0d: // Illegal if > 24 hours
                         {
-                            telescopeRaFromHourAngleRet -= 24.0d;
+                            telescopeRa -= 24.0d;
                             break;
                         }
                 }
             }
             else
             {
-                telescopeRaFromHourAngleRet = 0.0d - pOffset;
+                telescopeRa = 0.0d - hourAngle;
             }
 
-            return telescopeRaFromHourAngleRet;
+            return telescopeRa;
         }
 
-        private double TelescopeRaFromSiderealTime(string testName, double pOffset)
+        private double TelescopeRaFromSiderealTime(string testName, double raOffset)
         {
-            double telescopeRaFromSiderealTimeRet;
+            double telescopeRa;
             double currentSiderealTime;
 
             // Handle the possibility that the mandatory SideealTime property has not been implemented
@@ -7587,43 +7601,39 @@ namespace ConformU
                 // Create a legal RA based on an offset from Sidereal time
                 LogCallToDriver(testName, "About to get SiderealTime property");
                 currentSiderealTime = telescopeDevice.SiderealTime;
-                switch (currentSiderealTime) // Deal with possibility that sidereal time from the driver is bad
+
+                // Deal with possibility that sidereal time from the driver is bad
+                switch (currentSiderealTime)
                 {
                     case var @case when @case < 0.0d: // Illegal if < 0 hours
-                        {
-                            currentSiderealTime = 0d;
-                            break;
-                        }
+                        currentSiderealTime = 0d;
+                        break;
 
                     case var case1 when case1 >= 24.0d: // Illegal if > 24 hours
-                        {
-                            currentSiderealTime = 0d;
-                            break;
-                        }
+                        currentSiderealTime = 0d;
+                        break;
                 }
 
-                telescopeRaFromSiderealTimeRet = currentSiderealTime + pOffset;
-                switch (telescopeRaFromSiderealTimeRet)
+                telescopeRa = currentSiderealTime + raOffset;
+                switch (telescopeRa)
                 {
                     case var case2 when case2 < 0.0d: // Illegal if < 0 hours
-                        {
-                            telescopeRaFromSiderealTimeRet += 24.0d;
-                            break;
-                        }
+                        telescopeRa += 24.0d;
+                        break;
 
                     case var case3 when case3 >= 24.0d: // Illegal if > 24 hours
-                        {
-                            telescopeRaFromSiderealTimeRet -= 24.0d;
-                            break;
-                        }
+                        telescopeRa -= 24.0d;
+                        break;
                 }
+
+                LogDebug("TelescopeRaFromSiderealTime", $"Current sidereal time: {currentSiderealTime.ToHMS()}, Target RA: {telescopeRa.ToHMS()}");
             }
             else
             {
-                telescopeRaFromSiderealTimeRet = 0.0d + pOffset;
+                telescopeRa = 0.0d + raOffset;
             }
 
-            return telescopeRaFromSiderealTimeRet;
+            return telescopeRa;
         }
 #if WINDOWS
         private void TestEarlyBinding(InterfaceType testType)
