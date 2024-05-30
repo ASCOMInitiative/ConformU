@@ -7182,68 +7182,62 @@ namespace ConformU
 
         private void SideOfPierTests()
         {
-            SideOfPierResults lPierSideMinus3, lPierSideMinus9, lPierSidePlus3, lPierSidePlus9;
-            double lDeclination3, lDeclination9, lStartRa;
+            SideOfPierResults pierSideMinus3, pierSideMinus9, pierSidePlus3, pierSidePlus9;
+            double declination3, declination9, startRa, startDeclination;
 
-            // Slew to starting position
             LogDebug("SideofPier", "Starting Side of Pier tests");
             SetTest("Side of pier tests");
-            lStartRa = TelescopeRaFromHourAngle("SideofPier", -3.0d);
-            if (siteLatitude > 0.0d) // We are in the northern hemisphere
-            {
-                lDeclination3 = 90.0d - (180.0d - siteLatitude) * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR; // Calculate for northern hemisphere
-                lDeclination9 = 90.0d - siteLatitude * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR;
-            }
-            else // We are in the southern hemisphere
-            {
-                lDeclination3 = -90.0d + (180.0d + siteLatitude) * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR; // Calculate for southern hemisphere
-                lDeclination9 = -90.0d - siteLatitude * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR;
-            }
 
-            LogDebug("SideofPier", $"Declination for hour angle = +-3.0 tests: {lDeclination3.ToDMS()}, Declination for hour angle = +-9.0 tests: {lDeclination9.ToDMS()}");
-            SlewScope(lStartRa, 0.0d, "starting position");
-            if (cancellationToken.IsCancellationRequested)
-                return;
+            // Calculate the test RA form hour angle -3.0
+            startRa = TelescopeRaFromHourAngle("SideofPier", -3.0d);
+            startDeclination = GetTestDeclinationLessThan65("SideofPier", startRa);
+
+            // Calculate the acceptable declinations for hour angle 
+            declination3 = GetTestDeclinationHalfwayToHorizon("SideOfPierTests", startRa); // 90.0d - (180.0d - siteLatitude) * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR; // Calculate for northern hemisphere
+            declination9 = GetTestDeclinationHalfwayToHorizon("SideOfPierTests", TelescopeRaFromHourAngle("SideofPier", -9.0d)); // 90.0d - siteLatitude * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR;
+            LogDebug("SideofPier", $"Declination for hour angle = +-3.0 tests: {declination3.ToDMS()}, Declination for hour angle = +-9.0 tests: {declination9.ToDMS()}");
 
             // Run tests
-            SetAction($"Test hour angle -3.0 at declination: {lDeclination3.ToDMS()}");
-            lPierSideMinus3 = SopPierTest(lStartRa, lDeclination3, "hour angle -3.0");
+            SetAction($"Test hour angle -3.0 at declination: {declination3.ToDMS()}");
+            pierSideMinus3 = SopPierTest(TelescopeRaFromHourAngle("SideofPier", -3.0d), declination3, startRa, startDeclination, "hour angle -3.0");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            SetAction($"Test hour angle +3.0 at declination: {lDeclination3.ToDMS()}");
-            lPierSidePlus3 = SopPierTest(TelescopeRaFromHourAngle("SideofPier", +3.0d), lDeclination3, "hour angle +3.0");
+            SetAction($"Test hour angle -9.0 at declination: {declination9.ToDMS()}");
+            pierSideMinus9 = SopPierTest(TelescopeRaFromHourAngle("SideofPier", -9.0d), declination9, startRa, startDeclination, "hour angle -9.0");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            SetAction($"Test hour angle -9.0 at declination: {lDeclination9.ToDMS()}");
-            lPierSideMinus9 = SopPierTest(TelescopeRaFromHourAngle("SideofPier", -9.0d), lDeclination9, "hour angle -9.0");
+            SetAction($"Test hour angle +3.0 at declination: {declination3.ToDMS()}");
+            pierSidePlus3 = SopPierTest(TelescopeRaFromHourAngle("SideofPier", +3.0d), declination3, startRa, startDeclination, "hour angle +3.0");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            SetAction($"Test hour angle +9.0 at declination: {lDeclination9.ToDMS()}");
-            lPierSidePlus9 = SopPierTest(TelescopeRaFromHourAngle("SideofPier", +9.0d), lDeclination9, "hour angle +9.0");
+            SetAction($"Test hour angle +9.0 at declination: {declination9.ToDMS()}");
+            pierSidePlus9 = SopPierTest(TelescopeRaFromHourAngle("SideofPier", +9.0d), declination9, startRa, startDeclination, "hour angle +9.0");
             if (cancellationToken.IsCancellationRequested)
                 return;
+            
+            LogDebug(" "," ");
 
-            if ((lPierSideMinus3.SideOfPier == lPierSidePlus9.SideOfPier) & (lPierSidePlus3.SideOfPier == lPierSideMinus9.SideOfPier))// Reporting physical pier side
+            if ((pierSideMinus3.SideOfPier == pierSidePlus9.SideOfPier) & (pierSidePlus3.SideOfPier == pierSideMinus9.SideOfPier))// Reporting physical pier side
             {
                 LogIssue("SideofPier", "SideofPier reports physical pier side rather than pointing state");
             }
-            else if ((lPierSideMinus3.SideOfPier == lPierSideMinus9.SideOfPier) & (lPierSidePlus3.SideOfPier == lPierSidePlus9.SideOfPier)) // Make other tests
+            else if ((pierSideMinus3.SideOfPier == pierSideMinus9.SideOfPier) & (pierSidePlus3.SideOfPier == pierSidePlus9.SideOfPier)) // Make other tests
             {
                 LogOk("SideofPier", "Reports the pointing state of the mount as expected");
             }
             else // Don't know what this means!
             {
-                LogInfo("SideofPier", $"Unknown SideofPier reporting model: HA-3: {lPierSideMinus3.SideOfPier} HA-9: {lPierSideMinus9.SideOfPier} HA+3: {lPierSidePlus3.SideOfPier} HA+9: {lPierSidePlus9.SideOfPier}");
+                LogInfo("SideofPier", $"Unknown SideofPier reporting model: HA-3: {pierSideMinus3.SideOfPier} HA-9: {pierSideMinus9.SideOfPier} HA+3: {pierSidePlus3.SideOfPier} HA+9: {pierSidePlus9.SideOfPier}");
             }
 
-            LogInfo("SideofPier", $"Reported SideofPier at HA -9, +9: {TranslatePierSide((PointingState)lPierSideMinus9.SideOfPier, false)}{TranslatePierSide((PointingState)lPierSidePlus9.SideOfPier, false)}");
-            LogInfo("SideofPier", $"Reported SideofPier at HA -3, +3: {TranslatePierSide((PointingState)lPierSideMinus3.SideOfPier, false)}{TranslatePierSide((PointingState)lPierSidePlus3.SideOfPier, false)}");
+            LogInfo("SideofPier", $"Reported SideofPier at HA -9, +9: {TranslatePierSide(pierSideMinus9.SideOfPier, false)}{TranslatePierSide(pierSidePlus9.SideOfPier, false)}");
+            LogInfo("SideofPier", $"Reported SideofPier at HA -3, +3: {TranslatePierSide(pierSideMinus3.SideOfPier, false)}{TranslatePierSide(pierSidePlus3.SideOfPier, false)}");
 
-            // Now test the ASCOM convention that pierWest is returned when the mount is on the west side of the pier facing east at hour angle -3
-            if (lPierSideMinus3.SideOfPier == PointingState.ThroughThePole)
+            // Now test the ASCOM convention that pierWest is returned when the mount is on the west side of the pier facing east observing at hour angle -3
+            if (pierSideMinus3.SideOfPier == PointingState.ThroughThePole)
             {
                 LogOk("SideofPier", "pierWest is returned when the mount is observing at an hour angle between -6.0 and 0.0");
             }
@@ -7253,7 +7247,7 @@ namespace ConformU
                 LogInfo("SideofPier", "ASCOM has adopted a convention that, for German Equatorial mounts, pierWest must be returned when observing at hour angles from -6.0 to -0.0 and that pierEast must be returned at hour angles from 0.0 to +6.0.");
             }
 
-            if (lPierSidePlus3.SideOfPier == (int)PointingState.Normal)
+            if (pierSidePlus3.SideOfPier == (int)PointingState.Normal)
             {
                 LogOk("SideofPier", "pierEast is returned when the mount is observing at an hour angle between 0.0 and +6.0");
             }
@@ -7264,21 +7258,21 @@ namespace ConformU
             }
 
             // Test whether DestinationSideOfPier is implemented
-            if (lPierSideMinus3.DestinationSideOfPier == PointingState.Unknown & lPierSideMinus9.DestinationSideOfPier == PointingState.Unknown & lPierSidePlus3.DestinationSideOfPier == PointingState.Unknown & lPierSidePlus9.DestinationSideOfPier == PointingState.Unknown)
+            if (pierSideMinus3.DestinationSideOfPier == PointingState.Unknown & pierSideMinus9.DestinationSideOfPier == PointingState.Unknown & pierSidePlus3.DestinationSideOfPier == PointingState.Unknown & pierSidePlus9.DestinationSideOfPier == PointingState.Unknown)
             {
                 LogInfo("DestinationSideofPier", "Analysis skipped as this method is not implemented"); // Not implemented
             }
             else // It is implemented so assess the results
             {
-                if (lPierSideMinus3.DestinationSideOfPier == lPierSidePlus9.DestinationSideOfPier & lPierSidePlus3.DestinationSideOfPier == lPierSideMinus9.DestinationSideOfPier) // Reporting physical pier side
+                if (pierSideMinus3.DestinationSideOfPier == pierSidePlus9.DestinationSideOfPier & pierSidePlus3.DestinationSideOfPier == pierSideMinus9.DestinationSideOfPier) // Reporting physical pier side
                     LogIssue("DestinationSideofPier", "DestinationSideofPier reports physical pier side rather than pointing state");
-                else if (lPierSideMinus3.DestinationSideOfPier == lPierSideMinus9.DestinationSideOfPier & lPierSidePlus3.DestinationSideOfPier == lPierSidePlus9.DestinationSideOfPier) // Make other tests
+                else if (pierSideMinus3.DestinationSideOfPier == pierSideMinus9.DestinationSideOfPier & pierSidePlus3.DestinationSideOfPier == pierSidePlus9.DestinationSideOfPier) // Make other tests
                     LogOk("DestinationSideofPier", "Reports the pointing state of the mount as expected");
                 else // Don't know what this means!
-                    LogInfo("DestinationSideofPier", $"Unknown DestinationSideofPier reporting model: HA-3: {lPierSideMinus3.SideOfPier} HA-9: {lPierSideMinus9.SideOfPier} HA+3: {lPierSidePlus3.SideOfPier} HA+9: {lPierSidePlus9.SideOfPier}");
+                    LogInfo("DestinationSideofPier", $"Unknown DestinationSideofPier reporting model: HA-3: {pierSideMinus3.SideOfPier} HA-9: {pierSideMinus9.SideOfPier} HA+3: {pierSidePlus3.SideOfPier} HA+9: {pierSidePlus9.SideOfPier}");
 
                 // Now test the ASCOM convention that pierWest is returned when the mount is on the west side of the pier facing east at hour angle -3
-                if ((int)lPierSideMinus3.DestinationSideOfPier == (int)PointingState.ThroughThePole)
+                if ((int)pierSideMinus3.DestinationSideOfPier == (int)PointingState.ThroughThePole)
                     LogOk("DestinationSideofPier", "pierWest is returned when the mount will observe at an hour angle between -6.0 and 0.0");
                 else
                 {
@@ -7286,7 +7280,7 @@ namespace ConformU
                     LogInfo("DestinationSideofPier", "ASCOM has adopted a convention that, for German Equatorial mounts, pierWest must be returned when the mount will observe at hour angles from -6.0 to -0.0 and that pierEast must be returned for hour angles from 0.0 to +6.0.");
                 }
 
-                if (lPierSidePlus3.DestinationSideOfPier == (int)PointingState.Normal)
+                if (pierSidePlus3.DestinationSideOfPier == (int)PointingState.Normal)
                     LogOk("DestinationSideofPier", "pierEast is returned when the mount will observe at an hour angle between 0.0 and +6.0");
                 else
                 {
@@ -7295,8 +7289,8 @@ namespace ConformU
                 }
             }
 
-            LogInfo("DestinationSideofPier", $"Reported DesintationSideofPier at HA -9, +9: {TranslatePierSide((PointingState)lPierSideMinus9.DestinationSideOfPier, false)}{TranslatePierSide((PointingState)lPierSidePlus9.DestinationSideOfPier, false)}");
-            LogInfo("DestinationSideofPier", $"Reported DesintationSideofPier at HA -3, +3: {TranslatePierSide((PointingState)lPierSideMinus3.DestinationSideOfPier, false)}{TranslatePierSide((PointingState)lPierSidePlus3.DestinationSideOfPier, false)}");
+            LogInfo("DestinationSideofPier", $"Reported DesintationSideofPier at HA -9, +9: {TranslatePierSide((PointingState)pierSideMinus9.DestinationSideOfPier, false)}{TranslatePierSide((PointingState)pierSidePlus9.DestinationSideOfPier, false)}");
+            LogInfo("DestinationSideofPier", $"Reported DesintationSideofPier at HA -3, +3: {TranslatePierSide((PointingState)pierSideMinus3.DestinationSideOfPier, false)}{TranslatePierSide((PointingState)pierSidePlus3.DestinationSideOfPier, false)}");
 
             // Clean up
             // 3.0.0.12 added conditional test to next line
@@ -7305,33 +7299,39 @@ namespace ConformU
             ClearStatus();
         }
 
-        public SideOfPierResults SopPierTest(double pRa, double pDec, string pMsg)
+        public SideOfPierResults SopPierTest(double testRa, double testDec, double startRa, double startDeclination, string message)
         {
             // Determine side of pier and destination side of pier results for a particular RA and DEC
-            var lResults = new SideOfPierResults(); // Create result set object
-            double lStartRa, lStartDec;
+            SideOfPierResults results = new SideOfPierResults(); // Create result set object
+
             try
             {
-                // Prepare for tests
-                lStartRa = telescopeDevice.RightAscension;
-                lStartDec = telescopeDevice.Declination;
-
-                // Do destination side of pier test to see what side of pier we should end up on
                 LogDebug("", "");
-                LogDebug("SOPPierTest", $"Testing RA DEC: {pRa.ToHMS()} {pDec.ToDMS()} Current pierSide: {TranslatePierSide((PointingState)telescopeDevice.SideOfPier, true)}");
+
+                // Slew to start RA
+                LogDebug("SOPPierTest", $"Starting test for {message}");
+                //LogDebug("SOPPierTest", $"Slewing to start position: {startRa.ToHMS()} {startDeclination.ToDMS()}");
+                SlewScope(startRa, startDeclination, "start position");
+                //LogDebug("SOPPierTest", $"Slewed to start position:  {startRa.ToHMS()} {startDeclination.ToDMS()}");
+
+                LogCallToDriver("SopPierTest", "About to get SideofPier");
+                PointingState currentPointingState = telescopeDevice.SideOfPier;
+                LogDebug("SOPPierTest", $"Initial pointing state before slewing to test RA/Dec: {TranslatePierSide(currentPointingState, true)} ({currentPointingState})");
+                LogDebug("SOPPierTest", $"Test RA: {testRa.ToHMS()},Test declination: {testDec.ToDMS()}");
+
+                // Do destination side of pier test to see what side of pier we should end up on if we slew to the test coordinates
                 try
                 {
-                    lResults.DestinationSideOfPier = TimeFunc($"DestinatitonSideOfPier", () => telescopeDevice.DestinationSideOfPier(pRa, pDec), TargetTime.Fast);
-                    LogDebug("SOPPierTest", $"Target DestinationSideOfPier: {lResults.DestinationSideOfPier}");
+                    results.DestinationSideOfPier = TimeFunc($"DestinatitonSideOfPier", () => telescopeDevice.DestinationSideOfPier(testRa, testDec), TargetTime.Fast);
+                    LogDebug("SOPPierTest", $"==> Pointing state predicted by DestinationSideOfPier at test RA/Dec: {TranslatePierSide(results.DestinationSideOfPier, true)} ({results.DestinationSideOfPier})");
                 }
                 catch (COMException ex)
                 {
                     switch (ex.ErrorCode)
                     {
                         case var @case when @case == ErrorCodes.NotImplemented:
-                            lResults.DestinationSideOfPier = PointingState.Unknown;
-                            LogDebug("SOPPierTest",
-                                $"DestinationSideOfPier is not implemented setting result to: {lResults.DestinationSideOfPier}");
+                            results.DestinationSideOfPier = PointingState.Unknown;
+                            LogDebug("SOPPierTest", $"DestinationSideOfPier is not implemented setting result to: {TranslatePierSide(results.DestinationSideOfPier, true)} ({results.DestinationSideOfPier})");
                             break;
 
                         default:
@@ -7341,9 +7341,8 @@ namespace ConformU
                 }
                 catch (MethodNotImplementedException) // DestinationSideOfPier not available so mark as unknown
                 {
-                    lResults.DestinationSideOfPier = PointingState.Unknown;
-                    LogDebug("SOPPierTest",
-                        $"DestinationSideOfPier is not implemented setting result to: {lResults.DestinationSideOfPier}");
+                    results.DestinationSideOfPier = PointingState.Unknown;
+                    LogDebug("SOPPierTest", $"DestinationSideOfPier is not implemented setting result to: {TranslatePierSide(results.DestinationSideOfPier, true)} ({results.DestinationSideOfPier})");
                 }
                 catch (Exception ex)
                 {
@@ -7351,20 +7350,16 @@ namespace ConformU
                 }
 
                 // Now do an actual slew and record side of pier we actually get
-                SlewScope(pRa, pDec, $"test position {pMsg}");
-                lResults.SideOfPier = (PointingState)telescopeDevice.SideOfPier;
-                LogDebug("SOPPierTest", $"Actual SideOfPier: {lResults.SideOfPier}");
-
-                // Return to original RA
-                SlewScope(lStartRa, lStartDec, "initial start point");
-                LogDebug("SOPPierTest", $"Returned to: {lStartRa.ToHMS()} {lStartDec.ToDMS()}");
+                SlewScope(testRa, testDec, $"test position {message}");
+                results.SideOfPier = telescopeDevice.SideOfPier;
+                LogDebug("SOPPierTest", $"==> Actual pointing state after slewing to test RA/Dec: {TranslatePierSide(results.SideOfPier, true)} ({results.SideOfPier})");
             }
             catch (Exception ex)
             {
                 LogIssue("SOPPierTest", $"SideofPierException: {ex}");
             }
 
-            return lResults;
+            return results;
         }
 
         private void DestinationSideOfPierTests()
@@ -7517,25 +7512,24 @@ namespace ConformU
                 {
                     LogDebug("SlewScope", $"Slewing asynchronously to {pMsg} {pRa.ToHMS()} {pDec.ToDMS()}");
 
-                    LogCallToDriver("SlewScope",
-                        $"About to call SlewToCoordinatesAsync method, RA: {pRa.ToHMS()}, Declination: {pDec.ToDMS()}");
+                    LogCallToDriver("SlewScope", $"About to call SlewToCoordinatesAsync method, RA: {pRa.ToHMS()}, Declination: {pDec.ToDMS()}");
                     telescopeDevice.SlewToCoordinatesAsync(pRa, pDec);
 
                     WaitForSlew(pMsg, $"Slewing asynchronously to {pMsg}");
                 }
                 else
                 {
-                    LogDebug("SlewScope", $"Slewing synchronously to {pMsg} {pRa.ToHMS()} {pDec.ToDMS()}"); LogCallToDriver("SlewScope",
-                        $"About to call SlewToCoordinates method, RA: {pRa.ToHMS()}, Declination: {pDec.ToDMS()}");
                     SetStatus($"Slewing synchronously to {pMsg}: {pRa.ToHMS()} {pDec.ToDMS()}");
+                    LogDebug("SlewScope", $"Slewing synchronously to {pMsg} {pRa.ToHMS()} {pDec.ToDMS()}");
+                    LogCallToDriver("SlewScope", $"About to call SlewToCoordinates method, RA: {pRa.ToHMS()}, Declination: {pDec.ToDMS()}");
                     telescopeDevice.SlewToCoordinates(pRa, pDec);
                 }
 
-                if (CanReadSideOfPier("SlewScope"))
-                {
-                    LogCallToDriver("SlewScope", "About to get SideOfPier property");
-                    LogDebug("SlewScope", $"SideOfPier: {telescopeDevice.SideOfPier}");
-                }
+                //if (CanReadSideOfPier("SlewScope"))
+                //{
+                //    LogCallToDriver("SlewScope", "About to get SideOfPier property");
+                //    LogDebug("SlewScope", $"Final SideOfPier: {telescopeDevice.SideOfPier}");
+                //}
             }
             else
             {
@@ -7967,14 +7961,14 @@ namespace ConformU
                 // Retrieve the corresponding elevation
                 double elevation = transform.ElevationTopocentric;
 
-                LogDebug("GetTestDeclinationLessThan65", $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
+                //LogDebug("GetTestDeclinationLessThan65", $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
 
                 // Update the test declination if the new elevation is less that 65 degrees and also greater than the current highest elevation 
                 if ((elevation < 65.0) & (elevation > testElevation))
                 {
                     testDeclination = declination;
                     testElevation = elevation;
-                    LogDebug("GetTestDeclinationLessThan65", $"Saved declination {testDeclination.ToDMS()} as having highest elevation: {testElevation.ToDMS()}");
+                    //LogDebug("GetTestDeclinationLessThan65", $"Saved declination {testDeclination.ToDMS()} as having highest elevation: {testElevation.ToDMS()}");
                 }
             }
             sw.Stop();
@@ -7990,7 +7984,7 @@ namespace ConformU
         }
 
         /// <summary>
-        /// Return the declination which provides the highest elevation that is less than 65 degrees at the given RA.
+        /// Return the declination which provides the declination that is half way to the horizon at the give RA.
         /// </summary>
         /// <param name="testRa">RA to use when determining the optimum declination.</param>
         /// <returns>Declination in the range -80.0 to +80.0</returns>
@@ -8034,7 +8028,7 @@ namespace ConformU
                 // Retrieve the corresponding elevation
                 double elevation = transform.ElevationTopocentric;
 
-                LogDebug("GetTestDeclinationHalfwayToHorizon", $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
+                //LogDebug("GetTestDeclinationHalfwayToHorizon", $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
 
                 // Update the lowest declination above the horizon if the sky position is above the horizon and also has a declination closer to the horizon than the current value.
                 if (elevation > 0.0)
@@ -8043,7 +8037,7 @@ namespace ConformU
                     {
                         if (declination < lowestDeclinationAboveHorizon)
                         {
-                            LogDebug("GetTestDeclinationHalfwayToHorizon", $"Northern hemisphere - Saving this as the lowest declination above horizon:: {declination.ToDMS()}");
+                            //LogDebug("GetTestDeclinationHalfwayToHorizon", $"Northern hemisphere - Saving this as the lowest declination above horizon:: {declination.ToDMS()}");
                             lowestDeclinationAboveHorizon = declination;
                         }
                     }
@@ -8051,7 +8045,7 @@ namespace ConformU
                     {
                         if (declination > lowestDeclinationAboveHorizon)
                         {
-                            LogDebug("GetTestDeclinationHalfwayToHorizon", $"Southern hemisphere - Saving this as the lowest declination above horizon:: {declination.ToDMS()}");
+                            //LogDebug("GetTestDeclinationHalfwayToHorizon", $"Southern hemisphere - Saving this as the lowest declination above horizon:: {declination.ToDMS()}");
                             lowestDeclinationAboveHorizon = declination;
                         }
                     }
