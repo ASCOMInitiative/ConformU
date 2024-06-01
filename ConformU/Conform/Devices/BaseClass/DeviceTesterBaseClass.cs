@@ -829,12 +829,12 @@ namespace ConformU
             LogDebug("Disconnect", $"Interface version: {GetInterfaceVersion()}");
 
             // Use Connect /Disconnect if present
-            if (DeviceCapabilities.HasConnectAndDeviceState(DeviceTypes.Telescope, GetInterfaceVersion()))
+            if (DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, GetInterfaceVersion()))
             {
                 LogCallToDriver("Disconnect", "About to get Connecting property");
                 if (!baseClassDevice.Connecting) // No connection / disconnection is in progress
                 {
-                    // Call the Connect method and wait for the device to connect
+                    // Call the DIsconnect method and wait for the device to disconnect
                     SetAction("Waiting for the Disconnect method to complete");
                     LogCallToDriver("Disconnect", "About to call Disconnect() method");
                     TimeMethod("Disconnect", () => baseClassDevice.Disconnect(), TargetTime.Standard);
