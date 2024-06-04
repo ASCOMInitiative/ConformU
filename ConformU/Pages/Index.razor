@@ -240,17 +240,16 @@
 
                         // Create a task to run the conformance test
                         conformanceTestTask = new Task(() =>
-    {
-        try
-        {
-            tester.TestDevice(testCycles);
-        }
-        catch (Exception ex)
-        {
-            _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
-        }
-
-    }, cancelConformToken);
+                        {
+                            try
+                            {
+                                tester.TestDevice(testCycles);
+                            }
+                            catch (Exception ex)
+                            {
+                                _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
+                            }
+                        }, cancelConformToken);
 
                         // Start the conformance test task
                         _conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");

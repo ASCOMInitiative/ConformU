@@ -733,6 +733,8 @@ namespace ConformU
 
         public void Connect()
         {
+            CheckDevice("Connect");
+
             SetTest("Connect");
             SetAction("Waiting for Connected to become 'true'");
 
@@ -823,6 +825,7 @@ namespace ConformU
 
         public void Disconnect()
         {
+            CheckDevice("Disconnect");
             SetTest("Disconnect");
 
             // Try to get the device's interface version
@@ -970,6 +973,12 @@ namespace ConformU
         }
 
         internal bool IsPlatform7OrLater { get; private set; }
+
+        private void CheckDevice(string method)
+        {
+            if (baseClassDevice is null)
+                throw new InvalidOperationException($"DeviceTesterbaseClass.CheckDevice A device instance does not exist when called by the {method} method.");
+        }
 
         /// <summary>
         /// Get error codes.
