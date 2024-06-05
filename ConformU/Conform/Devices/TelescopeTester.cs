@@ -66,6 +66,7 @@ namespace ConformU
         private const double SITE_ELEVATION_TEST_VALUE = 2385.0; //Arbitrary site elevation write test value
         private const double ARC_SECONDS_TO_RA_SECONDS = 1.0 / 15.0; // Convert angular movement to time based movement
         private const double TRACKING_RATE_TEST_VALUE = 0.01; // Rate offset used when testing TrackinRate (degrees per second)
+        private const int ABORT_SLEW_WAIT_TIME_SECONDS = 30; // Time to wait for Slewing to become false after AbortSlew
 
         private bool canFindHome, canPark, canPulseGuide, canSetDeclinationRate, canSetGuideRates, canSetPark, canSetPierside, canSetRightAscensionRate;
         private bool canSetTracking, canSlew, canSlewAltAz, canSlewAltAzAsync, canSlewAsync, canSync, canSyncAltAz, canUnpark;
@@ -3296,84 +3297,92 @@ namespace ConformU
 
             // TargetRightAscension Write (bad negative value) - Optional
             // Test moved here so that Conform can check that the SlewTo... methods properly set target coordinates.")
-            try
+            // Test Equatorial target slewing - Optional
+            if (telescopeTests[SLEW_TO_TARGET] | telescopeTests[SLEW_TO_TARGET_ASYNC])
             {
-                LogCallToDriver("TargetRightAscension Write", "About to set TargetRightAscension property to -1.0");
-                telescopeDevice.TargetRightAscension = -1.0d;
-                LogIssue("TargetRightAscension Write", "No error generated on set TargetRightAscension < 0 hours");
-            }
-            catch (Exception ex)
-            {
-                HandleInvalidValueExceptionAsOk("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetRightAscension < 0 hours");
-            }
-
-            // TargetRightAscension Write (bad positive value) - Optional
-            try
-            {
-                LogCallToDriver("TargetRightAscension Write", "About to set TargetRightAscension property to 25.0");
-                telescopeDevice.TargetRightAscension = 25.0d;
-                LogIssue("TargetRightAscension Write", "No error generated on set TargetRightAscension > 24 hours");
-            }
-            catch (Exception ex)
-            {
-                HandleInvalidValueExceptionAsOk("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetRightAscension > 24 hours");
-            }
-
-            // TargetRightAscension Write (valid value) - Optional
-            try
-            {
-                targetRightAscension = TelescopeRaFromSiderealTime("TargetRightAscension Write", -4.0d); LogCallToDriver("TargetRightAscension Write",
-                    $"About to set TargetRightAscension property to {targetRightAscension}");
-                telescopeDevice.TargetRightAscension = targetRightAscension; // Set a valid value
                 try
                 {
-                    LogCallToDriver("TargetRightAscension Write", "About to get TargetRightAscension property");
-                    switch (Math.Abs(telescopeDevice.TargetRightAscension - targetRightAscension))
+                    LogCallToDriver("TargetRightAscension Write", "About to set TargetRightAscension property to -1.0");
+                    telescopeDevice.TargetRightAscension = -1.0d;
+                    LogIssue("TargetRightAscension Write", "No error generated on set TargetRightAscension < 0 hours");
+                }
+                catch (Exception ex)
+                {
+                    HandleInvalidValueExceptionAsOk("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetRightAscension < 0 hours");
+                }
+
+                // TargetRightAscension Write (bad positive value) - Optional
+                try
+                {
+                    LogCallToDriver("TargetRightAscension Write", "About to set TargetRightAscension property to 25.0");
+                    telescopeDevice.TargetRightAscension = 25.0d;
+                    LogIssue("TargetRightAscension Write", "No error generated on set TargetRightAscension > 24 hours");
+                }
+                catch (Exception ex)
+                {
+                    HandleInvalidValueExceptionAsOk("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetRightAscension > 24 hours");
+                }
+
+                // TargetRightAscension Write (valid value) - Optional
+                try
+                {
+                    targetRightAscension = TelescopeRaFromSiderealTime("TargetRightAscension Write", -4.0d); LogCallToDriver("TargetRightAscension Write",
+                        $"About to set TargetRightAscension property to {targetRightAscension}");
+                    telescopeDevice.TargetRightAscension = targetRightAscension; // Set a valid value
+                    try
                     {
-                        case 0.0d:
-                            {
-                                LogOk("TargetRightAscension Write",
-                                    $"Legal value {targetRightAscension.ToHMS()} HH:MM:SS written successfully");
-                                break;
-                            }
+                        LogCallToDriver("TargetRightAscension Write", "About to get TargetRightAscension property");
+                        switch (Math.Abs(telescopeDevice.TargetRightAscension - targetRightAscension))
+                        {
+                            case 0.0d:
+                                {
+                                    LogOk("TargetRightAscension Write",
+                                        $"Legal value {targetRightAscension.ToHMS()} HH:MM:SS written successfully");
+                                    break;
+                                }
 
-                        case var @case when @case <= 1.0d / 3600.0d: // 1 seconds
-                            {
-                                LogOk("TargetRightAscension Write",
-                                    $"Target RightAscension is within 1 second of the value set: {targetRightAscension.ToHMS()}");
-                                break;
-                            }
+                            case var @case when @case <= 1.0d / 3600.0d: // 1 seconds
+                                {
+                                    LogOk("TargetRightAscension Write",
+                                        $"Target RightAscension is within 1 second of the value set: {targetRightAscension.ToHMS()}");
+                                    break;
+                                }
 
-                        case var case1 when case1 <= 2.0d / 3600.0d: // 2 seconds
-                            {
-                                LogOk("TargetRightAscension Write",
-                                    $"Target RightAscension is within 2 seconds of the value set: {targetRightAscension.ToHMS()}");
-                                break;
-                            }
+                            case var case1 when case1 <= 2.0d / 3600.0d: // 2 seconds
+                                {
+                                    LogOk("TargetRightAscension Write",
+                                        $"Target RightAscension is within 2 seconds of the value set: {targetRightAscension.ToHMS()}");
+                                    break;
+                                }
 
-                        case var case2 when case2 <= 5.0d / 3600.0d: // 5 seconds
-                            {
-                                LogOk("TargetRightAscension Write",
-                                    $"Target RightAscension is within 5 seconds of the value set: {targetRightAscension.ToHMS()}");
-                                break;
-                            }
+                            case var case2 when case2 <= 5.0d / 3600.0d: // 5 seconds
+                                {
+                                    LogOk("TargetRightAscension Write",
+                                        $"Target RightAscension is within 5 seconds of the value set: {targetRightAscension.ToHMS()}");
+                                    break;
+                                }
 
-                        default:
-                            {
-                                LogInfo("TargetRightAscension Write",
-                                    $"Target RightAscension: {telescopeDevice.TargetRightAscension.ToHMS()}");
-                                break;
-                            }
+                            default:
+                                {
+                                    LogInfo("TargetRightAscension Write",
+                                        $"Target RightAscension: {telescopeDevice.TargetRightAscension.ToHMS()}");
+                                    break;
+                                }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleException("TargetRightAscension Write", MemberType.Property, Required.MustBeImplemented, ex, "Unable to read TargetRightAscension before writing to it.");
                     }
                 }
                 catch (Exception ex)
                 {
-                    HandleException("TargetRightAscension Write", MemberType.Property, Required.MustBeImplemented, ex, "Unable to read TargetRightAscension before writing to it.");
+                    HandleException("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "");
                 }
             }
-            catch (Exception ex)
+            else
             {
-                HandleException("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "");
+                LogInfo("TargetRightAscension Write", "Tests skipped");
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -3381,83 +3390,90 @@ namespace ConformU
 
             // TargetDeclination Write (bad negative value) - Optional
             // Test moved here so that Conform can check that the SlewTo... methods properly set target coordinates.")
-            try
+            if (telescopeTests[SLEW_TO_TARGET] | telescopeTests[SLEW_TO_TARGET_ASYNC])
             {
-                LogCallToDriver("TargetDeclination Write", "About to set TargetDeclination property to -91.0");
-                telescopeDevice.TargetDeclination = -91.0d;
-                LogIssue("TargetDeclination Write", "No error generated on set TargetDeclination < -90 degrees");
-            }
-            catch (Exception ex)
-            {
-                HandleInvalidValueExceptionAsOk("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetDeclination < -90 degrees");
-            }
-
-            // TargetDeclination Write (bad positive value) - Optional
-            try
-            {
-                LogCallToDriver("TargetDeclination Write", "About to set TargetDeclination property to 91.0");
-                telescopeDevice.TargetDeclination = 91.0d;
-                LogIssue("TargetDeclination Write", "No error generated on set TargetDeclination > 90 degrees");
-            }
-            catch (Exception ex)
-            {
-                HandleInvalidValueExceptionAsOk("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetDeclination < -90 degrees");
-            }
-
-            // TargetDeclination Write (valid value) - Optional
-            try
-            {
-                targetDeclination = 1.0d; LogCallToDriver("TargetDeclination Write",
-                    $"About to set TargetDeclination property to {targetDeclination}");
-                telescopeDevice.TargetDeclination = targetDeclination; // Set a valid value
                 try
                 {
-                    LogCallToDriver("TargetDeclination Write", "About to get TargetDeclination property");
-                    switch (Math.Abs(telescopeDevice.TargetDeclination - targetDeclination))
+                    LogCallToDriver("TargetDeclination Write", "About to set TargetDeclination property to -91.0");
+                    telescopeDevice.TargetDeclination = -91.0d;
+                    LogIssue("TargetDeclination Write", "No error generated on set TargetDeclination < -90 degrees");
+                }
+                catch (Exception ex)
+                {
+                    HandleInvalidValueExceptionAsOk("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetDeclination < -90 degrees");
+                }
+
+                // TargetDeclination Write (bad positive value) - Optional
+                try
+                {
+                    LogCallToDriver("TargetDeclination Write", "About to set TargetDeclination property to 91.0");
+                    telescopeDevice.TargetDeclination = 91.0d;
+                    LogIssue("TargetDeclination Write", "No error generated on set TargetDeclination > 90 degrees");
+                }
+                catch (Exception ex)
+                {
+                    HandleInvalidValueExceptionAsOk("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetDeclination < -90 degrees");
+                }
+
+                // TargetDeclination Write (valid value) - Optional
+                try
+                {
+                    targetDeclination = 1.0d; LogCallToDriver("TargetDeclination Write",
+                        $"About to set TargetDeclination property to {targetDeclination}");
+                    telescopeDevice.TargetDeclination = targetDeclination; // Set a valid value
+                    try
                     {
-                        case 0.0d:
-                            {
-                                LogOk("TargetDeclination Write",
-                                    $"Legal value {targetDeclination.ToDMS()} DD:MM:SS written successfully");
-                                break;
-                            }
+                        LogCallToDriver("TargetDeclination Write", "About to get TargetDeclination property");
+                        switch (Math.Abs(telescopeDevice.TargetDeclination - targetDeclination))
+                        {
+                            case 0.0d:
+                                {
+                                    LogOk("TargetDeclination Write",
+                                        $"Legal value {targetDeclination.ToDMS()} DD:MM:SS written successfully");
+                                    break;
+                                }
 
-                        case var case3 when case3 <= 1.0d / 3600.0d: // 1 seconds
-                            {
-                                LogOk("TargetDeclination Write",
-                                    $"Target Declination is within 1 second of the value set: {targetDeclination.ToDMS()}");
-                                break;
-                            }
+                            case var case3 when case3 <= 1.0d / 3600.0d: // 1 seconds
+                                {
+                                    LogOk("TargetDeclination Write",
+                                        $"Target Declination is within 1 second of the value set: {targetDeclination.ToDMS()}");
+                                    break;
+                                }
 
-                        case var case4 when case4 <= 2.0d / 3600.0d: // 2 seconds
-                            {
-                                LogOk("TargetDeclination Write",
-                                    $"Target Declination is within 2 seconds of the value set: {targetDeclination.ToDMS()}");
-                                break;
-                            }
+                            case var case4 when case4 <= 2.0d / 3600.0d: // 2 seconds
+                                {
+                                    LogOk("TargetDeclination Write",
+                                        $"Target Declination is within 2 seconds of the value set: {targetDeclination.ToDMS()}");
+                                    break;
+                                }
 
-                        case var case5 when case5 <= 5.0d / 3600.0d: // 5 seconds
-                            {
-                                LogOk("TargetDeclination Write",
-                                    $"Target Declination is within 5 seconds of the value set: {targetDeclination.ToDMS()}");
-                                break;
-                            }
+                            case var case5 when case5 <= 5.0d / 3600.0d: // 5 seconds
+                                {
+                                    LogOk("TargetDeclination Write",
+                                        $"Target Declination is within 5 seconds of the value set: {targetDeclination.ToDMS()}");
+                                    break;
+                                }
 
-                        default:
-                            {
-                                LogInfo("TargetDeclination Write", $"Target Declination: {targetDeclination.ToDMS()}");
-                                break;
-                            }
+                            default:
+                                {
+                                    LogInfo("TargetDeclination Write", $"Target Declination: {targetDeclination.ToDMS()}");
+                                    break;
+                                }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleException("TargetDeclination Write", MemberType.Property, Required.MustBeImplemented, ex, "Unable to read TargetDeclination before writing to it.");
                     }
                 }
                 catch (Exception ex)
                 {
-                    HandleException("TargetDeclination Write", MemberType.Property, Required.MustBeImplemented, ex, "Unable to read TargetDeclination before writing to it.");
+                    HandleException("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "");
                 }
             }
-            catch (Exception ex)
+            else
             {
-                HandleException("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "");
+                LogInfo("TargetDeclination Write", "Tests skipped");
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -5905,7 +5921,6 @@ namespace ConformU
                     switch (testType)
                     {
                         case OptionalMethodType.AbortSlew:
-                            LogDebug(testName, "TelescopeOptionalMethodsTest - ABout to call the ConformU AbortSlew method.");
                             AbortSlew(testName);
                             LogOk(testName, "AbortSlew OK when not slewing");
 
@@ -5934,8 +5949,7 @@ namespace ConformU
                                 // Slew to the target coordinates
                                 LogCallToDriver(testName, $"About to call SlewToCoordinatesAsync. RA: {targetRa.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
 
-                                LogCallToDriver(testName,
-                                    $"About to call SlewToCoordinatesAsync method, RA: {targetRa.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                                LogCallToDriver(testName, $"About to call SlewToCoordinatesAsync method, RA: {targetRa.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
                                 telescopeDevice.SlewToCoordinatesAsync(targetRa, targetDeclination);
 
                                 // Wait for 1.5 seconds
@@ -5944,25 +5958,28 @@ namespace ConformU
                                 // Validate that the slew is still going
                                 ValidateSlewing(testName, true);
 
-                                // Now try to end the slew
+                                // Now try to end the slew, waiting up to 30 seconds for this to happen
+                                Stopwatch sw = Stopwatch.StartNew();
                                 TimeMethod(testName, () => AbortSlew(testName), TargetTime.Standard);
-
-                                // Give time for the mount to stop
-                                WaitFor(1500, 100);
-
-                                // Make sure that slewing is now  false
-                                LogCallToDriver(testName, "About to get Slewing property");
-                                bool afterAbortSlewing = telescopeDevice.Slewing;
-
-                                // Wait for slew just in case it isn't stopped by AbortSlew...
-                                if (!afterAbortSlewing)
+                                try
                                 {
-                                    LogOk(testName, "AbortSlew stopped the mount from slewing.");
+                                    // Wait for the mount to report that it is no longer slewing or for the wait to time out
+                                    LogCallToDriver(testName, $"About to call Slewing repeatedly...");
+                                    WaitWhile("Waiting for slew to stop", () => telescopeDevice.Slewing == true, 500, ABORT_SLEW_WAIT_TIME_SECONDS);
+                                    LogOk(testName, $"AbortSlew stopped the mount from slewing in {sw.Elapsed.TotalSeconds:0.0} seconds.");
                                 }
-                                else
+                                catch (TimeoutException)
                                 {
-                                    LogIssue(testName, "The mount is still slewing after AbortSlew.");
-                                    WaitForSlew(testName, $"AbortSlew did not stop the slew, waiting for it to finish on its own.");
+                                    LogIssue(testName, $"The mount still reports Slewing as TRUE {ABORT_SLEW_WAIT_TIME_SECONDS} seconds after AbortSlew returned.");
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogIssue(testName, $"The mount reported an exception while waiting for Slewing to become false after AbortSlew: {ex.Message}");
+                                    LogDebug(testName, ex.ToString());
+                                }
+                                finally
+                                {
+                                    sw.Stop();
                                 }
                             }
                             else // Async slew is not supported
@@ -7217,8 +7234,8 @@ namespace ConformU
             pierSidePlus9 = SopPierTest(TelescopeRaFromHourAngle("SideofPier", +9.0d), declination9, startRa, startDeclination, "hour angle +9.0");
             if (cancellationToken.IsCancellationRequested)
                 return;
-            
-            LogDebug(" "," ");
+
+            LogDebug(" ", " ");
 
             if ((pierSideMinus3.SideOfPier == pierSidePlus9.SideOfPier) & (pierSidePlus3.SideOfPier == pierSideMinus9.SideOfPier))// Reporting physical pier side
             {
