@@ -427,7 +427,7 @@ namespace ConformU
                     TL.LogMessage("", MessageLevel.TestOnly, "");
                     if (numberOfTestCycles > 1) // Stress test
                     {
-                        TL.LogMessage($"Writing {(settings.ReportGoodTimings?(settings.ReportBadTimings?"good and bad":"good"):(settings.ReportBadTimings?"bad":"no"))} timings to the log file, please wait...", MessageLevel.TestOnly, "");
+                        TL.LogMessage($"Writing {(settings.ReportGoodTimings ? (settings.ReportBadTimings ? "good and bad" : "good") : (settings.ReportBadTimings ? "bad" : "no"))} timings to the log file, please wait...", MessageLevel.TestOnly, "");
                         TL.LogMessage("", MessageLevel.TestOnly, "");
                     }
                     foreach (KeyValuePair<string, string> kvp in conformResults.Timings)
@@ -483,7 +483,7 @@ namespace ConformU
                     returnCode = -99998;
                 }
 
-                TL.SetStatusMessage("Conformance test has finished");
+                TL.SetStatusMessage($"Conformance test has finished.      (Log file: {Path.Combine(TL.LogFilePath, TL.LogFileName)})");
             }
             catch (Exception ex)
             {
