@@ -65,7 +65,6 @@ namespace ConformU
         private const double SIDEREAL_RATE = 15.0 / SIDEREAL_SECONDS_TO_SI_SECONDS; //Arc-seconds per SI second
         private const double SITE_ELEVATION_TEST_VALUE = 2385.0; //Arbitrary site elevation write test value
         private const double ARC_SECONDS_TO_RA_SECONDS = 1.0 / 15.0; // Convert angular movement to time based movement
-        private const double TRACKING_RATE_TEST_VALUE = 0.01; // Rate offset used when testing TrackinRate (degrees per second)
         private const int ABORT_SLEW_WAIT_TIME_SECONDS = 30; // Time to wait for Slewing to become false after AbortSlew
 
         private bool canFindHome, canPark, canPulseGuide, canSetDeclinationRate, canSetGuideRates, canSetPark, canSetPierside, canSetRightAscensionRate;
@@ -923,6 +922,13 @@ namespace ConformU
                 {
                     SetTest("DeclinationRate Write");
 
+                    // Set up the rate offset Write test by ensuring that the telescope is in sidereal mode
+                    try
+                    {
+                        telescopeDevice.TrackingRate = DriveRate.Sidereal;
+                    }
+                    catch { } // This is best endeavours, it doesn't matter if it fails at this point
+
                     // Log the test offset rate if extended tests are enabled
                     if (settings.TelescopeExtendedRateOffsetTests)
                     {
@@ -1437,6 +1443,13 @@ namespace ConformU
                 {
 
                     SetTest("RightAscensionRate Write");
+
+                    // Set up the rate offset Write test by ensuring that the telescope is in sidereal mode
+                    try
+                    {
+                        telescopeDevice.TrackingRate = DriveRate.Sidereal;
+                    }
+                    catch { } // This is best endeavours, it doesn't matter if it fails at this point
 
                     // Log the test offset rate if extended tests are enabled
                     if (settings.TelescopeExtendedRateOffsetTests)
@@ -2459,8 +2472,7 @@ namespace ConformU
                         // This can be due to the driver returning the same TrackingRates object on every TrackingRates call but not resetting the iterator pointer
                         LogIssue("TrackingRates", "Multiple calls to TrackingRates returned different answers!");
                         LogInfo("TrackingRates", "");
-                        LogInfo("TrackingRates",
-                            $"The first call to TrackingRates returned {lCount} drive rates; the next call appeared to return no rates.");
+                        LogInfo("TrackingRates", $"The first call to TrackingRates returned {lCount} drive rates; the next call appeared to return no rates.");
                         LogInfo("TrackingRates", "This can arise when the SAME TrackingRates object is returned on every TrackingRates call.");
                         LogInfo("TrackingRates", "The root cause is usually that the enumeration pointer in the object is set to the end of the");
                         LogInfo("TrackingRates", "collection through the application's use of the first object; subsequent uses see the pointer at the end");
@@ -2554,15 +2566,6 @@ namespace ConformU
                         trackingRate = telescopeDevice.TrackingRate;
                         LogOk("TrackingRate Read", trackingRate.ToString());
 
-                        // Set up the TrackingRate Write test by attempting to set offset rates in sidereal mode
-                        try
-                        {
-                            telescopeDevice.TrackingRate = DriveRate.Sidereal;
-                            telescopeDevice.RightAscensionRate = TRACKING_RATE_TEST_VALUE / 15.0;
-                            telescopeDevice.DeclinationRate = TRACKING_RATE_TEST_VALUE;
-                        }
-                        catch { } // This is best endeavours, it doesn't matter if it fails
-
                         // TrackingRate Write - Optional
                         try
                         {
@@ -2592,8 +2595,8 @@ namespace ConformU
                                     // For ITelescopeV4 and later make sure that RightAscensionRate & DeclinationRate are only usable when tracking at Sidereal rate
                                     if (IsPlatform7OrLater)
                                     {
-                                        CheckRateOffsets(currentDriveRate, RateOffset.DeclinationRate);
-                                        CheckRateOffsets(currentDriveRate, RateOffset.RightAscensionRate);
+                                        CheckRateOffsetsRejectedForNonSiderealDriveRates(currentDriveRate, RateOffset.DeclinationRate);
+                                        CheckRateOffsetsRejectedForNonSiderealDriveRates(currentDriveRate, RateOffset.RightAscensionRate);
                                     }
                                 }
                                 catch (Exception ex)
@@ -3930,7 +3933,12 @@ namespace ConformU
 
         #region Support Code
 
-        private void CheckRateOffsets(DriveRate driveRate, RateOffset testRateOffset)
+        /// <summary>
+        /// Confirm that rate offsets are reported as 0.0 and that they cannot be set when tracking at drive rates other than sidereal.
+        /// </summary>
+        /// <param name="driveRate"></param>
+        /// <param name="testRateOffset"></param>
+        private void CheckRateOffsetsRejectedForNonSiderealDriveRates(DriveRate driveRate, RateOffset testRateOffset)
         {
             // Check whether or not we are tracking at sidereal rate
             if (driveRate != DriveRate.Sidereal) // We are tracking at a non-sidereal rate
@@ -3959,9 +3967,9 @@ namespace ConformU
                         // Try to set the appropriate offset rate
                         LogCallToDriver("", $"About to set {testRateOffset}");
                         if (testRateOffset == RateOffset.DeclinationRate) // Testing DeclinationRate
-                            telescopeDevice.DeclinationRate = TRACKING_RATE_TEST_VALUE;
+                            telescopeDevice.DeclinationRate = settings.TelescopeRateOffsetTestLowValue;
                         else // Testing RightAscensionRate
-                            telescopeDevice.RightAscensionRate = TRACKING_RATE_TEST_VALUE / 15.0;
+                            telescopeDevice.RightAscensionRate = settings.TelescopeRateOffsetTestLowValue / 15.0;
 
                         // Should never get here because an exception is expected
                         LogIssue("TrackingRate Write", $"Setting {testRateOffset} in {driveRate} drive rate did not result in an {(settings.DeviceTechnology == DeviceTechnology.COM ? "InvalidOperationException" : "InvalidOperation  error")} but should have.");
