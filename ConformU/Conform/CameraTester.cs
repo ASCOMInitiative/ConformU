@@ -52,7 +52,7 @@ namespace ConformU
         private bool mFastReadout, mCanReadGain, mCanReadGainMax, mCanReadGainMin, mCanReadGains, mCanReadReadoutModes;
         private IList<string> mGains;
         private IList<string> mReadoutModes;
-        private ASCOM.DeviceInterface.SensorType mSensorType;
+        private SensorType mSensorType;
         private bool mCanReadSensorType = false;
         private readonly Stopwatch sw = new();
 
@@ -948,7 +948,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to get SensorType");
-                    TimeFunc("SensorType", () => mSensorType = (ASCOM.DeviceInterface.SensorType)camera.SensorType, TargetTime.Fast);
+                    TimeFunc("SensorType", () => mSensorType = (SensorType)camera.SensorType, TargetTime.Fast);
                     mCanReadSensorType = true; // Set a flag to indicate that we have got a valid SensorType value
 
                     // Successfully retrieved a value
@@ -962,7 +962,7 @@ namespace ConformU
                 // BayerOffset Read
                 if (mCanReadSensorType)
                 {
-                    if (mSensorType == ASCOM.DeviceInterface.SensorType.Monochrome)
+                    if (mSensorType == SensorType.Monochrome)
                     {
                         // Monochrome so both BayerOffset properties should throw not implemented exceptions
                         CameraPropertyMustNotImplemented(CamPropertyType.BayerOffsetX, "BayerOffsetX Read");

@@ -158,7 +158,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Remove="Conform\Devices\Facades\DriverHostForm.resx" />
+		<EmbeddedResource Remove="Conform\Facades\DriverHostForm.resx" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -173,7 +173,7 @@
 
 	<ItemGroup>
 		<None Include="..\.editorconfig" Link=".editorconfig" />
-		<None Include="Conform\Devices\Facades\BaseClass\DriverHostForm.resx" />
+		<None Include="Conform\Facades\BaseClass\DriverHostForm.resx" />
 		<None Include="Properties\PublishProfiles\Linux-Arm.pubxml.user" />
 		<None Include="Properties\PublishProfiles\Linux-X64.pubxml.user" />
 		<None Include="Properties\PublishProfiles\Windows.pubxml.user" />
