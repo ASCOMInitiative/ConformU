@@ -65,7 +65,6 @@ namespace ConformU
         private const double SIDEREAL_RATE = 15.0 / SIDEREAL_SECONDS_TO_SI_SECONDS; //Arc-seconds per SI second
         private const double SITE_ELEVATION_TEST_VALUE = 2385.0; //Arbitrary site elevation write test value
         private const double ARC_SECONDS_TO_RA_SECONDS = 1.0 / 15.0; // Convert angular movement to time based movement
-        private const int ABORT_SLEW_WAIT_TIME_SECONDS = 30; // Time to wait for Slewing to become false after AbortSlew
 
         private bool canFindHome, canPark, canPulseGuide, canSetDeclinationRate, canSetGuideRates, canSetPark, canSetPierside, canSetRightAscensionRate;
         private bool canSetTracking, canSlew, canSlewAltAz, canSlewAltAzAsync, canSlewAsync, canSync, canSyncAltAz, canUnpark;
@@ -5973,12 +5972,12 @@ namespace ConformU
                                 {
                                     // Wait for the mount to report that it is no longer slewing or for the wait to time out
                                     LogCallToDriver(testName, $"About to call Slewing repeatedly...");
-                                    WaitWhile("Waiting for slew to stop", () => telescopeDevice.Slewing == true, 500, ABORT_SLEW_WAIT_TIME_SECONDS);
+                                    WaitWhile("Waiting for slew to stop", () => telescopeDevice.Slewing == true, 500, settings.TelescopeTimeForSlewingToBecomeFalse);
                                     LogOk(testName, $"AbortSlew stopped the mount from slewing in {sw.Elapsed.TotalSeconds:0.0} seconds.");
                                 }
                                 catch (TimeoutException)
                                 {
-                                    LogIssue(testName, $"The mount still reports Slewing as TRUE {ABORT_SLEW_WAIT_TIME_SECONDS} seconds after AbortSlew returned.");
+                                    LogIssue(testName, $"The mount still reports Slewing as TRUE {settings.TelescopeTimeForSlewingToBecomeFalse} seconds after AbortSlew returned.");
                                 }
                                 catch (Exception ex)
                                 {
@@ -6692,11 +6691,10 @@ namespace ConformU
                     canSetZero = false;
                     try
                     {
-                        LogCallToDriver(testName,
-                            $"About to call MoveAxis method for axis {((int)testAxis)} at speed 0");
+                        LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
                         TimeMethod($"{testName} {testAxis} 0", () => telescopeDevice.MoveAxis(testAxis, 0.0d), TargetTime.Standard); // Set a value of zero
 
-                        if (ValidateSlewing(testName, false))
+                        if (WaitForSlewingTobecomeFalse(testName))
                         {
                             LogOk(testName, "Can successfully set a movement rate of zero");
                             canSetZero = true;
@@ -6709,8 +6707,7 @@ namespace ConformU
                     }
                     catch (COMException ex)
                     {
-                        LogIssue(testName,
-                            $"Unable to set a movement rate of zero - {ex.Message} {((int)ex.ErrorCode):X8}");
+                        LogIssue(testName, $"Unable to set a movement rate of zero - {ex.Message} {((int)ex.ErrorCode):X8}");
                     }
                     catch (DriverException ex)
                     {
@@ -6727,16 +6724,11 @@ namespace ConformU
                     try
                     {
                         if (rateMinimum > 0d) // choose a value between the minimum and zero
-                        {
                             moveRate = rateMinimum / 2.0d;
-                        }
                         else // Choose a large negative value
-                        {
                             moveRate = -rateMaximum - 1.0d;
-                        }
 
-                        LogDebug(testName, $"Using minimum rate: {moveRate}"); LogCallToDriver(testName,
-                            $"About to call MoveAxis method for axis {((int)testAxis)} at speed {moveRate}");
+                        LogDebug(testName, $"Using minimum rate: {moveRate}"); LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {moveRate}");
                         telescopeDevice.MoveAxis(testAxis, moveRate); // Set a value lower than the minimum
                         LogIssue(testName, $"No exception raised when move axis value < minimum rate: {moveRate}");
                         // Clean up and release each object after use
@@ -6768,13 +6760,13 @@ namespace ConformU
                     if (cancellationToken.IsCancellationRequested)
                         return;
 
-                    // test that error is generated when rate is above maximum set
+                    // Test that error is generated when rate is above maximum set
                     SetAction("Set upper rate");
                     try
                     {
                         moveRate = rateMaximum + 1.0d;
-                        LogDebug(testName, $"Using maximum rate: {moveRate}"); LogCallToDriver(testName,
-                            $"About to call MoveAxis method for axis {((int)testAxis)} at speed {moveRate}");
+                        LogDebug(testName, $"Using maximum rate: {moveRate}");
+                        LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {moveRate}");
                         telescopeDevice.MoveAxis(testAxis, moveRate); // Set a value higher than the maximum
                         LogIssue(testName, $"No exception raised when move axis value > maximum rate: {moveRate}");
                         // Clean up and release each object after use
@@ -6813,33 +6805,23 @@ namespace ConformU
                             try
                             {
                                 SetAction("Moving forward at minimum rate");
-                                LogCallToDriver(testName,
-                                    $"About to call MoveAxis method for axis {((int)testAxis)} at speed {rateMinimum}");
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {rateMinimum}");
                                 TimeMethod($"{testName} {testAxis} {rateMinimum}", () => telescopeDevice.MoveAxis(testAxis, rateMinimum), TargetTime.Standard); // Set the minimum rate
 
                                 // Assess outcome depending on whether or not the minimum rate was 0.0
                                 if (rateMinimum == 0.0)
                                 {
                                     if (ValidateSlewing(testName, false))
-                                    {
                                         LogOk(testName, $"Can successfully set a movement rate of {rateMinimum}");
-                                    }
                                     else
-                                    {
                                         LogIssue(testName, $"Slewing was not false after setting a rate of {rateMinimum}");
-                                    }
-
                                 }
                                 else // rateMinimum != 0.0
                                 {
                                     if (ValidateSlewing(testName, true))
-                                    {
                                         LogOk(testName, $"Can successfully set a movement rate of {rateMinimum}");
-                                    }
                                     else
-                                    {
                                         LogIssue(testName, $"Slewing was not false after setting a rate of {rateMinimum}");
-                                    }
                                 }
 
                                 WaitFor(MOVE_AXIS_TIME);
@@ -6849,20 +6831,14 @@ namespace ConformU
 
                                 // Stop movement at minimum rate
                                 SetAction("Stopping movement");
-                                LogCallToDriver(testName,
-                                    $"About to call MoveAxis method for axis {((int)testAxis)} at speed 0");
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
                                 telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
 
-                                // Assess outcome depending on whether or not the minimum rate was 0.0
-                                if (ValidateSlewing(testName, false))
-                                {
+                                // Wait up to the configured time for slewing to become false
+                                if (WaitForSlewingTobecomeFalse(testName)) // Wait was successful
                                     LogOk(testName, $"Successfully stopped movement.");
-                                }
-                                else
-                                {
+                                else // Something went wrong
                                     LogIssue(testName, $"Slewing was not false after setting a rate of 0.0");
-                                }
-
 
                                 // Move back at minimum rate
                                 SetAction("Moving back at minimum rate");
@@ -6874,25 +6850,16 @@ namespace ConformU
                                 if (rateMinimum == 0.0)
                                 {
                                     if (ValidateSlewing(testName, false))
-                                    {
                                         LogOk(testName, $"Can successfully set a movement rate of {rateMinimum}");
-                                    }
                                     else
-                                    {
                                         LogIssue(testName, $"Slewing was not false after setting a rate of {rateMinimum}");
-                                    }
-
                                 }
                                 else // rateMinimum != 0.0
                                 {
                                     if (ValidateSlewing(testName, true))
-                                    {
                                         LogOk(testName, $"Can successfully set a movement rate of {-rateMinimum}");
-                                    }
                                     else
-                                    {
                                         LogIssue(testName, $"Slewing was not false after setting a rate of {-rateMinimum}");
-                                    }
                                 }
 
                                 WaitFor(MOVE_AXIS_TIME);
@@ -6902,24 +6869,18 @@ namespace ConformU
 
                                 // Stop movement at -minimum rate
                                 SetAction("Stopping movement");
-                                LogCallToDriver(testName,
-                                    $"About to call MoveAxis method for axis {((int)testAxis)} at speed 0");
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
                                 telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
 
-                                // Assess outcome depending on whether or not the minimum rate was 0.0
-                                if (ValidateSlewing(testName, false))
-                                {
+                                // Wait up to the configured time for slewing to become false
+                                if (WaitForSlewingTobecomeFalse(testName)) // Wait was successful
                                     LogOk(testName, $"Successfully stopped movement.");
-                                }
-                                else
-                                {
+                                else // Something went wrong
                                     LogIssue(testName, $"Slewing was not false after setting a rate of 0.0");
-                                }
                             }
                             catch (Exception ex)
                             {
-                                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex,
-                                    $"when setting rate: {rateMinimum}");
+                                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, $"when setting rate: {rateMinimum}");
                             }
 
                             SetStatus(""); // Clear status flag
@@ -6938,33 +6899,24 @@ namespace ConformU
                             try
                             {
                                 SetAction("Moving forward at maximum rate");
-                                LogCallToDriver(testName,
-                                    $"About to call MoveAxis method for axis {((int)testAxis)} at speed {rateMaximum}");
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {rateMaximum}");
                                 TimeMethod($"{testName} {testAxis} {rateMaximum}", () => telescopeDevice.MoveAxis(testAxis, rateMaximum), TargetTime.Standard); // Set the maximum rate
 
                                 // Assess outcome depending on whether or not the maximum rate was 0.0
                                 if (rateMaximum == 0.0)
                                 {
                                     if (ValidateSlewing(testName, false))
-                                    {
                                         LogOk(testName, $"Can successfully set a movement rate of {rateMaximum}");
-                                    }
                                     else
-                                    {
                                         LogIssue(testName, $"Slewing was not false after setting a rate of {rateMaximum}");
-                                    }
 
                                 }
                                 else // rateMaximum != 0.0
                                 {
                                     if (ValidateSlewing(testName, true))
-                                    {
                                         LogOk(testName, $"Can successfully set a movement rate of {rateMaximum}");
-                                    }
                                     else
-                                    {
                                         LogIssue(testName, $"Slewing was not false after setting a rate of {rateMaximum}");
-                                    }
                                 }
 
                                 WaitFor(MOVE_AXIS_TIME);
@@ -6974,19 +6926,14 @@ namespace ConformU
 
                                 // Stop movement at maximum rate
                                 SetAction("Stopping movement");
-                                LogCallToDriver(testName,
-                                    $"About to call MoveAxis method for axis {((int)testAxis)} at speed 0");
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
                                 telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
 
-                                // Assess outcome depending on whether or not the maximum rate was 0.0
-                                if (ValidateSlewing(testName, false))
-                                {
+                                // Wait up to the configured time for slewing to become false
+                                if (WaitForSlewingTobecomeFalse(testName)) // Wait was successful
                                     LogOk(testName, $"Successfully stopped movement.");
-                                }
-                                else
-                                {
+                                else // Something went wrong
                                     LogIssue(testName, $"Slewing was not false after setting a rate of 0.0");
-                                }
 
                                 // Move back at maximum rate
                                 SetAction("Moving back at maximum rate");
@@ -6998,25 +6945,16 @@ namespace ConformU
                                 if (rateMaximum == 0.0)
                                 {
                                     if (ValidateSlewing(testName, false))
-                                    {
                                         LogOk(testName, $"Can successfully set a movement rate of {rateMaximum}");
-                                    }
                                     else
-                                    {
                                         LogIssue(testName, $"Slewing was not false after setting a rate of {rateMaximum}");
-                                    }
-
                                 }
                                 else // rateMaximum != 0.0
                                 {
                                     if (ValidateSlewing(testName, true))
-                                    {
                                         LogOk(testName, $"Can successfully set a movement rate of {-rateMaximum}");
-                                    }
                                     else
-                                    {
                                         LogIssue(testName, $"Slewing was not false after setting a rate of {-rateMaximum}");
-                                    }
                                 }
 
                                 WaitFor(MOVE_AXIS_TIME);
@@ -7026,24 +6964,18 @@ namespace ConformU
 
                                 // Stop movement at -maximum rate
                                 SetAction("Stopping movement");
-                                LogCallToDriver(testName,
-                                    $"About to call MoveAxis method for axis {((int)testAxis)} at speed 0");
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
                                 telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
 
-                                // Assess outcome depending on whether or not the maximum rate was 0.0
-                                if (ValidateSlewing(testName, false))
-                                {
+                                // Wait up to the configured time for slewing to become false
+                                if (WaitForSlewingTobecomeFalse(testName)) // Wait was successful
                                     LogOk(testName, $"Successfully stopped movement.");
-                                }
-                                else
-                                {
+                                else // Something went wrong
                                     LogIssue(testName, $"Slewing was not false after setting a rate of 0.0");
-                                }
                             }
                             catch (Exception ex)
                             {
-                                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex,
-                                    $"when setting rate: {rateMaximum}");
+                                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, $"when setting rate: {rateMaximum}");
                             }
 
                             SetStatus(""); // Clear status flag
@@ -7064,15 +6996,16 @@ namespace ConformU
                             {
                                 LogCallToDriver(testName, "About to get Tracking property");
                                 trackingStart = telescopeDevice.Tracking; // Save the start tracking state
-                                SetStatus("Moving forward"); LogCallToDriver(testName,
-                                    $"About to call MoveAxis method for axis {((int)testAxis)} at speed {rateMaximum}");
+                                SetStatus("Moving forward"); LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {rateMaximum}");
                                 telescopeDevice.MoveAxis(testAxis, rateMaximum); // Set the maximum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
-                                SetStatus("Stop movement"); LogCallToDriver(testName,
-                                    $"About to call MoveAxis method for axis {((int)testAxis)} at speed 0");
-                                telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
+
+                                SetStatus("Stop movement"); LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
+                                telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis                                
+                                WaitForSlewingTobecomeFalse(testName); // Wait up to the configured time for slewing to become false
+
                                 LogCallToDriver(testName, "About to get Tracking property");
                                 trackingEnd = telescopeDevice.Tracking; // Save the final tracking state
                                 if (trackingStart == trackingEnd) // Successfully retained tracking state
@@ -7081,62 +7014,58 @@ namespace ConformU
                                     {
                                         SetStatus("Set tracking off"); LogCallToDriver(testName, "About to set Tracking property false");
                                         telescopeDevice.Tracking = false;
-                                        SetStatus("Move back"); LogCallToDriver(testName,
-                                            $"About to call MoveAxis method for axis {((int)testAxis)} at speed {-rateMaximum}");
+                                        SetStatus("Move back"); LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {-rateMaximum}");
                                         telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the maximum rate
                                         WaitFor(MOVE_AXIS_TIME);
                                         if (cancellationToken.IsCancellationRequested)
-                                            return; LogCallToDriver(testName,
-                                            $"About to call MoveAxis method for axis {((int)testAxis)} at speed 0");
+                                            return;
+
+                                        LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
                                         telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
+                                        WaitForSlewingTobecomeFalse(testName); // Wait up to the configured time for slewing to become false
+
                                         SetStatus(""); LogCallToDriver(testName, "About to get Tracking property");
                                         if (telescopeDevice.Tracking == false) // tracking correctly retained in both states
-                                        {
                                             LogOk(testName, "Tracking state correctly retained for both tracking states");
-                                        }
                                         else
-                                        {
-                                            LogIssue(testName,
-                                                $"Tracking state correctly retained when tracking is {trackingStart}, but not when tracking is false");
-                                        }
+                                            LogIssue(testName, $"Tracking state correctly retained when tracking is {trackingStart}, but not when tracking is false");
                                     }
                                     else // Tracking false so switch to true for return movement
                                     {
                                         SetStatus("Set tracking on"); LogCallToDriver(testName, "About to set Tracking property true");
                                         telescopeDevice.Tracking = true;
-                                        SetStatus("Move back"); LogCallToDriver(testName,
-                                            $"About to call MoveAxis method for axis {((int)testAxis)} at speed {-rateMaximum}");
+                                        SetStatus("Move back"); LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {-rateMaximum}");
                                         telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the maximum rate
                                         WaitFor(MOVE_AXIS_TIME);
                                         if (cancellationToken.IsCancellationRequested)
-                                            return; LogCallToDriver(testName,
-                                            $"About to call MoveAxis method for axis {((int)testAxis)} at speed 0");
+                                            return;
+
+                                        LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
                                         telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
+                                        WaitForSlewingTobecomeFalse(testName); // Wait up to the configured time for slewing to become false
+
                                         SetStatus(""); LogCallToDriver(testName, "About to get Tracking property");
                                         if (telescopeDevice.Tracking == true) // tracking correctly retained in both states
-                                        {
                                             LogOk(testName, "Tracking state correctly retained for both tracking states");
-                                        }
                                         else
-                                        {
-                                            LogIssue(testName,
-                                                $"Tracking state correctly retained when tracking is {trackingStart}, but not when tracking is true");
-                                        }
+                                            LogIssue(testName, $"Tracking state correctly retained when tracking is {trackingStart}, but not when tracking is true");
                                     }
 
                                     SetStatus(""); // Clear status flag
                                 }
                                 else // Tracking state not correctly restored
                                 {
-                                    SetStatus("Move back"); LogCallToDriver(testName,
-                                        $"About to call MoveAxis method for axis {((int)testAxis)} at speed {-rateMaximum}");
+                                    SetStatus("Move back"); LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {-rateMaximum}");
                                     telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the maximum rate
                                     WaitFor(MOVE_AXIS_TIME);
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
-                                    SetStatus(""); LogCallToDriver(testName,
-                                        $"About to call MoveAxis method for axis {((int)testAxis)} at speed 0");
+
+                                    SetStatus("");
+                                    LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
                                     telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
+                                    WaitForSlewingTobecomeFalse(testName); // Wait up to the configured time for slewing to become false
+
                                     LogCallToDriver(testName, $"About to set Tracking property {trackingStart}");
                                     telescopeDevice.Tracking = trackingStart; // Restore original value
                                     LogIssue(testName, "Tracking state not correctly restored after MoveAxis when CanSetTracking is true");
@@ -7145,28 +7074,30 @@ namespace ConformU
                             else // Can't set tracking so just test the current state
                             {
                                 LogCallToDriver(testName, "About to get Tracking property");
-                                trackingStart = telescopeDevice.Tracking;
-                                SetStatus("Moving forward"); LogCallToDriver(testName,
-                                    $"About to call MoveAxis method for axis {((int)testAxis)} at speed {rateMaximum}");
+                                trackingStart = telescopeDevice.Tracking; SetStatus("Moving forward");
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {rateMaximum}");
                                 telescopeDevice.MoveAxis(testAxis, rateMaximum); // Set the maximum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
-                                SetStatus("Stop movement"); LogCallToDriver(testName,
-                                    $"About to call MoveAxis method for axis {((int)testAxis)} at speed 0");
+
+                                SetStatus("Stop movement"); LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
                                 telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
+                                WaitForSlewingTobecomeFalse(testName); // Wait up to the configured time for slewing to become false
+
                                 LogCallToDriver(testName, "About to get Tracking property");
                                 trackingEnd = telescopeDevice.Tracking; // Save tracking state
-                                SetStatus("Move back"); LogCallToDriver(testName,
-                                    $"About to call method MoveAxis for axis {((int)testAxis)} at speed {-rateMaximum}");
+                                SetStatus("Move back"); LogCallToDriver(testName, $"About to call method MoveAxis for axis {(int)testAxis} at speed {-rateMaximum}");
                                 telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the maximum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
+
                                 // v1.0.12 next line added because movement wasn't stopped
-                                LogCallToDriver(testName,
-                                    $"About to call MoveAxis method for axis {((int)testAxis)} at speed 0");
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
                                 telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
+                                WaitForSlewingTobecomeFalse(testName); // Wait up to the configured time for slewing to become false
+
                                 if (trackingStart == trackingEnd)
                                 {
                                     LogOk(testName, "Tracking state correctly restored after MoveAxis when CanSetTracking is false");
@@ -7841,7 +7772,8 @@ namespace ConformU
             try
             {
                 // Tracking must be enabled for this test so make sure that it is enabled
-                LogCallToDriver(testName, $"{description} - About to get Tracking property");
+                LogCallToDriver(testName,
+                    $"{description} - About to get Tracking property");
                 tracking = telescopeDevice.Tracking;
 
                 // Test whether we are tracking and if not enable this if possible, abort the test if tracking cannot be set True
@@ -8559,6 +8491,36 @@ namespace ConformU
                 LogIssue(test, $"Unexpected exception from Slewing: {ex.Message}");
                 LogDebug(test, ex.ToString());
             }
+            return false;
+        }
+
+        /// <summary>
+        /// Wait up to the configured time for Slewing to become false.
+        /// </summary>
+        /// <param name="testName">Test name</param>
+        /// <returns>TRUE if wait completed successfully within the timeout, otherwise FALSE</returns>
+        private bool WaitForSlewingTobecomeFalse(string testName)
+        {
+            try
+            {
+                // Wait for the mount to report that it is no longer slewing or for the wait to time out
+                LogCallToDriver(testName, $"About to call Slewing repeatedly...");
+                WaitWhile("Waiting for slew to stop", () => telescopeDevice.Slewing == true, 500, settings.TelescopeTimeForSlewingToBecomeFalse);
+
+                // Indicate that the wait was successful
+                return true;
+            }
+            catch (TimeoutException)
+            {
+                LogIssue(testName, $"Timed out after {settings.TelescopeTimeForSlewingToBecomeFalse} seconds while waiting for Slewing to become FALSE.");
+            }
+            catch (Exception ex)
+            {
+                LogIssue(testName, $"The mount reported an exception while waiting for Slewing to become false: {ex.Message}");
+                LogDebug(testName, ex.ToString());
+            }
+
+            // Indicate that the wait failed
             return false;
         }
 

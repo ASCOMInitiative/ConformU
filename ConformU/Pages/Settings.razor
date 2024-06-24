@@ -447,6 +447,20 @@
                     </div>
 
                     <div class="row">
+                        <RadzenNumeric Name="TELESCOPEWAITFORSEWTIME"
+                                       Style="margin-top: 20px;  margin-left:20px; width: 6em"
+                                       Format="0"
+                                       @bind-Value="@telescopeTimeForSlewingToBecomeFalse"
+                                       TValue="int"
+                                       Min="1"
+                                       Step="1"
+                                       Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.TelescopeTimeForSlewingToBecomeFalse)) />
+                        <RadzenLabel Text="Maximum time to wait for slewing to become false (seconds)"
+                                     Component="TELESCOPEWAITFORSEWTIME"
+                                     Style="margin-left: 20px;margin-top:26px; margin-right: 20px" />
+                    </div>
+
+                    <div class="row">
                         <RadzenNumeric Name="RATEOFFSETTESTDURATION"
                                        Style="margin-top: 20px; margin-left:20px; width: 6em"
                                        Format="0.0"
@@ -833,6 +847,7 @@
     private double telescopeRateOffsetTestDuration;
     private double telescopeRateOffsetTestValueLow;
     private double telescopeRateOffsetTestValueHigh;
+    private int telescopeTimeForSlewingToBecomeFalse;
 
     #region Enums
 
@@ -871,7 +886,8 @@
         TelescopeMaximumSlewTime,
         TelescopeRateOffsetTestDuration,
         TelescopeRateOffsetTestValueLow,
-        TelescopeRateOffsetTestValueHigh
+        TelescopeRateOffsetTestValueHigh,
+        TelescopeTimeForSlewingToBecomeFalse
     }
 
     private enum CheckBoxConfigurationItem
@@ -1095,6 +1111,10 @@
                 settings.SwitchAsyncTimeout = newValue;
                 break;
 
+            case NumericConfigurationItem.TelescopeTimeForSlewingToBecomeFalse:
+                settings.TelescopeTimeForSlewingToBecomeFalse = newValue;
+                break;
+
             default:
                 throw new InvalidValueException($"OnIntegerItemChange - Unknown numeric configuration item: {numericConfigurationItem}");
         }
@@ -1272,6 +1292,7 @@
         telescopeRateOffsetTestDuration = settings.TelescopeRateOffsetTestDuration;
         telescopeRateOffsetTestValueLow = settings.TelescopeRateOffsetTestLowValue;
         telescopeRateOffsetTestValueHigh = settings.TelescopeRateOffsetTestHighValue;
+        telescopeTimeForSlewingToBecomeFalse = settings.TelescopeTimeForSlewingToBecomeFalse;
 
         // Camera tests
         cameraTestMaxBinX = settings.CameraMaxBinX;

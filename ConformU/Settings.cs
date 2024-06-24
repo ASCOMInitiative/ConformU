@@ -191,6 +191,7 @@ namespace ConformU
         public double TelescopeRateOffsetTestDuration { get; set; } = 10; // Seconds
         public double TelescopeRateOffsetTestLowValue { get; set; } = 0.05; // ArcSeconds per SI second
         public double TelescopeRateOffsetTestHighValue { get; set; } = 40.0; // ArcSeconds per SI second
+        public int TelescopeTimeForSlewingToBecomeFalse { get; set; } = 30; // Number of seconds to wait for Slewing to become false
 
         // Camera test configuration
         public int CameraMaxBinX { get; set; } = 0;
