@@ -6465,185 +6465,137 @@ namespace ConformU
                     switch (pType)
                     {
                         case CanType.CanFindHome:
-                            {
-                                canFindHome = telescopeDevice.CanFindHome;
-                                LogOk(pName, canFindHome.ToString());
-                                break;
-                            }
+                            canFindHome = telescopeDevice.CanFindHome;
+                            LogOk(pName, canFindHome.ToString());
+                            break;
 
                         case CanType.CanPark:
-                            {
-                                canPark = telescopeDevice.CanPark;
-                                LogOk(pName, canPark.ToString());
-                                break;
-                            }
+                            canPark = telescopeDevice.CanPark;
+                            LogOk(pName, canPark.ToString());
+                            break;
 
                         case CanType.CanPulseGuide:
-                            {
-                                canPulseGuide = telescopeDevice.CanPulseGuide;
-                                LogOk(pName, canPulseGuide.ToString());
-                                break;
-                            }
+                            canPulseGuide = telescopeDevice.CanPulseGuide;
+                            LogOk(pName, canPulseGuide.ToString());
+                            break;
 
                         case CanType.CanSetDeclinationRate:
+                            if (GetInterfaceVersion() > 1)
                             {
-                                if (GetInterfaceVersion() > 1)
-                                {
-                                    canSetDeclinationRate = telescopeDevice.CanSetDeclinationRate;
-                                    LogOk(pName, canSetDeclinationRate.ToString());
-                                }
-                                else
-                                {
-                                    LogInfo("CanSetDeclinationRate",
-                                        $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
-                                }
-
-                                break;
+                                canSetDeclinationRate = telescopeDevice.CanSetDeclinationRate;
+                                LogOk(pName, canSetDeclinationRate.ToString());
                             }
+                            else
+                            {
+                                LogInfo("CanSetDeclinationRate", $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                            }
+                            break;
 
                         case CanType.CanSetGuideRates:
+                            if (GetInterfaceVersion() > 1)
                             {
-                                if (GetInterfaceVersion() > 1)
-                                {
-                                    canSetGuideRates = telescopeDevice.CanSetGuideRates;
-                                    LogOk(pName, canSetGuideRates.ToString());
-                                }
-                                else
-                                {
-                                    LogInfo("CanSetGuideRates",
-                                        $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
-                                }
-
-                                break;
+                                canSetGuideRates = telescopeDevice.CanSetGuideRates;
+                                LogOk(pName, canSetGuideRates.ToString());
                             }
+                            else
+                            {
+                                LogInfo("CanSetGuideRates", $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                            }
+                            break;
 
                         case CanType.CanSetPark:
-                            {
-                                canSetPark = telescopeDevice.CanSetPark;
-                                LogOk(pName, canSetPark.ToString());
-                                break;
-                            }
+                            canSetPark = telescopeDevice.CanSetPark;
+                            LogOk(pName, canSetPark.ToString());
+                            break;
 
                         case CanType.CanSetPierSide:
+                            if (GetInterfaceVersion() > 1)
                             {
-                                if (GetInterfaceVersion() > 1)
-                                {
-                                    canSetPierside = telescopeDevice.CanSetPierSide;
-                                    LogOk(pName, canSetPierside.ToString());
-                                }
-                                else
-                                {
-                                    LogInfo("CanSetPierSide",
-                                        $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
-                                }
-
-                                break;
+                                canSetPierside = telescopeDevice.CanSetPierSide;
+                                LogOk(pName, canSetPierside.ToString());
                             }
+                            else
+                            {
+                                LogInfo("CanSetPierSide", $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                            }
+                            break;
 
                         case CanType.CanSetRightAscensionRate:
+                            if (GetInterfaceVersion() > 1)
                             {
-                                if (GetInterfaceVersion() > 1)
-                                {
-                                    canSetRightAscensionRate = telescopeDevice.CanSetRightAscensionRate;
-                                    LogOk(pName, canSetRightAscensionRate.ToString());
-                                }
-                                else
-                                {
-                                    LogInfo("CanSetRightAscensionRate",
-                                        $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
-                                }
-
-                                break;
+                                canSetRightAscensionRate = telescopeDevice.CanSetRightAscensionRate;
+                                LogOk(pName, canSetRightAscensionRate.ToString());
                             }
+                            else
+                            {
+                                LogInfo("CanSetRightAscensionRate", $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                            }
+                            break;
 
                         case CanType.CanSetTracking:
-                            {
-                                canSetTracking = telescopeDevice.CanSetTracking;
-                                LogOk(pName, canSetTracking.ToString());
-                                break;
-                            }
+                            canSetTracking = telescopeDevice.CanSetTracking;
+                            LogOk(pName, canSetTracking.ToString());
+                            break;
 
                         case CanType.CanSlew:
-                            {
-                                canSlew = telescopeDevice.CanSlew;
-                                LogOk(pName, canSlew.ToString());
-                                break;
-                            }
+                            canSlew = telescopeDevice.CanSlew;
+                            LogOk(pName, canSlew.ToString());
+                            break;
 
                         case CanType.CanSlewAltAz:
+                            if (GetInterfaceVersion() > 1)
                             {
-                                if (GetInterfaceVersion() > 1)
-                                {
-                                    canSlewAltAz = telescopeDevice.CanSlewAltAz;
-                                    LogOk(pName, canSlewAltAz.ToString());
-                                }
-                                else
-                                {
-                                    LogInfo("CanSlewAltAz",
-                                        $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
-                                }
-
-                                break;
+                                canSlewAltAz = telescopeDevice.CanSlewAltAz;
+                                LogOk(pName, canSlewAltAz.ToString());
                             }
+                            else
+                            {
+                                LogInfo("CanSlewAltAz", $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                            }
+                            break;
 
                         case CanType.CanSlewAltAzAsync:
+                            if (GetInterfaceVersion() > 1)
                             {
-                                if (GetInterfaceVersion() > 1)
-                                {
-                                    canSlewAltAzAsync = telescopeDevice.CanSlewAltAzAsync;
-                                    LogOk(pName, canSlewAltAzAsync.ToString());
-                                }
-                                else
-                                {
-                                    LogInfo("CanSlewAltAzAsync",
-                                        $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
-                                }
-
-                                break;
+                                canSlewAltAzAsync = telescopeDevice.CanSlewAltAzAsync;
+                                LogOk(pName, canSlewAltAzAsync.ToString());
                             }
+                            else
+                            {
+                                LogInfo("CanSlewAltAzAsync", $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                            }
+                            break;
 
                         case CanType.CanSlewAsync:
-                            {
-                                canSlewAsync = telescopeDevice.CanSlewAsync;
-                                LogOk(pName, canSlewAsync.ToString());
-                                break;
-                            }
+                            canSlewAsync = telescopeDevice.CanSlewAsync;
+                            LogOk(pName, canSlewAsync.ToString());
+                            break;
 
                         case CanType.CanSync:
-                            {
-                                canSync = telescopeDevice.CanSync;
-                                LogOk(pName, canSync.ToString());
-                                break;
-                            }
+                            canSync = telescopeDevice.CanSync;
+                            LogOk(pName, canSync.ToString());
+                            break;
 
                         case CanType.CanSyncAltAz:
+                            if (GetInterfaceVersion() > 1)
                             {
-                                if (GetInterfaceVersion() > 1)
-                                {
-                                    canSyncAltAz = telescopeDevice.CanSyncAltAz;
-                                    LogOk(pName, canSyncAltAz.ToString());
-                                }
-                                else
-                                {
-                                    LogInfo("CanSyncAltAz",
-                                        $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
-                                }
-
-                                break;
+                                canSyncAltAz = telescopeDevice.CanSyncAltAz;
+                                LogOk(pName, canSyncAltAz.ToString());
                             }
+                            else
+                            {
+                                LogInfo("CanSyncAltAz", $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                            }
+                            break;
 
                         case CanType.CanUnPark:
-                            {
-                                canUnpark = telescopeDevice.CanUnpark;
-                                LogOk(pName, canUnpark.ToString());
-                                break;
-                            }
+                            canUnpark = telescopeDevice.CanUnpark;
+                            LogOk(pName, canUnpark.ToString());
+                            break;
 
                         default:
-                            {
-                                LogIssue(pName, $"Conform:CanTest: Unknown test type {pType}");
-                                break;
-                            }
+                            LogIssue(pName, $"Conform:CanTest: Unknown test type {pType}");
+                            break;
                     }
                 }, TargetTime.Fast);
             }
