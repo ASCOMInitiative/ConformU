@@ -838,7 +838,7 @@ namespace ConformU
 
                                 // Start slew to new position 70 degrees away
                                 LogDebug(abortTestName, "Starting altitude slew to 80 degrees...");
-                                domeDevice.SlewToAzimuth(80.0);
+                                domeDevice.SlewToAltitude(80.0);
 
                                 // Wait for one second
                                 WaitFor(1000);
