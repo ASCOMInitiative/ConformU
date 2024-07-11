@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Xml.Linq;
 
 namespace ConformU
 {
@@ -585,23 +586,32 @@ namespace ConformU
             if (canUnpark & !canPark)
                 LogIssue("CanUnPark", "CanUnPark is true but CanPark is false - this does not comply with ASCOM specification");
 
-            // For Platform 7 ITelescopeV4 and later interfaces, make sure that sync and async slew methods are tied together
+            LogDebug("Can Slewing Checks", $"Interface version: {GetInterfaceVersion()}, Device technology: {settings.DeviceTechnology}, " +
+                $"CanSlew: {canSlew}, CanSlewAsync: {canSlewAsync}, CamSlewAltAz: {canSlewAltAz}, CanSlewAltAzAsync: {canSlewAltAzAsync}");
+
+            // For Platform 7 ITelescopeV4 and later interfaces, make sure that sync and async slew methods are tied together for COM devices
             if (IsPlatform7OrLater)
             {
-                // Test whether the two equatorial slewing values are both either true or false
-                if ((canSlew & !canSlewAsync) || (!canSlew & canSlewAsync)) // The values are not tied together
+                // Only apply this requirement to COM drivers, Alpaca devices are expected only to implement async slewing, synch is optional
+                if (settings.DeviceTechnology == DeviceTechnology.COM) // We are testing a COM driver
                 {
-                    LogIssue("Equatorial Slewing", $"The CanSlew and CanSlewAsync properties are not tied together: CanSlew: {canSlew}, CanSlewAsync: {canSlewAsync}");
-                    LogInfo("Equatorial Slewing", $"In ITelescopeV4 and later both synchronous and asynchronous equatorial slewing methods must either be implemented or not implemented.");
-                    LogInfo("Equatorial Slewing", $"It is not permissible for one to be implemented while the other is not.");
-                }
+                    // Test whether the two equatorial slewing values are both either true or false
+                    if ((canSlew & !canSlewAsync) || (!canSlew & canSlewAsync)) // The values are not tied together
+                    {
+                        LogNewLine();
+                        LogIssue("Equatorial Slewing", $"The CanSlew and CanSlewAsync properties are not tied together: CanSlew: {canSlew}, CanSlewAsync: {canSlewAsync}");
+                        LogInfo("Equatorial Slewing", $"In ITelescopeV4 and later COM drivers, both synchronous and asynchronous equatorial slewing methods must be either implemented or not implemented.");
+                        LogInfo("Equatorial Slewing", $"It is not permissible for one to be implemented while the other is not.");
+                    }
 
-                // Test whether the two Alt/Az slewing values are both either true or false
-                if ((canSlewAltAz & !canSlewAltAzAsync) || (!canSlewAltAz & canSlewAltAzAsync)) // The values are not tied together
-                {
-                    LogIssue("Alt/Az Slewing", $"The CanSlewAltAz and CanSlewAltAzAsync properties are not tied together: CanSlewAltAz: {canSlewAltAz}, CanSlewAltAzAsync: {canSlewAltAzAsync}");
-                    LogInfo("Alt/Az Slewing", $"In ITelescopeV4 and later both synchronous and asynchronous alt/az slewing methods must either be implemented or not implemented.");
-                    LogInfo("Alt/Az Slewing", $"It is not permissible for one to be implemented while the other is not.");
+                    // Test whether the two Alt/Az slewing values are both either true or false
+                    if ((canSlewAltAz & !canSlewAltAzAsync) || (!canSlewAltAz & canSlewAltAzAsync)) // The values are not tied together
+                    {
+                        LogNewLine();
+                        LogIssue("Alt/Az Slewing", $"The CanSlewAltAz and CanSlewAltAzAsync properties are not tied together: CanSlewAltAz: {canSlewAltAz}, CanSlewAltAzAsync: {canSlewAltAzAsync}");
+                        LogInfo("Alt/Az Slewing", $"In ITelescopeV4 and later COM drivers, both synchronous and asynchronous alt/az slewing methods must be either implemented or not implemented.");
+                        LogInfo("Alt/Az Slewing", $"It is not permissible for one to be implemented while the other is not.");
+                    }
                 }
             }
         }
@@ -4027,90 +4037,82 @@ namespace ConformU
                     switch (testType)
                     {
                         case SlewSyncType.SyncToCoordinates: // SyncToCoordinates
+                            LogCallToDriver(testName, "About to get Tracking property");
+                            if (canSetTracking & !telescopeDevice.Tracking)
                             {
-                                LogCallToDriver(testName, "About to get Tracking property");
-                                if (canSetTracking & !telescopeDevice.Tracking)
-                                {
-                                    LogCallToDriver(testName, "About to set Tracking property to true");
-                                    telescopeDevice.Tracking = true;
-                                }
-
-                                LogDebug(testName, $"SyncToCoordinates: {syncRa.ToHMS()} {syncDec.ToDMS()}"); LogCallToDriver(testName,
-                                    $"About to call SyncToCoordinates method, RA: {syncRa.ToHMS()}, Declination: {syncDec.ToDMS()}");
-                                telescopeDevice.SyncToCoordinates(syncRa, syncDec);
-                                LogIssue(testName, "CanSyncToCoordinates is False but call to SyncToCoordinates did not throw an exception.");
-                                break;
+                                LogCallToDriver(testName, "About to set Tracking property to true");
+                                telescopeDevice.Tracking = true;
                             }
+
+                            LogDebug(testName, $"SyncToCoordinates: {syncRa.ToHMS()} {syncDec.ToDMS()}"); LogCallToDriver(testName,
+                                $"About to call SyncToCoordinates method, RA: {syncRa.ToHMS()}, Declination: {syncDec.ToDMS()}");
+                            telescopeDevice.SyncToCoordinates(syncRa, syncDec);
+                            LogIssue(testName, "CanSyncToCoordinates is False but call to SyncToCoordinates did not throw an exception.");
+                            break;
 
                         case SlewSyncType.SyncToTarget: // SyncToTarget
+                            LogCallToDriver(testName, "About to get Tracking property");
+                            if (canSetTracking & !telescopeDevice.Tracking)
                             {
-                                LogCallToDriver(testName, "About to get Tracking property");
-                                if (canSetTracking & !telescopeDevice.Tracking)
-                                {
-                                    LogCallToDriver(testName, "About to set Tracking property to true");
-                                    telescopeDevice.Tracking = true;
-                                }
-
-                                try
-                                {
-                                    LogDebug(testName, $"Setting TargetRightAscension: {syncRa.ToHMS()}"); LogCallToDriver(testName,
-                                        $"About to set TargetRightAscension property to {syncRa.ToHMS()}");
-                                    telescopeDevice.TargetRightAscension = syncRa;
-                                    LogDebug(testName, "Completed Set TargetRightAscension");
-                                }
-                                catch (Exception)
-                                {
-                                    // Ignore errors at this point as we aren't trying to test Telescope.TargetRightAscension
-                                }
-
-                                try
-                                {
-                                    LogDebug(testName, $"Setting TargetDeclination: {syncDec.ToDMS()}"); LogCallToDriver(testName,
-                                        $"About to set TargetDeclination property to {syncDec.ToDMS()}");
-                                    telescopeDevice.TargetDeclination = syncDec;
-                                    LogDebug(testName, "Completed Set TargetDeclination");
-                                }
-                                catch (Exception)
-                                {
-                                    // Ignore other errors at this point as we aren't trying to test Telescope.TargetRightAscension
-                                }
-                                LogCallToDriver(testName, "About to call SyncToTarget method");
-                                telescopeDevice.SyncToTarget(); // Sync to target coordinates
-                                LogIssue(testName, "CanSyncToTarget is False but call to SyncToTarget did not throw an exception.");
-                                break;
+                                LogCallToDriver(testName, "About to set Tracking property to true");
+                                telescopeDevice.Tracking = true;
                             }
+
+                            try
+                            {
+                                LogDebug(testName, $"Setting TargetRightAscension: {syncRa.ToHMS()}"); LogCallToDriver(testName,
+                                    $"About to set TargetRightAscension property to {syncRa.ToHMS()}");
+                                telescopeDevice.TargetRightAscension = syncRa;
+                                LogDebug(testName, "Completed Set TargetRightAscension");
+                            }
+                            catch (Exception)
+                            {
+                                // Ignore errors at this point as we aren't trying to test Telescope.TargetRightAscension
+                            }
+
+                            try
+                            {
+                                LogDebug(testName, $"Setting TargetDeclination: {syncDec.ToDMS()}"); LogCallToDriver(testName,
+                                    $"About to set TargetDeclination property to {syncDec.ToDMS()}");
+                                telescopeDevice.TargetDeclination = syncDec;
+                                LogDebug(testName, "Completed Set TargetDeclination");
+                            }
+                            catch (Exception)
+                            {
+                                // Ignore other errors at this point as we aren't trying to test Telescope.TargetRightAscension
+                            }
+                            LogCallToDriver(testName, "About to call SyncToTarget method");
+                            telescopeDevice.SyncToTarget(); // Sync to target coordinates
+                            LogIssue(testName, "CanSyncToTarget is False but call to SyncToTarget did not throw an exception.");
+                            break;
 
                         case SlewSyncType.SyncToAltAz:
+                            if (canReadAltitide)
                             {
-                                if (canReadAltitide)
-                                {
-                                    LogCallToDriver(testName, "About to get Altitude property");
-                                    syncAlt = telescopeDevice.Altitude;
-                                }
-
-                                if (canReadAzimuth)
-                                {
-                                    LogCallToDriver(testName, "About to get Azimuth property");
-                                    syncAz = telescopeDevice.Azimuth;
-                                }
-                                LogCallToDriver(testName, "About to get Tracking property");
-                                if (canSetTracking & telescopeDevice.Tracking)
-                                {
-                                    LogCallToDriver(testName, "About to set Tracking property to false");
-                                    telescopeDevice.Tracking = false;
-                                }
-                                LogCallToDriver(testName,
-                                    $"About to call SyncToAltAz method, Altitude: {syncAlt.ToDMS()}, Azimuth: {syncAz.ToDMS()}");
-                                telescopeDevice.SyncToAltAz(syncAz, syncAlt); // Sync to new Alt Az
-                                LogIssue(testName, "CanSyncToAltAz is False but call to SyncToAltAz did not throw an exception.");
-                                break;
+                                LogCallToDriver(testName, "About to get Altitude property");
+                                syncAlt = telescopeDevice.Altitude;
                             }
+
+                            if (canReadAzimuth)
+                            {
+                                LogCallToDriver(testName, "About to get Azimuth property");
+                                syncAz = telescopeDevice.Azimuth;
+                            }
+                            LogCallToDriver(testName, "About to get Tracking property");
+                            if (canSetTracking & telescopeDevice.Tracking)
+                            {
+                                LogCallToDriver(testName, "About to set Tracking property to false");
+                                telescopeDevice.Tracking = false;
+                            }
+                            LogCallToDriver(testName,
+                                $"About to call SyncToAltAz method, Altitude: {syncAlt.ToDMS()}, Azimuth: {syncAz.ToDMS()}");
+                            telescopeDevice.SyncToAltAz(syncAz, syncAlt); // Sync to new Alt Az
+                            LogIssue(testName, "CanSyncToAltAz is False but call to SyncToAltAz did not throw an exception.");
+                            break;
 
                         default:
-                            {
-                                LogIssue(testName, $"Conform:SyncTest: Unknown test type {testType}");
-                                break;
-                            }
+                            LogIssue(testName, $"Conform:SyncTest: Unknown test type {testType}");
+                            break;
                     }
                 }
                 catch (Exception ex)
@@ -4127,340 +4129,317 @@ namespace ConformU
                     {
                         case SlewSyncType.SyncToCoordinates:
                         case SlewSyncType.SyncToTarget: // Only do this for equatorial syncs
+                                                        // Calculate the Sync test RA position
+                            startRa = TelescopeRaFromHourAngle(testName, +3.0d);
+                            LogDebug(testName, string.Format("RA for sync tests: {0}", startRa.ToHMS()));
+
+                            // Calculate the Sync test DEC position
+                            if (siteLatitude > 0.0d) // We are in the northern hemisphere
                             {
-
-                                // Calculate the Sync test RA position
-                                startRa = TelescopeRaFromHourAngle(testName, +3.0d);
-                                LogDebug(testName, string.Format("RA for sync tests: {0}", startRa.ToHMS()));
-
-                                // Calculate the Sync test DEC position
-                                if (siteLatitude > 0.0d) // We are in the northern hemisphere
-                                {
-                                    startDec = 90.0d - (180.0d - siteLatitude) * 0.5d; // Calculate for northern hemisphere
-                                }
-                                else // We are in the southern hemisphere
-                                {
-                                    startDec = -90.0d + (180.0d + siteLatitude) * 0.5d;
-                                } // Calculate for southern hemisphere
-
-                                LogDebug(testName, string.Format("Declination for sync tests: {0}", startDec.ToDMS()));
-                                SlewScope(startRa, startDec, "start position");
-                                if (cancellationToken.IsCancellationRequested)
-                                    return;
-                                SetAction("Checking that scope slewed OK");
-                                // Now test that we have actually arrived
-                                CheckScopePosition(testName, "Slewed to start position", startRa, startDec);
-
-                                // Calculate the sync test RA coordinate as a variation from the current RA coordinate
-                                syncRa = startRa - SYNC_SIMULATED_ERROR / (15.0d * 60.0d); // Convert sync error in arc minutes to RA hours
-                                if (syncRa < 0.0d)
-                                    syncRa += 24.0d; // Ensure legal RA
-
-                                // Calculate the sync test DEC coordinate as a variation from the current DEC coordinate
-                                syncDec = startDec - SYNC_SIMULATED_ERROR / 60.0d; // Convert sync error in arc minutes to degrees
-
-                                SetAction("Syncing the scope");
-                                // Sync the scope to the offset RA and DEC coordinates
-                                SyncScope(testName, canDoItName, testType, syncRa, syncDec);
-
-                                // Check that the scope's synchronised position is as expected
-                                CheckScopePosition(testName, "Synced to sync position", syncRa, syncDec);
-
-                                // Check that the TargetRA and TargetDec were 
-                                SetAction("Checking that the scope synced OK");
-                                if (testType == SlewSyncType.SyncToCoordinates)
-                                {
-                                    // Check that target coordinates are present and set correctly per the ASCOM Telescope specification
-                                    try
-                                    {
-                                        currentRa = telescopeDevice.TargetRightAscension;
-                                        LogDebug(testName, string.Format("Current TargetRightAscension: {0}, Set TargetRightAscension: {1}", currentRa, syncRa));
-                                        double raDifference;
-                                        raDifference = RaDifferenceInArcSeconds(syncRa, currentRa);
-                                        switch (raDifference)
-                                        {
-                                            case var @case when @case <= SLEW_SYNC_OK_TOLERANCE:  // Within specified tolerance
-                                                {
-                                                    LogOk(testName, string.Format("The TargetRightAscension property {0} matches the expected RA OK. ", syncRa.ToHMS())); // Outside specified tolerance
-                                                    break;
-                                                }
-
-                                            default:
-                                                {
-                                                    LogIssue(testName, string.Format("The TargetRightAscension property {0} does not match the expected RA {1}", currentRa.ToHMS(), syncRa.ToHMS()));
-                                                    break;
-                                                }
-                                        }
-                                    }
-                                    catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
-                                    {
-                                        LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
-                                    }
-                                    catch (ASCOM.InvalidOperationException)
-                                    {
-                                        LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
-                                    }
-                                    catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == ExNotSet1 | ex.Number == ExNotSet2)
-                                    {
-                                        LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        HandleException(testName, MemberType.Property, Required.Mandatory, ex, "");
-                                    }
-
-                                    try
-                                    {
-                                        currentDec = telescopeDevice.TargetDeclination;
-                                        LogDebug(testName, string.Format("Current TargetDeclination: {0}, Set TargetDeclination: {1}", currentDec, syncDec));
-                                        double decDifference;
-                                        decDifference = Math.Round(Math.Abs(currentDec - syncDec) * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero); // Dec difference is in arc seconds from degrees of Declination
-                                        switch (decDifference)
-                                        {
-                                            case var case1 when case1 <= SLEW_SYNC_OK_TOLERANCE: // Within specified tolerance
-                                                {
-                                                    LogOk(testName, string.Format("The TargetDeclination property {0} matches the expected Declination OK. ", syncDec.ToDMS())); // Outside specified tolerance
-                                                    break;
-                                                }
-
-                                            default:
-                                                {
-                                                    LogIssue(testName, string.Format("The TargetDeclination property {0} does not match the expected Declination {1}", currentDec.ToDMS(), syncDec.ToDMS()));
-                                                    break;
-                                                }
-                                        }
-                                    }
-                                    catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
-                                    {
-                                        LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
-                                    }
-                                    catch (ASCOM.InvalidOperationException)
-                                    {
-                                        LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
-                                    }
-                                    catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == ExNotSet1 | ex.Number == ExNotSet2)
-                                    {
-                                        LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        HandleException(testName, MemberType.Property, Required.Mandatory, ex, "");
-                                    }
-                                }
-
-                                // Now slew to the scope's original position
-                                SlewScope(startRa, startDec, "original position in post-sync coordinates");
-
-                                // Check that the scope's position is the original position
-                                CheckScopePosition(testName, "Slewed back to start position", startRa, startDec);
-
-                                // Now "undo" the sync by reversing syncing in the opposition sense than originally made
-
-                                // Calculate the sync test RA coordinate as a variation from the current RA coordinate
-                                syncRa = startRa + SYNC_SIMULATED_ERROR / (15.0d * 60.0d); // Convert sync error in arc minutes to RA hours
-                                if (syncRa >= 24.0d)
-                                    syncRa -= 24.0d; // Ensure legal RA
-
-                                // Calculate the sync test DEC coordinate as a variation from the current DEC coordinate
-                                syncDec = startDec + SYNC_SIMULATED_ERROR / 60.0d; // Convert sync error in arc minutes to degrees
-
-                                // Sync back to the original coordinates
-                                SetAction("Restoring original sync values");
-                                SyncScope(testName, canDoItName, testType, syncRa, syncDec);
-
-                                // Check that the scope's synchronised position is as expected
-                                CheckScopePosition(testName, "Synced to reversed sync position", syncRa, syncDec);
-
-                                // Now slew to the scope's original position
-                                SlewScope(startRa, startDec, "original position in pre-sync coordinates");
-
-                                // Check that the scope's position is the original position
-                                CheckScopePosition(testName, "Slewed back to start position", startRa, startDec);
-                                break;
+                                startDec = 90.0d - (180.0d - siteLatitude) * 0.5d; // Calculate for northern hemisphere
                             }
+                            else // We are in the southern hemisphere
+                            {
+                                startDec = -90.0d + (180.0d + siteLatitude) * 0.5d;
+                            } // Calculate for southern hemisphere
+
+                            LogDebug(testName, string.Format("Declination for sync tests: {0}", startDec.ToDMS()));
+                            SlewScope(startRa, startDec, "start position");
+                            if (cancellationToken.IsCancellationRequested)
+                                return;
+                            SetAction("Checking that scope slewed OK");
+                            // Now test that we have actually arrived
+                            CheckScopePosition(testName, "Slewed to start position", startRa, startDec);
+
+                            // Calculate the sync test RA coordinate as a variation from the current RA coordinate
+                            syncRa = startRa - SYNC_SIMULATED_ERROR / (15.0d * 60.0d); // Convert sync error in arc minutes to RA hours
+                            if (syncRa < 0.0d)
+                                syncRa += 24.0d; // Ensure legal RA
+
+                            // Calculate the sync test DEC coordinate as a variation from the current DEC coordinate
+                            syncDec = startDec - SYNC_SIMULATED_ERROR / 60.0d; // Convert sync error in arc minutes to degrees
+
+                            SetAction("Syncing the scope");
+                            // Sync the scope to the offset RA and DEC coordinates
+                            SyncScope(testName, canDoItName, testType, syncRa, syncDec);
+
+                            // Check that the scope's synchronised position is as expected
+                            CheckScopePosition(testName, "Synced to sync position", syncRa, syncDec);
+
+                            // Check that the TargetRA and TargetDec were 
+                            SetAction("Checking that the scope synced OK");
+                            if (testType == SlewSyncType.SyncToCoordinates)
+                            {
+                                // Check that target coordinates are present and set correctly per the ASCOM Telescope specification
+                                try
+                                {
+                                    currentRa = telescopeDevice.TargetRightAscension;
+                                    LogDebug(testName, string.Format("Current TargetRightAscension: {0}, Set TargetRightAscension: {1}", currentRa, syncRa));
+                                    double raDifference;
+                                    raDifference = RaDifferenceInArcSeconds(syncRa, currentRa);
+                                    switch (raDifference)
+                                    {
+                                        case var @case when @case <= SLEW_SYNC_OK_TOLERANCE:  // Within specified tolerance
+                                            {
+                                                LogOk(testName, string.Format("The TargetRightAscension property {0} matches the expected RA OK. ", syncRa.ToHMS())); // Outside specified tolerance
+                                                break;
+                                            }
+
+                                        default:
+                                            {
+                                                LogIssue(testName, string.Format("The TargetRightAscension property {0} does not match the expected RA {1}", currentRa.ToHMS(), syncRa.ToHMS()));
+                                                break;
+                                            }
+                                    }
+                                }
+                                catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
+                                {
+                                    LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
+                                }
+                                catch (ASCOM.InvalidOperationException)
+                                {
+                                    LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
+                                }
+                                catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == ExNotSet1 | ex.Number == ExNotSet2)
+                                {
+                                    LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
+                                }
+                                catch (Exception ex)
+                                {
+                                    HandleException(testName, MemberType.Property, Required.Mandatory, ex, "");
+                                }
+
+                                try
+                                {
+                                    currentDec = telescopeDevice.TargetDeclination;
+                                    LogDebug(testName, string.Format("Current TargetDeclination: {0}, Set TargetDeclination: {1}", currentDec, syncDec));
+                                    double decDifference;
+                                    decDifference = Math.Round(Math.Abs(currentDec - syncDec) * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero); // Dec difference is in arc seconds from degrees of Declination
+                                    switch (decDifference)
+                                    {
+                                        case var case1 when case1 <= SLEW_SYNC_OK_TOLERANCE: // Within specified tolerance
+                                            LogOk(testName, string.Format("The TargetDeclination property {0} matches the expected Declination OK. ", syncDec.ToDMS())); // Outside specified tolerance
+                                            break;
+
+                                        default:
+                                            LogIssue(testName, string.Format("The TargetDeclination property {0} does not match the expected Declination {1}", currentDec.ToDMS(), syncDec.ToDMS()));
+                                            break;
+                                    }
+                                }
+                                catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
+                                {
+                                    LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
+                                }
+                                catch (ASCOM.InvalidOperationException)
+                                {
+                                    LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
+                                }
+                                catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == ExNotSet1 | ex.Number == ExNotSet2)
+                                {
+                                    LogIssue(testName, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
+                                }
+                                catch (Exception ex)
+                                {
+                                    HandleException(testName, MemberType.Property, Required.Mandatory, ex, "");
+                                }
+                            }
+
+                            // Now slew to the scope's original position
+                            SlewScope(startRa, startDec, "original position in post-sync coordinates");
+
+                            // Check that the scope's position is the original position
+                            CheckScopePosition(testName, "Slewed back to start position", startRa, startDec);
+
+                            // Now "undo" the sync by reversing syncing in the opposition sense than originally made
+
+                            // Calculate the sync test RA coordinate as a variation from the current RA coordinate
+                            syncRa = startRa + SYNC_SIMULATED_ERROR / (15.0d * 60.0d); // Convert sync error in arc minutes to RA hours
+                            if (syncRa >= 24.0d)
+                                syncRa -= 24.0d; // Ensure legal RA
+
+                            // Calculate the sync test DEC coordinate as a variation from the current DEC coordinate
+                            syncDec = startDec + SYNC_SIMULATED_ERROR / 60.0d; // Convert sync error in arc minutes to degrees
+
+                            // Sync back to the original coordinates
+                            SetAction("Restoring original sync values");
+                            SyncScope(testName, canDoItName, testType, syncRa, syncDec);
+
+                            // Check that the scope's synchronised position is as expected
+                            CheckScopePosition(testName, "Synced to reversed sync position", syncRa, syncDec);
+
+                            // Now slew to the scope's original position
+                            SlewScope(startRa, startDec, "original position in pre-sync coordinates");
+
+                            // Check that the scope's position is the original position
+                            CheckScopePosition(testName, "Slewed back to start position", startRa, startDec);
+                            break;
 
                         case SlewSyncType.SyncToAltAz:
+                            if (canReadAltitide)
                             {
-                                if (canReadAltitide)
-                                {
-                                    LogCallToDriver(testName, "About to get Altitude property");
-                                    currentAlt = telescopeDevice.Altitude;
-                                }
-
-                                if (canReadAzimuth)
-                                {
-                                    LogCallToDriver(testName, "About to get Azimuth property");
-                                    currentAz = telescopeDevice.Azimuth;
-                                }
-
-                                syncAlt = currentAlt - 1.0d;
-                                syncAz = currentAz + 1.0d;
-                                if (syncAlt < 0.0d)
-                                    syncAlt = 1.0d; // Ensure legal Alt
-                                if (syncAz > 359.0d)
-                                    syncAz = 358.0d; // Ensure legal Az
-                                LogCallToDriver(testName, "About to get Tracking property");
-                                if (canSetTracking & telescopeDevice.Tracking)
-                                {
-                                    LogCallToDriver(testName, "About to set Tracking property to false");
-                                    telescopeDevice.Tracking = false;
-                                }
-                                LogCallToDriver(testName,
-                                    $"About to call SyncToAltAz method, Altitude: {syncAlt.ToDMS()}, Azimuth: {syncAz.ToDMS()}");
-                                telescopeDevice.SyncToAltAz(syncAz, syncAlt); // Sync to new Alt Az
-                                if (canReadAltitide & canReadAzimuth) // Can check effects of a sync
-                                {
-                                    LogCallToDriver(testName, "About to get Altitude property");
-                                    newAlt = telescopeDevice.Altitude; LogCallToDriver(testName, "About to get Azimuth property");
-                                    newAz = telescopeDevice.Azimuth;
-
-                                    // Compare old and new values
-                                    difference = Math.Abs(syncAlt - newAlt);
-                                    switch (difference)
-                                    {
-                                        case var case2 when case2 <= 1.0d / (60 * 60): // Within 1 seconds
-                                            {
-                                                LogOk(testName, "Synced Altitude OK");
-                                                break;
-                                            }
-
-                                        case var case3 when case3 <= 2.0d / (60 * 60): // Within 2 seconds
-                                            {
-                                                LogOk(testName, "Synced within 2 seconds of Altitude");
-                                                showOutcome = true;
-                                                break;
-                                            }
-
-                                        default:
-                                            {
-                                                LogInfo(testName, $"Synced to within {difference.ToDMS()} DD:MM:SS of expected Altitude: {syncAlt.ToDMS()}");
-                                                showOutcome = true;
-                                                break;
-                                            }
-                                    }
-
-                                    difference = Math.Abs(syncAz - newAz);
-                                    switch (difference)
-                                    {
-                                        case var case4 when case4 <= 1.0d / (60 * 60): // Within 1 seconds
-                                            {
-                                                LogOk(testName, "Synced Azimuth OK");
-                                                break;
-                                            }
-
-                                        case var case5 when case5 <= 2.0d / (60 * 60): // Within 2 seconds
-                                            {
-                                                LogOk(testName, "Synced within 2 seconds of Azimuth");
-                                                showOutcome = true;
-                                                break;
-                                            }
-
-                                        default:
-                                            {
-                                                LogInfo(testName,
-                                                    $"Synced to within {FormatAzimuth(difference)} DD:MM:SS of expected Azimuth: {FormatAzimuth(syncAz)}");
-                                                showOutcome = true;
-                                                break;
-                                            }
-                                    }
-
-                                    if (showOutcome)
-                                    {
-                                        LogTestAndMessage(testName, "             Altitude       Azimuth");
-                                        LogTestAndMessage(testName, $"Original:  {currentAlt.ToDMS()}   {FormatAzimuth(currentAz)}");
-                                        LogTestAndMessage(testName, $"Sync to:   {syncAlt.ToDMS()}   {FormatAzimuth(syncAz)}");
-                                        LogTestAndMessage(testName, $"New:       {newAlt.ToDMS()}   {FormatAzimuth(newAz)}");
-                                    }
-                                }
-                                else // Can't test effects of a sync
-                                {
-                                    LogInfo(testName, "Can't test SyncToAltAz because Altitude or Azimuth values are not implemented");
-                                } // Do nothing
-
-                                break;
+                                LogCallToDriver(testName, "About to get Altitude property");
+                                currentAlt = telescopeDevice.Altitude;
                             }
+
+                            if (canReadAzimuth)
+                            {
+                                LogCallToDriver(testName, "About to get Azimuth property");
+                                currentAz = telescopeDevice.Azimuth;
+                            }
+
+                            syncAlt = currentAlt - 1.0d;
+                            syncAz = currentAz + 1.0d;
+                            if (syncAlt < 0.0d)
+                                syncAlt = 1.0d; // Ensure legal Alt
+                            if (syncAz > 359.0d)
+                                syncAz = 358.0d; // Ensure legal Az
+
+                            LogCallToDriver(testName, "About to get Tracking property");
+                            if (canSetTracking & telescopeDevice.Tracking)
+                            {
+                                LogCallToDriver(testName, "About to set Tracking property to false");
+                                telescopeDevice.Tracking = false;
+                            }
+                            LogCallToDriver(testName, $"About to call SyncToAltAz method, Altitude: {syncAlt.ToDMS()}, Azimuth: {syncAz.ToDMS()}");
+                            telescopeDevice.SyncToAltAz(syncAz, syncAlt); // Sync to new Alt Az
+
+                            if (canReadAltitide & canReadAzimuth) // Can check effects of a sync
+                            {
+                                LogCallToDriver(testName, "About to get Altitude property");
+                                newAlt = telescopeDevice.Altitude; LogCallToDriver(testName, "About to get Azimuth property");
+                                newAz = telescopeDevice.Azimuth;
+
+                                // Compare old and new values
+                                difference = Math.Abs(syncAlt - newAlt);
+                                switch (difference)
+                                {
+                                    case var case2 when case2 <= 1.0d / (60 * 60): // Within 1 seconds
+                                        LogOk(testName, "Synced Altitude OK");
+                                        break;
+
+                                    case var case3 when case3 <= 2.0d / (60 * 60): // Within 2 seconds
+                                        LogOk(testName, "Synced within 2 seconds of Altitude");
+                                        showOutcome = true;
+                                        break;
+
+                                    default:
+                                        LogInfo(testName, $"Synced to within {difference.ToDMS()} DD:MM:SS of expected Altitude: {syncAlt.ToDMS()}");
+                                        showOutcome = true;
+                                        break;
+                                }
+
+                                difference = Math.Abs(syncAz - newAz);
+                                switch (difference)
+                                {
+                                    case var case4 when case4 <= 1.0d / (60 * 60): // Within 1 seconds
+                                        LogOk(testName, "Synced Azimuth OK");
+                                        break;
+
+                                    case var case5 when case5 <= 2.0d / (60 * 60): // Within 2 seconds
+                                        LogOk(testName, "Synced within 2 seconds of Azimuth");
+                                        showOutcome = true;
+                                        break;
+
+                                    default:
+                                        LogInfo(testName,
+                                            $"Synced to within {FormatAzimuth(difference)} DD:MM:SS of expected Azimuth: {FormatAzimuth(syncAz)}");
+                                        showOutcome = true;
+                                        break;
+                                }
+
+                                if (showOutcome)
+                                {
+                                    LogTestAndMessage(testName, "             Altitude       Azimuth");
+                                    LogTestAndMessage(testName, $"Original:  {currentAlt.ToDMS()}   {FormatAzimuth(currentAz)}");
+                                    LogTestAndMessage(testName, $"Sync to:   {syncAlt.ToDMS()}   {FormatAzimuth(syncAz)}");
+                                    LogTestAndMessage(testName, $"New:       {newAlt.ToDMS()}   {FormatAzimuth(newAz)}");
+                                }
+                            }
+                            else // Can't test effects of a sync
+                            {
+                                LogInfo(testName, "Can't test SyncToAltAz because Altitude or Azimuth values are not implemented");
+                            } // Do nothing
+
+                            break;
 
                         default:
-                            {
-                                break;
-                            }
+                            break;
                     }
                 }
                 catch (Exception ex)
                 {
-                    HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex,
-                        $"{canDoItName} is True");
+                    HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, $"{canDoItName} is True");
                 }
             }
         }
 
-        private void TelescopeSlewTest(SlewSyncType pTest, string pName, bool pCanDoIt, string pCanDoItName)
+        private void TelescopeSlewTest(SlewSyncType testType, string testName, bool canPropertyIsTrue, string canPropertyName)
         {
-            SetTest(pName);
+            SetTest(testName);
             if (canSetTracking)
             {
-                LogCallToDriver(pName, "About to set Tracking property to true");
+                LogCallToDriver(testName, "About to set Tracking property to true");
                 telescopeDevice.Tracking = true; // Enable tracking for these tests
             }
 
             try
             {
-                switch (pTest)
+                switch (testType)
                 {
                     case SlewSyncType.SlewToCoordinates:
-                        LogCallToDriver(pName, "About to get Tracking property");
+                        LogCallToDriver(testName, "About to get Tracking property");
                         if (canSetTracking & !telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(pName, "About to set Tracking property to true");
+                            LogCallToDriver(testName, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
 
-                        targetRightAscension = TelescopeRaFromSiderealTime(pName, -1.0d);
+                        targetRightAscension = TelescopeRaFromSiderealTime(testName, -1.0d);
                         targetDeclination = 1.0d;
                         SetAction("Slewing synchronously...");
 
-                        LogCallToDriver(pName, $"About to call SlewToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                        LogCallToDriver(testName, $"About to call SlewToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
                         TimeMethod($"SlewToCoordinates", () => telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination), TargetTime.Extended);
-                        LogDebug(pName, "Returned from SlewToCoordinates method");
+                        LogDebug(testName, "Returned from SlewToCoordinates method");
                         break;
 
                     case SlewSyncType.SlewToCoordinatesAsync:
-                        LogCallToDriver(pName, "About to get Tracking property");
+                        LogCallToDriver(testName, "About to get Tracking property");
                         if (canSetTracking & !telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(pName, "About to set Tracking property to true");
+                            LogCallToDriver(testName, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
 
-                        targetRightAscension = TelescopeRaFromSiderealTime(pName, -2.0d);
+                        targetRightAscension = TelescopeRaFromSiderealTime(testName, -2.0d);
                         targetDeclination = 2.0d;
 
-                        LogCallToDriver(pName, $"About to call SlewToCoordinatesAsync method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                        LogCallToDriver(testName, $"About to call SlewToCoordinatesAsync method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
                         TimeMethod($"SlewToCoordinatesAsync", () => telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination), TargetTime.Standard);
 
-                        WaitForSlew(pName, $"Slewing to coordinates asynchronously");
+                        WaitForSlew(testName, $"Slewing to coordinates asynchronously");
                         break;
 
                     case SlewSyncType.SlewToTarget:
-                        LogCallToDriver(pName, "About to get Tracking property");
+                        LogCallToDriver(testName, "About to get Tracking property");
                         if (canSetTracking & !telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(pName, "About to set Tracking property to true");
+                            LogCallToDriver(testName, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
 
-                        targetRightAscension = TelescopeRaFromSiderealTime(pName, -3.0d);
+                        targetRightAscension = TelescopeRaFromSiderealTime(testName, -3.0d);
                         targetDeclination = 3.0d;
                         try
                         {
-                            LogCallToDriver(pName, $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
+                            LogCallToDriver(testName, $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
                             telescopeDevice.TargetRightAscension = targetRightAscension;
                         }
                         catch (Exception ex)
                         {
-                            if (pCanDoIt)
+                            if (canPropertyIsTrue)
                             {
-                                HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex, $"{pCanDoItName} is True but can't set TargetRightAscension");
+                                HandleException(testName, MemberType.Property, Required.MustBeImplemented, ex, $"{canPropertyName} is True but can't set TargetRightAscension");
                             }
                             else
                             {
@@ -4470,14 +4449,14 @@ namespace ConformU
 
                         try
                         {
-                            LogCallToDriver(pName, $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
+                            LogCallToDriver(testName, $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
                             telescopeDevice.TargetDeclination = targetDeclination;
                         }
                         catch (Exception ex)
                         {
-                            if (pCanDoIt)
+                            if (canPropertyIsTrue)
                             {
-                                HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex, $"{pCanDoItName} is True but can't set TargetDeclination");
+                                HandleException(testName, MemberType.Property, Required.MustBeImplemented, ex, $"{canPropertyName} is True but can't set TargetDeclination");
                             }
                             else
                             {
@@ -4486,30 +4465,30 @@ namespace ConformU
                         }
 
                         SetAction("Slewing synchronously...");
-                        LogCallToDriver(pName, "About to call SlewToTarget method");
+                        LogCallToDriver(testName, "About to call SlewToTarget method");
                         TimeMethod($"SlewToTarget", () => telescopeDevice.SlewToTarget(), TargetTime.Extended);
                         break;
 
                     case SlewSyncType.SlewToTargetAsync: // SlewToTargetAsync
-                        LogCallToDriver(pName, "About to get Tracking property");
+                        LogCallToDriver(testName, "About to get Tracking property");
                         if (canSetTracking & !telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(pName, "About to set Tracking property to true");
+                            LogCallToDriver(testName, "About to set Tracking property to true");
                             telescopeDevice.Tracking = true;
                         }
 
-                        targetRightAscension = TelescopeRaFromSiderealTime(pName, -4.0d);
+                        targetRightAscension = TelescopeRaFromSiderealTime(testName, -4.0d);
                         targetDeclination = 4.0d;
                         try
                         {
-                            LogCallToDriver(pName, $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
+                            LogCallToDriver(testName, $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
                             telescopeDevice.TargetRightAscension = targetRightAscension;
                         }
                         catch (Exception ex)
                         {
-                            if (pCanDoIt)
+                            if (canPropertyIsTrue)
                             {
-                                HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex, $"{pCanDoItName} is True but can't set TargetRightAscension");
+                                HandleException(testName, MemberType.Property, Required.MustBeImplemented, ex, $"{canPropertyName} is True but can't set TargetRightAscension");
                             }
                             else
                             {
@@ -4519,14 +4498,14 @@ namespace ConformU
 
                         try
                         {
-                            LogCallToDriver(pName, $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
+                            LogCallToDriver(testName, $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
                             telescopeDevice.TargetDeclination = targetDeclination;
                         }
                         catch (Exception ex)
                         {
-                            if (pCanDoIt)
+                            if (canPropertyIsTrue)
                             {
-                                HandleException(pName, MemberType.Property, Required.MustBeImplemented, ex, $"{pCanDoItName} is True but can't set TargetDeclination");
+                                HandleException(testName, MemberType.Property, Required.MustBeImplemented, ex, $"{canPropertyName} is True but can't set TargetDeclination");
                             }
                             else
                             {
@@ -4534,206 +4513,200 @@ namespace ConformU
                             }
                         }
 
-                        LogCallToDriver(pName, "About to call SlewToTargetAsync method");
+                        LogCallToDriver(testName, "About to call SlewToTargetAsync method");
                         TimeMethod($"SlewToTargetAsync", () => telescopeDevice.SlewToTargetAsync(), TargetTime.Standard);
 
-                        WaitForSlew(pName, $"Slewing to target asynchronously");
+                        WaitForSlew(testName, $"Slewing to target asynchronously");
                         break;
 
                     case SlewSyncType.SlewToAltAz:
-                        LogDebug(pName, $"Tracking 1: {telescopeDevice.Tracking}");
-                        LogCallToDriver(pName, "About to get Tracking property");
+                        LogDebug(testName, $"Tracking 1: {telescopeDevice.Tracking}");
+                        LogCallToDriver(testName, "About to get Tracking property");
                         if (canSetTracking & telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(pName, "About to set property Tracking to false");
+                            LogCallToDriver(testName, "About to set property Tracking to false");
                             telescopeDevice.Tracking = false;
-                            LogDebug(pName, "Tracking turned off");
+                            LogDebug(testName, "Tracking turned off");
                         }
 
-                        LogCallToDriver(pName, "About to get Tracking property");
-                        LogDebug(pName, $"Tracking 2: {telescopeDevice.Tracking}");
+                        LogCallToDriver(testName, "About to get Tracking property");
+                        LogDebug(testName, $"Tracking 2: {telescopeDevice.Tracking}");
                         targetAltitude = 50.0d;
                         targetAzimuth = 150.0d;
                         SetAction("Slewing to Alt/Az synchronously...");
 
-                        LogCallToDriver(pName, $"About to call SlewToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
+                        LogCallToDriver(testName, $"About to call SlewToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
                         TimeMethod($"SlewToAltAz", () => telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude), TargetTime.Extended);
 
-                        LogCallToDriver(pName, "About to get Tracking property");
-                        LogDebug(pName, $"Tracking 3: {telescopeDevice.Tracking}");
+                        LogCallToDriver(testName, "About to get Tracking property");
+                        LogDebug(testName, $"Tracking 3: {telescopeDevice.Tracking}");
                         break;
 
                     case SlewSyncType.SlewToAltAzAsync:
-                        LogCallToDriver(pName, "About to get Tracking property");
-                        LogDebug(pName, $"Tracking 1: {telescopeDevice.Tracking}");
-                        LogCallToDriver(pName, "About to get Tracking property");
+                        LogCallToDriver(testName, "About to get Tracking property");
+                        LogDebug(testName, $"Tracking 1: {telescopeDevice.Tracking}");
+                        LogCallToDriver(testName, "About to get Tracking property");
                         if (canSetTracking & telescopeDevice.Tracking)
                         {
-                            LogCallToDriver(pName, "About to set Tracking property false");
+                            LogCallToDriver(testName, "About to set Tracking property false");
                             telescopeDevice.Tracking = false;
-                            LogDebug(pName, "Tracking turned off");
+                            LogDebug(testName, "Tracking turned off");
                         }
 
-                        LogCallToDriver(pName, "About to get Tracking property");
-                        LogDebug(pName, $"Tracking 2: {telescopeDevice.Tracking}");
+                        LogCallToDriver(testName, "About to get Tracking property");
+                        LogDebug(testName, $"Tracking 2: {telescopeDevice.Tracking}");
                         targetAltitude = 55.0d;
                         targetAzimuth = 155.0d;
 
-                        LogCallToDriver(pName, $"About to call SlewToAltAzAsync method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
+                        LogCallToDriver(testName, $"About to call SlewToAltAzAsync method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
                         TimeMethod($"SlewToAltAzAsync", () => telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude), TargetTime.Standard);
 
-                        LogCallToDriver(pName, "About to get Tracking property");
-                        LogDebug(pName, $"Tracking 3: {telescopeDevice.Tracking}");
+                        LogCallToDriver(testName, "About to get Tracking property");
+                        LogDebug(testName, $"Tracking 3: {telescopeDevice.Tracking}");
 
-                        WaitForSlew(pName, $"Slewing to Alt/Az asynchronously");
-                        LogCallToDriver(pName, "About to get Tracking property");
-                        LogDebug(pName, $"Tracking 4: {telescopeDevice.Tracking}");
+                        WaitForSlew(testName, $"Slewing to Alt/Az asynchronously");
+                        LogCallToDriver(testName, "About to get Tracking property");
+                        LogDebug(testName, $"Tracking 4: {telescopeDevice.Tracking}");
                         break;
 
                     default:
-                        LogError(pName, $"Conform:SlewTest: Unknown test type {pTest}");
+                        LogError(testName, $"Conform:SlewTest: Unknown test type {testType}");
                         break;
                 }
 
                 if (cancellationToken.IsCancellationRequested) return;
 
-                if (pCanDoIt) // Should be able to do this so report what happened
+                if (canPropertyIsTrue) // Should be able to do this so report what happened
                 {
                     SetAction("Slew completed");
-                    switch (pTest)
+                    switch (testType)
                     {
                         case SlewSyncType.SlewToCoordinates:
                         case SlewSyncType.SlewToCoordinatesAsync:
                         case SlewSyncType.SlewToTarget:
                         case SlewSyncType.SlewToTargetAsync:
+                            // Test how close the slew was to the required coordinates
+                            CheckScopePosition(testName, "Slewed", targetRightAscension, targetDeclination);
+
+                            // Check that the slews and syncs set the target RA coordinate correctly per the ASCOM Telescope specification
+                            try
                             {
-                                // Test how close the slew was to the required coordinates
-                                CheckScopePosition(pName, "Slewed", targetRightAscension, targetDeclination);
+                                double actualTargetRa = telescopeDevice.TargetRightAscension;
+                                LogDebug(testName, $"Current TargetRightAscension: {actualTargetRa}, Set TargetRightAscension: {targetRightAscension}");
 
-                                // Check that the slews and syncs set the target RA coordinate correctly per the ASCOM Telescope specification
-                                try
+                                if (RaDifferenceInArcSeconds(actualTargetRa, targetRightAscension) <= settings.TelescopeSlewTolerance) // Within specified tolerance
                                 {
-                                    double actualTargetRa = telescopeDevice.TargetRightAscension;
-                                    LogDebug(pName, $"Current TargetRightAscension: {actualTargetRa}, Set TargetRightAscension: {targetRightAscension}");
-
-                                    if (RaDifferenceInArcSeconds(actualTargetRa, targetRightAscension) <= settings.TelescopeSlewTolerance) // Within specified tolerance
-                                    {
-                                        LogOk(pName, $"The TargetRightAscension property: {actualTargetRa.ToHMS()} matches the expected RA {targetRightAscension.ToHMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds."); // Outside specified tolerance
-                                    }
-                                    else
-                                    {
-                                        LogIssue(pName, $"The TargetRightAscension property: {actualTargetRa.ToHMS()} does not match the expected RA {targetRightAscension.ToHMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
-                                    }
+                                    LogOk(testName, $"The TargetRightAscension property: {actualTargetRa.ToHMS()} matches the expected RA {targetRightAscension.ToHMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds."); // Outside specified tolerance
                                 }
-                                catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
+                                else
                                 {
-                                    LogIssue(pName, "The Driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
+                                    LogIssue(testName, $"The TargetRightAscension property: {actualTargetRa.ToHMS()} does not match the expected RA {targetRightAscension.ToHMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
                                 }
-                                catch (ASCOM.InvalidOperationException)
-                                {
-                                    LogIssue(pName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
-                                }
-                                catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == ExNotSet1 | ex.Number == ExNotSet2)
-                                {
-                                    LogIssue(pName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
-                                }
-                                catch (Exception ex)
-                                {
-                                    HandleException(pName, MemberType.Property, Required.Mandatory, ex, "");
-                                }
-
-                                // Check that the slews and syncs set the target declination coordinate correctly per the ASCOM Telescope specification
-                                try
-                                {
-                                    double actualTargetDec = telescopeDevice.TargetDeclination;
-                                    LogDebug(pName, $"Current TargetDeclination: {actualTargetDec}, Set TargetDeclination: {targetDeclination}");
-
-                                    if (Math.Round(Math.Abs(actualTargetDec - targetDeclination) * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero) <= settings.TelescopeSlewTolerance) // Within specified tolerance
-                                    {
-                                        LogOk(pName, $"The TargetDeclination property {actualTargetDec.ToDMS()} matches the expected Declination {targetDeclination.ToDMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds."); // Outside specified tolerance
-                                    }
-                                    else
-                                    {
-                                        LogIssue(pName, $"The TargetDeclination property {actualTargetDec.ToDMS()} does not match the expected Declination {targetDeclination.ToDMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
-                                    }
-
-                                }
-                                catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
-                                {
-                                    LogIssue(pName, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
-                                }
-                                catch (ASCOM.InvalidOperationException)
-                                {
-                                    LogIssue(pName, "The Driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
-                                }
-                                catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == ExNotSet1 | ex.Number == ExNotSet2)
-                                {
-                                    LogIssue(pName, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
-                                }
-                                catch (Exception ex)
-                                {
-                                    HandleException(pName, MemberType.Property, Required.Mandatory, ex, "");
-                                }
-
-                                break;
                             }
+                            catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
+                            {
+                                LogIssue(testName, "The Driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
+                            }
+                            catch (ASCOM.InvalidOperationException)
+                            {
+                                LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
+                            }
+                            catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == ExNotSet1 | ex.Number == ExNotSet2)
+                            {
+                                LogIssue(testName, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
+                            }
+                            catch (Exception ex)
+                            {
+                                HandleException(testName, MemberType.Property, Required.Mandatory, ex, "");
+                            }
+
+                            // Check that the slews and syncs set the target declination coordinate correctly per the ASCOM Telescope specification
+                            try
+                            {
+                                double actualTargetDec = telescopeDevice.TargetDeclination;
+                                LogDebug(testName, $"Current TargetDeclination: {actualTargetDec}, Set TargetDeclination: {targetDeclination}");
+
+                                if (Math.Round(Math.Abs(actualTargetDec - targetDeclination) * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero) <= settings.TelescopeSlewTolerance) // Within specified tolerance
+                                {
+                                    LogOk(testName, $"The TargetDeclination property {actualTargetDec.ToDMS()} matches the expected Declination {targetDeclination.ToDMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds."); // Outside specified tolerance
+                                }
+                                else
+                                {
+                                    LogIssue(testName, $"The TargetDeclination property {actualTargetDec.ToDMS()} does not match the expected Declination {targetDeclination.ToDMS()} within tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
+                                }
+
+                            }
+                            catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
+                            {
+                                LogIssue(testName, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet exception was thrown instead.");
+                            }
+                            catch (ASCOM.InvalidOperationException)
+                            {
+                                LogIssue(testName, "The Driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.");
+                            }
+                            catch (DriverException ex) when (ex.Number == ErrorCodes.ValueNotSet | ex.Number == ExNotSet1 | ex.Number == ExNotSet2)
+                            {
+                                LogIssue(testName, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.");
+                            }
+                            catch (Exception ex)
+                            {
+                                HandleException(testName, MemberType.Property, Required.Mandatory, ex, "");
+                            }
+
+                            break;
 
                         case SlewSyncType.SlewToAltAz:
                         case SlewSyncType.SlewToAltAzAsync:
+                            // Test how close the slew was to the required coordinates
+                            LogCallToDriver(testName, "About to get Azimuth property");
+                            double actualAzimuth = telescopeDevice.Azimuth;
+
+                            LogCallToDriver(testName, "About to get Altitude property");
+                            double actualAltitude = telescopeDevice.Altitude;
+
+                            double azimuthDifference = Math.Abs(actualAzimuth - targetAzimuth);
+                            if (azimuthDifference > 350.0d) azimuthDifference = 360.0d - azimuthDifference; // Deal with the case where the two elements are on different sides of 360 degrees
+
+                            if (azimuthDifference <= settings.TelescopeSlewTolerance)
                             {
-                                // Test how close the slew was to the required coordinates
-                                LogCallToDriver(pName, "About to get Azimuth property");
-                                double actualAzimuth = telescopeDevice.Azimuth;
-
-                                LogCallToDriver(pName, "About to get Altitude property");
-                                double actualAltitude = telescopeDevice.Altitude;
-
-                                double azimuthDifference = Math.Abs(actualAzimuth - targetAzimuth);
-                                if (azimuthDifference > 350.0d) azimuthDifference = 360.0d - azimuthDifference; // Deal with the case where the two elements are on different sides of 360 degrees
-
-                                if (azimuthDifference <= settings.TelescopeSlewTolerance)
-                                {
-                                    LogOk(pName, $"Slewed to target Azimuth OK within tolerance: {settings.TelescopeSlewTolerance} arc seconds. Actual Azimuth: {FormatAzimuth(actualAzimuth)}, Target Azimuth: {FormatAzimuth(targetAzimuth)}");
-                                }
-                                else
-                                {
-                                    LogIssue(pName, $"Slewed {azimuthDifference:0.0} arc seconds away from Azimuth target: {FormatAzimuth(targetAzimuth)} Actual Azimuth: {FormatAzimuth(actualAzimuth)}. Tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
-                                }
-
-                                double altitudeDifference = Math.Abs(actualAltitude - targetAltitude);
-                                if (altitudeDifference <= settings.DomeSlewTolerance)
-                                {
-                                    LogOk(pName, $"Slewed to target Altitude OK within tolerance: {settings.TelescopeSlewTolerance} arc seconds. Actual Altitude: {actualAltitude.ToDMS()}, Target Altitude: {targetAltitude.ToDMS()}");
-                                }
-                                else
-                                {
-                                    LogIssue(pName, $"Slewed {altitudeDifference:0.0} degree(s) away from Altitude target: {targetAltitude.ToDMS()} Actual Altitude: {actualAltitude.ToDMS()}. Tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
-                                }
-
-                                break;
+                                LogOk(testName, $"Slewed to target Azimuth OK within tolerance: {settings.TelescopeSlewTolerance} arc seconds. Actual Azimuth: {FormatAzimuth(actualAzimuth)}, Target Azimuth: {FormatAzimuth(targetAzimuth)}");
                             }
+                            else
+                            {
+                                LogIssue(testName, $"Slewed {azimuthDifference:0.0} arc seconds away from Azimuth target: {FormatAzimuth(targetAzimuth)} Actual Azimuth: {FormatAzimuth(actualAzimuth)}. Tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
+                            }
+
+                            double altitudeDifference = Math.Abs(actualAltitude - targetAltitude);
+                            if (altitudeDifference <= settings.DomeSlewTolerance)
+                            {
+                                LogOk(testName, $"Slewed to target Altitude OK within tolerance: {settings.TelescopeSlewTolerance} arc seconds. Actual Altitude: {actualAltitude.ToDMS()}, Target Altitude: {targetAltitude.ToDMS()}");
+                            }
+                            else
+                            {
+                                LogIssue(testName, $"Slewed {altitudeDifference:0.0} degree(s) away from Altitude target: {targetAltitude.ToDMS()} Actual Altitude: {actualAltitude.ToDMS()}. Tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
+                            }
+
+                            break;
 
                         default: // Do nothing
-                            {
-                                break;
-                            }
+                            break;
                     }
                 }
                 else // Not supposed to be able to do this but no error generated so report an error
                 {
-                    LogIssue(pName, $"{pCanDoItName} is false but no exception was generated on use");
+                    LogIssue(testName, $"{canPropertyName} is false but no exception was generated on use");
                 }
             }
             catch (Exception ex)
             {
-                if (pCanDoIt)
+                if (canPropertyIsTrue)
                 {
-                    HandleException(pName, MemberType.Method, Required.MustBeImplemented, ex, $"{pCanDoItName} is True");
+                    HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, $"{canPropertyName} is True");
                 }
                 else
                 {
-                    HandleException(pName, MemberType.Method, Required.MustNotBeImplemented, ex,
-                        $"{pCanDoItName} is False");
+                    HandleException(testName, MemberType.Method, Required.MustNotBeImplemented, ex,
+                        $"{canPropertyName} is False");
                 }
             }
 
@@ -7414,34 +7387,28 @@ namespace ConformU
                 telescopeDevice.Tracking = true;
             }
 
-            if (canSlew)
+            if (canSlewAsync)
             {
-                if (canSlewAsync)
-                {
-                    LogDebug("SlewScope", $"Slewing asynchronously to {pMsg} {pRa.ToHMS()} {pDec.ToDMS()}");
+                LogDebug("SlewScope", $"Slewing asynchronously to {pMsg} {pRa.ToHMS()} {pDec.ToDMS()}");
 
-                    LogCallToDriver("SlewScope", $"About to call SlewToCoordinatesAsync method, RA: {pRa.ToHMS()}, Declination: {pDec.ToDMS()}");
-                    telescopeDevice.SlewToCoordinatesAsync(pRa, pDec);
+                LogCallToDriver("SlewScope", $"About to call SlewToCoordinatesAsync method, RA: {pRa.ToHMS()}, Declination: {pDec.ToDMS()}");
+                telescopeDevice.SlewToCoordinatesAsync(pRa, pDec);
 
-                    WaitForSlew(pMsg, $"Slewing asynchronously to {pMsg}");
-                }
-                else
+                WaitForSlew(pMsg, $"Slewing asynchronously to {pMsg}");
+            }
+            else
+            {
+                if (canSlew)
                 {
                     SetStatus($"Slewing synchronously to {pMsg}: {pRa.ToHMS()} {pDec.ToDMS()}");
                     LogDebug("SlewScope", $"Slewing synchronously to {pMsg} {pRa.ToHMS()} {pDec.ToDMS()}");
                     LogCallToDriver("SlewScope", $"About to call SlewToCoordinates method, RA: {pRa.ToHMS()}, Declination: {pDec.ToDMS()}");
                     telescopeDevice.SlewToCoordinates(pRa, pDec);
                 }
-
-                //if (CanReadSideOfPier("SlewScope"))
-                //{
-                //    LogCallToDriver("SlewScope", "About to get SideOfPier property");
-                //    LogDebug("SlewScope", $"Final SideOfPier: {telescopeDevice.SideOfPier}");
-                //}
-            }
-            else
-            {
-                LogInfo("SlewScope", "Unable to slew this scope as CanSlew is false, slew omitted");
+                else
+                {
+                    LogInfo("SlewScope", "Unable to slew this scope as both CanSlew and CanSlewAsync are false, slew omitted");
+                }
             }
 
             SetAction("");
@@ -7712,10 +7679,10 @@ namespace ConformU
         /// <param name="testName">Test name</param>
         /// <param name="description">Test description</param>
         /// <param name="axis">RA or Dec axis</param>
-        /// <param name="rate">Offset rate to be set</param>
+        /// <param name="testRate">Offset rate to be set</param>
         /// <param name="includeSlewiingTest">Flag indicating whether the Slewing property should be tested to confirm that it is false.</param>
         /// <returns>True if the rate could be set</returns>
-        private bool TestRaDecRate(string testName, string description, Axis axis, double rate, bool includeSlewiingTest)
+        private bool TestRaDecRate(string testName, string description, Axis axis, double testRate, bool includeSlewiingTest)
         {
             // Initialise the outcome to false
             bool success = false;
@@ -7760,13 +7727,13 @@ namespace ConformU
                 // Check that we can set the rate
                 try
                 {
-                    LogCallToDriver(testName, $"{description} - About to set {RateOffsetName(axis)} property to {rate}");
+                    LogCallToDriver(testName, $"{description} - About to set {RateOffsetName(axis)} property to {testRate}");
 
                     // Set the appropriate offset rate
                     if (axis == Axis.Ra)
-                        TimeMethod($"{testName} {rate:#0.000}", () => telescopeDevice.RightAscensionRate = rate, TargetTime.Standard);
+                        TimeMethod($"{testName} {testRate:#0.000}", () => telescopeDevice.RightAscensionRate = testRate, TargetTime.Standard);
                     else
-                        TimeMethod($"{testName} {rate:#0.000}", () => telescopeDevice.DeclinationRate = rate, TargetTime.Standard);
+                        TimeMethod($"{testName} {testRate:#0.000}", () => telescopeDevice.DeclinationRate = testRate, TargetTime.Standard);
 
                     SetAction("Waiting for mount to settle");
                     WaitFor(1000); // Give a short wait to allow the mount to settle at the new rate
@@ -7783,29 +7750,31 @@ namespace ConformU
                     LogCallToDriver(testName, $"{description} - About to get the Slewing property");
                     slewing = telescopeDevice.Slewing;
 
-                    // Check the rate assignment outcome
-                    if (offsetRate == rate & !slewing) // Success - The rate has been correctly set and the mount reports that Slewing is False
+                    // Check the rate assignment outcome to within a small tolerance
+                    bool ratesMatch = CompareDouble(offsetRate, testRate, 0.00001);
+
+                    if (ratesMatch & !slewing) // Success - The rate has been correctly set and the mount reports that Slewing is False
                     {
                         LogOk(testName, $"{description} - successfully set rate to {offsetRate,7:+0.000;-0.000;+0.000}");
                         success = true;
                     }
                     else // Failed - Report what went wrong
                     {
-                        if (slewing & offsetRate == rate) // The correct rate was returned but Slewing is True
-                            LogIssue(testName, $"{RateOffsetName(axis)} was successfully set to {rate} but Slewing is returning True, it should return False.");
+                        if (slewing & ratesMatch) // The correct rate was returned but Slewing is True
+                            LogIssue(testName, $"{RateOffsetName(axis)} was successfully set to {testRate} but Slewing is returning True, it should return False.");
 
-                        if (slewing & offsetRate != rate) // An incorrect rate was returned and Slewing is True
-                            LogIssue(testName, $"{RateOffsetName(axis)} Read does not return {rate} as set, instead it returns {offsetRate}. Slewing is also returning True, it should return False.");
+                        if (slewing & !ratesMatch) // An incorrect rate was returned and Slewing is True
+                            LogIssue(testName, $"{RateOffsetName(axis)} Read does not return {testRate} as set, instead it returns {offsetRate}. Slewing is also returning True, it should return False.");
 
-                        if (!slewing & offsetRate != rate) // An incorrect rate was returned and Slewing is False
-                            LogIssue(testName, $"{RateOffsetName(axis)} Read does not return {rate} as set, instead it returns {offsetRate}.");
+                        if (!slewing & !ratesMatch) // An incorrect rate was returned and Slewing is False
+                            LogIssue(testName, $"{RateOffsetName(axis)} Read does not return {testRate} as set, instead it returns {offsetRate}.");
                     }
                 }
                 catch (Exception ex)
                 {
                     if (IsInvalidOperationException(testName, ex)) // We can't know what the valid range for this telescope is in advance so its possible that our test value will be rejected, if so just report this.
                     {
-                        LogInfo(testName, $"Unable to set test rate {rate}, it was rejected as an invalid value.");
+                        LogInfo(testName, $"Unable to set test rate {testRate}, it was rejected as an invalid value.");
                     }
                     else
                     {
@@ -8159,6 +8128,30 @@ namespace ConformU
                 {
                     LogIssue(testName, $"{name} is outside the expected tolerance. Expected: {expectedValue,8:+0.0000;-0.0000;+0.0000}, Actual: {actualValue,8:+0.0000;-0.0000;+0.0000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%, Tolerance:{tolerance * 100:N0}%.");
                 }
+            }
+        }
+
+        /// <summary>
+        /// Compare two numbers and return true if they match within a tolerance
+        /// </summary>
+        /// <param name="value1"></param>
+        /// <param name="value2"></param>
+        /// <returns></returns>
+        private bool CompareDouble(double actualValue, double expectedValue, double tolerance = 0.0001)
+        {
+            if (expectedValue == 0.0)
+            {
+                if (Math.Abs(actualValue - expectedValue) <= tolerance)
+                    return true;
+                else
+                    return false;
+            }
+            else
+            {
+                if (Math.Abs(Math.Abs(actualValue - expectedValue) / expectedValue) <= tolerance)
+                    return true;
+                else
+                    return false;
             }
         }
 
