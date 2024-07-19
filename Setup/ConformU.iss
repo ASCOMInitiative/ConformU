@@ -27,7 +27,7 @@
 #define MyAppUpdatesURL "https://github.com/ASCOMInitiative/ConformU/releases"
 #define MyAppExeName "ConformU.exe"
 #define MyAppAuthor "Peter Simpson"
-#define MyAppCopyright "Copyright © 2022 " + MyAppAuthor
+#define MyAppCopyright "Copyright © 2024 " + MyAppAuthor
 #define MyAppVersion GetVersionNumbersString("..\publish\ConformU64\conformu.exe")  ; Create version number variable
 
 [Setup]

@@ -413,7 +413,8 @@ namespace ConformU
                     int returnCode = -8888;
 
                     // Initialise required variables required by several commands
-                    InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
+                    if (InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile))
+                        return Task.CompletedTask;
 
                     // Run the conformance test
                     returnCode = RunConformanceTest(cycles);
@@ -421,7 +422,7 @@ namespace ConformU
                     // Return the return code
                     return Task.FromResult(returnCode);
 
-                }, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption,testCyclesOption);
+                }, logFileNameOption, logFilePathOption, resultsFileOption, settingsFileOption, debugDiscoveryOption, debugStartUpOption, testCyclesOption);
 
                 // CONFORMANCE COMMAND handler
                 conformanceCommand.SetHandler((device, file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp, cycles) =>
@@ -438,7 +439,8 @@ namespace ConformU
 
                         case DeviceTechnology.Alpaca:
                             // Initialise required variables required by several commands
-                            InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
+                            if (InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile))
+                                return Task.CompletedTask;
 
                             // Set options to conduct a full conformance test
                             conformConfiguration.SetFullTest();
@@ -454,7 +456,8 @@ namespace ConformU
                             if (OperatingSystem.IsWindows()) // OK because COM is valid on WindowsOS
                             {
                                 // Initialise required variables required by several commands
-                                InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
+                                if (InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile))
+                                    return Task.CompletedTask;
 
                                 // Set options to conduct a full conformance test
                                 conformConfiguration.SetFullTest();
@@ -496,7 +499,8 @@ namespace ConformU
 
                         case DeviceTechnology.Alpaca:
                             // Initialise required variables required by several commands
-                            InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
+                            if (InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile))
+                                return Task.CompletedTask;
 
                             // Set options to conduct a full conformance test
                             conformConfiguration.SetFullTest();
@@ -525,7 +529,9 @@ namespace ConformU
                 // ALPACA USING SETTINGS COMMAND handler
                 alpacaUsingSettingsCommand.SetHandler((file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
                 {
-                    InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
+                    if(InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile))
+                        return Task.CompletedTask;
+
                     // Return a task with the required return code
                     return Task.FromResult(RunAlpacaProtocolTest());
 
@@ -581,7 +587,8 @@ namespace ConformU
             else
             {
                 // Initialise required variables required by several commands
-                InitialiseVariables(null, null, false, false, null, null);
+                if(InitialiseVariables(null, null, false, false, null, null))
+                    return 0;
 
                 // Start a task to check whether any updates are available, if configured to do so.
                 // The update check is started here to give the maximum time to get a result before the UI is first displayed
@@ -640,7 +647,8 @@ namespace ConformU
         private static int StartGuiHandler(FileInfo file, DirectoryInfo path, bool debugStartUp, bool debugDiscovery, FileInfo resultsFile, FileInfo settingsFile)
         {
             // Initialise required variables required by several commands
-            InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile);
+            if(InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile))
+                return 0;
 
             // Start a task to check whether any updates are available, if configured to do so.
             // The update check is started here to give the maximum time to get a result before the UI is first displayed
@@ -823,8 +831,10 @@ namespace ConformU
         /// <param name="resultsFileInfo"></param>
         /// <param name="settingsFileInfo"></param>
 
-        private static void InitialiseVariables(FileInfo logFileInfo, DirectoryInfo logPathInfo, bool debugStartUp, bool debugDiscovery, FileInfo resultsFileInfo, FileInfo settingsFileInfo)
+        private static bool InitialiseVariables(FileInfo logFileInfo, DirectoryInfo logPathInfo, bool debugStartUp, bool debugDiscovery, FileInfo resultsFileInfo, FileInfo settingsFileInfo)
         {
+            bool closeDown = false; // Close down status: true = close down so that the 32bit process can run on its own, false to continue with this 64bit version
+
             argList = new();
 
             // Create and register logger objects and configuration services
@@ -914,13 +924,15 @@ namespace ConformU
                                 Console.WriteLine($"\r\n{RED_TEXT}Exception:{WHITE_TEXT}\r\n{ex}");
                             }
 
-                            return;
+                            closeDown = true; // Set the close down flag
                         }
                     }
                 }
             }
 
             #endregion
+
+            return closeDown;
         }
 
         private static DeviceTechnology GetDeviceTechnology(string progIdOrUri, out ServiceType? serviceType, out string address, out int port, out DeviceTypes? deviceType, out int deviceNumber)
