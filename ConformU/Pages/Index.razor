@@ -5,6 +5,7 @@
 @using ConformU.Conform.DataClasses
 @using Semver;
 @using System.Security.Principal;
+@using System.Runtime.InteropServices
 @inject BrowserResizeService _listener
 @inject ConformLogger _conformLogger
 @inject ConformConfiguration _configuration
@@ -94,7 +95,8 @@
         }
 
         statusMessage = $"Version {Update.ConformuVersionDisplayString}";
-        statusMessage += $"        Running as a {(Environment.Is64BitProcess ? "64bit" : "32bit")} application on {(Environment.Is64BitOperatingSystem ? "64bit" : "32bit")} {Environment.OSVersion}";
+        statusMessage += $"        Running as a {(Environment.Is64BitProcess ? "64bit" : "32bit")} application on a {(Environment.Is64BitOperatingSystem ? "64bit" : "32bit")}" +
+        $" {(RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "ARM" : "Intel")} processor.        OS: {Environment.OSVersion}";
 
         // Validate that the application SEMVER string is valid
         if (SemVersion.TryParse(Update.ConformuVersion, SemVersionStyles.AllowV, out SemVersion currentversion))
@@ -240,16 +242,16 @@
 
                         // Create a task to run the conformance test
                         conformanceTestTask = new Task(() =>
-                        {
-                            try
-                            {
-                                tester.TestDevice(testCycles);
-                            }
-                            catch (Exception ex)
-                            {
-                                _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
-                            }
-                        }, cancelConformToken);
+        {
+    try
+    {
+        tester.TestDevice(testCycles);
+    }
+    catch (Exception ex)
+    {
+        _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
+    }
+        }, cancelConformToken);
 
                         // Start the conformance test task
                         _conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
