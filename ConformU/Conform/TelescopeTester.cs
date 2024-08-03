@@ -7,6 +7,7 @@ using ASCOM.Tools;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -2576,87 +2577,143 @@ namespace ConformU
                         LogOk("TrackingRate Read", trackingRate.ToString());
 
                         // TrackingRate Write - Optional
+
+                        // Check whether TrackingRate SET is implemented at all
+                        bool canSetTrackingRate = false; // Default value to false
                         try
                         {
-                            // We can read TrackingRate so now test trying to set each tracking rate in turn
-                            LogDebug("TrackingRate Write", "About to enumerate tracking rates object");
-                            foreach (DriveRate currentDriveRate in (IEnumerable)trackingRates)
+                            telescopeDevice.TrackingRate = DriveRate.Sidereal;
+
+                            // If we get here tracking rate can be set
+                            canSetTrackingRate = true;
+                        }
+                        catch (InvalidValueException)
+                        {
+                            // Tracking rate can be set but not to Sidereal rate
+                            canSetTrackingRate = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            canSetTrackingRate = false;
+                            HandleException("TrackingRate Write", MemberType.Property, Required.Optional, ex, "");
+                        }
+
+                        if (canSetTrackingRate)
+                        {
+                            try
                             {
-                                if (cancellationToken.IsCancellationRequested)
-                                    return;
-                                try
+                                // Create a list to hold the supplied drive rates
+                                List<DriveRate> driveRates = new List<DriveRate>();
+
+                                // We can read TrackingRate so now test trying to set each tracking rate in turn
+                                LogDebug("TrackingRate Write", "About to enumerate tracking rates object");
+                                foreach (DriveRate currentDriveRate in (IEnumerable)trackingRates)
                                 {
-                                    // Set the tracking rate
-                                    LogCallToDriver("TrackingRate Write", $"About to set TrackingRate property to {currentDriveRate}");
-                                    telescopeDevice.TrackingRate = currentDriveRate;
+                                    // Exit if required
+                                    if (cancellationToken.IsCancellationRequested)
+                                        return;
 
-                                    // Make sure that the set rate is returned
-                                    LogCallToDriver("TrackingRate Write", $"About to get TrackingRate property");
-                                    if (telescopeDevice.TrackingRate == currentDriveRate)
-                                    {
-                                        LogOk("TrackingRate Write", $"Successfully set drive rate: {currentDriveRate}");
-                                    }
-                                    else
-                                    {
-                                        LogIssue("TrackingRate Write", $"Unable to set drive rate: {currentDriveRate}");
-                                    }
+                                    // Save the supplied drive rate
+                                    driveRates.Add(currentDriveRate);
 
-                                    // For ITelescopeV4 and later make sure that RightAscensionRate & DeclinationRate are only usable when tracking at Sidereal rate
-                                    if (IsPlatform7OrLater)
+                                    try
                                     {
-                                        CheckRateOffsetsRejectedForNonSiderealDriveRates(currentDriveRate, RateOffset.DeclinationRate);
-                                        CheckRateOffsetsRejectedForNonSiderealDriveRates(currentDriveRate, RateOffset.RightAscensionRate);
+                                        // Set the tracking rate
+                                        LogCallToDriver("TrackingRate Write", $"About to set TrackingRate property to {currentDriveRate}");
+                                        telescopeDevice.TrackingRate = currentDriveRate;
+
+                                        // Make sure that the set rate is returned
+                                        LogCallToDriver("TrackingRate Write", $"About to get TrackingRate property");
+                                        if (telescopeDevice.TrackingRate == currentDriveRate)
+                                        {
+                                            LogOk("TrackingRate Write", $"Successfully set drive rate: {currentDriveRate}");
+                                        }
+                                        else
+                                        {
+                                            LogIssue("TrackingRate Write", $"Unable to set drive rate: {currentDriveRate}");
+                                        }
+
+                                        // For ITelescopeV4 and later make sure that RightAscensionRate & DeclinationRate are only usable when tracking at Sidereal rate
+                                        if (IsPlatform7OrLater)
+                                        {
+                                            CheckRateOffsetsRejectedForNonSiderealDriveRates(currentDriveRate, RateOffset.DeclinationRate);
+                                            CheckRateOffsetsRejectedForNonSiderealDriveRates(currentDriveRate, RateOffset.RightAscensionRate);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        HandleException("TrackingRate Write", MemberType.Property, Required.Optional, ex, "");
                                     }
                                 }
-                                catch (Exception ex)
+
+                                //Now check that other drive rates are rejected by iterating over all possible values
+                                foreach (DriveRate rate in Enum.GetValues(typeof(DriveRate)))
                                 {
-                                    HandleException("TrackingRate Write", MemberType.Property, Required.Optional, ex, "");
+                                    LogDebug("TrackingRate Write", $"Checking drive rate {rate}");
+                                    if (!driveRates.Contains(rate)) // This is not a supported drive rate so it should be rejected
+                                    {
+                                        LogDebug("TrackingRate Write", $"Making sure that drive rate {rate} is rejected because it is not supported.");
+                                        try
+                                        {
+                                            telescopeDevice.TrackingRate = rate;
+                                            LogIssue("TrackingRate Write", $"Tracking rate {rate} is not supported but did not throw an InvalidValueException exception.");
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            HandleInvalidValueExceptionAsOk("TrackingRate Write", MemberType.Property, Required.Optional, ex, $"", $"Drive rate {rate} is not supported but did not throw an InvalidValueException as expected.");
+                                        }
+                                    }
+                                    else // This is a supported drive rate
+                                    {
+                                        // No action because it will have been tested above
+                                        LogDebug("TrackingRate Write", $"No action for drive rate {rate} because it was tested above.");
+                                    }
                                 }
                             }
-                        }
-                        catch (NullReferenceException) // Catch issues in iterating over a new TrackingRates object after a previous TrackingRates object was disposed.
-                        {
-                            LogIssue("TrackingRate Write 1", "A NullReferenceException was thrown while iterating a new TrackingRates instance after a previous TrackingRates instance was disposed. TrackingRate.Write testing skipped");
-                            LogInfo("TrackingRate Write 1", "This may indicate that the TrackingRates.Dispose method cleared a global variable shared by all TrackingRates instances.");
-                        }
-                        catch (Exception ex)
-                        {
-                            HandleException("TrackingRate Write 1", MemberType.Property, Required.Mandatory, ex, "");
-                        }
+                            catch (NullReferenceException) // Catch issues in iterating over a new TrackingRates object after a previous TrackingRates object was disposed.
+                            {
+                                LogIssue("TrackingRate Write 1", "A NullReferenceException was thrown while iterating a new TrackingRates instance after a previous TrackingRates instance was disposed. TrackingRate.Write testing skipped");
+                                LogInfo("TrackingRate Write 1", "This may indicate that the TrackingRates.Dispose method cleared a global variable shared by all TrackingRates instances.");
+                            }
+                            catch (Exception ex)
+                            {
+                                HandleException("TrackingRate Write 1", MemberType.Property, Required.Mandatory, ex, "");
+                            }
 
-                        // Attempt to write an invalid high tracking rate
-                        try
-                        {
-                            LogCallToDriver("TrackingRate Write", "About to set TrackingRate property to invalid value (5)");
-                            telescopeDevice.TrackingRate = (DriveRate)5;
-                            LogIssue("TrackingRate Write", "No error generated when TrackingRate is set to an invalid value (5)");
-                        }
-                        catch (Exception ex)
-                        {
-                            HandleInvalidValueExceptionAsOk("TrackingRate Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected when TrackingRate is set to an invalid value (5)");
-                        }
+                            // Attempt to write an invalid high tracking rate
+                            try
+                            {
+                                LogCallToDriver("TrackingRate Write", "About to set TrackingRate property to invalid value (5)");
+                                telescopeDevice.TrackingRate = (DriveRate)5;
+                                LogIssue("TrackingRate Write", "No error generated when TrackingRate is set to an invalid value (5)");
+                            }
+                            catch (Exception ex)
+                            {
+                                HandleInvalidValueExceptionAsOk("TrackingRate Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected when TrackingRate is set to an invalid value (5)");
+                            }
 
-                        // Attempt to write an invalid low tracking rate
-                        try
-                        {
-                            LogCallToDriver("TrackingRate Write", "About to set TrackingRate property to invalid value (-1)");
-                            telescopeDevice.TrackingRate = (DriveRate)(0 - 1); // Done this way to fool the compiler into allowing me to attempt to set a negative, invalid value
-                            LogIssue("TrackingRate Write", "No error generated when TrackingRate is set to an invalid value (-1)");
-                        }
-                        catch (Exception ex)
-                        {
-                            HandleInvalidValueExceptionAsOk("TrackingRate Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected when TrackingRate is set to an invalid value (-1)");
-                        }
+                            // Attempt to write an invalid low tracking rate
+                            try
+                            {
+                                LogCallToDriver("TrackingRate Write", "About to set TrackingRate property to invalid value (-1)");
+                                telescopeDevice.TrackingRate = (DriveRate)(0 - 1); // Done this way to fool the compiler into allowing me to attempt to set a negative, invalid value
+                                LogIssue("TrackingRate Write", "No error generated when TrackingRate is set to an invalid value (-1)");
+                            }
+                            catch (Exception ex)
+                            {
+                                HandleInvalidValueExceptionAsOk("TrackingRate Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected when TrackingRate is set to an invalid value (-1)");
+                            }
 
-                        // Finally restore original TrackingRate
-                        try
-                        {
-                            LogCallToDriver("TrackingRate Write", "About to set TrackingRate property to " + trackingRate.ToString());
-                            telescopeDevice.TrackingRate = trackingRate;
-                        }
-                        catch (Exception ex)
-                        {
-                            HandleException("TrackingRate Write", MemberType.Property, Required.Optional, ex, "Unable to restore original tracking rate");
+                            // Finally restore original TrackingRate
+                            try
+                            {
+                                LogCallToDriver("TrackingRate Write", "About to set TrackingRate property to " + trackingRate.ToString());
+                                telescopeDevice.TrackingRate = trackingRate;
+                            }
+                            catch (Exception ex)
+                            {
+                                HandleException("TrackingRate Write", MemberType.Property, Required.Optional, ex, "Unable to restore original tracking rate");
+                            }
                         }
                     }
                     else // No TrackingRates object received after disposing of a previous instance
