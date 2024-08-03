@@ -943,7 +943,7 @@ namespace ConformU
             CameraPropertyWriteTest(CamPropertyType.StartY, "StartY", System.Convert.ToInt32(cameraYSize / (double)2)); LogCallToDriver("ConformanceCheck", "About to get InterfaceVersion");
             if (camera.InterfaceVersion > 1)
             {
-                // SensorType - Mandatory
+                // SensorType - Optional
                 // This must be tested before BayerOffset because BayerOffset is mandatory for colour and optional for monochrome cameras
                 try
                 {
@@ -956,7 +956,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    HandleException("SensorType Read", MemberType.Property, Required.Mandatory, ex, "");
+                    HandleException("SensorType Read", MemberType.Property, Required.Optional, ex, "");
                 }
 
                 // BayerOffset Read
