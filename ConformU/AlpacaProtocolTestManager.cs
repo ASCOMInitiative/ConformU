@@ -2600,8 +2600,17 @@ namespace ConformU
                                             }
                                             else // Not a base 64 hand-off response so report the missing Value parameter
                                             {
-                                                LogIssue(testName, $"A JSON parameter of name {VALUE_PARAMETER_NAME} was expected, but was not found in the JSON response. This test is case sensitive.", responseString);
-                                                LogInformation(testName, $"The JSON {VALUE_PARAMETER_NAME} parameter must exist and be cased like this: {VALUE_PARAMETER_NAME}.", null);
+                                                // Decide whether to report the missing Value parameter
+                                                if (!settings.AlpacaConfiguration.ProtocolStrictChecks & returnedErrorNumber != 0) // We are in tolerant mode and an error was returned
+                                                {
+                                                    // No action, we tolerate an absent Value parameter when the device returns an error and Conform is in tolerant mode.
+                                                }
+                                                else // We are in strict mode or the device did not return an error
+                                                {
+                                                    // Report the missing Value parameter as an Issue
+                                                    LogIssue(testName, $"A JSON parameter of name {VALUE_PARAMETER_NAME} was expected, but was not found in the JSON response. This test is case sensitive.", responseString);
+                                                    LogInformation(testName, $"The JSON {VALUE_PARAMETER_NAME} parameter must exist and be cased like this: {VALUE_PARAMETER_NAME}.", null);
+                                                }
                                             }
                                         }
                                     }
