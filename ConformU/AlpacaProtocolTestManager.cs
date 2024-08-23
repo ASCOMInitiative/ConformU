@@ -75,9 +75,9 @@ namespace ConformU
             applicationCancellationToken = conformCancellationToken;
             applicationCancellationTokenSource = conformCancellationTokenSource;
             settings = conformConfiguration.Settings;
-            issueMessages = new List<string>();
-            informationMessages = new List<string>();
-            errorMessages = new List<string>();
+            issueMessages = [];
+            informationMessages = [];
+            errorMessages = [];
         }
 
         protected virtual void Dispose(bool disposing)
@@ -106,51 +106,56 @@ namespace ConformU
         #region Pre-formed status lists
 
         // HTTP statuses used to assess the outcome of protocol tests
-        private readonly List<HttpStatusCode> HttpStatusCodeAny = new();
-        private readonly List<HttpStatusCode> HttpStatusCode200 = new() { HttpStatusCode.OK };
-        private readonly List<HttpStatusCode> HttpStatusCode400 = new() { HttpStatusCode.BadRequest };
-        private readonly List<HttpStatusCode> HttpStatusCode200And400 = new() { HttpStatusCode.OK, HttpStatusCode.BadRequest };
+        private readonly List<HttpStatusCode> HttpStatusCodeAny = [];
+        private readonly List<HttpStatusCode> HttpStatusCode200 = [HttpStatusCode.OK];
+        private readonly List<HttpStatusCode> HttpStatusCode400 = [HttpStatusCode.BadRequest];
+        private readonly List<HttpStatusCode> HttpStatusCode200And400 = [HttpStatusCode.OK, HttpStatusCode.BadRequest];
 
-        private readonly List<HttpStatusCode> HttpStatusCode4XX = new() { HttpStatusCode.BadRequest, HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized, HttpStatusCode.PaymentRequired, HttpStatusCode.Forbidden,
-                                                     HttpStatusCode.NotFound, HttpStatusCode.MethodNotAllowed, HttpStatusCode.NotAcceptable, HttpStatusCode.ProxyAuthenticationRequired, HttpStatusCode.Conflict, HttpStatusCode.Gone };
+        private readonly List<HttpStatusCode> HttpStatusCode4XX = [ HttpStatusCode.BadRequest, HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized, HttpStatusCode.PaymentRequired, HttpStatusCode.Forbidden,
+                                                     HttpStatusCode.NotFound, HttpStatusCode.MethodNotAllowed, HttpStatusCode.NotAcceptable, HttpStatusCode.ProxyAuthenticationRequired, HttpStatusCode.Conflict, HttpStatusCode.Gone ];
 
         #endregion
 
         #region Pre-formed parameter lists that can be sent to clients
 
         // ClientID and ClientTransactionID OK
-        internal List<CheckProtocolParameter> ParamsOk = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
+        internal List<CheckProtocolParameter> ParamsOk = [new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture))];
 
         // ClientID and ClientTransactionID OK but with additional spurious parameter
-        internal List<CheckProtocolParameter> ParamsOkPlusExtraParameter = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ExtraParameter", "ExtraValue") };
+        internal List<CheckProtocolParameter> ParamsOkPlusExtraParameter = [new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ExtraParameter", "ExtraValue")];
 
         // ClientID and ClientTransactionID parameter names lower case
-        internal List<CheckProtocolParameter> ParamClientIDLowerCase = new() { new CheckProtocolParameter("clientid", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
-        internal List<CheckProtocolParameter> ParamTransactionIdLowerCase = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("clienttransactionid", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
+        internal List<CheckProtocolParameter> ParamClientIDLowerCase = [new CheckProtocolParameter("clientid", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture))];
+        internal List<CheckProtocolParameter> ParamTransactionIdLowerCase = [new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("clienttransactionid", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture))];
 
         // ClientID and ClientTransactionID values empty
-        internal List<CheckProtocolParameter> ParamClientIDEmpty = new() { new CheckProtocolParameter("ClientID", ""), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
-        internal List<CheckProtocolParameter> ParamTransactionIdEmpty = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", "") };
+        internal List<CheckProtocolParameter> ParamClientIDEmpty = [new CheckProtocolParameter("ClientID", ""), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture))];
+        internal List<CheckProtocolParameter> ParamTransactionIdEmpty = [new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", "")];
 
         // ClientID and ClientTransactionID values white space
-        internal List<CheckProtocolParameter> ParamClientIDWhiteSpace = new() { new CheckProtocolParameter("ClientID", "     "), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
-        internal List<CheckProtocolParameter> ParamTransactionIdWhiteSpace = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", "     ") };
+        internal List<CheckProtocolParameter> ParamClientIDWhiteSpace = [new CheckProtocolParameter("ClientID", "     "), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture))];
+        internal List<CheckProtocolParameter> ParamTransactionIdWhiteSpace = [new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", "     ")];
 
         // ClientID and ClientTransactionID values negative number
-        internal List<CheckProtocolParameter> ParamClientIDNegative = new() { new CheckProtocolParameter("ClientID", "-12345"), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
-        internal List<CheckProtocolParameter> ParamTransactionIdNegative = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", "-67890") };
+        internal List<CheckProtocolParameter> ParamClientIDNegative = [new CheckProtocolParameter("ClientID", "-12345"), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture))];
+        internal List<CheckProtocolParameter> ParamTransactionIdNegative = [new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", "-67890")];
 
         // ClientID and ClientTransactionID values non-numeric string
-        internal List<CheckProtocolParameter> ParamClientIDNonNumeric = new() { new CheckProtocolParameter("ClientID", "NASDAQ"), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)) };
-        internal List<CheckProtocolParameter> ParamTransactionIdString = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", "qweqwe") };
+        internal List<CheckProtocolParameter> ParamClientIDNonNumeric = [new CheckProtocolParameter("ClientID", "NASDAQ"), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture))];
+        internal List<CheckProtocolParameter> ParamTransactionIdString = [new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", "qweqwe")];
 
         // Set Connected True and False
-        internal List<CheckProtocolParameter> ParamConnectedTrue = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "True") };
-        internal List<CheckProtocolParameter> ParamConnectedFalse = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "False") };
+        internal List<CheckProtocolParameter> ParamConnectedTrue = [new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)),
+                                                                    new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)),
+                                                                    new CheckProtocolParameter("Connected", "True")];
+        internal List<CheckProtocolParameter> ParamConnectedTrueReordered = [new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)),
+                                                                             new CheckProtocolParameter("Connected", "True"),
+                                                                             new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture))];
+        internal List<CheckProtocolParameter> ParamConnectedFalse = [new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "False")];
 
         // Set Telescope.Tracking True and False
-        internal List<CheckProtocolParameter> ParamTrackingTrue = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Tracking", "True") };
-        internal List<CheckProtocolParameter> ParamTrackingFalse = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Tracking", "False") };
+        internal List<CheckProtocolParameter> ParamTrackingTrue = [new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Tracking", "True")];
+        internal List<CheckProtocolParameter> ParamTrackingFalse = [new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Tracking", "False")];
 
         #endregion
 
@@ -250,17 +255,32 @@ namespace ConformU
                         {
                             LogLine($"OK messages are suppressed, they can be enabled through the Alpaca and COM settings page.");
                             LogBlankLine();
-                            LogLine($"Connecting to device...");
                         }
+
                         // Set Connected true to start the test
+                        LogLine($"Connecting to device...");
                         await CallApi("True", "Connected", HttpMethod.Put, ParamConnectedTrue, HttpStatusCode200);
+                        LogBlankLine();
+                        LogLine($"Successfully connected to device, disconnecting in order to test that connection using a different PUT parameter order is successful...");
+
+                        // Disconnect from the device so we can try to connect with Put parameters in a different order
+                        await CallApi("False", "Connected", HttpMethod.Put, ParamConnectedFalse, HttpStatusCode200, true);
+                        LogBlankLine();
+                        LogLine($"Successfully disconnected from device, re-connecting using re-ordered PUT parameters...");
+
+                        // Set Connected true to start the test
+                        if (settings.AlpacaConfiguration.ProtocolMessageLevel != ProtocolMessageLevel.All)
+                            LogBlankLine();
+                        await CallApi("True", "Connected", HttpMethod.Put, ParamConnectedTrueReordered, HttpStatusCode200);
                         if (settings.AlpacaConfiguration.ProtocolMessageLevel == ProtocolMessageLevel.All)
                             LogBlankLine();
                         else
                         {
-                            LogLine($"Successfully connected to device, testing...");
+                            LogLine($"Successfully connected to device using re-ordered PUT parameters, testing device...");
                             LogBlankLine();
                         }
+
+                        // Get the interface version number
                         int interfaceVersion = await GetInterfaceVersion();
                         LogLine($"Device exposes interface version {interfaceVersion}");
 
@@ -413,9 +433,9 @@ namespace ConformU
 
         private async Task TestCommon()
         {
-            List<CheckProtocolParameter> ParamConnectedEmpty = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "") };
-            List<CheckProtocolParameter> ParamConnectedNumeric = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "123456") };
-            List<CheckProtocolParameter> ParamConnectedString = new() { new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "asdqwe") };
+            List<CheckProtocolParameter> ParamConnectedEmpty = [new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "")];
+            List<CheckProtocolParameter> ParamConnectedNumeric = [new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "123456")];
+            List<CheckProtocolParameter> ParamConnectedString = [new CheckProtocolParameter("ClientID", TEST_CLIENT_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("ClientTransactionID", TEST_TRANSACTION_ID.ToString(CultureInfo.InvariantCulture)), new CheckProtocolParameter("Connected", "asdqwe")];
 
             try
             {
@@ -1906,7 +1926,7 @@ namespace ConformU
                     // Add all parameters to the request body as form URL encoded content
                     if (parameters.Count > 0)
                     {
-                        Dictionary<string, string> formParameters = new();
+                        Dictionary<string, string> formParameters = [];
                         foreach (CheckProtocolParameter parameter in parameters)
                         {
                             formParameters.Add(parameter.ParameterName, parameter.ParameterValue);
@@ -2238,7 +2258,7 @@ namespace ConformU
                     // Add all parameters to the request body as form URL encoded content
                     if (parameters.Count > 0)
                     {
-                        Dictionary<string, string> formParameters = new();
+                        Dictionary<string, string> formParameters = [];
                         foreach (CheckProtocolParameter parameter in parameters)
                         {
                             formParameters.Add(parameter.ParameterName, parameter.ParameterValue);
