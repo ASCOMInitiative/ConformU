@@ -890,7 +890,7 @@ namespace ConformU
         /// Determine whether the calibrator is changing, ensuring that the CalibratorChanging and CalibratorState properties agree in ICoverCalibratorV2 and later interfaces 
         /// </summary>
         /// <param name="operation"></param>
-        /// <returns>True if the calibrator is not ready</returns>
+        /// <returns>True if the calibrator is ready</returns>
         private bool CalibratorReady(string operation)
         {
             // Get the calibrator state
@@ -942,8 +942,11 @@ namespace ConformU
                     // Check whether the call was synchronous or asynchronous
                     if (CalibratorReady("CalibratorOn")) // Synchronous call
                     {
-                        // Check the outcome
+                        // Get the outcome state
                         LogCallToDriver("CalibratorOn", "About to call CalibratorState property");
+                        calibratorState = coverCalibratorDevice.CalibratorState;
+
+                        // Check the outcome
                         if ((requestedBrightness < 0) | (requestedBrightness > maxBrightness)) // An invalid value should have been thrown so this code should never be reached
                             LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} should have thrown an InvalidValueException but did not.");
                         else if (calibratorState == CalibratorStatus.Ready) // A valid brightness was set and a Ready status was returned
@@ -979,7 +982,7 @@ namespace ConformU
                                 LogIssue("CalibratorOn", $"The Brightness property value: {returnedBrightness} does not match the value that was set: {requestedBrightness}");
                         }
                         else// A valid brightness was set but a status other than Ready was returned
-                            LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was unsuccessful - the returned CalibratorState was '{coverCalibratorDevice.CalibratorState.ToString().Trim()}' instead of 'Ready'. The synchronous operation took {sw.Elapsed.TotalSeconds:0.0} seconds");
+                            LogIssue("CalibratorOn", $"CalibratorOn with brightness {requestedBrightness} was unsuccessful - the returned CalibratorState was '{calibratorState}' instead of 'Ready'. The synchronous operation took {sw.Elapsed.TotalSeconds:0.0} seconds");
                     }
                     else // Asynchronous call
                     {
