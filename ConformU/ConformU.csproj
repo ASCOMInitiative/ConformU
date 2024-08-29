@@ -39,7 +39,7 @@
 	<PropertyGroup>
 		<!-- Set version numbers -->
 		<ProductMajor>3</ProductMajor>
-		<ProductMinor>0</ProductMinor>
+		<ProductMinor>1</ProductMinor>
 		<ProductPatch>0</ProductPatch>
 
 		<!-- Set the pre-release string without a leading minus e.g. rc.1 -->
