@@ -23,10 +23,10 @@ Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca De
 # Command line
 The command line format is: `conformu [COMMAND] [OPTIONS]` and the primary commands are:
 
-| Command | Description |
-| ----------------------------- | ------------- |
+| __Command__ | __Description__ |
+| --- | --- |
 | conformance `DEVICE_IDENTIFIER` | Run a full conformance check on the specified COM driver or Alpaca device.|
-| alpacaprotocol  ALPACA_URI | Run an Alpaca protocol check on the specified Alpaca device. |
+| alpacaprotocol `ALPACA_URI` | Run an Alpaca protocol check on the specified Alpaca device. |
 | conformance-settings | Run a full conformance check on the specified COM driver or Alpaca device configured in the supplied settings file. |
 | alpacaprotocol | Run an Alpaca protocol check on the device configured in the supplied settings file. |
 
