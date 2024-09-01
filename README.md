@@ -23,41 +23,12 @@ Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca De
 # Command line
 The command line format is: `conformu [COMMAND] [OPTIONS]` and the primary commands are:
 
-<table id="CommandOptions">
-        <tr>
-            <th style="width:390px">Command</th>
-            <th>Description</th>
-        </tr>
-        <tr>
-            <td><tt><b>conformance</b> DEVICE_IDENTIFIER</tt></td>
-            <td>Run a full conformance check on the specified COM driver or Alpaca device.</td>
-        </tr>
-        <tr>
-            <td><tt><b>alpacaprotocol</b> ALPACA_URI</tt></td>
-            <td>Run an Alpaca protocol check on the specified Alpaca device.</td>
-        </tr>
-        <tr>
-            <td><tt><b>conformance-settings</b></tt></td>
-            <td>Run a full conformance check on the specified COM driver or Alpaca device configured in the supplied settings file.</td>
-        </tr>
-        <tr>
-            <td><tt><b>alpacaprotocol-settings</b></tt></td>
-            <td>Run an Alpaca protocol check on the device configured in the supplied settings file.</td>
-        </tr>
-</table>
-
-
-
-
-
-
 | __Command__ | __Description__ |
 | --- | --- |
-| conformance `DEVICE_IDENTIFIER` | Run a full conformance check on the specified COM driver or Alpaca device.|
+| <nobr>conformance `DEVICE_IDENTIFIER`</nobr> | Run a full conformance check on the specified COM driver or Alpaca device.|
 | alpacaprotocol `ALPACA_URI` | Run an Alpaca protocol check on the specified Alpaca device. |
 | conformance-settings | Run a full conformance check on the specified COM driver or Alpaca device configured in the supplied settings file. |
 | alpacaprotocol | Run an Alpaca protocol check on the device configured in the supplied settings file. |
-
 
 `DEVICE_IDENTIFIER` can either be a COM ProgID such as ASCOM.Simulator.Camera or an Alpaca URI such as http://192.168.1.42:11111/api/v1/telescope/0. The application will
 automatically determine the technology type and device type from the device identifier.
