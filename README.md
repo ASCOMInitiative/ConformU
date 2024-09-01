@@ -8,6 +8,7 @@ Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca De
   * When running on Windows, COM Drivers will be presented for testing as well as Alpaca devices.
 * Tests Alpaca device conformance with the Alpaca API protocol
 * Tests Alpaca device conformance with the Alpaca Discovery protocol
+* Tests Alpaca devices for conformance with the Alpaca protocol
 * The application can run:
   * in the user's default browser as a Blazor single page application
   * as a command line utility without any graphical UI
@@ -19,31 +20,35 @@ Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca De
 * The application will advise when a new update is available on GitHub.
 * On Windows ConformU can be configured to run as a 32bit application when installed on a 64bit OS.
 
-# Changes from current Conform behaviour
-* An issue summary is appended at the end of the conformance report.
-* All conformance deviations are reported as "issues" rather than as a mix of "errors" and "issues".
-* Settings can be reset to default if required.
-* Navigation is locked while Alpaca discovery and device testing is underway, but the conformance test run can still be interrupted on demand.
+# Command line
+The command line format is: `conformu [COMMAND] [OPTIONS]` and the primary commands are:
 
-# Command line options
-* '--commandline' - Run as a command line application with no graphical interface using a pre-configured settings file.
-* '--settings fullyqualifiedfilename' - Fully qualified file name of the application configuration file. Leave blank to use the default location.
-* '--logfilepath fullyqualifiedlogfilepath' - Fully qualified path to the log file folder. Leave blank to use the default mechanic, which creates a new folder each day,
-* '--logfile filename' - If filename has no directory/folder component it will be appended to the log file path to create the fully qualified log file name. If filename is fully qualified, any logfilepath parameter will be ignored. Leave filename blank to use automatic file naming, where the file name will be based on the file creation time.
-* '--resultsfile fullyqualifiedfilename' - Fully qualified file name of the results file.
-* '--debugdiscovery' - Write discovery debug information to the log.
-* '--debugstartup' - Write start-up debug information to the log.
-* '--help' - Display a help screen.
-* '--version' - Display version information.
+| Command | Description |
+| ----------------------------- | ------------- |
+| conformance `DEVICE_IDENTIFIER` | Run a full conformance check on the specified COM driver or Alpaca device.|
+| alpacaprotocol  ALPACA_URI | Run an Alpaca protocol check on the specified Alpaca device. |
+| conformance-settings | Run a full conformance check on the specified COM driver or Alpaca device configured in the supplied settings file. |
+| alpacaprotocol | Run an Alpaca protocol check on the device configured in the supplied settings file. |
+
+
+`DEVICE_IDENTIFIER` can either be a COM ProgID such as ASCOM.Simulator.Camera or an Alpaca URI such as http://192.168.1.42:11111/api/v1/telescope/0. The application will
+automatically determine the technology type and device type from the device identifier.
+
+`ALPACA_URI` is an Alpaca URI such as http://192.168.1.42:11111/api/v1/telescope/0. The device type will be inferred from the URI.
+
+`Options` vary depending on the command being run.
+
+Full details of commands and options are available by entering `conformu --help` at a command prompt.
 
 # Supported Operating Systems and Hardware
 * Linux 64bit
-* Arm (tested on Raspberry Pi 3B and 4)
+* Arm (tested on Raspberry Pi 3B and 5)
   * 32bit OS
   * 64bit OS
 * Windows
   * x64
   * x86
+  * ARM
 * MacOS
   * Apple silicon
   * Intel silicon
