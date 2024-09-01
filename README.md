@@ -25,13 +25,13 @@ The command line format is: `conformu [COMMAND] [OPTIONS]` and the primary comma
 
 | __Command__ | __Description__ |
 | --- | --- |
-| conformance `DEVICE_ID` | Run a full conformance check on the specified COM driver or Alpaca device.|
+| conformance `DEVICE_IDENTIFIER` | Run a full conformance check on the specified COM driver or Alpaca device.|
 | alpacaprotocol `ALPACA_URI` | Run an Alpaca protocol check on the specified Alpaca device. |
-| conformance-settings&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Run a full conformance check on the specified COM driver or Alpaca device configured in the supplied settings file. |
+| conformance-settings | Run a full conformance check on the specified COM driver or Alpaca device configured in the supplied settings file. |
 | alpacaprotocol | Run an Alpaca protocol check on the device configured in the supplied settings file. |
 
 
-`DEVICE_ID` can either be a COM ProgID such as ASCOM.Simulator.Camera or an Alpaca URI such as http://192.168.1.42:11111/api/v1/telescope/0. The application will
+`DEVICE_IDENTIFIER` can either be a COM ProgID such as ASCOM.Simulator.Camera or an Alpaca URI such as http://192.168.1.42:11111/api/v1/telescope/0. The application will
 automatically determine the technology type and device type from the device identifier.
 
 `ALPACA_URI` is an Alpaca URI such as http://192.168.1.42:11111/api/v1/telescope/0. The device type will be inferred from the URI.
