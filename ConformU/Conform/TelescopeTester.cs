@@ -1059,12 +1059,12 @@ namespace ConformU
             // DoesRefraction Write - Optional
             if (GetInterfaceVersion() > 1)
             {
-                if (doesRefraction) // Try opposite value
+                if (doesRefraction) // Telescope reports DoesRefraction = True so try setting to False
                 {
                     try
                     {
                         LogCallToDriver("DoesRefraction Write", "About to set DoesRefraction property false");
-                        TimeMethod("DoesRefraction Write", () => telescopeDevice.DoesRefraction = false, TargetTime.Fast);
+                        TimeMethod("DoesRefraction Write", () => telescopeDevice.DoesRefraction = false, TargetTime.Standard);
                         LogOk("DoesRefraction Write", "Can set DoesRefraction to False");
                     }
                     catch (Exception ex)
@@ -1072,18 +1072,31 @@ namespace ConformU
                         HandleException("DoesRefraction Write", MemberType.Property, Required.Optional, ex, "");
                     }
                 }
-                else // Try other opposite value
+                else // // Telescope reports DoesRefraction = False so try setting to True
                 {
                     try
                     {
                         LogCallToDriver("DoesRefraction Write", "About to set DoesRefraction property true");
-                        telescopeDevice.DoesRefraction = true;
+                        TimeMethod("DoesRefraction Write", () => telescopeDevice.DoesRefraction = true, TargetTime.Standard);
                         LogOk("DoesRefraction Write", "Can set DoesRefraction to True");
                     }
                     catch (Exception ex)
                     {
                         HandleException("DoesRefraction Write", MemberType.Property, Required.Optional, ex, "");
                     }
+                }
+
+                // Restore the Telescope's original DoesRefraction state.
+                try
+                {
+                    LogCallToDriver("DoesRefraction Write", $"About to set DoesRefraction property {doesRefraction}");
+                    telescopeDevice.DoesRefraction = doesRefraction;
+                    LogOk("DoesRefraction Write", $"Restored original DoesRefraction state: {doesRefraction}");
+                }
+                catch (Exception ex)
+                {
+                    LogInfo("DoesRefraction Write",$"Exception while restoring the telescope's original DoesRefraction state: {ex.Message}");
+                    HandleException("DoesRefraction Write", MemberType.Property, Required.Optional, ex, "");
                 }
             }
             else
