@@ -16,17 +16,61 @@
 </p>
 <h5>How to check ASCOM Interface Conformance</h5>
 <p>
-    First select a device through the <b>Select Device</b> page and then use the <b>Home</b> page to test compliance.
+    First select a device through the <b>Select Device</b> page and then use the <b>Home</b> page to test compliance. The conformance report will be shown on screen and will be recorded in a log file.
+</p>
+<h4 style="margin-top: 40px">Timing Performance for Properties and Methods</h4>
+<p>
+    Drivers and Alpaca devices that complete tasks quickly lead to more responsive applications and a better end-user experience. This is what underlies the drive to ensure that all
+    potentially long-running operations are defined as asynchronous in the Platform 7 interface updates. Use of the asynchronous pattern enables the initiator of a long running operation
+    to return quickly, before the operation has completed, and use of completion variable polling allows applications to monitor progress of the operation through a series
+    of "quick return" status calls.
+</p>
+<p>
+    Within Conform Universal, device methods and properties have been assigned to one of three target response time groups:
+    <table id="ResponseTimeGroups">
+        <tr>
+            <th style="width:200px;text-align:center">Response Time Group</th>
+            <th style="width:300px;text-align:center">Target Response Time (seconds)</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td style="text-align:center">FAST</td>
+            <td style="text-align:center">&nbsp;&nbsp;&nbsp;&nbsp;0.1</td>
+            <td>Configuration and state reporting members</td>
+        </tr>
+        <tr>
+            <td style="text-align:center">STANDARD</td>
+            <td style="text-align:center">&nbsp;&nbsp;&nbsp;&nbsp;1.0</td>
+            <td>Property write and asynchronous methods</td>
+        </tr>
+        <tr>
+            <td style="text-align:center">EXTENDED</td>
+            <td style="text-align:center">600.0</td>
+            <td>Synchronous methods in Platform 6 interfaces, ImageArray and ImageArrayVariant</td>
+        </tr>
+    </table>
+</p>
+<p>
+    The timing report shows the call, its duration, the response time group to which the call is assigned and whether or not the call completed within the target time.
+</p>
+<p>
+    <b>Target response times are intended to apply just to the device being assessed.</b> This means that assessments should be made under favourable conditions, ensuring that response
+    times are dominated by the device's intrinsic performance, without undue contributions from under-powered PCs, servers or slow networks.
+</p>
+<p>
+    In an ideal test configuration the device running Conform Universal (and any COM drivers) should be sufficiently powerful to ensure that it doesn't limit performance. 
+    When testing an Alpaca device, the network connection between Conform Universal and the device must be fast to ensure that network latency doesn't make a significant 
+    contribution to timings.
 </p>
 
 <h4 style="margin-top: 40px">Alpaca Protocol Conformance</h4>
 <p>
     The Alpaca protocol uses HTTP and REST to communicate with a device that implements one of the ASCOM device interfaces. The protocol specifies command and
     parameter names, together with correct casing, which are required for proper execution. The <b>Check Alpaca Protocol</b> test confirms that an Alpaca device is compliant with Alpaca requirements,
-    including correct reporting of missing parameters and handling of commands and parameters that are incorrectly cased..
+    including correct reporting of missing parameters and handling of commands and parameters that are incorrectly cased.
 </p>
 <p>
-    The Alpaca protocol check does not attempt to confirm that a device is conformant with ASCOM interface specification requirements, use the conformance test on the Home page for this. The purpose 
+    The Alpaca protocol check does not attempt to confirm that a device is conformant with ASCOM interface specification requirements, use the conformance test on the Home page for this. The purpose
     of the Alpaca Protocol Check is to confirm that Alpaca specific command handling and happy / unhappy Alpaca path responses are as expected.
 </p>
 <p>
@@ -120,27 +164,27 @@
         </tr>
         <tr>
             <td><tt>DeviceType</tt></td>
-            <td>@string.Join(", ",Enum.GetNames(typeof(DeviceTypes)))</td>
+            <td>@string.Join(", ", Enum.GetNames(typeof(DeviceTypes)))</td>
         </tr>
         <tr>
             <td><tt>AlpacaDevice:AscomDeviceType</tt></td>
-            <td>@string.Join(", ",Enum.GetNames(typeof(DeviceTypes)))</td>
+            <td>@string.Join(", ", Enum.GetNames(typeof(DeviceTypes)))</td>
         </tr>
         <tr>
             <td><tt>AlpacaDevice:ServiceType</tt></td>
-            <td>@string.Join(", ",Enum.GetNames(typeof(ServiceType)))</td>
+            <td>@string.Join(", ", Enum.GetNames(typeof(ServiceType)))</td>
         </tr>
         <tr>
             <td><tt>AlpacaConfiguration:AccessServiceType</tt></td>
-            <td>@string.Join(", ",Enum.GetNames(typeof(ServiceType)))</td>
+            <td>@string.Join(", ", Enum.GetNames(typeof(ServiceType)))</td>
         </tr>
         <tr>
             <td><tt>AlpacaConfiguration:ImageArrayTransferType</tt></td>
-            <td>@string.Join(", ",Enum.GetNames(typeof(ImageArrayTransferType)))</td>
+            <td>@string.Join(", ", Enum.GetNames(typeof(ImageArrayTransferType)))</td>
         </tr>
         <tr>
             <td><tt>ComConfiguration:ComAccessMechanic</tt></td>
-            <td>@string.Join(", ",Enum.GetNames(typeof(ComAccessMechanic)))</td>
+            <td>@string.Join(", ", Enum.GetNames(typeof(ComAccessMechanic)))</td>
         </tr>
     </table>
 </p>

@@ -164,6 +164,7 @@ namespace ConformU
             tl = logger;
             this.ApplicationCancellationToken = cancellationToken;
             settings = conformConfiguration.Settings;
+            LogTiming("Timing Summary", $"See Help for further information.");
             LogTiming("Timing Summary", $"FAST target response time: {fastTargetResponseTime:0.0} second{(fastTargetResponseTime == 1.0 ? "" : "s")}, (configuration and state reporting members).");
             LogTiming("Timing Summary", $"STANDARD target response time: {standardTargetResponseTime:0.0} second{(standardTargetResponseTime == 1.0 ? "" : "s")}, (property write and asynchronous methods).");
             LogTiming("Timing Summary", $"EXTENDED target response time: {extendedTargetResponseTime:0.0} second{(extendedTargetResponseTime == 1.0 ? "" : "s")}, (synchronous methods, ImageArray and ImageArrayVariant).");
