@@ -7,6 +7,11 @@ namespace ConformU
 {
     public class ConformLogger : TraceLogger, ITraceLogger, IDisposable
     {
+        static ConformLogger()
+        {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+        }
+
         private bool debug;
         public ConformLogger(string logFileName, string logFilePath, string loggerName, bool enabled) : base(logFileName, logFilePath, loggerName, enabled)
         {
