@@ -9,6 +9,8 @@ namespace ConformU
     {
         static ConformLogger()
         {
+            // Ensure that text output always used UTF8 regardless of the setting of the parent application.
+            // Without this change, piping output to another process can result in translation of single Unicode characters into multiple ASCII characters.
             Console.OutputEncoding = System.Text.Encoding.UTF8;
         }
 
