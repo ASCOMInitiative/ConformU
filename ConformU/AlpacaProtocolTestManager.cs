@@ -50,15 +50,6 @@ namespace ConformU
         private readonly List<string> informationMessages;
         private readonly List<string> errorMessages;
 
-        internal enum TestOutcome
-        {
-            OK,
-            Info,
-            Issue,
-            Error,
-            Debug
-        }
-
         private enum AdditionalParameterCheck
         {
             None,
@@ -421,7 +412,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogMessage("TestAlpacaProtocol", TestOutcome.Error, $"Exception: {ex}");
+                LogMessage("TestAlpacaProtocol", MessageLevel.Error, $"Exception: {ex}");
             }
 
             return returnCode;
@@ -3099,45 +3090,15 @@ namespace ConformU
         ///<param name="method">Calling method name</param>
         ///    <param name = "message" > Message to log</param>
         ///    <param name = "padding" > Number of characters to which the message should be right padded</param>
-        private void LogMessage(string method, TestOutcome outcome, string message, string contextMessage = null)
+        private void LogMessage(string method, MessageLevel outcome, string message, string contextMessage = null)
         {
-            string methodString, outcomeString, methodStringNoOutcome;
-
-            switch (outcome)
-            {
-                case TestOutcome.OK:
-                    outcomeString = "OK";
-                    break;
-
-                case TestOutcome.Info:
-                    outcomeString = "INFO";
-                    break;
-
-                case TestOutcome.Issue:
-                    outcomeString = "ISSUE";
-                    break;
-
-                case TestOutcome.Error:
-                    outcomeString = "ERROR";
-                    break;
-
-                case TestOutcome.Debug:
-                    outcomeString = "DEBUG";
-                    break;
-
-                default:
-                    throw new Exception($"Unknown test outcome type: {outcome}");
-            }
-            methodString = $"{method,-ExtensionMethods.COLUMN_WIDTH}{outcomeString,-ExtensionMethods.OUTCOME_WIDTH}";
-            methodStringNoOutcome = $"{method,-ExtensionMethods.COLUMN_WIDTH}{"",-ExtensionMethods.OUTCOME_WIDTH}";
-
             // Write to the logger
-            TL?.LogMessage(methodString, message);
+            TL?.LogMessage(method, outcome, message);
 
             // Add the context message if present
             if (contextMessage is not null)
             {
-                TL?.LogMessage(methodStringNoOutcome, $"  Response: {contextMessage}");
+                TL?.LogMessage(method, MessageLevel.Debug, $"  Response: {contextMessage}");
             }
         }
 
@@ -3165,12 +3126,12 @@ namespace ConformU
                 if (settings.AlpacaConfiguration.ProtocolShowSuccessResponses)
                 {
                     // Include JSON responses
-                    LogMessage(method, TestOutcome.OK, message, contextMessage);
+                    LogMessage(method, MessageLevel.OK, message, contextMessage);
                 }
                 else
                 {
                     // Do not include JSON responses
-                    LogMessage(method, TestOutcome.OK, message);
+                    LogMessage(method, MessageLevel.OK, message);
                 }
             }
         }
@@ -3182,7 +3143,7 @@ namespace ConformU
         /// <param name = "message" > Message to log</param>
         private void LogIssue(string method, string message, string contextMessage)
         {
-            LogMessage(method, TestOutcome.Issue, message, contextMessage);
+            LogMessage(method, MessageLevel.Issue, message, contextMessage);
             issueMessages.Add($"{method} ==> {message}\r\n  Response: {contextMessage}\r\n");
         }
 
@@ -3193,7 +3154,7 @@ namespace ConformU
         /// <param name = "message" > Message to log</param>
         private void LogError(string method, string message, string contextMessage)
         {
-            LogMessage(method, TestOutcome.Error, message, contextMessage);
+            LogMessage(method, MessageLevel.Error, message, contextMessage);
             errorMessages.Add($"{method} ==> {message}\r\n  Response: {contextMessage}\r\n");
         }
 
@@ -3207,7 +3168,7 @@ namespace ConformU
             // Only display Information messages if configured to do so
             if ((settings.AlpacaConfiguration.ProtocolMessageLevel == ProtocolMessageLevel.Information) || (settings.AlpacaConfiguration.ProtocolMessageLevel == ProtocolMessageLevel.All))
             {
-                LogMessage(method, TestOutcome.Info, message, contextMessage);
+                LogMessage(method, MessageLevel.Info, message, contextMessage);
                 informationMessages.Add($"{method} ==> {message} {(string.IsNullOrEmpty(contextMessage) ? "" : $"\r\n  Response: {contextMessage}")}\r\n"); //
             }
         }
@@ -3220,7 +3181,7 @@ namespace ConformU
         private void LogDebug(string method, string message)
         {
             if (settings.Debug)
-                LogMessage(method, TestOutcome.Debug, message, null);
+                LogMessage(method, MessageLevel.Debug, message, null);
         }
 
         /// <summary>
