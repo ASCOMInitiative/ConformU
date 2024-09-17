@@ -50,7 +50,6 @@ namespace ConformU
             }
 
             sb.Append(')');
-            Console.WriteLine(sb.ToString());
             logger.LogMessage("NetworkLogger", sb.ToString());
         }
     }
