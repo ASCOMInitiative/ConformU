@@ -190,7 +190,7 @@
 		<PackageReference Include="Blazorise.TreeView" Version="1.6.1" />
 		<PackageReference Include="jQuery" Version="3.7.1" />
 		<PackageReference Include="Octokit" Version="13.0.1" />
-		<PackageReference Include="Radzen.Blazor" Version="5.1.11" />
+		<PackageReference Include="Radzen.Blazor" Version="5.2.0" />
 		<PackageReference Include="Semver" Version="2.3.0" />
 		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
 	</ItemGroup>
