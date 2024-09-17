@@ -181,7 +181,8 @@ namespace ConformU
             TstPExcepSlewToTargetAsync = 9,
             TstPExcepSyncToCoordinates = 10,
             TstPExcepSyncToTarget = 11,
-            TstPExcepPulseGuide = 12
+            TstPExcepPulseGuide = 12,
+            TstExcepTracking = 13
         }
         // Private Enum SyncType
         // End Enum
@@ -1095,7 +1096,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    LogInfo("DoesRefraction Write",$"Exception while restoring the telescope's original DoesRefraction state: {ex.Message}");
+                    LogInfo("DoesRefraction Write", $"Exception while restoring the telescope's original DoesRefraction state: {ex.Message}");
                     HandleException("DoesRefraction Write", MemberType.Property, Required.Optional, ex, "");
                 }
             }
@@ -2983,6 +2984,27 @@ namespace ConformU
                                             TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepSyncToTarget, "SyncToTarget");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
+                                        }
+
+                                        // Test Tracking behaviour when parked for ITelescopeV4 and later
+                                        if (canSetTracking & IsPlatform7OrLater)
+                                        {
+                                            // Confirm that setting Tracking = true results in a ParkedException
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstExcepTracking, "Tracking = true");
+                                            if (cancellationToken.IsCancellationRequested)
+                                                return;
+
+                                            // Confirm that setting Tracking = false works and doesn't result in an exception
+                                            try
+                                            {
+                                                LogCallToDriver("Park", "About to set Tracking to false");
+                                                telescopeDevice.Tracking=false;
+                                                LogOk("Park", $"Setting Tracking to false when parked does not throw an exception.");
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                HandleException("Park - Tracking=False",MemberType.Property,Required.MustBeImplemented,ex, "Setting Tracking false when parked must be successful for this interface version.");
+                                            }
                                         }
                                     }
                                     else // Scope is not parked - first Park attempt failed
@@ -5456,36 +5478,61 @@ namespace ConformU
                             break;
 
                         case ParkedExceptionType.TstPExcepSlewToTarget:
-                            targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d); LogCallToDriver(
-                                $"Parked:{methodName}",
-                                $"About to set property TargetRightAscension to {targetRa.ToHMS()}");
-                            telescopeDevice.TargetRightAscension = targetRa; LogCallToDriver($"Parked:{methodName}", "About to set property TargetDeclination to 0.0");
-                            telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver($"Parked:{methodName}", "About to call SlewToTarget method");
+                            targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d);
+                            LogCallToDriver($"Parked:{methodName}", $"About to set property TargetRightAscension to {targetRa.ToHMS()}");
+                            telescopeDevice.TargetRightAscension = targetRa;
+                            LogCallToDriver($"Parked:{methodName}", "About to set property TargetDeclination to 0.0");
+                            telescopeDevice.TargetDeclination = 0.0d;
+                            LogCallToDriver($"Parked:{methodName}", "About to call SlewToTarget method");
                             telescopeDevice.SlewToTarget();
                             break;
 
                         case ParkedExceptionType.TstPExcepSlewToTargetAsync:
-                            targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d); LogCallToDriver(
-                                $"Parked:{methodName}", $"About to set property to {targetRa.ToHMS()}");
-                            telescopeDevice.TargetRightAscension = targetRa; LogCallToDriver($"Parked:{methodName}", "About to set property to 0.0");
-                            telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver($"Parked:{methodName}", "About to call method");
+                            targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d);
+                            LogCallToDriver($"Parked:{methodName}", $"About to set property to {targetRa.ToHMS()}");
+                            telescopeDevice.TargetRightAscension = targetRa;
+                            LogCallToDriver($"Parked:{methodName}", "About to set property to 0.0");
+                            telescopeDevice.TargetDeclination = 0.0d;
+                            LogCallToDriver($"Parked:{methodName}", "About to call method");
                             telescopeDevice.SlewToTargetAsync();
                             WaitForSlew($"Parked:{methodName}", "Slewing to target asynchronously");
                             break;
 
                         case ParkedExceptionType.TstPExcepSyncToCoordinates:
-                            targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d); LogCallToDriver(
-                                $"Parked:{methodName}",
-                                $"About to call method, RA: {targetRa.ToHMS()}, Declination: 0.0");
+                            targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d);
+                            LogCallToDriver($"Parked:{methodName}", $"About to call method, RA: {targetRa.ToHMS()}, Declination: 0.0");
                             telescopeDevice.SyncToCoordinates(targetRa, 0.0d);
                             break;
 
                         case ParkedExceptionType.TstPExcepSyncToTarget:
-                            targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d); LogCallToDriver(
-                                $"Parked:{methodName}", $"About to set property to {targetRa.ToHMS()}");
-                            telescopeDevice.TargetRightAscension = targetRa; LogCallToDriver($"Parked:{methodName}", "About to set property to 0.0");
-                            telescopeDevice.TargetDeclination = 0.0d; LogCallToDriver($"Parked:{methodName}", "About to call SyncToTarget method");
+                            targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d);
+                            LogCallToDriver($"Parked:{methodName}", $"About to set property to {targetRa.ToHMS()}");
+                            telescopeDevice.TargetRightAscension = targetRa;
+                            LogCallToDriver($"Parked:{methodName}", "About to set property to 0.0");
+                            telescopeDevice.TargetDeclination = 0.0d;
+                            LogCallToDriver($"Parked:{methodName}", "About to call SyncToTarget method");
                             telescopeDevice.SyncToTarget();
+                            break;
+
+                        case ParkedExceptionType.TstExcepTracking:
+                            LogCallToDriver($"Parked:{methodName}", "About to get Tracking");
+                            bool orginalTrackingState = telescopeDevice.Tracking;
+                            LogCallToDriver($"Parked:{methodName}", "About to set Tracking True");
+                            telescopeDevice.Tracking = true;
+
+                            // If we get here setting Tracking to true did not throw an exception when parked so try to rest the original Tracking state if necessary
+                            if (orginalTrackingState == false) // Tracking was originally false so try to reset it to this state ignoring any errors
+                            {
+                                try
+                                {
+                                    LogCallToDriver($"Parked:{methodName}", "About to set Tracking False");
+                                    telescopeDevice.Tracking = false;
+                                }
+                                catch (Exception)
+                                {
+                                    // Ignore any errors here                                }
+                                }
+                            }
                             break;
 
                         default:
