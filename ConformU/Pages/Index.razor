@@ -26,7 +26,7 @@
 </div>
 
 <h4>Conform Log</h4>
-<RadzenTextArea Id="ConformLog" Style="line-height: 18px; padding-bottom: 0px" Name="_conformState.ScreenLog" @bind-Value=@_conformState.ConformLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
+<RadzenTextArea Id="ConformLog" Style='font-family: "Lucida Console", "Courier New", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px' Name="_conformState.ScreenLog" @bind-Value=@_conformState.ConformLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
 
 <div style="display :@statusVisible">
     <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:20px; margin-right:20px; margin-top:8px" @bind-Value=@statusMessage />

@@ -21,7 +21,7 @@
         <RadzenTextBox Name="TESTSTATUS" Placeholder="" @bind-Value=@statusText ReadOnly=true Style="width:600px;font-weight:bold;margin-right:40px;margin-bottom:10px" />
     </span>
 </div>
-<RadzenTextArea Id="ProtocolLog" Style="line-height: 18px; padding-bottom: 0px" Name="ProtocolLogName" @bind-Value=@conformState.ProtocolLog Rows="@screenLogRows" @bind-Cols=@screenLogColumns ReadOnly=true />
+<RadzenTextArea Id="ProtocolLog" Style='font-family: "Lucida Console", "Courier New", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px' Name="ProtocolLogName" @bind-Value=@conformState.ProtocolLog Rows="@screenLogRows" @bind-Cols=@screenLogColumns ReadOnly=true />
 
 @code
 {
