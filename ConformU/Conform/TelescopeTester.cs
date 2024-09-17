@@ -2997,13 +2997,13 @@ namespace ConformU
                                             // Confirm that setting Tracking = false works and doesn't result in an exception
                                             try
                                             {
-                                                LogCallToDriver("Park", "About to set Tracking to false");
+                                                LogCallToDriver("Parked", "About to set Tracking to false");
                                                 telescopeDevice.Tracking=false;
-                                                LogOk("Park", $"Setting Tracking to false when parked does not throw an exception.");
+                                                LogOk("Parked:Tracking = false", $"Tracking = false was successful when parked.");
                                             }
                                             catch (Exception ex)
                                             {
-                                                HandleException("Park - Tracking=False",MemberType.Property,Required.MustBeImplemented,ex, "Setting Tracking false when parked must be successful for this interface version.");
+                                                HandleException("Parked - Tracking=False",MemberType.Property,Required.MustBeImplemented,ex, "Setting Tracking false when parked must be successful for this interface version.");
                                             }
                                         }
                                     }
