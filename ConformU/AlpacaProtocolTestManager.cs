@@ -1269,6 +1269,7 @@ namespace ConformU
 
                         await PutNoParameters("SetPark", null);
                         await PutNoParameters("Unpark", null);
+                        WaitWhile("Park", () => telescope.AtPark == true, 500, settings.TelescopeMaximumSlewTime, null);
                     }
                     else // Test omitted
                     {
