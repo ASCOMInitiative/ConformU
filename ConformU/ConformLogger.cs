@@ -150,27 +150,6 @@ namespace ConformU
             }
         }
 
-        /// <summary>
-        /// Override this method to force consistent use of the LogMessage method.
-        /// </summary>
-        /// <param name="logLevel"></param>
-        /// <param name="message"></param>
-        public new void Log(ASCOM.Common.Interfaces.LogLevel logLevel, string message)
-        {
-
-            if (logLevel >= base.LoggingLevel)
-            {
-                // Write the message to the console
-                Console.WriteLine($"{logLevel,-TEST_NAME_WIDTH} {message}");
-
-                // Write the message to the log file
-                base.Log(logLevel, $"{string.Empty,-MESSAGE_LEVEL_WIDTH} {message}");
-
-                // Raise the MessaegLogChanged event to Write the message to the screen
-                OnMessageLogChanged($"{logLevel,-TEST_NAME_WIDTH - MESSAGE_LEVEL_WIDTH} {message}");
-            }
-        }
-
         public new void LogMessage(string method, string message)
         {
             // Write the message to the console

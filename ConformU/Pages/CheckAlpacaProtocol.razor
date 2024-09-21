@@ -42,15 +42,6 @@
     string statusText;
     ConformU.Settings settings;
 
-    internal enum TestOutcome
-    {
-        OK,
-        Info,
-        Issue,
-        Error,
-        Debug
-    }
-
     #region Blazor lifetime event handlers
 
     protected override void OnInitialized()
@@ -86,10 +77,10 @@
         await Task.Run(() =>
         {
             LogBlankLine();
-            LogLine($"STOP button pressed... stopping tests");
+            logger?.LogMessage("", $"STOP button pressed... stopping tests");
             LogBlankLine();
             applicationCancellationTokenSource.Cancel();
-            LogDebug("StopTest", $"After cancelling - applicationCancellationToken.IsCancellationRequested: {applicationCancellationToken.IsCancellationRequested}");
+            logger?.LogMessage("StopTest", MessageLevel.Debug, $"After cancelling - applicationCancellationToken.IsCancellationRequested: {applicationCancellationToken.IsCancellationRequested}");
         });
     }
 
@@ -219,88 +210,6 @@
     private void ClearLogScreen()
     {
         conformState.ProtocolLog = "";
-    }
-
-    /// <summary>
-    /// Log a formatted message to the screen and log file
-    ///</summary>
-    ///<param name="method">Calling method name</param>
-    ///    <param name = "message" > Message to log</param>
-    ///    <param name = "padding" > Number of characters to which the message should be right padded</param>
-    private async void LogMessage(string method, TestOutcome outcome, string message, string contextMessage = null)
-    {
-        string outcomeString;
-
-        switch (outcome)
-        {
-            case TestOutcome.OK:
-                outcomeString = "OK";
-                break;
-
-            case TestOutcome.Info:
-                outcomeString = "INFO";
-                break;
-
-            case TestOutcome.Issue:
-                outcomeString = "ISSUE";
-                break;
-
-            case TestOutcome.Error:
-                outcomeString = "ERROR";
-                break;
-
-            case TestOutcome.Debug:
-                outcomeString = "DEBUG";
-                break;
-
-            default:
-                throw new Exception($"Unknown test outcome type: {outcome}");
-        }
-        string methodString = $"{method,-ExtensionMethods.COLUMN_WIDTH}{outcomeString,-ExtensionMethods.OUTCOME_WIDTH}";
-
-        // Write to the logger
-        logger?.LogMessage(methodString, message);
-        if (contextMessage is not null) logger?.LogMessage("", contextMessage);
-
-        // Reformat the text across multiple screen lines if the message does not contain HTML code. If it does contain HTML display as-is.
-        conformState.ProtocolLog = $"{conformState.ProtocolLog}\r\n{methodString}{message.Trim(new char[] { ' ', '\r', '\n' })}";
-
-        // Add the context message if present
-        if (contextMessage is not null)
-        {
-            conformState.ProtocolLog = conformState.ProtocolLog + $"\r\n{new string(' ', ExtensionMethods.COLUMN_WIDTH + ExtensionMethods.OUTCOME_WIDTH)}  Response: {contextMessage}".TrimEnd(new char[] { '\r', '\n' });
-        }
-
-        try
-        {
-            await InvokeAsync(() => { StateHasChanged(); });
-            await JS.InvokeVoidAsync("ScrollToBottom", "ProtocolLog");
-        }
-        catch
-        {
-            // ignored
-        }
-    }
-
-    /// <summary>
-    /// Log a debug message
-    /// </summary>
-    /// <param name="method"> Calling method name</param>
-    ///<param name = "message" > Message to log</param>
-    private void LogDebug(string method, string message)
-    {
-        if (settings.Debug)
-            LogMessage(method, TestOutcome.Debug, message, null);
-    }
-
-    /// <summary>
-    /// Log a text line without additional formatting
-    /// </summary>
-    /// <param name="message"></param>
-    private void LogLine(string message)
-    {
-        logger?.LogMessage(message, "");
-        //screenLog = $"{screenLog}\r\n{message}";
     }
 
     /// <summary>
