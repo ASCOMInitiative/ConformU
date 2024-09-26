@@ -395,8 +395,7 @@ namespace ConformU
                                 }
                                 catch (Exception ex)
                                 {
-                                    LogIssue("GetSwitchDescription ",
-                                        $"Mandatory parameter threw an exception: {ex.Message}");
+                                    LogIssue("GetSwitchDescription ", $"Mandatory parameter threw an exception: {ex.Message}");
                                 }
 
                                 // Read switch minimum value
@@ -609,6 +608,17 @@ namespace ConformU
                                 // Now try to write to see which of these methods are available
                                 if (settings.SwitchEnableSet)
                                 {
+                                    // Optional method
+                                    // Check whether the switch name can be set by setting it to the current value
+                                    try
+                                    {
+                                        TimeMethod($"SetSwitchName ({i})", () => switchDevice.SetSwitchName(i, switchName), TargetTime.Standard);
+                                        LogOk($"SetSwitchName", $"  Successfully set switch {i} name to its current value: {switchName}.");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        HandleException($"SetSwitchName ({i})", MemberType.Method, Required.Optional, ex, "");
+                                    }
 
                                     // Try to set the two boolean values through SetSwitch
                                     double getSwitchValue;
@@ -997,9 +1007,9 @@ namespace ConformU
                                             {
                                                 bool stateChangeComplete = TimeFunc<bool>($"StateChangeComplete ({i})", () => switchDevice.StateChangeComplete(i), TargetTime.Fast);
                                                 if (stateChangeComplete)
-                                                    LogOk($"StateChangeComplete", $"True as expected");
+                                                    LogOk($"StateChangeComplete", $"  True as expected");
                                                 else
-                                                    LogIssue($"StateChangeComplete", $"False but no async operation has been started");
+                                                    LogIssue($"StateChangeComplete", $"  False but no async operation has been started");
                                             }
                                             catch (Exception ex)
                                             {
