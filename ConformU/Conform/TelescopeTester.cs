@@ -6282,6 +6282,13 @@ namespace ConformU
                                                     LogOk(testName, $"The mount is not capable of concurrent guiding in two directions, it correctly threw an InvalidOperationException: {ex.Message}");
                                                     LogDebug(testName, ex.ToString());
                                                 }
+                                                catch (Exception ex)
+                                                {
+                                                    HandleException("PulseGuide - Dual Axis", MemberType.Method, Required.MustBeImplemented, ex, $"received a {ex.GetType().Name} exception: {ex.Message}");
+                                                    LogInfo("PulseGuide - Dual Axis", $"If the mount is not capable of dual axis auto-guiding it should throw " +
+                                                        $"an InvalidOperationException when the second PulseGuide is started.");
+                                                    LogDebug("PulseGuide - Dual Axis", ex.ToString());
+                                                }
 
                                                 LogCallToDriver(testName, "About to get IsPulseGuiding property multiple times");
                                                 WaitWhile("Pulse guiding East and North", () => telescopeDevice.IsPulseGuiding, SLEEP_TIME, PULSEGUIDE_TIMEOUT_TIME);
@@ -6289,26 +6296,27 @@ namespace ConformU
                                                 // Check outcome of pulse guide East and North
                                                 if (!telescopeDevice.IsPulseGuiding)
                                                 {
-                                                    LogOk(testName, "Asynchronous dual axis pulse guide East and North found OK");
+                                                    LogOk(testName, dualAxisGuiding ? "Asynchronous dual axis pulse guide East and North found OK" : 
+                                                        "Single axis guide completed OK because the mount can not guide both axes simultaneously.");
                                                 }
                                                 else
                                                 {
-                                                    LogIssue(testName, $"Asynchronous dual axis pulse guide East and North expected but IsPulseGuiding is still TRUE {PULSEGUIDE_TIMEOUT_TIME} seconds beyond expected time");
+                                                    LogIssue(testName, $"Asynchronous dual axis pulse guide East and North expected, but IsPulseGuiding is still TRUE {PULSEGUIDE_TIMEOUT_TIME} seconds beyond expected time");
                                                 }
                                             }
                                             else
                                             {
-                                                LogIssue(testName, $"Asynchronous pulse guide North expected but IsPulseGuiding is still TRUE {PULSEGUIDE_TIMEOUT_TIME} seconds beyond expected time");
+                                                LogIssue(testName, $"Asynchronous pulse guide North expected, but IsPulseGuiding is still TRUE {PULSEGUIDE_TIMEOUT_TIME} seconds beyond expected time");
                                             }
                                         }
                                         else
                                         {
-                                            LogIssue(testName, $"Asynchronous pulse guide East expected but IsPulseGuiding is still TRUE {PULSEGUIDE_TIMEOUT_TIME} seconds beyond expected time");
+                                            LogIssue(testName, $"Asynchronous pulse guide East expected, but IsPulseGuiding is still TRUE {PULSEGUIDE_TIMEOUT_TIME} seconds beyond expected time");
                                         }
                                     }
                                     else
                                     {
-                                        LogIssue(testName, "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE");
+                                        LogIssue(testName, "Asynchronous pulse guide expected, but IsPulseGuiding returned FALSE");
                                     }
                                 }
                                 else // Took longer than the synchronous limit time so treat as synchronous
