@@ -2998,12 +2998,12 @@ namespace ConformU
                                             try
                                             {
                                                 LogCallToDriver("Parked", "About to set Tracking to false");
-                                                telescopeDevice.Tracking=false;
+                                                telescopeDevice.Tracking = false;
                                                 LogOk("Parked:Tracking = false", $"Tracking = false was successful when parked.");
                                             }
                                             catch (Exception ex)
                                             {
-                                                HandleException("Parked - Tracking=False",MemberType.Property,Required.MustBeImplemented,ex, "Setting Tracking false when parked must be successful for this interface version.");
+                                                HandleException("Parked - Tracking=False", MemberType.Property, Required.MustBeImplemented, ex, "Setting Tracking false when parked must be successful for this interface version.");
                                             }
                                         }
                                     }
@@ -6218,6 +6218,13 @@ namespace ConformU
                             break;
 
                         case OptionalMethodType.PulseGuide:
+                            // Ensure that tracking is true for this test
+                            if (canSetTracking)
+                            {
+                                LogCallToDriver(testName, "About to set Tracking property to true");
+                                telescopeDevice.Tracking = true;
+                            }
+
                             LogCallToDriver(testName, "About to get IsPulseGuiding property");
                             if (telescopeDevice.IsPulseGuiding) // IsPulseGuiding is true before we've started so this is an error and voids a real test
                             {
