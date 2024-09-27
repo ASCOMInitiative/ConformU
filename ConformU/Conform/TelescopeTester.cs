@@ -6246,17 +6246,64 @@ namespace ConformU
                                     if (telescopeDevice.IsPulseGuiding)
                                     {
                                         LogCallToDriver(testName, "About to get IsPulseGuiding property multiple times");
-                                        WaitWhile("Pulse guiding Eastwards", () => telescopeDevice.IsPulseGuiding, SLEEP_TIME, PULSEGUIDE_TIMEOUT_TIME);
+                                        WaitWhile("Pulse guiding East", () => telescopeDevice.IsPulseGuiding, SLEEP_TIME, PULSEGUIDE_TIMEOUT_TIME);
 
                                         LogCallToDriver(testName, "About to get IsPulseGuiding property");
                                         if (!telescopeDevice.IsPulseGuiding)
                                         {
-                                            LogOk(testName, "Asynchronous pulse guide found OK");
+                                            LogOk(testName, "Asynchronous single axis pulse guide East found OK");
                                             LogDebug(testName, $"IsPulseGuiding = True duration: {DateTime.Now.Subtract(startTime).TotalMilliseconds} milliseconds");
+
+                                            // Successfully tested an asynchronous guide to the East, now test to the North.
+                                            TimeMethod($"{testName} {GuideDirection.North} {PULSEGUIDE_MOVEMENT_TIME}s", () => telescopeDevice.PulseGuide(GuideDirection.North, PULSEGUIDE_MOVEMENT_TIME * 1000), TargetTime.Standard); // Start a 2 second pulse
+                                            LogCallToDriver(testName, "About to get IsPulseGuiding property multiple times");
+                                            WaitWhile("Pulse guiding North", () => telescopeDevice.IsPulseGuiding, SLEEP_TIME, PULSEGUIDE_TIMEOUT_TIME);
+
+                                            // Check outcome of pulse guide north
+                                            if (!telescopeDevice.IsPulseGuiding)
+                                            {
+                                                LogOk(testName, "Asynchronous single axis pulse guide North found OK");
+                                                LogDebug(testName, $"IsPulseGuiding = True duration: {DateTime.Now.Subtract(startTime).TotalMilliseconds} milliseconds");
+
+                                                // Successfully tested asynchronous guides to the East and North individually, now test whether they can run concurrently
+
+                                                LogCallToDriver(testName, "About to call PulseGuide East");
+                                                telescopeDevice.PulseGuide(GuideDirection.East, PULSEGUIDE_MOVEMENT_TIME * 1000); // Start a 2 second pulse guide East
+
+                                                bool dualAxisGuiding = false; // Flag indicating whether the mount supports dual axis guiding
+                                                try
+                                                {
+                                                    LogCallToDriver(testName, "About to call PulseGuide North");
+                                                    telescopeDevice.PulseGuide(GuideDirection.North, PULSEGUIDE_MOVEMENT_TIME * 1000); // Start a 2 second pulse guide North
+                                                    dualAxisGuiding = true;
+                                                }
+                                                catch (ASCOM.InvalidOperationException ex)
+                                                {
+                                                    LogOk(testName, $"The mount is not capable of concurrent guiding in two directions, it correctly threw an InvalidOperationException: {ex.Message}");
+                                                    LogDebug(testName, ex.ToString());
+                                                }
+
+                                                LogCallToDriver(testName, "About to get IsPulseGuiding property multiple times");
+                                                WaitWhile("Pulse guiding East and North", () => telescopeDevice.IsPulseGuiding, SLEEP_TIME, PULSEGUIDE_TIMEOUT_TIME);
+
+                                                // Check outcome of pulse guide East and North
+                                                if (!telescopeDevice.IsPulseGuiding)
+                                                {
+                                                    LogOk(testName, "Asynchronous dual axis pulse guide East and North found OK");
+                                                }
+                                                else
+                                                {
+                                                    LogIssue(testName, $"Asynchronous dual axis pulse guide East and North expected but IsPulseGuiding is still TRUE {PULSEGUIDE_TIMEOUT_TIME} seconds beyond expected time");
+                                                }
+                                            }
+                                            else
+                                            {
+                                                LogIssue(testName, $"Asynchronous pulse guide North expected but IsPulseGuiding is still TRUE {PULSEGUIDE_TIMEOUT_TIME} seconds beyond expected time");
+                                            }
                                         }
                                         else
                                         {
-                                            LogIssue(testName, $"Asynchronous pulse guide expected but IsPulseGuiding is still TRUE {PULSEGUIDE_TIMEOUT_TIME} seconds beyond expected time");
+                                            LogIssue(testName, $"Asynchronous pulse guide East expected but IsPulseGuiding is still TRUE {PULSEGUIDE_TIMEOUT_TIME} seconds beyond expected time");
                                         }
                                     }
                                     else
