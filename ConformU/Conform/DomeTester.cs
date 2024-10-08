@@ -657,236 +657,233 @@ namespace ConformU
         {
             try
             {
-                TimeMethod(pName, () =>
+                switch (pType)
                 {
-                    switch (pType)
-                    {
-                        case DomePropertyMethod.CanFindHome:
-                            LogCallToDriver(pName, "About to get CanFindHome property");
-                            canFindHome = TimeFunc(pName, () => domeDevice.CanFindHome, TargetTime.Fast);
-                            LogOk(pName, canFindHome.ToString());
-                            break;
+                    case DomePropertyMethod.CanFindHome:
+                        LogCallToDriver(pName, "About to get CanFindHome property");
+                        canFindHome = TimeFunc(pName, () => domeDevice.CanFindHome, TargetTime.Fast);
+                        LogOk(pName, canFindHome.ToString());
+                        break;
 
-                        case DomePropertyMethod.CanPark:
-                            LogCallToDriver(pName, "About to get CanPark property");
-                            canPark = domeDevice.CanPark;
-                            LogOk(pName, canPark.ToString());
-                            break;
+                    case DomePropertyMethod.CanPark:
+                        LogCallToDriver(pName, "About to get CanPark property");
+                        canPark = domeDevice.CanPark;
+                        LogOk(pName, canPark.ToString());
+                        break;
 
-                        case DomePropertyMethod.CanSetAltitude:
-                            LogCallToDriver(pName, "About to get CanSetAltitude property");
-                            canSetAltitude = domeDevice.CanSetAltitude;
-                            LogOk(pName, canSetAltitude.ToString());
-                            break;
+                    case DomePropertyMethod.CanSetAltitude:
+                        LogCallToDriver(pName, "About to get CanSetAltitude property");
+                        canSetAltitude = domeDevice.CanSetAltitude;
+                        LogOk(pName, canSetAltitude.ToString());
+                        break;
 
-                        case DomePropertyMethod.CanSetAzimuth:
-                            LogCallToDriver(pName, "About to get CanSetAzimuth property");
-                            canSetAzimuth = domeDevice.CanSetAzimuth;
-                            LogOk(pName, canSetAzimuth.ToString());
-                            break;
+                    case DomePropertyMethod.CanSetAzimuth:
+                        LogCallToDriver(pName, "About to get CanSetAzimuth property");
+                        canSetAzimuth = domeDevice.CanSetAzimuth;
+                        LogOk(pName, canSetAzimuth.ToString());
+                        break;
 
-                        case DomePropertyMethod.CanSetPark:
-                            LogCallToDriver(pName, "About to get CanSetPark property");
-                            canSetPark = domeDevice.CanSetPark;
-                            LogOk(pName, canSetPark.ToString());
-                            break;
+                    case DomePropertyMethod.CanSetPark:
+                        LogCallToDriver(pName, "About to get CanSetPark property");
+                        canSetPark = domeDevice.CanSetPark;
+                        LogOk(pName, canSetPark.ToString());
+                        break;
 
-                        case DomePropertyMethod.CanSetShutter:
-                            LogCallToDriver(pName, "About to get CanSetShutter property");
-                            canSetShutter = domeDevice.CanSetShutter;
-                            LogOk(pName, canSetShutter.ToString());
-                            break;
+                    case DomePropertyMethod.CanSetShutter:
+                        LogCallToDriver(pName, "About to get CanSetShutter property");
+                        canSetShutter = domeDevice.CanSetShutter;
+                        LogOk(pName, canSetShutter.ToString());
+                        break;
 
-                        case DomePropertyMethod.CanSlave:
-                            LogCallToDriver(pName, "About to get CanSlave property");
-                            canSlave = domeDevice.CanSlave;
-                            LogOk(pName, canSlave.ToString());
-                            break;
+                    case DomePropertyMethod.CanSlave:
+                        LogCallToDriver(pName, "About to get CanSlave property");
+                        canSlave = domeDevice.CanSlave;
+                        LogOk(pName, canSlave.ToString());
+                        break;
 
-                        case DomePropertyMethod.CanSyncAzimuth:
-                            LogCallToDriver(pName, "About to get CanSyncAzimuth property");
-                            canSyncAzimuth = domeDevice.CanSyncAzimuth;
-                            LogOk(pName, canSyncAzimuth.ToString());
-                            break;
+                    case DomePropertyMethod.CanSyncAzimuth:
+                        LogCallToDriver(pName, "About to get CanSyncAzimuth property");
+                        canSyncAzimuth = domeDevice.CanSyncAzimuth;
+                        LogOk(pName, canSyncAzimuth.ToString());
+                        break;
 
-                        case DomePropertyMethod.Connected:
-                            LogCallToDriver(pName, "About to get Connected property");
-                            connected = domeDevice.Connected;
-                            LogOk(pName, connected.ToString());
-                            break;
+                    case DomePropertyMethod.Connected:
+                        LogCallToDriver(pName, "About to get Connected property");
+                        connected = domeDevice.Connected;
+                        LogOk(pName, connected.ToString());
+                        break;
 
-                        case DomePropertyMethod.Description:
-                            LogCallToDriver(pName, "About to get Description property");
-                            description = domeDevice.Description;
-                            LogOk(pName, description.ToString());
-                            break;
+                    case DomePropertyMethod.Description:
+                        LogCallToDriver(pName, "About to get Description property");
+                        description = domeDevice.Description;
+                        LogOk(pName, description.ToString());
+                        break;
 
-                        case DomePropertyMethod.DriverInfo:
-                            LogCallToDriver(pName, "About to get DriverInfo property");
-                            driverInfo = domeDevice.DriverInfo;
-                            LogOk(pName, driverInfo.ToString());
-                            break;
+                    case DomePropertyMethod.DriverInfo:
+                        LogCallToDriver(pName, "About to get DriverInfo property");
+                        driverInfo = domeDevice.DriverInfo;
+                        LogOk(pName, driverInfo.ToString());
+                        break;
 
-                        case DomePropertyMethod.InterfaceVersion:
-                            LogCallToDriver(pName, "About to get InterfaceVersion property");
-                            interfaceVersion = domeDevice.InterfaceVersion;
-                            LogOk(pName, interfaceVersion.ToString());
-                            break;
+                    case DomePropertyMethod.InterfaceVersion:
+                        LogCallToDriver(pName, "About to get InterfaceVersion property");
+                        interfaceVersion = domeDevice.InterfaceVersion;
+                        LogOk(pName, interfaceVersion.ToString());
+                        break;
 
-                        case DomePropertyMethod.Name:
-                            LogCallToDriver(pName, "About to get Name property");
-                            name = domeDevice.Name;
-                            LogOk(pName, name.ToString());
-                            break;
+                    case DomePropertyMethod.Name:
+                        LogCallToDriver(pName, "About to get Name property");
+                        name = domeDevice.Name;
+                        LogOk(pName, name.ToString());
+                        break;
 
-                        case DomePropertyMethod.SlavedRead:
-                            canReadSlaved = false;
+                    case DomePropertyMethod.SlavedRead:
+                        canReadSlaved = false;
+                        LogCallToDriver(pName, "About to get Slaved property");
+                        slaved = domeDevice.Slaved;
+                        canReadSlaved = true;
+                        LogOk(pName, slaved.ToString());
+                        break;
+
+                    case DomePropertyMethod.Slewing:
+                        canReadSlewing = false;
+                        LogCallToDriver(pName, "About to get Slewing property");
+                        slewing = domeDevice.Slewing;
+                        canReadSlewing = true;
+                        LogOk(pName, slewing.ToString());
+                        break;
+
+                    case DomePropertyMethod.AbortSlew:
+                        LogCallToDriver(pName, "About to call AbortSlew method");
+                        domeDevice.AbortSlew();
+
+                        // Confirm that slaved is false
+                        if (canReadSlaved)
+                        {
                             LogCallToDriver(pName, "About to get Slaved property");
-                            slaved = domeDevice.Slaved;
-                            canReadSlaved = true;
-                            LogOk(pName, slaved.ToString());
-                            break;
-
-                        case DomePropertyMethod.Slewing:
-                            canReadSlewing = false;
-                            LogCallToDriver(pName, "About to get Slewing property");
-                            slewing = domeDevice.Slewing;
-                            canReadSlewing = true;
-                            LogOk(pName, slewing.ToString());
-                            break;
-
-                        case DomePropertyMethod.AbortSlew:
-                            LogCallToDriver(pName, "About to call AbortSlew method");
-                            domeDevice.AbortSlew();
-
-                            // Confirm that slaved is false
-                            if (canReadSlaved)
-                            {
-                                LogCallToDriver(pName, "About to get Slaved property");
-                                if (domeDevice.Slaved)
-                                    LogIssue("AbortSlew", "Slaved property Is true after AbortSlew");
-                                else
-                                    LogOk("AbortSlew", "AbortSlew command issued successfully");
-                            }
+                            if (domeDevice.Slaved)
+                                LogIssue("AbortSlew", "Slaved property Is true after AbortSlew");
                             else
-                                LogOk("AbortSlew", "Can't read Slaved property AbortSlew command was successful");
+                                LogOk("AbortSlew", "AbortSlew command issued successfully");
+                        }
+                        else
+                            LogOk("AbortSlew", "Can't read Slaved property AbortSlew command was successful");
 
-                            // Test aborting an azimuth slew
-                            string abortTestName = "AbortSlew-Azimuth";
-                            if (canSlewToAzimuth & canReadSlewing) // Can read Slewing and can slew to azimuth
+                        // Test aborting an azimuth slew
+                        string abortTestName = "AbortSlew-Azimuth";
+                        if (canSlewToAzimuth & canReadSlewing) // Can read Slewing and can slew to azimuth
+                        {
+                            // Slew to start position
+                            LogDebug(abortTestName, "Slewing azimuth to test start position 45 degrees...");
+                            domeDevice.SlewToAzimuth(45.0);
+                            DomeWaitForSlew(settings.DomeAzimuthMovementTimeout, () => $"{domeDevice.Azimuth:000} / {45.0:000} degrees");
+                            if (cancellationToken.IsCancellationRequested) return;
+
+                            // Start slew to new position 180 degrees away
+                            LogDebug(abortTestName, "Starting azimuth slew to 225 degrees...");
+                            domeDevice.SlewToAzimuth(225.0);
+
+                            // Wait for a few seconds
+                            WaitFor(3000);
+
+                            // Validate that the dome is slewing
+                            if (ValidateSlewing(abortTestName, true)) // Dome is slewing
                             {
-                                // Slew to start position
-                                LogDebug(abortTestName, "Slewing azimuth to test start position 45 degrees...");
-                                domeDevice.SlewToAzimuth(45.0);
-                                DomeWaitForSlew(settings.DomeAzimuthMovementTimeout, () => $"{domeDevice.Azimuth:000} / {45.0:000} degrees");
-                                if (cancellationToken.IsCancellationRequested) return;
-
-                                // Start slew to new position 180 degrees away
-                                LogDebug(abortTestName, "Starting azimuth slew to 225 degrees...");
-                                domeDevice.SlewToAzimuth(225.0);
-
-                                // Wait for a few seconds
-                                WaitFor(3000);
-
-                                // Validate that the dome is slewing
-                                if (ValidateSlewing(abortTestName, true)) // Dome is slewing
+                                // Now try to end the slew, waiting up to 30 seconds for this to happen
+                                LogDebug(abortTestName, "Aborting azimuth slew...");
+                                Stopwatch sw = Stopwatch.StartNew();
+                                TimeMethod(abortTestName, () => AbortSlew(abortTestName), TargetTime.Standard);
+                                try
                                 {
-                                    // Now try to end the slew, waiting up to 30 seconds for this to happen
-                                    LogDebug(abortTestName, "Aborting azimuth slew...");
-                                    Stopwatch sw = Stopwatch.StartNew();
-                                    TimeMethod(abortTestName, () => AbortSlew(abortTestName), TargetTime.Standard);
-                                    try
-                                    {
-                                        // Wait for the mount to report that it is no longer slewing or for the wait to time out
-                                        LogCallToDriver(abortTestName, $"About to call Slewing repeatedly...");
-                                        WaitWhile("Waiting for slew to stop", () => domeDevice.Slewing == true, 500, ABORT_SLEW_WAIT_TIME_SECONDS);
-                                        LogOk(abortTestName, $"AbortSlew stopped the mount from slewing in {sw.Elapsed.TotalSeconds:0.0} seconds.");
-                                    }
-                                    catch (TimeoutException)
-                                    {
-                                        LogIssue(abortTestName, $"The mount still reports Slewing as TRUE {ABORT_SLEW_WAIT_TIME_SECONDS} seconds after AbortSlew returned.");
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        LogIssue(abortTestName, $"The mount reported an exception while waiting for Slewing to become false after AbortSlew: {ex.Message}");
-                                        LogDebug(abortTestName, ex.ToString());
-                                    }
-                                    finally
-                                    {
-                                        sw.Stop();
-                                    }
+                                    // Wait for the mount to report that it is no longer slewing or for the wait to time out
+                                    LogCallToDriver(abortTestName, $"About to call Slewing repeatedly...");
+                                    WaitWhile("Waiting for slew to stop", () => domeDevice.Slewing == true, 500, ABORT_SLEW_WAIT_TIME_SECONDS);
+                                    LogOk(abortTestName, $"AbortSlew stopped the mount from slewing in {sw.Elapsed.TotalSeconds:0.0} seconds.");
                                 }
-                                else // Dome reports that it is not slewing
+                                catch (TimeoutException)
                                 {
-                                    LogIssue(abortTestName, $"The dome reported that it was not slewing when the slew was expected to be underway. This issue can be raised if the slew happened very quickly (under 3 seconds).");
+                                    LogIssue(abortTestName, $"The mount still reports Slewing as TRUE {ABORT_SLEW_WAIT_TIME_SECONDS} seconds after AbortSlew returned.");
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogIssue(abortTestName, $"The mount reported an exception while waiting for Slewing to become false after AbortSlew: {ex.Message}");
+                                    LogDebug(abortTestName, ex.ToString());
+                                }
+                                finally
+                                {
+                                    sw.Stop();
                                 }
                             }
-                            else // Cannot read Slewing or cannot slew to azimuth
+                            else // Dome reports that it is not slewing
                             {
-                                LogInfo(abortTestName, $"Aborting SlewToAzimuth test skipped because the driver either cannot slew to azimuth or doesn't have a functioning Slewing property.");
+                                LogIssue(abortTestName, $"The dome reported that it was not slewing when the slew was expected to be underway. This issue can be raised if the slew happened very quickly (under 3 seconds).");
                             }
+                        }
+                        else // Cannot read Slewing or cannot slew to azimuth
+                        {
+                            LogInfo(abortTestName, $"Aborting SlewToAzimuth test skipped because the driver either cannot slew to azimuth or doesn't have a functioning Slewing property.");
+                        }
 
-                            // Test aborting an altitude slew
-                            abortTestName= "AbortSlew-Altitude";
-                            if (canSlewToAltitude & canReadSlewing) // Can read Slewing and can slew to altitude
+                        // Test aborting an altitude slew
+                        abortTestName = "AbortSlew-Altitude";
+                        if (canSlewToAltitude & canReadSlewing) // Can read Slewing and can slew to altitude
+                        {
+                            // Slew to start position
+                            LogDebug(abortTestName, "Slewing altitude to test start position 10 degrees...");
+                            domeDevice.SlewToAltitude(10.0);
+                            DomeWaitForSlew(settings.DomeAzimuthMovementTimeout, () => $"{domeDevice.Altitude:000} / {10.0:000} degrees");
+                            if (cancellationToken.IsCancellationRequested) return;
+
+                            // Start slew to new position 70 degrees away
+                            LogDebug(abortTestName, "Starting altitude slew to 80 degrees...");
+                            domeDevice.SlewToAltitude(80.0);
+
+                            // Wait for one second
+                            WaitFor(1000);
+
+                            // Validate that the dome is slewing
+                            if (ValidateSlewing(abortTestName, true)) // Dome is slewing
                             {
-                                // Slew to start position
-                                LogDebug(abortTestName, "Slewing altitude to test start position 10 degrees...");
-                                domeDevice.SlewToAltitude(10.0);
-                                DomeWaitForSlew(settings.DomeAzimuthMovementTimeout, () => $"{domeDevice.Altitude:000} / {10.0:000} degrees");
-                                if (cancellationToken.IsCancellationRequested) return;
-
-                                // Start slew to new position 70 degrees away
-                                LogDebug(abortTestName, "Starting altitude slew to 80 degrees...");
-                                domeDevice.SlewToAltitude(80.0);
-
-                                // Wait for one second
-                                WaitFor(1000);
-
-                                // Validate that the dome is slewing
-                                if (ValidateSlewing(abortTestName, true)) // Dome is slewing
+                                // Now try to end the slew, waiting up to 30 seconds for this to happen
+                                LogDebug(abortTestName, "Aborting altitude slew...");
+                                Stopwatch sw = Stopwatch.StartNew();
+                                TimeMethod(abortTestName, () => AbortSlew(abortTestName), TargetTime.Standard);
+                                try
                                 {
-                                    // Now try to end the slew, waiting up to 30 seconds for this to happen
-                                    LogDebug(abortTestName, "Aborting altitude slew...");
-                                    Stopwatch sw = Stopwatch.StartNew();
-                                    TimeMethod(abortTestName, () => AbortSlew(abortTestName), TargetTime.Standard);
-                                    try
-                                    {
-                                        // Wait for the mount to report that it is no longer slewing or for the wait to time out
-                                        LogCallToDriver(abortTestName, $"About to call Slewing repeatedly...");
-                                        WaitWhile("Waiting for slew to stop", () => domeDevice.Slewing == true, 500, ABORT_SLEW_WAIT_TIME_SECONDS);
-                                        LogOk(abortTestName, $"AbortSlew stopped the mount from slewing in {sw.Elapsed.TotalSeconds:0.0} seconds.");
-                                    }
-                                    catch (TimeoutException)
-                                    {
-                                        LogIssue(abortTestName, $"The mount still reports Slewing as TRUE {ABORT_SLEW_WAIT_TIME_SECONDS} seconds after AbortSlew returned.");
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        LogIssue(abortTestName, $"The mount reported an exception while waiting for Slewing to become false after AbortSlew: {ex.Message}");
-                                        LogDebug(abortTestName, ex.ToString());
-                                    }
-                                    finally
-                                    {
-                                        sw.Stop();
-                                    }
+                                    // Wait for the mount to report that it is no longer slewing or for the wait to time out
+                                    LogCallToDriver(abortTestName, $"About to call Slewing repeatedly...");
+                                    WaitWhile("Waiting for slew to stop", () => domeDevice.Slewing == true, 500, ABORT_SLEW_WAIT_TIME_SECONDS);
+                                    LogOk(abortTestName, $"AbortSlew stopped the mount from slewing in {sw.Elapsed.TotalSeconds:0.0} seconds.");
                                 }
-                                else // Dome reports that it is not slewing
+                                catch (TimeoutException)
                                 {
-                                    LogIssue(abortTestName, $"The dome reported that it was not slewing when the slew was expected to be underway. This issue can be raised if the slew happened very quickly (under 3 seconds).");
+                                    LogIssue(abortTestName, $"The mount still reports Slewing as TRUE {ABORT_SLEW_WAIT_TIME_SECONDS} seconds after AbortSlew returned.");
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogIssue(abortTestName, $"The mount reported an exception while waiting for Slewing to become false after AbortSlew: {ex.Message}");
+                                    LogDebug(abortTestName, ex.ToString());
+                                }
+                                finally
+                                {
+                                    sw.Stop();
                                 }
                             }
-                            else // Cannot read Slewing or cannot slew to altitude
+                            else // Dome reports that it is not slewing
                             {
-                                LogInfo(abortTestName, $"Aborting SlewToAltitude test skipped because the driver either cannot slew to altitude or doesn't have a functioning Slewing property.");
+                                LogIssue(abortTestName, $"The dome reported that it was not slewing when the slew was expected to be underway. This issue can be raised if the slew happened very quickly (under 3 seconds).");
                             }
-                            break;
+                        }
+                        else // Cannot read Slewing or cannot slew to altitude
+                        {
+                            LogInfo(abortTestName, $"Aborting SlewToAltitude test skipped because the driver either cannot slew to altitude or doesn't have a functioning Slewing property.");
+                        }
+                        break;
 
-                        default:
-                            LogIssue(pName, $"DomeMandatoryTest: Unknown test type {pType}");
-                            break;
-                    }
-                }, TargetTime.Fast);
+                    default:
+                        LogIssue(pName, $"DomeMandatoryTest: Unknown test type {pType}");
+                        break;
+                }
             }
             catch (Exception ex)
             {
