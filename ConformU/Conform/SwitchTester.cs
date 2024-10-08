@@ -456,7 +456,8 @@ namespace ConformU
                                 // Read switch step value
                                 try
                                 {
-                                    SetAction("Getting switch step size"); LogCallToDriver("SwitchStep", $"  About to get switch {i} step size");
+                                    SetAction("Getting switch step size");
+                                    LogCallToDriver("SwitchStep", $"  About to get switch {i} step size");
                                     switchStep = TimeFunc<double>($"SwitchStep ({i})", () => switchDevice.SwitchStep(i), TargetTime.Fast);
                                     LogOk("SwitchStep ", $"  Step size: {switchStep}");
 
@@ -576,7 +577,8 @@ namespace ConformU
                                 // Access GetSwitch and record the outcome
                                 try
                                 {
-                                    SetAction($"GetSwitch"); LogCallToDriver("GetSwitch", $"  About to call GetSwitch({i}) method");
+                                    SetAction($"GetSwitch");
+                                    LogCallToDriver("GetSwitch", $"  About to call GetSwitch({i}) method");
                                     getSwitchOriginal = TimeFunc<bool>($"GetSwitch ({i})", () => switchDevice.GetSwitch(i), TargetTime.Fast);
                                     WaitForReadDelay("GetSwitch");
 
@@ -593,7 +595,8 @@ namespace ConformU
                                 bool getSwitchValueOk;
                                 try
                                 {
-                                    SetAction($"GetSwitchValue"); LogCallToDriver("GetSwitchValue", $"  About to call GetSwitchValue({i}) method");
+                                    SetAction($"GetSwitchValue");
+                                    LogCallToDriver("GetSwitchValue", $"  About to call GetSwitchValue({i}) method");
                                     getSwitchValueOriginal = TimeFunc<double>($"MinSwitchValue ({i})", () => switchDevice.GetSwitchValue(i), TargetTime.Fast);
                                     WaitForReadDelay("GetSwitchValue");
                                     getSwitchValueOk = true;
@@ -1702,7 +1705,8 @@ namespace ConformU
                         LogCallToDriver("SetSwitchValue", $"  About to call SetSwitchValue({i}, {testValue2}), attempting to set an intermediate value");
                         SetAction($"SetSwitchValue {testValue2}");
                         switchDevice.SetSwitchValue((short)i, testValue2); // Set the required switch value
-                        WaitForWriteDelay($"SetSwitchValue {testValue2}"); LogCallToDriver("SetSwitchValue", $"  About to call GetSwitchValue({i})");
+                        WaitForWriteDelay($"SetSwitchValue {testValue2}");
+                        LogCallToDriver("SetSwitchValue", $"  About to call GetSwitchValue({i})");
                         SetAction("GetSwitchValue");
                         double lSwitchValue = switchDevice.GetSwitchValue((short)i);
                         WaitForReadDelay("GetSwitchValue");

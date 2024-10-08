@@ -940,7 +940,8 @@ namespace ConformU
             CameraPropertyTestInteger(CamPropertyType.StartX, "StartX Read", 0, cameraXSize - 1); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyWriteTest(CamPropertyType.StartX, "StartX", System.Convert.ToInt32(cameraXSize / (double)2));
             CameraPropertyTestInteger(CamPropertyType.StartY, "StartY Read", 0, cameraYSize - 1); if (cancellationToken.IsCancellationRequested) return;
-            CameraPropertyWriteTest(CamPropertyType.StartY, "StartY", System.Convert.ToInt32(cameraYSize / (double)2)); LogCallToDriver("ConformanceCheck", "About to get InterfaceVersion");
+            CameraPropertyWriteTest(CamPropertyType.StartY, "StartY", System.Convert.ToInt32(cameraYSize / (double)2));
+            LogCallToDriver("ConformanceCheck", "About to get InterfaceVersion");
             if (camera.InterfaceVersion > 1)
             {
                 // SensorType - Optional
@@ -1840,13 +1841,20 @@ namespace ConformU
             if (mCanPulseGuide)
                 CameraPerformanceTest(CameraPerformance.IsPulseGuiding, "IsPulseGuiding");
             SetAction("Exposure for ImageArray Test");
-            SetStatus("Start"); LogCallToDriver("ConformanceCheck", "About to set BinX");
-            camera.BinX = 1; LogCallToDriver("ConformanceCheck", "About to set BinY");
-            camera.BinY = 1; LogCallToDriver("ConformanceCheck", "About to set StartX");
-            camera.StartX = 0; LogCallToDriver("ConformanceCheck", "About to set StartY");
-            camera.StartY = 0; LogCallToDriver("ConformanceCheck", "About to set MaxBinX");
-            camera.NumX = camera.MaxBinX; LogCallToDriver("ConformanceCheck", "About to set MaxBinY");
-            camera.NumY = camera.MaxBinY; LogCallToDriver("ConformanceCheck", "About to call StartExposure");
+            SetStatus("Start");
+            LogCallToDriver("ConformanceCheck", "About to set BinX");
+            camera.BinX = 1;
+            LogCallToDriver("ConformanceCheck", "About to set BinY");
+            camera.BinY = 1;
+            LogCallToDriver("ConformanceCheck", "About to set StartX");
+            camera.StartX = 0;
+            LogCallToDriver("ConformanceCheck", "About to set StartY");
+            camera.StartY = 0;
+            LogCallToDriver("ConformanceCheck", "About to set MaxBinX");
+            camera.NumX = camera.MaxBinX;
+            LogCallToDriver("ConformanceCheck", "About to set MaxBinY");
+            camera.NumY = camera.MaxBinY;
+            LogCallToDriver("ConformanceCheck", "About to call StartExposure");
             camera.StartExposure(1, true); // 1 second exposure
             LogCallToDriver("ConformanceCheck", "About to call ImageReady multiple times");
             do
@@ -2972,7 +2980,8 @@ namespace ConformU
                     {
                         // Wait for the exposing state to finish
                         startTime = DateTime.Now;
-                        startTimeUtc = DateTime.UtcNow; LogCallToDriver("ConformanceCheck", "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
+                        startTimeUtc = DateTime.UtcNow;
+                        LogCallToDriver("ConformanceCheck", "About to get CameraState, InterfaceVersion and PercentCompleted multiple times...");
 
                         // Start the loop timing stopwatch
                         sw.Restart();
@@ -3967,6 +3976,6 @@ namespace ConformU
         }
 
         #endregion
-    
+
     }
 }

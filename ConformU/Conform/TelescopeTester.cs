@@ -672,7 +672,8 @@ namespace ConformU
             // Altitude - Optional
             try
             {
-                canReadAltitide = false; LogCallToDriver("Altitude", "About to get Altitude property");
+                canReadAltitide = false;
+                LogCallToDriver("Altitude", "About to get Altitude property");
                 altitude = TimeFunc("Altitude", () => telescopeDevice.Altitude, TargetTime.Fast);
                 canReadAltitide = true; // Read successfully
                 switch (altitude)
@@ -821,7 +822,8 @@ namespace ConformU
             // Azimuth - Optional
             try
             {
-                canReadAzimuth = false; LogCallToDriver("Azimuth", "About to get Azimuth property");
+                canReadAzimuth = false;
+                LogCallToDriver("Azimuth", "About to get Azimuth property");
                 azimuth = TimeFunc("Azimuth", () => telescopeDevice.Azimuth, TargetTime.Fast);
                 canReadAzimuth = true; // Read successfully
                 switch (azimuth)
@@ -1826,7 +1828,7 @@ namespace ConformU
                     // Set the original value
                     LogCallToDriver("SiteLatitude Write", $"About to restore original SiteLatitude property :{siteLatitude.ToDMS()}");
                     telescopeDevice.SiteLatitude = siteLatitude;
-                    LogOk("SiteLatitude Write", $"Successfully restored original site latitude: {siteLatitude.ToDMS()}.");
+                    LogOk("SiteLatitude Write", $"Successfully restored original site latitude: {siteLatitude.ToDMS()}");
                 }
                 catch (Exception ex)
                 {
@@ -1974,7 +1976,7 @@ namespace ConformU
                     // Set the original value
                     LogCallToDriver("SiteLongitude Write", $"About to restore original SiteLongitude property :{siteLongitude.ToDMS()}");
                     telescopeDevice.SiteLongitude = siteLongitude;
-                    LogOk("SiteLongitude Write", $"Successfully restored original site longitude: {siteLongitude.ToDMS()}.");
+                    LogOk("SiteLongitude Write", $"Successfully restored original site longitude: {siteLongitude.ToDMS()}");
                 }
                 catch (Exception ex)
                 {
@@ -2102,7 +2104,8 @@ namespace ConformU
             // SiderealTime - Required
             try
             {
-                canReadSiderealTime = false; LogCallToDriver("SiderealTime", "About to get SiderealTime property");
+                canReadSiderealTime = false;
+                LogCallToDriver("SiderealTime", "About to get SiderealTime property");
                 siderealTimeScope = TimeFunc("SiderealTime", () => telescopeDevice.SiderealTime, TargetTime.Fast);
                 canReadSiderealTime = true;
                 siderealTimeAscom = (18.697374558d + 24.065709824419081d * (DateTime.UtcNow.ToOADate() + 2415018.5 - 2451545.0d) + siteLongitude / 15.0d) % 24.0d;
@@ -2586,7 +2589,8 @@ namespace ConformU
                     // Make sure that we have received a TrackingRates object after the Dispose() method was called
                     if (trackingRates is object) // We did get a TrackingRates object
                     {
-                        LogOk("TrackingRates", "Successfully obtained a TrackingRates object after the previous TrackingRates object was disposed"); LogCallToDriver("TrackingRate Read", "About to get TrackingRate property");
+                        LogOk("TrackingRates", "Successfully obtained a TrackingRates object after the previous TrackingRates object was disposed");
+                        LogCallToDriver("TrackingRate Read", "About to get TrackingRate property");
                         trackingRate = telescopeDevice.TrackingRate;
                         LogOk("TrackingRate Read", trackingRate.ToString());
 
@@ -3430,8 +3434,9 @@ namespace ConformU
                 // TargetRightAscension Write (valid value) - Optional
                 try
                 {
-                    targetRightAscension = TelescopeRaFromSiderealTime("TargetRightAscension Write", -4.0d); LogCallToDriver("TargetRightAscension Write",
-                        $"About to set TargetRightAscension property to {targetRightAscension}");
+                    targetRightAscension = TelescopeRaFromSiderealTime("TargetRightAscension Write", -4.0d);
+                    LogCallToDriver("TargetRightAscension Write",
+                                           $"About to set TargetRightAscension property to {targetRightAscension}");
                     telescopeDevice.TargetRightAscension = targetRightAscension; // Set a valid value
                     try
                     {
@@ -3522,8 +3527,9 @@ namespace ConformU
                 // TargetDeclination Write (valid value) - Optional
                 try
                 {
-                    targetDeclination = 1.0d; LogCallToDriver("TargetDeclination Write",
-                        $"About to set TargetDeclination property to {targetDeclination}");
+                    targetDeclination = 1.0d;
+                    LogCallToDriver("TargetDeclination Write",
+                                           $"About to set TargetDeclination property to {targetDeclination}");
                     telescopeDevice.TargetDeclination = targetDeclination; // Set a valid value
                     try
                     {
@@ -4120,7 +4126,8 @@ namespace ConformU
 
             // Basic test to make sure the method is either implemented OK or fails as expected if it is not supported in this driver.
             LogCallToDriver(testName, "About to get RightAscension property");
-            syncRa = telescopeDevice.RightAscension; LogCallToDriver(testName, "About to get Declination property");
+            syncRa = telescopeDevice.RightAscension;
+            LogCallToDriver(testName, "About to get Declination property");
             syncDec = telescopeDevice.Declination;
             if (!driverSupportsMethod) // Call should fail
             {
@@ -4136,8 +4143,9 @@ namespace ConformU
                                 telescopeDevice.Tracking = true;
                             }
 
-                            LogDebug(testName, $"SyncToCoordinates: {syncRa.ToHMS()} {syncDec.ToDMS()}"); LogCallToDriver(testName,
-                                $"About to call SyncToCoordinates method, RA: {syncRa.ToHMS()}, Declination: {syncDec.ToDMS()}");
+                            LogDebug(testName, $"SyncToCoordinates: {syncRa.ToHMS()} {syncDec.ToDMS()}");
+                            LogCallToDriver(testName,
+                                                           $"About to call SyncToCoordinates method, RA: {syncRa.ToHMS()}, Declination: {syncDec.ToDMS()}");
                             telescopeDevice.SyncToCoordinates(syncRa, syncDec);
                             LogIssue(testName, "CanSyncToCoordinates is False but call to SyncToCoordinates did not throw an exception.");
                             break;
@@ -4152,8 +4160,9 @@ namespace ConformU
 
                             try
                             {
-                                LogDebug(testName, $"Setting TargetRightAscension: {syncRa.ToHMS()}"); LogCallToDriver(testName,
-                                    $"About to set TargetRightAscension property to {syncRa.ToHMS()}");
+                                LogDebug(testName, $"Setting TargetRightAscension: {syncRa.ToHMS()}");
+                                LogCallToDriver(testName,
+                                                                   $"About to set TargetRightAscension property to {syncRa.ToHMS()}");
                                 telescopeDevice.TargetRightAscension = syncRa;
                                 LogDebug(testName, "Completed Set TargetRightAscension");
                             }
@@ -4164,8 +4173,9 @@ namespace ConformU
 
                             try
                             {
-                                LogDebug(testName, $"Setting TargetDeclination: {syncDec.ToDMS()}"); LogCallToDriver(testName,
-                                    $"About to set TargetDeclination property to {syncDec.ToDMS()}");
+                                LogDebug(testName, $"Setting TargetDeclination: {syncDec.ToDMS()}");
+                                LogCallToDriver(testName,
+                                                                   $"About to set TargetDeclination property to {syncDec.ToDMS()}");
                                 telescopeDevice.TargetDeclination = syncDec;
                                 LogDebug(testName, "Completed Set TargetDeclination");
                             }
@@ -4398,7 +4408,8 @@ namespace ConformU
                             if (canReadAltitide & canReadAzimuth) // Can check effects of a sync
                             {
                                 LogCallToDriver(testName, "About to get Altitude property");
-                                newAlt = telescopeDevice.Altitude; LogCallToDriver(testName, "About to get Azimuth property");
+                                newAlt = telescopeDevice.Altitude;
+                                LogCallToDriver(testName, "About to get Azimuth property");
                                 newAz = telescopeDevice.Azimuth;
 
                                 // Compare old and new values
@@ -4775,7 +4786,7 @@ namespace ConformU
                             }
                             else
                             {
-                                LogIssue(testName, $"Slewed {altitudeDifference:0.0} degree(s) away from Altitude target: {targetAltitude.ToDMS()} Actual Altitude: {actualAltitude.ToDMS()}. Tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
+                                LogIssue(testName, $"Slewed {altitudeDifference:0.0} degree(s) away from Altitude target: {targetAltitude.ToDMS()} Actual Altitude: {actualAltitude.ToDMS()} Tolerance ±{settings.TelescopeSlewTolerance} arc seconds.");
                             }
 
                             break;
@@ -4913,8 +4924,9 @@ namespace ConformU
                         {
                             SetAction("Sync underway");
                             targetRightAscension = badCoordinate1;
-                            targetDeclination = 0.0d; LogCallToDriver(pName,
-                                $"About to call SyncToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                            targetDeclination = 0.0d;
+                            LogCallToDriver(pName,
+                                                           $"About to call SyncToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
                             telescopeDevice.SyncToCoordinates(targetRightAscension, targetDeclination);
                             LogIssue(pName, $"Failed to reject bad RA coordinate: {targetRightAscension.ToHMS()}");
                         }
@@ -4929,8 +4941,9 @@ namespace ConformU
                         {
                             SetAction("Sync underway");
                             targetRightAscension = TelescopeRaFromSiderealTime(pName, -3.0d);
-                            targetDeclination = badCoordinate2; LogCallToDriver(pName,
-                                $"About to call SyncToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                            targetDeclination = badCoordinate2;
+                            LogCallToDriver(pName,
+                                                           $"About to call SyncToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
                             telescopeDevice.SyncToCoordinates(targetRightAscension, targetDeclination);
                             LogIssue(pName, $"Failed to reject bad Dec coordinate: {targetDeclination.ToDMS()}");
                         }
@@ -4958,8 +4971,9 @@ namespace ConformU
                         {
                             SetAction("Slew underway");
                             targetRightAscension = badCoordinate1;
-                            targetDeclination = 0.0d; LogCallToDriver(pName,
-                                $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
+                            targetDeclination = 0.0d;
+                            LogCallToDriver(pName,
+                                                           $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
                             telescopeDevice.TargetRightAscension = targetRightAscension;
                             // Successfully set bad RA coordinate so now set the good Dec coordinate and see whether the move fails when the slew is attempted
                             try
@@ -5013,8 +5027,9 @@ namespace ConformU
                         {
                             SetAction("Slew underway");
                             targetRightAscension = TelescopeRaFromSiderealTime(pName, -2.0d);
-                            targetDeclination = badCoordinate2; LogCallToDriver(pName,
-                                $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
+                            targetDeclination = badCoordinate2;
+                            LogCallToDriver(pName,
+                                                           $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
                             telescopeDevice.TargetDeclination = targetDeclination;
                             // Successfully set bad Dec coordinate so now set the good RA coordinate and see whether the move fails when the slew is attempted
                             try
@@ -5080,8 +5095,9 @@ namespace ConformU
                         {
                             SetAction("Sync underway");
                             targetRightAscension = badCoordinate1;
-                            targetDeclination = 0.0d; LogCallToDriver(pName,
-                                $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
+                            targetDeclination = 0.0d;
+                            LogCallToDriver(pName,
+                                                           $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
                             telescopeDevice.TargetRightAscension = targetRightAscension;
                             // Successfully set bad RA coordinate so now set the good Dec coordinate and see whether the move fails when the slew is attempted
                             try
@@ -5117,8 +5133,9 @@ namespace ConformU
                         {
                             SetAction("Sync underway");
                             targetRightAscension = TelescopeRaFromSiderealTime(pName, -3.0d);
-                            targetDeclination = badCoordinate2; LogCallToDriver(pName,
-                                $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
+                            targetDeclination = badCoordinate2;
+                            LogCallToDriver(pName,
+                                                           $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
                             telescopeDevice.TargetDeclination = targetDeclination;
                             // Successfully set bad Dec coordinate so now set the good RA coordinate and see whether the move fails when the slew is attempted
                             try
@@ -5250,8 +5267,9 @@ namespace ConformU
                         {
                             SetAction("Sync underway");
                             targetAltitude = badCoordinate1;
-                            targetAzimuth = 45.0d; LogCallToDriver(pName,
-                                $"About to call SyncToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
+                            targetAzimuth = 45.0d;
+                            LogCallToDriver(pName,
+                                                           $"About to call SyncToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
                             telescopeDevice.SyncToAltAz(targetAzimuth, targetAltitude);
                             LogIssue(pName, $"Failed to reject bad Altitude coordinate: {targetAltitude.ToDMS()}");
                         }
@@ -5265,8 +5283,9 @@ namespace ConformU
                         {
                             SetAction("Sync underway");
                             targetAltitude = 45.0d;
-                            targetAzimuth = badCoordinate2; LogCallToDriver(pName,
-                                $"About to call SyncToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
+                            targetAzimuth = badCoordinate2;
+                            LogCallToDriver(pName,
+                                                           $"About to call SyncToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
                             telescopeDevice.SyncToAltAz(targetAzimuth, targetAltitude);
                             LogIssue(pName, $"Failed to reject bad Azimuth coordinate: {FormatAzimuth(targetAzimuth)}");
                         }
@@ -6182,14 +6201,16 @@ namespace ConformU
                             }
                             else // Interface version 1
                             {
-                                SetAction("Waiting for mount to home"); LogCallToDriver(testName, "About to call FindHome method");
+                                SetAction("Waiting for mount to home");
+                                LogCallToDriver(testName, "About to call FindHome method");
                                 TimeMethod(testName, () => telescopeDevice.FindHome(), TargetTime.Extended);
 
                                 // Wait for mount to find home
                                 WaitWhile("Waiting for mount to home...", () => !telescopeDevice.AtHome, 200, settings.TelescopeMaximumSlewTime);
 
                                 // Now make sure that the mount is unparked
-                                LogOk(testName, "Found home OK."); LogCallToDriver(testName, "About to call Unpark method");
+                                LogOk(testName, "Found home OK.");
+                                LogCallToDriver(testName, "About to call Unpark method");
                                 telescopeDevice.Unpark();
                                 LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
                                 WaitWhile("Waiting for scope to unpark", () => telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
@@ -6233,7 +6254,8 @@ namespace ConformU
                             else // OK to test pulse guiding
                             {
                                 SetAction("Calling PulseGuide east");
-                                startTime = DateTime.Now; LogCallToDriver(testName, $"About to call PulseGuide method, Direction: {((int)GuideDirection.East)}, Duration: {PULSEGUIDE_MOVEMENT_TIME * 1000}ms");
+                                startTime = DateTime.Now;
+                                LogCallToDriver(testName, $"About to call PulseGuide method, Direction: {((int)GuideDirection.East)}, Duration: {PULSEGUIDE_MOVEMENT_TIME * 1000}ms");
                                 TimeMethod($"{testName} {GuideDirection.East} {PULSEGUIDE_MOVEMENT_TIME}s", () => telescopeDevice.PulseGuide(GuideDirection.East, PULSEGUIDE_MOVEMENT_TIME * 1000), TargetTime.Standard); // Start a 2 second pulse
                                 endTime = DateTime.Now;
                                 double pulseGuideTime = endTime.Subtract(startTime).TotalSeconds; // Seconds
@@ -6296,7 +6318,7 @@ namespace ConformU
                                                 // Check outcome of pulse guide East and North
                                                 if (!telescopeDevice.IsPulseGuiding)
                                                 {
-                                                    LogOk(testName, dualAxisGuiding ? "Asynchronous dual axis pulse guide East and North found OK" : 
+                                                    LogOk(testName, dualAxisGuiding ? "Asynchronous dual axis pulse guide East and North found OK" :
                                                         "Single axis guide completed OK because the mount can not guide both axes simultaneously.");
                                                 }
                                                 else
@@ -6370,7 +6392,8 @@ namespace ConformU
                                 while ((DateTime.Now.Subtract(startTime).TotalMilliseconds <= SIDEOFPIER_MERIDIAN_TRACKING_PERIOD) & !cancellationToken.IsCancellationRequested);
 
                                 if (cancellationToken.IsCancellationRequested)
-                                    return; LogCallToDriver(testName, "About to get SideOfPier property");
+                                    return;
+                                LogCallToDriver(testName, "About to get SideOfPier property");
 
                                 switch (telescopeDevice.SideOfPier)
                                 {
@@ -6832,7 +6855,8 @@ namespace ConformU
                         else // Choose a large negative value
                             moveRate = -rateMaximum - 1.0d;
 
-                        LogDebug(testName, $"Using minimum rate: {moveRate}"); LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {moveRate}");
+                        LogDebug(testName, $"Using minimum rate: {moveRate}");
+                        LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {moveRate}");
                         telescopeDevice.MoveAxis(testAxis, moveRate); // Set a value lower than the minimum
                         LogIssue(testName, $"No exception raised when move axis value < minimum rate: {moveRate}");
                         // Clean up and release each object after use
@@ -7100,13 +7124,15 @@ namespace ConformU
                             {
                                 LogCallToDriver(testName, "About to get Tracking property");
                                 trackingStart = telescopeDevice.Tracking; // Save the start tracking state
-                                SetStatus("Moving forward"); LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {rateMaximum}");
+                                SetStatus("Moving forward");
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {rateMaximum}");
                                 telescopeDevice.MoveAxis(testAxis, rateMaximum); // Set the maximum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
 
-                                SetStatus("Stop movement"); LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
+                                SetStatus("Stop movement");
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
                                 telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis                                
                                 WaitForSlewingTobecomeFalse(testName); // Wait up to the configured time for slewing to become false
 
@@ -7116,9 +7142,11 @@ namespace ConformU
                                 {
                                     if (trackingStart) // Tracking is true so switch to false for return movement
                                     {
-                                        SetStatus("Set tracking off"); LogCallToDriver(testName, "About to set Tracking property false");
+                                        SetStatus("Set tracking off");
+                                        LogCallToDriver(testName, "About to set Tracking property false");
                                         telescopeDevice.Tracking = false;
-                                        SetStatus("Move back"); LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {-rateMaximum}");
+                                        SetStatus("Move back");
+                                        LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {-rateMaximum}");
                                         telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the maximum rate
                                         WaitFor(MOVE_AXIS_TIME);
                                         if (cancellationToken.IsCancellationRequested)
@@ -7128,7 +7156,8 @@ namespace ConformU
                                         telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
                                         WaitForSlewingTobecomeFalse(testName); // Wait up to the configured time for slewing to become false
 
-                                        SetStatus(""); LogCallToDriver(testName, "About to get Tracking property");
+                                        SetStatus("");
+                                        LogCallToDriver(testName, "About to get Tracking property");
                                         if (telescopeDevice.Tracking == false) // tracking correctly retained in both states
                                             LogOk(testName, "Tracking state correctly retained for both tracking states");
                                         else
@@ -7136,9 +7165,11 @@ namespace ConformU
                                     }
                                     else // Tracking false so switch to true for return movement
                                     {
-                                        SetStatus("Set tracking on"); LogCallToDriver(testName, "About to set Tracking property true");
+                                        SetStatus("Set tracking on");
+                                        LogCallToDriver(testName, "About to set Tracking property true");
                                         telescopeDevice.Tracking = true;
-                                        SetStatus("Move back"); LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {-rateMaximum}");
+                                        SetStatus("Move back");
+                                        LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {-rateMaximum}");
                                         telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the maximum rate
                                         WaitFor(MOVE_AXIS_TIME);
                                         if (cancellationToken.IsCancellationRequested)
@@ -7148,7 +7179,8 @@ namespace ConformU
                                         telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
                                         WaitForSlewingTobecomeFalse(testName); // Wait up to the configured time for slewing to become false
 
-                                        SetStatus(""); LogCallToDriver(testName, "About to get Tracking property");
+                                        SetStatus("");
+                                        LogCallToDriver(testName, "About to get Tracking property");
                                         if (telescopeDevice.Tracking == true) // tracking correctly retained in both states
                                             LogOk(testName, "Tracking state correctly retained for both tracking states");
                                         else
@@ -7159,7 +7191,8 @@ namespace ConformU
                                 }
                                 else // Tracking state not correctly restored
                                 {
-                                    SetStatus("Move back"); LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {-rateMaximum}");
+                                    SetStatus("Move back");
+                                    LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed {-rateMaximum}");
                                     telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the maximum rate
                                     WaitFor(MOVE_AXIS_TIME);
                                     if (cancellationToken.IsCancellationRequested)
@@ -7185,13 +7218,15 @@ namespace ConformU
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
 
-                                SetStatus("Stop movement"); LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
+                                SetStatus("Stop movement");
+                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {(int)testAxis} at speed 0");
                                 telescopeDevice.MoveAxis(testAxis, 0.0d); // Stop the movement on this axis
                                 WaitForSlewingTobecomeFalse(testName); // Wait up to the configured time for slewing to become false
 
                                 LogCallToDriver(testName, "About to get Tracking property");
                                 trackingEnd = telescopeDevice.Tracking; // Save tracking state
-                                SetStatus("Move back"); LogCallToDriver(testName, $"About to call method MoveAxis for axis {(int)testAxis} at speed {-rateMaximum}");
+                                SetStatus("Move back");
+                                LogCallToDriver(testName, $"About to call method MoveAxis for axis {(int)testAxis} at speed {-rateMaximum}");
                                 telescopeDevice.MoveAxis(testAxis, -rateMaximum); // Set the maximum rate
                                 WaitFor(MOVE_AXIS_TIME);
                                 if (cancellationToken.IsCancellationRequested)
@@ -7473,7 +7508,7 @@ namespace ConformU
             }
             else
             {
-                LogIssue(testName, $"{functionName} {difference:0.0} arc seconds away from RA target: {expectedRa.ToHMS()} Actual RA: {actualRa.ToHMS()}. Tolerance: ±{settings.TelescopeSlewTolerance} arc seconds");
+                LogIssue(testName, $"{functionName} {difference:0.0} arc seconds away from RA target: {expectedRa.ToHMS()} Actual RA: {actualRa.ToHMS()} Tolerance: ±{settings.TelescopeSlewTolerance} arc seconds");
             }
 
             difference = Math.Round(Math.Abs(actualDec - expectedDec) * 60.0d * 60.0d, 1, MidpointRounding.AwayFromZero);
@@ -7483,7 +7518,7 @@ namespace ConformU
             }
             else
             {
-                LogIssue(testName, $"{functionName} {difference:0.0} arc seconds from the expected DEC: {expectedDec.ToDMS()}. Actual DEC: {actualDec.ToDMS()}. Tolerance: ±{settings.TelescopeSlewTolerance} degrees.");
+                LogIssue(testName, $"{functionName} {difference:0.0} arc seconds from the expected DEC: {expectedDec.ToDMS()} Actual DEC: {actualDec.ToDMS()} Tolerance: ±{settings.TelescopeSlewTolerance} degrees.");
             }
         }
 
@@ -7730,7 +7765,8 @@ namespace ConformU
                         {
                             LogCallToDriver("AccessChecks", "About to set Connected property true");
                             lITelescope.Connected = true;
-                            LogInfo("AccessChecks", $"Device exposes interface {testType}"); LogCallToDriver("AccessChecks", "About to set Connected property false");
+                            LogInfo("AccessChecks", $"Device exposes interface {testType}");
+                            LogCallToDriver("AccessChecks", "About to set Connected property false");
                             lITelescope.Connected = false;
                         }
                         catch (Exception)
@@ -8130,7 +8166,7 @@ namespace ConformU
             }
 
             // A valid declination was not found so throw an error
-            throw new ASCOM.InvalidOperationException($"GetTestDeclinationHalfwayToHorizon was unable to find a declination above the horizon at RA: {testRa.ToHMS()}.");
+            throw new ASCOM.InvalidOperationException($"GetTestDeclinationHalfwayToHorizon was unable to find a declination above the horizon at RA: {testRa.ToHMS()}");
         }
 
         internal void TestRAOffsetRates(string testName, double hourAngle)
@@ -8211,7 +8247,7 @@ namespace ConformU
             }
             catch (ASCOM.InvalidOperationException)
             {
-                LogInfo(testName, $"Test omitted because it was not possible to find a declination above the horizon at {testRa.ToHMS()}. This is an expected condition at latitudes close to the equator.");
+                LogInfo(testName, $"Test omitted because it was not possible to find a declination above the horizon at {testRa.ToHMS()} - this is an expected condition at latitudes close to the equator.");
                 return;
             }
 
@@ -8385,13 +8421,18 @@ namespace ConformU
             string actionName = $"Pulse guiding {direction} at {ha}";
             string logName = $"PulseGuide {ha:+0.0;-0.0;+0.0} {direction}";
 
-            LogDebug(logName, $"Test guiding direction: {direction}, RA change tolerance: {changeToleranceRa} ({changeToleranceRa.ToHMS()}, {changeToleranceRa.ToDMS()}), Declination change tolerance: {changeToleranceDec} ({changeToleranceDec.ToDMS()}, {changeToleranceDec.ToHMS()})"); LogCallToDriver(logName, "About to get RightAscension property");
-            double initialRaCoordinate = telescopeDevice.RightAscension; LogCallToDriver(logName, "About to get Declination property");
-            double initialDecCoordinate = telescopeDevice.Declination; LogCallToDriver(logName, $"About to call PulseGuide. Direction: {direction}, Duration: {PULSE_GUIDE_DURATION * 1000}ms.");
+            LogDebug(logName, $"Test guiding direction: {direction}, RA change tolerance: {changeToleranceRa} ({changeToleranceRa.ToHMS()}, {changeToleranceRa.ToDMS()}), Declination change tolerance: {changeToleranceDec} ({changeToleranceDec.ToDMS()}, {changeToleranceDec.ToHMS()})");
+            LogCallToDriver(logName, "About to get RightAscension property");
+            double initialRaCoordinate = telescopeDevice.RightAscension;
+            LogCallToDriver(logName, "About to get Declination property");
+            double initialDecCoordinate = telescopeDevice.Declination;
+            LogCallToDriver(logName, $"About to call PulseGuide. Direction: {direction}, Duration: {PULSE_GUIDE_DURATION * 1000}ms.");
             TimeMethod($"PulseGuide {direction} {PULSE_GUIDE_DURATION}s", () => telescopeDevice.PulseGuide(direction, PULSE_GUIDE_DURATION * 1000), TargetTime.Standard);
 
-            WaitWhile($"Pulse guiding {direction} at HA {ha:+0.0;-0.0;+0.0}", () => telescopeDevice.IsPulseGuiding, SLEEP_TIME, PULSE_GUIDE_TIMEOUT); LogCallToDriver(logName, "About to get RightAscension property");
-            double finalRaCoordinate = telescopeDevice.RightAscension; LogCallToDriver(logName, "About to get Declination property");
+            WaitWhile($"Pulse guiding {direction} at HA {ha:+0.0;-0.0;+0.0}", () => telescopeDevice.IsPulseGuiding, SLEEP_TIME, PULSE_GUIDE_TIMEOUT);
+            LogCallToDriver(logName, "About to get RightAscension property");
+            double finalRaCoordinate = telescopeDevice.RightAscension;
+            LogCallToDriver(logName, "About to get Declination property");
             double finalDecCoordinate = telescopeDevice.Declination;
 
             double raChange = finalRaCoordinate - initialRaCoordinate;
@@ -8404,13 +8445,13 @@ namespace ConformU
             {
                 case GuideDirection.North:
                     if ((decChange > 0.0) & (decDifference <= changeToleranceDec) & (Math.Abs(raChange) <= changeToleranceRa)) // Moved north by expected amount with no east-west movement
-                        LogOk(logName, $"Moved north with no east-west movement  - Declination change (DMS): {decChange.ToDMS()},  Expected: {expectedDecChange.ToDMS()},  Difference: {decDifference.ToDMS()},  Test tolerance: {changeToleranceDec.ToDMS()}.");
+                        LogOk(logName, $"Moved north with no east-west movement  - Declination change (DMS): {decChange.ToDMS()},  Expected: {expectedDecChange.ToDMS()},  Difference: {decDifference.ToDMS()},  Test tolerance: {changeToleranceDec.ToDMS()}");
                     else
                     {
                         switch (decChange)
                         {
                             case < 0.0: //Moved south
-                                LogIssue(logName, $"Moved south instead of north - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                                LogIssue(logName, $"Moved south instead of north - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}");
                                 break;
 
                             case 0.0: // No movement
@@ -8419,27 +8460,27 @@ namespace ConformU
 
                             default: // Moved north
                                 if (decDifference <= changeToleranceDec) // Moved north OK.
-                                    LogOk(logName, $"Moved north - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                                    LogOk(logName, $"Moved north - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}");
                                 else // Moved north but by wrong amount.
-                                    LogIssue(logName, $"Moved north but outside test tolerance - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                                    LogIssue(logName, $"Moved north but outside test tolerance - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}");
                                 break;
                         }
                         if (Math.Abs(raChange) <= changeToleranceRa)
-                            LogOk(logName, $"No significant east-west movement as expected. RA change (HMS): {raChange.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                            LogOk(logName, $"No significant east-west movement as expected. RA change (HMS): {raChange.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}");
                         else
-                            LogIssue(logName, $"East-West movement was outside test tolerance: RA change (HMS): {raChange.ToHMS()}, Expected: {0.0.ToHMS()}, Tolerance: {changeToleranceRa.ToHMS()}.");
+                            LogIssue(logName, $"East-West movement was outside test tolerance: RA change (HMS): {raChange.ToHMS()}, Expected: {0.0.ToHMS()}, Tolerance: {changeToleranceRa.ToHMS()}");
                     }
                     break;
 
                 case GuideDirection.South:
                     if ((decChange < 0.0) & (decDifference <= changeToleranceDec) & (Math.Abs(raChange) <= changeToleranceRa)) // Moved south by expected amount with no east-west movement
-                        LogOk(logName, $"Moved south with no east-west movement  - Declination change (DMS): {decChange.ToDMS()},  Expected: {expectedDecChange.ToDMS()},  Difference: {decDifference.ToDMS()},  Test tolerance: {changeToleranceDec.ToDMS()}.");
+                        LogOk(logName, $"Moved south with no east-west movement  - Declination change (DMS): {decChange.ToDMS()},  Expected: {expectedDecChange.ToDMS()},  Difference: {decDifference.ToDMS()},  Test tolerance: {changeToleranceDec.ToDMS()}");
                     else
                     {
                         switch (decChange)
                         {
                             case > 0.0: //Moved north
-                                LogIssue(logName, $"Moved north instead of south - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                                LogIssue(logName, $"Moved north instead of south - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}");
                                 break;
 
                             case 0.0: // No movement
@@ -8448,27 +8489,27 @@ namespace ConformU
 
                             default: // Moved south
                                 if (decDifference <= changeToleranceDec)// Moved south OK
-                                    LogOk(logName, $"Moved south - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                                    LogOk(logName, $"Moved south - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}");
                                 else// Moved south but by wrong amount.
-                                    LogIssue(logName, $"Moved south but outside test tolerance - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                                    LogIssue(logName, $"Moved south but outside test tolerance - Declination change (DMS): {decChange.ToDMS()}, Expected: {expectedDecChange.ToDMS()}, Difference: {decDifference.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}");
                                 break;
                         }
                         if (Math.Abs(raChange) <= changeToleranceRa)
-                            LogOk(logName, $"No significant east-west movement as expected. RA change (HMS): {raChange.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                            LogOk(logName, $"No significant east-west movement as expected. RA change (HMS): {raChange.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}");
                         else
-                            LogIssue(logName, $"East-West movement was outside test tolerance: RA change (HMS): {raChange.ToHMS()}, Expected: {0.0.ToHMS()}, Tolerance: {changeToleranceRa.ToHMS()}.");
+                            LogIssue(logName, $"East-West movement was outside test tolerance: RA change (HMS): {raChange.ToHMS()}, Expected: {0.0.ToHMS()}, Tolerance: {changeToleranceRa.ToHMS()}");
                     }
                     break;
 
                 case GuideDirection.East:
                     if ((raChange > 0.0) & (raDifference <= changeToleranceRa) & (Math.Abs(decChange) <= changeToleranceDec)) // Moved east by expected amount with no north-south movement
-                        LogOk(logName, $"Moved east with no north-south movement - RA change (HMS):          {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                        LogOk(logName, $"Moved east with no north-south movement - RA change (HMS):          {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}");
                     else
                     {
                         switch (raChange)
                         {
                             case < 0.0: //Moved west
-                                LogIssue(logName, $"Moved west instead of east - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                                LogIssue(logName, $"Moved west instead of east - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}");
                                 break;
 
                             case 0.0: // No movement
@@ -8477,27 +8518,27 @@ namespace ConformU
 
                             default: // Moved east
                                 if (raDifference <= changeToleranceRa)  // Moved east OK
-                                    LogOk(logName, $"Moved east - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                                    LogOk(logName, $"Moved east - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}");
                                 else // Moved east but by wrong amount.
-                                    LogIssue(logName, $"Moved east but outside test tolerance - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                                    LogIssue(logName, $"Moved east but outside test tolerance - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}");
                                 break;
                         }
                         if (Math.Abs(decChange) <= changeToleranceDec)
-                            LogOk(logName, $"No significant north-south movement as expected. Declination change (DMS): {decChange.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                            LogOk(logName, $"No significant north-south movement as expected. Declination change (DMS): {decChange.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}");
                         else
-                            LogIssue(logName, $"North-south movement was outside test tolerance: Declination change (DMS): {decChange.ToDMS()}, Expected: {0.0.ToDMS()}, Tolerance: {changeToleranceDec.ToDMS()}.");
+                            LogIssue(logName, $"North-south movement was outside test tolerance: Declination change (DMS): {decChange.ToDMS()}, Expected: {0.0.ToDMS()}, Tolerance: {changeToleranceDec.ToDMS()}");
                     }
                     break;
 
                 case GuideDirection.West:
                     if ((raChange < 0.0) & (raDifference <= changeToleranceRa) & (Math.Abs(decChange) <= changeToleranceDec)) // Moved west by expected amount with no north-south movement
-                        LogOk(logName, $"Moved west with no north-south movement - RA change (HMS):          {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                        LogOk(logName, $"Moved west with no north-south movement - RA change (HMS):          {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}");
                     else
                     {
                         switch (raChange)
                         {
                             case > 0.0: //Moved east
-                                LogIssue(logName, $"Moved east instead of west - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                                LogIssue(logName, $"Moved east instead of west - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}");
                                 break;
 
                             case 0.0: // No movement
@@ -8506,15 +8547,15 @@ namespace ConformU
 
                             default: // Moved west
                                 if (raDifference <= changeToleranceRa) // Moved west OK
-                                    LogOk(logName, $"Moved west - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                                    LogOk(logName, $"Moved west - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}");
                                 else// Moved west but by wrong amount.
-                                    LogIssue(logName, $"Moved west but outside test tolerance - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}.");
+                                    LogIssue(logName, $"Moved west but outside test tolerance - RA change (HMS): {raChange.ToHMS()}, Expected: {expectedRaChange.ToHMS()}, Difference: {raDifference.ToHMS()}, Test tolerance: {changeToleranceRa.ToHMS()}");
                                 break;
                         }
                         if (Math.Abs(decChange) <= changeToleranceDec)
-                            LogOk(logName, $"No significant north-south movement as expected. Declination change (DMS): {decChange.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}.");
+                            LogOk(logName, $"No significant north-south movement as expected. Declination change (DMS): {decChange.ToDMS()}, Test tolerance: {changeToleranceDec.ToDMS()}");
                         else
-                            LogIssue(logName, $"North-south movement was outside test tolerance: Declination change (DMS): {decChange.ToDMS()}, Expected: {0.0.ToDMS()}, Tolerance: {changeToleranceDec.ToDMS()}.");
+                            LogIssue(logName, $"North-south movement was outside test tolerance: Declination change (DMS): {decChange.ToDMS()}, Expected: {0.0.ToDMS()}, Tolerance: {changeToleranceDec.ToDMS()}");
                     }
                     break;
 
