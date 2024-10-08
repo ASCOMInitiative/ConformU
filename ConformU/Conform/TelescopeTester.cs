@@ -2843,12 +2843,12 @@ namespace ConformU
                                     // Wait for the park to complete using Platform 6 or 7 semantics as appropriate
                                     if (IsPlatform7OrLater) // Platform 7 or later device
                                     {
-                                        LogCallToDriver("Park", "About to get Slewing property repeatedly...");
+                                        LogCallToDriver("Park", "About to get Slewing property repeatedly (ITelescopeV4 interface)...");
                                         WaitWhile("Waiting for scope to park", () => telescopeDevice.Slewing, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
                                     }
                                     else // Platform 6 device
                                     {
-                                        LogCallToDriver("Park", "About to get AtPark property repeatedly...");
+                                        LogCallToDriver("Park", "About to get AtPark property repeatedly (ITelescopeV2/3 interface)...");
                                         WaitWhile("Waiting for scope to park", () => !telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
                                     }
 
@@ -2857,7 +2857,7 @@ namespace ConformU
                                     if (telescopeDevice.AtPark)
                                     {
                                         SetStatus("Scope parked");
-                                        LogOk("Park", "Parked successfully.");
+                                        LogOk("Park", "Parked successfully (AtPark is true).");
 
                                         if (cancellationToken.IsCancellationRequested) return;
 
@@ -3009,7 +3009,7 @@ namespace ConformU
                                     }
                                     else // Scope is not parked - first Park attempt failed
                                     {
-                                        LogIssue("Park", $"Failed to park within {settings.TelescopeMaximumSlewTime} seconds, skipping further Park tests.");
+                                        LogIssue("Park", $"Failed to park within {settings.TelescopeMaximumSlewTime} seconds (AtPark is false), skipping further Park tests.");
                                     }
 
                                     // Test unpark after park
