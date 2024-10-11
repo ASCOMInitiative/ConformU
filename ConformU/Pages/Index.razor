@@ -95,8 +95,20 @@
         }
 
         statusMessage = $"Version {Update.ConformuVersionDisplayString}";
-        statusMessage += $"        Running as a {(Environment.Is64BitProcess ? "64bit" : "32bit")} application on a {(Environment.Is64BitOperatingSystem ? "64bit" : "32bit")}" +
-        $" {(RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "ARM" : "Intel")} processor.        OS: {Environment.OSVersion}";
+
+        string processBitness = Environment.Is64BitProcess ? "64bit" : "32bit";
+        string osBitness = Environment.Is64BitOperatingSystem ? "64bit" : "32bit";
+        string architecture = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "ARM" : "Intel";
+        string osName;
+
+        // Select the best descriptive name depending on OS.
+#if WINDOWS
+    osName = ASCOM.Com.PlatformUtilities.OSBuildName();
+#else
+        osName = Environment.OSVersion.ToString();
+#endif
+
+        statusMessage += $"        Running as a {processBitness} application on a {osBitness} {architecture} processor.        OS: {osName}";
 
         // Validate that the application SEMVER string is valid
         if (SemVersion.TryParse(Update.ConformuVersion, SemVersionStyles.AllowV, out SemVersion currentversion))

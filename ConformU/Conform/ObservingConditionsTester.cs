@@ -460,7 +460,7 @@ namespace ConformU
             return !double.IsNaN(value);
         }
 
-        private double TestDouble(string propertyNmae, ObservingConditionsProperty enumName, double pMin, double pMax, Required pMandatory)
+        private double TestDouble(string propertyName, ObservingConditionsProperty enumName, double pMin, double pMax, Required pMandatory)
         {
             double returnValue;
             int retryCount = 0;
@@ -627,7 +627,7 @@ namespace ConformU
                             #endregion
 
                             default:
-                                LogError(propertyNmae, $"TestDouble - Unknown test type - {enumName}");
+                                LogError(propertyName, $"TestDouble - Unknown test type - {enumName}");
                                 break;
                         }
                     }, TargetTime.Fast);
@@ -637,11 +637,11 @@ namespace ConformU
                     switch (returnValue)
                     {
                         case var _ when returnValue < pMin:
-                            LogIssue(propertyNmae, $"Invalid value (below minimum expected - {pMin}): {returnValue}");
+                            LogIssue(propertyName, $"Invalid value (below minimum expected - {pMin}): {returnValue}");
                             break;
 
                         case var _ when returnValue > pMax:
-                            LogIssue(propertyNmae, $"Invalid value (above maximum expected - {pMax}): {returnValue}");
+                            LogIssue(propertyName, $"Invalid value (above maximum expected - {pMax}): {returnValue}");
                             break;
 
                         default:
@@ -652,36 +652,36 @@ namespace ConformU
                     // Record that a value was returned
                     if (enumName.ToString().StartsWith(PROPERTY_TIMESINCELASTUPDATE))
                     {
-                        sensorHasTimeOfLastUpdate.Add(propertyNmae);
-                        LogDebug(enumName.ToString(), $"Added {propertyNmae} to sensorHasTimeOfLastUpdate list");
+                        sensorHasTimeOfLastUpdate.Add(propertyName);
+                        LogDebug(enumName.ToString(), $"Added {propertyName} to sensorHasTimeOfLastUpdate list");
                     }
                     else
                     {
-                        sensorIsImplemented.Add(propertyNmae);
-                        LogDebug(propertyNmae, $"Added {propertyNmae} to sensorIsImplemented list");
+                        sensorIsImplemented.Add(propertyName);
+                        LogDebug(propertyName, $"Added {propertyName} to sensorIsImplemented list");
                     }
                 }
                 catch (Exception ex)
                 {
-                    if (IsInvalidOperationException(propertyNmae, ex))
+                    if (IsInvalidOperationException(propertyName, ex))
                     {
                         returnValue = BAD_VALUE;
                         retryCount += 1;
-                        LogInfo(propertyNmae, $"Sensor not ready, received InvalidOperationException, waiting {settings.ObservingConditionsRetryTime} second to retry. Attempt {retryCount} out of {settings.ObservingConditionsMaxRetries}");
+                        LogInfo(propertyName, $"Sensor not ready, received InvalidOperationException, waiting {settings.ObservingConditionsRetryTime} second to retry. Attempt {retryCount} out of {settings.ObservingConditionsMaxRetries}");
                         WaitFor(settings.ObservingConditionsRetryTime * 1000);
                     }
                     else
                     {
                         unexpectedError = true;
                         returnValue = BAD_VALUE;
-                        HandleException(propertyNmae, methodType, pMandatory, ex, "");
+                        HandleException(propertyName, methodType, pMandatory, ex, "");
                     }
                 }
             }
             while (!readOk & (retryCount <= settings.ObservingConditionsMaxRetries) & !unexpectedError); // Lower than minimum value// Higher than maximum value
 
             if ((!readOk) & (!unexpectedError))
-                LogInfo(propertyNmae, $"InvalidOperationException persisted for longer than {settings.ObservingConditionsMaxRetries * settings.ObservingConditionsRetryTime} seconds.");
+                LogInfo(propertyName, $"InvalidOperationException persisted for longer than {settings.ObservingConditionsMaxRetries * settings.ObservingConditionsRetryTime} seconds.");
             return returnValue;
 
         }
