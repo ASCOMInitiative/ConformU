@@ -1017,7 +1017,7 @@ namespace ConformU
             LogNewLine(); // Blank line
 
             // Set the architecture and bitness
-            string architecture = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "ARM" : "Intel/AMD";
+            string architecture = ((RuntimeInformation.ProcessArchitecture == Architecture.Arm64) | (RuntimeInformation.ProcessArchitecture == Architecture.Arm)) ? "ARM" : "Intel/AMD";
             string osBitness = Environment.Is64BitOperatingSystem ? "64" : "32";
             string processBitness = Environment.Is64BitProcess ? "64" : "32";
 

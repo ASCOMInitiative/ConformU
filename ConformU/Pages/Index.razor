@@ -96,9 +96,9 @@
 
         statusMessage = $"Version {Update.ConformuVersionDisplayString}";
 
-        string processBitness = Environment.Is64BitProcess ? "64bit" : "32bit";
-        string osBitness = Environment.Is64BitOperatingSystem ? "64bit" : "32bit";
-        string architecture = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "ARM" : "Intel/AMD";
+        string processBitness = Environment.Is64BitProcess ? "64" : "32";
+        string osBitness = Environment.Is64BitOperatingSystem ? "64" : "32";
+        string architecture = ((RuntimeInformation.ProcessArchitecture == Architecture.Arm64) | (RuntimeInformation.ProcessArchitecture == Architecture.Arm)) ? "ARM" : "Intel/AMD";
         string osName;
 
         // Select the best descriptive name depending on OS.
@@ -108,7 +108,7 @@
         osName = Environment.OSVersion.ToString();
 #endif
 
-        statusMessage += $"        Running as a {processBitness} application on a {osBitness} {architecture} processor.        OS: {osName}";
+        statusMessage += $"        Running as a {processBitness}bit application on a {osBitness}bit {architecture} processor.        OS: {osName}";
 
         // Validate that the application SEMVER string is valid
         if (SemVersion.TryParse(Update.ConformuVersion, SemVersionStyles.AllowV, out SemVersion currentversion))
