@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Xml.Linq;
 using static ConformU.Globals;
 using InvalidOperationException = System.InvalidOperationException;
 using NotImplementedException = ASCOM.NotImplementedException;
@@ -1015,7 +1016,14 @@ namespace ConformU
             LogTestOnly($"ASCOM Universal Device Conformance Checker Version {this.GetType().Assembly.GetName().Version}, Build time: {lastModifiedTime:ddd dd MMMM yyyy HH:mm:ss}");
             LogNewLine(); // Blank line
 
-            LogTestOnly($"Operating system is {RuntimeInformation.OSDescription} {(Environment.Is64BitOperatingSystem ? "64bit" : "32bit")}, Application is {(Environment.Is64BitProcess ? "64bit" : "32bit")}.");
+            // Set the OS name depending on whether or not it is Windows
+            string osName;
+#if WINDOWS
+            osName = ASCOM.Com.PlatformUtilities.OSBuildName();
+#else
+            osName = RuntimeInformation.OSDescription;
+#endif
+            LogTestOnly($"Operating system is {osName} {(Environment.Is64BitOperatingSystem ? "64bit" : "32bit")}, Application is {(Environment.Is64BitProcess ? "64bit" : "32bit")}.");
             LogNewLine(); // Blank line
 
             switch (settings.DeviceTechnology)
@@ -1030,7 +1038,7 @@ namespace ConformU
                     LogTestOnly($"COM Driver ProgID: {settings.ComDevice.ProgId}"); break;
 
                 case DeviceTechnology.NotSelected:
-                    throw new InvalidValueException($"CheckInitialise - 'NotSelected' is not a technology type, ploease select Alpaca or COM.");
+                    throw new InvalidValueException($"CheckInitialise - 'NotSelected' is not a technology type, please select Alpaca or COM.");
 
                 default:
                     throw new InvalidValueException($"CheckInitialise - Unknown technology type: {settings.DeviceTechnology}");
@@ -1338,7 +1346,6 @@ namespace ConformU
         internal void LogTiming(string test, string message)
         {
             conformResults.Timings.Add(new KeyValuePair<string, string>(test, message));
-            // tl?.LogMessage(test, MessageLevel.Info, message);
         }
 
         internal void LogError(string test, string message)
