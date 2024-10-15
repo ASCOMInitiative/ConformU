@@ -38,9 +38,9 @@
 	</Target>
 	<PropertyGroup>
 		<!-- Set version numbers -->
-		<ProductMajor>3</ProductMajor>
-		<ProductMinor>2</ProductMinor>
-		<ProductPatch>1</ProductPatch>
+		<ProductMajor>4</ProductMajor>
+		<ProductMinor>0</ProductMinor>
+		<ProductPatch>0</ProductPatch>
 
 		<!-- Set the pre-release string without a leading minus e.g. rc.1 -->
 		<ProductPreRelease></ProductPreRelease>
