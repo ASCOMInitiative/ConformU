@@ -98,7 +98,7 @@
 
         string processBitness = Environment.Is64BitProcess ? "64bit" : "32bit";
         string osBitness = Environment.Is64BitOperatingSystem ? "64bit" : "32bit";
-        string architecture = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "ARM" : "Intel";
+        string architecture = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "ARM" : "Intel/AMD";
         string osName;
 
         // Select the best descriptive name depending on OS.

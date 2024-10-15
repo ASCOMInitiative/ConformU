@@ -1016,6 +1016,11 @@ namespace ConformU
             LogTestOnly($"ASCOM Universal Device Conformance Checker Version {this.GetType().Assembly.GetName().Version}, Build time: {lastModifiedTime:ddd dd MMMM yyyy HH:mm:ss}");
             LogNewLine(); // Blank line
 
+            // Set the architecture and bitness
+            string architecture = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "ARM" : "Intel";
+            string osBitness = Environment.Is64BitOperatingSystem ? "64" : "32";
+            string processBitness = Environment.Is64BitProcess ? "64" : "32"+OperatingSystem.pl;
+
             // Set the OS name depending on whether or not it is Windows
             string osName;
 #if WINDOWS
@@ -1023,7 +1028,7 @@ namespace ConformU
 #else
             osName = RuntimeInformation.OSDescription;
 #endif
-            LogTestOnly($"Operating system is {osName} {(Environment.Is64BitOperatingSystem ? "64bit" : "32bit")}, Application is {(Environment.Is64BitProcess ? "64bit" : "32bit")}.");
+            LogTestOnly($"Operating system is {osName}, Processor is {architecture} {osBitness}bit, Application is {processBitness}bit.");
             LogNewLine(); // Blank line
 
             switch (settings.DeviceTechnology)
