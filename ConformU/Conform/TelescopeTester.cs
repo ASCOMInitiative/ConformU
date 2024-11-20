@@ -3078,7 +3078,7 @@ namespace ConformU
                                                     LogCallToDriver("Unpark", "About to get AtPark property");
                                                     if (!telescopeDevice.AtPark) // Scope remained unparked
                                                     {
-                                                        LogOk("Park", "Calling Unpark twice is harmless and leaves the mount in the un-parked state.");
+                                                        LogOk("Unpark", "Calling Unpark twice is harmless and leaves the mount in the un-parked state.");
                                                         SetStatus("Scope Unparked OK");
                                                     }
                                                     else // Scope is still parked - it did not unpark
@@ -8326,22 +8326,26 @@ namespace ConformU
             {
                 if (Math.Abs(actualValue - expectedValue) <= tolerance)
                 {
-                    LogOk(testName, $"{name} is within expected tolerance. Expected: {expectedValue,8:+0.0000;-0.0000;+0.0000}, Actual: {actualValue,8:+0.0000;-0.0000;+0.0000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / tolerance):N2}%.");
+                    LogOk(testName, $"{name} is within expected tolerance. Expected: {expectedValue,8:+0.0000;-0.0000;+0.0000}, Actual: {actualValue,8:+0.0000;-0.0000;+0.0000}, " +
+                        $"Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / tolerance):N2}%.");
                 }
                 else
                 {
-                    LogIssue(testName, $"{name} is outside the expected tolerance. Expected: {expectedValue,8:+0.0000;-0.0000;+0.0000}, Actual: {actualValue,8:+0.0000;-0.0000;+0.0000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / tolerance):N2}%, Tolerance:{tolerance * 100:N0}%.");
+                    LogIssue(testName, $"{name} is outside the expected tolerance. Expected: {expectedValue,8:+0.0000;-0.0000;+0.0000}, Actual: {actualValue,8:+0.0000;-0.0000;+0.0000}, " +
+                        $"Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / tolerance),5:N2}%, Tolerance:{tolerance * 100:N0}%, Test duration: {settings.TelescopeRateOffsetTestDuration} seconds.");
                 }
             }
             else
             {
                 if (Math.Abs(Math.Abs(actualValue - expectedValue) / expectedValue) <= tolerance)
                 {
-                    LogOk(testName, $"{name} is within expected tolerance. Expected: {expectedValue,8:+0.0000;-0.0000;+0.0000}, Actual: {actualValue,8:+0.0000;-0.0000;+0.0000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%.");
+                    LogOk(testName, $"{name} is within expected tolerance. Expected: {expectedValue,8:+0.0000;-0.0000;+0.0000}, Actual: {actualValue,8:+0.0000;-0.0000;+0.0000}, " +
+                        $"Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%.");
                 }
                 else
                 {
-                    LogIssue(testName, $"{name} is outside the expected tolerance. Expected: {expectedValue,8:+0.0000;-0.0000;+0.0000}, Actual: {actualValue,8:+0.0000;-0.0000;+0.0000}, Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue):N2}%, Tolerance:{tolerance * 100:N0}%.");
+                    LogIssue(testName, $"{name} is outside the expected tolerance. Expected: {expectedValue,8:+0.0000;-0.0000;+0.0000}, Actual: {actualValue,8:+0.0000;-0.0000;+0.0000}, " +
+                        $"Deviation from expected: {Math.Abs((actualValue - expectedValue) * 100.0 / expectedValue),5:N2}%, Tolerance:{tolerance * 100:N0}%, Test duration: {settings.TelescopeRateOffsetTestDuration} seconds.");
                 }
             }
         }
