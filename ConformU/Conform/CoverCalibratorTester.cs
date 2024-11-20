@@ -369,7 +369,7 @@ namespace ConformU
             SetTest("CalibratorOn");
 
             // Check whether CalibratorState can be read OK
-            if (calibratorStateOk & (IsPlatform7OrLater? calibratorChangingOk:true)) // CalibratorState and CalibratorChanging did return a values
+            if (calibratorStateOk & (IsPlatform7OrLater ? calibratorChangingOk : true)) // CalibratorState and CalibratorChanging did return a values
             {
                 // Check whether the calibrator is ready to accept changes
                 if (CalibratorReady("CalibratorOn")) // Calibrator is ready to accept changes
@@ -866,6 +866,7 @@ namespace ConformU
                 // Get the CoverMoving value
                 LogCallToDriver(operation, "About to call CoverMoving property");
                 bool coverMoving = coverCalibratorDevice.CoverMoving;
+                LogDebug("CoverIsMoving", $"Received cover state: {status} and cover moving: {coverMoving}");
 
                 // Test whether the values match
                 if (coverMoving & (status == CoverStatus.Moving)) // Both agree that the cover is moving
@@ -882,6 +883,7 @@ namespace ConformU
             else // Found an ICoverCalibratorV1 device
             {
                 // Return a boolean derived from CoverStatus response
+                LogDebug("CoverIsMoving", $"Received cover state: {status}");
                 return status == CoverStatus.Moving;
             }
         }
