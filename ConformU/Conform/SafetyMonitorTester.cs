@@ -150,7 +150,6 @@ namespace ConformU
 
                 // Validate the interface version
                 ValidateInterfaceVersion();
-
             }
             catch (COMException exCom) when (exCom.ErrorCode == REGDB_E_CLASSNOTREG)
             {

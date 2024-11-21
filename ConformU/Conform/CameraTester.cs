@@ -306,6 +306,9 @@ namespace ConformU
                 SetDevice(camera, DeviceTypes.Camera); // Assign the driver to the base class
 
                 LogInfo("CreateDevice", "Successfully created driver");
+
+                // Validate the interface version
+                ValidateInterfaceVersion();
             }
             catch (COMException exCom) when (exCom.ErrorCode == REGDB_E_CLASSNOTREG)
             {
