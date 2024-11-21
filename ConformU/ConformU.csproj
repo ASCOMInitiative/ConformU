@@ -39,11 +39,11 @@
 	<PropertyGroup>
 		<!-- Set version numbers -->
 		<ProductMajor>4</ProductMajor>
-		<ProductMinor>0</ProductMinor>
+		<ProductMinor>1</ProductMinor>
 		<ProductPatch>0</ProductPatch>
 
 		<!-- Set the pre-release string without a leading minus e.g. rc.1 -->
-		<ProductPreRelease></ProductPreRelease>
+		<ProductPreRelease>rc.1</ProductPreRelease>
 
 		<!--Create a dynamic revision number based on time of build
 		 
@@ -180,11 +180,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ASCOM.Alpaca.Components" Version="2.0.5" />
-		<PackageReference Include="ASCOM.AstrometryTools" Version="2.0.5" />
-		<PackageReference Include="ASCOM.Com.Components" Version="2.0.5" />
+		<PackageReference Include="ASCOM.Alpaca.Components" Version="2.0.8-rc.4" />
+		<PackageReference Include="ASCOM.AstrometryTools" Version="2.0.8-rc.4" />
+		<PackageReference Include="ASCOM.Com.Components" Version="2.0.8-rc.4" />
 		<PackageReference Include="ASCOM.Exception.Library" Version="7.0.1" />
-		<PackageReference Include="ASCOM.Tools" Version="2.0.5" />
+		<PackageReference Include="ASCOM.Tools" Version="2.0.8-rc.4" />
 		<PackageReference Include="Blazorise.Bootstrap" Version="1.6.1" />
 		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.6.1" />
 		<PackageReference Include="Blazorise.TreeView" Version="1.6.1" />

@@ -1,4 +1,6 @@
-﻿using ASCOM.Common;
+﻿using ASCOM;
+using ASCOM.Common;
+using ASCOM.Common.DeviceInterfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -227,7 +229,7 @@ namespace ConformU
                     {
                         // Test setting Connected to True
                         TL.LogMessage("Connect to device", MessageLevel.TestOnly, "");
-                        testStage = "Connect";
+                        testStage = "ConnectToDevice";
 
                         testDevice.Connect();
 
@@ -359,14 +361,32 @@ namespace ConformU
                             TL.LogMessage(testStage, MessageLevel.TestAndMessage, "Further tests abandoned.");
                         }
                     }
-                    catch (Exception ex) // Exception when setting Connected = True
+                    catch (MissingMemberException ex) // The Connecting property is missing
                     {
-                        conformResults.Issues.Add(new KeyValuePair<string, string>("Connected", $"Connection exception - testing abandoned: {ex.Message}"));
-                        TL.LogMessage(testStage, MessageLevel.Issue, $"Connection exception: {ex.Message}");
+                        testDevice.LogIssue(testStage, $"{ex.Message} Further testing abandoned.");
                         TL.LogMessage(testStage, MessageLevel.Debug, $"{ex}");
-                        TL.LogMessage("", MessageLevel.TestOnly, "");
-                        TL.LogMessage(testStage, MessageLevel.TestAndMessage, "Further tests abandoned.");
+                        testDevice.LogInfo(testStage, $"The {settings.DeviceType} device reported interface version {testDevice.GetInterfaceVersion()}, which indicates that it supports the Connect() and Disconnect() methods and the Connecting property.");
+                        testDevice.LogInfo(testStage, $"However, the Connecting property is not present in the device interface.");
+                        testDevice.LogInfo(testStage, $"Please check whether the device is reporting the correct interface version. For Platform 6 devices the latest {settings.DeviceType} interface version is {DeviceCapabilities.LatestPlatform6Interface[settings.DeviceType.Value]}.");
+                        testDevice.LogNewLine();
+                        testDevice.LogTestAndMessage(testStage, "Cannot connect to device, further tests abandoned.");
                     }
+                    catch (Exception ex) // Exception when connecting to device
+                    {
+                        testDevice.LogIssue(testStage, $"Connection exception - further testing abandoned: {ex.Message}");
+                        TL.LogMessage(testStage, MessageLevel.Debug, $"{ex}");
+                        testDevice.LogNewLine();
+                        testDevice.LogTestAndMessage(testStage, "Cannot connect to device, further tests abandoned.");
+                    }
+                }
+                catch (InvalidValueException ex) // Interface version is invalid
+                {
+                    //conformResults.Issues.Add(new KeyValuePair<string, string>("Initialise", $"The returned interface version is invalid for an {settings.DeviceType} device: {ex.Message}"));
+                    testDevice.LogIssue(testStage, $"The returned interface version is invalid for a {settings.DeviceType} device: {ex.Message}");
+                    testDevice.LogInfo(testStage, $"For a Platform 6 interface device the interface version should be: {DeviceCapabilities.LatestPlatform6Interface[settings.DeviceType.Value]}");
+                    testDevice.LogInfo(testStage, $"For a Platform 7 interface device that supports Connect(), Disconnect(), Connecting and DeviceState, the interface version should be: {DeviceCapabilities.LatestInterface[settings.DeviceType.Value]}");
+                    testDevice.LogNewLine();
+                    testDevice.LogTestAndMessage(testStage, "This device is incompatible with ASCOM clients because its interface version is invalid and the device cannot be tested further.");
                 }
                 catch (Exception ex) // Exception when creating device
                 {

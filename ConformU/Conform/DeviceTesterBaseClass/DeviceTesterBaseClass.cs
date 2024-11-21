@@ -1,12 +1,15 @@
 ﻿// Base class from which particular device testers are derived
 // Put all common elements in here
 using ASCOM;
+using ASCOM.Com;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
+using Microsoft.CSharp.RuntimeBinder;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -36,6 +39,9 @@ namespace ConformU
 
         // Class not registered COM exception error number
         internal const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
+
+        // Member not found COM exceptions error number
+        internal const int DISP_E_UNKNOWNNAME = unchecked((int)0x80020006);
 
         internal double fastTargetResponseTime = 0.100; // Time within which a status reporting interface member should ideally return (seconds)
         internal double standardTargetResponseTime = 1.000; // Time within which a non-status interface member should ideally return (seconds)
@@ -740,15 +746,27 @@ namespace ConformU
             SetTest("Connect");
             SetAction("Waiting for Connected to become 'true'");
 
-            // Try to get the device's interface version
-            LogDebug("Connect", $"Interface version: {GetInterfaceVersion()}");
-
-            // Set an internal indicating whether this is a Platform 7 or later device
+            // Set an internal property indicating whether this is a Platform 7 or later device
             IsPlatform7OrLater = DeviceCapabilities.IsPlatform7OrLater(settings.DeviceType, GetInterfaceVersion());
 
             // Use Connect /Disconnect if present
             if (DeviceCapabilities.HasConnectAndDeviceState(baseClassDeviceType, GetInterfaceVersion()))
             {
+                // First make sure that the Connecting property exists
+                try
+                {
+                    bool connecting = baseClassDevice.Connecting;
+                    // If we get there the property is implemented and can continue with connection tests
+                }
+                catch (Exception ex)
+                {
+                    // Check whether we got a missing member exception
+                    if (ex is RuntimeBinderException | ((ex is COMException) & (ex.HResult == DISP_E_UNKNOWNNAME))) // This is a missing member exception (different exceptions for the native and driver access components)
+                        throw new MissingMemberException("The Connecting property is not present in the device interface.");
+                    else // Some other error occurred so just throw it to the test manager
+                        throw;
+                }
+
                 LogCallToDriver("Connect", "About to get Connecting property");
                 if (!baseClassDevice.Connecting) // No connection / disconnection is in progress
                 {
@@ -823,6 +841,23 @@ namespace ConformU
 
             ResetTestActionStatus();
             tl.LogMessage("", MessageLevel.TestOnly, "");
+        }
+
+        public void ValidateInterfaceVersion()
+        {
+            // Try to get the device's interface version
+            int interfaceVersion = GetInterfaceVersion();
+
+            // Validate the interface version
+            if (DeviceCapabilities.IsValidAscomInterface(settings.DeviceType, interfaceVersion))
+                LogOk("CreateDevice", $"Found a valid interface version: {interfaceVersion}");
+            else
+            {
+                if (interfaceVersion < 1)
+                    throw new InvalidValueException($"The returned interface version was: {interfaceVersion}, ASCOM interface versions cannot be zero or negative.");
+                else
+                    throw new InvalidValueException($"The returned interface version was: {interfaceVersion}, this is above the highest supported ASCOM interface version.");
+            }
         }
 
         public void Disconnect()

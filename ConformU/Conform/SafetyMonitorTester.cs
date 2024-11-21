@@ -147,6 +147,10 @@ namespace ConformU
 
                 SetFullStatus("Create device", "Waiting for driver to stabilise", "");
                 WaitFor(1000, 100);
+
+                // Validate the interface version
+                ValidateInterfaceVersion();
+
             }
             catch (COMException exCom) when (exCom.ErrorCode == REGDB_E_CLASSNOTREG)
             {
