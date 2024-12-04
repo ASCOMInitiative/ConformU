@@ -459,7 +459,14 @@
         foreach (AscomDevice device in discovery.GetAscomDevices(Enum.Parse<DeviceTypes>(selectedDeviceTypeString)))
         {
             ascomDevices.Add(new AlpacaDeviceListItem($"{device.AscomDeviceName} ({device.IpAddress})", device));
-            if ((device.AscomDeviceName == configuration.Settings.AlpacaDevice.AscomDeviceName) & (device.IpAddress == configuration.Settings.AlpacaDevice.IpAddress) & (configuration.Settings.DeviceTechnology == DeviceTechnology.Alpaca)) ascomDevice = device;
+
+            // Make this device the current device in the UI list if it is an Alpaca device and the device name, IP address and IP port all match the currently selected device values.
+            if (
+                (configuration.Settings.DeviceTechnology == DeviceTechnology.Alpaca) &
+                (device.AscomDeviceName == configuration.Settings.AlpacaDevice.AscomDeviceName) &
+                (device.IpAddress == configuration.Settings.AlpacaDevice.IpAddress) &
+                (device.IpPort == configuration.Settings.AlpacaDevice.IpPort)
+                ) ascomDevice = device;
         }
         discoveryInProgress = false;
         configuration.Settings.OperationInProgress = false;
