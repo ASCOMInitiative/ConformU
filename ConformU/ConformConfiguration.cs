@@ -22,7 +22,23 @@ namespace ConformU
 
         private readonly SessionState conformStateManager;
 
-        #region Initialiser and Dispose
+        private static readonly JsonSerializerOptions jsonSerialisationOptions; // JSON De-serialisation options
+
+        #region Initialisers and Dispose
+
+        /// <summary>
+        /// Static initialiser so we only need to set JSON de-serialisation options once
+        /// </summary>
+        static ConformConfiguration()
+        {
+            // Set JSON de-serialisation options
+            jsonSerialisationOptions = new()
+            {
+                PropertyNameCaseInsensitive = true, // Ignore incorrect element name casing
+                WriteIndented = true
+            };
+            jsonSerialisationOptions.Converters.Add(new JsonStringEnumConverter()); // For increased resilience, accept both string member names and integer member values as valid for enum elements.
+        }
 
         /// <summary>
         /// Create a Configuration management instance and load the current settings
@@ -102,15 +118,8 @@ namespace ConformU
 
                                     try
                                     {
-                                        // Set de-serialisation options
-                                        JsonSerializerOptions options = new()
-                                        {
-                                            PropertyNameCaseInsensitive = true // Ignore incorrect element name casing
-                                        };
-                                        options.Converters.Add(new JsonStringEnumConverter()); // For increased resilience, accept both string member names and integer member values as valid for enum elements.
-
                                         // De-serialise the settings string into a Settings object
-                                        settings = JsonSerializer.Deserialize<Settings>(serialisedSettings, options);
+                                        settings = JsonSerializer.Deserialize<Settings>(serialisedSettings, jsonSerialisationOptions);
 
                                         // Test whether the retrieved settings match the requirements of this version of ConformU
                                         if (settings.SettingsCompatibilityVersion == Settings.SETTINGS_COMPATIBILTY_VERSION) // Version numbers match so all is well
@@ -302,7 +311,7 @@ namespace ConformU
                     if (string.IsNullOrEmpty(settings.AlpacaDevice.IpAddress)) issueList += $"\r\nAlpaca device IP address is not set";
 
                     if (settings.AlpacaDevice.IpPort == 0) issueList += $"\r\nAlpaca device IP Port is not set.";
-                    if (settings.AlpacaDevice.InterfaceVersion == 0) issueList += $"\r\nAlpaca interface version is not set";
+                    if (settings.AlpacaDevice.InterfaceVersion != 1) issueList += $"\r\nAlpaca interface version must be 1 but is actually: {settings.AlpacaDevice.InterfaceVersion}";
                     break;
 
                 case DeviceTechnology.COM:
@@ -336,7 +345,7 @@ namespace ConformU
         /// <param name="port"></param>
         /// <param name="deviceType"></param>
         /// <param name="deviceNumber"></param>
-        public void SetAlpacaDevice(ServiceType serviceType, string address, int port, DeviceTypes deviceType, int deviceNumber)
+        public void SetAlpacaDevice(ServiceType serviceType, string address, int port, int alpacaInterfaceVersion, DeviceTypes deviceType, int deviceNumber)
         {
             settings.DeviceTechnology = DeviceTechnology.Alpaca;
 
@@ -344,6 +353,7 @@ namespace ConformU
             settings.AlpacaDevice.ServerName = address;
             settings.AlpacaDevice.IpAddress = address;
             settings.AlpacaDevice.IpPort = port;
+            settings.AlpacaDevice.InterfaceVersion = alpacaInterfaceVersion;
             settings.AlpacaDevice.AscomDeviceType = deviceType;
             settings.AlpacaDevice.AlpacaDeviceNumber = deviceNumber;
             settings.DeviceType = deviceType;
@@ -440,23 +450,14 @@ namespace ConformU
         {
             try
             {
-                if (settingsToPersist is null)
-                {
-                    throw new ArgumentNullException(nameof(settingsToPersist));
-                }
+                ArgumentNullException.ThrowIfNull(settingsToPersist, nameof(settingsToPersist));
 
                 // Set the version number of this settings file
                 settingsToPersist.SettingsCompatibilityVersion = Settings.SETTINGS_COMPATIBILTY_VERSION;
 
                 TL?.LogMessage("PersistSettings", MessageLevel.Debug, $"Settings file: {SettingsFileName}");
 
-                JsonSerializerOptions options = new()
-                {
-                    WriteIndented = true
-                };
-                options.Converters.Add(new JsonStringEnumConverter());
-
-                string serialisedSettings = JsonSerializer.Serialize<Settings>(settingsToPersist, options);
+                string serialisedSettings = JsonSerializer.Serialize<Settings>(settingsToPersist, jsonSerialisationOptions);
 
                 Directory.CreateDirectory(Path.GetDirectoryName(SettingsFileName));
                 File.WriteAllText(SettingsFileName, serialisedSettings);

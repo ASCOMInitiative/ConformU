@@ -94,7 +94,7 @@ namespace ConformU
                 // Add a validator to handle both COM ProgIds and Alpaca URIs
                 deviceArgument.AddValidator((commandResult) =>
                 {
-                    DeviceTechnology technology = GetDeviceTechnology(commandResult.GetValueForArgument(deviceArgument), out _, out _, out _, out _, out _);
+                    DeviceTechnology technology = GetDeviceTechnology(commandResult.GetValueForArgument(deviceArgument), out _, out _, out _, out _, out _, out _);
 
                     switch (technology)
                     {
@@ -126,7 +126,7 @@ namespace ConformU
                 //Add a validator to handle Alpaca URIs
                 alpacaDeviceArgument.AddValidator((commandResult) =>
                 {
-                    DeviceTechnology technology = GetDeviceTechnology(commandResult.GetValueForArgument(alpacaDeviceArgument), out _, out _, out _, out _, out _);
+                    DeviceTechnology technology = GetDeviceTechnology(commandResult.GetValueForArgument(alpacaDeviceArgument), out _, out _, out _, out _, out _, out _);
 
                     switch (technology)
                     {
@@ -429,7 +429,7 @@ namespace ConformU
                 {
                     int returnCode = 0;
 
-                    DeviceTechnology technology = GetDeviceTechnology(device, out ServiceType? serviceType, out string address, out int port, out DeviceTypes? deviceType, out int deviceNumber);
+                    DeviceTechnology technology = GetDeviceTechnology(device, out ServiceType? serviceType, out string address, out int port, out int alpacaInterfaceVersion, out DeviceTypes? deviceType, out int deviceNumber);
 
                     switch (technology)
                     {
@@ -446,7 +446,7 @@ namespace ConformU
                             conformConfiguration.SetFullTest();
 
                             // Set the Alpaca device parameters
-                            conformConfiguration.SetAlpacaDevice(serviceType.Value, address, port, deviceType.Value, deviceNumber);
+                            conformConfiguration.SetAlpacaDevice(serviceType.Value, address, port, alpacaInterfaceVersion, deviceType.Value, deviceNumber);
 
                             // Run the conformance test
                             returnCode = RunConformanceTest(cycles);
@@ -489,7 +489,7 @@ namespace ConformU
                 {
                     int returnCode = 0;
 
-                    DeviceTechnology technology = GetDeviceTechnology(alpacaDevice, out ServiceType? serviceType, out string address, out int port, out DeviceTypes? deviceType, out int deviceNumber);
+                    DeviceTechnology technology = GetDeviceTechnology(alpacaDevice, out ServiceType? serviceType, out string address, out int port, out int alpacainterfaceVersion, out DeviceTypes? deviceType, out int deviceNumber);
 
                     switch (technology)
                     {
@@ -506,7 +506,7 @@ namespace ConformU
                             conformConfiguration.SetFullTest();
 
                             // Set the Alpaca device parameters
-                            conformConfiguration.SetAlpacaDevice(serviceType.Value, address, port, deviceType.Value, deviceNumber);
+                            conformConfiguration.SetAlpacaDevice(serviceType.Value, address, port, alpacainterfaceVersion, deviceType.Value, deviceNumber);
 
                             // Run the conformance test
                             returnCode = RunAlpacaProtocolTest();
@@ -529,7 +529,7 @@ namespace ConformU
                 // ALPACA USING SETTINGS COMMAND handler
                 alpacaUsingSettingsCommand.SetHandler((file, path, resultsFile, settingsFile, debugDiscovery, debugStartUp) =>
                 {
-                    if(InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile))
+                    if (InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile))
                         return Task.CompletedTask;
 
                     // Return a task with the required return code
@@ -587,7 +587,7 @@ namespace ConformU
             else
             {
                 // Initialise required variables required by several commands
-                if(InitialiseVariables(null, null, false, false, null, null))
+                if (InitialiseVariables(null, null, false, false, null, null))
                     return 0;
 
                 // Start a task to check whether any updates are available, if configured to do so.
@@ -647,7 +647,7 @@ namespace ConformU
         private static int StartGuiHandler(FileInfo file, DirectoryInfo path, bool debugStartUp, bool debugDiscovery, FileInfo resultsFile, FileInfo settingsFile)
         {
             // Initialise required variables required by several commands
-            if(InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile))
+            if (InitialiseVariables(file, path, debugStartUp, debugDiscovery, resultsFile, settingsFile))
                 return 0;
 
             // Start a task to check whether any updates are available, if configured to do so.
@@ -821,6 +821,7 @@ namespace ConformU
 
             return returnCode;
         }
+
         /// <summary>
         /// Initialises configuration variables required to run the application
         /// </summary>
@@ -830,7 +831,6 @@ namespace ConformU
         /// <param name="debugDiscovery"></param>
         /// <param name="resultsFileInfo"></param>
         /// <param name="settingsFileInfo"></param>
-
         private static bool InitialiseVariables(FileInfo logFileInfo, DirectoryInfo logPathInfo, bool debugStartUp, bool debugDiscovery, FileInfo resultsFileInfo, FileInfo settingsFileInfo)
         {
             bool closeDown = false; // Close down status: true = close down so that the 32bit process can run on its own, false to continue with this 64bit version
@@ -935,7 +935,7 @@ namespace ConformU
             return closeDown;
         }
 
-        private static DeviceTechnology GetDeviceTechnology(string progIdOrUri, out ServiceType? serviceType, out string address, out int port, out DeviceTypes? deviceType, out int deviceNumber)
+        private static DeviceTechnology GetDeviceTechnology(string progIdOrUri, out ServiceType? serviceType, out string address, out int port, out int apiVersion, out DeviceTypes? deviceType, out int deviceNumber)
         {
             // Initialise return values
             DeviceTechnology returnValue = DeviceTechnology.NotSelected;
@@ -943,6 +943,7 @@ namespace ConformU
             serviceType = null;
             address = null;
             port = 0;
+            apiVersion = 0;
             deviceType = null;
             deviceNumber = 0;
 
@@ -963,7 +964,7 @@ namespace ConformU
             // <DeviceType Group> - Device type e.g. telescope, camera etc.
             // <DeviceNumber Group> - Device number e.g.0, 1 etc.
             string alpacaPattern =
-                $@"^(?i)(?<Protocol>https?):\/\/(?<Address>(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){{3}}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:\[(?:(([0-9A-Fa-f]{{1,4}}:){{7}}([0-9A-Fa-f]{{1,4}}|:))|(([0-9A-Fa-f]{{1,4}}:){{6}}(:[0-9A-Fa-f]{{1,4}}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}})|:))|(([0-9A-Fa-f]{{1,4}}:){{5}}(((:[0-9A-Fa-f]{{1,4}}){{1,2}})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}})|:))|(([0-9A-Fa-f]{{1,4}}:){{4}}(((:[0-9A-Fa-f]{{1,4}}){{1,3}})|((:[0-9A-Fa-f]{{1,4}})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(([0-9A-Fa-f]{{1,4}}:){{3}}(((:[0-9A-Fa-f]{{1,4}}){{1,4}})|((:[0-9A-Fa-f]{{1,4}}){{0,2}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(?:(?:[0-9A-Fa-f]{{1,4}}:){{2}}(?:(?:(?::[0-9A-Fa-f]{{1,4}}){{1,5}})|((:[0-9A-Fa-f]{{1,4}}){{0,3}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(([0-9A-Fa-f]{{1,4}}:){{1}}(((:[0-9A-Fa-f]{{1,4}}){{1,6}})|((:[0-9A-Fa-f]{{1,4}}){{0,4}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(:(((:[0-9A-Fa-f]{{1,4}}){{1,7}})|((:[0-9A-Fa-f]{{1,4}}){{0,5}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:)))(?:%.+)?)\]):?(?<Port>[0-9]{{0,5}})(?-i)\/api\/v1\/(?<DeviceType>{deviceList})\/(?<DeviceNumber>[0-9]{{1,3}})\/?(?<Remainder>[0-9a-zA-Z]*)";
+                $@"^(?i)(?<Protocol>https?):\/\/(?<Address>(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){{3}}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:\[(?:(([0-9A-Fa-f]{{1,4}}:){{7}}([0-9A-Fa-f]{{1,4}}|:))|(([0-9A-Fa-f]{{1,4}}:){{6}}(:[0-9A-Fa-f]{{1,4}}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}})|:))|(([0-9A-Fa-f]{{1,4}}:){{5}}(((:[0-9A-Fa-f]{{1,4}}){{1,2}})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}})|:))|(([0-9A-Fa-f]{{1,4}}:){{4}}(((:[0-9A-Fa-f]{{1,4}}){{1,3}})|((:[0-9A-Fa-f]{{1,4}})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(([0-9A-Fa-f]{{1,4}}:){{3}}(((:[0-9A-Fa-f]{{1,4}}){{1,4}})|((:[0-9A-Fa-f]{{1,4}}){{0,2}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(?:(?:[0-9A-Fa-f]{{1,4}}:){{2}}(?:(?:(?::[0-9A-Fa-f]{{1,4}}){{1,5}})|((:[0-9A-Fa-f]{{1,4}}){{0,3}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(([0-9A-Fa-f]{{1,4}}:){{1}}(((:[0-9A-Fa-f]{{1,4}}){{1,6}})|((:[0-9A-Fa-f]{{1,4}}){{0,4}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(:(((:[0-9A-Fa-f]{{1,4}}){{1,7}})|((:[0-9A-Fa-f]{{1,4}}){{0,5}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:)))(?:%.+)?)\]):?(?<Port>[0-9]{{0,5}})(?-i)\/api\/v(?<ApiVersion>[0-9]*)\/(?<DeviceType>{deviceList})\/(?<DeviceNumber>[0-9]{{1,3}})\/?(?<Remainder>[0-9a-zA-Z]*)";
 
             Match alpacaMatch = Regex.Match(progIdOrUri, alpacaPattern, RegexOptions.CultureInvariant);
             if (alpacaMatch.Success) // This is an Alpaca URI
@@ -972,6 +973,7 @@ namespace ConformU
                 string protocolParameter = alpacaMatch.Groups["Protocol"].Value;
                 string addressParameter = alpacaMatch.Groups["Address"].Value;
                 string portParameter = alpacaMatch.Groups["Port"].Value;
+                string apiversionParameter = alpacaMatch.Groups["ApiVersion"].Value;
                 string deviceNumberParameter = alpacaMatch.Groups["DeviceNumber"].Value;
                 string deviceTypeParameter = alpacaMatch.Groups["DeviceType"].Value;
 
@@ -992,6 +994,9 @@ namespace ConformU
                     portParameter = "80";
                 }
                 port = Convert.ToInt32(portParameter);
+
+                apiVersion = Convert.ToInt32(apiversionParameter);
+
                 deviceNumber = Convert.ToInt32(deviceNumberParameter);
 
                 deviceType = Devices.StringToDeviceType(deviceTypeParameter);
