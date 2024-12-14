@@ -963,11 +963,21 @@ namespace ConformU
             // <Port Group> - IP port number e.g. 32323
             // <DeviceType Group> - Device type e.g. telescope, camera etc.
             // <DeviceNumber Group> - Device number e.g.0, 1 etc.
-            string alpacaPattern =
-                $@"^(?i)(?<Protocol>https?):\/\/(?<Address>(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){{3}}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:\[(?:(([0-9A-Fa-f]{{1,4}}:){{7}}([0-9A-Fa-f]{{1,4}}|:))|(([0-9A-Fa-f]{{1,4}}:){{6}}(:[0-9A-Fa-f]{{1,4}}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}})|:))|(([0-9A-Fa-f]{{1,4}}:){{5}}(((:[0-9A-Fa-f]{{1,4}}){{1,2}})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}})|:))|(([0-9A-Fa-f]{{1,4}}:){{4}}(((:[0-9A-Fa-f]{{1,4}}){{1,3}})|((:[0-9A-Fa-f]{{1,4}})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(([0-9A-Fa-f]{{1,4}}:){{3}}(((:[0-9A-Fa-f]{{1,4}}){{1,4}})|((:[0-9A-Fa-f]{{1,4}}){{0,2}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(?:(?:[0-9A-Fa-f]{{1,4}}:){{2}}(?:(?:(?::[0-9A-Fa-f]{{1,4}}){{1,5}})|((:[0-9A-Fa-f]{{1,4}}){{0,3}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(([0-9A-Fa-f]{{1,4}}:){{1}}(((:[0-9A-Fa-f]{{1,4}}){{1,6}})|((:[0-9A-Fa-f]{{1,4}}){{0,4}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(:(((:[0-9A-Fa-f]{{1,4}}){{1,7}})|((:[0-9A-Fa-f]{{1,4}}){{0,5}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:)))(?:%.+)?)\]):?(?<Port>[0-9]{{0,5}})(?-i)\/api\/v(?<ApiVersion>[0-9]*)\/(?<DeviceType>{deviceList})\/(?<DeviceNumber>[0-9]{{1,3}})\/?(?<Remainder>[0-9a-zA-Z]*)";
+            string alpacaPattern = $@"^(?i)(?<Protocol>https?):\/\/(?<Address>(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){{3}}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:\[(?:(([0-9A-Fa-f]{{1,4}}:){{7}}([0-9A-Fa-f]{{1,4}}|:))|(([0-9A-Fa-f]{{1,4}}:){{6}}(:[0-9A-Fa-f]{{1,4}}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}})|:))|(([0-9A-Fa-f]{{1,4}}:){{5}}(((:[0-9A-Fa-f]{{1,4}}){{1,2}})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}})|:))|(([0-9A-Fa-f]{{1,4}}:){{4}}(((:[0-9A-Fa-f]{{1,4}}){{1,3}})|((:[0-9A-Fa-f]{{1,4}})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(([0-9A-Fa-f]{{1,4}}:){{3}}(((:[0-9A-Fa-f]{{1,4}}){{1,4}})|((:[0-9A-Fa-f]{{1,4}}){{0,2}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(?:(?:[0-9A-Fa-f]{{1,4}}:){{2}}(?:(?:(?::[0-9A-Fa-f]{{1,4}}){{1,5}})|((:[0-9A-Fa-f]{{1,4}}){{0,3}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(([0-9A-Fa-f]{{1,4}}:){{1}}(((:[0-9A-Fa-f]{{1,4}}){{1,6}})|((:[0-9A-Fa-f]{{1,4}}){{0,4}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:))|(:(((:[0-9A-Fa-f]{{1,4}}){{1,7}})|((:[0-9A-Fa-f]{{1,4}}){{0,5}}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){{3}}))|:)))(?:%.+)?)\]):?(?<Port>[0-9]{{0,5}})(?-i)\/api\/v(?<ApiVersion>[0-9]*)\/(?<DeviceType>{deviceList})\/(?<DeviceNumber>[0-9]{{1,3}})\/?(?<Remainder>[0-9a-zA-Z]*)";
 
+            // Test whether there is an IP address regex match
             Match alpacaMatch = Regex.Match(progIdOrUri, alpacaPattern, RegexOptions.CultureInvariant);
-            if (alpacaMatch.Success) // This is an Alpaca URI
+
+            // Check whether the IP address Alpaca match failed. 
+            if (!alpacaMatch.Success) // IP address check failed so try a host name check
+            {
+                alpacaPattern = $@"^(?i)(?<Protocol>https?):\/\/(?<Address>([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{{0,61}}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{{0,61}}[a-zA-Z0-9]))*)?:?(?<Port>[0-9]{{0,5}})(?-i)\/api\/v(?<ApiVersion>[0-9]*)\/(?<DeviceType>{deviceList})\/(?<DeviceNumber>[0-9]{{1,3}})\/?(?<Remainder>[0-9a-zA-Z]*)";
+
+                // Test whether there is a host name regex match
+                alpacaMatch = Regex.Match(progIdOrUri, alpacaPattern, RegexOptions.CultureInvariant);
+            }
+
+            if (alpacaMatch.Success) // This is an Alpaca URI either using an IP address or a host name
             {
                 // Extract the match groups to convenience variables
                 string protocolParameter = alpacaMatch.Groups["Protocol"].Value;
