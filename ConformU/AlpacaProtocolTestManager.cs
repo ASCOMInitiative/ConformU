@@ -1,4 +1,5 @@
 ﻿using ASCOM.Alpaca.Clients;
+using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.Alpaca;
 using ASCOM.Common.DeviceInterfaces;
@@ -620,7 +621,11 @@ namespace ConformU
                         WaitWhile("StartExposure", () => camera.CameraState == CameraState.Exposing, 500,
                             settings.AlpacaConfiguration.StandardResponseTimeout, null);
                     });
-                    await PutNoParameters("StopExposure", null);
+                    await PutNoParameters("StopExposure", () =>
+                    {
+                        WaitWhile("StopExposure", () => (camera.CameraState != CameraState.Idle) & (camera.CameraState != CameraState.Error), 500,
+                            settings.AlpacaConfiguration.StandardResponseTimeout, null);
+                    });
 
                     // Test properties that require an image to have been taken first
 
@@ -657,6 +662,12 @@ namespace ConformU
 
                     await GetNoParameters("LastExposureDuration");
                     await GetNoParameters("LastExposureStartTime");
+
+                    // Make sure the camera is in Idle or Error state before exiting
+                    LogDebug("Cleanup", $"Ensuring Camera is in Idle or Error state. Camera state: {camera.CameraState}");
+                    WaitWhile("Cleanup", () => (camera.CameraState != CameraState.Idle) & (camera.CameraState != CameraState.Error), 500,
+                        settings.AlpacaConfiguration.StandardResponseTimeout, () => $"Camera state: {camera.CameraState}");
+                    LogDebug("Cleanup", $"Finished waiting for Idle or Error state. Camera state: {camera.CameraState}");
                 }
                 catch (TestCancelledException)
                 {
@@ -2947,9 +2958,17 @@ namespace ConformU
             // Combine the provided cancellation token parameter with the new timeout cancellation token
             CancellationTokenSource combinedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, applicationCancellationToken);
 
+            // Define a function to call the wait function and display the outcome
+            bool loggedWaitFunction()
+            {
+                bool waitFunctionResult = waitFunction();
+                LogDebug(actionName, $"Wait function outcome: {waitFunctionResult}, Status string: {(statusString is not null ? statusString() : "Not used")}");
+                return waitFunctionResult;
+            }
+
             // Wait for the completion function to return false
             Stopwatch sw = Stopwatch.StartNew(); // Start the loop timing stopwatch
-            while (waitFunction() & !combinedCts.Token.IsCancellationRequested)
+            while (loggedWaitFunction() & !combinedCts.Token.IsCancellationRequested)
             {
                 // Calculate the current loop number (starts at 0 given that the timer's elapsed time will be zero or very low on the first loop)
                 int currentLoopNumber = ((int)(sw.ElapsedMilliseconds) + 50) / pollInterval; // Add a small positive offset (50) because integer division always rounds down
