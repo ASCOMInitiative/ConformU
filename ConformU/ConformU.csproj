@@ -39,11 +39,11 @@
 	<PropertyGroup>
 		<!-- Set version numbers -->
 		<ProductMajor>4</ProductMajor>
-		<ProductMinor>1</ProductMinor>
+		<ProductMinor>2</ProductMinor>
 		<ProductPatch>0</ProductPatch>
 
 		<!-- Set the pre-release string without a leading minus e.g. rc.1 or leave empty for a production release -->
-		<ProductPreRelease></ProductPreRelease>
+		<ProductPreRelease>rc.1</ProductPreRelease>
 
 		<!--Create a dynamic revision number based on time of build
 		 
