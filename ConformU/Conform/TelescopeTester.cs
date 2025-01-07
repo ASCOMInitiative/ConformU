@@ -567,16 +567,6 @@ namespace ConformU
             TelescopeCanTest(CanType.CanSetGuideRates, "CanSetGuideRates");
             TelescopeCanTest(CanType.CanSetPark, "CanSetPark");
             TelescopeCanTest(CanType.CanSetPierSide, "CanSetPierSide");
-            try
-            {
-                LogCallToDriver("AlignmentMode Read", "About to get AlignmentMode property");
-                if ((telescopeDevice.AlignmentMode != AlignmentMode.GermanPolar) & canSetPierside)
-                    LogIssue("CanSetPierSide", "AlignmentMode is not GermanPolar but CanSetPierSide is true - contrary to ASCOM specification");
-            }
-            catch (Exception)
-            {
-            }
-
             TelescopeCanTest(CanType.CanSetRightAscensionRate, "CanSetRightAscensionRate");
             TelescopeCanTest(CanType.CanSetTracking, "CanSetTracking");
             TelescopeCanTest(CanType.CanSlew, "CanSlew");
@@ -1704,25 +1694,19 @@ namespace ConformU
                 siteLatitude = TimeFunc("SiteLatitude Read", () => telescopeDevice.SiteLatitude, TargetTime.Fast);
                 switch (siteLatitude)
                 {
-                    case var case19 when case19 < -90.0d:
-                        {
-                            LogIssue("SiteLatitude Read", "SiteLatitude is < -90 degrees");
-                            canReadSiteLatitude = false;
-                            break;
-                        }
+                    case < -90.0d: // Invalid - less than -90.0
+                        LogIssue("SiteLatitude Read", $"SiteLatitude is < -90.0 degrees: {siteLatitude.ToDMS()}");
+                        canReadSiteLatitude = false;
+                        break;
 
-                    case var case20 when case20 > 90.0d:
-                        {
-                            LogIssue("SiteLatitude Read", "SiteLatitude is > 90 degrees");
-                            canReadSiteLatitude = false;
-                            break;
-                        }
+                    case > 90.0d: // Invalid - more than 90.0
+                        LogIssue("SiteLatitude Read", $"SiteLatitude is > 90.0 degrees: {siteLatitude.ToDMS()}");
+                        canReadSiteLatitude = false;
+                        break;
 
-                    default:
-                        {
-                            LogOk("SiteLatitude Read", siteLatitude.ToDMS());
-                            break;
-                        }
+                    default: // Valid - normal range
+                        LogOk("SiteLatitude Read", siteLatitude.ToDMS());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1731,112 +1715,118 @@ namespace ConformU
                 HandleException("SiteLatitude Read", MemberType.Property, Required.Optional, ex, "");
             }
 
-            // SiteLatitude Write - Invalid low value
-            try
+            // Only try write tests if a valid latitude value was returned
+            if (canReadSiteLatitude) // A valid value was received
             {
-                LogCallToDriver("SiteLatitude Write", "About to set SiteLatitude property to -91.0");
-                telescopeDevice.SiteLatitude = -91.0d;
-                LogIssue("SiteLatitude Write", "No error generated on set site latitude < -90 degrees");
-            }
-            catch (Exception ex)
-            {
-                HandleInvalidValueExceptionAsOk("SiteLatitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site latitude < -90 degrees");
-            }
-
-            // SiteLatitude Write - Invalid high value
-            try
-            {
-                LogCallToDriver("SiteLatitude Write", "About to set SiteLatitude property to 91.0");
-                telescopeDevice.SiteLatitude = 91.0d;
-                LogIssue("SiteLatitude Write", "No error generated on set site latitude > 90 degrees");
-            }
-            catch (Exception ex)
-            {
-                HandleInvalidValueExceptionAsOk("SiteLatitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site latitude > 90 degrees");
-            }
-
-            // SiteLatitude Write - Valid value
-            bool canWriteSiteLatitude = true;
-            try
-            {
-                if (siteLatitude < -90.0d | siteLatitude > 90.0d)
-                    siteLatitude = 45.0d;
-                LogCallToDriver("SiteLatitude Write", $"About to set SiteLatitude property to {siteLatitude}");
-                TimeMethod("SiteLatitude Write", () => telescopeDevice.SiteLatitude = siteLatitude, TargetTime.Standard); // Restore original value
-                LogOk("SiteLatitude Write", $"Current value: {siteLatitude.ToDMS()} degrees written successfully");
-            }
-            catch (Exception ex)
-            {
-                canWriteSiteLatitude = false;
-                HandleException("SiteLatitude Write", MemberType.Property, Required.Optional, ex, "");
-            }
-
-            // Change the site latitude value
-            if (canReadSiteLatitude & canWriteSiteLatitude & settings.TelescopeExtendedSiteTests)
-            {
+                // SiteLatitude Write - Invalid low value
                 try
                 {
-                    // Calculate the new test latitude
-                    double testLatitude;
-
-                    switch (siteLatitude)
-                    {
-                        // Latitude -90 to 70
-                        case double d when d <= -70.0:
-                            testLatitude = siteLatitude + 10.0;
-                            break;
-
-                        // Latitude -70 to 0
-                        case double d when d > -70.0 & d <= 0.0:
-                            testLatitude = siteLatitude - 10.0;
-                            break;
-
-                        // Latitude 0 to 70
-                        case double d when d > 0.0 & d <= 70.0:
-                            testLatitude = siteLatitude + 10.0;
-                            break;
-
-                        // Latitude 70 upwards
-                        default:
-                            testLatitude = siteLatitude - 10.0;
-                            break;
-                    }
-
-                    // Set the test value
-                    LogCallToDriver("SiteLatitude Write", $"About to set SiteLatitude property to arbitrary value:{testLatitude.ToDMS()}");
-                    telescopeDevice.SiteLatitude = testLatitude;
-
-                    // Read the value back
-                    LogCallToDriver("SiteLatitude Write", "About to get SiteLatitude property");
-                    double newLatitude = telescopeDevice.SiteLatitude;
-
-                    // Compare with the expected value
-                    if (newLatitude == testLatitude)
-                    {
-                        LogOk("SiteLatitude Write", $"Test value {testLatitude.ToDMS()} set and read correctly");
-                    }
-                    else
-                    {
-                        LogIssue("SiteLatitude Write", $"Test value {testLatitude.ToDMS()} did not round trip correctly. GET SiteLatitude returned: {newLatitude.ToDMS()} instead of {testLatitude.ToDMS()}");
-                    }
+                    LogCallToDriver("SiteLatitude Write", "About to set SiteLatitude property to -91.0");
+                    telescopeDevice.SiteLatitude = -91.0d;
+                    LogIssue("SiteLatitude Write", "No error generated on set site latitude < -90 degrees");
                 }
                 catch (Exception ex)
                 {
-                    HandleException("SiteLatitude Write", MemberType.Property, Required.MustBeImplemented, ex, "A valid value could not be set");
+                    HandleInvalidValueExceptionAsOk("SiteLatitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site latitude < -90 degrees");
                 }
 
-                // Attempt to restore the original value
+                // SiteLatitude Write - Invalid high value
                 try
                 {
-                    // Set the original value
-                    LogCallToDriver("SiteLatitude Write", $"About to restore original SiteLatitude property :{siteLatitude.ToDMS()}");
-                    telescopeDevice.SiteLatitude = siteLatitude;
-                    LogOk("SiteLatitude Write", $"Successfully restored original site latitude: {siteLatitude.ToDMS()}");
+                    LogCallToDriver("SiteLatitude Write", "About to set SiteLatitude property to 91.0");
+                    telescopeDevice.SiteLatitude = 91.0d;
+                    LogIssue("SiteLatitude Write", "No error generated on set site latitude > 90 degrees");
                 }
                 catch (Exception ex)
                 {
-                    HandleException("SiteLatitude Write", MemberType.Property, Required.MustBeImplemented, ex, "The original value could not be restored");
+                    HandleInvalidValueExceptionAsOk("SiteLatitude Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set site latitude > 90 degrees");
                 }
+
+                // SiteLatitude Write - Valid value
+                bool canWriteSiteLatitude = true;
+                try
+                {
+                    LogCallToDriver("SiteLatitude Write", $"About to set SiteLatitude property to {siteLatitude}");
+                    TimeMethod("SiteLatitude Write", () => telescopeDevice.SiteLatitude = siteLatitude, TargetTime.Standard); // Restore original value
+                    LogOk("SiteLatitude Write", $"Current value: {siteLatitude.ToDMS()} degrees written successfully");
+                }
+                catch (Exception ex)
+                {
+                    canWriteSiteLatitude = false;
+                    HandleException("SiteLatitude Write", MemberType.Property, Required.Optional, ex, "");
+                }
+
+                // Change the site latitude value
+                if (canWriteSiteLatitude & settings.TelescopeExtendedSiteTests)
+                {
+                    try
+                    {
+                        // Calculate the new test latitude
+                        double testLatitude;
+
+                        switch (siteLatitude)
+                        {
+                            // Latitude -90 to 70
+                            case double d when d <= -70.0:
+                                testLatitude = siteLatitude + 10.0;
+                                break;
+
+                            // Latitude -70 to 0
+                            case double d when d > -70.0 & d <= 0.0:
+                                testLatitude = siteLatitude - 10.0;
+                                break;
+
+                            // Latitude 0 to 70
+                            case double d when d > 0.0 & d <= 70.0:
+                                testLatitude = siteLatitude + 10.0;
+                                break;
+
+                            // Latitude 70 upwards
+                            default:
+                                testLatitude = siteLatitude - 10.0;
+                                break;
+                        }
+
+                        // Set the test value
+                        LogCallToDriver("SiteLatitude Write", $"About to set SiteLatitude property to arbitrary value:{testLatitude.ToDMS()}");
+                        telescopeDevice.SiteLatitude = testLatitude;
+
+                        // Read the value back
+                        LogCallToDriver("SiteLatitude Write", "About to get SiteLatitude property");
+                        double newLatitude = telescopeDevice.SiteLatitude;
+
+                        // Compare with the expected value
+                        if (newLatitude == testLatitude)
+                        {
+                            LogOk("SiteLatitude Write", $"Test value {testLatitude.ToDMS()} set and read correctly");
+                        }
+                        else
+                        {
+                            LogIssue("SiteLatitude Write", $"Test value {testLatitude.ToDMS()} did not round trip correctly. GET SiteLatitude returned: {newLatitude.ToDMS()} instead of {testLatitude.ToDMS()}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleException("SiteLatitude Write", MemberType.Property, Required.MustBeImplemented, ex, "A valid value could not be set");
+                    }
+
+                    // Attempt to restore the original value
+                    try
+                    {
+                        // Set the original value
+                        LogCallToDriver("SiteLatitude Write", $"About to restore original SiteLatitude property :{siteLatitude.ToDMS()}");
+                        telescopeDevice.SiteLatitude = siteLatitude;
+                        LogOk("SiteLatitude Write", $"Successfully restored original site latitude: {siteLatitude.ToDMS()}");
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleException("SiteLatitude Write", MemberType.Property, Required.MustBeImplemented, ex, "The original value could not be restored");
+                    }
+                }
+            }
+            else // Cannot read
+            {
+                LogInfo("SiteLatitude Write", $"Tests skipped because SiteLatitude Read is not implemented, returned an invalid value or reported an error.");
             }
             if (cancellationToken.IsCancellationRequested) return;
 
@@ -3783,16 +3773,16 @@ namespace ConformU
                         LogCallToDriver("SideOfPier Model Tests", "About to get AlignmentMode property");
                         if (telescopeDevice.AlignmentMode == AlignmentMode.GermanPolar)
                         {
-                            LogDebug("SideOfPier Model Tests", "Calling SideOfPierTests()");
+                            LogDebug("SideOfPier Model Tests", $"Site latitude: {siteLatitude.ToDMS()}");
                             switch (siteLatitude)
                             {
-                                case var case6 when -SIDE_OF_PIER_INVALID_LATITUDE <= case6 && case6 <= SIDE_OF_PIER_INVALID_LATITUDE: // Refuse to handle this value because the Conform targeting logic or the mount's SideofPier flip logic may fail when the poles are this close to the horizon
-                                    LogInfo("SideOfPier Model Tests", $"Tests skipped because the site latitude is reported as {Utilities.DegreesToDMS(siteLatitude, ":", ":", "", 3)}");
+                                case >= -SIDE_OF_PIER_INVALID_LATITUDE and <= SIDE_OF_PIER_INVALID_LATITUDE: // Refuse to handle this value because the Conform targeting logic or the mount's SideofPier flip logic may fail when the poles are this close to the horizon
+                                    LogInfo("SideOfPier Model Tests", $"Tests skipped because the site latitude is reported as {siteLatitude.ToDMS()}");
                                     LogInfo("SideOfPier Model Tests", "This places the celestial poles close to the horizon and the mount's flip logic may override Conform's expected behaviour.");
                                     LogInfo("SideOfPier Model Tests", $"Please set the site latitude to a value within the ranges {SIDE_OF_PIER_INVALID_LATITUDE:+0.0;-0.0} to +90.0 or {(-SIDE_OF_PIER_INVALID_LATITUDE):+0.0;-0.0} to -90.0 to obtain a reliable result.");
                                     break;
 
-                                case var case7 when -90.0d <= case7 && case7 <= 90.0d: // Normal case, just run the tests because latitude is outside the invalid range but within -90.0 to +90.0
+                                case >= -90.0d and <= 90.0d: // Normal case, just run the tests because latitude is outside the invalid range but within -90.0 to +90.0
                                     // SideOfPier write property test - Optional
                                     if (settings.TestSideOfPierWrite)
                                     {
