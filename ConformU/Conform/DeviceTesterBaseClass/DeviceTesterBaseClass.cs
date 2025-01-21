@@ -448,7 +448,7 @@ namespace ConformU
                                         if (baseClassDeviceType == DeviceTypes.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.ToUpper() == "ASCOM.OCH.OBSERVINGCONDITIONS")
                                         {
                                             string result;
-                                            if (actionString.ToUpperInvariant().StartsWith("//OCSIMULATOR:"))
+                                            if (actionString.StartsWith("//OCSIMULATOR:", StringComparison.InvariantCultureIgnoreCase))
                                             {
                                                 try
                                                 {
@@ -463,7 +463,7 @@ namespace ConformU
                                                         $"Exception calling OCH simulator action {actionString}: {ex1.Message}");
                                                 }
                                             }
-                                            else if (actionString.ToUpperInvariant().StartsWith("//ASCOM.SIMULATOR.OBSERVINGCONDITIONS:"))
+                                            else if (actionString.StartsWith("//ASCOM.SIMULATOR.OBSERVINGCONDITIONS:", StringComparison.InvariantCultureIgnoreCase))
                                             {
                                                 try
                                                 {
@@ -478,7 +478,7 @@ namespace ConformU
                                                         $"Exception calling OCH simulator action {actionString}: {ex1.Message}");
                                                 }
                                             }
-                                            else if (actionString.ToUpperInvariant().StartsWith("//SWITCHSIMULATOR:"))
+                                            else if (actionString.StartsWith("//SWITCHSIMULATOR:", StringComparison.InvariantCultureIgnoreCase))
                                             {
                                                 try
                                                 {
@@ -493,7 +493,7 @@ namespace ConformU
                                                         $"Exception calling switch simulator action {actionString}: {ex1.Message}");
                                                 }
                                             }
-                                            else if (actionString.ToUpperInvariant().StartsWith("//ASCOM.SIMULATOR.SWITCH:"))
+                                            else if (actionString.StartsWith("//ASCOM.SIMULATOR.SWITCH:", StringComparison.InvariantCultureIgnoreCase))
                                             {
                                                 try
                                                 {
@@ -1738,9 +1738,9 @@ namespace ConformU
             string retVal;
 
             // Treat ASCOM exceptions specially
-            if (clientException.GetType().FullName.ToUpper().Contains("ASCOM"))
+            if (clientException.GetType().FullName.Contains("ASCOM", StringComparison.InvariantCultureIgnoreCase))
             {
-                if (clientException.GetType().FullName.ToUpper().Contains("DRIVEREXCEPTION")) // We have a driver exception so add its number
+                if (clientException.GetType().FullName.Contains("DRIVEREXCEPTION", StringComparison.InvariantCultureIgnoreCase)) // We have a driver exception so add its number
                 {
                     DriverException driverEx = (DriverException)clientException;
                     retVal = $"DriverException(0x{driverEx.Number:X8})";
