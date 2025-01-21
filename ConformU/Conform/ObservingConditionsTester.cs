@@ -16,9 +16,9 @@ namespace ConformU
         private double averageperiod, dewPoint, humidity, windDirection, windSpeed;
 
         // Variables to indicate whether each function is or is not implemented to that it is possible to check that for any given sensor, all three either are or are not implemented
-        private readonly List<string> sensorIsImplemented = new();
-        private readonly List<string> sensorHasDescription = new();
-        private readonly List<string> sensorHasTimeOfLastUpdate = new();
+        private readonly List<string> sensorIsImplemented = [];
+        private readonly List<string> sensorHasDescription = [];
+        private readonly List<string> sensorHasTimeOfLastUpdate = [];
 
         // Helper variables
         private IObservingConditionsV2 mObservingConditions;
@@ -52,7 +52,7 @@ namespace ConformU
         private const string PROPERTY_TIMESINCELASTUPDATE = "TimeSinceLastUpdate";
 
         // List of valid ObservingConditions sensor properties
-        private readonly List<string> validSensors = new() {
+        private readonly List<string> validSensors = [
             PROPERTY_CLOUDCOVER,
             PROPERTY_DEWPOINT,
             PROPERTY_HUMIDITY,
@@ -66,7 +66,7 @@ namespace ConformU
             PROPERTY_WINDDIRECTION,
             PROPERTY_WINDGUST,
             PROPERTY_WINDSPEED
-        };
+        ];
 
         private enum ObservingConditionsProperty
         {
@@ -327,13 +327,18 @@ namespace ConformU
             TestDouble(PROPERTY_WINDGUST, ObservingConditionsProperty.WindGust, 0.0, 1000.0, Required.Optional);
             windSpeed = TestDouble(PROPERTY_WINDSPEED, ObservingConditionsProperty.WindSpeed, 0.0, 1000.0, Required.Optional);
 
-            // Additional test to confirm that the reported direction is 0.0 if the wind speed is reported as 0.0
-            if ((windSpeed == 0.0))
+            // Additional test to confirm that wind direction is reported as 0.0 if wind speed is reported as 0.0
+            if ((windSpeed == 0.0)) // Wind speed is reported as 0.0
             {
-                if ((windDirection == 0.0))
-                    LogOk(PROPERTY_WINDSPEED, "Wind direction is reported as 0.0 when wind speed is 0.0");
-                else
-                    LogIssue(PROPERTY_WINDSPEED, string.Format("When wind speed is reported as 0.0, wind direction should also be reported as 0.0, it is actually reported as {0}", windDirection));
+                // Check whether wind direction is implemented
+                if (IsGoodValue(windDirection)) // Wind direction is implemented
+                {
+                    // Check whether wind direction is reported as 0.0
+                    if (windDirection == 0.0)
+                        LogOk(PROPERTY_WINDSPEED, "Wind direction is reported as 0.0 when wind speed is 0.0");
+                    else
+                        LogIssue(PROPERTY_WINDSPEED, $"When wind speed is reported as 0.0, wind direction should also be reported as 0.0, it is actually reported as {windDirection}");
+                }
             }
         }
 
@@ -453,11 +458,11 @@ namespace ConformU
         #region Support Code
 
         /// <summary>
-        ///     ''' Tests whether a double has a good value or the NaN bad value indicator
-        ///     ''' </summary>
-        ///     ''' <param name="value">Variable to be tested</param>
-        ///     ''' <returns>Returns True if the variable has a good value, otherwise returns False</returns>
-        ///     ''' <remarks></remarks>
+        /// Tests whether a double has a good value or the NaN bad value indicator
+        /// </summary>
+        /// <param name="value">Variable to be tested</param>
+        /// <returns>Returns True if the variable has a good value, otherwise returns False</returns>
+        /// <remarks></remarks>
         private static bool IsGoodValue(double value)
         {
             return !double.IsNaN(value);
@@ -691,7 +696,7 @@ namespace ConformU
 
         private string TestSensorDescription(string propertyName, ObservingConditionsProperty enumName, int pMaxLength, Required pMandatory)
         {
-            string returnValue="";
+            string returnValue = "";
             try
             {
                 LogCallToDriver(enumName.ToString(), $"About to call SensorDescription({propertyName}) method");
