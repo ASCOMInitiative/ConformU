@@ -4,6 +4,7 @@ using ASCOM;
 using ASCOM.Com;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
+using ASCOM.Tools;
 using Microsoft.CSharp.RuntimeBinder;
 using System;
 using System.Collections;
@@ -233,17 +234,13 @@ namespace ConformU
                 switch (TimeFunc("InterfaceVersion", () => GetInterfaceVersion(), TargetTime.Fast))
                 {
                     case < 1:
-                        {
-                            LogIssue("InterfaceVersion",
-                                $"InterfaceVersion must be 1 or greater but driver returned: {GetInterfaceVersion()}");
-                            break;
-                        }
+                        LogIssue("InterfaceVersion",
+                            $"InterfaceVersion must be 1 or greater but driver returned: {GetInterfaceVersion()}");
+                        break;
 
                     default:
-                        {
-                            LogOk("InterfaceVersion", GetInterfaceVersion().ToString());
-                            break;
-                        }
+                        LogOk("InterfaceVersion", GetInterfaceVersion().ToString());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -272,142 +269,136 @@ namespace ConformU
             }
 
             // Description - Required
-            if (IncludeMethod(MandatoryMethod.Description, baseClassDeviceType, GetInterfaceVersion()))
+            try
             {
-                try
+                if (DeviceCapabilities.InterfaceHasMember(MemberNames.Description, baseClassDeviceType, GetInterfaceVersion()))
                 {
                     LogCallToDriver("Description", "About to get property Description");
                     string description = TimeFunc("Description", () => baseClassDevice.Description, TargetTime.Fast);
                     switch (description ?? "")
                     {
                         case "":
-                            {
-                                LogInfo("Description", "No description string");
-                                break;
-                            }
+                            LogInfo("Description", "No description string");
+                            break;
 
                         default:
+                            if (description.Length > 68 & baseClassDeviceType == DeviceTypes.Camera)
                             {
-                                if (description.Length > 68 & baseClassDeviceType == DeviceTypes.Camera)
-                                {
-                                    LogIssue("Description",
-                                        $"Maximum number of characters is 68 for compatibility with FITS headers, found: {description.Length} characters: {description}");
-                                }
-                                else
-                                {
-                                    LogOk("Description", description.ToString());
-                                }
-
-                                break;
+                                LogIssue("Description",
+                                    $"Maximum number of characters is 68 for compatibility with FITS headers, found: {description.Length} characters: {description}");
                             }
+                            else
+                            {
+                                LogOk("Description", description.ToString());
+                            }
+                            break;
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    HandleException("Description", MemberType.Property, Required.Mandatory, ex, "");
+                    LogInfo("Description", "Description test omitted - Description is not a member of this interface version.");
                 }
-
-                if (ApplicationCancellationToken.IsCancellationRequested)
-                    return;
+            }
+            catch (Exception ex)
+            {
+                HandleException("Description", MemberType.Property, Required.Mandatory, ex, "");
             }
 
+            if (ApplicationCancellationToken.IsCancellationRequested)
+                return;
+
             // DriverInfo - Required
-            if (IncludeMethod(MandatoryMethod.DriverInfo, baseClassDeviceType, GetInterfaceVersion()))
+            try
             {
-                try
+                if (DeviceCapabilities.InterfaceHasMember(MemberNames.DriverInfo, baseClassDeviceType, GetInterfaceVersion()))
                 {
                     LogCallToDriver("DriverInfo", "About to get property DriverInfo");
                     string driverInfo = TimeFunc("DriverInfo", () => baseClassDevice.DriverInfo, TargetTime.Fast);
                     switch (driverInfo ?? "")
                     {
                         case "":
-                            {
-                                LogInfo("DriverInfo", "No DriverInfo string");
-                                break;
-                            }
+                            LogInfo("DriverInfo", "No DriverInfo string");
+                            break;
 
                         default:
-                            {
-                                LogOk("DriverInfo", driverInfo.ToString());
-                                break;
-                            }
+                            LogOk("DriverInfo", driverInfo.ToString());
+                            break;
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    HandleException("DriverInfo", MemberType.Property, Required.Mandatory, ex, "");
+                    LogInfo("DriverInfo", "DriverInfo test omitted - DriverInfo is not a member of this interface version.");
                 }
-
-                if (ApplicationCancellationToken.IsCancellationRequested)
-                    return;
+            }
+            catch (Exception ex)
+            {
+                HandleException("DriverInfo", MemberType.Property, Required.Mandatory, ex, "");
             }
 
+            if (ApplicationCancellationToken.IsCancellationRequested)
+                return;
+
             // DriverVersion - Required
-            if (IncludeMethod(MandatoryMethod.DriverVersion, baseClassDeviceType, GetInterfaceVersion()))
+            try
             {
-                try
+                if (DeviceCapabilities.InterfaceHasMember(MemberNames.DriverVersion, baseClassDeviceType, GetInterfaceVersion()))
                 {
                     LogCallToDriver("DriverVersion", "About to get property DriverVersion");
                     string driverVersion = TimeFunc("DriverVersion", () => baseClassDevice.DriverVersion, TargetTime.Fast);
                     switch (driverVersion ?? "")
                     {
                         case "":
-                            {
-                                LogInfo("DriverVersion", "No DriverVersion string");
-                                break;
-                            }
+                            LogInfo("DriverVersion", "No DriverVersion string");
+                            break;
 
                         default:
-                            {
-                                LogOk("DriverVersion", driverVersion.ToString());
-                                break;
-                            }
+                            LogOk("DriverVersion", driverVersion.ToString());
+                            break;
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    LogIssue("DriverVersion", ex.Message);
+                    LogInfo("DriverVersion", "DriverVersion test omitted - DriverVersion is not a member of this interface version.");
                 }
-
-                if (ApplicationCancellationToken.IsCancellationRequested)
-                    return;
             }
-            else
+            catch (Exception ex)
             {
-                LogInfo("DriverVersion",
-                    $"Skipping test as this method is not supported in interface V{GetInterfaceVersion()}");
+                LogIssue("DriverVersion", ex.Message);
             }
+
+            if (ApplicationCancellationToken.IsCancellationRequested)
+                return;
 
             // Name - Required
-            if (IncludeMethod(MandatoryMethod.Name, baseClassDeviceType, GetInterfaceVersion()))
+            try
             {
-                try
+                if (DeviceCapabilities.InterfaceHasMember(MemberNames.Name, baseClassDeviceType, GetInterfaceVersion()))
                 {
                     LogCallToDriver("Name", "About to get property Name");
                     string name = TimeFunc("Name", () => baseClassDevice.Name, TargetTime.Fast);
                     switch (name ?? "")
                     {
                         case "":
-                            {
-                                LogInfo("Name", "Name is empty");
-                                break;
-                            }
+                            LogInfo("Name", "Name is empty");
+                            break;
 
                         default:
-                            {
-                                LogOk("Name", name);
-                                break;
-                            }
+                            LogOk("Name", name);
+                            break;
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    HandleException("Name", MemberType.Property, Required.Mandatory, ex, "");
+                    LogInfo("Name", "Skipping test because Name is not a member of this interface version.");
                 }
-
-                if (ApplicationCancellationToken.IsCancellationRequested)
-                    return;
             }
+            catch (Exception ex)
+            {
+                HandleException("Name", MemberType.Property, Required.Mandatory, ex, "");
+            }
+
+            if (ApplicationCancellationToken.IsCancellationRequested)
+                return;
             LogNewLine();
 
             // Action - optional but cannot be tested
@@ -416,110 +407,115 @@ namespace ConformU
             // Supported actions - Optional but Required through DriverAccess
             try
             {
-                LogCallToDriver("SupportedActions", "About to call method SupportedActions");
-                IList supportedActions = TimeFunc("SupportedActions", () => (IList)baseClassDevice.SupportedActions, TargetTime.Fast);
-                if (supportedActions.Count == 0)
+                if (DeviceCapabilities.InterfaceHasMember(MemberNames.SupportedActions, baseClassDeviceType, GetInterfaceVersion()))
                 {
-                    LogOk("SupportedActions", "Driver returned an empty action list");
+                    LogCallToDriver("SupportedActions", "About to call method SupportedActions");
+                    IList supportedActions = TimeFunc("SupportedActions", () => (IList)baseClassDevice.SupportedActions, TargetTime.Fast);
+                    if (supportedActions.Count == 0)
+                    {
+                        LogOk("SupportedActions", "Driver returned an empty action list");
+                    }
+                    else
+                    {
+                        int i = 0;
+                        foreach (object action in supportedActions)
+                        {
+                            i += 1;
+                            if (action.GetType().Name == "String")
+                            {
+                                string actionString = action.ToString();
+                                const string testParameters = "Conform test parameters";
+                                switch (actionString ?? "")
+                                {
+                                    case "":
+                                        LogIssue("SupportedActions", $"Supported action {i} Is an empty string"); // List the action that was found
+                                        break;
+
+                                    default:
+                                        {
+                                            LogOk("SupportedActions", $"Found action: {actionString}");
+
+                                            // Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
+                                            if (baseClassDeviceType == DeviceTypes.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.Equals("ASCOM.OCH.OBSERVINGCONDITIONS", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                string result;
+                                                if (actionString.StartsWith("//OCSIMULATOR:", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    try
+                                                    {
+                                                        LogCallToDriver("SupportedActions", "About to call method Action");
+                                                        result = baseClassDevice.Action(actionString, testParameters);
+                                                        LogOk("SupportedActions",
+                                                            $"OC simulator action {actionString} gave result: {result}");
+                                                    }
+                                                    catch (Exception ex1)
+                                                    {
+                                                        LogIssue("SupportedActions",
+                                                            $"Exception calling OCH simulator action {actionString}: {ex1.Message}");
+                                                    }
+                                                }
+                                                else if (actionString.StartsWith("//ASCOM.SIMULATOR.OBSERVINGCONDITIONS:", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    try
+                                                    {
+                                                        LogCallToDriver("SupportedActions", "About to call method Action");
+                                                        result = baseClassDevice.Action(actionString, testParameters);
+                                                        LogOk("SupportedActions",
+                                                            $"OC simulator action {actionString} gave result: {result}");
+                                                    }
+                                                    catch (Exception ex1)
+                                                    {
+                                                        LogIssue("SupportedActions",
+                                                            $"Exception calling OCH simulator action {actionString}: {ex1.Message}");
+                                                    }
+                                                }
+                                                else if (actionString.StartsWith("//SWITCHSIMULATOR:", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    try
+                                                    {
+                                                        LogCallToDriver("SupportedActions", "About to call method Action");
+                                                        result = baseClassDevice.Action(actionString, testParameters);
+                                                        LogOk("SupportedActions",
+                                                            $"Switch simulator action {actionString} gave result: {result}");
+                                                    }
+                                                    catch (Exception ex1)
+                                                    {
+                                                        LogIssue("SupportedActions",
+                                                            $"Exception calling switch simulator action {actionString}: {ex1.Message}");
+                                                    }
+                                                }
+                                                else if (actionString.StartsWith("//ASCOM.SIMULATOR.SWITCH:", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    try
+                                                    {
+                                                        LogCallToDriver("SupportedActions", "About to call method Action");
+                                                        result = baseClassDevice.Action(actionString, testParameters);
+                                                        LogOk("SupportedActions",
+                                                            $"Switch simulator action {actionString} gave result: {result}");
+                                                    }
+                                                    catch (Exception ex1)
+                                                    {
+                                                        LogIssue("SupportedActions",
+                                                            $"Exception calling switch simulator action {actionString}: {ex1.Message}");
+                                                    }
+                                                }
+                                            }
+
+                                            break;
+                                        }
+                                }
+                            }
+                            else
+                            {
+                                LogIssue("SupportedActions",
+                                    $"Actions must be strings. The type of action {i} {action} is: {action.GetType().Name}");
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    int i = 0;
-                    foreach (object action in supportedActions)
-                    {
-                        i += 1;
-                        if (action.GetType().Name == "String")
-                        {
-                            string actionString = action.ToString();
-                            const string testParameters = "Conform test parameters";
-                            switch (actionString ?? "")
-                            {
-                                case "":
-                                    {
-                                        LogIssue("SupportedActions", $"Supported action {i} Is an empty string"); // List the action that was found
-                                        break;
-                                    }
-
-                                default:
-                                    {
-                                        LogOk("SupportedActions", $"Found action: {actionString}");
-
-                                        // Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
-                                        if (baseClassDeviceType == DeviceTypes.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.ToUpper() == "ASCOM.OCH.OBSERVINGCONDITIONS")
-                                        {
-                                            string result;
-                                            if (actionString.StartsWith("//OCSIMULATOR:", StringComparison.InvariantCultureIgnoreCase))
-                                            {
-                                                try
-                                                {
-                                                    LogCallToDriver("SupportedActions", "About to call method Action");
-                                                    result = baseClassDevice.Action(actionString, testParameters);
-                                                    LogOk("SupportedActions",
-                                                        $"OC simulator action {actionString} gave result: {result}");
-                                                }
-                                                catch (Exception ex1)
-                                                {
-                                                    LogIssue("SupportedActions",
-                                                        $"Exception calling OCH simulator action {actionString}: {ex1.Message}");
-                                                }
-                                            }
-                                            else if (actionString.StartsWith("//ASCOM.SIMULATOR.OBSERVINGCONDITIONS:", StringComparison.InvariantCultureIgnoreCase))
-                                            {
-                                                try
-                                                {
-                                                    LogCallToDriver("SupportedActions", "About to call method Action");
-                                                    result = baseClassDevice.Action(actionString, testParameters);
-                                                    LogOk("SupportedActions",
-                                                        $"OC simulator action {actionString} gave result: {result}");
-                                                }
-                                                catch (Exception ex1)
-                                                {
-                                                    LogIssue("SupportedActions",
-                                                        $"Exception calling OCH simulator action {actionString}: {ex1.Message}");
-                                                }
-                                            }
-                                            else if (actionString.StartsWith("//SWITCHSIMULATOR:", StringComparison.InvariantCultureIgnoreCase))
-                                            {
-                                                try
-                                                {
-                                                    LogCallToDriver("SupportedActions", "About to call method Action");
-                                                    result = baseClassDevice.Action(actionString, testParameters);
-                                                    LogOk("SupportedActions",
-                                                        $"Switch simulator action {actionString} gave result: {result}");
-                                                }
-                                                catch (Exception ex1)
-                                                {
-                                                    LogIssue("SupportedActions",
-                                                        $"Exception calling switch simulator action {actionString}: {ex1.Message}");
-                                                }
-                                            }
-                                            else if (actionString.StartsWith("//ASCOM.SIMULATOR.SWITCH:", StringComparison.InvariantCultureIgnoreCase))
-                                            {
-                                                try
-                                                {
-                                                    LogCallToDriver("SupportedActions", "About to call method Action");
-                                                    result = baseClassDevice.Action(actionString, testParameters);
-                                                    LogOk("SupportedActions",
-                                                        $"Switch simulator action {actionString} gave result: {result}");
-                                                }
-                                                catch (Exception ex1)
-                                                {
-                                                    LogIssue("SupportedActions",
-                                                        $"Exception calling switch simulator action {actionString}: {ex1.Message}");
-                                                }
-                                            }
-                                        }
-
-                                        break;
-                                    }
-                            }
-                        }
-                        else
-                        {
-                            LogIssue("SupportedActions",
-                                $"Actions must be strings. The type of action {i} {action} is: {action.GetType().Name}");
-                        }
-                    }
+                    LogInfo("SupportedActions", "Skipping test because SupportedActions is not a member of this interface version.");
                 }
             }
             catch (Exception ex)
@@ -552,7 +548,7 @@ namespace ConformU
                     LogOk("DeviceState", $"Received {numberOfItems} operational state properties.");
 
                     // Create a case sensitive dictionary to hold property names
-                    Dictionary<string, bool> casedPropertyNames = new();
+                    Dictionary<string, bool> casedPropertyNames = [];
 
                     // Define expected operational properties for each device type
                     switch (settings.DeviceType)
@@ -679,7 +675,7 @@ namespace ConformU
                             // Test whether this has the correct spelling but incorrect casing
                             if (caseInsensitivePropertyNames.ContainsKey(property.Name)) // Property name was found
                             {
-                                string key = casedPropertyNames.Where(pair => pair.Key.ToLowerInvariant() == property.Name.ToLowerInvariant()).Select(pair => pair.Key).FirstOrDefault();
+                                string key = casedPropertyNames.Where(pair => pair.Key.Equals(property.Name, StringComparison.InvariantCultureIgnoreCase)).Select(pair => pair.Key).FirstOrDefault();
                                 LogIssue("DeviceState", $"The {key} property name is mis-cased: {property.Name}. The correct casing is: {key}");
                             }
                             else // An unexpected name was found
@@ -693,7 +689,7 @@ namespace ConformU
                     List<KeyValuePair<string, bool>> missingProperties = casedPropertyNames.Where(x => x.Value == false).ToList();
 
                     // Test whether any properties were not found
-                    if (missingProperties.Any()) // One or more properties were missing
+                    if (missingProperties.Count != 0) // One or more properties were missing
                         foreach (KeyValuePair<string, bool> item in missingProperties)
                         {
                             LogInfo("DeviceState", $"Operational property {item.Key} was not included in the DeviceState response.");
@@ -711,11 +707,12 @@ namespace ConformU
             }
             else
             {
-                LogInfo("DeviceState", "DeviceState tests omitted - DeviceState is not available in this interface version.");
+                LogInfo("DeviceState", "DeviceState tests omitted - DeviceState is not a member of this interface version."); //"Skipping test because Description is not a member of this interface version.");
             }
 
             if (ApplicationCancellationToken.IsCancellationRequested)
                 return;
+
             LogNewLine();
         }
 
@@ -732,10 +729,26 @@ namespace ConformU
 
                 return baseInterfaceVersion.Value;
             }
-            catch (Exception ex)
+            catch (Exception ex) // Failed to get the interface version
             {
                 LogDebug("GetInterfaceVersion", $"Exception getting interface version: {ex.Message}\r\n{ex}");
-                throw;
+
+                // Check whether InterfaceVersion is implemented in the version 1 interface
+                if (!DeviceCapabilities.InterfaceHasMember(MemberNames.InterfaceVersion, baseClassDeviceType, 1)) // Interface version is NOT implemented in the version 1 interface
+                {
+                    // Assume that this is a version 1 interface to enable further tests to proceed
+                    baseInterfaceVersion = 1;
+                    LogInfo("InterfaceVersion", $"#####");
+                    LogInfo("InterfaceVersion", $"##### InterfaceVersion returned an error: {ex.Message}. Assuming interface version 1");
+                    LogInfo("InterfaceVersion", $"#####");
+
+                    // Return interface version 1
+                    return baseInterfaceVersion.Value;
+                }
+                else // Report that an error occurred when trying to get the interface version
+                {
+                    throw;
+                }
             }
         }
 
@@ -1947,30 +1960,41 @@ namespace ConformU
             {
                 case DeviceTypes.Camera:
                     break;
+
                 case DeviceTypes.CoverCalibrator:
                     memberNamePadWidth = 20;
                     break;
+
                 case DeviceTypes.Dome:
                     break;
+
                 case DeviceTypes.FilterWheel:
                     break;
+
                 case DeviceTypes.Focuser:
                     break;
+
                 case DeviceTypes.ObservingConditions:
                     memberNamePadWidth = 33;
                     break;
+
                 case DeviceTypes.Rotator:
                     break;
+
                 case DeviceTypes.SafetyMonitor:
                     break;
+
                 case DeviceTypes.Switch:
                     memberNamePadWidth = 25;
                     break;
+
                 case DeviceTypes.Telescope:
                     memberNamePadWidth = 42;
                     break;
+
                 case DeviceTypes.Video:
                     break;
+
                 default:
                     break;
             }
@@ -2006,31 +2030,23 @@ namespace ConformU
             switch (deviceType)
             {
                 case DeviceTypes.Telescope:
+                    switch (interfaceVersion)
                     {
-                        switch (interfaceVersion)
-                        {
-                            case 1: // Telescope interface V1 does not have Driver Version
-                                {
-                                    if (method == MandatoryMethod.DriverVersion)
-                                        retVal = false;
-                                    break;
-                                }
+                        case 1: // Telescope interface V1 does not have Driver Version
+                            if (method == MandatoryMethod.DriverVersion)
+                                retVal = false;
+                            break;
 
-                            default:
-                                {
-                                    retVal = true; // All methods in all interface versions are mandatory
-                                    break;
-                                }
-                        }
-
-                        break;
+                        default:
+                            retVal = true; // All methods in all interface versions are mandatory
+                            break;
                     }
+
+                    break;
 
                 case DeviceTypes.Camera:
-                    {
-                        retVal = true;
-                        break;
-                    }
+                    retVal = true;
+                    break;
             }
 
             return retVal;
@@ -2051,34 +2067,24 @@ namespace ConformU
             switch (test)
             {
                 case SpecialTest.TelescopeSideOfPier:
-                    {
-                        SpecialTelescopeSideOfPier();
-                        break;
-                    }
+                    SpecialTelescopeSideOfPier();
+                    break;
 
                 case SpecialTest.TelescopeDestinationSideOfPier:
-                    {
-                        SpecialTelescopeDestinationSideOfPier();
-                        break;
-                    }
+                    SpecialTelescopeDestinationSideOfPier();
+                    break;
 
                 case SpecialTest.TelescopeSideOfPierAnalysis:
-                    {
-                        SpecialTelescopeSideOfPierAnalysis();
-                        break;
-                    }
+                    SpecialTelescopeSideOfPierAnalysis();
+                    break;
 
                 case SpecialTest.TelescopeCommands:
-                    {
-                        SpecialTelescopeCommands();
-                        break;
-                    }
+                    SpecialTelescopeCommands();
+                    break;
 
                 default:
-                    {
-                        LogIssue("DeviceTesterBaseClass:SpecialTests", $"Unknown test: {test}");
-                        break;
-                    }
+                    LogIssue("DeviceTesterBaseClass:SpecialTests", $"Unknown test: {test}");
+                    break;
             }
         }
 
@@ -2101,6 +2107,7 @@ namespace ConformU
         {
             LogIssue("SpecialTelescopeCommands", "DeviceTester base Class warning message, you should not see this message!");
         }
+
         #endregion
 
     }

@@ -341,22 +341,22 @@ namespace ConformU
         {
             int lVStringPtr, lV1, lV2, lV3;
             // Add a test for a back level version of the Camera simulator - just abandon this process if any errors occur
-            if (settings.ComDevice.ProgId.ToUpper() == "CCDSIMULATOR.CAMERA")
+            if (settings.ComDevice.ProgId.Equals("CCDSIMULATOR.CAMERA", StringComparison.OrdinalIgnoreCase))
             {
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to get Description");
-                    lVStringPtr = camera.Description.ToUpper().IndexOf("VERSION "); // Point at the start of the version string
+                    lVStringPtr = camera.Description.IndexOf("VERSION ", StringComparison.CurrentCultureIgnoreCase); // Point at the start of the version string
                     if (lVStringPtr >= 0)
                     {
                         LogCallToDriver("ConformanceCheck", "About to get Description");
                         string lVString = camera.Description.ToUpper().Substring(lVStringPtr, 8);
-                        lVStringPtr = lVString.IndexOf(".");
+                        lVStringPtr = lVString.IndexOf('.');
                         if (lVStringPtr > 0)
                         {
                             lV1 = Convert.ToInt32(lVString[..(lVStringPtr - 1)]); // Extract the number
                             lVString = lVString[(lVStringPtr + 1)..]; // Get the second version number part
-                            lVStringPtr = lVString.IndexOf(".");
+                            lVStringPtr = lVString.IndexOf('.');
                             if (lVStringPtr > 1)
                             {
                                 lV2 = Convert.ToInt32(lVString[..(lVStringPtr - 1)]); // Extract the number
@@ -430,7 +430,6 @@ namespace ConformU
         public override void CheckProperties()
         {
             int lBinX, lBinY, lMaxBinX, lMaxBinY;
-
 
             // Basic read tests
             mMaxBinX = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.MaxBinX, "MaxBinX", 1, MAX_BIN_X));
@@ -2617,7 +2616,7 @@ namespace ConformU
             SetTest(testName);
 
             // Log test name for happy path tests
-            if (testName.ToUpperInvariant() == "STARTEXPOSURE")
+            if (testName.Equals("STARTEXPOSURE", StringComparison.InvariantCultureIgnoreCase))
             {
                 LogNewLine(); // Blank Line
                 LogTestOnly(testDescription);
