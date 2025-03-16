@@ -103,7 +103,7 @@
 
         // Select the best descriptive name depending on OS.
 #if WINDOWS
-    osName = ASCOM.Com.PlatformUtilities.OSBuildName();
+        osName = ASCOM.Com.PlatformUtilities.OSBuildName();
 #else
         osName = Environment.OSVersion.ToString();
 #endif
@@ -125,16 +125,16 @@
     // Give warning message if running as ADMIN
     using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
     {
-    // Determine whether the user is running as admin
-    WindowsPrincipal principal = new WindowsPrincipal(identity);
-    if (principal.IsInRole(WindowsBuiltInRole.Administrator))
-    {
-    // Running as admin so show a warning message on the screen
-    _conformState.ConformLog += ("\r\n\r\n***** CONFORM UNIVERSAL IS RUNNING WITH ADMIN PRIVILEGE!");
-    _conformState.ConformLog += ("\r\n\r\n***** This increases the risk that malicious individuals will target you and cause havoc in your life.");
-    _conformState.ConformLog += ("\r\n***** There is no need to run Conform Universal with Admin privilege, the application is fully functional in normal user mode.");
-    _conformState.ConformLog += ("\r\n***** Please close the application and re-open it in normal user mode.\r\n");
-    }
+        // Determine whether the user is running as admin
+        WindowsPrincipal principal = new WindowsPrincipal(identity);
+        if (principal.IsInRole(WindowsBuiltInRole.Administrator))
+        {
+            // Running as admin so show a warning message on the screen
+            _conformState.ConformLog += ("\r\n\r\n***** CONFORM UNIVERSAL IS RUNNING WITH ADMIN PRIVILEGE!");
+            _conformState.ConformLog += ("\r\n\r\n***** This increases the risk that malicious individuals will target you and cause havoc in your life.");
+            _conformState.ConformLog += ("\r\n***** There is no need to run Conform Universal with Admin privilege, the application is fully functional in normal user mode.");
+            _conformState.ConformLog += ("\r\n***** Please close the application and re-open it in normal user mode.\r\n");
+        }
     }
 
 #endif
@@ -254,16 +254,16 @@
 
                         // Create a task to run the conformance test
                         conformanceTestTask = new Task(() =>
-        {
-    try
-    {
-        tester.TestDevice(testCycles);
-    }
-    catch (Exception ex)
-    {
-        _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
-    }
-        }, cancelConformToken);
+                        {
+                            try
+                            {
+                                tester.TestDevice(testCycles);
+                            }
+                            catch (Exception ex)
+                            {
+                                _conformLogger.LogMessage("StartTest", MessageLevel.Error, $"Exception: \r\n {ex}");
+                            }
+                        }, cancelConformToken);
 
                         // Start the conformance test task
                         _conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
