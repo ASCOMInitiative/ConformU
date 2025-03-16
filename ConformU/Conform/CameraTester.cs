@@ -2610,7 +2610,8 @@ namespace ConformU
             // Start off by assuming the worst case, this will be set true if the exposure completes OK
             exposedOk = false;
 
-            LogDebug(testName, $"Entered CameraExposure");
+            LogDebug(testName, $"Entered CameraExposure - Test description: {testDescription}, Expected error message: {expectedErrorMessage}");
+            LogDebug(testName, $"BinX: {requiredBinX}, BinY: {requiredBinY}, StartX: {requiredStartX}, StartY: {requiredStartY}, NumX: {requiredNumX}, NumY: {requiredNumY}, Duration: {requiredDuration}");
 
             // Set the name of this test for status update purposes
             SetTest(testName);
