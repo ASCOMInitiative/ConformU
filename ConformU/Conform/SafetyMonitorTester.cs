@@ -166,21 +166,7 @@ namespace ConformU
 
         public override void PreConnectChecks()
         {
-            // Confirm that key properties are false when not connected
-            try
-            {
-                LogCallToDriver("IsSafe", "About to get IsSafe property");
-                mIsSafe = mSafetyMonitor.IsSafe;
-                if (!mIsSafe)
-                    LogOk("IsSafe", "Reports false before connection");
-                else
-                    LogIssue("IsSafe", "Reports true before connection rather than false");
-            }
-            catch (Exception ex)
-            {
-                LogIssue("IsSafe",
-                    $"Cannot confirm that IsSafe is false before connection because it threw an exception: {ex.Message}");
-            }
+            // The check that IsSafe is false when not connected was removed on 16th March 2025 after feedback on ASCOM Talk and agreement at a Core Team meeting.
         }
 
         public override void CheckProperties()
