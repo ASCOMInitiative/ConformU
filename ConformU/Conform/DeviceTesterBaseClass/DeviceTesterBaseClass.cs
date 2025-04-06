@@ -1529,21 +1529,31 @@ namespace ConformU
                 {
                     // This is a COM exception so test whether the error code indicates that it is an invalid value exception
                     case COMException exception:
-                        if (exception.ErrorCode == ErrorCodes.InvalidValue | exception.ErrorCode == ExInvalidValue1 | exception.ErrorCode == ExInvalidValue2 | exception.ErrorCode == ExInvalidValue3 | exception.ErrorCode == ExInvalidValue4 | exception.ErrorCode == ExInvalidValue5 | exception.ErrorCode == ExInvalidValue6) // This is an invalid value exception
-                            isInvalidValueExceptionRet = true;
+                        if ((exception.ErrorCode == ErrorCodes.InvalidValue) | 
+                            (exception.ErrorCode == ExInvalidValue1) | 
+                            (exception.ErrorCode == ExInvalidValue2) |
+                            (exception.ErrorCode == ExInvalidValue3) | 
+                            (exception.ErrorCode == ExInvalidValue4) | 
+                            (exception.ErrorCode == ExInvalidValue5) | 
+                            (exception.ErrorCode == ExInvalidValue6)) // This is an invalid value exception
+                                isInvalidValueExceptionRet = true;
                         break;
 
                     case InvalidValueException:
                         isInvalidValueExceptionRet = true;
                         break;
 
-                    case DriverException exception1:
-                        if (exception1.Number == ErrorCodes.InvalidValue) // This is an invalid value exception
-                            LogIssue(memberName, $"Received ASCOM.DriverException(0x{ErrorCodes.InvalidValue:X8}), please use ASCOM.InvalidValueException to report invalid values");
+                    case ASCOM.InvalidOperationException:
+                        LogIssue(memberName, "Received ASCOM.InvalidOperationException rather than ASCOM.InvalidValueException");
                         break;
 
                     case InvalidOperationException:
                         LogIssue(memberName, "Received System.InvalidOperationException rather than ASCOM.InvalidValueException");
+                        break;
+
+                    case DriverException exception1:
+                        if (exception1.Number == ErrorCodes.InvalidValue) // This is an invalid value exception
+                            LogIssue(memberName, $"Received ASCOM.DriverException(0x{ErrorCodes.InvalidValue:X8}), please use ASCOM.InvalidValueException to report invalid values");
                         break;
                 }
             }

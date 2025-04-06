@@ -1871,6 +1871,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
+                    LogDebug(method.ToString(), $"Switch ID below 0 ({lowTestValue}) exception: {ex.Message}\r\n{ex}");
                     HandleInvalidValueExceptionAsOk("SwitchNumber", MemberType.Property, Required.MustBeImplemented, ex,
                         $"when a switch ID below 0 was used in method: {method}", $"Switch device threw an InvalidOperationException when a switch ID below 0 was used in method: {method}");
                 }
@@ -1954,6 +1955,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
+                    LogDebug(method.ToString(), $"Switch ID above MaxSwitch ({maxSwitch+highTestValue}) exception: {ex.Message}\r\n{ex}");
                     HandleInvalidValueExceptionAsOk("SwitchNumber", MemberType.Property, Required.MustBeImplemented, ex,
                         $"when a switch ID above MaxSwitch was used in method: {method}", $"Switch device threw an InvalidOperationException when a switch ID above MaxSwitch was used in method: {method}");
                 }
