@@ -69,7 +69,7 @@ namespace ConformU
         private const double ARC_SECONDS_TO_RA_SECONDS = 1.0 / 15.0; // Convert angular movement to time based movement
 
         private bool canFindHome, canPark, canPulseGuide, canSetDeclinationRate, canSetGuideRates, canSetPark, canSetPierside, canSetRightAscensionRate;
-        private bool canSetTracking, canSlew, canSlewAltAz, canSlewAltAzAsync, canSlewAsync, canSync, canSyncAltAz, canUnpark;
+        private bool canSetTracking, canSlew, canSlewAltAz, canSlewAltAzAsync, canSlewAsync, canSync, canSyncAltAz, canUnpark, canReadTracking;
         private AlignmentMode alignmentMode;
         private double altitude;
         private double apertureArea;
@@ -2295,8 +2295,11 @@ namespace ConformU
             // Tracking Read - Required
             try
             {
+                canReadTracking = false;
                 LogCallToDriver("Tracking Read", "About to get Tracking property");
                 tracking = TimeFunc("Tracking Read", () => telescopeDevice.Tracking, TargetTime.Fast); // Read of tracking state is mandatory
+                canReadTracking = true;
+
                 LogOk("Tracking Read", tracking.ToString());
             }
             catch (Exception ex)
@@ -6153,6 +6156,28 @@ namespace ConformU
                             SetAction("Homing mount...");
                             if (GetInterfaceVersion() > 1)
                             {
+                                bool currentTrackngState = false;
+
+                                // Report the current Tracking state
+                                if (canReadTracking)
+                                {
+                                    LogCallToDriver(testName, "About to get Tracking property");
+                                    currentTrackngState = telescopeDevice.Tracking; // Save the current tracking state
+                                    LogDebug(testName, $"Current tracking state: {currentTrackngState}");
+                                }
+                                else
+                                    LogDebug(testName, "Cannot get tracking property");
+
+                                // Set tracking False if possible
+                                if (canSetTracking)
+                                {
+                                    LogCallToDriver(testName, $"About to set Tracking property to false (currently {currentTrackngState})");
+                                    telescopeDevice.Tracking = false; // Disable tracking for this test
+                                }
+                                else
+                                    LogDebug(testName, "Cannot set tracking to false");
+
+                                // Test FindHome()
                                 LogCallToDriver(testName, "About to call FindHome method");
                                 TimeMethod(testName, () => telescopeDevice.FindHome(), IsPlatform7OrLater ? TargetTime.Standard : TargetTime.Extended);
 
@@ -6168,15 +6193,44 @@ namespace ConformU
                                     WaitWhile("Waiting for scope to home...", () => !telescopeDevice.AtHome, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
                                 }
 
-                                // Validate FindHome outcome
+                                // Ensure Tracking is false after FindHome if possible
+                                if (canReadTracking) // Can read the tracking state
+                                {
+                                    LogCallToDriver(testName, "About to get Tracking property");
+                                    currentTrackngState = telescopeDevice.Tracking; // Save the current tracking state
+                                    LogDebug(testName, $"Post FindHome tracking state: {currentTrackngState}");
+
+                                    // Reset tracking to false if it has been enabled by FindHome
+                                    if (currentTrackngState)
+                                    {
+                                        LogCallToDriver(testName, $"About to set Tracking property to false (currently {currentTrackngState})");
+                                        telescopeDevice.Tracking = false; // DIsable tracking for this test
+                                    }
+                                    else
+                                        LogDebug(testName, "Tracking is already false so no need to change it");
+                                }
+                                else // Cannot read the tracking state
+                                {
+                                    // Set tracking False if possible
+                                    if (canSetTracking)
+                                    {
+                                        LogCallToDriver(testName, $"About to set Tracking property to false (state currently unknown)");
+                                        telescopeDevice.Tracking = false; // Disable tracking for this test
+                                    }
+                                    else
+                                        LogDebug(testName, "Cannot set tracking to false");
+                                }
+
+                                // Validate FindHome outcome                                
                                 LogCallToDriver(testName, "About to get AtHome property");
                                 if (telescopeDevice.AtHome)
                                 {
-                                    LogOk(testName, "Found home OK.");
+                                    LogOk(testName, "Found home OK, AtHome reports TRUE as expected.");
                                 }
                                 else
                                 {
-                                    LogIssue(testName, $"Failed to Find home within the configured {settings.TelescopeMaximumSlewTime} second timeout.");
+                                    LogIssue(testName, $"AtHome reports false after FindHome.");
+                                    LogInfo(testName, $"This could be because of an issue in implementing AtHome, or because Tracking has been automatically enabled by FindHome or because FindHome did not complete within the configured {settings.TelescopeMaximumSlewTime} second timeout.");
                                 }
 
                                 // Unpark the mount in case it was parked by the Home command
@@ -6191,6 +6245,15 @@ namespace ConformU
                                     LogCallToDriver("Unpark", "About to get AtPark property repeatedly");
                                     WaitWhile("Waiting for scope to unpark", () => telescopeDevice.AtPark, SLEEP_TIME, settings.TelescopeMaximumSlewTime);
                                 }
+
+                                // Re-enable tracking
+                                if (canSetTracking)
+                                {
+                                    LogCallToDriver(testName, $"About to set Tracking property to true after FindHome test");
+                                    telescopeDevice.Tracking = true;
+                                }
+                                else
+                                    LogDebug(testName, "Cannot set tracking to true after FindHome test.");
                             }
                             else // Interface version 1
                             {
