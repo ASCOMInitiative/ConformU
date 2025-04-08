@@ -789,13 +789,14 @@ namespace ConformU
                                             // Check GetSwitch
                                             if (getSwitchOk)
                                             {
-                                                LogCallToDriver("SetSwitchValue",
-                                                    $"  About to call GetSwitch({i}) method");
+                                                LogCallToDriver("SetSwitchValue", $"  About to call GetSwitch({i}) method");
                                                 SetAction("GetSwitch");
+
                                                 if (switchDevice.GetSwitch(i) == false)
                                                     LogOk("SetSwitchValue", "  GetSwitch returned False after SetSwitchValue(MINIMUM_VALUE)");
                                                 else
                                                     LogIssue("SetSwitchValue", "  GetSwitch returned True after SetSwitchValue(MINIMUM_VALUE)");
+
                                                 WaitForReadDelay("GetSwitch");
                                             }
                                             else
@@ -843,7 +844,7 @@ namespace ConformU
                                             }
                                             catch (Exception ex)
                                             {
-                                                HandleInvalidValueExceptionAsOk("SetSwitchValue", MemberType.Method, Required.Mandatory, ex,
+                                                HandleInvalidValueExceptionAsOk("SetSwitchValue", MemberType.Method, Required.Optional, ex,
                                                     $"when setting a value below SwitchMinimum - {(switchMinimum - 1.0)}",
                                                     $"  Switch threw an InvalidOperationException when a value below SwitchMinimum was set: {(switchMinimum - 1.0)}");
                                             }
@@ -914,7 +915,7 @@ namespace ConformU
                                             }
                                             catch (Exception ex)
                                             {
-                                                HandleInvalidValueExceptionAsOk("SetSwitchValue", MemberType.Method, Required.Mandatory, ex,
+                                                HandleInvalidValueExceptionAsOk("SetSwitchValue", MemberType.Method, Required.Optional, ex,
                                                     $"when setting a value above SwitchMaximum was set: {switchMaximum}{1.0}",
                                                     $"  Switch threw an InvalidOperationException when a value above SwitchMaximum was set: {switchMaximum}{1.0}");
                                             }
@@ -1795,7 +1796,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver(method.ToString(),
-                        $"About to call {method} with invalid low value for switch number: {lowTestValue} for ");
+                        $"About to call {method} with invalid low value for switch number: {lowTestValue}");
                     switch (method)
                     {
                         case SwitchMethod.CanWrite:
@@ -1872,14 +1873,14 @@ namespace ConformU
                 catch (Exception ex)
                 {
                     LogDebug(method.ToString(), $"Switch ID below 0 ({lowTestValue}) exception: {ex.Message}\r\n{ex}");
-                    HandleInvalidValueExceptionAsOk("SwitchNumber", MemberType.Property, Required.MustBeImplemented, ex,
-                        $"when a switch ID below 0 was used in method: {method}", $"Switch device threw an InvalidOperationException when a switch ID below 0 was used in method: {method}");
+                    HandleInvalidValueExceptionAsOk("SwitchNumber", MemberType.Method, Required.MustBeImplemented, ex,
+                        $"when a switch ID below 0 was used in method: {method}", $"Switch device threw an InvalidValueException when a switch ID below 0 was used in method: {method}");
                 }
 
                 // Try a value above MaxSwitch
                 try
                 {
-                    LogCallToDriver(method.ToString(), $"About to call {method} with invalid high value for switch number: {maxSwitch + highTestValue} for ");
+                    LogCallToDriver(method.ToString(), $"About to call {method} with invalid high value for switch number: {maxSwitch + highTestValue}");
                     switch (method)
                     {
                         case SwitchMethod.CanWrite:
@@ -1955,9 +1956,9 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    LogDebug(method.ToString(), $"Switch ID above MaxSwitch ({maxSwitch+highTestValue}) exception: {ex.Message}\r\n{ex}");
-                    HandleInvalidValueExceptionAsOk("SwitchNumber", MemberType.Property, Required.MustBeImplemented, ex,
-                        $"when a switch ID above MaxSwitch was used in method: {method}", $"Switch device threw an InvalidOperationException when a switch ID above MaxSwitch was used in method: {method}");
+                    LogDebug(method.ToString(), $"Switch ID above MaxSwitch ({maxSwitch + highTestValue}) exception: {ex.Message}\r\n{ex}");
+                    HandleInvalidValueExceptionAsOk("SwitchNumber", MemberType.Method, Required.MustBeImplemented, ex,
+                        $"when a switch ID above MaxSwitch was used in method: {method}", $"Switch device threw an InvalidValueException when a switch ID above MaxSwitch was used in method: {method}");
                 }
             }
             else
