@@ -3783,7 +3783,7 @@ namespace ConformU
                 if (mIsPulseGuidingFunctional) // IsPulseGuiding is functional - ICameraV4 and later interfaces always use this path
                 {
                     // Test how long the PulseGuide method took to complete
-                    if (duration.Elapsed.TotalSeconds < (IsPlatform7OrLater ? standardTargetResponseTime : (CAMERA_PULSE_DURATION_MILLISECONDS - 500) / 1000.0)) // Completed before the required pulse guide duration (so assume asynchronous operation)
+                    if (duration.Elapsed.TotalSeconds < (IsPlatform7OrLater ? Globals.STANDARD_TARGET_RESPONSE_TIME : (CAMERA_PULSE_DURATION_MILLISECONDS - 500) / 1000.0)) // Completed before the required pulse guide duration (so assume asynchronous operation)
                     {
                         // Check whether the camera is still pulse guiding 
                         LogCallToDriver("ConformanceCheck", "About to get IsPulseGuiding");

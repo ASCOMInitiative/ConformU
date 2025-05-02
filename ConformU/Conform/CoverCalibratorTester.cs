@@ -667,12 +667,12 @@ namespace ConformU
                     // Check whether the cover reports that it is open
                     LogCallToDriver("OpenCover", "About to call CoverState property");
                     if (coverCalibratorDevice.CoverState == CoverStatus.Open) // Cover reports that it opened OK
-                        if (sw.Elapsed.TotalSeconds <= (IsPlatform7OrLater ? standardTargetResponseTime : extendedTargetResponseTime)) // Cover opened synchronously within the appropriate time
+                        if (sw.Elapsed.TotalSeconds <= (IsPlatform7OrLater ? Globals.STANDARD_TARGET_RESPONSE_TIME : Globals.EXTENDED_TARGET_RESPONSE_TIME)) // Cover opened synchronously within the appropriate time
                             LogOk("OpenCover", $"Synchronous open: CoverState was 'Open' when the method completed and the call returned within the target time. The call took {sw.Elapsed.TotalSeconds:0.0} seconds");
                         else // Cover opened synchronously but took longer than the appropriate command time
                         {
                             LogIssue("OpenCover", $"Synchronous open: CoverState was 'Open' when the OpenCover method completed but the operation took {sw.Elapsed.TotalSeconds:0.0} seconds, " +
-                                $"which is longer than the target response time: {(IsPlatform7OrLater ? standardTargetResponseTime : extendedTargetResponseTime):0.0} seconds");
+                                $"which is longer than the target response time: {(IsPlatform7OrLater ? Globals.STANDARD_TARGET_RESPONSE_TIME : Globals.EXTENDED_TARGET_RESPONSE_TIME):0.0} seconds");
                             LogInfo("OpenCover", $"Please implement this method asynchronously: return quickly from OpenCover, set CoverState to Moving and set CoverMoving to true (ICoverCalibratorV2 and later only), resetting these when movement is complete.");
                         }
                     else // Cover is no longer moving but reports some state other than Open
@@ -713,11 +713,11 @@ namespace ConformU
                     LogCallToDriver("CloseCover", "About to call CoverState property");
                     if (coverCalibratorDevice.CoverState == CoverStatus.Closed) // Cover reports that it closed OK
                     {
-                        if (sw.Elapsed.TotalSeconds <= (IsPlatform7OrLater ? standardTargetResponseTime : extendedTargetResponseTime)) // Cover closed synchronously within the appropriate time
+                        if (sw.Elapsed.TotalSeconds <= (IsPlatform7OrLater ? Globals.STANDARD_TARGET_RESPONSE_TIME : Globals.EXTENDED_TARGET_RESPONSE_TIME)) // Cover closed synchronously within the appropriate time
                             LogOk("CloseCover", $"Synchronous close: CoverState was 'Closed' when the method completed: the call took {sw.Elapsed.TotalSeconds:0.0} seconds");
                         else // Cover closed synchronously but took longer than the appropriate command time
                         {
-                            LogIssue("CloseCover", $"Synchronous close: CoverState was 'Closed' when the CloseCover method completed but the operation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is longer than the target response time: {(IsPlatform7OrLater ? standardTargetResponseTime : extendedTargetResponseTime):0.0} seconds");
+                            LogIssue("CloseCover", $"Synchronous close: CoverState was 'Closed' when the CloseCover method completed but the operation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is longer than the target response time: {(IsPlatform7OrLater ? Globals.EXTENDED_TARGET_RESPONSE_TIME : Globals.EXTENDED_TARGET_RESPONSE_TIME):0.0} seconds");
                             LogInfo("CloseCover", $"Please implement this method asynchronously: return quickly from CloseCover, set CoverState to Moving and set CoverMoving to true (ICoverCalibratorV2 and later only), resetting these when movement is complete.");
                         }
                     }
@@ -957,11 +957,11 @@ namespace ConformU
                         else if (calibratorState == CalibratorStatus.Ready) // A valid brightness was set and a Ready status was returned
                         {
                             // Check whether the synchronous operation completed within the expected response time
-                            if (sw.Elapsed.TotalSeconds <= (IsPlatform7OrLater ? standardTargetResponseTime : extendedTargetResponseTime)) // Completed within the expected response time
+                            if (sw.Elapsed.TotalSeconds <= (IsPlatform7OrLater ? Globals.STANDARD_TARGET_RESPONSE_TIME : Globals.EXTENDED_TARGET_RESPONSE_TIME)) // Completed within the expected response time
                                 LogOk("CalibratorOn", $"Synchronous operation: CalibratorState was 'Ready' when the method completed: the call took {sw.Elapsed.TotalSeconds:0.0} seconds");
                             else // Did not complete within the expected response time
                             {
-                                LogIssue("CalibratorOn", $"Synchronous operation: CalibratorState was 'Ready' when the CalibratorOn method completed but the operation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is longer than the target response time: {standardTargetResponseTime:0.0} seconds");
+                                LogIssue("CalibratorOn", $"Synchronous operation: CalibratorState was 'Ready' when the CalibratorOn method completed but the operation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is longer than the target response time: {Globals.STANDARD_TARGET_RESPONSE_TIME:0.0} seconds");
                                 LogInfo("CalibratorOn", $"Please implement this method asynchronously: return quickly from CalibratorOn, set CalibratorChanging to true and set CalibratorState to NotReady resetting these when the change is complete.");
                             }
 
@@ -1074,11 +1074,11 @@ namespace ConformU
                         if (calibratorState == CalibratorStatus.Ready) // A valid brightness was set and a Ready status was returned
                         {
                             // Check whether the synchronous operation completed within the expected response time
-                            if (sw.Elapsed.TotalSeconds <= (IsPlatform7OrLater ? standardTargetResponseTime : extendedTargetResponseTime)) // Completed within the expected response time
+                            if (sw.Elapsed.TotalSeconds <= (IsPlatform7OrLater ? Globals.STANDARD_TARGET_RESPONSE_TIME : Globals.EXTENDED_TARGET_RESPONSE_TIME)) // Completed within the expected response time
                                 LogOk("CalibratorOff", $"Synchronous operation: CalibratorState was 'Ready' when the method completed: the call took {sw.Elapsed.TotalSeconds:0.0} seconds");
                             else // Did not complete within the expected response time
                             {
-                                LogIssue("CalibratorOff", $"Synchronous operation: CalibratorState was 'Ready' when the CalibratorOff method completed but the operation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is longer than the target response time: {standardTargetResponseTime:0.0} seconds");
+                                LogIssue("CalibratorOff", $"Synchronous operation: CalibratorState was 'Ready' when the CalibratorOff method completed but the operation took {sw.Elapsed.TotalSeconds:0.0} seconds, which is longer than the target response time: {Globals.STANDARD_TARGET_RESPONSE_TIME:0.0} seconds");
                                 LogInfo("CalibratorOff", $"Please implement this method asynchronously: return quickly from CalibratorOff, set CalibratorChanging to true and set CalibratorState to NotReady resetting these when the change is complete.");
                             }
 

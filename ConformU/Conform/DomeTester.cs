@@ -551,12 +551,12 @@ namespace ConformU
                     // Check whether this is a Platform 7 or later device and message accordingly
                     if (IsPlatform7OrLater) // Platform 7 or later interface
                     {
-                        if (sw.Elapsed.TotalSeconds < standardTargetResponseTime)
+                        if (sw.Elapsed.TotalSeconds < Globals.STANDARD_TARGET_RESPONSE_TIME)
 
                             LogOk($"{pName} {pAltitude}", "Synchronous slew OK");
                         else
                         {
-                            LogIssue($"{pName} {pAltitude}", $"Synchronous slew took {sw.Elapsed.TotalSeconds} seconds, which is longer than the standard response target: {standardTargetResponseTime} seconds.,");
+                            LogIssue($"{pName} {pAltitude}", $"Synchronous slew took {sw.Elapsed.TotalSeconds} seconds, which is longer than the standard response target: {Globals.STANDARD_TARGET_RESPONSE_TIME} seconds.,");
                         }
                     }
                     else // Platform 6 interface

@@ -29,12 +29,29 @@
 
         internal const int CLIENT_NUMBER_DEFAULT = 1;
 
+        // Member response target times 
+
+        /// <summary>
+        /// Time within which a status reporting interface member should ideally return (seconds)
+        /// </summary>
+        internal const double FAST_TARGET_RESPONSE_TIME = 0.100; // 100ms
+
+        /// <summary>
+        /// Time within which a non-status interface member should ideally return (seconds)
+        /// </summary>
+        internal static double STANDARD_TARGET_RESPONSE_TIME = 1.000; // 1 second
+
+        /// <summary>
+        /// Time within which a long running interface member should ideally return (seconds)
+        /// </summary>
+        internal static double EXTENDED_TARGET_RESPONSE_TIME = 600.000; // 10 minutes
+
         #endregion
 
         #region Global Variables
 
         // Variables shared between the test manager and device testers        
-        internal static ConformResults conformResults= new();
+        internal static ConformResults conformResults = new();
 
         #endregion
 

@@ -43,7 +43,7 @@
 		<ProductPatch>0</ProductPatch>
 
 		<!-- Set the pre-release string without a leading minus e.g. rc.1 or leave empty for a production release -->
-		<ProductPreRelease>rc.3</ProductPreRelease>
+		<ProductPreRelease>rc.4</ProductPreRelease>
 
 		<!--Create a dynamic revision number based on time of build
 		 

@@ -44,10 +44,6 @@ namespace ConformU
         // Member not found COM exceptions error number
         internal const int DISP_E_UNKNOWNNAME = unchecked((int)0x80020006);
 
-        internal double fastTargetResponseTime = 0.100; // Time within which a status reporting interface member should ideally return (seconds)
-        internal double standardTargetResponseTime = 1.000; // Time within which a non-status interface member should ideally return (seconds)
-        internal double extendedTargetResponseTime = 600.0; // Time within which a long running interface member should ideally return (seconds)
-
         #endregion
 
         #region Variables
@@ -146,6 +142,7 @@ namespace ConformU
             hasMethods = true;
             hasPostRunCheck = false;
             hasPerformanceCheck = true;
+
             ClearStatus();
         }
 
@@ -172,14 +169,7 @@ namespace ConformU
             tl = logger;
             this.ApplicationCancellationToken = cancellationToken;
             settings = conformConfiguration.Settings;
-            LogTiming("Timing Summary", $"See Help for further information.");
-            LogTiming("Timing Summary", $"FAST target response time: {fastTargetResponseTime:0.0} second{(fastTargetResponseTime == 1.0 ? "" : "s")}, (configuration and state reporting members).");
-            LogTiming("Timing Summary", $"STANDARD target response time: {standardTargetResponseTime:0.0} second{(standardTargetResponseTime == 1.0 ? "" : "s")}, (property write and asynchronous initiators).");
-            LogTiming("Timing Summary", $"EXTENDED target response time: {extendedTargetResponseTime:0.0} second{(extendedTargetResponseTime == 1.0 ? "" : "s")}, (synchronous methods, ImageArray and ImageArrayVariant).");
-            LogTiming("Timing Summary", $"The log {(settings.ReportGoodTimings ? (settings.ReportBadTimings ? "shows good and bad" : "only shows good") : (settings.ReportBadTimings ? "only shows bad" : "configuration prevents display of any"))} timings.");
-            LogTiming("", $"");
         }
-
         private bool disposedValue = false;        // To detect redundant calls
         protected virtual void Dispose(bool disposing)
         {
@@ -1151,7 +1141,7 @@ namespace ConformU
 
         public void SynchronousBehaviourInformation(string operation, string completionFalse, string completionTrue)
         {
-            LogInfo(testName, $"As an I{settings.DeviceType}V{GetInterfaceVersion()} device, {operation} should have operated asynchronously: Returning quickly (less than {standardTargetResponseTime} second) after setting {completionFalse}.");
+            LogInfo(testName, $"As an I{settings.DeviceType}V{GetInterfaceVersion()} device, {operation} should have operated asynchronously: Returning quickly (less than {Globals.STANDARD_TARGET_RESPONSE_TIME} second) after setting {completionFalse}.");
             LogInfo(testName, $"The {settings.DeviceType} device should then continue the operation in the background and set {completionTrue} when it has completed.");
 
         }
@@ -1392,7 +1382,7 @@ namespace ConformU
 
         internal void LogIssue(string test, string message)
         {
-            conformResults.Issues.Add(new System.Collections.Generic.KeyValuePair<string, string>(test, message));
+            conformResults.Issues.Add(new KeyValuePair<string, string>(test, message));
             tl?.LogMessage(test, MessageLevel.Issue, message);
         }
 
@@ -1529,14 +1519,14 @@ namespace ConformU
                 {
                     // This is a COM exception so test whether the error code indicates that it is an invalid value exception
                     case COMException exception:
-                        if ((exception.ErrorCode == ErrorCodes.InvalidValue) | 
-                            (exception.ErrorCode == ExInvalidValue1) | 
+                        if ((exception.ErrorCode == ErrorCodes.InvalidValue) |
+                            (exception.ErrorCode == ExInvalidValue1) |
                             (exception.ErrorCode == ExInvalidValue2) |
-                            (exception.ErrorCode == ExInvalidValue3) | 
-                            (exception.ErrorCode == ExInvalidValue4) | 
-                            (exception.ErrorCode == ExInvalidValue5) | 
+                            (exception.ErrorCode == ExInvalidValue3) |
+                            (exception.ErrorCode == ExInvalidValue4) |
+                            (exception.ErrorCode == ExInvalidValue5) |
                             (exception.ErrorCode == ExInvalidValue6)) // This is an invalid value exception
-                                isInvalidValueExceptionRet = true;
+                            isInvalidValueExceptionRet = true;
                         break;
 
                     case InvalidValueException:
@@ -1946,15 +1936,15 @@ namespace ConformU
             switch (targetTime)
             {
                 case TargetTime.Fast:
-                    ReportTiming(methodName, elapsedTime, "FAST", fastTargetResponseTime);
+                    ReportTiming(methodName, elapsedTime, "FAST", Globals.FAST_TARGET_RESPONSE_TIME);
                     break;
 
                 case TargetTime.Standard:
-                    ReportTiming(methodName, elapsedTime, "STANDARD", standardTargetResponseTime);
+                    ReportTiming(methodName, elapsedTime, "STANDARD", Globals.STANDARD_TARGET_RESPONSE_TIME);
                     break;
 
                 case TargetTime.Extended:
-                    ReportTiming(methodName, elapsedTime, "EXTENDED", extendedTargetResponseTime);
+                    ReportTiming(methodName, elapsedTime, "EXTENDED", Globals.EXTENDED_TARGET_RESPONSE_TIME);
                     break;
 
                 default:
@@ -1964,6 +1954,9 @@ namespace ConformU
 
         private void ReportTiming(string memberName, double elapsedTime, string targetName, double targetTime)
         {
+            // Increment the count of timing measurements
+            conformResults.TimingCount++;
+
             int memberNamePadWidth = 24; // Set a default method name column width
 
             switch (baseClassDeviceType)
@@ -2013,7 +2006,9 @@ namespace ConformU
             if (elapsedTime <= targetTime) // Member completed within the target time
             {
                 if (settings.ReportGoodTimings)
+                {
                     LogTiming($"{memberName}", $"At {DateTime.Now:HH:mm:ss.fff} {memberName.PadRight(memberNamePadWidth)} {elapsedTime:0.000} seconds. {((char)0x2713)} ({targetName})"); // 0x2713 is the UTF16 tick character.
+                }
             }
             else // Member took longer than the target time
             {

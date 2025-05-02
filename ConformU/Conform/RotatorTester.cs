@@ -993,10 +993,10 @@ namespace ConformU
                     if (canReadIsMoving) // IsMoving can be read
                     {
                         // Check whether the rotator is not moving and the Move method exceeded the standard response time
-                        if (!rotator.IsMoving & sw.Elapsed.TotalSeconds > standardTargetResponseTime) // Not moving and time > standard response time ==> synchronous behaviour so rais issue
+                        if (!rotator.IsMoving & sw.Elapsed.TotalSeconds > Globals.STANDARD_TARGET_RESPONSE_TIME) // Not moving and time > standard response time ==> synchronous behaviour so raise issue
                         {
                             LogIssue(memberName, $"The {memberName} method operated synchronously when it should operate asynchronously in IRotatorV4 and later devices.");
-                            LogInfo(memberName, $"The {memberName} method took {sw.Elapsed.TotalSeconds:0.0} seconds to complete, which is longer than the standard response time of {standardTargetResponseTime:0.0} seconds.");
+                            LogInfo(memberName, $"The {memberName} method took {sw.Elapsed.TotalSeconds:0.0} seconds to complete, which is longer than the standard response time of {Globals.STANDARD_TARGET_RESPONSE_TIME:0.0} seconds.");
                             LogInfo(memberName, $"The {memberName} method should complete quickly and IsMoving should be set true until the rotator finishes movement.");
                         }
                     }

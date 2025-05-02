@@ -6318,7 +6318,7 @@ namespace ConformU
                                 LogDebug(testName, $"PulseGuide command time: {PULSEGUIDE_MOVEMENT_TIME:0.0} seconds, PulseGuide call duration: {pulseGuideTime:0.0} seconds");
 
                                 // Check whether the pulse guide completed before the pulse duration. Target time depends on interface version. Standard response time for Platform 7, 75% of pulse guide time for Platform 6
-                                if (pulseGuideTime < (IsPlatform7OrLater ? standardTargetResponseTime : PULSEGUIDE_MOVEMENT_TIME * 0.75)) // Returned in less than the synchronous limit time so treat as asynchronous
+                                if (pulseGuideTime < (IsPlatform7OrLater ? Globals.STANDARD_TARGET_RESPONSE_TIME : PULSEGUIDE_MOVEMENT_TIME * 0.75)) // Returned in less than the synchronous limit time so treat as asynchronous
                                 {
                                     LogCallToDriver(testName, "About to get IsPulseGuiding property");
                                     if (telescopeDevice.IsPulseGuiding)
@@ -6402,7 +6402,7 @@ namespace ConformU
                                     // Check whether this is a Platform 7 or later interface
                                     if (IsPlatform7OrLater) // Platform 7 or later is expected
                                     {
-                                        LogIssue(testName, $"Synchronous pulse guide found. The guide took {pulseGuideTime} seconds to complete, the expected maximum time is {standardTargetResponseTime} seconds.");
+                                        LogIssue(testName, $"Synchronous pulse guide found. The guide took {pulseGuideTime} seconds to complete, the expected maximum time is {Globals.STANDARD_TARGET_RESPONSE_TIME} seconds.");
                                         LogInfo(testName, $"In ITelescopeV4 and later interfaces, PulseGuide should be implemented asynchronously: returning quickly with isMoving returning TRUE.");
                                         LogInfo(testName, $"When guide movement is complete, IsMoving should return FALSE.");
                                     }

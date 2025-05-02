@@ -776,7 +776,7 @@ namespace ConformU
                 TimeSpan duration = DateTime.Now.Subtract(startTime);
 
                 // Check whether the Move is a synchronous call or an asynchronous call where Move() exceeded the standard response time
-                if (duration.TotalSeconds > standardTargetResponseTime) // The Move command duration was more than the standard response time, so could be a synchronous call
+                if (duration.TotalSeconds > Globals.STANDARD_TARGET_RESPONSE_TIME) // The Move command duration was more than the standard response time, so could be a synchronous call
                 {
                     // Check whether this is a Platform 6 or Platform 7 device
                     if (IsPlatform7OrLater) // Platform 7 or later interface
@@ -787,7 +787,7 @@ namespace ConformU
                         LogCallToDriver(testName, "About to get IsMoving property");
                         if (focuser.IsMoving) // This is an asynchronous move but with a long initiation time
                         {
-                            LogIssue(testName, $"The Move method took {duration.TotalSeconds:0.000} seconds to complete, which exceeded Conform's standard response time of {standardTargetResponseTime:0.000} seconds.");
+                            LogIssue(testName, $"The Move method took {duration.TotalSeconds:0.000} seconds to complete, which exceeded Conform's standard response time of {Globals.STANDARD_TARGET_RESPONSE_TIME:0.000} seconds.");
 
                             // Wait for the move to complete
                             if (mAbsolute)
@@ -802,7 +802,7 @@ namespace ConformU
                         else // This is a synchronous move in excess of the standard response time
                         {
                             // Log an issue because of the synchronous move
-                            LogIssue(testName, $"The focuser moved synchronously and the Move() method exceeded the standard response time of {standardTargetResponseTime:0.0} seconds.");
+                            LogIssue(testName, $"The focuser moved synchronously and the Move() method exceeded the standard response time of {Globals.STANDARD_TARGET_RESPONSE_TIME:0.0} seconds.");
                         }
                     }
                     else // Platform 6 or earlier interface
@@ -814,7 +814,7 @@ namespace ConformU
                         if (focuser.IsMoving)
                         {
                             LogIssue(testName, $"The Move method took {duration.TotalSeconds:0.000} seconds to complete and was assumed to be synchronous, but the IsMoving property returned TRUE after the Move completed.");
-                            LogInfo(testName, $"The move was assumed to be synchronous because the Move method duration exceeded Conform's standard response time of {standardTargetResponseTime:0.000} seconds.");
+                            LogInfo(testName, $"The move was assumed to be synchronous because the Move method duration exceeded Conform's standard response time of {Globals.STANDARD_TARGET_RESPONSE_TIME:0.000} seconds.");
                             if (mAbsolute)
                             {
                                 WaitWhile($"Moving focuser", () => focuser.IsMoving, 500, settings.FocuserTimeout, () => $"{focuser.Position} / {newPosition}"); // Wait for move to complete

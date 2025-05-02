@@ -572,10 +572,10 @@ namespace ConformU
                     // The operation should have either been synchronous within the standard target or asynchronous
 
                     LogCallToDriver(testName, "About to get Position property");
-                    if (filterWheel.Position == position & sw.Elapsed.TotalSeconds > standardTargetResponseTime)
+                    if (filterWheel.Position == position & sw.Elapsed.TotalSeconds > Globals.STANDARD_TARGET_RESPONSE_TIME)
                     {
                         LogIssue(testName, $"The Position Set property operated synchronously and should have operated asynchronously.");
-                        LogInfo(testName, $"The device returned the expected position {position} but took longer than the standard response time: {standardTargetResponseTime} seconds.");
+                        LogInfo(testName, $"The device returned the expected position {position} but took longer than the standard response time: {Globals.STANDARD_TARGET_RESPONSE_TIME} seconds.");
                         LogInfo(testName, $"Position Set should have return quickly and Position Get should return -1 while moving until the set position is achieved.");
                     }
                 }

@@ -39,78 +39,53 @@ namespace ConformU
             switch (settings.DeviceType) // Set current progID and device test class
             {
                 case DeviceTypes.Telescope:
-                    {
-                        testDevice = new TelescopeTester(configuration, TL, cancellationToken);
-                        break;
-                    }
+                    testDevice = new TelescopeTester(configuration, TL, cancellationToken);
+                    break;
 
                 case DeviceTypes.Dome:
-                    {
-                        testDevice = new DomeTester(configuration, TL, cancellationToken);
-                        break;
-                    }
+                    testDevice = new DomeTester(configuration, TL, cancellationToken);
+                    break;
 
                 case DeviceTypes.Camera:
-                    {
-                        testDevice = new CameraTester(configuration, TL, cancellationToken);
-                        break;
-                    }
+                    testDevice = new CameraTester(configuration, TL, cancellationToken);
+                    break;
 
                 case DeviceTypes.Video:
-                    {
-                        testDevice = new VideoTester(configuration, TL, cancellationToken);
-                        break;
-                    }
+                    testDevice = new VideoTester(configuration, TL, cancellationToken);
+                    break;
 
                 case DeviceTypes.Rotator:
-                    {
-                        testDevice = new RotatorTester(configuration, TL, cancellationToken);
-                        break;
-                    }
+                    testDevice = new RotatorTester(configuration, TL, cancellationToken);
+                    break;
 
                 case DeviceTypes.Focuser:
-                    {
-                        testDevice = new FocuserTester(configuration, TL, cancellationToken);
-                        break;
-                    }
+                    testDevice = new FocuserTester(configuration, TL, cancellationToken);
+                    break;
 
                 case DeviceTypes.ObservingConditions:
-                    {
-                        testDevice = new ObservingConditionsTester(configuration, TL, cancellationToken);
-                        break;
-                    }
+                    testDevice = new ObservingConditionsTester(configuration, TL, cancellationToken);
+                    break;
 
                 case DeviceTypes.FilterWheel:
-                    {
-                        testDevice = new FilterWheelTester(configuration, TL, cancellationToken);
-                        break;
-                    }
+                    testDevice = new FilterWheelTester(configuration, TL, cancellationToken);
+                    break;
 
                 case DeviceTypes.Switch:
-                    {
-                        testDevice = new SwitchTester(configuration, TL, cancellationToken);
-                        break;
-                    }
+                    testDevice = new SwitchTester(configuration, TL, cancellationToken);
+                    break;
 
                 case DeviceTypes.SafetyMonitor:
-                    {
-                        testDevice = new SafetyMonitorTester(configuration, TL, cancellationToken);
-                        break;
-                    }
+                    testDevice = new SafetyMonitorTester(configuration, TL, cancellationToken);
+                    break;
 
                 case DeviceTypes.CoverCalibrator:
-                    {
-                        testDevice = new CoverCalibratorTester(configuration, TL, cancellationToken);
-                        break;
-                    }
+                    testDevice = new CoverCalibratorTester(configuration, TL, cancellationToken);
+                    break;
 
                 default:
-                    {
-                        TL.LogMessage("Conform:ConformanceCheck", MessageLevel.Error, $"Unknown device type: {settings.DeviceType}. You need to add it to the ConformanceCheck subroutine");
-                        throw new ASCOM.InvalidValueException($"Conform:ConformanceCheck - Unknown device type: {settings.DeviceType}. You need to add it to the ConformanceCheck subroutine");
-                    }
+                    TL.LogMessage("Conform:ConformanceCheck", MessageLevel.Error, $"Unknown device type: {settings.DeviceType}. You need to add it to the ConformanceCheck subroutine");
+                    throw new InvalidValueException($"Conform:ConformanceCheck - Unknown device type: {settings.DeviceType}. You need to add it to the ConformanceCheck subroutine");
             }
-
         }
 
         public void SetupDialog()
@@ -206,6 +181,7 @@ namespace ConformU
                 if (testDevice is null)
                     throw new ASCOM.InvalidOperationException("No test device has been selected.");
 
+                // Initialise the device
                 string testStage = "Initialise";
                 testDevice.InitialiseTest();
 
@@ -241,7 +217,6 @@ namespace ConformU
                             // Repeat the main tests until the required number of test cycles has been completed
                             do
                             {
-
                                 // Test common methods
                                 if (!cancellationToken.IsCancellationRequested & settings.TestProperties)
                                 {
@@ -381,7 +356,6 @@ namespace ConformU
                 }
                 catch (InvalidValueException ex) // Interface version is invalid
                 {
-                    //conformResults.Issues.Add(new KeyValuePair<string, string>("Initialise", $"The returned interface version is invalid for an {settings.DeviceType} device: {ex.Message}"));
                     testDevice.LogIssue(testStage, $"The returned interface version is invalid for a {settings.DeviceType} device: {ex.Message}");
                     testDevice.LogInfo(testStage, $"For a Platform 6 interface device the interface version should be: {DeviceCapabilities.LatestPlatform6Interface[settings.DeviceType.Value]}");
                     testDevice.LogInfo(testStage, $"For a Platform 7 interface device that supports Connect(), Disconnect(), Connecting and DeviceState, the interface version should be: {DeviceCapabilities.LatestInterface[settings.DeviceType.Value]}");
@@ -390,8 +364,7 @@ namespace ConformU
                 }
                 catch (Exception ex) // Exception when creating device
                 {
-                    conformResults.Issues.Add(new KeyValuePair<string, string>("Initialise", $"Unable to {(settings.DeviceTechnology == DeviceTechnology.Alpaca ? "access" : "create")} the device: {ex.Message}"));
-                    TL.LogMessage(testStage, MessageLevel.Issue, $"Unable to {(settings.DeviceTechnology == DeviceTechnology.Alpaca ? "access" : "create")} the device: {ex.Message}");
+                    testDevice.LogIssue("Initialise", $"Unable to {(settings.DeviceTechnology == DeviceTechnology.Alpaca ? "access" : "create")} the device: {ex.Message}");
                     TL.LogMessage("", MessageLevel.TestOnly, "");
                     TL.LogMessage(testStage, MessageLevel.TestAndMessage, "Further tests abandoned as Conform cannot create the driver");
                 }
@@ -401,14 +374,14 @@ namespace ConformU
                 if (conformResults.ErrorCount == 0 & conformResults.IssueCount == 0 & conformResults.ConfigurationAlertCount == 0 & !cancellationToken.IsCancellationRequested) // No issues - device conforms as expected
                 {
                     TL.LogMessage("Congratulations, no errors, warnings or issues found: your driver passes ASCOM validation!!", MessageLevel.TestOnly, "");
-                }
+                } // No issues found - success
                 else // Some issues found, the device fails the conformance check
                 {
-                    l_Message =
-                        $"Your device had {conformResults.IssueCount} issue{(conformResults.IssueCount == 1 ? "" : "s")}, {conformResults.ErrorCount} error{(conformResults.ErrorCount == 1 ? "" : "s")} and {conformResults.ConfigurationAlertCount} configuration alert{(conformResults.ConfigurationAlertCount == 1 ? "" : "s")}";
+                    l_Message = $"Your device had {conformResults.IssueCount} issue{(conformResults.IssueCount == 1 ? "" : "s")}, {conformResults.ErrorCount} error{(conformResults.ErrorCount == 1 ? "" : "s")} and " +
+                        $"{conformResults.ConfigurationAlertCount} configuration alert{(conformResults.ConfigurationAlertCount == 1 ? "" : "s")}";
 
                     TL.LogMessage(l_Message, MessageLevel.TestOnly, "");
-                }
+                }// Some issues found, the device fails the conformance check
 
                 // List issues, errors and configuration alerts
                 if (conformResults.ErrorCount > 0)
@@ -441,28 +414,68 @@ namespace ConformU
                     }
                 }
 
+                // Report the timing results if configured to do so
                 if (settings.ReportGoodTimings | settings.ReportBadTimings)
                 {
-                    // List the timing outcomes
-                    TL.LogMessage("", MessageLevel.TestOnly, "");
-                    if (numberOfTestCycles > 1) // Stress test
-                    {
-                        TL.LogMessage($"Writing {(settings.ReportGoodTimings ? (settings.ReportBadTimings ? "good and bad" : "good") : (settings.ReportBadTimings ? "bad" : "no"))} timings to the log file, please wait...", MessageLevel.TestOnly, "");
-                        TL.LogMessage("", MessageLevel.TestOnly, "");
-                    }
-                    foreach (KeyValuePair<string, string> kvp in conformResults.Timings)
-                    {
-                        TL.LogMessage(kvp.Key, MessageLevel.TestAndMessage, kvp.Value, logToScreen: numberOfTestCycles == 1);
-                    }
-                    TL.LogMessage("", MessageLevel.TestOnly, "", logToScreen: numberOfTestCycles == 1);
+                    // Display timing header
+                    TL.LogMessage("", $"");
+                    TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"See Help for further information.");
+                    TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"FAST target response time: {Globals.FAST_TARGET_RESPONSE_TIME:0.0} second{(Globals.FAST_TARGET_RESPONSE_TIME == 1.0 ? "" : "s")}, (configuration and state reporting members).");
+                    TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"STANDARD target response time: {Globals.STANDARD_TARGET_RESPONSE_TIME:0.0} second{(Globals.STANDARD_TARGET_RESPONSE_TIME == 1.0 ? "" : "s")}, (property write and asynchronous initiators).");
+                    TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"EXTENDED target response time: {Globals.EXTENDED_TARGET_RESPONSE_TIME:0.0} second{(Globals.EXTENDED_TARGET_RESPONSE_TIME == 1.0 ? "" : "s")}, (synchronous methods, ImageArray and ImageArrayVariant).");
 
-                    // Report the high level timing outcome
-                    if (conformResults.TimingIssuesCount == 0)
-                        TL.LogMessage("Congratulations, all members returned within their target response times!!", MessageLevel.TestOnly, "");
-                    else
-                        TL.LogMessage($"{conformResults.TimingIssuesCount} member{(conformResults.TimingIssuesCount == 1 ? "" : "s")} " +
-                            $"took longer than {(conformResults.TimingIssuesCount == 1 ? "its" : "their")} target response " +
-                            $"time{(conformResults.TimingIssuesCount == 1 ? "" : "s")}.", MessageLevel.TestOnly, "", true);
+                    // Report the timing configuration
+                    if (settings.ReportGoodTimings) // Configured to report good outcomes
+                    {
+                        if (settings.ReportBadTimings) // Configured to report bad outcomes
+                            TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"Conform is configured to report both good and bad timing outcomes.");
+                        else  // Configured NOT to report bad timing outcomes
+                            TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"Conform is configured to report only good timing outcomes and to suppress bad timing outcomes.");
+                    }
+                    else // Configured NOT to report good timing outcomes
+                    {
+                        if (settings.ReportBadTimings) // Configured to report bad outcomes
+                            TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"Conform is configured to report only bad timing outcomes.");
+                        else // Configured NOT to report bad timing outcomes
+                            TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"Conform is configured to suppress all timing outcomes.");
+                    }
+
+                    // Check whether any timing results were recorded
+                    if (conformResults.TimingCount > 0) // Some timings were recorded so report them
+                    {
+                        // List the timing outcomes
+                        TL.LogMessage("", MessageLevel.TestOnly, "");
+
+                        // Provide a wait message if stress testing
+                        if (numberOfTestCycles > 1) // Stress test
+                        {
+                            TL.LogMessage($"Writing {(settings.ReportGoodTimings ? (settings.ReportBadTimings ? "good and bad" : "good") : (settings.ReportBadTimings ? "bad" : "no"))} timings to the log file, please wait...", MessageLevel.TestOnly, "");
+                            TL.LogMessage("", MessageLevel.TestOnly, "");
+                        }
+
+                        // List the timing results
+                        foreach (KeyValuePair<string, string> kvp in conformResults.Timings)
+                        {
+                            TL.LogMessage(kvp.Key, MessageLevel.TestAndMessage, kvp.Value, logToScreen: numberOfTestCycles == 1);
+                        }
+
+                        // Add a new line to the log
+                        if (conformResults.Timings.Count > 0)
+                            TL.LogMessage($"", MessageLevel.TestOnly, $"", logToScreen: numberOfTestCycles == 1);
+
+                        // Report the overall timing outcome
+                        if (conformResults.TimingIssuesCount == 0) // No timing issues - success
+                            TL.LogMessage("Congratulations, all members returned within their target response times!!", MessageLevel.TestOnly, "");
+                        else // There were timing issues
+                            TL.LogMessage($"{conformResults.TimingIssuesCount} member{(conformResults.TimingIssuesCount == 1 ? "" : "s")} " +
+                                $"took longer than {(conformResults.TimingIssuesCount == 1 ? "its" : "their")} target response " +
+                                $"time{(conformResults.TimingIssuesCount == 1 ? "" : "s")}.", MessageLevel.TestOnly, "", true);
+                    }
+                    else // No member timings were recorded
+                    {
+                        TL.LogMessage("", MessageLevel.TestOnly, "", logToScreen: numberOfTestCycles == 1);
+                        TL.LogMessage("No member timings were recorded.", MessageLevel.TestOnly, "", true);
+                    }
                 }
 
                 // Add a blank line to the console output
@@ -505,9 +518,9 @@ namespace ConformU
 
                 TL.SetStatusMessage($"Conformance test has finished.      (Log file: {Path.Combine(TL.LogFilePath, TL.LogFileName)})");
             }
-            catch (Exception ex)
+            catch (Exception ex) // An error occurred when initialising the device
             {
-                TL.LogMessage("ConformanceTestManager", MessageLevel.Error, $"Exception running conformance test:\r\n{ex}");
+                TL.LogMessage("ConformanceTestManager", MessageLevel.Error, $"Exception initialising device: {ex.Message}\r\n{ex}");
                 returnCode = -99997;
             }
 

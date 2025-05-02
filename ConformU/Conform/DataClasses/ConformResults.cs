@@ -12,6 +12,7 @@ namespace ConformU
             ConfigurationAlerts= new();
             Timings = new();
             TimingIssuesCount = 0;
+            TimingCount = 0;
         }
 
         public int ErrorCount
@@ -39,6 +40,8 @@ namespace ConformU
         }
 
         public int TimingIssuesCount { get; set; }
+
+        public int TimingCount { get; set; }
 
         public List<KeyValuePair<string, string>> Errors { get; set; }
 
