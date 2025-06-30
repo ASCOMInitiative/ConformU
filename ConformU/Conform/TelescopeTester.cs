@@ -6403,8 +6403,8 @@ namespace ConformU
                                     if (IsPlatform7OrLater) // Platform 7 or later is expected
                                     {
                                         LogIssue(testName, $"Synchronous pulse guide found. The guide took {pulseGuideTime} seconds to complete, the expected maximum time is {Globals.STANDARD_TARGET_RESPONSE_TIME} seconds.");
-                                        LogInfo(testName, $"In ITelescopeV4 and later interfaces, PulseGuide should be implemented asynchronously: returning quickly with isMoving returning TRUE.");
-                                        LogInfo(testName, $"When guide movement is complete, IsMoving should return FALSE.");
+                                        LogInfo(testName, $"In ITelescopeV4 and later interfaces, PulseGuide should be implemented asynchronously: returning quickly with IsPulseGuiding returning TRUE.");
+                                        LogInfo(testName, $"When guide movement is complete, IsPulseGuiding should return FALSE.");
                                     }
                                     else // Platform 6 or earlier behaviour is expected
                                     {
