@@ -4516,6 +4516,11 @@ namespace ConformU
                         LogCallToDriver(testName, $"About to call SlewToCoordinatesAsync method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
                         TimeMethod($"SlewToCoordinatesAsync", () => telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination), TargetTime.Standard);
 
+                        if (telescopeDevice.Slewing)
+                            LogDebug(testName, "Slewing after SlewToCoordinatesAsync is True as expected, waiting for slew to complete.");
+                        else
+                            LogIssue(testName, "Slewing is FALSE after SlewToCoordinatesAsync returned, expected TRUE, continuing test.");
+
                         WaitForSlew(testName, $"Slewing to coordinates asynchronously");
                         break;
 
@@ -4615,6 +4620,11 @@ namespace ConformU
                         LogCallToDriver(testName, "About to call SlewToTargetAsync method");
                         TimeMethod($"SlewToTargetAsync", () => telescopeDevice.SlewToTargetAsync(), TargetTime.Standard);
 
+                        if (telescopeDevice.Slewing)
+                            LogDebug(testName, "Slewing after SlewToTargetAsync is True as expected, waiting for slew to complete.");
+                        else
+                            LogIssue(testName, "Slewing is FALSE after SlewToTargetAsync returned, expected TRUE, continuing test.");
+
                         WaitForSlew(testName, $"Slewing to target asynchronously");
                         break;
 
@@ -4659,6 +4669,11 @@ namespace ConformU
 
                         LogCallToDriver(testName, $"About to call SlewToAltAzAsync method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
                         TimeMethod($"SlewToAltAzAsync", () => telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude), TargetTime.Standard);
+
+                        if (telescopeDevice.Slewing)
+                            LogDebug(testName, "Slewing after SlewToAltAzAsync is True as expected, waiting for slew to complete.");
+                        else
+                            LogIssue(testName, "Slewing is FALSE after SlewToAltAzAsync returned, expected TRUE, continuing test.");
 
                         LogCallToDriver(testName, "About to get Tracking property");
                         LogDebug(testName, $"Tracking 3: {telescopeDevice.Tracking}");
