@@ -5,6 +5,7 @@
 @inject ConformConfiguration configuration
 @inject SessionState state
 @inject NotificationService notificationService
+@inject NavigationManager navigationManager
 
 @*Title and settings reset button*@
 <div class="row">
@@ -30,7 +31,7 @@
                     <h4 style="color: #479cc8; margin-bottom: 0;">Test Scope</h4>
                     <RadzenCheckBoxList @bind-Value=@conformanceTestScope TValue="int" Orientation="Orientation.Vertical" Change=@(args => OnConformTestScopeChange(args))>
                         <Items>
-                            <RadzenCheckBoxListItem Text="Test Properties" Value="0" />
+                            <RadzenCheckBoxListItem Text="Test Properties" Value="0" Disabled=@propertiesButtonDisabled />
                             <RadzenCheckBoxListItem Text="Test Methods" Value="1" />
                             <RadzenCheckBoxListItem Text="Test Performance" Value="2" />
                             <RadzenCheckBoxListItem Text="Report Good Timings" Value="3" />
@@ -43,7 +44,7 @@
                     <h4 style="color: #479cc8; margin-bottom: 0;">Operation</h4>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Style="margin-top:6px;" Name="CHECKFORUPDATES" @bind-Value=@checkForUpdates TValue="bool" Change=@(args =>
-                                        OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
+                                                                                                                                                                          OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
                         <RadzenLabel Text="Check for updates" Component="CHECKFORUPDATES" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
                     </div>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
@@ -58,7 +59,7 @@
                         <RadzenCheckBox Name="GOHOME" @bind-Value=@goHomeOnDeviceSelection TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.GoHomeOnDeviceSelection)) />
                         <RadzenLabel Text="Return to home page when device is selected" Component="GOHOME" Style="margin-left: 5px;" />
                     </div>
-                    <div class="row" style="margin-top:14px; margin-left:4px; display:@(isWindowsOs?"Block":"None")">
+                    <div class="row" style="margin-top:14px; margin-left:4px; display:@(isWindowsOs ? "Block" : "None")">
                         <RadzenCheckBox Name="APPBITNESS" @bind-Value=@runAs32Bit TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.RunAs32Bit)) />
                         <RadzenLabel Text="Run as 32bit on a 64bit OS ====> Takes effect on restart" Component="APPBITNESS" Style="margin-left: 5px;" />
                     </div>
@@ -530,15 +531,15 @@
             <p>By default Conform will test camera imaging at all bin values reported by the camera through MaxBinX and MaxBinY. If required, the test range can be limited using the settings below.</p>
 
             <div style="margin-top:10px" class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraTestMaxBinX" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraMaxBinX)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraTestMaxBinX" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.CameraMaxBinX)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Max BinX for testing. (Zero tests all available bin values.)</p>
             </div>
             <div class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraTestMaxBinY" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraMaxBinY)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraTestMaxBinY" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.CameraMaxBinY)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Max BinY for testing. (Zero tests all available bin values.)</p>
             </div>
             <div class="row">
-                <RadzenNumeric Style="margin-left: 20px" Format="0.00" @bind-Value="cameraExposureDuration" TValue="double" Min="1.0m" Change=@(args => OnDoubleItemChange(args,NumericConfigurationItem.CameraExposureDuration)) />
+                <RadzenNumeric Style="margin-left: 20px" Format="0.00" @bind-Value="cameraExposureDuration" TValue="double" Min="1.0m" Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.CameraExposureDuration)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Test exposure duration (seconds)</p>
             </div>
 
@@ -571,15 +572,15 @@
             </div>
 
             <div class="row" style="margin-top: 20px">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraXMax" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraXMax)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraXMax" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.CameraXMax)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Maximum image X size for StartExposure tests. Set to zero to use the value determined by the camera's configuration.</p>
             </div>
             <div class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraYMax" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraYMax)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraYMax" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.CameraYMax)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Maximum image Y size for StartExposure tests. Set to zero to use the value determined by the camera's configuration.</p>
             </div>
             <div class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraWaitTimeout" TValue="int" Min="1" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.CameraWaitTimeout)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="cameraWaitTimeout" TValue="int" Min="1" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.CameraWaitTimeout)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Image ready timeout (seconds)</p>
             </div>
 
@@ -591,19 +592,19 @@
             <p>These settings control how long Conform waits for actions to complete before reporting a timeout.</p>
 
             <div style="margin-top:20px" class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeShutterTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.DomeShutterTimeout)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeShutterTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.DomeShutterTimeout)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Shutter movement completion timeout</p>
             </div>
             <div class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeAzimuthTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.DomeAzimuthTimeout)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeAzimuthTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.DomeAzimuthTimeout)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Azimuth movement completion timeout</p>
             </div>
             <div class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeAltitudeTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.DomeAltitudeTimeout)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeAltitudeTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.DomeAltitudeTimeout)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Altitude movement completion timeout</p>
             </div>
             <div class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeStabilisationWaitTime" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.DomeStabilisationWaitTime)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeStabilisationWaitTime" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.DomeStabilisationWaitTime)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Movement stabilisation wait time</p>
             </div>
 
@@ -636,7 +637,7 @@
             <p>This setting controls how long Conform waits for movement to complete before reporting a timeout.</p>
 
             <div style="margin-top:20px" class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="filterWheelTimeout" TValue="int" Min="1" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.FilterWheelTimeout)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="filterWheelTimeout" TValue="int" Min="1" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.FilterWheelTimeout)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Filter wheel move completion timeout (seconds).</p>
             </div>
         </RadzenTabsItem>
@@ -647,13 +648,13 @@
             <p>These settings control how long Conform waits for actions to complete before reporting a timeout.</p>
 
             <div style="margin-top:20px" class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="focuserTimeout" TValue="int" Min="10" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.FocuserTimeout)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="focuserTimeout" TValue="int" Min="10" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.FocuserTimeout)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Focuser move completion timeout (seconds).</p>
             </div>
             <h4 style="margin-top: 20px">Miscellaneous Configuration</h4>
 
             <div style="margin-top:20px" class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="focuserMoveTolerance" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.focuserMoveTolerance)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="focuserMoveTolerance" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.focuserMoveTolerance)) />
                 <p style="margin-left: 20px;margin-top: 5px;">± Tolerance within which a focuser move is reported as OK (Position count).</p>
             </div>
         </RadzenTabsItem>
@@ -664,11 +665,11 @@
             <p>These settings control how long Conform waits for actions to complete before reporting a timeout.</p>
 
             <div style="margin-top:20px" class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="observingConditionsMaxRetries" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.ObservingConditionsMaxRetries)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="observingConditionsMaxRetries" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.ObservingConditionsMaxRetries)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Number of attempts to read a property when an invalid operation is reported.</p>
             </div>
             <div class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="observingConditionsRetryTime" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.ObservingConditionsRetryTime)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="observingConditionsRetryTime" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.ObservingConditionsRetryTime)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Wait time between invalid operation retries.</p>
             </div>
         </RadzenTabsItem>
@@ -679,7 +680,7 @@
             <p>These settings control how long Conform waits for actions to complete before reporting a timeout.</p>
 
             <div style="margin-top:20px" class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="rotatorTimeout" TValue="int" Min="10" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.RotatorTimeout)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="rotatorTimeout" TValue="int" Min="10" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.RotatorTimeout)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Rotator move completion timeout (seconds).</p>
             </div>
         </RadzenTabsItem>
@@ -690,15 +691,15 @@
             <p>These settings control the maximum time to wait for an asynchrous operation to complete and how much delay is added after reading or writing a switch so that it can settle.</p>
 
             <div style="margin-top:20px" class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchAsyncTimeout" TValue="int" Min="1" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.SwitchAsyncTimeout)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchAsyncTimeout" TValue="int" Min="1" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.SwitchAsyncTimeout)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Switch asynchronous operation timeout (seconds).</p>
             </div>
             <div class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchReadDelay" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.SwitchReadDelay)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchReadDelay" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.SwitchReadDelay)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Switch read delay (ms).</p>
             </div>
             <div class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchWriteDelay" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.SwitchWriteDelay)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchWriteDelay" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.SwitchWriteDelay)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Switch write delay (ms).</p>
             </div>
 
@@ -713,7 +714,7 @@
             <p>This setting controls how far Conform tests for working switches outside the configured range 1 ==> MaxSwitch. Tests will be conducted in the ranges (-XXX ==> 0) and (MaxSwitch + 1 ==> +XXX).</p>
 
             <div style="margin-top:0px" class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchExtendedNumberTestRange" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args,NumericConfigurationItem.SwitchExtendedNumberTestRange)) />
+                <RadzenNumeric Style="margin-left: 20px" @bind-Value="switchExtendedNumberTestRange" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.SwitchExtendedNumberTestRange)) />
                 <p style="margin-left: 20px;margin-top: 5px;">Extended switch number test range.</p>
             </div>
             <div class="row" style="margin-top:14px; margin-left:4px;">
@@ -734,6 +735,8 @@
     private ConformU.Settings settings;
 
     // Conform general configuration
+    private bool propertiesButtonDisabled = false;
+
     private IEnumerable<int> conformanceTestScope = new List<int>() { 0, 1, 2, 3 };
     private bool checkForUpdates;
     private bool displayMethodCalls;
@@ -1249,11 +1252,17 @@
         List<int> newScope = new();
 
         // Set scope
-        if (settings.TestProperties) newScope.Add(0);
+        if ((settings.TestProperties) | (settings.TestMethods)) newScope.Add(0);
         if (settings.TestMethods) newScope.Add(1);
         if (settings.TestPerformance) newScope.Add(2);
         if (settings.ReportGoodTimings) newScope.Add(3);
         if (settings.ReportBadTimings) newScope.Add(4);
+
+        if (settings.TestMethods)
+            propertiesButtonDisabled = true;
+        else
+            propertiesButtonDisabled = false;
+
         conformanceTestScope = newScope;
 
         // Operation settings
@@ -1426,6 +1435,12 @@
             }
         }
 
+        // Set the enabled / disabled state of the Properties button
+        if (methodsEnabled)
+            propertiesButtonDisabled = true; // Disable the properties button when methods are enabled
+        else
+            propertiesButtonDisabled = false; // Enable the properties button when methods are disabled
+
         if (performanceEnabled)
         {
             newScope.Add(2);
@@ -1457,6 +1472,8 @@
         }
 
         scope = newScope;
+        conformanceTestScope = scope;
+
         SaveConfiguration();
     }
 
@@ -1481,8 +1498,10 @@
         configuration.Reset();
         settings = configuration.Settings;
         status = configuration.Status;
+
         SetConfiguration();
         StateHasChanged();
+        navigationManager.NavigateTo("/settings", true);
     }
 
     private void OnSetTelescopeTestsButtonClick(bool state)
