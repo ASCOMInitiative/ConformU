@@ -402,7 +402,8 @@ namespace ConformU
                                                     settings.TraceAlpacaCalls ? logger : null,
                                                     Globals.USER_AGENT_PRODUCT_NAME,
                                                     Assembly.GetExecutingAssembly().GetName().Version.ToString(4),
-                                                    settings.AlpacaConfiguration.TrustUserGeneratedSslCertificates);
+                                                    settings.AlpacaConfiguration.TrustUserGeneratedSslCertificates,
+                                                    true);  // Throw on JSON DateTime values that are not unambiguously UTC
 
                         LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;
@@ -544,12 +545,22 @@ namespace ConformU
                 }
 
                 // v1.0.12.0 Added catch logic for any UTCDate issues
+                DateTime mountTime;
                 try
                 {
-                    LogCallToDriver("TimeCheck", "About to get UTCDate property");
-                    DateTime mountTime = telescopeDevice.UTCDate;
-                    LogDebug("TimeCheck", $"Mount UTCDate Unformatted: {telescopeDevice.UTCDate}");
-                    LogInfo("TimeCheck", $"Mount UTCDate: {telescopeDevice.UTCDate:dd-MMM-yyyy HH:mm:ss.fff}");
+                    // Handle any InvalidJsonDateTimeException that may be thrown by the driver
+                    try
+                    {
+                        LogCallToDriver("TimeCheck", "About to get UTCDate property");
+                        mountTime = telescopeDevice.UTCDate;
+                    }
+                    catch (InvalidJsonDateTimeException ex)
+                    {
+                        // Use the non-UTC date time as the mount time for now
+                        mountTime = ex.InvalidDateTime;
+                    }
+                    LogDebug("TimeCheck", $"Mount UTCDate Unformatted: {mountTime}");
+                    LogInfo("TimeCheck", $"Mount UTCDate: {mountTime:dd-MMM-yyyy HH:mm:ss.fff}");
                 }
                 catch (Exception ex)
                 {
@@ -2752,8 +2763,19 @@ namespace ConformU
             try
             {
                 LogCallToDriver("UTCDate Read", "About to get UTCDate property");
-                utcDate = TimeFunc("UTCDate Read", () => telescopeDevice.UTCDate, TargetTime.Fast); // Save starting value
-                LogOk("UTCDate Read", utcDate.ToString("dd-MMM-yyyy HH:mm:ss.fff"));
+                try
+                {
+                    utcDate = TimeFunc("UTCDate Read", () => telescopeDevice.UTCDate, TargetTime.Fast); // Save starting value
+                    LogOk("UTCDate Read", utcDate.ToString("dd-MMM-yyyy HH:mm:ss.fff"));
+                }
+                catch (InvalidJsonDateTimeException ex)
+                {
+                    LogIssue("UTCDate Read", $"The returned JSON date-time string \"{ex.JsonDateTimeString}\" is not a UTC date-time.");
+                    LogInfo("UTCDate Read", $"In order to unambiguously represent a UTC date-time,the JSON date-time string must end with a 'Z' character per ISO 8601.");
+                    LogInfo("UTCDate Read", $"The de-serialised DateTime value is: {ex.InvalidDateTime.ToString("dd-MMM-yyyy HH:mm:ss.fff")} and its kind is: {ex.InvalidDateTime.Kind}.");
+                    LogDebug("UTCDate Read", ex.ToString());
+                    utcDate = ex.InvalidDateTime; // Set utcDate to the returned time to enable write tests to run
+                }
 
                 try // UTCDate Write is optional since if you are using the PC time as UTCTime then you should not write to the PC clock!
                 {
@@ -5398,7 +5420,14 @@ namespace ConformU
 
                         case PerformanceType.TstPerfUtcDate:
                             {
-                                utcDate = telescopeDevice.UTCDate;
+                                // Ignore InvalidJsonDateTimeException as this is not relevant to performance testing
+                                try
+                                {
+                                    utcDate = telescopeDevice.UTCDate;
+                                }
+                                catch (InvalidJsonDateTimeException)
+                                {
+                                }
                                 break;
                             }
 
