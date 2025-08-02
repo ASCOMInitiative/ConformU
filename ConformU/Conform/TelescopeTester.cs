@@ -2770,10 +2770,16 @@ namespace ConformU
                 }
                 catch (InvalidJsonDateTimeException ex)
                 {
-                    LogIssue("UTCDate Read", $"The returned JSON date-time string \"{ex.JsonDateTimeString}\" is not a UTC date-time.");
-                    LogInfo("UTCDate Read", $"In order to unambiguously represent a UTC date-time,the JSON date-time string must end with a 'Z' character per ISO 8601.");
-                    LogInfo("UTCDate Read", $"The de-serialised DateTime value is: {ex.InvalidDateTime.ToString("dd-MMM-yyyy HH:mm:ss.fff")} and its kind is: {ex.InvalidDateTime.Kind}.");
-                    LogDebug("UTCDate Read", ex.ToString());
+                    LogIssue("UTCDate Read", $"The returned JSON date-time string \"{ex.JsonDateTimeString}\" does not explicitly state that it is a UTC date-time.");
+                    LogInfo("UTCDate Read", $"");
+                    LogInfo("UTCDate Read", $"ASCOM requires that JSON UTC date-time strings include the 'Z' designator defined in ISO 8601 to unambiguously state that the time is UTC.");
+                    LogInfo("UTCDate Read", $"A zero time zone offset (+00:00) explicitly states the UTC offset, which happens to be zero. This indicates that the time is a local time, which");
+                    LogInfo("UTCDate Read", $"currently matches UTC, but may not always. For example this device may be in a region that observes daylight saving time at some times of the year.");
+                    LogInfo("UTCDate Read", $"");
+                    LogInfo("UTCDate Read", $"The de-serialised DateTime value is: {ex.InvalidDateTime.ToString("dd-MMM-yyyy HH:mm:ss.fff")} and its .NET DateTime Kind is: {ex.InvalidDateTime.Kind}.");
+                    LogInfo("UTCDate Read", $"");
+                    LogDebug("UTCDate Read", $"Exception message: {ex.Message}\r\n{ex}");
+
                     utcDate = ex.InvalidDateTime; // Set utcDate to the returned time to enable write tests to run
                 }
 
