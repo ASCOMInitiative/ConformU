@@ -5800,6 +5800,24 @@ namespace ConformU
                                     LogIssue(pName,
                                         $"Maximum rate is less than minimum rate - minimum: {lRate.Minimum} maximum: {lRate.Maximum}");
                                 }
+
+                                // Check whether the device returned a rate with minimum and maximum values of zero
+                                if (lRate.Minimum == 0.0d & lRate.Maximum == 0.0d) // An axis rate of 0.0, 0.0 was returned.
+                                {
+                                    LogIssue(pName, "Axis rate minimum and maximum values are both zero.");
+                                    LogInfo(pName, "You do not need to advertise a rate of 0.0, it is assumed that a rate of 0.0 is always supported and resets movement to the previous tracking state.");
+
+                                    // Warn about an Alpaca specific condition
+                                    if (settings.DeviceTechnology == DeviceTechnology.Alpaca)
+                                    {
+                                        LogInfo(pName, "Alpaca devices - Are the Minimum and Maximum fields in your JSON response correctly named and cased?");
+                                        LogInfo(pName, "If not, clients will see a rate of 0.0, 0.0 and Conform Universal will generate the Issue above.");
+                                    }
+                                }
+                                else
+                                {
+                                    LogOk(pName, $"Axis rate minimum: {lRate.Minimum} Axis rate maximum: {lRate.Maximum}");
+                                }
                             }
                             // Save rates for overlap testing
                             lNAxisRates += 1;
