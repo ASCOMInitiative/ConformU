@@ -35,7 +35,7 @@ namespace ConformU
         private readonly Settings settings;
         private readonly ConformLogger logger;
 
-        private enum DomePropertyMethod
+        private enum DomeInterfaceMember
         {
             // Properties
             Altitude,
@@ -202,35 +202,35 @@ namespace ConformU
 
         public override void ReadCanProperties()
         {
-            DomeMandatoryTest(DomePropertyMethod.CanFindHome, "CanFindHome");
+            DomeMandatoryTest(DomeInterfaceMember.CanFindHome, "CanFindHome");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            DomeMandatoryTest(DomePropertyMethod.CanPark, "CanPark");
+            DomeMandatoryTest(DomeInterfaceMember.CanPark, "CanPark");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            DomeMandatoryTest(DomePropertyMethod.CanSetAltitude, "CanSetAltitude");
+            DomeMandatoryTest(DomeInterfaceMember.CanSetAltitude, "CanSetAltitude");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            DomeMandatoryTest(DomePropertyMethod.CanSetAzimuth, "CanSetAzimuth");
+            DomeMandatoryTest(DomeInterfaceMember.CanSetAzimuth, "CanSetAzimuth");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            DomeMandatoryTest(DomePropertyMethod.CanSetPark, "CanSetPark");
+            DomeMandatoryTest(DomeInterfaceMember.CanSetPark, "CanSetPark");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            DomeMandatoryTest(DomePropertyMethod.CanSetShutter, "CanSetShutter");
+            DomeMandatoryTest(DomeInterfaceMember.CanSetShutter, "CanSetShutter");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            DomeMandatoryTest(DomePropertyMethod.CanSlave, "CanSlave");
+            DomeMandatoryTest(DomeInterfaceMember.CanSlave, "CanSlave");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            DomeMandatoryTest(DomePropertyMethod.CanSyncAzimuth, "CanSyncAzimuth");
+            DomeMandatoryTest(DomeInterfaceMember.CanSyncAzimuth, "CanSyncAzimuth");
             if (cancellationToken.IsCancellationRequested)
                 return;
         }
@@ -357,69 +357,69 @@ namespace ConformU
             if (!settings.DomeOpenShutter)
                 LogInfo("Altitude", "You have configured Conform not to open the shutter so the following test may fail.");
 
-            DomeOptionalTest(DomePropertyMethod.Altitude, MemberType.Property, "Altitude");
+            DomeOptionalTest(DomeInterfaceMember.Altitude, MemberType.Property, "Altitude");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            DomeOptionalTest(DomePropertyMethod.AtHome, MemberType.Property, "AtHome");
+            DomeOptionalTest(DomeInterfaceMember.AtHome, MemberType.Property, "AtHome");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            DomeOptionalTest(DomePropertyMethod.AtPark, MemberType.Property, "AtPark");
+            DomeOptionalTest(DomeInterfaceMember.AtPark, MemberType.Property, "AtPark");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            DomeOptionalTest(DomePropertyMethod.Azimuth, MemberType.Property, "Azimuth");
+            DomeOptionalTest(DomeInterfaceMember.Azimuth, MemberType.Property, "Azimuth");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            DomeOptionalTest(DomePropertyMethod.ShutterStatus, MemberType.Property, "ShutterStatus");
+            DomeOptionalTest(DomeInterfaceMember.ShutterStatus, MemberType.Property, "ShutterStatus");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            DomeMandatoryTest(DomePropertyMethod.SlavedRead, "Slaved Read");
+            DomeMandatoryTest(DomeInterfaceMember.SlavedRead, "Slaved Read");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             if (slaved & (!canSlave))
                 LogIssue("Slaved Read", "Dome is slaved but CanSlave is false");
 
-            DomeOptionalTest(DomePropertyMethod.SlavedWrite, MemberType.Property, "Slaved Write");
+            DomeOptionalTest(DomeInterfaceMember.SlavedWrite, MemberType.Property, "Slaved Write");
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            DomeMandatoryTest(DomePropertyMethod.Slewing, "Slewing");
+            DomeMandatoryTest(DomeInterfaceMember.Slewing, "Slewing");
             if (cancellationToken.IsCancellationRequested)
                 return;
         }
 
         public override void CheckMethods()
         {
-            DomeOptionalTest(DomePropertyMethod.SlewToAltitude, MemberType.Method, "SlewToAltitude");
+            DomeOptionalTest(DomeInterfaceMember.SlewToAltitude, MemberType.Method, "SlewToAltitude");
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeOptionalTest(DomePropertyMethod.SlewToAzimuth, MemberType.Method, "SlewToAzimuth");
+            DomeOptionalTest(DomeInterfaceMember.SlewToAzimuth, MemberType.Method, "SlewToAzimuth");
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeMandatoryTest(DomePropertyMethod.AbortSlew, "AbortSlew");
+            DomeMandatoryTest(DomeInterfaceMember.AbortSlew, "AbortSlew");
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeOptionalTest(DomePropertyMethod.SyncToAzimuth, MemberType.Method, "SyncToAzimuth");
+            DomeOptionalTest(DomeInterfaceMember.SyncToAzimuth, MemberType.Method, "SyncToAzimuth");
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeOptionalTest(DomePropertyMethod.CloseShutter, MemberType.Method, "CloseShutter");
+            DomeOptionalTest(DomeInterfaceMember.CloseShutter, MemberType.Method, "CloseShutter");
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeOptionalTest(DomePropertyMethod.OpenShutter, MemberType.Method, "OpenShutter");
+            DomeOptionalTest(DomeInterfaceMember.OpenShutter, MemberType.Method, "OpenShutter");
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeOptionalTest(DomePropertyMethod.FindHome, MemberType.Method, "FindHome");
+            DomeOptionalTest(DomeInterfaceMember.FindHome, MemberType.Method, "FindHome");
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeOptionalTest(DomePropertyMethod.Park, MemberType.Method, "Park");
+            DomeOptionalTest(DomeInterfaceMember.Park, MemberType.Method, "Park");
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeOptionalTest(DomePropertyMethod.SetPark, MemberType.Method, "SetPark");
+            DomeOptionalTest(DomeInterfaceMember.SetPark, MemberType.Method, "SetPark");
             if (cancellationToken.IsCancellationRequested) return; // SetPark must follow Park
         }
 
@@ -427,27 +427,27 @@ namespace ConformU
         {
             if (canReadAltitude)
             {
-                DomePerformanceTest(DomePropertyMethod.Altitude, "Altitude"); if (cancellationToken.IsCancellationRequested)
+                DomePerformanceTest(DomeInterfaceMember.Altitude, "Altitude"); if (cancellationToken.IsCancellationRequested)
                     return;
             }
             if (canReadAzimuth)
             {
-                DomePerformanceTest(DomePropertyMethod.Azimuth, "Azimuth"); if (cancellationToken.IsCancellationRequested)
+                DomePerformanceTest(DomeInterfaceMember.Azimuth, "Azimuth"); if (cancellationToken.IsCancellationRequested)
                     return;
             }
             if (canReadShutterStatus)
             {
-                DomePerformanceTest(DomePropertyMethod.ShutterStatus, "ShutterStatus"); if (cancellationToken.IsCancellationRequested)
+                DomePerformanceTest(DomeInterfaceMember.ShutterStatus, "ShutterStatus"); if (cancellationToken.IsCancellationRequested)
                     return;
             }
             if (canReadSlaved)
             {
-                DomePerformanceTest(DomePropertyMethod.SlavedRead, "Slaved"); if (cancellationToken.IsCancellationRequested)
+                DomePerformanceTest(DomeInterfaceMember.SlavedRead, "Slaved"); if (cancellationToken.IsCancellationRequested)
                     return;
             }
             if (canReadSlewing)
             {
-                DomePerformanceTest(DomePropertyMethod.Slewing, "Slewing"); if (cancellationToken.IsCancellationRequested)
+                DomePerformanceTest(DomeInterfaceMember.Slewing, "Slewing"); if (cancellationToken.IsCancellationRequested)
                     return;
             }
         }
@@ -524,27 +524,27 @@ namespace ConformU
 
         #region Support Code
 
-        private void DomeSlewToAltitude(string pName, double pAltitude)
+        private void DomeSlewToAltitude(string testName, double testAltitude)
         {
             Stopwatch sw = Stopwatch.StartNew();
 
             if (!settings.DomeOpenShutter) LogInfo("SlewToAltitude", "You have configured Conform not to open the shutter so the following slew may fail.");
 
             SetTest("SlewToAltitude");
-            SetAction($"Slewing to altitude {pAltitude} degrees");
-            LogCallToDriver(pName, "About to call SlewToAltitude");
-            TimeMethod(pName, () => domeDevice.SlewToAltitude(pAltitude), TargetTime.Standard);
+            SetAction($"Slewing to altitude {testAltitude} degrees");
+            LogCallToDriver(testName, "About to call SlewToAltitude");
+            TimeMethod(testName, () => domeDevice.SlewToAltitude(testAltitude), TargetTime.Standard);
             canSlewToAltitude = true;
 
             // Check whether Slewing can be read
             if (canReadSlewing) // Slewing can be read OK
             {
                 // Check whether Slewing was set on return
-                LogCallToDriver(pName, "About to get Slewing property");
+                LogCallToDriver(testName, "About to get Slewing property");
                 if (domeDevice.Slewing) // Asynchronous operation so wait for the slew to complete
                 {
-                    DomeWaitForSlew(settings.DomeAltitudeMovementTimeout, () => $"{domeDevice.Altitude:00} / {pAltitude:00} degrees"); if (cancellationToken.IsCancellationRequested) return;
-                    LogOk($"{pName} {pAltitude}", "Asynchronous slew OK");
+                    DomeWaitForSlew(settings.DomeAltitudeMovementTimeout, () => $"{domeDevice.Altitude:00} / {testAltitude:00} degrees"); if (cancellationToken.IsCancellationRequested) return;
+                    LogOk($"{testName} {testAltitude}", "Asynchronous slew OK");
                 }
                 else // Synchronous operation
                 {
@@ -553,217 +553,217 @@ namespace ConformU
                     {
                         if (sw.Elapsed.TotalSeconds < Globals.STANDARD_TARGET_RESPONSE_TIME)
 
-                            LogOk($"{pName} {pAltitude}", "Synchronous slew OK");
+                            LogOk($"{testName} {testAltitude}", "Synchronous slew OK");
                         else
                         {
-                            LogIssue($"{pName} {pAltitude}", $"Synchronous slew took {sw.Elapsed.TotalSeconds} seconds, which is longer than the standard response target: {Globals.STANDARD_TARGET_RESPONSE_TIME} seconds.,");
+                            LogIssue($"{testName} {testAltitude}", $"Synchronous slew took {sw.Elapsed.TotalSeconds} seconds, which is longer than the standard response target: {Globals.STANDARD_TARGET_RESPONSE_TIME} seconds.,");
                         }
                     }
                     else // Platform 6 interface
                     {
-                        LogOk($"{pName} {pAltitude}", "Synchronous slew OK");
+                        LogOk($"{testName} {testAltitude}", "Synchronous slew OK");
                     }
                 }
             }
             else // Slewing can't be read
             {
-                LogOk($"{pName} {pAltitude}", "Can't read Slewing so assume synchronous slew OK");
+                LogOk($"{testName} {testAltitude}", "Can't read Slewing so assume synchronous slew OK");
             }
             DomeStabliisationWait();
 
             // Check whether the reported altitude matches the requested altitude
             if (canReadAltitude)
             {
-                LogCallToDriver(pName, "About to get Altitude property");
+                LogCallToDriver(testName, "About to get Altitude property");
                 double altitude = domeDevice.Altitude;
 
-                if (Math.Abs(altitude - pAltitude) <= settings.DomeSlewTolerance)
+                if (Math.Abs(altitude - altitude) <= settings.DomeSlewTolerance)
                 {
-                    LogOk($"{pName} {pAltitude}", $"Reached the required altitude: {pAltitude:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported altitude: {altitude:0.0} degrees");
+                    LogOk($"{testName} {altitude}", $"Reached the required altitude: {altitude:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported altitude: {altitude:0.0} degrees");
                 }
                 else
                 {
-                    LogIssue($"{pName} {pAltitude}", $"Failed to reach the required altitude: {pAltitude:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported altitude: {altitude:0.0} degrees");
+                    LogIssue($"{testName} {altitude}", $"Failed to reach the required altitude: {altitude:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported altitude: {altitude:0.0} degrees");
                 }
             }
         }
 
-        private void DomeSlewToAzimuth(string pName, double pAzimuth)
+        private void DomeSlewToAzimuth(string testName, double testAzimuth)
         {
-            SetAction($"Slewing to azimuth {pAzimuth} degrees");
-            if (pAzimuth >= 0.0 & pAzimuth <= 359.9999999)
+            SetAction($"Slewing to azimuth {testAzimuth} degrees");
+            if (testAzimuth >= 0.0 & testAzimuth <= 359.9999999)
             {
                 canSlewToAzimuth = false;
-                LogCallToDriver(pName, "About to call SlewToAzimuth");
-                TimeMethod(pName, () => domeDevice.SlewToAzimuth(pAzimuth), TargetTime.Standard);
+                LogCallToDriver(testName, "About to call SlewToAzimuth");
+                TimeMethod(testName, () => domeDevice.SlewToAzimuth(testAzimuth), TargetTime.Standard);
                 canSlewToAzimuth = true; // Command is supported and didn't generate an exception
             }
             else
             {
-                LogCallToDriver(pName, "About to call SlewToAzimuth");
-                TimeMethod(pName, () => domeDevice.SlewToAzimuth(pAzimuth), TargetTime.Standard);
+                LogCallToDriver(testName, "About to call SlewToAzimuth");
+                TimeMethod(testName, () => domeDevice.SlewToAzimuth(testAzimuth), TargetTime.Standard);
             }
 
             if (canReadSlewing)
             {
-                LogCallToDriver(pName, "About to get Slewing property");
+                LogCallToDriver(testName, "About to get Slewing property");
                 if (domeDevice.Slewing)
                 {
-                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout, () => $"{domeDevice.Azimuth:000} / {pAzimuth:000} degrees"); if (cancellationToken.IsCancellationRequested) return;
-                    LogOk($"{pName} {pAzimuth}", "Asynchronous slew OK");
+                    DomeWaitForSlew(settings.DomeAzimuthMovementTimeout, () => $"{domeDevice.Azimuth:000} / {testAzimuth:000} degrees"); if (cancellationToken.IsCancellationRequested) return;
+                    LogOk($"{testName} {testAzimuth}", "Asynchronous slew OK");
                 }
                 else
                 {
-                    LogOk($"{pName} {pAzimuth}", "Synchronous slew OK");
+                    LogOk($"{testName} {testAzimuth}", "Synchronous slew OK");
                 }
             }
             else
             {
-                LogOk($"{pName} {pAzimuth}", "Can't read Slewing so assume synchronous slew OK");
+                LogOk($"{testName} {testAzimuth}", "Can't read Slewing so assume synchronous slew OK");
             }
             DomeStabliisationWait();
 
             // Check whether the reported azimuth matches the requested azimuth
             if (canReadAzimuth)
             {
-                LogCallToDriver(pName, "About to get Azimuth property");
+                LogCallToDriver(testName, "About to get Azimuth property");
                 double azimuth = domeDevice.Azimuth;
 
-                if (Math.Abs(azimuth - pAzimuth) <= settings.DomeSlewTolerance)
+                if (Math.Abs(azimuth - azimuth) <= settings.DomeSlewTolerance)
                 {
-                    LogOk($"{pName} {pAzimuth}", $"Reached the required azimuth: {pAzimuth:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported azimuth: {azimuth:0.0}");
+                    LogOk($"{testName} {azimuth}", $"Reached the required azimuth: {azimuth:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported azimuth: {azimuth:0.0}");
                 }
                 else
                 {
-                    LogIssue($"{pName} {pAzimuth}", $"Failed to reach the required azimuth: {pAzimuth:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported azimuth: {azimuth:0.0}");
+                    LogIssue($"{testName} {azimuth}", $"Failed to reach the required azimuth: {azimuth:0.0} within tolerance ±{settings.DomeSlewTolerance} degrees. Reported azimuth: {azimuth:0.0}");
                 }
             }
 
         }
 
-        private void DomeWaitForSlew(double pTimeOut, Func<string> reportingFunction)
+        private void DomeWaitForSlew(double waitForSlewTimeOut, Func<string> reportingFunction)
         {
             DateTime lStartTime;
             lStartTime = DateTime.Now;
 
-            WaitWhile(GetAction(), () => domeDevice.Slewing, 500, Convert.ToInt32(pTimeOut), reportingFunction);
+            WaitWhile(GetAction(), () => domeDevice.Slewing, 500, Convert.ToInt32(waitForSlewTimeOut), reportingFunction);
 
             SetStatus("");
-            if ((DateTime.Now.Subtract(lStartTime).TotalSeconds > pTimeOut))
+            if ((DateTime.Now.Subtract(lStartTime).TotalSeconds > waitForSlewTimeOut))
             {
                 LogIssue("DomeWaitForSlew", "Timed out waiting for Dome slew, consider increasing time-outs in Options/Conform Options.");
                 LogInfo("DomeWaitForSlew", "Another cause of time-outs is if your Slewing Property logic is inverted or is not operating correctly.");
             }
         }
 
-        private void DomeMandatoryTest(DomePropertyMethod pType, string pName)
+        private void DomeMandatoryTest(DomeInterfaceMember domeInterfaceMember, string testName)
         {
             try
             {
-                switch (pType)
+                switch (domeInterfaceMember)
                 {
-                    case DomePropertyMethod.CanFindHome:
-                        LogCallToDriver(pName, "About to get CanFindHome property");
-                        canFindHome = TimeFunc(pName, () => domeDevice.CanFindHome, TargetTime.Fast);
-                        LogOk(pName, canFindHome.ToString());
+                    case DomeInterfaceMember.CanFindHome:
+                        LogCallToDriver(testName, "About to get CanFindHome property");
+                        canFindHome = TimeFunc(testName, () => domeDevice.CanFindHome, TargetTime.Fast);
+                        LogOk(testName, canFindHome.ToString());
                         break;
 
-                    case DomePropertyMethod.CanPark:
-                        LogCallToDriver(pName, "About to get CanPark property");
+                    case DomeInterfaceMember.CanPark:
+                        LogCallToDriver(testName, "About to get CanPark property");
                         canPark = domeDevice.CanPark;
-                        LogOk(pName, canPark.ToString());
+                        LogOk(testName, canPark.ToString());
                         break;
 
-                    case DomePropertyMethod.CanSetAltitude:
-                        LogCallToDriver(pName, "About to get CanSetAltitude property");
+                    case DomeInterfaceMember.CanSetAltitude:
+                        LogCallToDriver(testName, "About to get CanSetAltitude property");
                         canSetAltitude = domeDevice.CanSetAltitude;
-                        LogOk(pName, canSetAltitude.ToString());
+                        LogOk(testName, canSetAltitude.ToString());
                         break;
 
-                    case DomePropertyMethod.CanSetAzimuth:
-                        LogCallToDriver(pName, "About to get CanSetAzimuth property");
+                    case DomeInterfaceMember.CanSetAzimuth:
+                        LogCallToDriver(testName, "About to get CanSetAzimuth property");
                         canSetAzimuth = domeDevice.CanSetAzimuth;
-                        LogOk(pName, canSetAzimuth.ToString());
+                        LogOk(testName, canSetAzimuth.ToString());
                         break;
 
-                    case DomePropertyMethod.CanSetPark:
-                        LogCallToDriver(pName, "About to get CanSetPark property");
+                    case DomeInterfaceMember.CanSetPark:
+                        LogCallToDriver(testName, "About to get CanSetPark property");
                         canSetPark = domeDevice.CanSetPark;
-                        LogOk(pName, canSetPark.ToString());
+                        LogOk(testName, canSetPark.ToString());
                         break;
 
-                    case DomePropertyMethod.CanSetShutter:
-                        LogCallToDriver(pName, "About to get CanSetShutter property");
+                    case DomeInterfaceMember.CanSetShutter:
+                        LogCallToDriver(testName, "About to get CanSetShutter property");
                         canSetShutter = domeDevice.CanSetShutter;
-                        LogOk(pName, canSetShutter.ToString());
+                        LogOk(testName, canSetShutter.ToString());
                         break;
 
-                    case DomePropertyMethod.CanSlave:
-                        LogCallToDriver(pName, "About to get CanSlave property");
+                    case DomeInterfaceMember.CanSlave:
+                        LogCallToDriver(testName, "About to get CanSlave property");
                         canSlave = domeDevice.CanSlave;
-                        LogOk(pName, canSlave.ToString());
+                        LogOk(testName, canSlave.ToString());
                         break;
 
-                    case DomePropertyMethod.CanSyncAzimuth:
-                        LogCallToDriver(pName, "About to get CanSyncAzimuth property");
+                    case DomeInterfaceMember.CanSyncAzimuth:
+                        LogCallToDriver(testName, "About to get CanSyncAzimuth property");
                         canSyncAzimuth = domeDevice.CanSyncAzimuth;
-                        LogOk(pName, canSyncAzimuth.ToString());
+                        LogOk(testName, canSyncAzimuth.ToString());
                         break;
 
-                    case DomePropertyMethod.Connected:
-                        LogCallToDriver(pName, "About to get Connected property");
+                    case DomeInterfaceMember.Connected:
+                        LogCallToDriver(testName, "About to get Connected property");
                         connected = domeDevice.Connected;
-                        LogOk(pName, connected.ToString());
+                        LogOk(testName, connected.ToString());
                         break;
 
-                    case DomePropertyMethod.Description:
-                        LogCallToDriver(pName, "About to get Description property");
+                    case DomeInterfaceMember.Description:
+                        LogCallToDriver(testName, "About to get Description property");
                         description = domeDevice.Description;
-                        LogOk(pName, description.ToString());
+                        LogOk(testName, description.ToString());
                         break;
 
-                    case DomePropertyMethod.DriverInfo:
-                        LogCallToDriver(pName, "About to get DriverInfo property");
+                    case DomeInterfaceMember.DriverInfo:
+                        LogCallToDriver(testName, "About to get DriverInfo property");
                         driverInfo = domeDevice.DriverInfo;
-                        LogOk(pName, driverInfo.ToString());
+                        LogOk(testName, driverInfo.ToString());
                         break;
 
-                    case DomePropertyMethod.InterfaceVersion:
-                        LogCallToDriver(pName, "About to get InterfaceVersion property");
+                    case DomeInterfaceMember.InterfaceVersion:
+                        LogCallToDriver(testName, "About to get InterfaceVersion property");
                         interfaceVersion = domeDevice.InterfaceVersion;
-                        LogOk(pName, interfaceVersion.ToString());
+                        LogOk(testName, interfaceVersion.ToString());
                         break;
 
-                    case DomePropertyMethod.Name:
-                        LogCallToDriver(pName, "About to get Name property");
+                    case DomeInterfaceMember.Name:
+                        LogCallToDriver(testName, "About to get Name property");
                         name = domeDevice.Name;
-                        LogOk(pName, name.ToString());
+                        LogOk(testName, name.ToString());
                         break;
 
-                    case DomePropertyMethod.SlavedRead:
+                    case DomeInterfaceMember.SlavedRead:
                         canReadSlaved = false;
-                        LogCallToDriver(pName, "About to get Slaved property");
+                        LogCallToDriver(testName, "About to get Slaved property");
                         slaved = domeDevice.Slaved;
                         canReadSlaved = true;
-                        LogOk(pName, slaved.ToString());
+                        LogOk(testName, slaved.ToString());
                         break;
 
-                    case DomePropertyMethod.Slewing:
+                    case DomeInterfaceMember.Slewing:
                         canReadSlewing = false;
-                        LogCallToDriver(pName, "About to get Slewing property");
+                        LogCallToDriver(testName, "About to get Slewing property");
                         slewing = domeDevice.Slewing;
                         canReadSlewing = true;
-                        LogOk(pName, slewing.ToString());
+                        LogOk(testName, slewing.ToString());
                         break;
 
-                    case DomePropertyMethod.AbortSlew:
-                        LogCallToDriver(pName, "About to call AbortSlew method");
+                    case DomeInterfaceMember.AbortSlew:
+                        LogCallToDriver(testName, "About to call AbortSlew method");
                         domeDevice.AbortSlew();
 
                         // Confirm that slaved is false
                         if (canReadSlaved)
                         {
-                            LogCallToDriver(pName, "About to get Slaved property");
+                            LogCallToDriver(testName, "About to get Slaved property");
                             if (domeDevice.Slaved)
                                 LogIssue("AbortSlew", "Slaved property Is true after AbortSlew");
                             else
@@ -884,79 +884,79 @@ namespace ConformU
                         break;
 
                     default:
-                        LogIssue(pName, $"DomeMandatoryTest: Unknown test type {pType}");
+                        LogIssue(testName, $"DomeMandatoryTest: Unknown test type {domeInterfaceMember}");
                         break;
                 }
             }
             catch (Exception ex)
             {
-                HandleException(pName, MemberType.Property, Required.Mandatory, ex, "");
+                HandleException(testName, MemberType.Property, Required.Mandatory, ex, "");
             }
         }
 
-        private void DomeOptionalTest(DomePropertyMethod pType, MemberType pMemberType, string pName)
+        private void DomeOptionalTest(DomeInterfaceMember domeInterfaceMember, MemberType memberType, string testName)
         {
             double lSlewAngle, lOriginalAzimuth, lNewAzimuth;
             try
             {
-                switch (pType)
+                switch (domeInterfaceMember)
                 {
-                    case DomePropertyMethod.Altitude:
+                    case DomeInterfaceMember.Altitude:
                         canReadAltitude = false;
-                        LogCallToDriver(pName, "About to get Altitude property");
-                        TimeMethod(pName, () => altitude = domeDevice.Altitude, TargetTime.Fast);
+                        LogCallToDriver(testName, "About to get Altitude property");
+                        TimeMethod(testName, () => altitude = domeDevice.Altitude, TargetTime.Fast);
                         canReadAltitude = true;
-                        LogOk(pName, altitude.ToString());
+                        LogOk(testName, altitude.ToString());
                         break;
 
-                    case DomePropertyMethod.AtHome:
+                    case DomeInterfaceMember.AtHome:
                         canReadAtHome = false;
-                        LogCallToDriver(pName, "About to get AtHome property");
-                        TimeMethod(pName, () => atHome = domeDevice.AtHome, TargetTime.Fast);
+                        LogCallToDriver(testName, "About to get AtHome property");
+                        TimeMethod(testName, () => atHome = domeDevice.AtHome, TargetTime.Fast);
                         canReadAtHome = true;
-                        LogOk(pName, atHome.ToString());
+                        LogOk(testName, atHome.ToString());
                         break;
 
-                    case DomePropertyMethod.AtPark:
+                    case DomeInterfaceMember.AtPark:
                         canReadAtPark = false;
-                        LogCallToDriver(pName, "About to get AtPark property");
-                        TimeMethod(pName, () => atPark = domeDevice.AtPark, TargetTime.Fast);
+                        LogCallToDriver(testName, "About to get AtPark property");
+                        TimeMethod(testName, () => atPark = domeDevice.AtPark, TargetTime.Fast);
                         canReadAtPark = true;
-                        LogOk(pName, atPark.ToString());
+                        LogOk(testName, atPark.ToString());
                         break;
 
-                    case DomePropertyMethod.Azimuth:
+                    case DomeInterfaceMember.Azimuth:
                         canReadAzimuth = false;
-                        LogCallToDriver(pName, "About to get Azimuth property");
-                        TimeMethod(pName, () => azimuth = domeDevice.Azimuth, TargetTime.Fast);
+                        LogCallToDriver(testName, "About to get Azimuth property");
+                        TimeMethod(testName, () => azimuth = domeDevice.Azimuth, TargetTime.Fast);
                         canReadAzimuth = true;
-                        LogOk(pName, azimuth.ToString());
+                        LogOk(testName, azimuth.ToString());
                         break;
 
-                    case DomePropertyMethod.ShutterStatus:
+                    case DomeInterfaceMember.ShutterStatus:
                         canReadShutterStatus = false;
-                        LogCallToDriver(pName, "About to get ShutterStatus property");
-                        TimeMethod(pName, () => shutterStatus = domeDevice.ShutterStatus, TargetTime.Fast);
+                        LogCallToDriver(testName, "About to get ShutterStatus property");
+                        TimeMethod(testName, () => shutterStatus = domeDevice.ShutterStatus, TargetTime.Fast);
                         canReadShutterStatus = true;
-                        LogOk(pName, shutterStatus.ToString());
+                        LogOk(testName, shutterStatus.ToString());
                         break;
 
-                    case DomePropertyMethod.SlavedWrite:
+                    case DomeInterfaceMember.SlavedWrite:
                         if (canSlave)
                         {
                             if (canReadSlaved)
                             {
                                 if (slaved)
                                 {
-                                    LogCallToDriver(pName, "About to set Slaved property");
-                                    TimeMethod(pName, () => domeDevice.Slaved = false, TargetTime.Standard);
+                                    LogCallToDriver(testName, "About to set Slaved property");
+                                    TimeMethod(testName, () => domeDevice.Slaved = false, TargetTime.Standard);
                                 }
                                 else
                                 {
-                                    LogCallToDriver(pName, "About to set Slaved property");
-                                    TimeMethod(pName, () => domeDevice.Slaved = true, TargetTime.Standard);
+                                    LogCallToDriver(testName, "About to set Slaved property");
+                                    TimeMethod(testName, () => domeDevice.Slaved = true, TargetTime.Standard);
                                 }
-                                LogCallToDriver(pName, "About to set Slaved property");
+                                LogCallToDriver(testName, "About to set Slaved property");
                                 domeDevice.Slaved = slaved; // Restore original value
                                 LogOk("Slaved Write", "Slave state changed successfully");
                             }
@@ -965,197 +965,197 @@ namespace ConformU
                         }
                         else
                         {
-                            LogCallToDriver(pName, "About to set Slaved property");
+                            LogCallToDriver(testName, "About to set Slaved property");
                             domeDevice.Slaved = true;
-                            LogIssue(pName, "CanSlave is false but setting Slaved true did not raise an exception");
-                            LogCallToDriver(pName, "About to set Slaved property");
+                            LogIssue(testName, "CanSlave is false but setting Slaved true did not raise an exception");
+                            LogCallToDriver(testName, "About to set Slaved property");
                             domeDevice.Slaved = false; // Un-slave to continue tests
                         }
 
                         break;
 
-                    case DomePropertyMethod.CloseShutter:
+                    case DomeInterfaceMember.CloseShutter:
                         if (canSetShutter)
                         {
                             try
                             {
-                                DomeShutterTest(ShutterState.Closed, pName);
+                                DomeShutterTest(ShutterState.Closed, testName);
                                 DomeStabliisationWait();
                             }
                             catch (Exception ex)
                             {
-                                HandleException(pName, MemberType.Method, Required.MustBeImplemented, ex, "CanSetShutter is True");
+                                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, "CanSetShutter is True");
                             }
                         }
                         else
                         {
                             domeDevice.CloseShutter();
-                            LogIssue(pName, "CanSetShutter is false but CloseShutter did not raise an exception");
+                            LogIssue(testName, "CanSetShutter is false but CloseShutter did not raise an exception");
                         }
 
                         break;
 
-                    case DomePropertyMethod.FindHome:
+                    case DomeInterfaceMember.FindHome:
                         if (canFindHome)
                         {
-                            SetTest(pName);
+                            SetTest(testName);
                             SetAction("Finding home");
                             SetStatus("Waiting for movement to stop");
                             try
                             {
-                                LogCallToDriver(pName, "About to call FindHome method");
-                                TimeMethod(pName, () => domeDevice.FindHome(), TargetTime.Standard);
+                                LogCallToDriver(testName, "About to call FindHome method");
+                                TimeMethod(testName, () => domeDevice.FindHome(), TargetTime.Standard);
                                 if (canReadSlaved)
                                 {
-                                    LogCallToDriver(pName, "About to get Slaved Property");
+                                    LogCallToDriver(testName, "About to get Slaved Property");
                                     if (domeDevice.Slaved)
-                                        LogIssue(pName, "Slaved is true but Home did not raise an exception");
+                                        LogIssue(testName, "Slaved is true but Home did not raise an exception");
                                 }
                                 if (canReadSlewing)
                                 {
-                                    LogCallToDriver(pName, "About to get Slewing property repeatedly");
+                                    LogCallToDriver(testName, "About to get Slewing property repeatedly");
                                     WaitWhile("Finding home", () => domeDevice.Slewing, 500, settings.DomeAzimuthMovementTimeout);
                                 }
                                 if (!cancellationToken.IsCancellationRequested)
                                 {
                                     if (canReadAtHome)
                                     {
-                                        LogCallToDriver(pName, "About to get AtHome property");
+                                        LogCallToDriver(testName, "About to get AtHome property");
                                         if (domeDevice.AtHome)
-                                            LogOk(pName, "Dome homed successfully");
+                                            LogOk(testName, "Dome homed successfully");
                                         else
-                                            LogIssue(pName, "Home command completed but AtHome is false");
+                                            LogIssue(testName, "Home command completed but AtHome is false");
                                     }
                                     else
-                                        LogOk(pName, "Can't read AtHome so assume that dome has homed successfully");
+                                        LogOk(testName, "Can't read AtHome so assume that dome has homed successfully");
                                     DomeStabliisationWait();
                                 }
                             }
                             catch (Exception ex)
                             {
-                                HandleException(pName, MemberType.Method, Required.MustBeImplemented, ex, "CanFindHome is True");
+                                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, "CanFindHome is True");
                                 DomeStabliisationWait();
                             }
                         }
                         else
                         {
-                            LogCallToDriver(pName, "About to call FindHome method");
+                            LogCallToDriver(testName, "About to call FindHome method");
                             domeDevice.FindHome();
-                            LogIssue(pName, "CanFindHome is false but FindHome did not throw an exception");
+                            LogIssue(testName, "CanFindHome is false but FindHome did not throw an exception");
                         }
 
                         break;
 
-                    case DomePropertyMethod.OpenShutter:
+                    case DomeInterfaceMember.OpenShutter:
                         if (canSetShutter)
                         {
                             try
                             {
-                                DomeShutterTest(ShutterState.Open, pName);
+                                DomeShutterTest(ShutterState.Open, testName);
                                 DomeStabliisationWait();
                             }
                             catch (Exception ex)
                             {
-                                HandleException(pName, MemberType.Method, Required.MustBeImplemented, ex, "CanSetShutter is True");
+                                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, "CanSetShutter is True");
                             }
                         }
                         else
                         {
-                            LogCallToDriver(pName, "About to call OpenShutter method");
+                            LogCallToDriver(testName, "About to call OpenShutter method");
                             domeDevice.OpenShutter();
-                            LogIssue(pName, "CanSetShutter is false but OpenShutter did not raise an exception");
+                            LogIssue(testName, "CanSetShutter is false but OpenShutter did not raise an exception");
                         }
 
                         break;
 
-                    case DomePropertyMethod.Park:
+                    case DomeInterfaceMember.Park:
                         if (canPark)
                         {
-                            SetTest(pName);
+                            SetTest(testName);
                             SetAction("Parking");
                             SetStatus("Waiting for movement to stop");
                             try
                             {
-                                LogCallToDriver(pName, "About to call Park method");
-                                TimeMethod(pName, () => domeDevice.Park(), TargetTime.Standard);
+                                LogCallToDriver(testName, "About to call Park method");
+                                TimeMethod(testName, () => domeDevice.Park(), TargetTime.Standard);
                                 if (canReadSlaved)
                                 {
-                                    LogCallToDriver(pName, "About to get Slaved property");
+                                    LogCallToDriver(testName, "About to get Slaved property");
                                     if (domeDevice.Slaved)
-                                        LogIssue(pName, "Slaved is true but Park did not raise an exception");
+                                        LogIssue(testName, "Slaved is true but Park did not raise an exception");
                                 }
                                 if (canReadSlewing)
                                 {
-                                    LogCallToDriver(pName, "About to get Slewing property repeatedly");
+                                    LogCallToDriver(testName, "About to get Slewing property repeatedly");
                                     WaitWhile("Parking", () => domeDevice.Slewing, 500, settings.DomeAzimuthMovementTimeout);
                                 }
                                 if (!cancellationToken.IsCancellationRequested)
                                 {
                                     if (canReadAtPark)
                                     {
-                                        LogCallToDriver(pName, "About to get AtPark property");
+                                        LogCallToDriver(testName, "About to get AtPark property");
                                         if (domeDevice.AtPark)
-                                            LogOk(pName, "Dome parked successfully");
+                                            LogOk(testName, "Dome parked successfully");
                                         else
-                                            LogIssue(pName, "Park command completed but AtPark is false");
+                                            LogIssue(testName, "Park command completed but AtPark is false");
                                     }
                                     else
-                                        LogOk(pName, "Can't read AtPark so assume that dome has parked successfully");
+                                        LogOk(testName, "Can't read AtPark so assume that dome has parked successfully");
                                 }
                                 DomeStabliisationWait();
                             }
                             catch (Exception ex)
                             {
-                                HandleException(pName, MemberType.Method, Required.MustBeImplemented, ex, "CanPark is True");
+                                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, "CanPark is True");
                                 DomeStabliisationWait();
                             }
                         }
                         else
                         {
-                            LogCallToDriver(pName, "About to call Park method");
+                            LogCallToDriver(testName, "About to call Park method");
                             domeDevice.Park();
-                            LogIssue(pName, "CanPark is false but Park did not raise an exception");
+                            LogIssue(testName, "CanPark is false but Park did not raise an exception");
                         }
 
                         break;
 
-                    case DomePropertyMethod.SetPark:
+                    case DomeInterfaceMember.SetPark:
                         if (canSetPark)
                         {
                             try
                             {
-                                LogCallToDriver(pName, "About to call SetPark method");
-                                TimeMethod(pName, () => domeDevice.SetPark(), TargetTime.Standard);
-                                LogOk(pName, "SetPark issued OK");
+                                LogCallToDriver(testName, "About to call SetPark method");
+                                TimeMethod(testName, () => domeDevice.SetPark(), TargetTime.Standard);
+                                LogOk(testName, "SetPark issued OK");
                             }
                             catch (Exception ex)
                             {
-                                HandleException(pName, MemberType.Method, Required.MustBeImplemented, ex, "CanSetPark is True");
+                                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, "CanSetPark is True");
                             }
                         }
                         else
                         {
-                            LogCallToDriver(pName, "About to call SetPark method");
+                            LogCallToDriver(testName, "About to call SetPark method");
                             domeDevice.SetPark();
-                            LogIssue(pName, "CanSetPath is false but SetPath did not throw an exception");
+                            LogIssue(testName, "CanSetPath is false but SetPath did not throw an exception");
                         }
 
                         break;
 
-                    case DomePropertyMethod.SlewToAltitude:
+                    case DomeInterfaceMember.SlewToAltitude:
                         if (canSetAltitude)
                         {
-                            SetTest(pName);
+                            SetTest(testName);
                             for (lSlewAngle = 0; lSlewAngle <= 90; lSlewAngle += 15)
                             {
                                 try
                                 {
-                                    DomeSlewToAltitude(pName, lSlewAngle);
+                                    DomeSlewToAltitude(testName, lSlewAngle);
                                     if (cancellationToken.IsCancellationRequested) return;
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleException(pName, MemberType.Method, Required.MustBeImplemented, ex, "CanSetAltitude is True");
+                                    HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, "CanSetAltitude is True");
                                 }
                             }
 
@@ -1164,25 +1164,25 @@ namespace ConformU
                             {
                                 try
                                 {
-                                    DomeSlewToAltitude(pName, DOME_ILLEGAL_ALTITUDE_LOW);
-                                    LogIssue(pName,
+                                    DomeSlewToAltitude(testName, DOME_ILLEGAL_ALTITUDE_LOW);
+                                    LogIssue(testName,
                                         $"No exception generated when slewing to illegal altitude {DOME_ILLEGAL_ALTITUDE_LOW} degrees");
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex,
+                                    HandleInvalidValueExceptionAsOk(testName, MemberType.Method, Required.MustBeImplemented, ex,
                                         $"slew to {DOME_ILLEGAL_ALTITUDE_LOW} degrees",
                                         $"Invalid value exception correctly raised for slew to {DOME_ILLEGAL_ALTITUDE_LOW} degrees");
                                 }
                                 try
                                 {
-                                    DomeSlewToAltitude(pName, DOME_ILLEGAL_ALTITUDE_HIGH);
-                                    LogIssue(pName,
+                                    DomeSlewToAltitude(testName, DOME_ILLEGAL_ALTITUDE_HIGH);
+                                    LogIssue(testName,
                                         $"No exception generated when slewing to illegal altitude {DOME_ILLEGAL_ALTITUDE_HIGH} degrees");
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex,
+                                    HandleInvalidValueExceptionAsOk(testName, MemberType.Method, Required.MustBeImplemented, ex,
                                         $"slew to {DOME_ILLEGAL_ALTITUDE_HIGH} degrees",
                                         $"Invalid value exception correctly raised for slew to {DOME_ILLEGAL_ALTITUDE_HIGH} degrees");
                                 }
@@ -1190,28 +1190,28 @@ namespace ConformU
                         }
                         else
                         {
-                            LogCallToDriver(pName, "About to call SlewToAltitude method");
+                            LogCallToDriver(testName, "About to call SlewToAltitude method");
                             domeDevice.SlewToAltitude(45.0);
-                            LogIssue(pName, "CanSetAltitude is false but SlewToAltitude did not raise an exception");
+                            LogIssue(testName, "CanSetAltitude is false but SlewToAltitude did not raise an exception");
                         }
 
                         break;
 
-                    case DomePropertyMethod.SlewToAzimuth:
+                    case DomeInterfaceMember.SlewToAzimuth:
                         if (canSetAzimuth)
                         {
-                            SetTest(pName);
+                            SetTest(testName);
                             for (lSlewAngle = 0; lSlewAngle <= 315; lSlewAngle += 45)
                             {
                                 try
                                 {
-                                    DomeSlewToAzimuth(pName, lSlewAngle);
+                                    DomeSlewToAzimuth(testName, lSlewAngle);
                                     if (cancellationToken.IsCancellationRequested)
                                         return;
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleException(pName, MemberType.Method, Required.MustBeImplemented, ex, "CanSetAzimuth is True");
+                                    HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, "CanSetAzimuth is True");
                                 }
                             }
 
@@ -1220,13 +1220,13 @@ namespace ConformU
                                 // Test out of range values -10 and 370 degrees
                                 try
                                 {
-                                    DomeSlewToAzimuth(pName, DOME_ILLEGAL_AZIMUTH_LOW);
-                                    LogIssue(pName,
+                                    DomeSlewToAzimuth(testName, DOME_ILLEGAL_AZIMUTH_LOW);
+                                    LogIssue(testName,
                                         $"No exception generated when slewing to illegal azimuth {DOME_ILLEGAL_AZIMUTH_LOW} degrees");
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex,
+                                    HandleInvalidValueExceptionAsOk(testName, MemberType.Method, Required.MustBeImplemented, ex,
                                         $"slew to {DOME_ILLEGAL_AZIMUTH_LOW} degrees",
                                         $"Invalid value exception correctly raised for slew to {DOME_ILLEGAL_AZIMUTH_LOW} degrees");
                                 }
@@ -1234,13 +1234,13 @@ namespace ConformU
                                     return;
                                 try
                                 {
-                                    DomeSlewToAzimuth(pName, DOME_ILLEGAL_AZIMUTH_HIGH);
-                                    LogIssue(pName,
+                                    DomeSlewToAzimuth(testName, DOME_ILLEGAL_AZIMUTH_HIGH);
+                                    LogIssue(testName,
                                         $"No exception generated when slewing to illegal azimuth {DOME_ILLEGAL_AZIMUTH_HIGH} degrees");
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex,
+                                    HandleInvalidValueExceptionAsOk(testName, MemberType.Method, Required.MustBeImplemented, ex,
                                         $"slew to {DOME_ILLEGAL_AZIMUTH_HIGH} degrees",
                                         $"Invalid value exception correctly raised for slew to {DOME_ILLEGAL_AZIMUTH_HIGH} degrees");
                                 }
@@ -1250,21 +1250,21 @@ namespace ConformU
                         }
                         else
                         {
-                            LogCallToDriver(pName, "About to call SlewToAzimuth method");
+                            LogCallToDriver(testName, "About to call SlewToAzimuth method");
                             domeDevice.SlewToAzimuth(45.0);
-                            LogIssue(pName, "CanSetAzimuth is false but SlewToAzimuth did not throw an exception");
+                            LogIssue(testName, "CanSetAzimuth is false but SlewToAzimuth did not throw an exception");
                         }
 
                         break;
 
-                    case DomePropertyMethod.SyncToAzimuth:
+                    case DomeInterfaceMember.SyncToAzimuth:
                         if (canSyncAzimuth)
                         {
                             if (canSlewToAzimuth)
                             {
                                 if (canReadAzimuth)
                                 {
-                                    LogCallToDriver(pName, "About to get Azimuth property");
+                                    LogCallToDriver(testName, "About to get Azimuth property");
                                     lOriginalAzimuth = domeDevice.Azimuth;
                                     if (lOriginalAzimuth > 300.0)
                                         lNewAzimuth = lOriginalAzimuth - DOME_SYNC_OFFSET;
@@ -1272,116 +1272,116 @@ namespace ConformU
                                         lNewAzimuth = lOriginalAzimuth + DOME_SYNC_OFFSET;
 
                                     // Sync to new azimuth
-                                    TimeMethod(pName, () => domeDevice.SyncToAzimuth(lNewAzimuth), TargetTime.Standard);
+                                    TimeMethod(testName, () => domeDevice.SyncToAzimuth(lNewAzimuth), TargetTime.Standard);
 
                                     // OK Dome hasn't moved but should now show azimuth as a new value
                                     switch (Math.Abs(lNewAzimuth - domeDevice.Azimuth))
                                     {
                                         case object _ when Math.Abs(lNewAzimuth - domeDevice.Azimuth) < 1.0: // very close so give it an OK
-                                            LogOk(pName, "Dome synced OK to within +- 1 degree");
+                                            LogOk(testName, "Dome synced OK to within +- 1 degree");
                                             break;
 
                                         case object _ when Math.Abs(lNewAzimuth - domeDevice.Azimuth) < 2.0: // close so give it an INFO
-                                            LogInfo(pName, "Dome synced to within +- 2 degrees");
+                                            LogInfo(testName, "Dome synced to within +- 2 degrees");
                                             break;
 
                                         case object _ when Math.Abs(lNewAzimuth - domeDevice.Azimuth) < 5.0: // Closish so give an issue
-                                            LogIssue(pName, "Dome only synced to within +- 5 degrees");
+                                            LogIssue(testName, "Dome only synced to within +- 5 degrees");
                                             break;
 
                                         case object _ when (DOME_SYNC_OFFSET - 2.0) <= Math.Abs(lNewAzimuth - domeDevice.Azimuth) && Math.Abs(lNewAzimuth - domeDevice.Azimuth) <= (DOME_SYNC_OFFSET + 2): // Hasn't really moved
-                                            LogIssue(pName, "Dome did not sync, Azimuth didn't change value after sync command");
+                                            LogIssue(testName, "Dome did not sync, Azimuth didn't change value after sync command");
                                             break;
 
                                         default:
-                                            LogIssue(pName, $"Dome azimuth was {Math.Abs(lNewAzimuth - domeDevice.Azimuth)} degrees away from expected value");
+                                            LogIssue(testName, $"Dome azimuth was {Math.Abs(lNewAzimuth - domeDevice.Azimuth)} degrees away from expected value");
                                             break;
                                     }
 
                                     // Now try and restore original value
-                                    LogCallToDriver(pName, "About to call SyncToAzimuth method");
+                                    LogCallToDriver(testName, "About to call SyncToAzimuth method");
                                     domeDevice.SyncToAzimuth(lOriginalAzimuth);
                                 }
                                 else
                                 {
-                                    LogCallToDriver(pName, "About to call SyncToAzimuth method");
-                                    TimeMethod(pName, () => domeDevice.SyncToAzimuth(45.0), TargetTime.Standard); // Sync to an arbitrary direction
-                                    LogOk(pName, "Dome successfully synced to 45 degrees but unable to read azimuth to confirm this");
+                                    LogCallToDriver(testName, "About to call SyncToAzimuth method");
+                                    TimeMethod(testName, () => domeDevice.SyncToAzimuth(45.0), TargetTime.Standard); // Sync to an arbitrary direction
+                                    LogOk(testName, "Dome successfully synced to 45 degrees but unable to read azimuth to confirm this");
                                 }
 
                                 // Now test sync to illegal values
                                 try
                                 {
-                                    LogCallToDriver(pName, "About to call SyncToAzimuth method");
+                                    LogCallToDriver(testName, "About to call SyncToAzimuth method");
                                     domeDevice.SyncToAzimuth(DOME_ILLEGAL_AZIMUTH_LOW);
-                                    LogIssue(pName, $"No exception generated when syncing to illegal azimuth {DOME_ILLEGAL_AZIMUTH_LOW} degrees");
+                                    LogIssue(testName, $"No exception generated when syncing to illegal azimuth {DOME_ILLEGAL_AZIMUTH_LOW} degrees");
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex, $"sync to {DOME_ILLEGAL_AZIMUTH_LOW} degrees",
+                                    HandleInvalidValueExceptionAsOk(testName, MemberType.Method, Required.MustBeImplemented, ex, $"sync to {DOME_ILLEGAL_AZIMUTH_LOW} degrees",
                                         $"Invalid value exception correctly raised for sync to {DOME_ILLEGAL_AZIMUTH_LOW} degrees");
                                 }
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                                 try
                                 {
-                                    LogCallToDriver(pName, "About to call SyncToAzimuth method");
+                                    LogCallToDriver(testName, "About to call SyncToAzimuth method");
                                     domeDevice.SyncToAzimuth(DOME_ILLEGAL_AZIMUTH_HIGH);
-                                    LogIssue(pName, $"No exception generated when syncing to illegal azimuth {DOME_ILLEGAL_AZIMUTH_HIGH} degrees");
+                                    LogIssue(testName, $"No exception generated when syncing to illegal azimuth {DOME_ILLEGAL_AZIMUTH_HIGH} degrees");
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.MustBeImplemented, ex, $"sync to {DOME_ILLEGAL_AZIMUTH_HIGH} degrees",
+                                    HandleInvalidValueExceptionAsOk(testName, MemberType.Method, Required.MustBeImplemented, ex, $"sync to {DOME_ILLEGAL_AZIMUTH_HIGH} degrees",
                                         $"Invalid value exception correctly raised for sync to {DOME_ILLEGAL_AZIMUTH_HIGH} degrees");
                                 }
                                 if (cancellationToken.IsCancellationRequested)
                                     return;
                             }
                             else
-                                LogInfo(pName, "SyncToAzimuth test skipped since SlewToAzimuth throws an exception");
+                                LogInfo(testName, "SyncToAzimuth test skipped since SlewToAzimuth throws an exception");
                         }
                         else
                         {
-                            LogCallToDriver(pName, "About to call SyncToAzimuth method");
+                            LogCallToDriver(testName, "About to call SyncToAzimuth method");
                             domeDevice.SyncToAzimuth(45.0);
-                            LogIssue(pName, "CanSyncAzimuth is false but SyncToAzimuth did not raise an exception");
+                            LogIssue(testName, "CanSyncAzimuth is false but SyncToAzimuth did not raise an exception");
                         }
                         break;
 
                     default:
-                        LogIssue(pName, $"DomeOptionalTest: Unknown test type {pType}");
+                        LogIssue(testName, $"DomeOptionalTest: Unknown test type {domeInterfaceMember}");
                         break;
                 }
             }
             catch (Exception ex)
             {
-                HandleException(pName, pMemberType, Required.Optional, ex, "");
+                HandleException(testName, memberType, Required.Optional, ex, "");
             }
             ClearStatus();
         }
 
-        private void DomeShutterTest(ShutterState pRequiredFinalShutterState, string pName)
+        private void DomeShutterTest(ShutterState requiredFinalShutterState, string testName)
         {
             ShutterState lShutterState;
 
             if (settings.DomeOpenShutter)
             {
-                SetTest(pName);
+                SetTest(testName);
                 if (canReadShutterStatus)
                 {
-                    LogCallToDriver(pName, "About to get ShutterStatus property");
+                    LogCallToDriver(testName, "About to get ShutterStatus property");
                     lShutterState = (ShutterState)domeDevice.ShutterStatus;
 
                     // Make sure we are in the required Open state to start the close test
                     switch (lShutterState)
                     {
                         case ShutterState.Closed:
-                            if (pRequiredFinalShutterState == ShutterState.Closed)
+                            if (requiredFinalShutterState == ShutterState.Closed)
                             {
                                 // Wrong state, get to the required state
                                 SetAction("Opening shutter ready for close test");
-                                LogDebug(pName, "Opening shutter ready for close test");
-                                LogCallToDriver(pName, "About to call OpenShutter method");
+                                LogDebug(testName, "Opening shutter ready for close test");
+                                LogCallToDriver(testName, "About to call OpenShutter method");
                                 domeDevice.OpenShutter();
 
                                 // Wait for shutter to open
@@ -1398,18 +1398,18 @@ namespace ConformU
                             break;
 
                         case ShutterState.Closing:
-                            if (pRequiredFinalShutterState == ShutterState.Closed)
+                            if (requiredFinalShutterState == ShutterState.Closed)
                             {
                                 SetAction("Waiting for shutter to close before opening ready for close test");
-                                LogDebug(pName, "Waiting for shutter to close before opening ready for close test");
+                                LogDebug(testName, "Waiting for shutter to close before opening ready for close test");
 
                                 // Wait for shutter to close
                                 if (!DomeShutterWait(ShutterState.Closed))
                                     return;
 
-                                LogDebug(pName, "Opening shutter ready for close test");
+                                LogDebug(testName, "Opening shutter ready for close test");
                                 SetAction("Opening shutter ready for close test");
-                                LogCallToDriver(pName, "About to call OpenShutter method");
+                                LogCallToDriver(testName, "About to call OpenShutter method");
 
                                 // Then open it
                                 domeDevice.OpenShutter();
@@ -1422,7 +1422,7 @@ namespace ConformU
                             else
                             {
                                 SetAction("Waiting for shutter to close ready for open test");
-                                LogDebug(pName, "Waiting for shutter to close ready for open test");
+                                LogDebug(testName, "Waiting for shutter to close ready for open test");
 
                                 // Wait for shutter to close
                                 if (!DomeShutterWait(ShutterState.Closed))
@@ -1433,10 +1433,10 @@ namespace ConformU
                             break;
 
                         case ShutterState.Opening:
-                            if (pRequiredFinalShutterState == ShutterState.Closed)
+                            if (requiredFinalShutterState == ShutterState.Closed)
                             {
                                 SetAction("Waiting for shutter to open ready for close test");
-                                LogDebug(pName, "Waiting for shutter to open ready for close test");
+                                LogDebug(testName, "Waiting for shutter to open ready for close test");
 
                                 // Wait for shutter to open
                                 if (!DomeShutterWait(ShutterState.Open))
@@ -1447,15 +1447,15 @@ namespace ConformU
                             else
                             {
                                 SetAction("Waiting for shutter to open before closing ready for open test");
-                                LogDebug(pName, "Waiting for shutter to open before closing ready for open test");
+                                LogDebug(testName, "Waiting for shutter to open before closing ready for open test");
 
                                 // Wait for shutter to open
                                 if (!DomeShutterWait(ShutterState.Open))
                                     return;
 
-                                LogDebug(pName, "Closing shutter ready for open test");
+                                LogDebug(testName, "Closing shutter ready for open test");
                                 SetAction("Closing shutter ready for open test");
-                                LogCallToDriver(pName, "About to call CloseShutter method");
+                                LogCallToDriver(testName, "About to call CloseShutter method");
 
                                 // Then close it
                                 domeDevice.CloseShutter();
@@ -1471,7 +1471,7 @@ namespace ConformU
                             break;
 
                         case ShutterState.Open:
-                            if (pRequiredFinalShutterState == ShutterState.Closed)
+                            if (requiredFinalShutterState == ShutterState.Closed)
                             {
                                 // Already in Closed state, no action required
                             }
@@ -1479,8 +1479,8 @@ namespace ConformU
                             {
                                 // Wrong state, get to the required state
                                 SetAction("Closing shutter ready for open  test");
-                                LogDebug(pName, "Closing shutter ready for open test");
-                                LogCallToDriver(pName, "About to call CloseShutter method");
+                                LogDebug(testName, "Closing shutter ready for open test");
+                                LogCallToDriver(testName, "About to call CloseShutter method");
                                 domeDevice.CloseShutter();
 
                                 // Wait for shutter to open
@@ -1496,65 +1496,65 @@ namespace ConformU
                     }
 
                     // Now test that we can get to the required state
-                    if (pRequiredFinalShutterState == ShutterState.Closed) // Test that we can close the shutter
+                    if (requiredFinalShutterState == ShutterState.Closed) // Test that we can close the shutter
                     {
                         // Shutter is now open so close it
                         SetAction("Closing shutter");
-                        LogCallToDriver(pName, "About to call CloseShutter method");
-                        TimeMethod(pName, () => domeDevice.CloseShutter(), TargetTime.Standard);
+                        LogCallToDriver(testName, "About to call CloseShutter method");
+                        TimeMethod(testName, () => domeDevice.CloseShutter(), TargetTime.Standard);
 
                         SetAction("Waiting for shutter to close");
-                        LogDebug(pName, "Waiting for shutter to close");
+                        LogDebug(testName, "Waiting for shutter to close");
                         if (!DomeShutterWait(ShutterState.Closed))
                         {
-                            LogCallToDriver(pName, "About to get ShutterStatus property");
+                            LogCallToDriver(testName, "About to get ShutterStatus property");
                             lShutterState = domeDevice.ShutterStatus;
-                            LogIssue(pName, $"Unable to close shutter - ShutterStatus: {lShutterState}");
+                            LogIssue(testName, $"Unable to close shutter - ShutterStatus: {lShutterState}");
                             return;
                         }
                         else
-                            LogOk(pName, "Shutter closed successfully");
+                            LogOk(testName, "Shutter closed successfully");
                         DomeStabliisationWait();
                     }
                     else // Test that we can open the shutter
                     {
                         // Shutter is now closed so open it
                         SetAction("Opening shutter");
-                        LogCallToDriver(pName, "About to call OpenShutter method");
-                        TimeMethod(pName, () => domeDevice.OpenShutter(), TargetTime.Standard);
+                        LogCallToDriver(testName, "About to call OpenShutter method");
+                        TimeMethod(testName, () => domeDevice.OpenShutter(), TargetTime.Standard);
 
                         SetAction("Waiting for shutter to open");
-                        LogDebug(pName, "Waiting for shutter to open");
+                        LogDebug(testName, "Waiting for shutter to open");
                         if (!DomeShutterWait(ShutterState.Open))
                         {
-                            LogCallToDriver(pName, "About to get ShutterStatus property");
+                            LogCallToDriver(testName, "About to get ShutterStatus property");
                             lShutterState = domeDevice.ShutterStatus;
-                            LogIssue(pName, $"Unable to open shutter - ShutterStatus: {lShutterState}");
+                            LogIssue(testName, $"Unable to open shutter - ShutterStatus: {lShutterState}");
                             return;
                         }
                         else
-                            LogOk(pName, "Shutter opened successfully");
+                            LogOk(testName, "Shutter opened successfully");
                         DomeStabliisationWait();
                     }
                 }
                 else
                 {
-                    LogDebug(pName, "Can't read shutter status!");
-                    if (pRequiredFinalShutterState == ShutterState.Closed)
+                    LogDebug(testName, "Can't read shutter status!");
+                    if (requiredFinalShutterState == ShutterState.Closed)
                     {
                         // Just issue command to see if it doesn't generate an error
-                        LogCallToDriver(pName, "About to call CloseShutter method");
+                        LogCallToDriver(testName, "About to call CloseShutter method");
                         domeDevice.CloseShutter();
                         DomeStabliisationWait();
                     }
                     else
                     {
                         // Just issue command to see if it doesn't generate an error
-                        LogCallToDriver(pName, "About to call OpenShutter method");
+                        LogCallToDriver(testName, "About to call OpenShutter method");
                         domeDevice.OpenShutter();
                         DomeStabliisationWait();
                     }
-                    LogOk(pName, "Command issued successfully but can't read ShutterStatus to confirm shutter is closed");
+                    LogOk(testName, "Command issued successfully but can't read ShutterStatus to confirm shutter is closed");
                 }
 
                 ClearStatus();
@@ -1563,7 +1563,7 @@ namespace ConformU
                 LogTestAndMessage("DomeSafety", "Open shutter check box is unchecked so shutter test bypassed");
         }
 
-        private bool DomeShutterWait(ShutterState pRequiredStatus)
+        private bool DomeShutterWait(ShutterState requiredStatus)
         {
             DateTime lStartTime;
             // Wait for shutter to reach required stats or user presses stop or timeout occurs
@@ -1573,13 +1573,13 @@ namespace ConformU
             try
             {
                 LogCallToDriver("DomeShutterWait", "About to get ShutterStatus property multiple times");
-                WaitWhile($"Waiting for shutter state {pRequiredStatus}", () => (domeDevice.ShutterStatus != pRequiredStatus), 500, settings.DomeShutterMovementTimeout);
+                WaitWhile($"Waiting for shutter state {requiredStatus}", () => (domeDevice.ShutterStatus != requiredStatus), 500, settings.DomeShutterMovementTimeout);
 
-                if ((domeDevice.ShutterStatus == pRequiredStatus)) returnValue = true; // All worked so return True
+                if ((domeDevice.ShutterStatus == requiredStatus)) returnValue = true; // All worked so return True
 
                 if ((DateTime.Now.Subtract(lStartTime).TotalSeconds > settings.DomeShutterMovementTimeout))
                     LogIssue("DomeShutterWait",
-                        $"Timed out waiting for shutter to reach state: {pRequiredStatus}, consider increasing the timeout setting in Options / Conformance Options");
+                        $"Timed out waiting for shutter to reach state: {requiredStatus}, consider increasing the timeout setting in Options / Conformance Options");
             }
             catch (Exception ex)
             {
@@ -1589,7 +1589,7 @@ namespace ConformU
             return returnValue;
         }
 
-        private void DomePerformanceTest(DomePropertyMethod pType, string pName)
+        private void DomePerformanceTest(DomeInterfaceMember memberType, string testName)
         {
             DateTime lStartTime;
             double lCount, lLastElapsedTime, lElapsedTime;
@@ -1598,7 +1598,7 @@ namespace ConformU
             double lDouble;
             ShutterState lShutterState;
             SetTest("Performance Testing");
-            SetAction(pName);
+            SetAction(testName);
             try
             {
                 lStartTime = DateTime.Now;
@@ -1607,33 +1607,33 @@ namespace ConformU
                 do
                 {
                     lCount += 1.0;
-                    switch (pType)
+                    switch (memberType)
                     {
-                        case DomePropertyMethod.Altitude:
+                        case DomeInterfaceMember.Altitude:
                             {
                                 lDouble = domeDevice.Altitude;
                                 break;
                             }
 
-                        case DomePropertyMethod.Azimuth:
+                        case DomeInterfaceMember.Azimuth:
                             {
                                 lDouble = domeDevice.Azimuth;
                                 break;
                             }
 
-                        case DomePropertyMethod.ShutterStatus:
+                        case DomeInterfaceMember.ShutterStatus:
                             {
                                 lShutterState = domeDevice.ShutterStatus;
                                 break;
                             }
 
-                        case DomePropertyMethod.SlavedRead:
+                        case DomeInterfaceMember.SlavedRead:
                             {
                                 lBoolean = domeDevice.Slaved;
                                 break;
                             }
 
-                        case DomePropertyMethod.Slewing:
+                        case DomeInterfaceMember.Slewing:
                             {
                                 lBoolean = domeDevice.Slewing;
                                 break;
@@ -1641,7 +1641,7 @@ namespace ConformU
 
                         default:
                             {
-                                LogIssue(pName, $"DomePerformanceTest: Unknown test type {pType}");
+                                LogIssue(testName, $"DomePerformanceTest: Unknown test type {memberType}");
                                 break;
                             }
                     }
@@ -1661,32 +1661,32 @@ namespace ConformU
                 {
                     case object _ when lRate > 10.0:
                         {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                            LogInfo(testName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 2.0 <= lRate && lRate <= 10.0:
                         {
-                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
+                            LogOk(testName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     case object _ when 1.0 <= lRate && lRate <= 2.0:
                         {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                            LogInfo(testName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
 
                     default:
                         {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                            LogInfo(testName, $"Transaction rate: {lRate:0.0} per second");
                             break;
                         }
                 }
             }
             catch (Exception ex)
             {
-                LogInfo(pName, $"Unable to complete test: {ex.Message}");
+                LogInfo(testName, $"Unable to complete test: {ex.Message}");
             }
         }
 
@@ -1700,11 +1700,11 @@ namespace ConformU
             }
         }
 
-        private bool ValidateSlewing(string test, bool expectedState)
+        private bool ValidateSlewing(string testName, bool expectedState)
         {
             try
             {
-                LogCallToDriver(test, "About to call Slewing property");
+                LogCallToDriver(testName, "About to call Slewing property");
                 bool slewing = domeDevice.Slewing;
 
                 if (slewing == expectedState)
@@ -1713,13 +1713,13 @@ namespace ConformU
                 }
                 else
                 {
-                    LogIssue(test, $"Slewing did not have the expected state: {expectedState}, it was: {slewing}.");
+                    LogIssue(testName, $"Slewing did not have the expected state: {expectedState}, it was: {slewing}.");
                 }
             }
             catch (Exception ex)
             {
-                LogIssue(test, $"Unexpected exception from Slewing: {ex.Message}");
-                LogDebug(test, ex.ToString());
+                LogIssue(testName, $"Unexpected exception from Slewing: {ex.Message}");
+                LogDebug(testName, ex.ToString());
             }
             return false;
         }
