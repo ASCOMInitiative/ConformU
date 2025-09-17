@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ConformU
 {
@@ -1496,45 +1497,153 @@ namespace ConformU
                     }
 
                     // Now test that we can get to the required state
-                    if (requiredFinalShutterState == ShutterState.Closed) // Test that we can close the shutter
+                    switch (requiredFinalShutterState) // Test that we can close the shutter
                     {
-                        // Shutter is now open so close it
-                        SetAction("Closing shutter");
-                        LogCallToDriver(testName, "About to call CloseShutter method");
-                        TimeMethod(testName, () => domeDevice.CloseShutter(), TargetTime.Standard);
+                        case ShutterState.Closed:
+                            // Shutter is now open so close it
+                            SetAction("Closing shutter");
+                            LogCallToDriver(testName, "About to call CloseShutter method");
+                            TimeMethod(testName, () => domeDevice.CloseShutter(), TargetTime.Standard);
 
-                        SetAction("Waiting for shutter to close");
-                        LogDebug(testName, "Waiting for shutter to close");
-                        if (!DomeShutterWait(ShutterState.Closed))
-                        {
-                            LogCallToDriver(testName, "About to get ShutterStatus property");
-                            lShutterState = domeDevice.ShutterStatus;
-                            LogIssue(testName, $"Unable to close shutter - ShutterStatus: {lShutterState}");
-                            return;
-                        }
-                        else
-                            LogOk(testName, "Shutter closed successfully");
-                        DomeStabliisationWait();
-                    }
-                    else // Test that we can open the shutter
-                    {
-                        // Shutter is now closed so open it
-                        SetAction("Opening shutter");
-                        LogCallToDriver(testName, "About to call OpenShutter method");
-                        TimeMethod(testName, () => domeDevice.OpenShutter(), TargetTime.Standard);
+                            SetAction("Waiting for shutter to close");
+                            LogDebug(testName, "Waiting for shutter to close");
+                            if (!DomeShutterWait(ShutterState.Closed))
+                            {
+                                LogCallToDriver(testName, "About to get ShutterStatus property");
+                                lShutterState = domeDevice.ShutterStatus;
+                                LogIssue(testName, $"Unable to close shutter - ShutterStatus: {lShutterState}");
+                                return;
+                            }
+                            else
+                                LogOk(testName, "Shutter closed successfully");
 
-                        SetAction("Waiting for shutter to open");
-                        LogDebug(testName, "Waiting for shutter to open");
-                        if (!DomeShutterWait(ShutterState.Open))
-                        {
-                            LogCallToDriver(testName, "About to get ShutterStatus property");
-                            lShutterState = domeDevice.ShutterStatus;
-                            LogIssue(testName, $"Unable to open shutter - ShutterStatus: {lShutterState}");
-                            return;
-                        }
-                        else
-                            LogOk(testName, "Shutter opened successfully");
-                        DomeStabliisationWait();
+                            DomeStabliisationWait();
+
+                            SetAction("Opening shutter for async test...");
+                            LogCallToDriver(testName, "About to call OpenShutter method");
+                            domeDevice.OpenShutter();
+
+                            SetAction("Waiting for shutter to open");
+                            LogDebug(testName, "Waiting for shutter to open");
+                            if (!DomeShutterWait(ShutterState.Open))
+                            {
+                                LogCallToDriver(testName, "About to get ShutterStatus property");
+                                lShutterState = domeDevice.ShutterStatus;
+                                LogIssue(testName, $"Unable to open shutter - ShutterStatus: {lShutterState}");
+                                return;
+                            }
+                            else
+                                LogOk(testName, "Shutter opened successfully");
+                            DomeStabliisationWait();
+
+                            SetAction("Closing shutter asynchronously...");
+                            LogCallToDriver(testName, "About to call CloseShutter method asynchronously");
+
+                            // Create a task to close the shutter asynchronously
+                            LogDebug(testName, "Starting CloseShutter async method task");
+                            Task closeShutterTask = Task.Run(() =>
+                            {
+                                ClientExtensions.CloseShutterAsync(domeDevice, cancellationToken).Wait();
+                            }, cancellationToken);
+                            LogDebug(testName, "Async close shutter Task running, waiting for completion");
+
+                            // Wait for the task to complete or timeout
+                            closeShutterTask.Wait(settings.DomeShutterMovementTimeout * 1000);
+                            LogDebug(testName, $"Async close shutter Task completed - Status: {closeShutterTask.Status}");
+
+                            // Log the outcome
+                            switch (closeShutterTask.Status)
+                            {
+                                case TaskStatus.RanToCompletion:
+                                    // All OK
+                                    LogOk(testName, "CloseShutter async method call completed successfully");
+                                    break;
+                                case TaskStatus.Canceled:
+                                    LogIssue(testName, "CloseShutter async task was cancelled");
+                                    return;
+                                case TaskStatus.Faulted:
+                                    LogIssue(testName, $"CloseShutter async task faulted: {closeShutterTask.Exception?.InnerException?.Message}");
+                                    return;
+                                default:
+                                    LogIssue(testName, $"CloseShutter async task status: {closeShutterTask.Status}");
+                                    return;
+                            }
+                            break;
+
+                        case ShutterState.Open:
+                            // Shutter is now closed so open it
+                            SetAction("Opening shutter");
+                            LogCallToDriver(testName, "About to call OpenShutter method");
+                            TimeMethod(testName, () => domeDevice.OpenShutter(), TargetTime.Standard);
+
+                            SetAction("Waiting for shutter to open");
+                            LogDebug(testName, "Waiting for shutter to open");
+                            if (!DomeShutterWait(ShutterState.Open))
+                            {
+                                LogCallToDriver(testName, "About to get ShutterStatus property");
+                                lShutterState = domeDevice.ShutterStatus;
+                                LogIssue(testName, $"Unable to open shutter - ShutterStatus: {lShutterState}");
+                                return;
+                            }
+                            else
+                                LogOk(testName, "Shutter opened successfully");
+                            DomeStabliisationWait();
+
+                            SetAction("Closing shutter for async test...");
+                            LogCallToDriver(testName, "About to call CloseShutter method");
+                            domeDevice.CloseShutter();
+                            DomeStabliisationWait();
+
+                            SetAction("Waiting for shutter to close");
+                            LogDebug(testName, "Waiting for shutter to close");
+                            if (!DomeShutterWait(ShutterState.Closed))
+                            {
+                                LogCallToDriver(testName, "About to get ShutterStatus property");
+                                lShutterState = domeDevice.ShutterStatus;
+                                LogIssue(testName, $"Unable to close shutter - ShutterStatus: {lShutterState}");
+                                return;
+                            }
+                            else
+                                LogOk(testName, "Shutter closed successfully");
+                            DomeStabliisationWait();
+
+                            SetAction("Opening shutter asynchronously...");
+                            LogCallToDriver(testName, "About to call OpenShutter method asynchronously");
+
+                            // Create a task to open the shutter asynchronously
+                            LogDebug(testName, "Starting OpenShutter async method task");
+                            Task openShutterTask = Task.Run(() =>
+                            {
+                                ClientExtensions.OpenShutterAsync(domeDevice, cancellationToken).Wait();
+                            }, cancellationToken);
+                            LogDebug(testName, "Async open shutter Task running, waiting for completion");
+
+                            // Wait for the task to complete or timeout
+                            openShutterTask.Wait(settings.DomeShutterMovementTimeout * 1000);
+                            LogDebug(testName, $"Async open shutter Task completed - Status: {openShutterTask.Status}");
+
+                            // Log the outcome
+                            switch (openShutterTask.Status)
+                            {
+                                case TaskStatus.RanToCompletion:
+                                    // All OK
+                                    LogOk(testName, "OpenShutter async method call completed successfully");
+                                    break;
+                                case TaskStatus.Canceled:
+                                    LogIssue(testName, "OpenShutter async task was cancelled");
+                                    return;
+                                case TaskStatus.Faulted:
+                                    LogIssue(testName, $"OpenShutter async task faulted: {openShutterTask.Exception?.InnerException?.Message}");
+                                    return;
+                                default:
+                                    LogIssue(testName, $"OpenShutter async task status: {openShutterTask.Status}");
+                                    return;
+                            }
+                            break;
+
+                        default:
+                            LogError("DomeShutterTest", $"Unexpected required shutter status: {requiredFinalShutterState}");
+                            break;
                     }
                 }
                 else
