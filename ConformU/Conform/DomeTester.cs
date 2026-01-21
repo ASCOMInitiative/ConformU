@@ -252,12 +252,12 @@ namespace ConformU
                     {
                         LogCallToDriver("PreRunCheck", "About to get DriverInfo property");
                         lVString = domeDevice.DriverInfo.ToUpper()[(lVStringPtr + 21)..]; // Get the version string
-                        lVStringPtr = lVString.IndexOf(".");
+                        lVStringPtr = lVString.IndexOf('.');
                         if (lVStringPtr > 1)
                         {
                             lV1 = System.Convert.ToInt32(lVString[1..lVStringPtr]); // Extract the number
                             lVString = lVString[(lVStringPtr + 1)..]; // Get the second version number part
-                            lVStringPtr = lVString.IndexOf(".");
+                            lVStringPtr = lVString.IndexOf('.');
                             if (lVStringPtr > 1)
                             {
                                 lV2 = int.Parse(lVString[1..lVStringPtr]); // Extract the number

@@ -180,11 +180,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ASCOM.Alpaca.Components" Version="2.2.0-rc.6" />
-		<PackageReference Include="ASCOM.AstrometryTools" Version="2.2.0-rc.6" />
-		<PackageReference Include="ASCOM.Com.Components" Version="2.2.0-rc.6" />
-		<PackageReference Include="ASCOM.Exception.Library" Version="7.1.0-rc.3" />
-		<PackageReference Include="ASCOM.Tools" Version="2.2.0-rc.6" />
+		<PackageReference Include="ASCOM.Alpaca.Components" Version="3.0.0-rc.21" />
+		<PackageReference Include="ASCOM.AstrometryTools" Version="3.0.0-rc.21" />
+		<PackageReference Include="ASCOM.Com.Components" Version="3.0.0-rc.21" />
+		<PackageReference Include="ASCOM.Exception.Library" Version="7.1.1-rc.1" />
+		<PackageReference Include="ASCOM.Tools" Version="3.0.0-rc.21" />
 		<PackageReference Include="Blazorise.Bootstrap" Version="1.7.6" />
 		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.7.6" />
 		<PackageReference Include="Blazorise.TreeView" Version="1.7.6" />
