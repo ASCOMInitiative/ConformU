@@ -172,6 +172,7 @@ namespace ConformU
         {
             try
             {
+#if WINDOWS
                 switch (settings.DeviceTechnology)
                 {
                     case DeviceTechnology.Alpaca:
@@ -195,7 +196,6 @@ namespace ConformU
                                 throw new InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComAccessMechanic}");
                         }
                         break;
-
                     default:
                         throw new InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
@@ -208,6 +208,7 @@ namespace ConformU
 
                 // Validate the interface version
                 ValidateInterfaceVersion();
+#endif
             }
             catch (COMException exCom) when (exCom.ErrorCode == REGDB_E_CLASSNOTREG)
             {

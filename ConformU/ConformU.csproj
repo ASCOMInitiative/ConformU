@@ -12,7 +12,11 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<DisableWinExeOutputInference>true</DisableWinExeOutputInference>
 	</PropertyGroup>
-	<Target Name="Test" AfterTargets="AfterBuild">
+  <PropertyGroup Condition="'$(TargetFramework)'=='net10.0-windows'">
+    <UseWindowsForms>true</UseWindowsForms>
+    <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
+  </PropertyGroup>
+  <Target Name="Test" AfterTargets="AfterBuild">
 		<Message Importance="High" Text=" Version: $(ProductMajor).$(ProductMinor).$(ProductPatch).$(BuildNumber)" />
 		<Message Importance="High" Text=" InformationalVersion: $(InformationalVersion)" />
 	</Target>
@@ -43,7 +47,7 @@
 		<ProductPatch>0</ProductPatch>
 
 		<!-- Set the pre-release string without a leading minus e.g. rc.1 or leave empty for a production release -->
-		<ProductPreRelease>rc.4</ProductPreRelease>
+		<ProductPreRelease></ProductPreRelease>
 
 		<!--Create a dynamic revision number based on time of build
 		 
@@ -58,7 +62,7 @@
 		<ProductPreReleaseSeparator>-</ProductPreReleaseSeparator>
 	</PropertyGroup>
 	<PropertyGroup>
-		<TargetFrameworks>net8.0-windows;net8.0</TargetFrameworks>
+		<TargetFrameworks>net10.0-windows;net10.0</TargetFrameworks>
 		<Configurations>Debug;Release</Configurations>
 		<OutputType>Exe</OutputType>
 		<UserSecretsId>c49fec0a-dd2c-4e60-9e85-407d8d9bdd9f</UserSecretsId>
@@ -162,6 +166,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="ascomicon.ico" />
 	  <None Remove="C:\Users\peter\.nuget\packages\ascom.tools\1.0.66\contentFiles\any\netstandard2.0\README.md" />
 	</ItemGroup>
 

@@ -408,6 +408,7 @@ namespace ConformU
                         LogInfo("CreateDevice", $"Alpaca device created OK");
                         break;
 
+#if WINDOWS
                     case DeviceTechnology.COM:
                         switch (settings.ComConfiguration.ComAccessMechanic)
                         {
@@ -425,7 +426,7 @@ namespace ConformU
                                 throw new ASCOM.InvalidValueException($"CreateDevice - Unknown COM access mechanic: {settings.ComConfiguration.ComAccessMechanic}");
                         }
                         break;
-
+#endif
                     default:
                         throw new ASCOM.InvalidValueException($"CreateDevice - Unknown technology type: {settings.DeviceTechnology}");
                 }
