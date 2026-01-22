@@ -14,7 +14,7 @@ Conform Universal (ConformU) is a cross-platform tool to validate that Alpaca De
   * as a command line utility without any graphical UI.
 * Test outcomes are reported:
   * in the browser UI and console.
-  	* as a human readable log file.
+  	* as a human readable log file
   * as a structured machine readable JSON report file.
 * The Alpaca Discovery Map provides an Alpaca Device view of discovered ASCOM devices and a unique ASCOM Device view of discovered Alpaca devices.
 * The application will advise when a new update is available on GitHub.
