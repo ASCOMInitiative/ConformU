@@ -185,17 +185,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ASCOM.Alpaca.Components" Version="3.0.0-rc.21" />
-		<PackageReference Include="ASCOM.AstrometryTools" Version="3.0.0-rc.21" />
-		<PackageReference Include="ASCOM.Com.Components" Version="3.0.0-rc.21" />
+		<PackageReference Include="ASCOM.Alpaca.Components" Version="3.0.0" />
+		<PackageReference Include="ASCOM.AstrometryTools" Version="3.0.0" />
+		<PackageReference Include="ASCOM.Com.Components" Version="3.0.0" />
 		<PackageReference Include="ASCOM.Exception.Library" Version="7.1.1-rc.1" />
-		<PackageReference Include="ASCOM.Tools" Version="3.0.0-rc.21" />
-		<PackageReference Include="Blazorise.Bootstrap" Version="1.7.6" />
-		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.7.6" />
-		<PackageReference Include="Blazorise.TreeView" Version="1.7.6" />
+		<PackageReference Include="ASCOM.Tools" Version="3.0.0" />
+		<PackageReference Include="Blazorise.Bootstrap" Version="1.8.9" />
+		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.8.9" />
+		<PackageReference Include="Blazorise.TreeView" Version="1.8.9" />
 		<PackageReference Include="jQuery" Version="3.7.1" />
 		<PackageReference Include="Octokit" Version="14.0.0" />
-		<PackageReference Include="Radzen.Blazor" Version="6.6.4" />
+		<PackageReference Include="Radzen.Blazor" Version="8.6.5" />
 		<PackageReference Include="Semver" Version="3.0.0" />
 		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
 	</ItemGroup>
