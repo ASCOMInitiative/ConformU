@@ -101,7 +101,16 @@ namespace ConformU
                 // Run the SetupDialog method on a separate thread
                 Task setupDialogTask = new(() =>
                 {
-                    testDevice.SetupDialog();
+                    try
+                    {
+                        TL.LogMessage("TestManager:SetupDialog", MessageLevel.Debug, $"Entering SetupDialogue");
+                        testDevice.SetupDialog();
+                        TL.LogMessage("TestManager:SetupDialog", MessageLevel.Debug, $"Returned from SetupDialogue");
+                    }
+                    catch (Exception ex)
+                    {
+                        TL.LogMessage("TestManager:SetupDialog", MessageLevel.Error, $"Exception in Setup dialogue: {ex.Message}\r\n{ex}");
+                    }
                 }, cancellationToken);
 
                 // Test whether we are being cancelled

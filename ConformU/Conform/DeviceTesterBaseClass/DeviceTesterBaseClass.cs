@@ -212,6 +212,7 @@ namespace ConformU
         {
             if (settings.DisplayMethodCalls) LogTestAndMessage("SetupDialog", "About to call SetupDialog");
             ((dynamic)baseClassDevice).SetupDialog();
+            LogDebug("SetupDialog", "Returned from SetupDialog");
         }
 
         public virtual void CheckCommonMethods()
