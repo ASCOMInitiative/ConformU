@@ -3,7 +3,7 @@ echo *** Setup environment
 rmdir /s /q "publish"
 mkdir publish
 
-call "C:\Program Files\Microsoft Visual Studio\2026\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+call "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
 cd
 cd J:\ConformU
 
