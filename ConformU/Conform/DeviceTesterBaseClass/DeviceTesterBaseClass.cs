@@ -1,22 +1,19 @@
 ﻿// Base class from which particular device testers are derived
 // Put all common elements in here
 using ASCOM;
-using ASCOM.Com;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
-using ASCOM.Tools;
+using ConformU.ObsMan;
 using Microsoft.CSharp.RuntimeBinder;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Threading;
-using System.Xml.Linq;
 using static ConformU.Globals;
 using InvalidOperationException = System.InvalidOperationException;
 using NotImplementedException = ASCOM.NotImplementedException;
@@ -65,6 +62,8 @@ namespace ConformU
 
         internal int ExNotImplemented, ExNotSet1, ExNotSet2;
         internal int ExInvalidValue1, ExInvalidValue2, ExInvalidValue3, ExInvalidValue4, ExInvalidValue5, ExInvalidValue6;
+
+        internal bool hasGetSafetyState = false;
 
         #endregion
 
@@ -392,9 +391,6 @@ namespace ConformU
                 return;
             LogNewLine();
 
-            // Action - optional but cannot be tested
-            LogInfo("Action", "Conform cannot test the Action method");
-
             // Supported actions - Optional but Required through DriverAccess
             try
             {
@@ -492,6 +488,8 @@ namespace ConformU
                                                 }
                                             }
 
+                                            if (actionString.Trim().ToLowerInvariant() == "getsafetystate")
+                                                hasGetSafetyState = true;
                                             break;
                                         }
                                 }
@@ -521,6 +519,45 @@ namespace ConformU
                     LogIssue("SupportedActions", ex.Message);
                 }
             }
+
+            // Test Action
+            if (hasGetSafetyState)
+            {
+                try
+                {
+                    // Try to call IsSafe if it is implemented to check that it works and to give the driver a chance to initialise any safety state information before we call GetSafetyState
+                    try
+                    {
+                        bool safe = ((ISafetyMonitorV3)baseClassDevice).IsSafe;
+                    }
+                    catch { }
+
+                    LogCallToDriver("GetSafetyState Action", "About to call Action GetSafetyState");
+                    string responseString = baseClassDevice.Action("GetSafetyState", "");
+                    if (string.IsNullOrEmpty(responseString))
+                        LogIssue("GetSafetyState Action", $"Returned string is null or empty.");
+                    else
+                    {
+                        LogDebug("GetSafetyState Action", $"JSON response:{responseString}");
+                        JsonSerializerOptions options = new() { Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
+                        List<SafetyState> response = JsonSerializer.Deserialize<List<SafetyState>>(responseString, options);
+                        LogOk("GetSafetyState Action", $"JSON read OK, {response.Count} records returned");
+
+                        foreach (SafetyState s in response)
+                        {
+                            LogInfo("GetSafetyState Action", $"{s.EventTimeUtc:HH:mm:ss.fff}, {s.EventType}, {s.EventCondition}, {s.EventSource} {s.EventMessage}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    HandleException("GetSafetyState Action", MemberType.Method, Required.Mandatory, ex, "");
+                    LogIssue("GetSafetyState Action", ex.Message);
+                }
+            }
+            else // Action - optional but cannot be tested
+                LogInfo("Action", "Conform cannot test the Action method");
+
             LogNewLine();
 
             // DeviceState - Mandatory for Platform 7 and above, otherwise not present
