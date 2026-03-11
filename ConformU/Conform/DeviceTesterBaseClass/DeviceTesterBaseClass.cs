@@ -532,27 +532,27 @@ namespace ConformU
                     }
                     catch { }
 
-                    LogCallToDriver("GetSafetyState Action", "About to call Action GetSafetyState");
+                    LogCallToDriver("Action - GetSafetyState", "About to call Action GetSafetyState");
                     string responseString = baseClassDevice.Action("GetSafetyState", "");
                     if (string.IsNullOrEmpty(responseString))
-                        LogIssue("GetSafetyState Action", $"Returned string is null or empty.");
+                        LogIssue("Action - GetSafetyState", $"Returned string is null or empty.");
                     else
                     {
-                        LogDebug("GetSafetyState Action", $"JSON response:{responseString}");
+                        LogDebug("Action - GetSafetyState", $"JSON response:{responseString}");
                         JsonSerializerOptions options = new() { Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
                         List<SafetyState> response = JsonSerializer.Deserialize<List<SafetyState>>(responseString, options);
-                        LogOk("GetSafetyState Action", $"JSON read OK, {response.Count} records returned");
+                        LogOk("Action - GetSafetyState", $"JSON read OK, {response.Count} record{(response.Count == 1 ? "" : "s")} returned");
 
                         foreach (SafetyState s in response)
                         {
-                            LogInfo("GetSafetyState Action", $"{s.EventTimeUtc:HH:mm:ss.fff}, {s.EventType}, {s.EventCondition}, {s.EventSource} {s.EventMessage}");
+                            LogInfo("Action - GetSafetyState", $"  {s.EventTimeUtc:HH:mm:ss.fff}, {s.EventType}, {s.EventCondition}, {s.EventSource}, {s.EventMessage}");
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    HandleException("GetSafetyState Action", MemberType.Method, Required.Mandatory, ex, "");
-                    LogIssue("GetSafetyState Action", ex.Message);
+                    HandleException("Action - GetSafetyState", MemberType.Method, Required.Mandatory, ex, "");
+                    LogIssue("Action - GetSafetyState", ex.Message);
                 }
             }
             else // Action - optional but cannot be tested
@@ -573,7 +573,7 @@ namespace ConformU
                     {
                         numberOfItems++;
                     }
-                    LogOk("DeviceState", $"Received {numberOfItems} operational state properties.");
+                    LogOk("DeviceState", $"Received {numberOfItems} operational state propert{(numberOfItems == 1 ? "y" : "ies")}.");
 
                     // Create a case sensitive dictionary to hold property names
                     Dictionary<string, bool> casedPropertyNames = [];
