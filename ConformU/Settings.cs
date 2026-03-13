@@ -34,6 +34,9 @@ namespace ConformU
 
         #region Conform test configuration
 
+        [MandatoryInFullTest(false)]
+        public bool AllowConnectedTrueAfterDisconnect { get; set; } = false;
+
         // Conform application configuration 
         [MandatoryInFullTest(false)]
         public bool DisplayMethodCalls { get; set; } = false;

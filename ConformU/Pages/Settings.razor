@@ -103,6 +103,10 @@
                             Device Connect / Disconnect timeout (seconds)
                         </p>
                     </div>
+                    <div class="row" style="margin-top:14px; margin-left:4px;">
+                        <RadzenCheckBox Name="CONNECTEDTRUEAFTERDISCONNECT" @bind-Value=@allowConnectedTrueAfterDisconnect TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.AllowConnectedTrueAfterDisconnect)) />
+                        <RadzenLabel Text="Allow Connected = True after Connected = False" Component="CONNECTEDTRUEAFTERDISCONNECT" Style="margin-left: 5px;" />
+                    </div>
 
                 </RadzenCard>
 
@@ -741,6 +745,7 @@
     private bool checkForUpdates;
     private bool displayMethodCalls;
     private bool enableDebugLogging;
+    private bool allowConnectedTrueAfterDisconnect;
     private string alpacaAndComText;
     private bool goHomeOnDeviceSelection;
     private int applicationPort;
@@ -923,6 +928,7 @@
         TelescopeExtendedRateOffsetTests,
         TelescopeExtendedSiteTests,
         UpdateCheck,
+        AllowConnectedTrueAfterDisconnect
     }
 
     private enum BoolConfigurationItem
@@ -1240,6 +1246,10 @@
                 settings.AlpacaConfiguration.ProtocolStrictChecks = chkProtocolStrictChecks;
                 break;
 
+            case CheckBoxConfigurationItem.AllowConnectedTrueAfterDisconnect:
+                settings.AllowConnectedTrueAfterDisconnect = allowConnectedTrueAfterDisconnect;
+                break;
+
             default:
                 throw new InvalidValueException($"OnCheckboxChange - Unknown checkbox name: {name}");
         }
@@ -1274,6 +1284,7 @@
         applicationPort = settings.ApplicationPort;
         runAs32Bit = settings.RunAs32Bit;
         connectDisconnectTimeout = settings.ConnectDisconnectTimeout;
+        allowConnectedTrueAfterDisconnect = settings.AllowConnectedTrueAfterDisconnect;
 
         // Trace settings
         chkTraceDiscovery = settings.TraceDiscovery;

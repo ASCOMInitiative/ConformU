@@ -1917,6 +1917,9 @@ namespace ConformU
                 if (!settings.TestProperties)
                     LogConfigurationAlert("Property tests were omitted due to Conform configuration.");
 
+                if (settings.AllowConnectedTrueAfterDisconnect)
+                    LogConfigurationAlert("Connected is allowed to be true after disconnection.");
+
                 if (!settings.TestMethods)
                     LogConfigurationAlert("Method tests were omitted due to Conform configuration.");
 

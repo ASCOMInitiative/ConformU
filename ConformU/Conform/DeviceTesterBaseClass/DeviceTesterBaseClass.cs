@@ -831,12 +831,16 @@ namespace ConformU
                     SetAction("Waiting for Connected to become False");
                     LogCallToDriver("Connected", "About to set Connected property False");
                     baseClassDevice.Connected = false;
-                    if (baseClassDevice.Connected != false)
+                    bool connectedOutcome = baseClassDevice.Connected;
+                    if (!settings.AllowConnectedTrueAfterDisconnect && connectedOutcome != false)
                     {
                         throw new ASCOM.InvalidOperationException($"Set Connected False - The device disconnected without error but Connected Get returned True.");
                     }
 
-                    LogOk("Connected", "Disconnected from device successfully using Connected = False");
+                    if (connectedOutcome)
+                        LogInfo("Connected", "===> Connected returned true after setting Connected = False.");
+                    else
+                        LogOk("Connected", "Disconnected from device successfully using Connected = False");
 
                     // Call the Connect method and wait for the device to connect
                     SetAction("Waiting for the Connect method to complete");
@@ -935,16 +939,40 @@ namespace ConformU
             }
 
             // Make sure that the value set is reflected in Connected GET
-            LogCallToDriver("Disconnect", "About to get Connected property");
-            if (baseClassDevice.Connected != false)
+            LogCallToDriver("Disconnect", $"Allow : {settings.AllowConnectedTrueAfterDisconnect}");
+            // Check whether we are allowing Connected Get to return True after setting Connected False.
+            if (settings.AllowConnectedTrueAfterDisconnect) // Connected Get is allowed to return True after setting Connected False.
             {
-                throw new ASCOM.InvalidOperationException($"The device disconnected without error but Connected Get returned True.");
+                // Check whether Connected Get returns True or False
+                LogCallToDriver("Disconnect", "About to get Connected property");
+                if (baseClassDevice.Connected == true) // Connected Get has returned True after setting Connected False.
+                {
+                    if (settings.DeviceType != null && DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, (short)GetInterfaceVersion()))
+                        LogInfo("Disconnect", "==> Connected returned true after Disconnect()");
+                    else
+                        LogInfo("Disconnect", "==> Connected returned true after setting Connected = False.");
+                }
+                else // Connected Get has returned False after setting Connected False.
+                {
+                    if (settings.DeviceType != null && DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, (short)GetInterfaceVersion()))
+                        tl.LogMessage("Disconnect", MessageLevel.OK, "Disconnected from device successfully using Disconnect()");
+                    else
+                        tl.LogMessage("Connected", MessageLevel.OK, "False");
+                }
             }
+            else // Connected Get must return False after setting Connected False, if it doesn't then report an error
+            {
+                LogCallToDriver("Disconnect", "About to get Connected property");
+                if (baseClassDevice.Connected != false)
+                {
+                    throw new ASCOM.InvalidOperationException($"The device disconnected without error but Connected Get returned True.");
+                }
 
-            if (settings.DeviceType != null && DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, (short)GetInterfaceVersion()))
-                tl.LogMessage("Disconnect", MessageLevel.OK, "Disconnected from device successfully using Disconnect()");
-            else
-                tl.LogMessage("Connected", MessageLevel.OK, "False");
+                if (settings.DeviceType != null && DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, (short)GetInterfaceVersion()))
+                    tl.LogMessage("Disconnect", MessageLevel.OK, "Disconnected from device successfully using Disconnect()");
+                else
+                    tl.LogMessage("Connected", MessageLevel.OK, "False");
+            }
 
             ResetTestActionStatus();
             tl.LogMessage("", MessageLevel.TestOnly, "");

@@ -1513,6 +1513,8 @@ namespace ConformU
                 if (!settings.SwitchEnableSet)
                     LogConfigurationAlert("Set switch tests were omitted due to Conform configuration.");
 
+                if (settings.AllowConnectedTrueAfterDisconnect)
+                    LogConfigurationAlert("Connected is allowed to be true after disconnection.");
             }
             catch (Exception ex)
             {

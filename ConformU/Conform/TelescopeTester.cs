@@ -4034,6 +4034,9 @@ namespace ConformU
                         LogConfigurationAlert("Sync to altitude / azimuth tests were omitted due to Conform configuration.");
                 }
 
+                if (settings.AllowConnectedTrueAfterDisconnect)
+                    LogConfigurationAlert("Connected is allowed to be true after disconnection.");
+                
                 // Miscellaneous configuration
                 if (!settings.TelescopeFirstUseTests)
                     LogConfigurationAlert("First time use tests were omitted due to Conform configuration.");

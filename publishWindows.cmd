@@ -7,11 +7,11 @@ call "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\v
 cd
 cd J:\ConformU
 
-echo *** Build application
-MSBuild "ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Restore 
-cd
-MSBuild "ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Rebuild
-echo *** Completed Build
+rem echo *** Build application
+rem MSBuild "ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Restore 
+rem cd
+rem MSBuild "ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Rebuild
+rem echo *** Completed Build
 
 echo *** Publishing Windows ARM 64bit
 dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r win-arm64 --framework net10.0-windows --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=false -o ./publish/ConformUArm64/
