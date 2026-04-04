@@ -3,7 +3,6 @@ using ASCOM.Alpaca.Clients;
 using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
-using Blazorise;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

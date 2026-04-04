@@ -5,7 +5,6 @@
 @inject SessionState state
 @using System.Threading
 @using ASCOM.Alpaca.Discovery
-@using Blazorise.TreeView
 @using System.Reflection;
 
 <h2 style=@statusVisible>Alpaca Discovery Map</h2>
@@ -21,20 +20,16 @@
 
 <div class="col" style="margin-bottom: 16px; width: 100%">
     <h4>Discovered Alpaca Devices</h4>
-    <TreeView Nodes="alpacaDevices"
-              GetChildNodes="@(item => item.Children)"
-              HasChildNodes="@(item => item.Children?.Any() == true)">
-        <NodeContent>@context.Text</NodeContent>
-    </TreeView>
+    <RadzenTree Data="@alpacaDevices">
+        <RadzenTreeLevel TextProperty="Text" ChildrenProperty="Children" HasChildren="@(item => ((TreeItem)item).Children?.Any() == true)" />
+    </RadzenTree>
 </div>
 
 <div class="col" style="margin-bottom: 16px; width: 100%">
     <h4>Available ASCOM Devices</h4>
-    <TreeView Nodes="ascomDevices"
-              GetChildNodes="@(item => item.Children)"
-              HasChildNodes="@(item => item.Children?.Any() == true)">
-        <NodeContent>@context.Text</NodeContent>
-    </TreeView>
+    <RadzenTree Data="@ascomDevices">
+        <RadzenTreeLevel TextProperty="Text" ChildrenProperty="Children" HasChildren="@(item => ((TreeItem)item).Children?.Any() == true)" />
+    </RadzenTree>
 </div>
 
 @* Only show the unrecognised device types message if there are such devices *@
@@ -42,19 +37,17 @@
 {
     <div class="col" style="margin-bottom: 16px; width: 100%">
         <h4>UNRECOGNISED ASCOM DEVICE TYPES - THESE ARE NOT VALID AND SHOULD BE REMOVED</h4>
-        <TreeView Nodes="nonStandardDevices"
-              GetChildNodes="@(item => item.Children)"
-              HasChildNodes="@(item => item.Children?.Any() == true)">
-            <NodeContent>@context.Text</NodeContent>
-        </TreeView>
+        <RadzenTree Data="@nonStandardDevices">
+            <RadzenTreeLevel TextProperty="Text" ChildrenProperty="Children" HasChildren="@(item => ((TreeItem)item).Children?.Any() == true)" />
+        </RadzenTree>
     </div>
 }
 
 @code {
 
-    List<BlazoriseTreeItem> alpacaDevices = new() { new BlazoriseTreeItem() { Text = "None" } };
-    List<BlazoriseTreeItem> ascomDevices = new() { new BlazoriseTreeItem() { Text = "None" } };
-    List<BlazoriseTreeItem> nonStandardDevices = new() { new BlazoriseTreeItem() { Text = "None" } };
+    List<TreeItem> alpacaDevices = new() { new TreeItem() { Text = "None" } };
+    List<TreeItem> ascomDevices = new() { new TreeItem() { Text = "None" } };
+    List<TreeItem> nonStandardDevices = new() { new TreeItem() { Text = "None" } };
 
     private string statusVisible = "display: initial";
     private bool disposedValue;
@@ -97,9 +90,9 @@
 
                 try
                 {
-                    List<BlazoriseTreeItem> discoveredAlpacaDevices = new();
-                    List<BlazoriseTreeItem> discoveredAscomDevices = new();
-                    List<BlazoriseTreeItem> discoveredNonStandardDevices = new();
+                    List<TreeItem> discoveredAlpacaDevices = new();
+                    List<TreeItem> discoveredAscomDevices = new();
+                    List<TreeItem> discoveredNonStandardDevices = new();
 
                     SetStatusMessage("Discovery started");
 
@@ -132,15 +125,15 @@
                                     string alpacaDeviceString = $"\"Found: {$"{alpacaDevice.IpAddress}:{alpacaDevice.Port.ToString().PadRight(6)}".PadRight(40)} {alpacaDevice.ServerName,-15} {alpacaDevice.Manufacturer,-15} {alpacaDevice.ManufacturerVersion,-20} {alpacaDevice.Location}\"";
 
                                     // Create a node for the Alpaca device and add sub-nodes for th device's details
-                                    BlazoriseTreeItem alpacaDeviceItem = new() { Text = $"{alpacaDevice.ServerName} on host {alpacaDevice.HostName} ({alpacaDevice.IpAddress}:{alpacaDevice.Port})" };
-                                    List<BlazoriseTreeItem> deviceDescription = new();
-                                    deviceDescription.Add(new BlazoriseTreeItem() { Text = $"Manufacturer: {alpacaDevice.Manufacturer}" });
-                                    deviceDescription.Add(new BlazoriseTreeItem() { Text = $"Version: {alpacaDevice.ManufacturerVersion}" });
-                                    deviceDescription.Add(new BlazoriseTreeItem() { Text = $"Location: {alpacaDevice.Location}" });
+                                    TreeItem alpacaDeviceItem = new() { Text = $"{alpacaDevice.ServerName} on host {alpacaDevice.HostName} ({alpacaDevice.IpAddress}:{alpacaDevice.Port})" };
+                                    List<TreeItem> deviceDescription = new();
+                                    deviceDescription.Add(new TreeItem() { Text = $"Manufacturer: {alpacaDevice.Manufacturer}" });
+                                    deviceDescription.Add(new TreeItem() { Text = $"Version: {alpacaDevice.ManufacturerVersion}" });
+                                    deviceDescription.Add(new TreeItem() { Text = $"Location: {alpacaDevice.Location}" });
 
                                     // Add the discovered ASCOM devices to the main list of ASCOM devices
-                                    List<BlazoriseTreeItem> ascomDevices = new();
-                                    List<BlazoriseTreeItem> nonStandardDevices = new();
+                                    List<TreeItem> ascomDevices = new();
+                                    List<TreeItem> nonStandardDevices = new();
 
                                     foreach (AscomDevice ascomDevice in alpacaDevice.AscomDevices(null))
                                     {
@@ -148,19 +141,19 @@
 
                                         if (ascomDevice.AscomDeviceType is null) // This is not an ASCOM device type
                                         {
-                                            nonStandardDevices.Add(new BlazoriseTreeItem() { Text = $"{ascomDevice.NonAscomDeviceType} Device: {ascomDevice.AscomDeviceName} - Alpaca device number: {ascomDevice.AlpacaDeviceNumber} - Alpaca Unique ID: {ascomDevice.UniqueId}" });
+                                            nonStandardDevices.Add(new TreeItem() { Text = $"{ascomDevice.NonAscomDeviceType} Device: {ascomDevice.AscomDeviceName} - Alpaca device number: {ascomDevice.AlpacaDeviceNumber} - Alpaca Unique ID: {ascomDevice.UniqueId}" });
                                         }
                                         else // This is an ASCOM device type
                                         {
-                                            ascomDevices.Add(new BlazoriseTreeItem() { Text = $"ASCOM {ascomDevice.AscomDeviceType} Device: {ascomDevice.AscomDeviceName} - Alpaca device number: {ascomDevice.AlpacaDeviceNumber} - Alpaca Unique ID: {ascomDevice.UniqueId}" });
+                                            ascomDevices.Add(new TreeItem() { Text = $"ASCOM {ascomDevice.AscomDeviceType} Device: {ascomDevice.AscomDeviceName} - Alpaca device number: {ascomDevice.AlpacaDeviceNumber} - Alpaca Unique ID: {ascomDevice.UniqueId}" });
                                         }
                                     }
 
                                     //Add a node to display this Alpaca device's ASCOM devices
-                                    deviceDescription.Add(new BlazoriseTreeItem() { Text = "Available ASCOM Devices", Children = ascomDevices });
+                                    deviceDescription.Add(new TreeItem() { Text = "Available ASCOM Devices", Children = ascomDevices });
 
                                     //Add a node to display this Alpaca device's non-standard devices
-                                    if (nonStandardDevices.Count > 0) deviceDescription.Add(new BlazoriseTreeItem() { Text = "UNRECOGNISED ASCOM DEVICE TYPES - THESE ARE NOT VALID AND SHOULD BE REMOVED", Children = nonStandardDevices });
+                                    if (nonStandardDevices.Count > 0) deviceDescription.Add(new TreeItem() { Text = "UNRECOGNISED ASCOM DEVICE TYPES - THESE ARE NOT VALID AND SHOULD BE REMOVED", Children = nonStandardDevices });
 
                                     // Add the ASCOM device descriptions to the Alpaca device description
                                     alpacaDeviceItem.Children = deviceDescription;
@@ -175,20 +168,20 @@
                                 foreach (AscomDevice uniqueAscomDevice in uniqueAscomDevices)
                                 {
                                     IEnumerable<AscomDevice> sameDevices = alpacaDiscovery.GetAscomDevices(null).Where<AscomDevice>(x => x.UniqueId == uniqueAscomDevice.UniqueId);
-                                    List<BlazoriseTreeItem> sameDevicesListItems = new();
+                                    List<TreeItem> sameDevicesListItems = new();
 
                                     foreach (AscomDevice ad in sameDevices)
                                     {
-                                        sameDevicesListItems.Add(new BlazoriseTreeItem() { Text = $"Found at {ad.HostName} ({ad.IpAddress}:{ad.IpPort}) - {ad.AscomDeviceType} {ad.AlpacaDeviceNumber}" });
+                                        sameDevicesListItems.Add(new TreeItem() { Text = $"Found at {ad.HostName} ({ad.IpAddress}:{ad.IpPort}) - {ad.AscomDeviceType} {ad.AlpacaDeviceNumber}" });
                                     }
 
                                     if (uniqueAscomDevice.AscomDeviceType is null) // This is a non-standard device so add it to the non-standard deviecs list
                                     {
-                                        discoveredNonStandardDevices.Add(new BlazoriseTreeItem() { Text = $"{uniqueAscomDevice.AscomDeviceName} (UniqueID: {uniqueAscomDevice.UniqueId})", Children = sameDevicesListItems });
+                                        discoveredNonStandardDevices.Add(new TreeItem() { Text = $"{uniqueAscomDevice.AscomDeviceName} (UniqueID: {uniqueAscomDevice.UniqueId})", Children = sameDevicesListItems });
                                     }
                                     else // This is a standard device so add it to the ASCOM devices list
                                     {
-                                        discoveredAscomDevices.Add(new BlazoriseTreeItem() { Text = $"{uniqueAscomDevice.AscomDeviceName} (UniqueID: {uniqueAscomDevice.UniqueId})", Children = sameDevicesListItems });
+                                        discoveredAscomDevices.Add(new TreeItem() { Text = $"{uniqueAscomDevice.AscomDeviceName} (UniqueID: {uniqueAscomDevice.UniqueId})", Children = sameDevicesListItems });
                                     }
                                 }
                             }
@@ -210,8 +203,8 @@
                     conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting conformance task completion");
                     await discoverytask;
 
-                    if (discoveredAlpacaDevices.Count == 0) discoveredAlpacaDevices.Add(new BlazoriseTreeItem() { Text = "None" });
-                    if (discoveredAscomDevices.Count == 0) discoveredAscomDevices.Add(new BlazoriseTreeItem() { Text = "None" });
+                    if (discoveredAlpacaDevices.Count == 0) discoveredAlpacaDevices.Add(new TreeItem() { Text = "None" });
+                    if (discoveredAscomDevices.Count == 0) discoveredAscomDevices.Add(new TreeItem() { Text = "None" });
 
                     alpacaDevices = discoveredAlpacaDevices;
                     ascomDevices = discoveredAscomDevices;

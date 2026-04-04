@@ -1,6 +1,3 @@
-using Blazorise;
-using Blazorise.Bootstrap;
-using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Hosting;
@@ -55,14 +52,6 @@ namespace ConformU
 
             // Add event handler to detect when the browser closes
             services.AddSingleton<CircuitHandler, CircuitHandlerService>();
-
-            // Add Blazorise services
-            services.AddBlazorise(options =>
-             {
-                 options.Immediate = true; // optional
-             })
-                .AddBootstrapProviders()
-                .AddFontAwesomeIcons();
         }
 
         /// <summary>
