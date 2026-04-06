@@ -31,7 +31,8 @@ namespace ConformU
         }
         private enum PerformanceProperty
         {
-            PropIsSafe
+            IsSafe,
+            GetSafetyState
         }
 
         #region New and Dispose
@@ -182,7 +183,11 @@ namespace ConformU
             // Test performance of common methods
             PerformanceTestCommon(ApplicationCancellationToken);
 
-            PerformanceTest(PerformanceProperty.PropIsSafe, "IsSafe");
+            PerformanceTest(PerformanceProperty.IsSafe, "IsSafe");
+
+            if (hasGetSafetyState)
+                PerformanceTest(PerformanceProperty.GetSafetyState, "GetSafetyState");
+
             SetTest("");
             SetAction("");
             SetStatus("");
@@ -254,17 +259,17 @@ namespace ConformU
                     lCount += 1.0;
                     switch (pType)
                     {
-                        case PerformanceProperty.PropIsSafe:
-                            {
-                                mIsSafe = mSafetyMonitor.IsSafe;
-                                break;
-                            }
+                        case PerformanceProperty.IsSafe:
+                            mIsSafe = mSafetyMonitor.IsSafe;
+                            break;
+
+                        case PerformanceProperty.GetSafetyState:
+                            _ = mSafetyMonitor.Action("GetSafetyState", "");
+                            break;
 
                         default:
-                            {
-                                LogIssue(pName, $"PerformanceTest: Unknown test type {pType}");
-                                break;
-                            }
+                            LogIssue(pName, $"PerformanceTest: Unknown test type {pType}");
+                            break;
                     }
 
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
