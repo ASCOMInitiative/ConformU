@@ -1,7 +1,9 @@
 ﻿// Base class from which particular device testers are derived
 // Put all common elements in here
 using ASCOM;
+using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
+using ASCOM.Common.Alpaca;
 using ASCOM.Common.DeviceInterfaces;
 using ConformU.ObsMan;
 using Microsoft.CSharp.RuntimeBinder;
@@ -68,6 +70,12 @@ namespace ConformU
         #endregion
 
         #region Enums
+
+        private enum PerformanceProperty
+        {
+            DeviceState = 1
+        }
+
         private enum CommandType
         {
             TstCommandString = 1,
@@ -99,8 +107,6 @@ namespace ConformU
             Extended
         }
 
-        #region Enums
-
         internal enum StatusType
         {
             StaTest = 1,
@@ -125,9 +131,6 @@ namespace ConformU
             Name = 4,
             CommandXxx = 5
         }
-        #endregion
-
-
 
         #endregion
 
@@ -206,6 +209,92 @@ namespace ConformU
         #endregion
 
         #region Code
+
+        public void TestCommonPerformance()
+        {
+            if (settings.DisplayMethodCalls) LogTestAndMessage("Performance", "About to call Performance");
+            ((dynamic)baseClassDevice).Performance();
+            LogDebug("Performance", "Returned from Performance");
+        }
+
+        public void PerformanceTestCommon(CancellationToken cancellationToken)
+        {
+            PerformanceTest(PerformanceProperty.DeviceState, "DeviceState", cancellationToken);
+        }
+        private void PerformanceTest(PerformanceProperty pType, string pName, CancellationToken cancellationToken)
+        {
+            DateTime lStartTime;
+            double lCount, lLastElapsedTime, lElapsedTime, lRate;
+
+            List<StateValue> deviceState = [];
+
+            SetAction(pName);
+            try
+            {
+                lStartTime = DateTime.Now;
+                lCount = 0.0;
+                lLastElapsedTime = 0.0;
+                do
+                {
+                    lCount += 1.0;
+                    switch (pType)
+                    {
+                        case PerformanceProperty.DeviceState:
+                            {
+                                deviceState = baseClassDevice.DeviceState;
+                                break;
+                            }
+
+                        default:
+                            {
+                                LogIssue(pName, $"PerformanceTest: Unknown test type {pType}");
+                                break;
+                            }
+                    }
+
+                    lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
+                    if (lElapsedTime > lLastElapsedTime + 1.0)
+                    {
+                        SetStatus($"{lCount} transactions in {lElapsedTime:0} seconds");
+                        lLastElapsedTime = lElapsedTime;
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+                    }
+                }
+                while (lElapsedTime <= PERF_LOOP_TIME);
+                lRate = lCount / lElapsedTime;
+                switch (lRate)
+                {
+                    case object _ when lRate > 10.0:
+                        {
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                            break;
+                        }
+
+                    case object _ when 2.0 <= lRate && lRate <= 10.0:
+                        {
+                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
+                            break;
+                        }
+
+                    case object _ when 1.0 <= lRate && lRate <= 2.0:
+                        {
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                            break;
+                        }
+
+                    default:
+                        {
+                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                            break;
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogInfo(pName, $"Unable to complete test: {ex}");
+            }
+        }
 
         public void SetupDialog()
         {

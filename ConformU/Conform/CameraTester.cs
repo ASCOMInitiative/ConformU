@@ -1833,6 +1833,11 @@ namespace ConformU
 
         public override void CheckPerformance()
         {
+            SetTest("Performance");
+
+            // Test performance of common methods
+            PerformanceTestCommon(ApplicationCancellationToken);
+
             CameraPerformanceTest(CameraPerformance.CameraState, "CameraState");
             CameraPerformanceTest(CameraPerformance.CcdTemperature, "CCDTemperature");
             CameraPerformanceTest(CameraPerformance.CoolerPower, "CoolerPower");

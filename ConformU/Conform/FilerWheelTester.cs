@@ -29,9 +29,8 @@ namespace ConformU
         private readonly ConformLogger logger;
 
         #region New and Dispose
-        public FilterWheelTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(false, true, false, true, false, false, false, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
+        public FilterWheelTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken) : base(false, true, false, true, false, true, false, conformConfiguration, logger, conformCancellationToken) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
         {
-
             settings = conformConfiguration.Settings;
             cancellationToken = conformCancellationToken;
             this.logger = logger;
@@ -430,6 +429,11 @@ namespace ConformU
 
         public override void CheckPerformance()
         {
+            SetTest("Performance");
+
+            // Test performance of common methods
+            PerformanceTestCommon(ApplicationCancellationToken);
+
             FilterWheelPerformanceTest(FilterWheelProperties.FocusOffsets, "FocusOffsets");
             FilterWheelPerformanceTest(FilterWheelProperties.Names, "Names");
             FilterWheelPerformanceTest(FilterWheelProperties.Position, "Position");

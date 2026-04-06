@@ -178,6 +178,10 @@ namespace ConformU
         public override void CheckPerformance()
         {
             SetTest("Performance");
+
+            // Test performance of common methods
+            PerformanceTestCommon(ApplicationCancellationToken);
+
             PerformanceTest(PerformanceProperty.PropIsSafe, "IsSafe");
             SetTest("");
             SetAction("");
@@ -218,7 +222,7 @@ namespace ConformU
                     case RequiredProperty.PropIsSafe:
                         {
                             LogCallToDriver("IsSafe", "About to get IsSafe property");
-                            mIsSafe = TimeFunc("IsSafe", () => mSafetyMonitor.IsSafe,TargetTime.Fast);
+                            mIsSafe = TimeFunc("IsSafe", () => mSafetyMonitor.IsSafe, TargetTime.Fast);
                             LogOk(pName, mIsSafe.ToString());
                             break;
                         }

@@ -2,6 +2,7 @@
 using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
+using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -430,6 +431,29 @@ namespace ConformU
 
         public override void CheckPerformance()
         {
+            SetTest("Performance");
+
+            // Test performance of common methods
+            PerformanceTestCommon(ApplicationCancellationToken);
+
+            PerformanceTest(ObservingConditionsProperty.AveragePeriod, "AveragePeriod");
+            PerformanceTest(ObservingConditionsProperty.CloudCover, "CloudCover");
+            PerformanceTest(ObservingConditionsProperty.DewPoint, "DewPoint");
+            PerformanceTest(ObservingConditionsProperty.Humidity, "Humidity");
+            PerformanceTest(ObservingConditionsProperty.Pressure, "Pressure");
+            PerformanceTest(ObservingConditionsProperty.RainRate, "RainRate");
+            PerformanceTest(ObservingConditionsProperty.SkyBrightness, "SkyBrightness");
+            PerformanceTest(ObservingConditionsProperty.SkyQuality, "SkyQuality");
+            PerformanceTest(ObservingConditionsProperty.SkyTemperature, "SkyTemperature");
+            PerformanceTest(ObservingConditionsProperty.StarFWHM, "StarFWHM");
+            PerformanceTest(ObservingConditionsProperty.Temperature, "Temperature");
+            PerformanceTest(ObservingConditionsProperty.WindDirection, "WindDirection");
+            PerformanceTest(ObservingConditionsProperty.WindGust, "WindGust");
+            PerformanceTest(ObservingConditionsProperty.WindSpeed, "WindSpeed");
+            PerformanceTest(ObservingConditionsProperty.SensorDescriptionCloudCover, "SensorDescription");
+            PerformanceTest(ObservingConditionsProperty.TimeSinceLastUpdateCloudCover, "TimeSinceLastUpdate");
+
+
             SetTest("");
             SetAction("");
             SetStatus("");
@@ -740,6 +764,129 @@ namespace ConformU
             return returnValue;
         }
 
+        private void PerformanceTest(ObservingConditionsProperty pType, string pName)
+        {
+            DateTime lStartTime;
+            double lCount, lLastElapsedTime, lElapsedTime;
+            double lRate, doubleValue;
+            string stringValue = "";
+
+            SetTest("Performance Test");
+            SetAction(pName);
+            try
+            {
+                lStartTime = DateTime.Now;
+                lCount = 0.0;
+                lLastElapsedTime = 0.0;
+                do
+                {
+                    lCount += 1.0;
+                    switch (pType)
+                    {
+                        case ObservingConditionsProperty.AveragePeriod:
+                            doubleValue = mObservingConditions.AveragePeriod;
+                            break;
+
+                        case ObservingConditionsProperty.CloudCover:
+                            doubleValue = mObservingConditions.CloudCover;
+                            break;
+
+                        case ObservingConditionsProperty.DewPoint:
+                            doubleValue = mObservingConditions.DewPoint;
+                            break;
+
+                        case ObservingConditionsProperty.Humidity:
+                            doubleValue = mObservingConditions.Humidity;
+                            break;
+
+                        case ObservingConditionsProperty.Pressure:
+                            doubleValue = mObservingConditions.Pressure;
+                            break;
+
+                        case ObservingConditionsProperty.RainRate:
+                            doubleValue = mObservingConditions.RainRate;
+                            break;
+
+                        case ObservingConditionsProperty.SkyBrightness:
+                            doubleValue = mObservingConditions.SkyBrightness;
+                            break;
+
+                        case ObservingConditionsProperty.SkyQuality:
+                            doubleValue = mObservingConditions.SkyQuality;
+                            break;
+
+                        case ObservingConditionsProperty.SkyTemperature:
+                            doubleValue = mObservingConditions.SkyTemperature;
+                            break;
+
+                        case ObservingConditionsProperty.StarFWHM:
+                            doubleValue = mObservingConditions.StarFWHM;
+                            break;
+
+                        case ObservingConditionsProperty.Temperature:
+                            doubleValue = mObservingConditions.Temperature;
+                            break;
+
+                        case ObservingConditionsProperty.WindDirection:
+                            doubleValue = mObservingConditions.WindDirection;
+                            break;
+
+                        case ObservingConditionsProperty.WindGust:
+                            doubleValue = mObservingConditions.WindGust;
+                            break;
+
+                        case ObservingConditionsProperty.WindSpeed:
+                            doubleValue = mObservingConditions.WindSpeed;
+                            break;
+
+                        case ObservingConditionsProperty.SensorDescriptionCloudCover:
+                            stringValue = mObservingConditions.SensorDescription("CloudCover");
+                            break;
+
+                        case ObservingConditionsProperty.TimeSinceLastUpdateCloudCover:
+                            doubleValue = mObservingConditions.TimeSinceLastUpdate("CloudCover");
+                            break;
+
+                        default:
+                            LogIssue(pName, $"FilterWheelPerformanceTest: Unknown test type {pType}");
+                            break;
+                    }
+
+                    lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
+                    if (lElapsedTime > lLastElapsedTime + 1.0)
+                    {
+                        SetStatus($"{lCount} transactions in {lElapsedTime:0} seconds");
+                        lLastElapsedTime = lElapsedTime;
+                        if (ApplicationCancellationToken.IsCancellationRequested)
+                            return;
+                    }
+                }
+                while (lElapsedTime <= PERF_LOOP_TIME);
+                lRate = lCount / lElapsedTime;
+                switch (lRate)
+                {
+                    case object _ when lRate > 10.0:
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
+
+                    case object _ when 2.0 <= lRate && lRate <= 10.0:
+                        LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
+
+                    case object _ when 1.0 <= lRate && lRate <= 2.0:
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
+
+                    default:
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogInfo(pName, $"Unable to complete test: {ex.Message}");
+            }
+        }
         #endregion
 
     }

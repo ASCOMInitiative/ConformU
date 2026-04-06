@@ -3846,7 +3846,11 @@ namespace ConformU
 
         public override void CheckPerformance()
         {
-            SetTest("Performance"); // Clear status messages
+            SetTest("Performance");
+
+            // Test performance of common methods
+            PerformanceTestCommon(ApplicationCancellationToken);
+
             TelescopePerformanceTest(PerformanceType.TstPerfAltitude, "Altitude");
             if (cancellationToken.IsCancellationRequested)
                 return;

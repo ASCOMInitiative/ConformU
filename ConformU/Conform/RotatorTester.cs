@@ -636,6 +636,11 @@ namespace ConformU
 
         public override void CheckPerformance()
         {
+            SetTest("Performance");
+
+            // Test performance of common methods
+            PerformanceTestCommon(ApplicationCancellationToken);
+
             // Position
             if (canReadPosition)
             {

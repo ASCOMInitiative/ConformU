@@ -1478,6 +1478,11 @@ namespace ConformU
 
         public override void CheckPerformance()
         {
+            SetTest("Performance");
+
+            // Test performance of common methods
+            PerformanceTestCommon(ApplicationCancellationToken);
+
             // MaxSwitch
             if (canReadMaxSwitch)
                 SwitchPerformanceTest(SwitchPropertyMethod.MaxSwitch, "MaxSwitch");
@@ -1575,6 +1580,8 @@ namespace ConformU
 
         private void SwitchPerformanceTest(SwitchPropertyMethod pType, string pName)
         {
+            int intValue = 0;
+
             SetTest("Performance Testing");
             SetAction(pName);
             try
@@ -1589,6 +1596,7 @@ namespace ConformU
                     switch (pType)
                     {
                         case SwitchPropertyMethod.MaxSwitch:
+                            intValue = switchDevice.MaxSwitch;
                             break;
 
                         case SwitchPropertyMethod.GetSwitch:

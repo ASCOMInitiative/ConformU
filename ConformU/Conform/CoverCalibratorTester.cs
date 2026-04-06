@@ -24,7 +24,9 @@ namespace ConformU
         private enum PerformanceProperty
         {
             CalibratorState,
-            CoverState
+            CoverState,
+            CalibratorChanging,
+            CoverMoving
         }
 
         private CoverStatus coverState;
@@ -581,8 +583,17 @@ namespace ConformU
         {
             SetTest("Performance");
 
-            PerformanceTest(PerformanceProperty.CalibratorState, "CalibratorState");
+            // Test performance of common methods
+            PerformanceTestCommon(ApplicationCancellationToken);
+
             PerformanceTest(PerformanceProperty.CoverState, "CoverState");
+            PerformanceTest(PerformanceProperty.CalibratorState, "CalibratorState");
+
+            if (GetInterfaceVersion() >= 2)
+            {
+                PerformanceTest(PerformanceProperty.CoverMoving, "CoverMoving");
+                PerformanceTest(PerformanceProperty.CalibratorChanging, "CalibratorChanging");
+            }
 
             SetTest("");
             SetAction("");
@@ -1203,6 +1214,7 @@ namespace ConformU
             double loopCount, lastElapsedTime, elapsedTime, loopRate;
             CalibratorStatus testCalibratorState;
             CoverStatus testCoverState;
+            bool coverMoving, calibratorChanging;
 
             SetAction(propertyName);
             try
@@ -1216,16 +1228,20 @@ namespace ConformU
                     switch (propertyToTest)
                     {
                         case PerformanceProperty.CalibratorState:
-                            {
-                                testCalibratorState = coverCalibratorDevice.CalibratorState;
-                                break;
-                            }
+                            testCalibratorState = coverCalibratorDevice.CalibratorState;
+                            break;
 
                         case PerformanceProperty.CoverState:
-                            {
-                                testCoverState = coverCalibratorDevice.CoverState;
-                                break;
-                            }
+                            testCoverState = coverCalibratorDevice.CoverState;
+                            break;
+
+                        case PerformanceProperty.CoverMoving:
+                            coverMoving = coverCalibratorDevice.CoverMoving;
+                            break;
+
+                        case PerformanceProperty.CalibratorChanging:
+                            calibratorChanging = coverCalibratorDevice.CalibratorChanging;
+                            break;
 
                         default:
                             {
