@@ -5,7 +5,6 @@ using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.Alpaca;
 using ASCOM.Common.DeviceInterfaces;
-using ConformU.ObsMan;
 using Microsoft.CSharp.RuntimeBinder;
 using System;
 using System.Collections;
@@ -634,7 +633,7 @@ namespace ConformU
 
                         foreach (SafetyState s in response)
                         {
-                            LogInfo("Action - GetSafetyState", $"  {s.EventTimeUtc:HH:mm:ss.fff}, {s.EventType}, {s.EventCondition}, {s.EventSource}, {s.EventMessage}");
+                            LogInfo("Action - GetSafetyState", $"  {s.EventTimeUtc:HH:mm:ss.fff} - {s.EventSource} rule {s.RuleName} ({s.RuleId}) fired: {s.EventType}, {s.EventCondition},  {s.EventMessage}");
                         }
                     }
                 }
