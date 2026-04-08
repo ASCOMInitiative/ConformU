@@ -72,7 +72,7 @@ namespace ConformU
 
             EventSource = eventSource;
             RuleName = ruleName;
-            RuleName = ruleId;
+            RuleId = ruleId;
             EventType = eventType;
             EventCondition = eventCondition;
             EventMessage = eventMessage;
