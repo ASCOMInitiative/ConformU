@@ -75,9 +75,10 @@ namespace ConformU
         private const SafetyEventCondition SAFETY_CONDITION = SafetyEventCondition.AboveLimit;
         private const string SAFETY_MESSAGE = "Cloud cover above safety limit: 30%";
 
-        List<SafetyState> testSafetyState = [new SafetyState(SAFETY_SOURCE_NAME, SAFETY_RULE_NAME, "9876543210", SAFETY_TYPE, SAFETY_CONDITION, SAFETY_MESSAGE)];
-
+        // Safety state fields
+        internal static List<SafetyState> testSafetyState = [new SafetyState(SAFETY_SOURCE_NAME, SAFETY_RULE_NAME, "9876543210", SAFETY_TYPE, SAFETY_CONDITION, SAFETY_MESSAGE)];
         internal static JsonSerializerOptions jsonOptions = new() { Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
+        internal static string serialisedTestState = JsonSerializer.Serialize<List<SafetyState>>(testSafetyState, jsonOptions);
 
         #endregion
 
@@ -638,17 +639,12 @@ namespace ConformU
                 testSafetyState[0].RuleId = testRuleId;
 
                 // Serialise the rule
-                string serialisedTestState = JsonSerializer.Serialize<List<SafetyState>>(testSafetyState, jsonOptions);
+                serialisedTestState = JsonSerializer.Serialize<List<SafetyState>>(testSafetyState, jsonOptions);
                 try
                 {
                     LogCallToDriver("Action - SetSafetyState", "About to call Action / SetSafetyState");
-                    string jsonResponse = baseClassDevice.Action("SetSafetyState", serialisedTestState);
-                    LogDebug("Action - SetSafetyState", $"JSON response: {jsonResponse}");
-                    SafetyActionResponse response = JsonSerializer.Deserialize<SafetyActionResponse>(jsonResponse, jsonOptions);
-                    if (response.Success)
-                        LogOk("Action - SetSafetyState", "Set safety state OK");
-                    else
-                        LogIssue("Action - SetSafetyState", $"SetSafetyState returned an error: {response.Message}");
+                    baseClassDevice.Action("SetSafetyState", serialisedTestState);
+                    LogDebug("Action - SetSafetyState", $"SetSafetyState completed OK. Sent JSON string: {serialisedTestState}");
 
                     // Get the updated list of safety states
                     List<SafetyState> safetyStates = GetSafetyStates();
@@ -661,27 +657,27 @@ namespace ConformU
                     {
                         case 0:
                             testRuleSetOk = false;
-                            LogIssue("Action - SetSafetyState", $"Conform Universal test rule not found in the devices GetSafetyState response.");
+                            LogIssue("Action - SetSafetyState", $"The Conform test safety condition was not added to the states in the device's GetSafetyState response.");
                             break;
 
                         case 1:
                             testRuleSetOk = true;
+                            LogOk("Action - SetSafetyState", $"The Conform test safety condition was successfully added to the device's GetSafetyState response.");
 
                             SafetyState s = state[0];
 
                             // Validate values
                             bool sourceOk = s.EventSource == SAFETY_SOURCE_NAME;
                             bool ruleNameOk = s.RuleName == SAFETY_RULE_NAME;
-                            //         List<SafetyState> testSafetyState = [new SafetyState(SAFETY_SOURCE_NAME, SAFETY_RULE_NAME, "9876543210", SAFETY_TYPE, SAFETY_CONDITION, SAFETY_MESSAGE)];
                             bool safetyTypeOk = s.EventType == SAFETY_TYPE;
                             bool safetyConditionsOk = s.EventCondition == SAFETY_CONDITION;
                             bool safetyMessageOk = s.EventMessage == SAFETY_MESSAGE;
 
                             if (sourceOk & ruleNameOk & safetyTypeOk & safetyConditionsOk & safetyMessageOk)
-                                LogOk("Action - SetSafetyState", $"Found Conform Universal test rule and all values matched.");
+                                LogOk("Action - SetSafetyState", $"The Conform test safety condition values all match those set.");
                             else
                             {
-                                LogIssue("Action - SetSafetyState", "Found Conform Universal test rule but one or more rule values did not match those set.");
+                                LogIssue("Action - SetSafetyState", "One or more of the returned Conform test safety condition values did not match those set.");
                                 LogInfo("Action - SetSafetyState", $"  Received source: {s.EventSource} - Expected {SAFETY_SOURCE_NAME}");
                                 LogInfo("Action - SetSafetyState", $"  Received rule name: {s.RuleName} - Expected {SAFETY_RULE_NAME}");
                                 LogInfo("Action - SetSafetyState", $"  Received event type: {s.EventType} - Expected {SAFETY_TYPE}");
@@ -694,9 +690,9 @@ namespace ConformU
                             {
                                 LogCallToDriver("Action - SetSafetyState", "About to call IsSafe");
                                 if (!((ISafetyMonitorV3)baseClassDevice).IsSafe)
-                                    LogOk("Action - SetSafetyState", "IsSafe returned false as expected when safety state was set.");
+                                    LogOk("Action - SetSafetyState", "IsSafe returned false as expected after the test safety state was added.");
                                 else
-                                    LogIssue("Action - SetSafetyState", "IsSafe returned true after the Conform Universal safety state was set.");
+                                    LogIssue("Action - SetSafetyState", "IsSafe returned true after the Conform safety state was set.");
                             }
                             catch (Exception ex)
                             {
@@ -706,7 +702,7 @@ namespace ConformU
 
                         default:
                             testRuleSetOk = false;
-                            LogIssue("Action - SetSafetyState", $"More than 1 Conform Universal test rule found in the devices GetSafetyState response: {state.Count}.");
+                            LogIssue("Action - SetSafetyState", $"More than 1 Conform test rules were found in the devices GetSafetyState response: {state.Count}.");
                             break;
                     }
                 }
@@ -714,6 +710,30 @@ namespace ConformU
                 {
                     LogIssue("Action - SetSafetyState", $"Error while trying to set safety state: {ex.Message}");
                     LogDebug("Action - SetSafetyState", ex.ToString());
+                }
+
+                // Make sure the device rejects a null string
+                try
+                {
+                    LogCallToDriver("Action - SetSafetyState", "About to call Action / SetSafetyState");
+                    baseClassDevice.Action("SetSafetyState", null);
+                    LogIssue("Action - SetSafetyState", $"The device did not reject a null serialised safety state string.");
+                }
+                catch 
+                {
+                    LogOk("Action - SetSafetyState", $"The device correctly rejected a null JSON safety state string.");
+                }
+
+                // Make sure the device rejects an empty string
+                try
+                {
+                    LogCallToDriver("Action - SetSafetyState", "About to call Action / SetSafetyState");
+                    baseClassDevice.Action("SetSafetyState", string.Empty);
+                    LogIssue("Action - SetSafetyState", $"The device did not reject a null serialised safety state string.");
+                }
+                catch 
+                {
+                    LogOk("Action - SetSafetyState", $"The device correctly rejected an empty JSON safety state string.");
                 }
             }
 
@@ -746,7 +766,7 @@ namespace ConformU
             if (hasClearSafetyState)
             {
                 // Check whether the test rule was set OK
-                if (testRuleSetOk) // Rule was set Ok so try to clear it
+                if (testRuleSetOk) // Rule was set OK so try to clear it
                 {
                     // Serialise the test rule
                     string serialisedTestState = JsonSerializer.Serialize<List<SafetyState>>(testSafetyState, jsonOptions);
@@ -754,30 +774,23 @@ namespace ConformU
                     {
                         // Send the Action to the device
                         LogCallToDriver("Action - ClearSafetyState", "About to call IsSafe");
-                        string jsonResponse = baseClassDevice.Action("ClearSafetyState", serialisedTestState);
-                        LogDebug("Action - ClearSafetyState", $"JSON response: {jsonResponse}");
-                        SafetyActionResponse response = JsonSerializer.Deserialize<SafetyActionResponse>(jsonResponse, jsonOptions);
-                        if (!response.Success) // Device reported an issue
-                            LogIssue("Action - ClearSafetyState", $"SetSafetyState returned an error: {response.Message}");
-                        else // Device reported success
-                        {
-                            // Get the updated list of safety states
-                            List<SafetyState> safetyStates = GetSafetyStates();
+                        baseClassDevice.Action("ClearSafetyState", serialisedTestState);
+                        // Get the updated list of safety states
+                        List<SafetyState> safetyStates = GetSafetyStates();
 
-                            // Make sure our value is absent
-                            bool containsRule = safetyStates.Exists(state => state.RuleId == testRuleId);
-                            if (containsRule) // Rule is still present but should not be
+                        // Make sure our value is absent
+                        bool containsRule = safetyStates.Exists(state => state.RuleId == testRuleId);
+                        if (containsRule) // Rule is still present but should not be
+                        {
+                            LogIssue("Action - ClearSafetyState", $"The Conform test rule: {testRuleId} was found in the devices GetSafetyState response after it was cleared.");
+                            foreach (SafetyState s in safetyStates)
                             {
-                                LogIssue("Action - ClearSafetyState", $"Conform Universal test rule: {testRuleId} was found in the devices GetSafetyState response after it was cleared.");
-                                foreach (SafetyState s in safetyStates)
-                                {
-                                    LogInfo("Action - ClearSafetyState", $"  {s.EventTimeUtc:HH:mm:ss.fff} - {s.EventSource} rule {s.RuleName} ({s.RuleId}): {s.EventType}, {s.EventCondition},  {s.EventMessage}");
-                                }
+                                LogInfo("Action - ClearSafetyState", $"  {s.EventTimeUtc:HH:mm:ss.fff} - {s.EventSource} rule {s.RuleName} ({s.RuleId}): {s.EventType}, {s.EventCondition},  {s.EventMessage}");
                             }
-                            else
-                            {
-                                LogOk("Action - ClearSafetyState", $"Conform Universal test rule cleared OK");
-                            }
+                        }
+                        else
+                        {
+                            LogOk("Action - ClearSafetyState", $"Conform test rule cleared OK");
                         }
                     }
                     catch (Exception ex)
@@ -789,6 +802,31 @@ namespace ConformU
                 }
                 else // Rule not set so skipping test
                     LogIssue("Action - ClearSafetyState", $"Skipping ClearSafetyState check because the test rule was not set successfully by SetSafetyState.");
+
+                // Make sure the device rejects a null string
+                try
+                {
+                    LogCallToDriver("Action - ClearSafetyState", "About to call Action / SetSafetyState");
+                    baseClassDevice.Action("ClearSafetyState", null);
+                    LogIssue("Action - ClearSafetyState", $"The device did not reject a null serialised safety state string.");
+                }
+                catch 
+                {
+                    LogOk("Action - ClearSafetyState", $"The device correctly rejected a null JSON safety state string.");
+                }
+
+                // Make sure the device rejects an empty string
+                try
+                {
+                    LogCallToDriver("Action - ClearSafetyState", "About to call Action / SetSafetyState");
+                    baseClassDevice.Action("ClearSafetyState", string.Empty);
+                    LogIssue("Action - ClearSafetyState", $"The device did not reject a null serialised safety state string.");
+                }
+                catch 
+                {
+                    LogOk("Action - ClearSafetyState", $"The device correctly rejected an empty JSON safety state string.");
+                }
+
             }
 
             // Action - optional but cannot be tested

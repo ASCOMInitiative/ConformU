@@ -4,8 +4,10 @@ using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using ASCOM.Tools;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Threading;
 
 namespace ConformU
@@ -32,7 +34,9 @@ namespace ConformU
         private enum PerformanceProperty
         {
             IsSafe,
-            GetSafetyState
+            GetSafetyState,
+            SetSafetyState,
+            ClearSafetyState
         }
 
         #region New and Dispose
@@ -188,6 +192,12 @@ namespace ConformU
             if (hasGetSafetyState)
                 PerformanceTest(PerformanceProperty.GetSafetyState, "GetSafetyState");
 
+            if (hasSetSafetyState)
+                PerformanceTest(PerformanceProperty.SetSafetyState, "SetSafetyState");
+
+            if (hasClearSafetyState)
+                PerformanceTest(PerformanceProperty.ClearSafetyState, "ClearSafetyState");
+
             SetTest("");
             SetAction("");
             SetStatus("");
@@ -265,6 +275,14 @@ namespace ConformU
 
                         case PerformanceProperty.GetSafetyState:
                             _ = mSafetyMonitor.Action("GetSafetyState", "");
+                            break;
+
+                        case PerformanceProperty.SetSafetyState:
+                            _ = mSafetyMonitor.Action("SetSafetyState", serialisedTestState);
+                            break;
+
+                        case PerformanceProperty.ClearSafetyState:
+                            _ = mSafetyMonitor.Action("ClearSafetyState", serialisedTestState);
                             break;
 
                         default:
