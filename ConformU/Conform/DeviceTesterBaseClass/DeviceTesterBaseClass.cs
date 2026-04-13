@@ -1,11 +1,10 @@
 ﻿// Base class from which particular device testers are derived
 // Put all common elements in here
 using ASCOM;
-using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
-using ASCOM.Common.Alpaca;
 using ASCOM.Common.DeviceInterfaces;
 using Microsoft.CSharp.RuntimeBinder;
+using SafetyMonitorExtension;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -72,13 +71,17 @@ namespace ConformU
         private const string SAFETY_SOURCE_NAME = "Conform Universal";
         private const string SAFETY_RULE_NAME = "Test Rule";
         private const SafetyEventType SAFETY_TYPE = SafetyEventType.CloudCover;
-        private const SafetyEventCondition SAFETY_CONDITION = SafetyEventCondition.AboveLimit;
-        private const string SAFETY_MESSAGE = "Cloud cover above safety limit: 30%";
+        private const SafetyEventTrigger SAFETY_TRIGGER = SafetyEventTrigger.AboveThreshold;
+        private const string SAFETY_DESCRIPTION = "Cloud cover above safety limit: 30%";
+
+        private const string GET_SAFETY_EVENTS_ACTION_NAME = "SafetyEvents";
+        private const string SET_EXTERNAL_EVENTS_ACTION_NAME = "SetExternalEvents";
+        private const string CLEAR_EXTERNAL_EVENTS_ACTION_NAME = "ClearExternalEvents";
 
         // Safety state fields
-        internal static List<SafetyState> testSafetyState = [new SafetyState(SAFETY_SOURCE_NAME, SAFETY_RULE_NAME, "9876543210", SAFETY_TYPE, SAFETY_CONDITION, SAFETY_MESSAGE)];
+        internal static List<SafetyEvent> testSafetyState = new List<SafetyEvent> { new SafetyEvent(SAFETY_SOURCE_NAME, SAFETY_RULE_NAME, "9876543210", SAFETY_TYPE, SAFETY_TRIGGER, SAFETY_DESCRIPTION) };
         internal static JsonSerializerOptions jsonOptions = new() { Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
-        internal static string serialisedTestState = JsonSerializer.Serialize<List<SafetyState>>(testSafetyState, jsonOptions);
+        internal static string serialisedTestState = JsonSerializer.Serialize<List<SafetyEvent>>(testSafetyState, jsonOptions);
 
         #endregion
 
@@ -148,6 +151,7 @@ namespace ConformU
         #endregion
 
         #region New and Dispose
+
         public DeviceTesterBaseClass() : base()
         {
             hasPreConnectCheck = false;
@@ -181,11 +185,14 @@ namespace ConformU
             this.hasMethods = hasMethods;
             this.hasPostRunCheck = hasPostRunCheck;
             this.hasPerformanceCheck = hasPerformanceCheck;
+
             tl = logger;
             this.ApplicationCancellationToken = cancellationToken;
             settings = conformConfiguration.Settings;
         }
+
         private bool disposedValue = false;        // To detect redundant calls
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -219,6 +226,7 @@ namespace ConformU
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
         #endregion
 
         #region Code
@@ -534,8 +542,7 @@ namespace ConformU
                                                     {
                                                         LogCallToDriver("SupportedActions", "About to call method Action");
                                                         result = baseClassDevice.Action(actionString, testParameters);
-                                                        LogOk("SupportedActions",
-                                                            $"OC simulator action {actionString} gave result: {result}");
+                                                        LogOk("SupportedActions", $"OC simulator action {actionString} gave result: {result}");
                                                     }
                                                     catch (Exception ex1)
                                                     {
@@ -549,8 +556,7 @@ namespace ConformU
                                                     {
                                                         LogCallToDriver("SupportedActions", "About to call method Action");
                                                         result = baseClassDevice.Action(actionString, testParameters);
-                                                        LogOk("SupportedActions",
-                                                            $"OC simulator action {actionString} gave result: {result}");
+                                                        LogOk("SupportedActions", $"OC simulator action {actionString} gave result: {result}");
                                                     }
                                                     catch (Exception ex1)
                                                     {
@@ -564,8 +570,7 @@ namespace ConformU
                                                     {
                                                         LogCallToDriver("SupportedActions", "About to call method Action");
                                                         result = baseClassDevice.Action(actionString, testParameters);
-                                                        LogOk("SupportedActions",
-                                                            $"Switch simulator action {actionString} gave result: {result}");
+                                                        LogOk("SupportedActions", $"Switch simulator action {actionString} gave result: {result}");
                                                     }
                                                     catch (Exception ex1)
                                                     {
@@ -579,8 +584,7 @@ namespace ConformU
                                                     {
                                                         LogCallToDriver("SupportedActions", "About to call method Action");
                                                         result = baseClassDevice.Action(actionString, testParameters);
-                                                        LogOk("SupportedActions",
-                                                            $"Switch simulator action {actionString} gave result: {result}");
+                                                        LogOk("SupportedActions", $"Switch simulator action {actionString} gave result: {result}");
                                                     }
                                                     catch (Exception ex1)
                                                     {
@@ -590,13 +594,13 @@ namespace ConformU
                                                 }
                                             }
 
-                                            if (actionString.Trim().ToLowerInvariant() == "getsafetystate")
+                                            if (actionString.Trim().Equals(GET_SAFETY_EVENTS_ACTION_NAME, StringComparison.InvariantCultureIgnoreCase))
                                                 hasGetSafetyState = true;
 
-                                            if (actionString.Trim().ToLowerInvariant() == "setsafetystate")
+                                            if (actionString.Trim().Equals(SET_EXTERNAL_EVENTS_ACTION_NAME, StringComparison.InvariantCultureIgnoreCase))
                                                 hasSetSafetyState = true;
 
-                                            if (actionString.Trim().ToLowerInvariant() == "clearsafetystate")
+                                            if (actionString.Trim().Equals(CLEAR_EXTERNAL_EVENTS_ACTION_NAME, StringComparison.InvariantCultureIgnoreCase))
                                                 hasClearSafetyState = true;
                                             break;
                                         }
@@ -636,104 +640,120 @@ namespace ConformU
                 testRuleId = Guid.NewGuid().ToString();
 
                 // Update the rule id for this run
-                testSafetyState[0].RuleId = testRuleId;
+                testSafetyState[0].Id = testRuleId;
 
                 // Serialise the rule
-                serialisedTestState = JsonSerializer.Serialize<List<SafetyState>>(testSafetyState, jsonOptions);
+                serialisedTestState = JsonSerializer.Serialize<List<SafetyEvent>>(testSafetyState, jsonOptions);
+
+                // First make suree that IsSafe returns true so the tests below will work correctly
+                // Make sure that isSafe returns false.
                 try
                 {
-                    LogCallToDriver("Action - SetSafetyState", "About to call Action / SetSafetyState");
-                    baseClassDevice.Action("SetSafetyState", serialisedTestState);
-                    LogDebug("Action - SetSafetyState", $"SetSafetyState completed OK. Sent JSON string: {serialisedTestState}");
+                    LogCallToDriver($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", "About to call IsSafe");
+                    if (!((ISafetyMonitorV3)baseClassDevice).IsSafe)
+                        LogIssue($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", "IsSafe is false at the start of the test. This invalidates the check that IsSafe is false after an external event is sent.");
+                    else
+                        LogOk($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", "IsSafe returned true at the start of the test.");
+                }
+                catch (Exception ex)
+                {
+                    LogIssue($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"Exception calling IsSafe: {ex.Message}");
+                }
+
+                try
+                {
+                    LogCallToDriver($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"About to call Action / {SET_EXTERNAL_EVENTS_ACTION_NAME}");
+                    baseClassDevice.Action(SET_EXTERNAL_EVENTS_ACTION_NAME, serialisedTestState);
+                    LogDebug($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"{SET_EXTERNAL_EVENTS_ACTION_NAME} completed OK. Sent JSON string: {serialisedTestState}");
 
                     // Get the updated list of safety states
-                    List<SafetyState> safetyStates = GetSafetyStates();
+                    List<SafetyEvent> safetyStates = GetSafetyStates();
 
                     // Make sure our value is present
-                    bool containsRule = safetyStates.Exists(state => state.RuleId == testRuleId);
-                    List<SafetyState> state = safetyStates.Where((state) => state.RuleId == testRuleId).ToList();
+                    bool containsRule = safetyStates.Exists(state => state.Id == testRuleId);
+                    List<SafetyEvent> state = safetyStates.Where((state) => state.Id == testRuleId).ToList();
 
                     switch (state.Count)
                     {
                         case 0:
                             testRuleSetOk = false;
-                            LogIssue("Action - SetSafetyState", $"The Conform test safety condition was not added to the states in the device's GetSafetyState response.");
+                            LogIssue($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"The Conform test safety event was not added to the events in the device's GetSafetyState response.");
                             break;
 
                         case 1:
                             testRuleSetOk = true;
-                            LogOk("Action - SetSafetyState", $"The Conform test safety condition was successfully added to the device's GetSafetyState response.");
+                            LogOk($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"The Conform test safety event was successfully added to the device's GetSafetyState response.");
 
-                            SafetyState s = state[0];
+                            SafetyEvent s = state[0];
 
                             // Validate values
-                            bool sourceOk = s.EventSource == SAFETY_SOURCE_NAME;
-                            bool ruleNameOk = s.RuleName == SAFETY_RULE_NAME;
-                            bool safetyTypeOk = s.EventType == SAFETY_TYPE;
-                            bool safetyConditionsOk = s.EventCondition == SAFETY_CONDITION;
-                            bool safetyMessageOk = s.EventMessage == SAFETY_MESSAGE;
+                            bool sourceOk = s.Source == SAFETY_SOURCE_NAME;
+                            bool ruleNameOk = s.Name == SAFETY_RULE_NAME;
+                            bool safetyTypeOk = s.Type == SAFETY_TYPE;
+                            bool safetyTriggerOk = s.Trigger == SAFETY_TRIGGER;
+                            bool safetyDescriptionOk = s.Description == SAFETY_DESCRIPTION;
 
-                            if (sourceOk & ruleNameOk & safetyTypeOk & safetyConditionsOk & safetyMessageOk)
-                                LogOk("Action - SetSafetyState", $"The Conform test safety condition values all match those set.");
+                            if (sourceOk & ruleNameOk & safetyTypeOk & safetyTriggerOk & safetyDescriptionOk)
+                                LogOk($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"The Conform test safety event values all match those set.");
                             else
                             {
-                                LogIssue("Action - SetSafetyState", "One or more of the returned Conform test safety condition values did not match those set.");
-                                LogInfo("Action - SetSafetyState", $"  Received source: {s.EventSource} - Expected {SAFETY_SOURCE_NAME}");
-                                LogInfo("Action - SetSafetyState", $"  Received rule name: {s.RuleName} - Expected {SAFETY_RULE_NAME}");
-                                LogInfo("Action - SetSafetyState", $"  Received event type: {s.EventType} - Expected {SAFETY_TYPE}");
-                                LogInfo("Action - SetSafetyState", $"  Received event condition: {s.EventCondition} - Expected {SAFETY_CONDITION}");
-                                LogInfo("Action - SetSafetyState", $"  Received event message: {s.EventMessage} - Expected {SAFETY_MESSAGE}");
+                                LogIssue($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", "One or more of the returned Conform test safety event values did not match those set.");
+                                LogInfo($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"  Received source: {s.Source} - Expected {SAFETY_SOURCE_NAME}");
+                                LogInfo($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"  Received name: {s.Name} - Expected {SAFETY_RULE_NAME}");
+                                LogInfo($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"  Received event type: {s.Type} - Expected {SAFETY_TYPE}");
+                                LogInfo($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"  Received event condition: {s.Trigger} - Expected {SAFETY_TRIGGER}");
+                                LogInfo($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"  Received event message: {s.Description} - Expected {SAFETY_DESCRIPTION}");
                             }
 
                             // Make sure that isSafe returns false.
                             try
                             {
-                                LogCallToDriver("Action - SetSafetyState", "About to call IsSafe");
+                                LogCallToDriver($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", "About to call IsSafe");
                                 if (!((ISafetyMonitorV3)baseClassDevice).IsSafe)
-                                    LogOk("Action - SetSafetyState", "IsSafe returned false as expected after the test safety state was added.");
+                                    LogOk($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", "IsSafe returned false, as expected, after the test safety event was set.");
                                 else
-                                    LogIssue("Action - SetSafetyState", "IsSafe returned true after the Conform safety state was set.");
+                                    LogIssue($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", "IsSafe returned true after the test safety event was set.");
                             }
                             catch (Exception ex)
                             {
-                                LogIssue("Action - SetSafetyState", $"Exception calling IsSafe: {ex.Message}");
+                                LogIssue($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"Exception calling IsSafe: {ex.Message}");
                             }
                             break;
 
                         default:
                             testRuleSetOk = false;
-                            LogIssue("Action - SetSafetyState", $"More than 1 Conform test rules were found in the devices GetSafetyState response: {state.Count}.");
+                            LogIssue($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"More than 1 Conform test rules were found in the device's SafetyState response: {state.Count}.");
                             break;
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogIssue("Action - SetSafetyState", $"Error while trying to set safety state: {ex.Message}");
-                    LogDebug("Action - SetSafetyState", ex.ToString());
+                    LogIssue($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"Error while trying to add safety event: {ex.Message}");
+                    LogDebug($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", ex.ToString());
                 }
 
                 // Make sure the device rejects a null string
                 try
                 {
-                    LogCallToDriver("Action - SetSafetyState", "About to call Action / SetSafetyState");
+                    LogCallToDriver($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", "About to call Action / SetSafetyState");
                     baseClassDevice.Action("SetSafetyState", null);
-                    LogIssue("Action - SetSafetyState", $"The device did not reject a null serialised safety state string.");
+                    LogIssue($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"The device did not reject a null serialised safety state string.");
                 }
-                catch 
+                catch
                 {
-                    LogOk("Action - SetSafetyState", $"The device correctly rejected a null JSON safety state string.");
+                    LogOk($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"The device correctly rejected a null JSON safety state string.");
                 }
 
                 // Make sure the device rejects an empty string
                 try
                 {
-                    LogCallToDriver("Action - SetSafetyState", "About to call Action / SetSafetyState");
+                    LogCallToDriver($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", "About to call Action / SetSafetyState");
                     baseClassDevice.Action("SetSafetyState", string.Empty);
-                    LogIssue("Action - SetSafetyState", $"The device did not reject a null serialised safety state string.");
+                    LogIssue($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"The device did not reject a null serialised safety state string.");
                 }
-                catch 
+                catch
                 {
-                    LogOk("Action - SetSafetyState", $"The device correctly rejected an empty JSON safety state string.");
+                    LogOk($"Action - {SET_EXTERNAL_EVENTS_ACTION_NAME}", $"The device correctly rejected an empty JSON safety state string.");
                 }
             }
 
@@ -742,24 +762,24 @@ namespace ConformU
                 try
                 {
                     // Try to call IsSafe if it is implemented to check that it works and to give the driver a chance to initialise any safety state information before we call GetSafetyState
-                    LogCallToDriver("Action - GetSafetyState", "About to call IsSafe");
+                    LogCallToDriver($"Action - {GET_SAFETY_EVENTS_ACTION_NAME}", "About to call IsSafe");
                     try
                     {
                         bool safe = ((ISafetyMonitorV3)baseClassDevice).IsSafe;
                     }
                     catch { }
 
-                    List<SafetyState> safetyStates = GetSafetyStates();
-                    LogOk("Action - GetSafetyState", $"JSON read OK, {safetyStates.Count} record{(safetyStates.Count == 1 ? "" : "s")} returned");
+                    List<SafetyEvent> safetyStates = GetSafetyStates();
+                    LogOk($"Action - {GET_SAFETY_EVENTS_ACTION_NAME}", $"JSON read OK, {safetyStates.Count} record{(safetyStates.Count == 1 ? "" : "s")} returned");
 
-                    foreach (SafetyState s in safetyStates)
+                    foreach (SafetyEvent s in safetyStates)
                     {
-                        LogInfo("Action - GetSafetyState", $"  {s.EventTimeUtc:HH:mm:ss.fff} - {s.EventSource} rule {s.RuleName} ({s.RuleId}): {s.EventType}, {s.EventCondition},  {s.EventMessage}");
+                        LogInfo($"Action - {GET_SAFETY_EVENTS_ACTION_NAME}", $"  {s.EventTimeUtc:HH:mm:ss.fff} - {s.Source} rule {s.Name} ({s.Id}): {s.Type}, {s.Trigger},  {s.Description}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogIssue("Action - GetSafetyState", ex.Message);
+                    LogIssue($"Action - {GET_SAFETY_EVENTS_ACTION_NAME}", ex.Message);
                 }
             }
 
@@ -769,62 +789,64 @@ namespace ConformU
                 if (testRuleSetOk) // Rule was set OK so try to clear it
                 {
                     // Serialise the test rule
-                    string serialisedTestState = JsonSerializer.Serialize<List<SafetyState>>(testSafetyState, jsonOptions);
                     try
                     {
+                        string serialisedStringList = JsonSerializer.Serialize<List<string>>(new List<string>() { testRuleId }, jsonOptions);
+
                         // Send the Action to the device
-                        LogCallToDriver("Action - ClearSafetyState", "About to call IsSafe");
-                        baseClassDevice.Action("ClearSafetyState", serialisedTestState);
+                        LogCallToDriver($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", $"About to call Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}");
+                        baseClassDevice.Action(CLEAR_EXTERNAL_EVENTS_ACTION_NAME, serialisedStringList);
+
                         // Get the updated list of safety states
-                        List<SafetyState> safetyStates = GetSafetyStates();
+                        List<SafetyEvent> safetyStates = GetSafetyStates();
 
                         // Make sure our value is absent
-                        bool containsRule = safetyStates.Exists(state => state.RuleId == testRuleId);
+                        bool containsRule = safetyStates.Exists(state => state.Id == testRuleId);
                         if (containsRule) // Rule is still present but should not be
                         {
-                            LogIssue("Action - ClearSafetyState", $"The Conform test rule: {testRuleId} was found in the devices GetSafetyState response after it was cleared.");
-                            foreach (SafetyState s in safetyStates)
+                            LogIssue($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", $"The Conform test event: {testRuleId} was found in the device's SafetyState response after it was cleared.");
+                            foreach (SafetyEvent s in safetyStates)
                             {
-                                LogInfo("Action - ClearSafetyState", $"  {s.EventTimeUtc:HH:mm:ss.fff} - {s.EventSource} rule {s.RuleName} ({s.RuleId}): {s.EventType}, {s.EventCondition},  {s.EventMessage}");
+                                LogInfo($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", $"  {s.EventTimeUtc:HH:mm:ss.fff} - {s.Source} rule {s.Name} ({s.Id}): {s.Type}, {s.Trigger},  {s.Description}");
                             }
                         }
                         else
                         {
-                            LogOk("Action - ClearSafetyState", $"Conform test rule cleared OK");
+                            LogOk($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", $"Conform test event cleared OK");
                         }
                     }
                     catch (Exception ex)
                     {
-                        LogIssue("Action - ClearSafetyState", $"Error while trying to set safety state: {ex.Message}");
-                        LogDebug("Action - ClearSafetyState", ex.ToString());
+                        LogIssue($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", $"Error while trying to clear safety event: {ex.Message}");
+                        LogDebug($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", ex.ToString());
                     }
 
                 }
                 else // Rule not set so skipping test
-                    LogIssue("Action - ClearSafetyState", $"Skipping ClearSafetyState check because the test rule was not set successfully by SetSafetyState.");
+                    LogIssue($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", $"Skipping ClearSafetyState check because the test rule was not set successfully by SetSafetyState.");
 
                 // Make sure the device rejects a null string
                 try
                 {
-                    LogCallToDriver("Action - ClearSafetyState", "About to call Action / SetSafetyState");
-                    baseClassDevice.Action("ClearSafetyState", null);
-                    LogIssue("Action - ClearSafetyState", $"The device did not reject a null serialised safety state string.");
+                    LogCallToDriver($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", $"About to call Action / {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}");
+                    baseClassDevice.Action(CLEAR_EXTERNAL_EVENTS_ACTION_NAME, null);
+                    LogIssue($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", $"The device did not reject a null serialised safety state string.");
                 }
-                catch 
+                catch
                 {
-                    LogOk("Action - ClearSafetyState", $"The device correctly rejected a null JSON safety state string.");
+                    LogOk($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", $"The device correctly rejected a null JSON safety state string.");
                 }
 
                 // Make sure the device rejects an empty string
                 try
                 {
-                    LogCallToDriver("Action - ClearSafetyState", "About to call Action / SetSafetyState");
-                    baseClassDevice.Action("ClearSafetyState", string.Empty);
-                    LogIssue("Action - ClearSafetyState", $"The device did not reject a null serialised safety state string.");
+                    LogCallToDriver($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", $"About to call Action / {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}");
+                    baseClassDevice.Action(CLEAR_EXTERNAL_EVENTS_ACTION_NAME, string.Empty);
+                    LogIssue($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", $"The device did not reject a null serialised safety state string.");
                 }
-                catch 
+                catch
                 {
-                    LogOk("Action - ClearSafetyState", $"The device correctly rejected an empty JSON safety state string.");
+                    LogOk($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", $"The device correctly rejected an empty JSON safety state string.");
                 }
 
             }
@@ -2365,16 +2387,16 @@ namespace ConformU
 
         #region Base class support Code
 
-        private List<SafetyState> GetSafetyStates()
+        private List<SafetyEvent> GetSafetyStates()
         {
-            LogCallToDriver("Action - GetSafetyState", "About to call Action GetSafetyState");
-            string responseString = baseClassDevice.Action("GetSafetyState", "");
+            LogCallToDriver($"GetSafetyStates", $"About to call Action - {GET_SAFETY_EVENTS_ACTION_NAME}");
+            string responseString = baseClassDevice.Action(GET_SAFETY_EVENTS_ACTION_NAME, "");
             if (string.IsNullOrEmpty(responseString))
-                throw new InvalidValueException("Action - GetSafetyState -Returned string is null or empty.");
+                throw new InvalidValueException($"Action - {GET_SAFETY_EVENTS_ACTION_NAME} - Returned string is null or empty.");
             else
             {
-                LogDebug("Action - GetSafetyState", $"JSON response:{responseString}");
-                List<SafetyState> response = JsonSerializer.Deserialize<List<SafetyState>>(responseString, jsonOptions);
+                LogDebug($"Action - {GET_SAFETY_EVENTS_ACTION_NAME}", $"JSON response:{responseString}");
+                List<SafetyEvent> response = JsonSerializer.Deserialize<List<SafetyEvent>>(responseString, jsonOptions);
                 return response;
             }
         }
