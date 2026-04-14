@@ -55,7 +55,7 @@ echo *** Completed setting large address aware flag on 32bit EXE
 
 echo *** Creating Windows installer
 cd Setup
-"C:\Program Files (x86)\Inno Script Studio\isstudio.exe" -compile "conformu.iss"
+"C:\Program Files (x86)\Inno Setup 6\iscc.exe" "conformu.iss"
 cd ..
 
 echo *** Builds complete
