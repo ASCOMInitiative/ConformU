@@ -109,7 +109,7 @@
 		<NoWarn>1701;1702;MSB3042;CS8002</NoWarn>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<AnalysisLevel>latest</AnalysisLevel>
-		<PlatformTarget>x86</PlatformTarget>
+		<PlatformTarget>AnyCPU</PlatformTarget>
 		<StartupObject>ConformU.Program</StartupObject>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
