@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 
 namespace ConformU
 {
-    public class TelescopeFacade : FacadeBaseClass, ITelescopeV4, IDisposable
+    public class TelescopeFacade : FacadeBaseClass, ITelescopeV4, IDeviceExtensions, IDisposable
     {
 
         // Create the test device in the facade base class

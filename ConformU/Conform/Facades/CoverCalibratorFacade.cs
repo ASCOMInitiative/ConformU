@@ -1,8 +1,9 @@
 ﻿using ASCOM.Common.DeviceInterfaces;
+using System;
 
 namespace ConformU
 {
-    public class CoverCalibratorFacade : FacadeBaseClass, ICoverCalibratorV2
+    public class CoverCalibratorFacade : FacadeBaseClass, ICoverCalibratorV2, IDeviceExtensions, IDisposable
     {
         // Create the test device in the facade base class
         public CoverCalibratorFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }

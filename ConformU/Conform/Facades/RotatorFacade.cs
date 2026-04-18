@@ -1,8 +1,9 @@
 ﻿using ASCOM.Common.DeviceInterfaces;
+using System;
 
 namespace ConformU
 {
-    public class RotatorFacade : FacadeBaseClass, IRotatorV4
+    public class RotatorFacade : FacadeBaseClass, IRotatorV4, IDeviceExtensions, IDisposable
     {
         // Create the test device in the facade base class
         public RotatorFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }

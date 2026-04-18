@@ -1,8 +1,9 @@
 ﻿using ASCOM.Common.DeviceInterfaces;
+using System;
 
 namespace ConformU
 {
-    public class SwitchFacade : FacadeBaseClass, ISwitchV3
+    public class SwitchFacade : FacadeBaseClass, ISwitchV3, IDeviceExtensions, IDisposable
     {
         // Create the test device in the facade base class
         public SwitchFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }

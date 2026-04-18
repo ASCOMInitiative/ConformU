@@ -1,4 +1,5 @@
 ﻿using ASCOM.Common.DeviceInterfaces;
+using System;
 /* Unmerged change from project 'ConformU (net5.0)'
 Before:
 using System.Runtime.InteropServices;
@@ -10,7 +11,7 @@ using System.Runtime.InteropServices;
 
 namespace ConformU
 {
-    public class SafetyMonitorFacade : FacadeBaseClass, ISafetyMonitorV3
+    public class SafetyMonitorFacade : FacadeBaseClass, ISafetyMonitorV3, IDeviceExtensions, IDisposable
     {
 
         // Create the test device in the facade base class

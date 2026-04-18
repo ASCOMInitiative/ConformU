@@ -1,11 +1,12 @@
 ﻿
 using ASCOM.Common.DeviceInterfaces;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace ConformU
 {
-    public class VideoFacade : FacadeBaseClass, IVideoV2
+    public class VideoFacade : FacadeBaseClass, IVideoV2, IDeviceExtensions, IDisposable
     {
         // Create the test device in the facade base class
         public VideoFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }

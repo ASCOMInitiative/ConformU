@@ -1,8 +1,9 @@
 ﻿using ASCOM.Common.DeviceInterfaces;
+using System;
 
 namespace ConformU
 {
-    public class FilterWheelFacade : FacadeBaseClass, IFilterWheelV3
+    public class FilterWheelFacade : FacadeBaseClass, IFilterWheelV3, IDeviceExtensions, IDisposable
     {
         // Create the test device in the facade base class
         public FilterWheelFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }

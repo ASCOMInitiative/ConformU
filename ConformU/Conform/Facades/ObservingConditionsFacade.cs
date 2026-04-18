@@ -1,8 +1,9 @@
 ﻿using ASCOM.Common.DeviceInterfaces;
+using System;
 
 namespace ConformU
 {
-    public class ObservingConditionsFacade : FacadeBaseClass, IObservingConditionsV2
+    public class ObservingConditionsFacade : FacadeBaseClass, IObservingConditionsV2, IDeviceExtensions, IDisposable
     {
         // Create the test device in the facade base class
         public ObservingConditionsFacade(Settings conformSettings, ConformLogger logger) : base(conformSettings, logger) { }

@@ -356,6 +356,18 @@ namespace ConformU
 
         #endregion
 
+        #region Additional Members
+
+        public object InterfaceVersionObject
+        {
+            get
+            {
+                return FunctionNoParameters<object>(() => Driver.InterfaceVersion);
+            }
+        }
+
+        #endregion
+
         #region IAscomDevice Members
 
         public bool Connected

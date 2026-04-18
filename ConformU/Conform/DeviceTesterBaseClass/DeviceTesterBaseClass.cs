@@ -792,7 +792,7 @@ namespace ConformU
                     try
                     {
                         string serialisedStringList = JsonSerializer.Serialize<List<string>>(new List<string>() { testRuleId }, jsonOptions);
-
+                        LogDebug($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", $"JSON serialised rule ID that will be sent to {CLEAR_EXTERNAL_EVENTS_ACTION_NAME} action: {serialisedStringList}");
                         // Send the Action to the device
                         LogCallToDriver($"Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}", $"About to call Action - {CLEAR_EXTERNAL_EVENTS_ACTION_NAME}");
                         baseClassDevice.Action(CLEAR_EXTERNAL_EVENTS_ACTION_NAME, serialisedStringList);
@@ -1049,7 +1049,49 @@ namespace ConformU
                     return baseInterfaceVersion.Value;
 
                 LogCallToDriver("InterfaceVersion", "About to get property InterfaceVersion");
-                baseInterfaceVersion = baseClassDevice.InterfaceVersion;
+
+                // Check which access mechanic has been selected
+                if (settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.Native) // Native so we can test what type of value is returned by the InterfaceVersion property and handle it appropriately
+                {
+                    object interfaceVersion = ((IDeviceExtensions)baseClassDevice).InterfaceVersionObject;
+
+                    if (interfaceVersion is null)
+                    {
+                        LogDebug("GetInterfaceVersion", $"InterfaceVersion property returned null, treating this as an error.");
+                        throw new InvalidOperationException("The InterfaceVersion property returned null.");
+                    }
+
+                    Type interfaceVersionType = interfaceVersion.GetType();
+
+                    // Check whether a short was returned per the interface definition or whether some other type was returned.
+                    switch (interfaceVersionType.Name)
+                    {
+                        case nameof(Int16): // Correct, expected type was returned
+                            baseInterfaceVersion = Convert.ToInt16(interfaceVersion);
+                            LogDebug("GetInterfaceVersion", $"Device interface version: {baseInterfaceVersion}");
+                            break;
+
+                        case nameof(Byte):
+                        case nameof(Int64):
+                        case nameof(Int32): // A Byte, Int32, or Int64 value was returned when an Int16 was expected.
+                            baseInterfaceVersion = Convert.ToInt16(interfaceVersion); // Convert the value to the expected short type to try to continue with testing
+                            LogInfo("InterfaceVersion", $"#####");
+                            LogInfo("InterfaceVersion", $"##### InterfaceVersion returned an {interfaceVersionType.Name} type when an Int16 (short) type was expected. Using the returned value: {baseInterfaceVersion}");
+                            LogInfo("InterfaceVersion", $"#####");
+                            break;
+
+                        default:
+                            baseInterfaceVersion = 1; // Assume that this is a version 1 interface to enable further tests to proceed, as the returned value is not in a recognised format
+                            LogInfo("InterfaceVersion", $"#####");
+                            LogInfo("InterfaceVersion", $"##### InterfaceVersion returned an {interfaceVersionType.Name} type when an Int16 (short) type was expected, assuming a value of 1. The returned value was: {interfaceVersion}");
+                            LogInfo("InterfaceVersion", $"#####");
+                            break;
+                    }
+                }
+                else
+                {
+                    baseInterfaceVersion= baseClassDevice.InterfaceVersion;
+                }
                 LogDebug("GetInterfaceVersion", $"Device interface version: {baseInterfaceVersion}");
 
                 return baseInterfaceVersion.Value;

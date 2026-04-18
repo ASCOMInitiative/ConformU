@@ -2549,10 +2549,10 @@ namespace ConformU
                 }
 
                 // Test the TrackingRates.Dispose() method
-                LogDebug("TrackingRates", "Getting tracking rates");
-                trackingRates = telescopeDevice.TrackingRates;
                 try
                 {
+                    LogDebug("TrackingRates", "Getting tracking rates");
+                    trackingRates = telescopeDevice.TrackingRates;
                     LogDebug("TrackingRates", "Disposing tracking rates");
                     trackingRates.Dispose();
                     LogOk("TrackingRates", "Disposed tracking rates OK");
@@ -4040,7 +4040,7 @@ namespace ConformU
 
                 if (settings.AllowConnectedTrueAfterDisconnect)
                     LogConfigurationAlert("Connected is allowed to be true after disconnection.");
-                
+
                 // Miscellaneous configuration
                 if (!settings.TelescopeFirstUseTests)
                     LogConfigurationAlert("First time use tests were omitted due to Conform configuration.");
