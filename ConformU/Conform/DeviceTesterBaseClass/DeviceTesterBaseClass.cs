@@ -203,7 +203,7 @@ namespace ConformU
                     try
                     {
                         tl.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, "Calling base class Dispose method...");
-                        baseClassDevice.Dispose();
+                        baseClassDevice?.Dispose();
                         tl.LogMessage("DeviceTesterbaseClass", MessageLevel.Debug, "returned from base class Dispose method");
                     }
                     catch (Exception ex)
@@ -1090,7 +1090,7 @@ namespace ConformU
                 }
                 else
                 {
-                    baseInterfaceVersion= baseClassDevice.InterfaceVersion;
+                    baseInterfaceVersion = baseClassDevice.InterfaceVersion;
                 }
                 LogDebug("GetInterfaceVersion", $"Device interface version: {baseInterfaceVersion}");
 
@@ -1483,7 +1483,54 @@ namespace ConformU
                     break;
 
                 case DeviceTechnology.COM:
-                    LogTestOnly($"COM Driver ProgID: {settings.ComDevice.ProgId}"); break;
+                    LogInfo("COM Driver",$"Checking ProgID: {settings.ComDevice.ProgId}");
+#if WINDOWS
+                    // Make sure the driver will run on this platform.
+                    ASCOM.Com.ComMetadata metadata = null;
+                    try
+                    {
+                        metadata = ASCOM.Com.PlatformUtilities.GetComMetadata(settings.ComDevice.ProgId, tl);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogError("COM Driver", $"Exception while getting driver COM metadata: {ex.Message}, please report this as a GitHub Issue: https://github.com/ASCOMInitiative/ConformU/issues. Continuing anyway...");
+                        LogDebug("COM Driver", ex.ToString());
+                    }
+
+                    if (metadata is not null)
+                    {
+                        if (metadata.IsRegistered)
+                        {
+                            // Now check wether it is compatible with ConformU's current bitness: 32bit or 64bit
+                            if (metadata.Is64BitCompatible & Environment.Is64BitProcess) // 64bit compatible
+                                LogOk("COM Driver", $"This driver is compatible with the currently running 64-bit Conform Universal application.");
+                            else if (metadata.Is32BitCompatible & !Environment.Is64BitProcess) // 32bit compatible
+                                LogOk("COM Driver", $"This driver is compatible with the currently running 32-bit Conform Universal application.");
+                            else // Not compatible
+                            {
+                                LogIssue("COM Driver", $"This driver is not compatible with Conform Universal's current bitness: {processBitness}bit.");
+                                LogNewLine();
+                                LogInfo("COM Driver", $"The driver is compatible with 32-bit applications: {metadata.Is32BitCompatible}.");
+                                LogInfo("COM Driver", $"The driver is compatible with 64-bit applications: {metadata.Is64BitCompatible}.");
+                                LogInfo("COM Driver", $"Conform Universal is running as a {processBitness}bit application.");
+                                LogNewLine();
+                                // Check whether Conform should be restarted in 32bit mode.
+                                if (metadata.Is32BitCompatible & Environment.Is64BitProcess) // Yes, driver can be checked in 32bit mode
+                                    LogInfo("COM Driver", "This driver can be tested by enabling the \"Run as 32bit on a 64bit OS\" checkbox on the Settings/Conform page.");
+
+                                LogTestAndMessage("","");
+                                LogTestOnly("Conformance run complete.");
+                                // Cancel the test run because the driver is not compatible with the application's bitness
+                                ConformanceTestManager.ConformCancellationTokenSource.Cancel();
+                            }
+                        }
+                        else
+                        {
+                            throw new InvalidValueException($"The COM driver ProgID: {settings.ComDevice.ProgId} does not appear to be COM registered. Please check and ensure that the driver is correctly installed.");
+                        }
+                    }
+#endif
+                    break;
 
                 case DeviceTechnology.NotSelected:
                     throw new InvalidValueException($"CheckInitialise - 'NotSelected' is not a technology type, please select Alpaca or COM.");

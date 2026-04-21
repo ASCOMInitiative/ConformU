@@ -173,7 +173,7 @@ namespace ConformU
         /// </remarks>
         public int TestDevice(int numberOfTestCycles)
         {
-            int returnCode;
+            int returnCode = 0;
 
             // Start with a blank line to the console log
             Console.WriteLine("");
@@ -193,339 +193,342 @@ namespace ConformU
                 // Initialise the device
                 string testStage = "Initialise";
                 testDevice.InitialiseTest();
-
-                try
+                
+                if (!cancellationToken.IsCancellationRequested)
                 {
-                    testStage = "CreateDevice";
-                    testDevice.CreateDevice();
-                    TL.LogMessage(testStage, MessageLevel.OK, "Driver instance created successfully");
-                    TL.LogMessage("", MessageLevel.TestOnly, "");
-
-                    // Run pre-connect checks if required
-                    if (!cancellationToken.IsCancellationRequested & testDevice.HasPreConnectCheck)
-                    {
-                        TL.LogMessage("Pre-connect checks", MessageLevel.TestOnly, "");
-                        testDevice.PreConnectChecks();
-                        TL.LogMessage("", MessageLevel.TestOnly, "");
-                    }
-
-                    // Try to set Connected to True
                     try
                     {
-                        // Test setting Connected to True
-                        TL.LogMessage("Connect to device", MessageLevel.TestOnly, "");
-                        testStage = "ConnectToDevice";
+                        testStage = "CreateDevice";
+                        testDevice.CreateDevice();
+                        TL.LogMessage(testStage, MessageLevel.OK, "Driver instance created successfully");
+                        TL.LogMessage("", MessageLevel.TestOnly, "");
 
-                        testDevice.Connect();
+                        // Run pre-connect checks if required
+                        if (!cancellationToken.IsCancellationRequested & testDevice.HasPreConnectCheck)
+                        {
+                            TL.LogMessage("Pre-connect checks", MessageLevel.TestOnly, "");
+                            testDevice.PreConnectChecks();
+                            TL.LogMessage("", MessageLevel.TestOnly, "");
+                        }
 
+                        // Try to set Connected to True
                         try
                         {
-                            // Initialise the test cycle counter
-                            int testCycleCount = 0;
+                            // Test setting Connected to True
+                            TL.LogMessage("Connect to device", MessageLevel.TestOnly, "");
+                            testStage = "ConnectToDevice";
 
-                            // Repeat the main tests until the required number of test cycles has been completed
-                            do
+                            testDevice.Connect();
+
+                            try
                             {
-                                // Test common methods
-                                if (!cancellationToken.IsCancellationRequested & settings.TestProperties)
-                                {
-                                    testStage = "CheckCommonMethods";
+                                // Initialise the test cycle counter
+                                int testCycleCount = 0;
 
-                                    testDevice.CheckCommonMethods();
-                                }
-
-                                // Test and read Can properties
-                                if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasCanProperties)
+                                // Repeat the main tests until the required number of test cycles has been completed
+                                do
                                 {
-                                    TL.LogMessage("Can Properties", MessageLevel.TestOnly, "");
-                                    testStage = "ReadCanProperties";
-                                    testDevice.ReadCanProperties();
-                                    TL.LogMessage("", MessageLevel.TestOnly, "");
-                                }
+                                    // Test common methods
+                                    if (!cancellationToken.IsCancellationRequested & settings.TestProperties)
+                                    {
+                                        testStage = "CheckCommonMethods";
 
-                                // Carry out pre-test tasks
-                                if (!cancellationToken.IsCancellationRequested & testDevice.HasPreRunCheck)
-                                {
-                                    TL.LogMessage("Pre-run Checks", MessageLevel.TestOnly, "");
-                                    testStage = "PreRunCheck";
-                                    testDevice.PreRunCheck();
-                                    TL.LogMessage("", MessageLevel.TestOnly, "");
-                                }
+                                        testDevice.CheckCommonMethods();
+                                    }
 
-                                // Test properties
-                                if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasProperties)
-                                {
-                                    TL.LogMessage("Properties", MessageLevel.TestOnly, "");
-                                    testStage = "CheckProperties";
-                                    testDevice.CheckProperties();
-                                    TL.LogMessage("", MessageLevel.TestOnly, "");
-                                }
+                                    // Test and read Can properties
+                                    if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasCanProperties)
+                                    {
+                                        TL.LogMessage("Can Properties", MessageLevel.TestOnly, "");
+                                        testStage = "ReadCanProperties";
+                                        testDevice.ReadCanProperties();
+                                        TL.LogMessage("", MessageLevel.TestOnly, "");
+                                    }
 
-                                // Test methods
-                                if (!cancellationToken.IsCancellationRequested & settings.TestMethods & testDevice.HasMethods)
+                                    // Carry out pre-test tasks
+                                    if (!cancellationToken.IsCancellationRequested & testDevice.HasPreRunCheck)
+                                    {
+                                        TL.LogMessage("Pre-run Checks", MessageLevel.TestOnly, "");
+                                        testStage = "PreRunCheck";
+                                        testDevice.PreRunCheck();
+                                        TL.LogMessage("", MessageLevel.TestOnly, "");
+                                    }
+
+                                    // Test properties
+                                    if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasProperties)
+                                    {
+                                        TL.LogMessage("Properties", MessageLevel.TestOnly, "");
+                                        testStage = "CheckProperties";
+                                        testDevice.CheckProperties();
+                                        TL.LogMessage("", MessageLevel.TestOnly, "");
+                                    }
+
+                                    // Test methods
+                                    if (!cancellationToken.IsCancellationRequested & settings.TestMethods & testDevice.HasMethods)
+                                    {
+                                        TL.LogMessage("Methods", MessageLevel.TestOnly, "");
+                                        testStage = "CheckMethods";
+                                        testDevice.CheckMethods();
+                                        TL.LogMessage("", MessageLevel.TestOnly, ""); // Blank line
+                                    }
+
+                                    // Test performance
+                                    if (!cancellationToken.IsCancellationRequested & settings.TestPerformance & testDevice.HasPerformanceCheck)
+                                    {
+                                        TL.LogMessage("Performance", MessageLevel.TestOnly, "");
+                                        testStage = "CheckPerformance";
+                                        testDevice.CheckPerformance();
+                                        TL.LogMessage("", MessageLevel.TestOnly, "");
+                                    }
+
+                                    // Increment the test cycle counter
+                                    testCycleCount++;
+
+                                    if (cancellationToken.IsCancellationRequested)
+                                        break;
+
+                                } while (testCycleCount < numberOfTestCycles); // Exit when the required number of test cycles has been completed.
+
+                                // Carry out post-test tasks
+                                if (!cancellationToken.IsCancellationRequested & testDevice.HasPostRunCheck)
                                 {
-                                    TL.LogMessage("Methods", MessageLevel.TestOnly, "");
-                                    testStage = "CheckMethods";
-                                    testDevice.CheckMethods();
+                                    TL.LogMessage("Post-run Checks", MessageLevel.TestOnly, "");
+                                    testStage = "PostRunCheck";
+                                    testDevice.PostRunCheck();
                                     TL.LogMessage("", MessageLevel.TestOnly, ""); // Blank line
                                 }
 
-                                // Test performance
-                                if (!cancellationToken.IsCancellationRequested & settings.TestPerformance & testDevice.HasPerformanceCheck)
+                                // Disconnect from the device
+                                try
                                 {
-                                    TL.LogMessage("Performance", MessageLevel.TestOnly, "");
-                                    testStage = "CheckPerformance";
-                                    testDevice.CheckPerformance();
+                                    TL.LogMessage("Disconnect from device", MessageLevel.TestOnly, "");
+                                    testStage = "Disconnect";
+
+                                    testDevice.Disconnect();
+                                }
+                                catch (Exception ex)
+                                {
+                                    conformResults.Issues.Add(new KeyValuePair<string, string>("Connected", $"Exception when setting Connected to false: {ex.Message}"));
+                                    TL.LogMessage("Connected", MessageLevel.Issue, $"Exception when setting Connected to False: {ex.Message}");
+                                    TL.LogMessage("Connected", MessageLevel.Debug, $"{ex}");
                                     TL.LogMessage("", MessageLevel.TestOnly, "");
                                 }
 
-                                // Increment the test cycle counter
-                                testCycleCount++;
+                                // Carry out check on whether any tests were omitted due to Conform configuration
+                                if (!cancellationToken.IsCancellationRequested)
+                                {
+                                    testStage = "CheckConfiguration";
+                                    testDevice.CheckConfiguration();
+                                }
 
-                                if (cancellationToken.IsCancellationRequested)
-                                    break;
+                                // Display completion or "test cancelled" message
+                                if (!cancellationToken.IsCancellationRequested | (numberOfTestCycles > 1)) // Test ran to completion or it is a stress test
+                                {
+                                    if (numberOfTestCycles > 1)
+                                        TL.LogMessage("Stress test has finished", MessageLevel.TestOnly, "");
+                                    else
+                                        TL.LogMessage("Conformance test has finished", MessageLevel.TestOnly, "");
+                                }
+                                else // Basic conformance test that was cancelled by the STOP key.
+                                {
+                                    TL.LogMessage("Conformance test interrupted by STOP button or to protect the device.", MessageLevel.TestOnly, "");
 
-                            } while (testCycleCount < numberOfTestCycles); // Exit when the required number of test cycles has been completed.
+                                    // Add an issue if the test was interrupted and is therefore incomplete
+                                    conformResults.Issues.Add(new KeyValuePair<string, string>("StopKey", "The conformance test is incomplete because it was interrupted by the stop key or to protect the device being tested."));
+                                }
 
-                            // Carry out post-test tasks
-                            if (!cancellationToken.IsCancellationRequested & testDevice.HasPostRunCheck)
-                            {
-                                TL.LogMessage("Post-run Checks", MessageLevel.TestOnly, "");
-                                testStage = "PostRunCheck";
-                                testDevice.PostRunCheck();
-                                TL.LogMessage("", MessageLevel.TestOnly, ""); // Blank line
-                            }
-
-                            // Disconnect from the device
-                            try
-                            {
-                                TL.LogMessage("Disconnect from device", MessageLevel.TestOnly, "");
-                                testStage = "Disconnect";
-
-                                testDevice.Disconnect();
                             }
                             catch (Exception ex)
                             {
-                                conformResults.Issues.Add(new KeyValuePair<string, string>("Connected", $"Exception when setting Connected to false: {ex.Message}"));
-                                TL.LogMessage("Connected", MessageLevel.Issue, $"Exception when setting Connected to False: {ex.Message}");
-                                TL.LogMessage("Connected", MessageLevel.Debug, $"{ex}");
+                                conformResults.Issues.Add(new KeyValuePair<string, string>(testStage, $"Exception when testing device - testing abandoned: {ex.Message}"));
+                                TL.LogMessage(testStage, MessageLevel.Issue, $"Exception when testing device: {ex.Message}");
+                                TL.LogMessage(testStage, MessageLevel.Debug, $"{ex}");
+                                TL.LogMessage("", MessageLevel.TestOnly, "");
+                                TL.LogMessage(testStage, MessageLevel.TestAndMessage, "Further tests abandoned.");
+                            }
+                        }
+                        catch (MissingMemberException ex) // The Connecting property is missing
+                        {
+                            testDevice.LogIssue(testStage, $"{ex.Message} Further testing abandoned.");
+                            TL.LogMessage(testStage, MessageLevel.Debug, $"{ex}");
+                            testDevice.LogInfo(testStage, $"The {settings.DeviceType} device reported interface version {testDevice.GetInterfaceVersion()}, which indicates that it supports the Connect() and Disconnect() methods and the Connecting property.");
+                            testDevice.LogInfo(testStage, $"However, the Connecting property is not present in the device interface.");
+                            testDevice.LogInfo(testStage, $"Please check whether the device is reporting the correct interface version. For Platform 6 devices the latest {settings.DeviceType} interface version is {DeviceCapabilities.LatestPlatform6Interface[settings.DeviceType.Value]}.");
+                            testDevice.LogNewLine();
+                            testDevice.LogTestAndMessage(testStage, "Cannot connect to device, further tests abandoned.");
+                        }
+                        catch (Exception ex) // Exception when connecting to device
+                        {
+                            testDevice.LogIssue(testStage, $"Connection exception - further testing abandoned: {ex.Message}");
+                            TL.LogMessage(testStage, MessageLevel.Debug, $"{ex}");
+                            testDevice.LogNewLine();
+                            testDevice.LogTestAndMessage(testStage, "Cannot connect to device, further tests abandoned.");
+                        }
+                    }
+                    catch (InvalidValueException ex) // Interface version is invalid
+                    {
+                        testDevice.LogIssue(testStage, $"The returned interface version is invalid for a {settings.DeviceType} device: {ex.Message}");
+                        testDevice.LogInfo(testStage, $"For a Platform 6 interface device the interface version should be: {DeviceCapabilities.LatestPlatform6Interface[settings.DeviceType.Value]}");
+                        testDevice.LogInfo(testStage, $"For a Platform 7 interface device that supports Connect(), Disconnect(), Connecting and DeviceState, the interface version should be: {DeviceCapabilities.LatestInterface[settings.DeviceType.Value]}");
+                        testDevice.LogNewLine();
+                        testDevice.LogTestAndMessage(testStage, "This device is incompatible with ASCOM clients because its interface version is invalid and the device cannot be tested further.");
+                    }
+                    catch (Exception ex) // Exception when creating device
+                    {
+                        testDevice.LogIssue("Initialise", $"Unable to {(settings.DeviceTechnology == DeviceTechnology.Alpaca ? "access" : "create")} the device: {ex.Message}");
+                        TL.LogMessage("", MessageLevel.TestOnly, "");
+                        TL.LogMessage(testStage, MessageLevel.TestAndMessage, "Further tests abandoned as Conform cannot create the driver");
+                    }
+
+                    // Report the success or failure of conformance checking
+                    TL.LogMessage("", MessageLevel.TestOnly, "");
+                    if (conformResults.ErrorCount == 0 & conformResults.IssueCount == 0 & conformResults.ConfigurationAlertCount == 0 & !cancellationToken.IsCancellationRequested) // No issues - device conforms as expected
+                    {
+                        TL.LogMessage("Congratulations, no errors, warnings or issues found: your driver passes ASCOM validation!!", MessageLevel.TestOnly, "");
+                    } // No issues found - success
+                    else // Some issues found, the device fails the conformance check
+                    {
+                        l_Message = $"Your device had {conformResults.IssueCount} issue{(conformResults.IssueCount == 1 ? "" : "s")}, {conformResults.ErrorCount} error{(conformResults.ErrorCount == 1 ? "" : "s")} and " +
+                            $"{conformResults.ConfigurationAlertCount} configuration alert{(conformResults.ConfigurationAlertCount == 1 ? "" : "s")}";
+
+                        TL.LogMessage(l_Message, MessageLevel.TestOnly, "");
+                    }// Some issues found, the device fails the conformance check
+
+                    // List issues, errors and configuration alerts
+                    if (conformResults.ErrorCount > 0)
+                    {
+                        TL.LogMessage("", MessageLevel.TestOnly, "");
+                        TL.LogMessage("Error Summary", MessageLevel.TestOnly, "");
+                        foreach (KeyValuePair<string, string> kvp in conformResults.Errors)
+                        {
+                            TL.LogMessage(kvp.Key, MessageLevel.Error, kvp.Value);
+                        }
+                    }
+
+                    if (conformResults.IssueCount > 0)
+                    {
+                        TL.LogMessage("", MessageLevel.TestOnly, "");
+                        TL.LogMessage("Issue Summary", MessageLevel.TestOnly, "");
+                        foreach (KeyValuePair<string, string> kvp in conformResults.Issues)
+                        {
+                            TL.LogMessage(kvp.Key, MessageLevel.Issue, kvp.Value);
+                        }
+                    }
+
+                    if (conformResults.ConfigurationAlertCount > 0)
+                    {
+                        TL.LogMessage("", MessageLevel.TestOnly, "");
+                        TL.LogMessage("Configuration Alert Summary", MessageLevel.TestOnly, "");
+                        foreach (KeyValuePair<string, string> kvp in conformResults.ConfigurationAlerts)
+                        {
+                            TL.LogMessage(kvp.Key, MessageLevel.TestAndMessage, kvp.Value);
+                        }
+                    }
+
+                    // Report the timing results if configured to do so
+                    if (settings.ReportGoodTimings | settings.ReportBadTimings)
+                    {
+                        // Display timing header
+                        TL.LogMessage("", $"");
+                        TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"See Help for further information.");
+                        TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"FAST target response time: {Globals.FAST_TARGET_RESPONSE_TIME:0.0} second{(Globals.FAST_TARGET_RESPONSE_TIME == 1.0 ? "" : "s")}, (configuration and state reporting members).");
+                        TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"STANDARD target response time: {Globals.STANDARD_TARGET_RESPONSE_TIME:0.0} second{(Globals.STANDARD_TARGET_RESPONSE_TIME == 1.0 ? "" : "s")}, (property write and asynchronous initiators).");
+                        TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"EXTENDED target response time: {Globals.EXTENDED_TARGET_RESPONSE_TIME:0.0} second{(Globals.EXTENDED_TARGET_RESPONSE_TIME == 1.0 ? "" : "s")}, (synchronous methods, ImageArray and ImageArrayVariant).");
+
+                        // Report the timing configuration
+                        if (settings.ReportGoodTimings) // Configured to report good outcomes
+                        {
+                            if (settings.ReportBadTimings) // Configured to report bad outcomes
+                                TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"Conform is configured to report both good and bad timing outcomes.");
+                            else  // Configured NOT to report bad timing outcomes
+                                TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"Conform is configured to report only good timing outcomes and to suppress bad timing outcomes.");
+                        }
+                        else // Configured NOT to report good timing outcomes
+                        {
+                            if (settings.ReportBadTimings) // Configured to report bad outcomes
+                                TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"Conform is configured to report only bad timing outcomes.");
+                            else // Configured NOT to report bad timing outcomes
+                                TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"Conform is configured to suppress all timing outcomes.");
+                        }
+
+                        // Check whether any timing results were recorded
+                        if (conformResults.TimingCount > 0) // Some timings were recorded so report them
+                        {
+                            // List the timing outcomes
+                            TL.LogMessage("", MessageLevel.TestOnly, "");
+
+                            // Provide a wait message if stress testing
+                            if (numberOfTestCycles > 1) // Stress test
+                            {
+                                TL.LogMessage($"Writing {(settings.ReportGoodTimings ? (settings.ReportBadTimings ? "good and bad" : "good") : (settings.ReportBadTimings ? "bad" : "no"))} timings to the log file, please wait...", MessageLevel.TestOnly, "");
                                 TL.LogMessage("", MessageLevel.TestOnly, "");
                             }
 
-                            // Carry out check on whether any tests were omitted due to Conform configuration
-                            if (!cancellationToken.IsCancellationRequested)
+                            // List the timing results
+                            foreach (KeyValuePair<string, string> kvp in conformResults.Timings)
                             {
-                                testStage = "CheckConfiguration";
-                                testDevice.CheckConfiguration();
+                                TL.LogMessage(kvp.Key, MessageLevel.TestAndMessage, kvp.Value, logToScreen: numberOfTestCycles == 1);
                             }
 
-                            // Display completion or "test cancelled" message
-                            if (!cancellationToken.IsCancellationRequested | (numberOfTestCycles > 1)) // Test ran to completion or it is a stress test
-                            {
-                                if (numberOfTestCycles > 1)
-                                    TL.LogMessage("Stress test has finished", MessageLevel.TestOnly, "");
-                                else
-                                    TL.LogMessage("Conformance test has finished", MessageLevel.TestOnly, "");
-                            }
-                            else // Basic conformance test that was cancelled by the STOP key.
-                            {
-                                TL.LogMessage("Conformance test interrupted by STOP button or to protect the device.", MessageLevel.TestOnly, "");
+                            // Add a new line to the log
+                            if (conformResults.Timings.Count > 0)
+                                TL.LogMessage($"", MessageLevel.TestOnly, $"", logToScreen: numberOfTestCycles == 1);
 
-                                // Add an issue if the test was interrupted and is therefore incomplete
-                                conformResults.Issues.Add(new KeyValuePair<string, string>("StopKey", "The conformance test is incomplete because it was interrupted by the stop key or to protect the device being tested."));
-                            }
-
+                            // Report the overall timing outcome
+                            if (conformResults.TimingIssuesCount == 0) // No timing issues - success
+                                TL.LogMessage("Congratulations, all members returned within their target response times!!", MessageLevel.TestOnly, "");
+                            else // There were timing issues
+                                TL.LogMessage($"{conformResults.TimingIssuesCount} member{(conformResults.TimingIssuesCount == 1 ? "" : "s")} " +
+                                    $"took longer than {(conformResults.TimingIssuesCount == 1 ? "its" : "their")} target response " +
+                                    $"time{(conformResults.TimingIssuesCount == 1 ? "" : "s")}.", MessageLevel.TestOnly, "", true);
                         }
-                        catch (Exception ex)
+                        else // No member timings were recorded
                         {
-                            conformResults.Issues.Add(new KeyValuePair<string, string>(testStage, $"Exception when testing device - testing abandoned: {ex.Message}"));
-                            TL.LogMessage(testStage, MessageLevel.Issue, $"Exception when testing device: {ex.Message}");
-                            TL.LogMessage(testStage, MessageLevel.Debug, $"{ex}");
-                            TL.LogMessage("", MessageLevel.TestOnly, "");
-                            TL.LogMessage(testStage, MessageLevel.TestAndMessage, "Further tests abandoned.");
+                            TL.LogMessage("", MessageLevel.TestOnly, "", logToScreen: numberOfTestCycles == 1);
+                            TL.LogMessage("No member timings were recorded.", MessageLevel.TestOnly, "", true);
                         }
                     }
-                    catch (MissingMemberException ex) // The Connecting property is missing
+
+                    // Add a blank line to the console output
+                    Console.WriteLine("");
+
+                    try
                     {
-                        testDevice.LogIssue(testStage, $"{ex.Message} Further testing abandoned.");
-                        TL.LogMessage(testStage, MessageLevel.Debug, $"{ex}");
-                        testDevice.LogInfo(testStage, $"The {settings.DeviceType} device reported interface version {testDevice.GetInterfaceVersion()}, which indicates that it supports the Connect() and Disconnect() methods and the Connecting property.");
-                        testDevice.LogInfo(testStage, $"However, the Connecting property is not present in the device interface.");
-                        testDevice.LogInfo(testStage, $"Please check whether the device is reporting the correct interface version. For Platform 6 devices the latest {settings.DeviceType} interface version is {DeviceCapabilities.LatestPlatform6Interface[settings.DeviceType.Value]}.");
-                        testDevice.LogNewLine();
-                        testDevice.LogTestAndMessage(testStage, "Cannot connect to device, further tests abandoned.");
-                    }
-                    catch (Exception ex) // Exception when connecting to device
-                    {
-                        testDevice.LogIssue(testStage, $"Connection exception - further testing abandoned: {ex.Message}");
-                        TL.LogMessage(testStage, MessageLevel.Debug, $"{ex}");
-                        testDevice.LogNewLine();
-                        testDevice.LogTestAndMessage(testStage, "Cannot connect to device, further tests abandoned.");
-                    }
-                }
-                catch (InvalidValueException ex) // Interface version is invalid
-                {
-                    testDevice.LogIssue(testStage, $"The returned interface version is invalid for a {settings.DeviceType} device: {ex.Message}");
-                    testDevice.LogInfo(testStage, $"For a Platform 6 interface device the interface version should be: {DeviceCapabilities.LatestPlatform6Interface[settings.DeviceType.Value]}");
-                    testDevice.LogInfo(testStage, $"For a Platform 7 interface device that supports Connect(), Disconnect(), Connecting and DeviceState, the interface version should be: {DeviceCapabilities.LatestInterface[settings.DeviceType.Value]}");
-                    testDevice.LogNewLine();
-                    testDevice.LogTestAndMessage(testStage, "This device is incompatible with ASCOM clients because its interface version is invalid and the device cannot be tested further.");
-                }
-                catch (Exception ex) // Exception when creating device
-                {
-                    testDevice.LogIssue("Initialise", $"Unable to {(settings.DeviceTechnology == DeviceTechnology.Alpaca ? "access" : "create")} the device: {ex.Message}");
-                    TL.LogMessage("", MessageLevel.TestOnly, "");
-                    TL.LogMessage(testStage, MessageLevel.TestAndMessage, "Further tests abandoned as Conform cannot create the driver");
-                }
-
-                // Report the success or failure of conformance checking
-                TL.LogMessage("", MessageLevel.TestOnly, "");
-                if (conformResults.ErrorCount == 0 & conformResults.IssueCount == 0 & conformResults.ConfigurationAlertCount == 0 & !cancellationToken.IsCancellationRequested) // No issues - device conforms as expected
-                {
-                    TL.LogMessage("Congratulations, no errors, warnings or issues found: your driver passes ASCOM validation!!", MessageLevel.TestOnly, "");
-                } // No issues found - success
-                else // Some issues found, the device fails the conformance check
-                {
-                    l_Message = $"Your device had {conformResults.IssueCount} issue{(conformResults.IssueCount == 1 ? "" : "s")}, {conformResults.ErrorCount} error{(conformResults.ErrorCount == 1 ? "" : "s")} and " +
-                        $"{conformResults.ConfigurationAlertCount} configuration alert{(conformResults.ConfigurationAlertCount == 1 ? "" : "s")}";
-
-                    TL.LogMessage(l_Message, MessageLevel.TestOnly, "");
-                }// Some issues found, the device fails the conformance check
-
-                // List issues, errors and configuration alerts
-                if (conformResults.ErrorCount > 0)
-                {
-                    TL.LogMessage("", MessageLevel.TestOnly, "");
-                    TL.LogMessage("Error Summary", MessageLevel.TestOnly, "");
-                    foreach (KeyValuePair<string, string> kvp in conformResults.Errors)
-                    {
-                        TL.LogMessage(kvp.Key, MessageLevel.Error, kvp.Value);
-                    }
-                }
-
-                if (conformResults.IssueCount > 0)
-                {
-                    TL.LogMessage("", MessageLevel.TestOnly, "");
-                    TL.LogMessage("Issue Summary", MessageLevel.TestOnly, "");
-                    foreach (KeyValuePair<string, string> kvp in conformResults.Issues)
-                    {
-                        TL.LogMessage(kvp.Key, MessageLevel.Issue, kvp.Value);
-                    }
-                }
-
-                if (conformResults.ConfigurationAlertCount > 0)
-                {
-                    TL.LogMessage("", MessageLevel.TestOnly, "");
-                    TL.LogMessage("Configuration Alert Summary", MessageLevel.TestOnly, "");
-                    foreach (KeyValuePair<string, string> kvp in conformResults.ConfigurationAlerts)
-                    {
-                        TL.LogMessage(kvp.Key, MessageLevel.TestAndMessage, kvp.Value);
-                    }
-                }
-
-                // Report the timing results if configured to do so
-                if (settings.ReportGoodTimings | settings.ReportBadTimings)
-                {
-                    // Display timing header
-                    TL.LogMessage("", $"");
-                    TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"See Help for further information.");
-                    TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"FAST target response time: {Globals.FAST_TARGET_RESPONSE_TIME:0.0} second{(Globals.FAST_TARGET_RESPONSE_TIME == 1.0 ? "" : "s")}, (configuration and state reporting members).");
-                    TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"STANDARD target response time: {Globals.STANDARD_TARGET_RESPONSE_TIME:0.0} second{(Globals.STANDARD_TARGET_RESPONSE_TIME == 1.0 ? "" : "s")}, (property write and asynchronous initiators).");
-                    TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"EXTENDED target response time: {Globals.EXTENDED_TARGET_RESPONSE_TIME:0.0} second{(Globals.EXTENDED_TARGET_RESPONSE_TIME == 1.0 ? "" : "s")}, (synchronous methods, ImageArray and ImageArrayVariant).");
-
-                    // Report the timing configuration
-                    if (settings.ReportGoodTimings) // Configured to report good outcomes
-                    {
-                        if (settings.ReportBadTimings) // Configured to report bad outcomes
-                            TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"Conform is configured to report both good and bad timing outcomes.");
-                        else  // Configured NOT to report bad timing outcomes
-                            TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"Conform is configured to report only good timing outcomes and to suppress bad timing outcomes.");
-                    }
-                    else // Configured NOT to report good timing outcomes
-                    {
-                        if (settings.ReportBadTimings) // Configured to report bad outcomes
-                            TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"Conform is configured to report only bad timing outcomes.");
-                        else // Configured NOT to report bad timing outcomes
-                            TL.LogMessage("Timing Summary", MessageLevel.TestAndMessage, $"Conform is configured to suppress all timing outcomes.");
-                    }
-
-                    // Check whether any timing results were recorded
-                    if (conformResults.TimingCount > 0) // Some timings were recorded so report them
-                    {
-                        // List the timing outcomes
-                        TL.LogMessage("", MessageLevel.TestOnly, "");
-
-                        // Provide a wait message if stress testing
-                        if (numberOfTestCycles > 1) // Stress test
+                        TL.LogMessage("WriteResultsFile", MessageLevel.Debug, $"TraceLogger Log file path: {TL.LogFilePath}, Log file name: {TL.LogFileName}");
+                        JsonSerializerOptions options = new()
                         {
-                            TL.LogMessage($"Writing {(settings.ReportGoodTimings ? (settings.ReportBadTimings ? "good and bad" : "good") : (settings.ReportBadTimings ? "bad" : "no"))} timings to the log file, please wait...", MessageLevel.TestOnly, "");
-                            TL.LogMessage("", MessageLevel.TestOnly, "");
-                        }
+                            WriteIndented = true
+                        };
+                        string json = JsonSerializer.Serialize<ConformResults>(conformResults, options);
+                        TL.LogMessage("WriteResultsFile", MessageLevel.Debug, json);
 
-                        // List the timing results
-                        foreach (KeyValuePair<string, string> kvp in conformResults.Timings)
+                        // Set the results file filename
+                        string reportFileName;
+                        if (string.IsNullOrEmpty(settings.ResultsFileName)) // No command line argument has been supplied, so use the log file folder as default
                         {
-                            TL.LogMessage(kvp.Key, MessageLevel.TestAndMessage, kvp.Value, logToScreen: numberOfTestCycles == 1);
+                            reportFileName = Path.Combine(TL.LogFilePath, "conform.report.txt");
+                        }
+                        else // A results filename has been supplied on the command line so use it
+                        {
+                            reportFileName = settings.ResultsFileName;
                         }
 
-                        // Add a new line to the log
-                        if (conformResults.Timings.Count > 0)
-                            TL.LogMessage($"", MessageLevel.TestOnly, $"", logToScreen: numberOfTestCycles == 1);
+                        TL.LogMessage("WriteResultsFile", MessageLevel.Debug, $"Log file path: {TL.LogFilePath}, Report file name: {reportFileName}");
+                        File.WriteAllText(reportFileName, json); // Write the file to disk
 
-                        // Report the overall timing outcome
-                        if (conformResults.TimingIssuesCount == 0) // No timing issues - success
-                            TL.LogMessage("Congratulations, all members returned within their target response times!!", MessageLevel.TestOnly, "");
-                        else // There were timing issues
-                            TL.LogMessage($"{conformResults.TimingIssuesCount} member{(conformResults.TimingIssuesCount == 1 ? "" : "s")} " +
-                                $"took longer than {(conformResults.TimingIssuesCount == 1 ? "its" : "their")} target response " +
-                                $"time{(conformResults.TimingIssuesCount == 1 ? "" : "s")}.", MessageLevel.TestOnly, "", true);
+                        // Create a return code equal to the number of errors + issues
+                        returnCode = conformResults.ErrorCount + conformResults.IssueCount + conformResults.ConfigurationAlertCount;
+
                     }
-                    else // No member timings were recorded
+                    catch (Exception ex)
                     {
-                        TL.LogMessage("", MessageLevel.TestOnly, "", logToScreen: numberOfTestCycles == 1);
-                        TL.LogMessage("No member timings were recorded.", MessageLevel.TestOnly, "", true);
+
+                        TL.LogMessage("WriteResultsFile", MessageLevel.Error, ex.ToString());
+                        returnCode = -99998;
                     }
+
+                    TL.SetStatusMessage($"Conformance test has finished.      (Log file: {Path.Combine(TL.LogFilePath, TL.LogFileName)})");
                 }
-
-                // Add a blank line to the console output
-                Console.WriteLine("");
-
-                try
-                {
-                    TL.LogMessage("WriteResultsFile", MessageLevel.Debug, $"TraceLogger Log file path: {TL.LogFilePath}, Log file name: {TL.LogFileName}");
-                    JsonSerializerOptions options = new()
-                    {
-                        WriteIndented = true
-                    };
-                    string json = JsonSerializer.Serialize<ConformResults>(conformResults, options);
-                    TL.LogMessage("WriteResultsFile", MessageLevel.Debug, json);
-
-                    // Set the results file filename
-                    string reportFileName;
-                    if (string.IsNullOrEmpty(settings.ResultsFileName)) // No command line argument has been supplied, so use the log file folder as default
-                    {
-                        reportFileName = Path.Combine(TL.LogFilePath, "conform.report.txt");
-                    }
-                    else // A results filename has been supplied on the command line so use it
-                    {
-                        reportFileName = settings.ResultsFileName;
-                    }
-
-                    TL.LogMessage("WriteResultsFile", MessageLevel.Debug, $"Log file path: {TL.LogFilePath}, Report file name: {reportFileName}");
-                    File.WriteAllText(reportFileName, json); // Write the file to disk
-
-                    // Create a return code equal to the number of errors + issues
-                    returnCode = conformResults.ErrorCount + conformResults.IssueCount + conformResults.ConfigurationAlertCount;
-
-                }
-                catch (Exception ex)
-                {
-
-                    TL.LogMessage("WriteResultsFile", MessageLevel.Error, ex.ToString());
-                    returnCode = -99998;
-                }
-
-                TL.SetStatusMessage($"Conformance test has finished.      (Log file: {Path.Combine(TL.LogFilePath, TL.LogFileName)})");
             }
             catch (Exception ex) // An error occurred when initialising the device
             {
