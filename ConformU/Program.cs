@@ -65,6 +65,16 @@ namespace ConformU
                     $"Conform Universal {Update.ConformuVersionDisplayString}\r\nCopyright (c) 2021-{DateTime.Now.Year} Peter Simpson\r\n\r\nEnter conformu [command] -h for information on options available in each command.\r\n\r\nIf no command or options are provided Conform Universal will start as a GUI application using default parameters."
                 );
 
+                // Remove the built-in --version option so our custom handler is used instead
+                for (int i = 0; i < rootCommand.Options.Count; i++)
+                {
+                    if (rootCommand.Options[i] is VersionOption)
+                    {
+                        rootCommand.Options.RemoveAt(i);
+                        break;
+                    }
+                }
+
                 // CONFORMANCE command
                 var conformanceCommand = new Command("conformance", "Check the specified device for ASCOM device interface conformance with all tests enabled.");
 
@@ -153,8 +163,8 @@ namespace ConformU
 
                 #region Option definitions
 
-                // VERSION option
-                Option<bool> versionOption = new("-v")
+                // VERSION option - replaces the built-in --version option (removed above)
+                Option<bool> versionOption = new("-v", "--version")
                 {
                     Description = "Show the Conform Universal version number"
                 };
@@ -351,7 +361,7 @@ namespace ConformU
                 rootCommand.Subcommands.Add(conformanceUsingSettingsCommand);
                 rootCommand.Subcommands.Add(alpacaUsingSettingsCommand);
                 rootCommand.Subcommands.Add(startAsGuiCommand);
-               // rootCommand.Options.Add(versionOption);
+                rootCommand.Options.Add(versionOption);
 
                 // CONFORMANCE COMMAND - add arguments and options 
                 conformanceCommand.Arguments.Add(deviceArgument);
