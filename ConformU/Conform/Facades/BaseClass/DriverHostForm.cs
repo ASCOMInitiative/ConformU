@@ -19,7 +19,7 @@ namespace ConformU
 
         private readonly object driverLock = new();
 
-        public bool FormInitialised = false;
+        public volatile bool FormInitialised = false;
 
         public DriverHostForm(ConformLogger logger)
         {

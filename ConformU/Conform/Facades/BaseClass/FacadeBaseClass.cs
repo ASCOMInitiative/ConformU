@@ -26,7 +26,7 @@ namespace ConformU
         private bool disposedValue;
 
 #if WINDOWS
-        internal DriverHostForm DriverHostForm;
+        internal volatile DriverHostForm DriverHostForm;
 
         /// <summary>
         /// Commands to start the COM driver hosting environment
