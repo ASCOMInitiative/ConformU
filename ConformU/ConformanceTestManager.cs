@@ -20,7 +20,7 @@ namespace ConformU
         private readonly ConformLogger TL;
         private readonly Settings settings;
         private DeviceTesterBaseClass testDevice = null; // Variable to hold the device tester class
-        internal static CancellationTokenSource ConformCancellationTokenSource;
+        internal CancellationTokenSource ConformCancellationTokenSource;
         public ConformanceTestManager(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationTokenSource conformCancellationTokenSource, CancellationToken conformCancellationToken)
         {
             configuration = conformConfiguration;
@@ -39,47 +39,47 @@ namespace ConformU
             switch (settings.DeviceType) // Set current progID and device test class
             {
                 case DeviceTypes.Telescope:
-                    testDevice = new TelescopeTester(configuration, TL, cancellationToken);
+                    testDevice = new TelescopeTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
                     break;
 
                 case DeviceTypes.Dome:
-                    testDevice = new DomeTester(configuration, TL, cancellationToken);
+                    testDevice = new DomeTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
                     break;
 
                 case DeviceTypes.Camera:
-                    testDevice = new CameraTester(configuration, TL, cancellationToken);
+                    testDevice = new CameraTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
                     break;
 
                 case DeviceTypes.Video:
-                    testDevice = new VideoTester(configuration, TL, cancellationToken);
+                    testDevice = new VideoTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
                     break;
 
                 case DeviceTypes.Rotator:
-                    testDevice = new RotatorTester(configuration, TL, cancellationToken);
+                    testDevice = new RotatorTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
                     break;
 
                 case DeviceTypes.Focuser:
-                    testDevice = new FocuserTester(configuration, TL, cancellationToken);
+                    testDevice = new FocuserTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
                     break;
 
                 case DeviceTypes.ObservingConditions:
-                    testDevice = new ObservingConditionsTester(configuration, TL, cancellationToken);
+                    testDevice = new ObservingConditionsTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
                     break;
 
                 case DeviceTypes.FilterWheel:
-                    testDevice = new FilterWheelTester(configuration, TL, cancellationToken);
+                    testDevice = new FilterWheelTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
                     break;
 
                 case DeviceTypes.Switch:
-                    testDevice = new SwitchTester(configuration, TL, cancellationToken);
+                    testDevice = new SwitchTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
                     break;
 
                 case DeviceTypes.SafetyMonitor:
-                    testDevice = new SafetyMonitorTester(configuration, TL, cancellationToken);
+                    testDevice = new SafetyMonitorTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
                     break;
 
                 case DeviceTypes.CoverCalibrator:
-                    testDevice = new CoverCalibratorTester(configuration, TL, cancellationToken);
+                    testDevice = new CoverCalibratorTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
                     break;
 
                 default:

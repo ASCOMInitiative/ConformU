@@ -56,6 +56,7 @@ namespace ConformU
 
         private readonly ConformLogger tl;
         internal readonly CancellationToken ApplicationCancellationToken;
+        internal CancellationTokenSource conformCancellationTokenSource;
 
         private readonly Settings settings;
 
@@ -176,7 +177,7 @@ namespace ConformU
         /// <param name="hasPerformanceCheck">Device has a performance test</param>
         /// <param name="hasPostRunCheck">Device requires a post run safety check</param>
         /// <remarks></remarks>
-        public DeviceTesterBaseClass(bool hasCanProperties, bool hasProperties, bool hasMethods, bool hasPreRunCheck, bool hasPreConnectCheck, bool hasPerformanceCheck, bool hasPostRunCheck, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken cancellationToken) : this()
+        public DeviceTesterBaseClass(bool hasCanProperties, bool hasProperties, bool hasMethods, bool hasPreRunCheck, bool hasPreConnectCheck, bool hasPerformanceCheck, bool hasPostRunCheck, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken cancellationToken, CancellationTokenSource cancellationTokenSource) : this()
         {
             this.hasPreConnectCheck = hasPreConnectCheck;
             this.hasPreRunCheck = hasPreRunCheck;
@@ -188,6 +189,7 @@ namespace ConformU
 
             tl = logger;
             this.ApplicationCancellationToken = cancellationToken;
+            this.conformCancellationTokenSource = cancellationTokenSource;
             settings = conformConfiguration.Settings;
         }
 
@@ -1521,7 +1523,7 @@ namespace ConformU
                                 LogTestAndMessage("","");
                                 LogTestOnly("Conformance run complete.");
                                 // Cancel the test run because the driver is not compatible with the application's bitness
-                                ConformanceTestManager.ConformCancellationTokenSource.Cancel();
+                                conformCancellationTokenSource.Cancel();
                             }
                         }
                         else
