@@ -57,6 +57,7 @@ namespace ConformU
         private readonly ConformLogger tl;
         internal readonly CancellationToken ApplicationCancellationToken;
         internal CancellationTokenSource conformCancellationTokenSource;
+        internal ConformResults conformResults;
 
         private readonly Settings settings;
 
@@ -177,7 +178,7 @@ namespace ConformU
         /// <param name="hasPerformanceCheck">Device has a performance test</param>
         /// <param name="hasPostRunCheck">Device requires a post run safety check</param>
         /// <remarks></remarks>
-        public DeviceTesterBaseClass(bool hasCanProperties, bool hasProperties, bool hasMethods, bool hasPreRunCheck, bool hasPreConnectCheck, bool hasPerformanceCheck, bool hasPostRunCheck, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken cancellationToken, CancellationTokenSource cancellationTokenSource) : this()
+        public DeviceTesterBaseClass(bool hasCanProperties, bool hasProperties, bool hasMethods, bool hasPreRunCheck, bool hasPreConnectCheck, bool hasPerformanceCheck, bool hasPostRunCheck, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken cancellationToken, CancellationTokenSource cancellationTokenSource, ConformResults conformResults) : this()
         {
             this.hasPreConnectCheck = hasPreConnectCheck;
             this.hasPreRunCheck = hasPreRunCheck;
@@ -190,6 +191,7 @@ namespace ConformU
             tl = logger;
             this.ApplicationCancellationToken = cancellationToken;
             this.conformCancellationTokenSource = cancellationTokenSource;
+            this.conformResults = conformResults;
             settings = conformConfiguration.Settings;
         }
 
@@ -1856,7 +1858,7 @@ namespace ConformU
             tl?.LogMessage(testName, messageLevel, message);
         }
 
-        internal static void LogConfigurationAlert(string message)
+        internal void LogConfigurationAlert(string message)
         {
             conformResults.ConfigurationAlerts.Add(new System.Collections.Generic.KeyValuePair<string, string>("Conform configuration", message));
         }

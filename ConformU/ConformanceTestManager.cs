@@ -21,6 +21,7 @@ namespace ConformU
         private readonly Settings settings;
         private DeviceTesterBaseClass testDevice = null; // Variable to hold the device tester class
         internal CancellationTokenSource ConformCancellationTokenSource;
+        internal ConformResults conformResults;
         public ConformanceTestManager(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationTokenSource conformCancellationTokenSource, CancellationToken conformCancellationToken)
         {
             configuration = conformConfiguration;
@@ -39,47 +40,47 @@ namespace ConformU
             switch (settings.DeviceType) // Set current progID and device test class
             {
                 case DeviceTypes.Telescope:
-                    testDevice = new TelescopeTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
+                    testDevice = new TelescopeTester(configuration, TL, cancellationToken, ConformCancellationTokenSource, conformResults);
                     break;
 
                 case DeviceTypes.Dome:
-                    testDevice = new DomeTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
+                    testDevice = new DomeTester(configuration, TL, cancellationToken, ConformCancellationTokenSource, conformResults);
                     break;
 
                 case DeviceTypes.Camera:
-                    testDevice = new CameraTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
+                    testDevice = new CameraTester(configuration, TL, cancellationToken, ConformCancellationTokenSource, conformResults);
                     break;
 
                 case DeviceTypes.Video:
-                    testDevice = new VideoTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
+                    testDevice = new VideoTester(configuration, TL, cancellationToken, ConformCancellationTokenSource, conformResults);
                     break;
 
                 case DeviceTypes.Rotator:
-                    testDevice = new RotatorTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
+                    testDevice = new RotatorTester(configuration, TL, cancellationToken, ConformCancellationTokenSource, conformResults);
                     break;
 
                 case DeviceTypes.Focuser:
-                    testDevice = new FocuserTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
+                    testDevice = new FocuserTester(configuration, TL, cancellationToken, ConformCancellationTokenSource, conformResults);
                     break;
 
                 case DeviceTypes.ObservingConditions:
-                    testDevice = new ObservingConditionsTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
+                    testDevice = new ObservingConditionsTester(configuration, TL, cancellationToken, ConformCancellationTokenSource, conformResults);
                     break;
 
                 case DeviceTypes.FilterWheel:
-                    testDevice = new FilterWheelTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
+                    testDevice = new FilterWheelTester(configuration, TL, cancellationToken, ConformCancellationTokenSource, conformResults);
                     break;
 
                 case DeviceTypes.Switch:
-                    testDevice = new SwitchTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
+                    testDevice = new SwitchTester(configuration, TL, cancellationToken, ConformCancellationTokenSource, conformResults);
                     break;
 
                 case DeviceTypes.SafetyMonitor:
-                    testDevice = new SafetyMonitorTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
+                    testDevice = new SafetyMonitorTester(configuration, TL, cancellationToken, ConformCancellationTokenSource, conformResults);
                     break;
 
                 case DeviceTypes.CoverCalibrator:
-                    testDevice = new CoverCalibratorTester(configuration, TL, cancellationToken, ConformCancellationTokenSource);
+                    testDevice = new CoverCalibratorTester(configuration, TL, cancellationToken, ConformCancellationTokenSource, conformResults);
                     break;
 
                 default:

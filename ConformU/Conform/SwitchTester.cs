@@ -58,7 +58,7 @@ namespace ConformU
 
         #region New and Dispose
 
-        public SwitchTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken, CancellationTokenSource conformCancellationTokenSource) : base(false, true, true, false, false, true, false, conformConfiguration, logger, conformCancellationToken, conformCancellationTokenSource) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
+        public SwitchTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken, CancellationTokenSource conformCancellationTokenSource, ConformResults conformResults) : base(false, true, true, false, false, true, false, conformConfiguration, logger, conformCancellationToken, conformCancellationTokenSource, conformResults) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
         {
             settings = conformConfiguration.Settings;
             cancellationToken = conformCancellationToken;
