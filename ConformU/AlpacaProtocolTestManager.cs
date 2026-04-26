@@ -78,10 +78,9 @@ namespace ConformU
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects)
+                    httpClient?.Dispose();
                 }
 
-                httpClient.Dispose();
                 disposedValue = true;
             }
         }
