@@ -1052,11 +1052,11 @@ namespace ConformU
                 if (baseInterfaceVersion.HasValue)
                     return baseInterfaceVersion.Value;
 
-                LogCallToDriver("InterfaceVersion", "About to get property InterfaceVersion");
 
-                // Check which access mechanic has been selected
-                if (settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.Native) // Native so we can test what type of value is returned by the InterfaceVersion property and handle it appropriately
+                // Check whether we are testing a COM device and which access mechanic has been selected
+                if ((settings.DeviceTechnology == DeviceTechnology.COM) & (settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.Native)) // Native so we can test what type of value is returned by the InterfaceVersion property and handle it appropriately
                 {
+                    LogCallToDriver("InterfaceVersion", "About to get InterfaceVersion as an Object");
                     object interfaceVersion = ((IDeviceExtensions)baseClassDevice).InterfaceVersionObject;
 
                     if (interfaceVersion is null)
@@ -1092,8 +1092,9 @@ namespace ConformU
                             break;
                     }
                 }
-                else
+                else // Alpaca device or COM device using DriverAccess
                 {
+                    LogCallToDriver("InterfaceVersion", "About to get property InterfaceVersion");
                     baseInterfaceVersion = baseClassDevice.InterfaceVersion;
                 }
                 LogDebug("GetInterfaceVersion", $"Device interface version: {baseInterfaceVersion}");
@@ -1487,7 +1488,7 @@ namespace ConformU
                     break;
 
                 case DeviceTechnology.COM:
-                    LogInfo("COM Driver",$"Checking ProgID: {settings.ComDevice.ProgId}");
+                    LogInfo("COM Driver", $"Checking ProgID: {settings.ComDevice.ProgId}");
 #if WINDOWS
                     // Make sure the driver will run on this platform.
                     ASCOM.Com.ComMetadata metadata = null;
@@ -1522,7 +1523,7 @@ namespace ConformU
                                 if (metadata.Is32BitCompatible & Environment.Is64BitProcess) // Yes, driver can be checked in 32bit mode
                                     LogInfo("COM Driver", "This driver can be tested by enabling the \"Run as 32bit on a 64bit OS\" checkbox on the Settings/Conform page.");
 
-                                LogTestAndMessage("","");
+                                LogTestAndMessage("", "");
                                 LogTestOnly("Conformance run complete.");
                                 // Cancel the test run because the driver is not compatible with the application's bitness
                                 conformCancellationTokenSource.Cancel();
