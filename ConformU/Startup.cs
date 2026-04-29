@@ -41,8 +41,10 @@ namespace ConformU
                 options.DetailedErrors = true;
             });
 
-            // Add window resize listener
-            services.AddSingleton<BrowserResizeService>();
+            // Add window resize listener - must be Scoped (per-circuit) so each browser tab
+            // gets its own instance with its own IJSRuntime; a Singleton would store the first
+            // tab's IJSRuntime and block all subsequent tabs from registering.
+            services.AddScoped<BrowserResizeService>();
 
             // Radzen services
             services.AddScoped<NotificationService>();
