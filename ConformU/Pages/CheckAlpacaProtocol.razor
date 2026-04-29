@@ -132,13 +132,13 @@
                         Console.WriteLine("");
 
                         // Create a task to run the conformance test
-                        conformanceTestTask = new Task<int>(() =>
+                        conformanceTestTask = Task.Run(async () =>
                         {
                             int returnCode = -99997;
                             try
                             {
                                 logger.LogMessage("StartTest", MessageLevel.Debug, "Before TestAlpacaProtocol method");
-                                returnCode = tester.TestAlpacaProtocol().GetAwaiter().GetResult();
+                                returnCode = await tester.TestAlpacaProtocol();
                                 logger.LogMessage("StartTest", MessageLevel.Debug, $"After TestAlpacaProtocol method - Return code: {returnCode}");
                             }
                             catch (Exception ex)
@@ -149,15 +149,9 @@
                             return returnCode;
                         }, applicationCancellationToken);
 
-                        // Start the conformance test task
-                        logger.LogMessage("StartTest", MessageLevel.Debug, "Starting conformance test");
-                        conformanceTestTask.Start();
-                        logger.LogMessage("StartTest", MessageLevel.Debug, "Conformance test started OK");
-
                         // Wait for the task to complete.
                         logger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting conformance task completion");
-                        await conformanceTestTask;
-                        int numberOfErrosAndIssue = conformanceTestTask.Result;
+                        int numberOfErrosAndIssue = await conformanceTestTask;
                         logger.LogMessage("StartTest", MessageLevel.Debug, $"Conformance task completed. Number of issues and errors: {numberOfErrosAndIssue}");
                     }
                     finally
