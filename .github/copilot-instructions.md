@@ -41,6 +41,8 @@ Test execution is split into two manager classes:
 - `ConformanceTestManager` selects a device-specific tester based on `Settings.DeviceType` and runs the standard lifecycle: initialize, create device, pre-connect checks, connect, common methods, can-properties, pre-run checks, properties, methods, performance, post-run checks, disconnect, then configuration checks. It also writes the machine-readable JSON report file.
 - `AlpacaProtocolTestManager` drives direct HTTP-level protocol validation with `HttpClient`, explicit request parameter permutations, and response/status-code checks.
 
+Both managers accumulate test outcomes into a `ConformResults` instance (tracking `Errors`, `Issues`, `ConfigurationAlerts`, and `Timings`). The CLI process exit code is the total count of errors plus issues; zero means a clean run.
+
 Device-specific ASCOM validation lives under `Conform\`:
 
 - Each device type has a dedicated tester such as `CameraTester`, `TelescopeTester`, or `DomeTester`.
@@ -62,3 +64,7 @@ The facade layer is important for technology differences:
 - Settings compatibility is versioned. Changes to persisted configuration should respect `SettingsCompatibilityVersion` handling in `ConformConfiguration`; do not silently change the on-disk schema without updating the compatibility flow.
 - Safety-related defaults are intentional. Examples include disabled dome shutter opening and disabled switch write tests until explicitly enabled in settings. Preserve those guardrails when changing default behavior or test scope.
 - The UI log panes are fed from logger events into `SessionState` (`ConformLog` and `ProtocolLog`). If you add a long-running action that should be visible in the browser, wire it into the existing logger/event flow rather than updating the UI ad hoc.
+- Log calls use `TL.LogMessage(id, MessageLevel, message)`. The `MessageLevel` enum values are: `Debug` (filtered unless debug mode), `Info`, `OK`, `Issue`, `Error`, `TestOnly` (prints `id` as a section header with no level prefix), and `TestAndMessage` (prints a line with no level prefix). Match the level to the semantic outcome.
+- Settings properties that must be forced to a fixed value during CLI full-test runs are decorated with `[MandatoryInFullTest(bool)]`. Annotate new settings that belong to test scope rather than user preference.
+- Windows-only code is conditionally compiled with `#if WINDOWS` / `#if !WINDOWS`. The project dual-targets `net10.0-windows` (Windows, including COM/WinForms STA host) and `net10.0` (cross-platform). Keep platform-specific blocks explicit rather than relying on runtime OS checks when a compile-time guard is sufficient.
+- The Blazor UI uses **Radzen** components (`RadzenButton`, `RadzenTextArea`, `NotificationService`, `DialogService`, etc.). Radzen services are registered `AddScoped` (per Blazor circuit), not singleton. `Settings.OperationInProgress` is the canonical flag that enables/disables Start/Stop buttons; set it at the start and end of any long-running operation exposed through the UI.
