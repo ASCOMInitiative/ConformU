@@ -30,7 +30,6 @@
     AlpacaProtocolTestManager tester;
     Task<int> conformanceTestTask;
 
-    readonly object screenLogLockObject = new object();
     readonly object statusLockObject = new object();
 
     // Cancellation management
@@ -163,8 +162,6 @@
             }
             await JS.InvokeVoidAsync("ScrollToBottom", "ProtocolLog");
             logger.LogMessage("StartTest", MessageLevel.Debug, "Scroll to bottom completed");
-
-            GC.Collect();
         }
         catch (Exception ex)
         {
@@ -213,7 +210,7 @@
     ///    </summary>
     private void LogBlankLine()
     {
-        conformState.ProtocolLog += $"\r\n";
+        conformState.AppendToProtocolLog("\r\n");
     }
 
     /// <summary>
@@ -316,10 +313,8 @@
     {
         try
         {
-            lock (screenLogLockObject)
-            {
-                conformState.ProtocolLog += $"{e.Message}\r\n";  // Add the new log message to the screen display
-            }
+            // AppendToProtocolLog handles thread-safety internally
+            conformState.AppendToProtocolLog($"{e.Message}\r\n");
             await InvokeAsync(StateHasChanged);
             await JS.InvokeVoidAsync("ScrollToBottom", "ProtocolLog");
         }

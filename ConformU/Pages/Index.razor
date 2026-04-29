@@ -36,7 +36,6 @@
     private string statusVisible = "initial";
     private bool disposedValue;
     int screenLogRows = 10;
-    object screenLogLockObject = new object();
     object statusLockObject = new object();
     private string deviceDescription = "";
     string statusMessage = "";
@@ -283,8 +282,6 @@
             }
             await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
             _conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Scroll to bottom completed");
-
-            GC.Collect();
         }
         catch (Exception ex)
         {
@@ -380,19 +377,8 @@
     {
         try
         {
-            lock (screenLogLockObject)
-            {
-                // Manage the screen log to between 1,000,000 and 900,000 characters
-                int logLength = _conformState.ConformLog.Length;
-                if (logLength > 1000000)
-                {
-                    _conformState.ConformLog = _conformState.ConformLog.Substring(900000);
-                    GC.Collect();
-                }
-
-                // Add the new log message to the screen display
-                _conformState.ConformLog += $"{e.Message}\r\n";
-            }
+            // AppendToConformLog handles length-bounding and thread-safety internally
+            _conformState.AppendToConformLog($"{e.Message}\r\n");
             await InvokeAsync(StateHasChanged);
 
             // Scroll to the bottom of the window and return the current window 'top' value.
