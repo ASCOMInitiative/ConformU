@@ -78,7 +78,7 @@ namespace ConformU
                 {
                     Thread.Sleep(20);
                     Application.DoEvents();
-                } while ((DriverHostForm == null) & (sw.ElapsedMilliseconds < DRIVER_LOAD_TIMEOUT * 1000));
+                } while ((DriverHostForm == null) && (sw.ElapsedMilliseconds < DRIVER_LOAD_TIMEOUT * 1000));
                 if (logEnabled) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Sandbox form creation complete.");
 
                 // Test whether the form loaded OK
@@ -93,7 +93,7 @@ namespace ConformU
                 {
                     Thread.Sleep(20);
                     Application.DoEvents();
-                } while ((DriverHostForm.FormInitialised == false) & (sw.ElapsedMilliseconds < DRIVER_LOAD_TIMEOUT * 1000));
+                } while ((DriverHostForm.FormInitialised == false) && (sw.ElapsedMilliseconds < DRIVER_LOAD_TIMEOUT * 1000));
                 if (logEnabled) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Sandbox form initialisation complete.");
 
                 // Test whether the form initialised OK
@@ -177,7 +177,7 @@ namespace ConformU
                                         remainingObjectCount = Marshal.ReleaseComObject(Driver);
                                         Logger?.LogMessage("FacadeBaseClass-Dispose", MessageLevel.Debug, $"Released COM driver. Remaining object count: {remainingObjectCount}.");
                                     }
-                                    while ((remainingObjectCount > 0) & (loopCount <= 20));
+                                    while ((remainingObjectCount > 0) && (loopCount <= 20));
                                 }
                                 catch (Exception ex)
                                 {
