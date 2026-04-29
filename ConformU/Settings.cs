@@ -249,10 +249,18 @@ namespace ConformU
 
         #region Internal state variables - not persisted
 
+        private volatile bool operationInProgress;
+
         /// <summary>
-        /// Flag indicating that a long running process is underway
+        /// Flag indicating that a long running process is underway.
+        /// Marked volatile so reads on the UI/circuit thread always see the value
+        /// written by the background test thread without a memory-barrier instruction.
         /// </summary>
-        internal bool OperationInProgress { get; set; }
+        internal bool OperationInProgress
+        {
+            get => operationInProgress;
+            set => operationInProgress = value;
+        }
 
         /// <summary>
         /// Output filename for the results file as specified on the command line
