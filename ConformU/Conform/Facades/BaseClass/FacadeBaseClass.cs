@@ -14,7 +14,7 @@ using System.Windows.Forms;
 
 namespace ConformU
 {
-    public class FacadeBaseClass : IAscomDeviceV2, IDisposable
+    public class FacadeBaseClass : IAscomDeviceV2, IDeviceExtensions, IDisposable
     {
         private const int DRIVER_LOAD_TIMEOUT = 5; // Seconds to wait for the driver to load
         private readonly bool logEnabled = false; // Enable debug logging of this class
@@ -88,7 +88,7 @@ namespace ConformU
                 }
 
                 // Wait for the sandbox form to run it's form load event handler
-                sw.Reset();
+                sw.Restart();
                 do
                 {
                     Thread.Sleep(20);
