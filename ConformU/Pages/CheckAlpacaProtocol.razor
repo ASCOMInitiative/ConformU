@@ -332,7 +332,11 @@
         {
             SetStatus(e.Message);  // Add the new log message to the screen display
 
-            _ = InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
+            // InvokeAsync may throw ObjectDisposedException if the component was disposed between
+            // the lock check and the actual call; observe the exception to avoid an unhandled
+            // task exception in the finaliser thread.
+            _ = InvokeAsync(StateHasChanged)
+                    .ContinueWith(static t => _ = t.Exception, TaskContinuationOptions.OnlyOnFaulted);
         }
     }
 
