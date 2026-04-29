@@ -26,7 +26,9 @@ namespace ConformU
         private bool disposedValue;
 
 #if WINDOWS
-        internal volatile DriverHostForm DriverHostForm;
+        private readonly ManualResetEventSlim driverHostFormCreatedEvent = new(false);
+        private readonly ManualResetEventSlim driverHostFormInitialisedEvent = new(false);
+        internal DriverHostForm DriverHostForm;
 
         /// <summary>
         /// Commands to start the COM driver hosting environment
@@ -41,6 +43,8 @@ namespace ConformU
             {
                 ShowInTaskbar = false
             }; // Create the form
+            DriverHostForm.Load += DriverHostForm_Load;
+            driverHostFormCreatedEvent.Set();
             if (logEnabled) Logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Created driver host form, starting driver host environment for {Settings.ComDevice.ProgId} on thread {Environment.CurrentManagedThreadId}");
 
             // Start the message loop on this thread to bring the form to life
@@ -49,6 +53,11 @@ namespace ConformU
             // The form has closed
             if (logEnabled) Logger?.LogMessage("DriverOnSeparateThread", MessageLevel.Debug, $"Environment for driver host {Settings.ComDevice.ProgId} shut down on thread {Environment.CurrentManagedThreadId}");
             DriverHostForm.Dispose();
+        }
+
+        private void DriverHostForm_Load(object sender, EventArgs e)
+        {
+            driverHostFormInitialisedEvent.Set();
         }
 #endif
 
@@ -72,35 +81,27 @@ namespace ConformU
                 driverThread.Start(this);
                 if (logEnabled) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Thread {driverThread.ManagedThreadId} started successfully for {Settings.ComDevice.ProgId}. This is thread: {Environment.CurrentManagedThreadId}");
 
-                // Wait for the sandbox form to load or timeout
-                Stopwatch sw = Stopwatch.StartNew();
-                do
+                // Wait for the sandbox form to be created or timeout
+                if (!driverHostFormCreatedEvent.Wait(TimeSpan.FromSeconds(DRIVER_LOAD_TIMEOUT)))
                 {
-                    Thread.Sleep(20);
-                    Application.DoEvents();
-                } while ((DriverHostForm == null) && (sw.ElapsedMilliseconds < DRIVER_LOAD_TIMEOUT * 1000));
+                    throw new TimeoutException($"It took more than {DRIVER_LOAD_TIMEOUT} seconds to create the sandbox Form for driver {Settings.ComDevice.ProgId}.");
+                }
+
                 if (logEnabled) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Sandbox form creation complete.");
 
                 // Test whether the form loaded OK
                 if (DriverHostForm is null) // Form did not create OK in a timely manner
                 {
-                    throw new Exception($"It took more than {DRIVER_LOAD_TIMEOUT} seconds to create the sandbox Form for driver {Settings.ComDevice.ProgId}.");
+                    throw new InvalidOperationException($"The sandbox Form for driver {Settings.ComDevice.ProgId} was not created.");
                 }
 
-                // Wait for the sandbox form to run it's form load event handler
-                sw.Restart();
-                do
+                // Wait for the sandbox form to run its form load event handler
+                if (!driverHostFormInitialisedEvent.Wait(TimeSpan.FromSeconds(DRIVER_LOAD_TIMEOUT)))
                 {
-                    Thread.Sleep(20);
-                    Application.DoEvents();
-                } while ((DriverHostForm.FormInitialised == false) && (sw.ElapsedMilliseconds < DRIVER_LOAD_TIMEOUT * 1000));
+                    throw new TimeoutException($"It took more than {DRIVER_LOAD_TIMEOUT} seconds to initialise the sandbox Form for driver {Settings.ComDevice.ProgId}.");
+                }
+
                 if (logEnabled) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Sandbox form initialisation complete.");
-
-                // Test whether the form initialised OK
-                if (DriverHostForm.FormInitialised == false) // Form did not initialise in a timely manner
-                {
-                    throw new Exception($"It took more than {DRIVER_LOAD_TIMEOUT} seconds to create the sandbox Form for driver {Settings.ComDevice.ProgId}.");
-                }
 
                 // Create the driver on the newly initialised form
                 if (logEnabled) logger?.LogMessage("FacadeBaseClass", MessageLevel.Debug, $"Sandbox form created OK, about to create driver {Settings.ComDevice.ProgId}");
@@ -203,6 +204,11 @@ namespace ConformU
 
                             break;
                     }
+
+#if WINDOWS
+                    driverHostFormCreatedEvent.Dispose();
+                    driverHostFormInitialisedEvent.Dispose();
+#endif
                 }
 
                 disposedValue = true;

@@ -4,6 +4,7 @@ using System.Windows.Forms;
 
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 #if WINDOWS
 namespace ConformU
@@ -18,8 +19,6 @@ namespace ConformU
         private dynamic driver;
 
         private readonly object driverLock = new();
-
-        public volatile bool FormInitialised = false;
 
         public DriverHostForm(ConformLogger logger)
         {
@@ -42,7 +41,6 @@ namespace ConformU
             this.Show();
             this.WindowState = FormWindowState.Minimized;
             this.Hide();
-            FormInitialised = true;
         }
 
         /// <summary>
