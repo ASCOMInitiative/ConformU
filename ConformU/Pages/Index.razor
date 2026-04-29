@@ -288,8 +288,8 @@
         }
         catch (Exception ex)
         {
-            try { _conformLogger.LogMessage("INDEX.RAZOR-StartTest", MessageLevel.Error, $"{ex}"); } catch (Exception) { throw; }
-            try { Console.WriteLine($"INDEX.RAZOR-StartTest Exception: {ex}"); } catch (Exception) { throw; }
+            try { _conformLogger.LogMessage("INDEX.RAZOR-StartTest", MessageLevel.Error, $"{ex}"); } catch { }
+            try { Console.WriteLine($"INDEX.RAZOR-StartTest Exception: {ex}"); } catch { }
         }
         finally
         {
