@@ -295,7 +295,11 @@
         {
             _configuration.Settings.OperationInProgress = false;
             _conformState.RaiseUiHasChangedEvent();
-            StateHasChanged();
+            try
+            {
+                await InvokeAsync(StateHasChanged);
+            }
+            catch (ObjectDisposedException) { }
             try
             {
                 await JS.InvokeVoidAsync("ScrollToBottom", "ConformLog");
