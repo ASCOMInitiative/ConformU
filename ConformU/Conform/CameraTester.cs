@@ -3628,7 +3628,7 @@ namespace ConformU
 
                 // Wait for the start of the next loop
                 Thread.Sleep(sleeptime);
-            } while (!updateUiTaskCancellationToken.IsCancellationRequested & (sw.Elapsed.TotalSeconds < settings.CameraWaitTimeout));
+            } while (!updateUiTaskCancellationToken.IsCancellationRequested && (sw.Elapsed.TotalSeconds < settings.CameraWaitTimeout));
         }
 
         private void CameraTestLast(double pDuration, DateTime pStart)

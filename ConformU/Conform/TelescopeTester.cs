@@ -519,7 +519,7 @@ namespace ConformU
                 }
             }
 
-            if (!cancellationToken.IsCancellationRequested & canSetTracking)
+            if (!cancellationToken.IsCancellationRequested && canSetTracking)
             {
                 LogCallToDriver("Mount Safety", "About to set Tracking property true");
                 try

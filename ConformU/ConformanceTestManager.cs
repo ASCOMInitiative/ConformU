@@ -205,7 +205,7 @@ namespace ConformU
                         TL.LogMessage("", MessageLevel.TestOnly, "");
 
                         // Run pre-connect checks if required
-                        if (!cancellationToken.IsCancellationRequested & testDevice.HasPreConnectCheck)
+                        if (!cancellationToken.IsCancellationRequested && testDevice.HasPreConnectCheck)
                         {
                             TL.LogMessage("Pre-connect checks", MessageLevel.TestOnly, "");
                             testDevice.PreConnectChecks();
@@ -230,7 +230,7 @@ namespace ConformU
                                 do
                                 {
                                     // Test common methods
-                                    if (!cancellationToken.IsCancellationRequested & settings.TestProperties)
+                                    if (!cancellationToken.IsCancellationRequested && settings.TestProperties)
                                     {
                                         testStage = "CheckCommonMethods";
 
@@ -238,7 +238,7 @@ namespace ConformU
                                     }
 
                                     // Test and read Can properties
-                                    if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasCanProperties)
+                                    if (!cancellationToken.IsCancellationRequested && settings.TestProperties && testDevice.HasCanProperties)
                                     {
                                         TL.LogMessage("Can Properties", MessageLevel.TestOnly, "");
                                         testStage = "ReadCanProperties";
@@ -247,7 +247,7 @@ namespace ConformU
                                     }
 
                                     // Carry out pre-test tasks
-                                    if (!cancellationToken.IsCancellationRequested & testDevice.HasPreRunCheck)
+                                    if (!cancellationToken.IsCancellationRequested && testDevice.HasPreRunCheck)
                                     {
                                         TL.LogMessage("Pre-run Checks", MessageLevel.TestOnly, "");
                                         testStage = "PreRunCheck";
@@ -256,7 +256,7 @@ namespace ConformU
                                     }
 
                                     // Test properties
-                                    if (!cancellationToken.IsCancellationRequested & settings.TestProperties & testDevice.HasProperties)
+                                    if (!cancellationToken.IsCancellationRequested && settings.TestProperties && testDevice.HasProperties)
                                     {
                                         TL.LogMessage("Properties", MessageLevel.TestOnly, "");
                                         testStage = "CheckProperties";
@@ -265,7 +265,7 @@ namespace ConformU
                                     }
 
                                     // Test methods
-                                    if (!cancellationToken.IsCancellationRequested & settings.TestMethods & testDevice.HasMethods)
+                                    if (!cancellationToken.IsCancellationRequested && settings.TestMethods && testDevice.HasMethods)
                                     {
                                         TL.LogMessage("Methods", MessageLevel.TestOnly, "");
                                         testStage = "CheckMethods";
@@ -274,7 +274,7 @@ namespace ConformU
                                     }
 
                                     // Test performance
-                                    if (!cancellationToken.IsCancellationRequested & settings.TestPerformance & testDevice.HasPerformanceCheck)
+                                    if (!cancellationToken.IsCancellationRequested && settings.TestPerformance && testDevice.HasPerformanceCheck)
                                     {
                                         TL.LogMessage("Performance", MessageLevel.TestOnly, "");
                                         testStage = "CheckPerformance";
@@ -291,7 +291,7 @@ namespace ConformU
                                 } while (testCycleCount < numberOfTestCycles); // Exit when the required number of test cycles has been completed.
 
                                 // Carry out post-test tasks
-                                if (!cancellationToken.IsCancellationRequested & testDevice.HasPostRunCheck)
+                                if (!cancellationToken.IsCancellationRequested && testDevice.HasPostRunCheck)
                                 {
                                     TL.LogMessage("Post-run Checks", MessageLevel.TestOnly, "");
                                     testStage = "PostRunCheck";
@@ -383,7 +383,7 @@ namespace ConformU
 
                     // Report the success or failure of conformance checking
                     TL.LogMessage("", MessageLevel.TestOnly, "");
-                    if (conformResults.ErrorCount == 0 & conformResults.IssueCount == 0 & conformResults.ConfigurationAlertCount == 0 & !cancellationToken.IsCancellationRequested) // No issues - device conforms as expected
+                    if (conformResults.ErrorCount == 0 && conformResults.IssueCount == 0 && conformResults.ConfigurationAlertCount == 0 && !cancellationToken.IsCancellationRequested) // No issues - device conforms as expected
                     {
                         TL.LogMessage("Congratulations, no errors, warnings or issues found: your driver passes ASCOM validation!!", MessageLevel.TestOnly, "");
                     } // No issues found - success
