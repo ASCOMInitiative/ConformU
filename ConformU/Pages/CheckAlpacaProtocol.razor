@@ -159,8 +159,6 @@
                         await conformanceTestTask;
                         int numberOfErrosAndIssue = conformanceTestTask.Result;
                         logger.LogMessage("StartTest", MessageLevel.Debug, $"Conformance task completed. Number of issues and errors: {numberOfErrosAndIssue}");
-
-                        tester.Dispose();
                     }
                     finally
                     {

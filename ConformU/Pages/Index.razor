@@ -273,8 +273,6 @@
                         _conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Awaiting conformance task completion");
                         await conformanceTestTask;
                         _conformLogger.LogMessage("StartTest", MessageLevel.Debug, "Conformance task completed");
-
-                        tester.Dispose();
                     }
                     finally
                     {
