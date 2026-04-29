@@ -21,7 +21,7 @@ namespace ConformU
         private readonly Settings settings;
         private DeviceTesterBaseClass testDevice = null; // Variable to hold the device tester class
         internal CancellationTokenSource ConformCancellationTokenSource;
-        internal ConformResults conformResults;
+        internal ConformResults conformResults = new();
         public ConformanceTestManager(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationTokenSource conformCancellationTokenSource, CancellationToken conformCancellationToken)
         {
             configuration = conformConfiguration;
