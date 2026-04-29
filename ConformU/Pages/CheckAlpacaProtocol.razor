@@ -138,7 +138,7 @@
                             try
                             {
                                 logger.LogMessage("StartTest", MessageLevel.Debug, "Before TestAlpacaProtocol method");
-                                returnCode = tester.TestAlpacaProtocol().Result;
+                                returnCode = tester.TestAlpacaProtocol().GetAwaiter().GetResult();
                                 logger.LogMessage("StartTest", MessageLevel.Debug, $"After TestAlpacaProtocol method - Return code: {returnCode}");
                             }
                             catch (Exception ex)
