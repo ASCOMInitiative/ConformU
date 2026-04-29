@@ -49,8 +49,8 @@
         conformState.UiHasChanged += OnUiHasChanged;
         settings = configuration.Settings;
     
-        // AUtomatically start a check if an Alpaca device is selected
-        if (settings.DeviceTechnology == DeviceTechnology.Alpaca)
+        // Automatically start a check if an Alpaca device is selected and no test is already running
+        if (settings.DeviceTechnology == DeviceTechnology.Alpaca && !settings.OperationInProgress)
             StartCheckAlpacaProtocol();
     }
 
