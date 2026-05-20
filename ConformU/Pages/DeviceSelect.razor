@@ -237,7 +237,7 @@
         selectedDeviceType = configuration.Settings.DeviceType.GetValueOrDefault(DeviceTypes.Telescope);
 
         selectedDeviceTypeString = selectedDeviceType.ToString();
-        discovery = new AlpacaDiscovery(configuration.Settings.AlpacaConfiguration.StrictCasing, configuration.Settings.TraceDiscovery ? conformLogger : null, Globals.USER_AGENT_PRODUCT_NAME, Assembly.GetExecutingAssembly().GetName().Version.ToString()); // Create a discovery component with or without logging
+        discovery = new AlpacaDiscovery(configuration.Settings.AlpacaConfiguration.StrictCasing.ToJsonNameCaseSensitivity(), configuration.Settings.TraceDiscovery ? conformLogger : null, Globals.USER_AGENT_PRODUCT_NAME, Assembly.GetExecutingAssembly().GetName().Version.ToString()); // Create a discovery component with or without logging
         discovery.AlpacaDevicesUpdated += AlpacaDeviceDiscovered;
         discovery.DiscoveryCompleted += AlpacaDiscoveryCompleted;
 

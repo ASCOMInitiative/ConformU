@@ -101,7 +101,7 @@
                     {
                         try
                         {
-                            using (AlpacaDiscovery alpacaDiscovery = new AlpacaDiscovery(configuration.Settings.AlpacaConfiguration.StrictCasing, configuration.Settings.TraceDiscovery ? conformLogger : null, Globals.USER_AGENT_PRODUCT_NAME, Assembly.GetExecutingAssembly().GetName().Version.ToString())) // Create a discovery component with or without logging
+                            using (AlpacaDiscovery alpacaDiscovery = new AlpacaDiscovery(configuration.Settings.AlpacaConfiguration.StrictCasing.ToJsonNameCaseSensitivity(), configuration.Settings.TraceDiscovery ? conformLogger : null, Globals.USER_AGENT_PRODUCT_NAME, Assembly.GetExecutingAssembly().GetName().Version.ToString())) // Create a discovery component with or without logging
                             {
                                 // Start the discovery process
                                 alpacaDiscovery.StartDiscovery(alpacaConfiguration.NumberOfDiscoveryPolls,
