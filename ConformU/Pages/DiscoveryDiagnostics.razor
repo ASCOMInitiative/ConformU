@@ -205,7 +205,7 @@
                                             CancellationTokenSource ctsVersions = new CancellationTokenSource();
                                             ctsVersions.CancelAfter(Convert.ToInt32(configuration.Settings.AlpacaConfiguration.DiscoveryDuration * 1000));
                                             string apiVersionsJsonResponse = await httpClient.GetStringAsync($"{hostIpAndPort}/management/apiversions", ctsVersions.Token);
-                                            IntArray1DResponse apiVersionsResponse = JsonSerializer.Deserialize<IntArray1DResponse>(apiVersionsJsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = configuration.Settings.AlpacaConfiguration.StrictCasing });
+                                            IntArray1DResponse apiVersionsResponse = JsonSerializer.Deserialize<IntArray1DResponse>(apiVersionsJsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = !configuration.Settings.AlpacaConfiguration.StrictCasing });
 
                                             // Process the API version response. Currently only version 1 is valid, so we expect an array with one entry whose value is 1.
                                             switch (apiVersionsResponse.Value.Length)
@@ -344,7 +344,7 @@
             CancellationTokenSource ctsDescription = new CancellationTokenSource();
             ctsDescription.CancelAfter(Convert.ToInt32(configuration.Settings.AlpacaConfiguration.DiscoveryDuration * 1000));
             string deviceDescriptionJsonResponse = await httpClient.GetStringAsync($"{hostIpAndPort}/management/v1/description", ctsDescription.Token);
-            AlpacaDescriptionResponse deviceDescriptionResponse = JsonSerializer.Deserialize<AlpacaDescriptionResponse>(deviceDescriptionJsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = configuration.Settings.AlpacaConfiguration.StrictCasing });
+            AlpacaDescriptionResponse deviceDescriptionResponse = JsonSerializer.Deserialize<AlpacaDescriptionResponse>(deviceDescriptionJsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = !configuration.Settings.AlpacaConfiguration.StrictCasing });
 
             // Make sure that we can parse the returned JSON string successfully
             if (deviceDescriptionResponse is null)
@@ -421,7 +421,7 @@
             ctsDevices.CancelAfter(Convert.ToInt32(configuration.Settings.AlpacaConfiguration.DiscoveryDuration * 1000));
             string configuredDevicesJsonResponse = await httpClient.GetStringAsync($"{hostIpAndPort}/management/v1/configureddevices", ctsDevices.Token);
 
-            AlpacaConfiguredDevicesResponse configuredDevicesResponse = JsonSerializer.Deserialize<AlpacaConfiguredDevicesResponse>(configuredDevicesJsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = configuration.Settings.AlpacaConfiguration.StrictCasing });
+            AlpacaConfiguredDevicesResponse configuredDevicesResponse = JsonSerializer.Deserialize<AlpacaConfiguredDevicesResponse>(configuredDevicesJsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = !configuration.Settings.AlpacaConfiguration.StrictCasing });
 
             // Make sure that we can parse the returned JSON string successfully
             if (configuredDevicesResponse is null)
