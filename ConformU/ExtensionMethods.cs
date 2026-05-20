@@ -1,4 +1,5 @@
-﻿using ASCOM.Tools;
+﻿using ASCOM.Alpaca.Discovery;
+using ASCOM.Tools;
 using System;
 
 namespace ConformU
@@ -17,6 +18,17 @@ namespace ConformU
             return $"{(declination >= 0.0 ? "+" : "")}{Utilities.DegreesToDMS(declination, ":", ":", "", 1)}";
         }
 
+        /// <summary>
+        /// Convert boolean value to JsonNameCaseSensitivity enum. True for CorrectCasingOnly, False for AnyCasing.
+        /// </summary>
+        /// <param name="value">Strict casing state</param>
+        /// <returns>JsonNameCaseSensitivity.CorrectCasingOnly when value is true, JsonNameCaseSensitivity.AnyCasing when value is false</returns>
+        public static JsonNameCaseSensitivity ToJsonNameCaseSensitivity(this bool value)
+        {
+            if(value)
+                return JsonNameCaseSensitivity.CorrectCasingOnly;
 
+            return JsonNameCaseSensitivity.AnyCasing;
+        }
     }
 }
