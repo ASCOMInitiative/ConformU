@@ -1483,7 +1483,8 @@ namespace ConformU
             {
                 case DeviceTechnology.Alpaca:
                     LogTestOnly($"Alpaca device: {settings.AlpacaDevice.AscomDeviceName} ({settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} {settings.AlpacaDevice.AscomDeviceType}/{settings.AlpacaDevice.AlpacaDeviceNumber})");
-                    if (!settings.AlpacaConfiguration.StrictCasing) LogIssue("ConformanceCheck", "Alpaca strict casing has been disabled, this in only supported for testing devices.");
+                    if (!settings.AlpacaConfiguration.StrictCasing) 
+                        LogConfigurationAlert("Alpaca strict casing has been disabled, this is not advised when checking device conformance.");
 
                     break;
 
