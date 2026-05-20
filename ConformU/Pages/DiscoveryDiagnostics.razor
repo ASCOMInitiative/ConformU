@@ -93,7 +93,7 @@
                         await InvokeAsync(() => { StateHasChanged(); });
 
                         // Create a Finder to send the discovery broadcast and collect responses
-                        using (Finder finder = new Finder(true, logger))
+                        using (Finder finder = new Finder(logger))
                         {
                             // Send the discovery broadcast
                             finder.Search(configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV4, configuration.Settings.AlpacaConfiguration.DiscoveryUseIpV6);
