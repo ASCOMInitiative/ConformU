@@ -106,7 +106,6 @@
                             {
                                 LogMessage("DiscoveryDiagnostics", $"Discovery completed. Found {finder.BroadcastResponses.Count} broadcast responses.", 0);
                                 LogMessage("DiscoveryDiagnostics", " ", 0);
-
                                 // Process each discovery response
                                 foreach (BroadcastResponse broadcastResponse in finder.BroadcastResponses)
                                 {
@@ -125,13 +124,15 @@
                                     }
 
                                     // Test for the presence of the AlpacaPort string in its expected casing
-                                    if (responseString.Contains(Constants.ResponseString)) // AlpacaPort
+                                    if (responseString.Contains(Constants.ResponseString, StringComparison.Ordinal)) // test for AlpacaPort - tested case sensitively
                                     {
                                         LogOk("DiscoveryDiagnostics", $"The Alpaca port JSON key name is spelled and cased correctly", COLUMN_OVERALL);
                                     }
                                     else
                                     {
-                                        LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"The Alpaca port JSON key name is incorrectly spelled or incorrectly cased.", COLUMN_OVERALL);
+                                        IPAddress iPAddress = broadcastResponse.IPEndpoint.Address;
+                                        broadcastResponse.IPEndpoint.Port = 0;
+                                        LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"The Alpaca port JSON key name is missing, incorrectly spelled or incorrectly cased. It must be: \"{Constants.ResponseString}\"", COLUMN_OVERALL);
                                     }
 
                                     // Extract the Alpaca port number from the response
