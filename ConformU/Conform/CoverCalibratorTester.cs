@@ -779,6 +779,8 @@ namespace ConformU
 
         private void TestHaltCover()
         {
+            // NOTE - HaltCover is an optional method so can throw a not implemented exception
+
             SetTest("HaltCover");
 
             // Check whether a cover is implemented
@@ -790,46 +792,67 @@ namespace ConformU
                     // Test whether the cover opened OK or malfunctioned
                     if (coverOpenTime > 0.0) // Cover opened OK
                     {
-                        // Initiate a cover open first
-                        LogCallToDriver("HaltCover", "About to call OpenCover method");
-                        SetAction("Opening cover so that it can be halted");
-                        coverCalibratorDevice.OpenCover();
-
-                        // Wait for half of the expected cover open time
-                        WaitFor((int)(coverOpenTime * 1000.0 / 2.0));
-
-                        // Confirm that the cover is still moving
-                        if (coverCalibratorDevice.CoverState == CoverStatus.Moving) // Cover is still moving
+                        // First test whether HaltCover is implemented and does not throw an exception when called while the cover is stationary
+                        try
                         {
-                            // Issue a halt command
+                            SetAction("Testing HaltCover while cover is stationary");
+                            LogCallToDriver("HaltCover", "About to call HaltCover method");
+                            TimeMethod("HaltCover", coverCalibratorDevice.HaltCover, TargetTime.Standard);
+                            LogOk("HaltCover", "HaltCover did not throw an exception when called while the cover is stationary");
+
+                            // HaltCover is implemented so test it by opening the cover and issuing a HaltCover half way through the expected opening period
                             try
                             {
-                                SetAction("Halting cover");
-                                SetStatus("Waiting for Halt to complete");
+                                LogCallToDriver("HaltCover", "About to call OpenCover method");
+                                SetAction("Opening cover so that it can be halted");
+                                coverCalibratorDevice.OpenCover();
 
-                                LogCallToDriver("HaltCover", "About to call HaltCover method");
-                                TimeMethod("HaltCover", coverCalibratorDevice.HaltCover, TargetTime.Standard);
-                                SetStatus("HaltCover command completed");
+                                // Wait for half of the expected cover open time
+                                WaitFor((int)(coverOpenTime * 1000.0 / 2.0));
 
-                                // Confirm that the cover is no longer moving
-                                if (!CoverIsMoving("HaltCover")) // The cover is now stationary
-                                    LogOk("HaltCover", "Cover is no longer moving after issuing the HaltCover command");
-                                else // The cover is still moving
+                                // Confirm that the cover is still moving
+                                if (coverCalibratorDevice.CoverState == CoverStatus.Moving) // Cover is still moving
                                 {
-                                    LogIssue("HaltCover", "The cover was still moving after return from the HaltCover command.");
-                                    LogInfo("HaltCover", "HaltCover() is expected to be a short-lived, synchronous, method that quickly stops movement.");
+                                    // Issue a halt command
+                                    try
+                                    {
+                                        SetAction("Halting cover");
+                                        SetStatus("Waiting for Halt to complete");
+
+                                        LogCallToDriver("HaltCover", "About to call HaltCover method");
+                                        TimeMethod("HaltCover", coverCalibratorDevice.HaltCover, TargetTime.Standard);
+                                        SetStatus("HaltCover command completed");
+
+                                        // Confirm that the cover is no longer moving
+                                        if (!CoverIsMoving("HaltCover")) // The cover is now stationary
+                                            LogOk("HaltCover", "Cover is no longer moving after issuing the HaltCover command");
+                                        else // The cover is still moving
+                                        {
+                                            LogIssue("HaltCover", "The cover was still moving after return from the HaltCover command.");
+                                            LogInfo("HaltCover", "HaltCover() is expected to be a short-lived, synchronous, method that quickly stops movement.");
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        HandleException("HaltCover", MemberType.Method, Required.MustBeImplemented, ex, "CoverStatus indicates that the device has cover capability");
+                                    }
                                 }
+                                else // The cover should have been moving after just half of the expected open time, but was not
+                                    LogIssue("HaltCover", "Cover should have been moving after waiting for half of the previous open time, but it was not. Test abandoned");
                             }
-                            catch (Exception ex)
+                            catch(Exception ex)
                             {
-                                HandleException("HaltCover", MemberType.Method, Required.MustBeImplemented, ex, "CoverStatus indicates that the device has cover capability");
+                                HandleException("HaltCover", MemberType.Method, Required.MustBeImplemented, ex, "The test did not complete successfully so HaltCover could not be fully tested");
                             }
                         }
-                        else // The cover should have been moving after just half of the expected open time, but was not
-                            LogIssue("HaltCover", "Cover should have been moving after waiting for half of the previous open time, but it was not. Test abandoned");
+                        catch (Exception ex) // HaltCover threw an exception when called while the cover was stationary
+                        {
+                            HandleException("HaltCover", MemberType.Method, Required.Optional, ex, ""); // Accept method not implemented for this method
+                        }
+
                     }
                     else // The cover did not open OK so skip the test
-                        LogIssue("HaltCover", $"HaltCover tests skipped because either the cover could not be opened successfully.");
+                        LogIssue("HaltCover", $"HaltCover tests skipped because the cover could not be opened successfully.");
                 }
                 else // The cover opens synchronously so make sure that HaltCover is not implemented
                 {
