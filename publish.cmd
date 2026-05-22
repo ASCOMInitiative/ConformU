@@ -7,34 +7,28 @@ call "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\v
 cd
 cd J:\ConformU
 
-echo *** Build application
-MSBuild ConformU.sln /p:Configuration=Debug /p:Platform="Any CPU" /t:Restore 
-cd
-MSBuild ConformU.sln /p:Configuration=Debug /p:Platform="Any CPU" /t:Rebuild
-echo *** Completed Build
-
 echo *** Publishing MacOS Intel silicon
-dotnet publish -c Debug -p:Platform="Any CPU" -r osx-x64 --framework net10.0 --self-contained true /p:PublishTrimmed=false -p:PublishSingleFile=true -p:PublishReadyToRunShowWarnings=true
+dotnet publish -c Debug -p:Platform="Any CPU" -r osx-x64 --framework net10.0 --self-contained true /p:PublishTrimmed=false -p:PublishSingleFile=true -p:PublishReadyToRunShowWarnings=true /p:UseAppHost=true
 bsdtar -cJf publish/conformu.macos-x64.tar.xz -C ConformU\bin\Debug\net10.0\osx-x64\publish\ *
 echo *** Completed MacOS Intel silicon
 
 echo *** Publishing MacOS Apple silicon
-dotnet publish -c Debug -p:Platform="Any CPU" -r osx-arm64 --framework net10.0 --self-contained true /p:PublishTrimmed=false -p:PublishSingleFile=true 
+dotnet publish -c Debug -p:Platform="Any CPU" -r osx-arm64 --framework net10.0 --self-contained true /p:PublishTrimmed=false -p:PublishSingleFile=true /p:UseAppHost=true
 bsdtar -cJf publish/conformu.macos-arm64.tar.xz -C ConformU\bin\Debug\net10.0\osx-arm64\publish\ *
 echo *** Completed MacOS Apple silicon
 
 echo *** Publishing Linux ARM32
-dotnet publish -c Debug /p:Platform="Any CPU" -r linux-arm --framework net10.0 --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true 
+dotnet publish -c Debug /p:Platform="Any CPU" -r linux-arm --framework net10.0 --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true /p:UseAppHost=true
 bsdtar -cJf publish/conformu.linux-arm32.needsexec.tar.xz -C ConformU\bin\Debug\net10.0\linux-arm\publish\ *
 echo *** Completed Linux ARM32
 
 echo *** Publishing Linux ARM64
-dotnet publish -c Debug /p:Platform="Any CPU" -r linux-arm64 --framework net10.0 --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true
+dotnet publish -c Debug /p:Platform="Any CPU" -r linux-arm64 --framework net10.0 --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true /p:UseAppHost=true
 bsdtar -cJf publish/conformu.linux-arm64.needsexec.tar.xz -C ConformU\bin\Debug\net10.0\linux-arm64\publish\ *
 echo *** Completed Linux ARM64
 
 echo *** Publishing Linux X64
-dotnet publish -c Debug /p:Platform="Any CPU" -r linux-x64 --framework net10.0 --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true
+dotnet publish -c Debug /p:Platform="Any CPU" -r linux-x64 --framework net10.0 --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true /p:UseAppHost=true
 bsdtar -cJf publish/conformu.linux-x64.needsexec.tar.xz -C ConformU\bin\Debug\net10.0\linux-x64\publish\ *
 echo *** Completed Linux X64
 

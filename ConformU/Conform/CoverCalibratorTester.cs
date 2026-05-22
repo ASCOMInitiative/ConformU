@@ -798,7 +798,7 @@ namespace ConformU
                             SetAction("Testing HaltCover while cover is stationary");
                             LogCallToDriver("HaltCover", "About to call HaltCover method");
                             TimeMethod("HaltCover", coverCalibratorDevice.HaltCover, TargetTime.Standard);
-                            LogOk("HaltCover", "HaltCover did not throw an exception when called while the cover is stationary");
+                            LogOk("HaltCover", "HaltCover completed successfully when called while the cover is stationary");
 
                             // HaltCover is implemented so test it by opening the cover and issuing a HaltCover half way through the expected opening period
                             try
