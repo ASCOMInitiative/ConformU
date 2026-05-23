@@ -22,7 +22,7 @@
     <RadzenTextBox Name="DIAGNOSTICSTATUS" Placeholder="Diagnostic not run." @bind-Value=@statusText ReadOnly=true Style="width:500px;font-weight:bold;" />
 </div>
 
-<RadzenTextArea Id="ConformLog" Style="line-height: 18px; padding-bottom: 0px" Name="ScreenLog" @bind-Value=@screenLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
+<RadzenTextArea Id="ConformLog" Style='font-family: "Lucida Console", "Courier New", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px' Name="ScreenLog" @bind-Value=@screenLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
 
 @code
 {
@@ -35,7 +35,7 @@
     List<AlpacaDiscoveryDiagnostic> informationMessages;
 
     // Constants and variables to create formatted on-screen messages
-    const int COLUMN_WIDTH = 30;
+    const int COLUMN_WIDTH = 14;
     const int COLUMN_PADDING = 24;
     const int COLUMN_OVERALL = COLUMN_WIDTH + COLUMN_PADDING;
 
@@ -123,6 +123,17 @@
                                         LogMessage("DiscoveryDiagnostics", $"Found response from {broadcastResponse.IPEndpoint.Address.ToString().PadRight(COLUMN_WIDTH)} => {responseString}", 0);
                                     }
 
+                                    // Check for control characters (0x00–0x1F) in the response bytes
+                                    for (int i = 0; i < broadcastResponse.Response.Length; i++)
+                                    {
+                                        byte b = broadcastResponse.Response[i];
+                                        if (b <= 0x1F && b != 0x09 && b != 0x0A && b != 0x0D) // Check for < 31 but not 09 (TAB), 10 (LINEFEED) or 13 (CARRIAGE_RETURN), which are valid whitespace characters in JSON
+                                            LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"The character at position {i} in the discovery response is a control character: 0x{b:X2}. This is illegal in a JSON response.", COLUMN_OVERALL);
+
+                                        if (b == 0x20 || b == 0x09 || b == 0x0A || b == 0x0D) // Check for space, TAB, LINEFEED, or CARRIAGE_RETURN characters
+                                            LogInformation(broadcastResponse, "DiscoveryDiagnostics", $"Ignoring white space character 0x{b:X2} at position {i} in the discovery response. This is valid JSON, but its presence adds no further meaning.", COLUMN_OVERALL);
+                                    }
+
                                     // Test for the presence of the AlpacaPort string in its expected casing
                                     if (responseString.Contains(Constants.ResponseString, StringComparison.Ordinal)) // test for AlpacaPort - tested case sensitively
                                     {
@@ -164,7 +175,7 @@
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"Exception parsing response: {ex.Message}.", COLUMN_OVERALL);
+                                        LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"Exception while parsing device response, further tests abandoned: {ex.Message}.", COLUMN_OVERALL);
                                         logger?.LogMessage("DiscoveryDiagnostics", $"Exception parsing response: \r\n{ex}");
                                     }
 
@@ -264,7 +275,6 @@
                                             logger?.LogMessage("DiscoveryDiagnostics", $"Exception reading supported API versions: {ex}");
                                         }
                                     }
-                                    LogMessage("DiscoveryDiagnostics", $" ", 0);
                                 }
                             }
                             else // There are no responses to the Finder broadcast
@@ -277,24 +287,27 @@
                             // Summarise the diagnostic outcome
                             if ((informationMessages.Count == 0) & (issueMessages.Count == 0))
                             {
+                                LogMessage("DiscoveryDiagnostics", $" ", 0);
                                 LogMessage("", $"No issues or information alerts found: Your Alpaca devices pass ASCOM Discovery Diagnostics validation!!", 0);
                             }
                             else
                             {
                                 if (issueMessages.Count > 0)
                                 {
+                                    LogMessage("DiscoveryDiagnostics", $" ", 0);
                                     LogMessage("", $"Issue Summary", 0);
                                     foreach (AlpacaDiscoveryDiagnostic diagnostic in issueMessages)
                                     {
-                                        LogMessage("", $"{diagnostic.DeviceIp.PadRight(COLUMN_OVERALL)} {diagnostic.Message}", 0);
+                                        LogMessage("", $"{diagnostic.DeviceIp.PadRight(logger.IdentifierWidth + 2)} {diagnostic.Message}", 0);
                                     }
                                 }
                                 if (informationMessages.Count > 0)
                                 {
+                                    LogMessage("DiscoveryDiagnostics", $" ", 0);
                                     LogMessage("", $"Information Alert Summary", 0);
                                     foreach (AlpacaDiscoveryDiagnostic diagnostic in informationMessages)
                                     {
-                                        LogMessage("", $"{diagnostic.DeviceIp.PadRight(COLUMN_OVERALL)} {diagnostic.Message}", 0);
+                                        LogMessage("", $"{diagnostic.DeviceIp.PadRight(logger.IdentifierWidth + 2)} {diagnostic.Message}", 0);
                                     }
                                 }
                             }
@@ -585,10 +598,11 @@
     /// </summary>
     /// <param name="method">Calling method name</param>
     /// <param name="message">Message to log</param>
-    /// <param name="padding">Number of characters to which the message should be right padded</param>
-    private async void LogMessage(string method, string message, int padding)
+    /// <param name="padding">Number of characters to which the message should be left padded</param>
+    private async void LogMessage(string method, string message, int leftPadding)
     {
-        string padString = new string(' ', padding);
+        ArgumentOutOfRangeException.ThrowIfNegative(leftPadding);
+        string padString = new string(' ', leftPadding);
 
         logger?.LogMessage(method, message);
         screenLog = (screenLog + $"\r\n{padString}{message}").Trim(new char[] { '\r', '\n' });
@@ -600,10 +614,10 @@
     /// </summary>
     /// <param name="method">Calling method name</param>
     /// <param name="message">Message to log</param>
-    /// <param name="padding">Number of characters to which the message should be right padded</param>
-    private void LogOk(string method, string message, int padding)
+    /// <param name="padding">Number of characters to which the message should be left padded</param>
+    private void LogOk(string method, string message, int leftPadding)
     {
-        LogMessage(method, $"OK    - {message}", padding);
+        LogMessage(method, $"OK    - {message}", leftPadding);
 
     }
 
@@ -613,10 +627,10 @@
     /// <param name="broadcastResponse">Discovery broadcast response</param>
     /// <param name="method">Calling method name</param>
     /// <param name="message">Message to log</param>
-    /// <param name="padding">Number of characters to which the message should be right padded</param>
-    private void LogIssue(BroadcastResponse broadcastResponse, string method, string message, int padding)
+    /// <param name="padding">Number of characters to which the message should be left padded</param>
+    private void LogIssue(BroadcastResponse broadcastResponse, string method, string message, int leftPadding)
     {
-        LogMessage(method, $"ISSUE - {message}", padding);
+        LogMessage(method, $"ISSUE - {message}", leftPadding);
         issueMessages.Add(new AlpacaDiscoveryDiagnostic(broadcastResponse.IPEndpoint.ToString(), message));
     }
 
@@ -626,10 +640,10 @@
     /// <param name="broadcastResponse">Discovery broadcast response</param>
     /// <param name="method">Calling method name</param>
     /// <param name="message">Message to log</param>
-    /// <param name="padding">Number of characters to which the message should be right padded</param>
-    private void LogInformation(BroadcastResponse broadcastResponse, string method, string message, int padding)
+    /// <param name="padding">Number of characters to which the message should be left padded</param>
+    private void LogInformation(BroadcastResponse broadcastResponse, string method, string message, int leftPadding)
     {
-        LogMessage(method, $"INFO  - {message}", padding);
+        LogMessage(method, $"INFO  - {message}", leftPadding);
 
         // Ignore null broadcast responses
         if (broadcastResponse is null)
