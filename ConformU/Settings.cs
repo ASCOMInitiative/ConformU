@@ -197,28 +197,43 @@ namespace ConformU
         public int TelescopeTimeForSlewingToBecomeFalse { get; set; } = 30; // Number of seconds to wait for Slewing to become false
 
         // Camera test configuration
-        public int CameraMaxBinX { get; set; } = 0;
-        public int CameraMaxBinY { get; set; } = 0;
         [MandatoryInFullTest(true)]
         public bool CameraFirstUseTests { get; set; } = true;
+
         [MandatoryInFullTest(true)]
         public bool CameraTestImageArrayVariant { get; set; } = true;
+        
+        public int CameraMaxBinX { get; set; } = 0;
+        public int CameraMaxBinY { get; set; } = 0;
         public double CameraExposureDuration { get; set; } = 2.0;
         public int CameraXMax { get; set; } = 0;
         public int CameraYMax { get; set; } = 0;
         public int CameraWaitTimeout { get; set; } = 10;
 
         // Dome test configuration
+        /// <summary>
+        /// List of dome tests that can be enabled / disabled through configuration
+        /// </summary>
+        public Dictionary<string, bool> DomeTests { get; set; } = new()
+        {
+            { DomeTester.ABORT_SLEW, true },
+            { DomeTester.CLOSE_SHUTTER, true },
+            { DomeTester.FIND_HOME, true },
+            { DomeTester.OPEN_SHUTTER, true },
+            { DomeTester.PARK, true },
+            { DomeTester.SET_PARK, true },
+            { DomeTester.SLEW_TO_ALTITUDE, true },
+            { DomeTester.SLEW_TO_AZIMUTH, true },
+            { DomeTester.SYNC_TO_AZIMUTH, true }
+        };
+
+        [MandatoryInFullTest(true)]
+        public bool DomeOpenShutter { get; set; } = false;
+
         public int DomeShutterMovementTimeout { get; set; } = 240;
         public int DomeAzimuthMovementTimeout { get; set; } = 240;
         public int DomeAltitudeMovementTimeout { get; set; } = 240;
-
-        /// <summary>
-        /// Dome stabilisation time (seconds)
-        /// </summary>
         public int DomeStabilisationWaitTime { get; set; } = 10;
-        [MandatoryInFullTest(true)]
-        public bool DomeOpenShutter { get; set; } = false;
         public double DomeSlewTolerance { get; set; } = 1.0; // Degrees
 
         // Filter wheel test configuration

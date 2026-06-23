@@ -44,7 +44,7 @@
                     <h4 style="color: #479cc8; margin-bottom: 0;">Operation</h4>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
                         <RadzenCheckBox Style="margin-top:6px;" Name="CHECKFORUPDATES" @bind-Value=@checkForUpdates TValue="bool" Change=@(args =>
-                                                                                                                                                                          OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
+                                                                                                                                                                                                                                                                                                                                          OnCheckboxChange(args, CheckBoxConfigurationItem.UpdateCheck)) />
                         <RadzenLabel Text="Check for updates" Component="CHECKFORUPDATES" Style="margin-top:6px; margin-left: 5px;margin-right:5px;" />
                     </div>
                     <div class="row" style="margin-top:12px; margin-left:4px;">
@@ -321,7 +321,7 @@
         <RadzenTabsItem Text="Telescope">
             <div class="row">
                 <RadzenCard Style="margin-left: 10px;padding-bottom:5px;margin-right: 10px;margin-bottom: 20px">
-                    <h4 style="margin-top: 5px; color: #479cc8">Select which tests Conform should perform.</h4>
+                    <h4 style="margin-top: 5px; color: #479cc8">Select the tests to perform.</h4>
 
                     <div class="row" style="margin-top:0px;">
                         <RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(true)) Text="Check all" Style="margin-left: 20px; " />
@@ -592,46 +592,73 @@
 
         @*Dome configuration*@
         <RadzenTabsItem Text="Dome">
-            <h4 style="margin-top: 10px">Timeouts</h4>
-            <p>These settings control how long Conform waits for actions to complete before reporting a timeout.</p>
+            <div class="row">
+                <RadzenCard Style="margin-left: 10px;padding-bottom:5px;margin-right: 10px;margin-bottom: 20px">
+                    <h4 style="margin-top: 5px; color: #479cc8">Select the tests to perform.</h4>
+                    <div class="row" style="margin-top:0px;">
+                        <RadzenButton Click=@(args => OnSetDomeTestsButtonClick(true)) Text="Check all" Style="margin-left: 20px; " />
+                        <RadzenButton Click=@(args => OnSetDomeTestsButtonClick(false)) Text="Uncheck all" Style="margin-left: 20px; " />
+                    </div>
 
-            <div style="margin-top:20px" class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeShutterTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.DomeShutterTimeout)) />
-                <p style="margin-left: 20px;margin-top: 5px;">Shutter movement completion timeout</p>
-            </div>
-            <div class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeAzimuthTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.DomeAzimuthTimeout)) />
-                <p style="margin-left: 20px;margin-top: 5px;">Azimuth movement completion timeout</p>
-            </div>
-            <div class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeAltitudeTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.DomeAltitudeTimeout)) />
-                <p style="margin-left: 20px;margin-top: 5px;">Altitude movement completion timeout</p>
-            </div>
-            <div class="row">
-                <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeStabilisationWaitTime" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.DomeStabilisationWaitTime)) />
-                <p style="margin-left: 20px;margin-top: 5px;">Movement stabilisation wait time</p>
-            </div>
+                    <RadzenCheckBoxList @bind-Value=@domeTests
+                                        Style="margin-top:10px;margin-bottom: 0px"
+                                        TValue="string"
+                                        Orientation="Orientation.Vertical"
+                                        Change=@(args => OnDomeTestsChange(args))>
+                        <Items>
+                            @foreach (var item in settings.DomeTests)
+                            {
+                                <RadzenCheckBoxListItem Text="@item.Key" Value="@item.Key" />
+                            }
+                        </Items>
+                    </RadzenCheckBoxList>
+                </RadzenCard>
+                <RadzenCard Style="margin-left: 10px;padding-bottom:5px;margin-right: 10px;margin-bottom: 20px">
+                    <h4 style="margin-top: 5px; color: #479cc8">Further configuration.</h4>
 
-            <h4 style="margin-top: 20px">Dome Safety</h4>
-            <p>By default commands to open the dome shutter will be suppressed to protect observing equipment. For a full conformance check, the dome must be permitted to open its shutter.</p>
-            <div class="row" style="margin-top:14px; margin-left:4px;">
-                <RadzenCheckBox Name="CHKOPENSHUTTER" @bind-Value=@domeOpenShutter TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.DomeOpenShutter)) />
-                <RadzenLabel Text="Allow dome to open during testing." Component="CHKOPENSHUTTER" Style="margin-left: 5px;" />
-            </div>
+                    <h4>Dome Safety</h4>
+                    <div class="row" style="margin-left:3px">By default commands to open the dome shutter will be suppressed to protect observing equipment.</div>
+                    <div class="row" style="margin-left:3px">For a full conformance check, the dome must be permitted to open its shutter.</div>
+                    <div class="row" style="margin-top:14px; margin-left:4px;margin-bottom:25px;">
+                        <RadzenCheckBox Name="CHKOPENSHUTTER" Style="margin-bottom:24px;" @bind-Value=@domeOpenShutter TValue="bool" Change=@(args => OnCheckboxChange(args, CheckBoxConfigurationItem.DomeOpenShutter)) />
+                        <RadzenLabel Text="Allow dome to open during testing." Component="CHKOPENSHUTTER" Style="margin-left: 5px;" />
+                    </div>
 
-            <h4 style="margin-top: 40px">Miscellaneous Configuration</h4>
-            <div class="row">
-                <RadzenNumeric Name="DOMESLEWTOLERANCE"
-                               Style="margin-left: 20px; width: 6em"
-                               Format="0.00"
-                               @bind-Value="@domeSlewTolerance"
-                               TValue="double"
-                               Min="0.0m"
-                               Step="0.1"
-                               Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.DomeSlewtolerance)) />
-                <RadzenLabel Text="Dome slew accuracy tolerance (degrees))"
-                             Component="DOMESLEWTOLERANCE"
-                             Style="margin-left: 20px; margin-top: 6px; margin-right: 26px" />
+                    <h4>Timeouts</h4>
+                    <p style="margin-left:3px;">These settings control how long Conform waits for actions to complete before reporting a timeout.</p>
+
+                    <div style="margin-top:20px" class="row">
+                        <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeShutterTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.DomeShutterTimeout)) />
+                        <p style="margin-left: 20px;margin-top: 5px;">Shutter movement completion timeout</p>
+                    </div>
+                    <div class="row">
+                        <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeAzimuthTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.DomeAzimuthTimeout)) />
+                        <p style="margin-left: 20px;margin-top: 5px;">Azimuth movement completion timeout</p>
+                    </div>
+                    <div class="row">
+                        <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeAltitudeTimeout" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.DomeAltitudeTimeout)) />
+                        <p style="margin-left: 20px;margin-top: 5px;">Altitude movement completion timeout</p>
+                    </div>
+                    <div class="row">
+                        <RadzenNumeric Style="margin-left: 20px" @bind-Value="domeStabilisationWaitTime" TValue="int" Min="0" Change=@(args => OnIntegerItemChange(args, NumericConfigurationItem.DomeStabilisationWaitTime)) />
+                        <p style="margin-left: 20px;margin-top: 5px;">Movement stabilisation wait time</p>
+                    </div>
+
+                    <h4 style="margin-top: 40px">Miscellaneous Configuration</h4>
+                    <div class="row">
+                        <RadzenNumeric Name="DOMESLEWTOLERANCE"
+                                       Style="margin-left: 20px; width: 6em; margin-bottom:16px;"
+                                       Format="0.00"
+                                       @bind-Value="@domeSlewTolerance"
+                                       TValue="double"
+                                       Min="0.0m"
+                                       Step="0.1"
+                                       Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.DomeSlewtolerance)) />
+                        <RadzenLabel Text="Dome slew accuracy tolerance (degrees))"
+                                     Component="DOMESLEWTOLERANCE"
+                                     Style="margin-left: 20px; margin-top: 6px; margin-right: 26px;" />
+                    </div>
+                </RadzenCard>
             </div>
         </RadzenTabsItem>
 
@@ -810,6 +837,7 @@
         };
 
     // Dome test configuration
+    private IEnumerable<string> domeTests;
     private int domeShutterTimeout;
     private int domeAzimuthTimeout;
     private int domeAltitudeTimeout;
@@ -1325,6 +1353,12 @@
         cameraWaitTimeout = settings.CameraWaitTimeout;
 
         // Dome tests
+        domeTests = new List<string>();
+        foreach (KeyValuePair<string, bool> item in settings.DomeTests)
+        {
+            if (item.Value) ((List<string>)domeTests).Add(item.Key);
+        }
+
         domeShutterTimeout = settings.DomeShutterMovementTimeout;
         domeAzimuthTimeout = settings.DomeAzimuthMovementTimeout;
         domeAltitudeTimeout = settings.DomeAltitudeMovementTimeout;
@@ -1488,7 +1522,7 @@
         SaveConfiguration();
     }
 
-    private void OnTelescopeTestsChange(IEnumerable<string> value)
+    private void OnTelescopeTestsChange(IEnumerable<string> setValues)
     {
         Dictionary<string, bool> newTelescopetestValues = new();
         foreach (KeyValuePair<string, bool> item in settings.TelescopeTests)
@@ -1496,11 +1530,27 @@
             newTelescopetestValues[item.Key] = false;
         }
 
-        foreach (string i in value)
+        foreach (string valueName in setValues)
         {
-            newTelescopetestValues[i] = true;
+            newTelescopetestValues[valueName] = true;
         }
         settings.TelescopeTests = newTelescopetestValues;
+        SaveConfiguration();
+    }
+
+    private void OnDomeTestsChange(IEnumerable<string> setValues)
+    {
+        Dictionary<string, bool> newDomeTestValues = new();
+        foreach (KeyValuePair<string, bool> item in settings.DomeTests)
+        {
+            newDomeTestValues[item.Key] = false;
+        }
+
+        foreach (string valueName in setValues)
+        {
+            newDomeTestValues[valueName] = true;
+        }
+        settings.DomeTests = newDomeTestValues;
         SaveConfiguration();
     }
 
@@ -1513,6 +1563,20 @@
         SetConfiguration();
         StateHasChanged();
         navigationManager.NavigateTo("/settings", true);
+    }
+
+    private void OnSetDomeTestsButtonClick(bool state)
+    {
+        Dictionary<string, bool> changedTests = new();
+        foreach (KeyValuePair<string, bool> item in settings.DomeTests)
+        {
+            changedTests.Add(item.Key, state);
+        }
+        settings.DomeTests = changedTests;
+
+        SaveConfiguration();
+        SetConfiguration();
+        StateHasChanged();
     }
 
     private void OnSetTelescopeTestsButtonClick(bool state)

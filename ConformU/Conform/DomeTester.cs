@@ -1,4 +1,5 @@
-﻿using ASCOM.Alpaca.Clients;
+﻿using ASCOM;
+using ASCOM.Alpaca.Clients;
 using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
@@ -14,12 +15,27 @@ namespace ConformU
 
     internal class DomeTester : DeviceTesterBaseClass
     {
+        #region Constants
+
         private const double DOME_SYNC_OFFSET = 45.0; // Amount to offset the azimuth when testing ability to sync
         private const double DOME_ILLEGAL_ALTITUDE_LOW = -10.0; // Illegal value to test dome driver exception generation
         private const double DOME_ILLEGAL_ALTITUDE_HIGH = 100.0; // Illegal value to test dome driver exception generation
         private const double DOME_ILLEGAL_AZIMUTH_LOW = -10.0; // Illegal value to test dome driver exception generation
         private const double DOME_ILLEGAL_AZIMUTH_HIGH = 370.0; // Illegal value to test dome driver exception generation
         private const int ABORT_SLEW_WAIT_TIME_SECONDS = 30; // Time to wait for Slewing to become false after AbortSlew
+
+        // Constants for selecting which tests to perform
+        internal const string ABORT_SLEW = "AbortSlew";
+        internal const string CLOSE_SHUTTER = "CloseShutter";
+        internal const string FIND_HOME = "FindHome";
+        internal const string OPEN_SHUTTER = "OpenShutter";
+        internal const string PARK = "Park";
+        internal const string SET_PARK = "SetPark";
+        internal const string SLEW_TO_ALTITUDE = "SlewToAltitude";
+        internal const string SLEW_TO_AZIMUTH = "SlewToAzimuth";
+        internal const string SYNC_TO_AZIMUTH = "SyncToAzimuth";
+
+        #endregion
 
         // Dome variables
         private bool canSetAltitude, canSetAzimuth, canSetShutter, canSlave, canSyncAzimuth, slaved;
@@ -537,7 +553,8 @@ namespace ConformU
         {
             Stopwatch sw = Stopwatch.StartNew();
 
-            if (!settings.DomeOpenShutter) LogInfo("SlewToAltitude", "You have configured Conform not to open the shutter so the following slew may fail.");
+            if (!settings.DomeOpenShutter)
+                LogInfo("SlewToAltitude", "You have configured Conform not to open the shutter so the following slew may fail.");
 
             SetTest("SlewToAltitude");
             SetAction($"Slewing to altitude {testAltitude} degrees");
@@ -984,7 +1001,7 @@ namespace ConformU
                         break;
 
                     case DomeInterfaceMember.CloseShutter:
-                        if (canSetShutter)
+                        if (canSetShutter) // Can set shutter state so test closing the shutter
                         {
                             try
                             {
@@ -996,7 +1013,7 @@ namespace ConformU
                                 HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, "CanSetShutter is True");
                             }
                         }
-                        else
+                        else // Can't set shutter state so test that CloseShutter raises an exception
                         {
                             domeDevice.CloseShutter();
                             LogIssue(testName, "CanSetShutter is false but CloseShutter did not raise an exception");
@@ -1056,7 +1073,7 @@ namespace ConformU
                         break;
 
                     case DomeInterfaceMember.OpenShutter:
-                        if (canSetShutter)
+                        if (canSetShutter) // Can set shutter state so test opening the shutter
                         {
                             try
                             {
@@ -1068,7 +1085,7 @@ namespace ConformU
                                 HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, "CanSetShutter is True");
                             }
                         }
-                        else
+                        else // Can't set shutter state so test that OpenShutter raises an exception
                         {
                             LogCallToDriver(testName, "About to call OpenShutter method");
                             domeDevice.OpenShutter();
@@ -1373,21 +1390,47 @@ namespace ConformU
         {
             ShutterState lShutterState;
 
-            if (settings.DomeOpenShutter)
+            if (settings.DomeOpenShutter) // We are allowed to open the shutter so test it
             {
                 SetTest(testName);
                 if (canReadShutterStatus)
                 {
                     LogCallToDriver(testName, "About to get ShutterStatus property");
-                    lShutterState = (ShutterState)domeDevice.ShutterStatus;
+                    lShutterState = domeDevice.ShutterStatus;
 
-                    // Make sure we are in the required Open state to start the close test
-                    switch (lShutterState)
+                    // Make sure we are in the required shutter state before starting the test
+                    switch (lShutterState) // Switch on the current shutter state
                     {
-                        case ShutterState.Closed:
-                            if (requiredFinalShutterState == ShutterState.Closed)
+                        case ShutterState.Open: // The shutter is currently open
+                            // Check what final state is required
+                            if (requiredFinalShutterState == ShutterState.Closed) // The shutter is currently open and the test is to close it
                             {
-                                // Wrong state, get to the required state
+                                // Already in Open state, no action required
+                            }
+                            else // The shutter is currently open and the test is to open the shutter, so start by closing it
+                            {
+                                // Wrong shutter state, get to the closed state
+                                SetAction("Closing shutter ready for open test");
+                                LogDebug(testName, "Closing shutter ready for open test");
+                                LogCallToDriver(testName, "About to call CloseShutter method");
+                                domeDevice.CloseShutter();
+
+                                // Wait for shutter to open
+                                if (!DomeShutterWait(ShutterState.Closed))
+                                    return;
+                                DomeStabliisationWait();
+                            }
+                            break;
+
+                        case ShutterState.Closed: // The shutter is currently closed
+                            // Check what final state is required
+                            if (requiredFinalShutterState == ShutterState.Open)  // The shutter is currently closed and the test is to open it
+                            {
+                                // Already in Closed state, no action required
+                            }
+                            else // The shutter is currently closed and the test is to open the shutter, so start by opening it
+                            {
+                                // Wrong shutter state, get to the open state
                                 SetAction("Opening shutter ready for close test");
                                 LogDebug(testName, "Opening shutter ready for close test");
                                 LogCallToDriver(testName, "About to call OpenShutter method");
@@ -1399,50 +1442,11 @@ namespace ConformU
 
                                 DomeStabliisationWait();
                             }
-                            else
-                            {
-                                // Already in Open state, no action required
-                            }
 
                             break;
 
-                        case ShutterState.Closing:
-                            if (requiredFinalShutterState == ShutterState.Closed)
-                            {
-                                SetAction("Waiting for shutter to close before opening ready for close test");
-                                LogDebug(testName, "Waiting for shutter to close before opening ready for close test");
-
-                                // Wait for shutter to close
-                                if (!DomeShutterWait(ShutterState.Closed))
-                                    return;
-
-                                LogDebug(testName, "Opening shutter ready for close test");
-                                SetAction("Opening shutter ready for close test");
-                                LogCallToDriver(testName, "About to call OpenShutter method");
-
-                                // Then open it
-                                domeDevice.OpenShutter();
-
-                                if (!DomeShutterWait(ShutterState.Open))
-                                    return;
-
-                                DomeStabliisationWait();
-                            }
-                            else
-                            {
-                                SetAction("Waiting for shutter to close ready for open test");
-                                LogDebug(testName, "Waiting for shutter to close ready for open test");
-
-                                // Wait for shutter to close
-                                if (!DomeShutterWait(ShutterState.Closed))
-                                    return;
-
-                                DomeStabliisationWait();
-                            }
-                            break;
-
-                        case ShutterState.Opening:
-                            if (requiredFinalShutterState == ShutterState.Closed)
+                        case ShutterState.Opening: // The shutter is currently opening
+                            if (requiredFinalShutterState == ShutterState.Closed) // The shutter is currently opening and the test is to close it, so wait for it to open
                             {
                                 SetAction("Waiting for shutter to open ready for close test");
                                 LogDebug(testName, "Waiting for shutter to open ready for close test");
@@ -1453,7 +1457,7 @@ namespace ConformU
 
                                 DomeStabliisationWait();
                             }
-                            else
+                            else // The shutter is currently opening and the test is to open it, so wait for it to open and then close it
                             {
                                 SetAction("Waiting for shutter to open before closing ready for open test");
                                 LogDebug(testName, "Waiting for shutter to open before closing ready for open test");
@@ -1475,37 +1479,52 @@ namespace ConformU
                             }
                             break;
 
-                        case ShutterState.Error:
-                            LogIssue("DomeShutterTest", $"Shutter state is Error: {lShutterState}");
-                            break;
-
-                        case ShutterState.Open:
-                            if (requiredFinalShutterState == ShutterState.Closed)
+                        case ShutterState.Closing: // The shutter is currently closing
+                            if (requiredFinalShutterState == ShutterState.Open) // The shutter is currently closing and the test is to open it, so just wait for it to close
                             {
-                                // Already in Closed state, no action required
-                            }
-                            else
-                            {
-                                // Wrong state, get to the required state
-                                SetAction("Closing shutter ready for open  test");
-                                LogDebug(testName, "Closing shutter ready for open test");
-                                LogCallToDriver(testName, "About to call CloseShutter method");
-                                domeDevice.CloseShutter();
+                                SetAction("Waiting for shutter to close ready for open test");
+                                LogDebug(testName, "Waiting for shutter to close ready for open test");
 
-                                // Wait for shutter to open
+                                // Wait for shutter to close
                                 if (!DomeShutterWait(ShutterState.Closed))
                                     return;
+
+                                DomeStabliisationWait();
+                            }
+                            else // The shutter is currently closing and the test is to close it, so wait for it to close and then open it
+                            {
+                                SetAction("Waiting for shutter to close before opening ready for close test");
+                                LogDebug(testName, "Waiting for shutter to close before opening ready for close test");
+
+                                // Wait for shutter to close
+                                if (!DomeShutterWait(ShutterState.Closed))
+                                    return;
+
+                                LogDebug(testName, "Opening shutter ready for close test");
+                                SetAction("Opening shutter ready for close test");
+                                LogCallToDriver(testName, "About to call OpenShutter method");
+
+                                // Then open it
+                                domeDevice.OpenShutter();
+
+                                if (!DomeShutterWait(ShutterState.Open))
+                                    return;
+
                                 DomeStabliisationWait();
                             }
                             break;
+
+                        case ShutterState.Error: // The shutter is in an error state
+                            LogIssue("DomeShutterTest", $"Shutter state is Error: {lShutterState}");
+                            throw new ASCOM.InvalidOperationException($"Shutter state is Error, cannot continue with {testName} test");
 
                         default:
                             LogIssue("DomeShutterTest", $"Unexpected shutter status: {lShutterState}");
                             break;
                     }
 
-                    // Now test that we can get to the required state
-                    switch (requiredFinalShutterState) // Test that we can close the shutter
+                    // The shutter is now in the correct state to perform the test so undertake a detailed test that we can open or close the shutter
+                    switch (requiredFinalShutterState)
                     {
                         case ShutterState.Closed:
                             // Shutter is now open so close it
@@ -1654,7 +1673,7 @@ namespace ConformU
                             break;
                     }
                 }
-                else
+                else // Cannot read the shutter status so just issue the command and see if it generates an error
                 {
                     LogDebug(testName, "Can't read shutter status!");
                     if (requiredFinalShutterState == ShutterState.Closed)
@@ -1676,17 +1695,21 @@ namespace ConformU
 
                 ClearStatus();
             }
-            else
+            else // Shutter movement is not allowed so just log that the test was bypassed
                 LogTestAndMessage("DomeSafety", "Open shutter check box is unchecked so shutter test bypassed");
         }
 
+        /// <summary>
+        /// Waits for the dome shutter to reach the required state, or until a timeout occurs.
+        /// </summary>
+        /// <param name="requiredStatus">The desired shutter state to wait for.</param>
+        /// <returns>True if the shutter reached the required state within the timeout period; otherwise, false.</returns>
         private bool DomeShutterWait(ShutterState requiredStatus)
         {
             DateTime lStartTime;
-            // Wait for shutter to reach required stats or user presses stop or timeout occurs
-            // Returns true if required state is reached
             bool returnValue = false;
             lStartTime = DateTime.Now;
+
             try
             {
                 LogCallToDriver("DomeShutterWait", "About to get ShutterStatus property multiple times");
@@ -1846,6 +1869,7 @@ namespace ConformU
             LogCallToDriver(testName, "About to call AbortSlew method");
             domeDevice.AbortSlew();
         }
+
         #endregion
 
     }
