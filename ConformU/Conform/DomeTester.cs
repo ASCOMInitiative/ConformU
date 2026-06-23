@@ -4,6 +4,7 @@ using ASCOM.Com.DriverAccess;
 using ASCOM.Common;
 using ASCOM.Common.DeviceInterfaces;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -52,6 +53,9 @@ namespace ConformU
         private readonly Settings settings;
         private readonly ConformLogger logger;
 
+        private readonly Dictionary<string, bool> domeTests;
+
+
         private enum DomeInterfaceMember
         {
             // Properties
@@ -97,6 +101,7 @@ namespace ConformU
         {
             settings = conformConfiguration.Settings;
             cancellationToken = conformCancellationToken;
+            domeTests = settings.DomeTests;
             this.logger = logger;
         }
 
@@ -413,31 +418,94 @@ namespace ConformU
 
         public override void CheckMethods()
         {
-            DomeOptionalTest(DomeInterfaceMember.SlewToAltitude, MemberType.Method, "SlewToAltitude");
+            if (domeTests[SLEW_TO_ALTITUDE])
+            {
+                DomeOptionalTest(DomeInterfaceMember.SlewToAltitude, MemberType.Method, "SlewToAltitude");
+            }
+            else
+            {
+                LogInfo(SLEW_TO_ALTITUDE, "Tests skipped");
+            }
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeOptionalTest(DomeInterfaceMember.SlewToAzimuth, MemberType.Method, "SlewToAzimuth");
+            if (domeTests[SLEW_TO_AZIMUTH])
+            {
+                DomeOptionalTest(DomeInterfaceMember.SlewToAzimuth, MemberType.Method, "SlewToAzimuth");
+            }
+            else
+            {
+                LogInfo(SLEW_TO_AZIMUTH, "Tests skipped");
+            }
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeMandatoryTest(DomeInterfaceMember.AbortSlew, "AbortSlew");
+            if (domeTests[ABORT_SLEW])
+            {
+                DomeMandatoryTest(DomeInterfaceMember.AbortSlew, "AbortSlew");
+            }
+            else
+            {
+                LogInfo(ABORT_SLEW, "Tests skipped");
+            }
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeOptionalTest(DomeInterfaceMember.SyncToAzimuth, MemberType.Method, "SyncToAzimuth");
+            if (domeTests[SYNC_TO_AZIMUTH])
+            {
+                DomeOptionalTest(DomeInterfaceMember.SyncToAzimuth, MemberType.Method, "SyncToAzimuth");
+            }
+            else
+            {
+                LogInfo(SYNC_TO_AZIMUTH, "Tests skipped");
+            }
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeOptionalTest(DomeInterfaceMember.CloseShutter, MemberType.Method, "CloseShutter");
+            if (domeTests[CLOSE_SHUTTER])
+            {
+                DomeOptionalTest(DomeInterfaceMember.CloseShutter, MemberType.Method, "CloseShutter");
+            }
+            else
+            {
+                LogInfo(CLOSE_SHUTTER, "Tests skipped");
+            }
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeOptionalTest(DomeInterfaceMember.OpenShutter, MemberType.Method, "OpenShutter");
+            if (domeTests[OPEN_SHUTTER])
+            {
+                DomeOptionalTest(DomeInterfaceMember.OpenShutter, MemberType.Method, "OpenShutter");
+            }
+            else
+            {
+                LogInfo(OPEN_SHUTTER, "Tests skipped");
+            }
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeOptionalTest(DomeInterfaceMember.FindHome, MemberType.Method, "FindHome");
+            if (domeTests[FIND_HOME])
+            {
+                DomeOptionalTest(DomeInterfaceMember.FindHome, MemberType.Method, "FindHome");
+            }
+            else
+            {
+                LogInfo(FIND_HOME, "Tests skipped");
+            }
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeOptionalTest(DomeInterfaceMember.Park, MemberType.Method, "Park");
+            if (domeTests[PARK])
+            {
+                DomeOptionalTest(DomeInterfaceMember.Park, MemberType.Method, "Park");
+            }
+            else
+            {
+                LogInfo(PARK, "Tests skipped");
+            } 
             if (cancellationToken.IsCancellationRequested) return;
 
-            DomeOptionalTest(DomeInterfaceMember.SetPark, MemberType.Method, "SetPark");
+            if (domeTests[SET_PARK])
+            {
+                DomeOptionalTest(DomeInterfaceMember.SetPark, MemberType.Method, "SetPark");
+            }
+            else
+            {
+                LogInfo(SET_PARK, "Tests skipped");
+            }
             if (cancellationToken.IsCancellationRequested) return; // SetPark must follow Park
         }
 
@@ -537,6 +605,33 @@ namespace ConformU
 
                 if (settings.AllowConnectedTrueAfterDisconnect)
                     LogConfigurationAlert("Connected is allowed to be true after disconnection.");
+
+                if (!domeTests[ABORT_SLEW])
+                    LogConfigurationAlert("AbortSlew tests were omitted due to Conform configuration.");
+
+                if (!domeTests[CLOSE_SHUTTER])
+                    LogConfigurationAlert("CloseShutter tests were omitted due to Conform configuration.");
+
+                if (!domeTests[FIND_HOME])
+                    LogConfigurationAlert("FindHome tests were omitted due to Conform configuration.");
+
+                if (!domeTests[OPEN_SHUTTER])
+                    LogConfigurationAlert("OpenShutter tests were omitted due to Conform configuration.");
+
+                if (!domeTests[PARK])
+                    LogConfigurationAlert("Park tests were omitted due to Conform configuration.");
+
+                if (!domeTests[SET_PARK])
+                    LogConfigurationAlert("SetPark tests were omitted due to Conform configuration.");
+
+                if (!domeTests[SLEW_TO_ALTITUDE])
+                    LogConfigurationAlert("SlewToAltitude tests were omitted due to Conform configuration.");
+
+                if (!domeTests[SLEW_TO_AZIMUTH])
+                    LogConfigurationAlert("SlewToAzimuth tests were omitted due to Conform configuration.");
+
+                if (!domeTests[SYNC_TO_AZIMUTH])
+                    LogConfigurationAlert("SyncToAzimuth tests were omitted due to Conform configuration.");
             }
             catch (Exception ex)
             {
