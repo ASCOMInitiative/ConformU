@@ -1622,28 +1622,60 @@ namespace ConformU
                     // The shutter is now in the correct state so undertake a detailed test that opening or closing the shutter works as expected.
                     switch (requiredFinalShutterState)
                     {
-                        case ShutterState.Closed: 
+                        case ShutterState.Closed:
                             // STEP 1 - Start the shutter close process
                             SetAction("Closing shutter");
                             LogCallToDriver(testName, "About to call CloseShutter method");
                             Stopwatch sw = Stopwatch.StartNew(); // Time the CloseShutter call
                             TimeMethod(testName, () => domeDevice.CloseShutter(), TargetTime.Standard);
                             sw.Stop(); // Stop the stopwatch to record the call duration
-                           
+
                             // Step 2 - Validate the shutter state immediately after the call to CloseShutter
                             LogCallToDriver(testName, "About to call ShutterStatus property");
                             currentShutterState = domeDevice.ShutterStatus; // Check the shutter status immediately after the call
-
                             switch (currentShutterState)
                             {
-                                case ShutterState.Closing: // Asynchronous operation - Expected outcome, no action required
-                                    break;
+                                case ShutterState.Closing: // Asynchronous operation - wait for the shutter to close and validate that it has closed successfully
+                                   // Validate that Slewing is true for IDomeV3 and later devices.
+                                    if (GetInterfaceVersion() >= 3)
+                                    {
+                                        if (domeDevice.Slewing)
+                                        {
+                                            LogOk(testName, "Slewing is true as expected.");
+                                        }
+                                        else
+                                        {
+                                            LogIssue(testName, "Slewing is false, it must be true when any part of the dome is moving, including on return from CloseShutter.");
+                                            LogInfo(testName, "Please note that synchronous operation is not supported in IDomeV3 and later devices.");
+                                        }
+                                    }
+
+                                    SetAction("Waiting for shutter to close");
+                                    LogDebug(testName, "Waiting for shutter to close");
+                                    if (!DomeShutterWait(ShutterState.Closed))
+                                    {
+                                        LogCallToDriver(testName, "About to get ShutterStatus property");
+                                        currentShutterState = domeDevice.ShutterStatus;
+                                        LogIssue(testName, $"Unable to close shutter - ShutterStatus: {currentShutterState}");
+                                        return;
+                                    }
+                                    else
+                                        LogOk(testName, "The shutter closed asynchronously"); break;
 
                                 case ShutterState.Closed: // Synchronous operation
-                                    if (sw.Elapsed.TotalSeconds < DOME_SYNCHRONOUS_SHUTTER_TEST_TIME) // The close happened very quickly so alert the user
+                                    if (GetInterfaceVersion() >= 3) // IDomeV3 and later
                                     {
-                                        LogInfo(testName, $"The shutter state, immediately after calling CloseShutter was Closed but CloseShutter only took {sw.Elapsed.TotalSeconds:0.0} seconds, which is very quick.");
-                                        LogInfo(testName, $"Please check to make sure that the device is behaving as you expect.");
+                                        LogIssue(testName, $"The shutter closed synchronously and returned ShutterState.Closed immediately after CloseShutter returned.");
+                                        LogInfo(testName, $"The device interface version is {GetInterfaceVersion}, CloseShutter must operate asynchronously in IDomeV3 and later devices.");
+                                    }
+                                    else // IDomeV2 and earlier
+                                    {
+                                        LogOk(testName, $"The shutter closed synchronously");
+                                        if (sw.Elapsed.TotalSeconds < DOME_SYNCHRONOUS_SHUTTER_TEST_TIME) // The close happened very quickly so alert the user
+                                        {
+                                            LogInfo(testName, $"The shutter state, immediately after calling CloseShutter was Closed but CloseShutter only took {sw.Elapsed.TotalSeconds:0.0} seconds, which is very quick!");
+                                            LogInfo(testName, $"Please check to make sure that the device is behaving as you expect.");
+                                        }
                                     }
                                     break;
 
@@ -1652,29 +1684,15 @@ namespace ConformU
                                     break;
 
                                 default: // An inappropriate response so log an issue and provide information about what is expected
-                                    LogIssue(testName, $"The shutter state must be Closing or Closed or Error after a call to CloseShutter, however, the returned state was: {currentShutterState}.");
+                                    LogIssue(testName, $"The shutter state must be Closing or Error after a call to CloseShutter, however, the returned state was: {currentShutterState}.");
                                     LogInfo(testName, $"Devices that operate asynchronously must set ShutterStatus to Closing before returning from the CloseShutter method i.e. before any mechanical action has started.");
                                     LogInfo(testName, $"This is because ShutterStatus is acting as the CloseShutter operation's completion variable and clients rely on it to inform them of the operation's progress.");
                                     LogInfo(testName, $"The completion variable enables the client to determine whether the operation is still underway, whether it has completed or whether it errored,");
                                     break;
                             }
-
-                            // SETP 3 - Wait for the shutter to close and validate that it has closed successfully
-                            SetAction("Waiting for shutter to close");
-                            LogDebug(testName, "Waiting for shutter to close");
-                            if (!DomeShutterWait(ShutterState.Closed))
-                            {
-                                LogCallToDriver(testName, "About to get ShutterStatus property");
-                                currentShutterState = domeDevice.ShutterStatus;
-                                LogIssue(testName, $"Unable to close shutter - ShutterStatus: {currentShutterState}");
-                                return;
-                            }
-                            else
-                                LogOk(testName, "Shutter closed successfully");
-
                             DomeStabliisationWait();
 
-                            // STEP 4 - Open the shutter for asynchronous test
+                            // STEP 3 - Open the shutter for asynchronous test
                             SetAction("Opening shutter for async test...");
                             LogCallToDriver(testName, "About to call OpenShutter method");
                             domeDevice.OpenShutter();
@@ -1692,10 +1710,10 @@ namespace ConformU
                                 LogOk(testName, "Shutter re-opened successfully for asynchronous close test");
                             DomeStabliisationWait();
 
-                            // STEP 5 - Close the shutter asynchronously
+                            // STEP 4 - Close the shutter asynchronously
                             SetAction("Closing shutter asynchronously...");
                             LogCallToDriver(testName, "About to call CloseShutter method asynchronously");
-                       
+
                             LogDebug(testName, "Starting CloseShutter async method task");
                             Task closeShutterTask = Task.Run(() =>  // Create a task to close the shutter asynchronously
                             {
@@ -1703,11 +1721,11 @@ namespace ConformU
                             }, cancellationToken);
                             LogDebug(testName, "Async close shutter Task running, waiting for completion");
 
-                            // STEP 6 - Wait for the asynchronous close shutter task to complete or timeout
+                            // STEP 5 - Wait for the asynchronous close shutter task to complete or timeout
                             closeShutterTask.Wait(settings.DomeShutterMovementTimeout * 1000); // Wait for the task to complete or timeout
                             LogDebug(testName, $"Async close shutter Task completed - Status: {closeShutterTask.Status}");
 
-                            // STEP 7 - Log the outcome of the asynchronous close shutter task
+                            // STEP 6 - Log the outcome of the asynchronous close shutter task
                             switch (closeShutterTask.Status)
                             {
                                 case TaskStatus.RanToCompletion:
@@ -1763,7 +1781,21 @@ namespace ConformU
                                     break;
                             }
 
-                            // STEP 3 - Wait for the shutter to open and validate that it has opened successfully
+                            // STEP 3 - Validate that Slewing is true for IDomeV3 and later devices.
+                            if (GetInterfaceVersion() >= 3)
+                            {
+                                if (domeDevice.Slewing)
+                                {
+                                    LogOk(testName, "Slewing is true as expected.");
+                                }
+                                else
+                                {
+                                    LogIssue(testName, "Slewing is false, it must be true when any part of the dome is moving, including on return from OpenShutter.");
+                                    LogInfo(testName, "Please note that synchronous operation is not supported in IDomeV3 and later devices.");
+                                }
+                            }
+
+                            // STEP 4 - Wait for the shutter to open and validate that it has opened successfully
                             SetAction("Waiting for shutter to open");
                             LogDebug(testName, "Waiting for shutter to open");
                             if (!DomeShutterWait(ShutterState.Open))
@@ -1777,7 +1809,7 @@ namespace ConformU
                                 LogOk(testName, "Shutter opened successfully");
                             DomeStabliisationWait();
 
-                            // STEP 4 - Close the shutter for asynchronous test
+                            // STEP 5 - Close the shutter for asynchronous test
                             SetAction("Closing shutter for async test...");
                             LogCallToDriver(testName, "About to call CloseShutter method");
                             domeDevice.CloseShutter();
@@ -1796,7 +1828,7 @@ namespace ConformU
                                 LogOk(testName, "Shutter re-closed successfully for asynchronous open test");
                             DomeStabliisationWait();
 
-                            // STEP 5 - Open the shutter asynchronously
+                            // STEP 6 - Open the shutter asynchronously
                             SetAction("Opening shutter asynchronously...");
                             LogCallToDriver(testName, "About to call OpenShutter method asynchronously");
 
@@ -1807,11 +1839,11 @@ namespace ConformU
                             }, cancellationToken);
                             LogDebug(testName, "Async open shutter Task running, waiting for completion");
 
-                            // STEP 6 - Wait for the asynchronous open shutter task to complete or timeout
+                            // STEP 7 - Wait for the asynchronous open shutter task to complete or timeout
                             openShutterTask.Wait(settings.DomeShutterMovementTimeout * 1000); // Wait for the task to complete or timeout
                             LogDebug(testName, $"Async open shutter Task completed - Status: {openShutterTask.Status}");
 
-                            // STEP 7 - Log the outcome of the asynchronous open shutter task
+                            // STEP 8 - Log the outcome of the asynchronous open shutter task
                             switch (openShutterTask.Status)
                             {
                                 case TaskStatus.RanToCompletion:
