@@ -1834,24 +1834,26 @@ namespace ConformU
                 return true;
             }
             else
-                LogOk(testName, $"The shutter {closed} asynchronously"); return false;
-        }
+                LogOk(testName, $"The shutter {closed} asynchronously");
 
-        private void HandleSynchronousShutterMovement(string testName, string closeShutter, string closed, string shutterStateClosed, Stopwatch sw, ShutterState currentShutterState)
-        {
             // Validate that Slewing is false for IDomeV3 and later devices.
             if (GetInterfaceVersion() >= 3)
             {
                 if (!domeDevice.Slewing)
                 {
-                    LogOk(testName, "Slewing is false as expected after a synchronous shutter movement.");
+                    LogOk(testName, "Slewing is false as expected after a asynchronous shutter movement.");
                 }
                 else
                 {
-                    LogIssue(testName, $"Slewing is true, it's state does not match the state reported by ShutterStatus: {currentShutterState}.");
+                    LogIssue(testName, $"Slewing is true, it's state does not match the state reported by ShutterStatus: {requiredShutterState}.");
                 }
             }
 
+            return false;
+        }
+
+        private void HandleSynchronousShutterMovement(string testName, string closeShutter, string closed, string shutterStateClosed, Stopwatch sw, ShutterState currentShutterState)
+        {
             if (GetInterfaceVersion() >= 3 && sw.Elapsed.TotalSeconds <= Globals.STANDARD_TARGET_RESPONSE_TIME) // IDomeV3 and later - within the standard response time
             {
                 LogOk(testName, $"The shutter {closed} synchronously within the standard response time ({Globals.STANDARD_TARGET_RESPONSE_TIME:0.0} seconds).");
@@ -1868,6 +1870,19 @@ namespace ConformU
                 {
                     LogInfo(testName, $"The shutter state, immediately after calling {closeShutter} was {closed} but {closeShutter} only took {sw.Elapsed.TotalSeconds:0.0} seconds, which is very quick!");
                     LogInfo(testName, $"Please check to make sure that the device is behaving as you expect.");
+                }
+            }
+
+            // Validate that Slewing is false for IDomeV3 and later devices.
+            if (GetInterfaceVersion() >= 3)
+            {
+                if (!domeDevice.Slewing)
+                {
+                    LogOk(testName, "Slewing is false as expected after a synchronous shutter movement.");
+                }
+                else
+                {
+                    LogIssue(testName, $"Slewing is true, it's state does not match the state reported by ShutterStatus: {currentShutterState}.");
                 }
             }
         }
