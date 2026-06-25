@@ -1640,7 +1640,8 @@ namespace ConformU
                         currentShutterState = domeDevice.ShutterStatus; // Check the shutter status immediately after the call
                         switch (currentShutterState)
                         {
-                            case ShutterState.Closing: // Asynchronous operation - wait for the shutter to close and validate that it has closed successfully
+                            // Asynchronous operation - wait for the shutter to close and validate that it has closed successfully
+                            case ShutterState.Closing:
                                                        // Validate that Slewing is true for IDomeV3 and later devices.
                                 if (GetInterfaceVersion() >= 3)
                                 {
@@ -1667,7 +1668,8 @@ namespace ConformU
                                 else
                                     LogOk(testName, "The shutter closed asynchronously"); break;
 
-                            case ShutterState.Closed: // Synchronous operation
+                            // Synchronous operation
+                            case ShutterState.Closed:
                                 if (GetInterfaceVersion() >= 3 && sw.Elapsed.TotalSeconds <= Globals.STANDARD_TARGET_RESPONSE_TIME) // IDomeV3 and later - within the standard response time
                                 {
                                     LogOk(testName, $"The shutter closed synchronously within the standard response time ({Globals.STANDARD_TARGET_RESPONSE_TIME:0.0} seconds).");
@@ -1688,15 +1690,17 @@ namespace ConformU
                                 }
                                 break;
 
-                            case ShutterState.Error: // Something went wrong
+                            // Something went wrong
+                            case ShutterState.Error:
                                 LogIssue(testName, $"The device reported an error state immediately after calling CloseShutter: {currentShutterState}.");
                                 LogInfo(testName, $"Further {testName} testing abandoned.");
                                 return;
 
-                            default: // An inappropriate response so log an issue and provide information about what is expected
+                            // An inappropriate response so log an issue and provide information about what is expected
+                            default:
                                 LogIssue(testName, $"The shutter state must be Closing or Error after a call to CloseShutter, however, the returned state was: {currentShutterState}.");
                                 LogInfo(testName, $"Devices that operate asynchronously must set ShutterStatus to Closing before returning from the CloseShutter method i.e. before any mechanical action has started.");
-                                LogInfo(testName, $"This is because ShutterStatus is acting as the CloseShutter operation's completion variable and clients rely on it to inform them of the operation's progress.");
+                                LogInfo(testName, $"This is because ShutterStatus acts as the CloseShutter operation's completion variable and clients rely on it to inform them of the operation's progress.");
                                 LogInfo(testName, $"The completion variable enables the client to determine whether the operation is still underway, whether it has completed or whether it errored,");
                                 LogInfo(testName, $"Further {testName} testing abandoned.");
                                 return;
@@ -1769,8 +1773,9 @@ namespace ConformU
 
                         switch (currentShutterState)
                         {
-                            case ShutterState.Opening: // Asynchronous operation - wait for the shutter to open and validate that it has opened successfully
-                                                       // Validate that Slewing is true for IDomeV3 and later devices.
+                            // Asynchronous operation - wait for the shutter to open and validate that it has opened successfully
+                            case ShutterState.Opening:
+                                // Validate that Slewing is true for IDomeV3 and later devices.
                                 if (GetInterfaceVersion() >= 3)
                                 {
                                     if (domeDevice.Slewing)
@@ -1797,7 +1802,8 @@ namespace ConformU
                                     LogOk(testName, "The shutter opened asynchronously");
                                 break;
 
-                            case ShutterState.Open: // Synchronous operation
+                            // Synchronous operation
+                            case ShutterState.Open:
                                 if (GetInterfaceVersion() >= 3 && sw.Elapsed.TotalSeconds <= Globals.STANDARD_TARGET_RESPONSE_TIME) // IDomeV3 and later - within the standard response time
                                 {
                                     LogOk(testName, $"The shutter opened synchronously within the standard response time ({Globals.STANDARD_TARGET_RESPONSE_TIME:0.0} seconds).");
@@ -1818,15 +1824,17 @@ namespace ConformU
                                 }
                                 break;
 
-                            case ShutterState.Error: // Something went wrong
+                            // Something went wrong
+                            case ShutterState.Error:
                                 LogIssue(testName, $"The device reported an error state immediately after calling OpenShutter: {currentShutterState}.");
                                 LogInfo(testName, $"Further {testName} testing abandoned.");
                                 return;
 
-                            default: // An inappropriate response so log an issue and provide information about what is expected
+                            // An inappropriate response so log an issue and provide information about what is expected
+                            default:
                                 LogIssue(testName, $"The shutter state must be Opening or Error after a call to OpenShutter, however, the returned state was: {currentShutterState}.");
                                 LogInfo(testName, $"Devices that operate asynchronously must set ShutterStatus to Opening before returning from the OpenShutter method i.e. before any mechanical action has started.");
-                                LogInfo(testName, $"This is because ShutterStatus is acting as the OpenShutter operation's completion variable and clients rely on it to inform them of the operation's progress.");
+                                LogInfo(testName, $"This is because ShutterStatus acts as the OpenShutter operation's completion variable and clients rely on it to inform them of the operation's progress.");
                                 LogInfo(testName, $"The completion variable enables the client to determine whether the operation is still underway, whether it has completed or whether it errored,");
                                 LogInfo(testName, $"Further {testName} testing abandoned.");
                                 return;
