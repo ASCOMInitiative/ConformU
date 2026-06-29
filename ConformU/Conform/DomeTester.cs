@@ -1489,7 +1489,10 @@ namespace ConformU
         /// <param name="testName">The name of the test.</param>
         /// <exception cref="ASCOM.InvalidOperationException"></exception>
         /// <remarks>
-        /// This is the top level method for testing the shutter. The mechanic is broken into several methods to ensure that each part of the test process is only defined once and is used for both OpenShutter and CloseShutter tests. 
+        /// This is the top level method for testing the shutter. The mechanic is broken into several methods to ensure that each part of the test process is only defined once and is used for both OpenShutter and CloseShutter tests.
+        /// 
+        /// NOTE: ShutterStatus is used as the completion property for ShutterOpoen and ShutterClose to maintain backward compatibility with historic usage patters since the dome interface was
+        /// introduced in 2003. Use of Slewing would be preferable but sadly the "horse has bolted" on this one!
         /// </remarks>
         private void DomeShutterTest(ShutterState requiredShutterState, string testName)
         {
@@ -1497,7 +1500,7 @@ namespace ConformU
             string oppositeShutterCommand, close, open, closing, opening, closed, opened, shutterStateClosed;
             Action openShutterAction, closeShutterAction;
 
-            // Assign variable values depending on whether we are testing ShutterOpen or ShutterClose
+            // Assign variable values depending on whether we are testing ShutterOpen or ShutterClose. This mechanic is to enable the same code to be used for testing both OpenShutter and CloseShutter.
             switch (requiredShutterState)
             {
                 case ShutterState.Closed:  // Dome.CloseShutter() is being tested
@@ -1870,6 +1873,9 @@ namespace ConformU
         /// <param name="close"></param>
         /// <param name="closed"></param>
         /// <returns>True if tests are successful or false if there is a fatal test failure.</returns>
+        /// <remarks>
+        /// NOTE ShutterStatus is used as the completion property rather than Slewing to ensure backward compatibility with the normal usage pattern since IDome was introduced in 2003.
+        /// </remarks>
         private bool AsynchronousShutterTestProcess(string testName, ShutterState requiredShutterState, string close, string closed)
         {
             // Validate that Slewing is true for IDomeV3 and later devices.
@@ -1912,6 +1918,17 @@ namespace ConformU
             return true;
         }
 
+        /// <summary>
+        /// test a synchronous shutter operation
+        /// </summary>
+        /// <param name="testName">Name of the test</param>
+        /// <param name="closed">Indicates whether the shutter is closed</param>
+        /// <param name="shutterStateClosed">The state of the shutter when closed</param>
+        /// <param name="sw">Stopwatch instance for measuring elapsed time</param>
+        /// <param name="currentShutterState">The current state of the shutter</param>
+        /// <remarks>
+        /// NOTE ShutterStatus is used as the completion property rather than Slewing to ensure backward compatibility with the normal usage pattern since IDome was introduced in 2003.
+        /// </remarks>
         private void SynchronousShutterTestProcess(string testName, string closed, string shutterStateClosed, Stopwatch sw, ShutterState currentShutterState)
         {
             if (GetInterfaceVersion() >= 3 && sw.Elapsed.TotalSeconds <= Globals.STANDARD_TARGET_RESPONSE_TIME) // IDomeV3 and later - within the standard response time
