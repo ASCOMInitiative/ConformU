@@ -7,14 +7,28 @@
 <h4 style="margin-top: 20px">Conform Universal Version @assemblyVersion</h4>
 <p>Conform Universal - Copyright © Peter Simpson (ASCOM Initiative) 2021-@DateTime.Now.Year</p>
 
-<p style="margin-top: 20px">For support please post on the <a href="https://ascomtalk.groups.io/g/Developer" target="_blank">ASCOM Developer Support Forum</a>
+<p style="margin-top: 20px">
+    For support please post on the <a href="https://ascomtalk.groups.io/g/Developer" target="_blank">ASCOM Developer Support Forum</a>
     or create an issue on the <a href="https://github.com/ASCOMInitiative/ConformU/issues" target="_blank">Conform Universal GitHub repository</a>.
 </p>
 
 <h4 style="margin-top: 40px">ASCOM Interface Conformance</h4>
 <p>
-    Conform Universal is a client application for both Windows COM drivers and Alpaca devices that assesses their behaviour for conformance with requirements given in the relevant ASCOM Interface specification.
-    Responses to both expected (happy path) and unexpected (unhappy path) inputs are assessed.
+    Conform Universal is the real-world reference master for assessing COM and Alpaca device conformance to required ASCOM interface behaviour. It also provides information on a wide range of non-conforming behaviour but cannot possibly detect every
+    way in which drivers / Alpaca devices might deviate from the specification.
+
+</p>
+<p>
+    For example, all ASCOM asynchronous methods require that the completion property e.g. ShutterStatus for a dome shutter, is set correctly before the initiating method returns control to the client.
+    Conform has logic to check for this but there remains a possibility that Conform may not see deviations from expected behaviour due to the relative speeds of the client and device, software implementation choices and network latency.
+</p>
+<p>
+    <b>The upshot of this is that Conform may not find every single implementation issue and that some issues may only become apparent in real-world use.</b>
+</p>
+<p>
+    Driver / Alpaca device authors can not rely on a clean Conform run "guaranteeing" that their device is fully compliant. When reputable clients report issues they should be fully investigated and addressed. 
+    If necessary, advice / clarification can be sought from the ASCOM team on
+    the <a href="https://ascomtalk.groups.io/g/Developer" target="_blank">ASCOM Developer Support Forum</a>.
 </p>
 <h5>How to check ASCOM Interface Conformance</h5>
 <p>
@@ -28,9 +42,9 @@
     of "quick return" operation state calls.
 </p>
 <p>
-    To provide a benchmark for assessing timing performance, every device method and property has been assigned to one of the three target response time groups shown below. 
+    To provide a benchmark for assessing timing performance, every device method and property has been assigned to one of the three target response time groups shown below.
     It's important to note that target response times are intended to apply just to the device being assessed, at its ASCOM interface, when measured under "ideal" conditions.
-    This means that assessments should be made under favourable conditions, ensuring that response times are dominated by the device's intrinsic performance, 
+    This means that assessments should be made under favourable conditions, ensuring that response times are dominated by the device's intrinsic performance,
     without undue contributions from slow clients, under-powered PCs and servers or slow networks.
 </p>
 <p>
@@ -41,8 +55,8 @@
 <h5>Target Times</h5>
 <p>
     Unlike the requirements given in ASCOM interface definitions, which must be met, performance targets are considered "best practice" rather than being hard requirements.
-    Measured response times are feedback for the developer, to help determine whether their chosen hardware is appropriate for the task. For example, failure to meet one or two target times, 
-    so long as measured values are close to target, would likely be considered acceptable. However, failure to meet several target times or missing by larger margins 
+    Measured response times are feedback for the developer, to help determine whether their chosen hardware is appropriate for the task. For example, failure to meet one or two target times,
+    so long as measured values are close to target, would likely be considered acceptable. However, failure to meet several target times or missing by larger margins
     would suggest that more powerful hardware / more efficient software is required.
 </p>
 <h5>Target Response Time Groups</h5>
@@ -71,7 +85,7 @@
     </table>
 </p>
 <p>
-    The timing report shows the interface member name, the time when measured, the member's response time, the response time group to which the call is assigned and 
+    The timing report shows the interface member name, the time when measured, the member's response time, the response time group to which the call is assigned and
     whether or not the call completed within the target time.
 </p>
 <p>
