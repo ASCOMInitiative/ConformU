@@ -130,8 +130,9 @@
                                         if (b <= 0x1F && b != 0x09 && b != 0x0A && b != 0x0D) // Check for < 31 but not 09 (TAB), 10 (LINEFEED) or 13 (CARRIAGE_RETURN), which are valid whitespace characters in JSON
                                             LogIssue(broadcastResponse, "DiscoveryDiagnostics", $"The character at position {i} in the discovery response is a control character: 0x{b:X2}. This is illegal in a JSON response.", COLUMN_OVERALL);
 
-                                        if (b == 0x20 || b == 0x09 || b == 0x0A || b == 0x0D) // Check for space, TAB, LINEFEED, or CARRIAGE_RETURN characters
-                                            LogInformation(broadcastResponse, "DiscoveryDiagnostics", $"Ignoring white space character 0x{b:X2} at position {i} in the discovery response. This is valid JSON, but its presence adds no further meaning.", COLUMN_OVERALL);
+                                        if (b == 0x09 || b == 0x0A || b == 0x0D) // Check for TAB, LINEFEED, or CARRIAGE_RETURN characters
+                                            LogInformation(broadcastResponse, "DiscoveryDiagnostics", $"Ignoring white space character 0x{b:X2} at position {i} in the discovery response. " +
+                                                "This is valid JSON, but it may cause issues for hand-coded parsers that only expect additional space characters.", COLUMN_OVERALL);
                                     }
 
                                     // Test for the presence of the AlpacaPort string in its expected casing
