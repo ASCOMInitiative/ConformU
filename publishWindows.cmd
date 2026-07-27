@@ -14,7 +14,7 @@ rem MSBuild "ConformU.sln" /p:Configuration=Debug /p:Platform="Any CPU" /t:Rebui
 rem echo *** Completed Build
 
 echo *** Publishing Windows ARM 64bit
-dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r win-arm64 --framework net10.0-windows --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=false -o ./publish/ConformUArm64/
+dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r win-arm64 --framework net10.0-windows --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true -o ./publish/ConformUArm64/
 echo *** Completed Windows ARM 64bit publish
 
 echo *** Publishing Windows Intel 64bit
