@@ -2,11 +2,9 @@
 @implements IDisposable
 @using System.Threading
 @using ASCOM.Common
-@using ConformU.Conform.DataClasses
 @using Semver;
 @using System.Security.Principal;
 @using System.Runtime.InteropServices
-@inject BrowserResizeService _listener
 @inject ConformLogger _conformLogger
 @inject ConformConfiguration _configuration
 @inject SessionState _conformState
@@ -26,16 +24,21 @@
 </div>
 
 <h4>Conform Log</h4>
-<RadzenTextArea Id="ConformLog" Style='font-family: "Lucida Console", "Courier New", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px' Name="_conformState.ScreenLog" @bind-Value=@_conformState.ConformLog Rows="@screenLogRows" Cols="250" ReadOnly=true />
-
-<div style="display :@statusVisible">
+<div style="height: calc(100vh - 17rem); min-height: 200px;margin-bottom:6px;">
+    <RadzenTextArea Id="ConformLog"
+                    Style='font-family: "Lucida Console", "Courier New", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px; width:100%; height:100%;'
+                    Name="_conformState.ScreenLog"
+                    @bind-Value=@_conformState.ConformLog
+                    Cols="250"
+                    ReadOnly=true />
+</div>
+<div style="padding-top:24px;margin-top:24px;display :@statusVisible">
     <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:20px; margin-right:20px; margin-top:8px" @bind-Value=@statusMessage />
 </div>
 
 @code {
     private string statusVisible = "initial";
     private bool disposedValue;
-    int screenLogRows = 10;
     object statusLockObject = new object();
     private string deviceDescription = "";
     string statusMessage = "";
@@ -166,7 +169,7 @@
     {
         try
         {
-            await ResizeLogWindow();
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
@@ -180,9 +183,9 @@
         if (firstRender)
         {
             // Subscribe to the OnResized event. This will do work when the browser is resized.
-            _listener.Init(JS);
-            _listener.OnResize += WindowResized;
-            await ResizeLogWindow();
+            //_listener.Init(JS);
+            //_listener.OnResize += WindowResized;
+            //await ResizeLogWindow();
 
             // Scroll the log window to the bottom of its contents.
             try
@@ -413,62 +416,7 @@
 
     async Task ResizeLogWindow()
     {
-        try
-        {
-            BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
-            BrowserWindowSize blazorProWindowSize = new();
-            blazorProWindowSize.Width = (int)browserWindowSize.Width;
-            blazorProWindowSize.Height = (int)browserWindowSize.Height;
-
-            //_conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
-            WindowResized(new object(), blazorProWindowSize);
-            //_conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
-        }
-        catch { }
-    }
-
-    // This method will be called when the window resizes.
-    // It is ONLY called when the user stops dragging the window's edge. (It is already throttled to protect your app from performance nightmares)
-    async void WindowResized(object _, BrowserWindowSize window)
-    {
-        try
-        {
-            // Get the browsers's width / height
-            // Find the current position of the Conform log text area in the viewport
-            BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ConformLog");
-            if (result is not null)
-            {
-                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 5;
-
-                // Hide the status field at small heights
-                if (window.Height < 600)
-                {
-                    statusVisible = "none";
-                    screenLogRows += 3;
-                }
-                else
-                {
-                    statusVisible = "initial";
-                }
-
-                string browser = "";
-                browser = await JS.InvokeAsync<string>(identifier: "IdentifyBrowser");
-
-                if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
-
-                //_conformLogger.LogMessage("Set_conformState.ScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, _conformState.ScreenLogRows: {_conformState.ScreenLogRows}, Browser: {browser}");
-                await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
-            }
-
-            else
-            {
-                _conformLogger.LogMessage("screenLogRows", MessageLevel.Debug, $"BoundingClientRectangle is NULL - No action taken.");
-            }
-        }
-        catch
-        {
-            // _conformLogger.LogMessage("Set_conformState.ScreenLogRows", $"Exception: \r\n{ex}");
-        }
+        await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
     }
 
     #endregion
@@ -481,7 +429,6 @@
         {
             if (disposing)
             {
-                _listener.OnResize -= WindowResized;
                 _conformState.UiHasChanged -= OnUiHasChanged;
             }
 

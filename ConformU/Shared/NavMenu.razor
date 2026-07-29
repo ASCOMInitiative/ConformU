@@ -2,7 +2,6 @@
 @inject IJSRuntime JsRuntime
 @inject ConformConfiguration configuration
 @inject SessionState state
-@inject BrowserResizeService resizeListener
 @inject ConformLogger conformLogger
 @inject IJSRuntime JS
 @implements IDisposable
@@ -147,12 +146,6 @@ else
 
     protected override void OnAfterRender(bool firstRender)
     {
-
-        if (firstRender)
-        {
-            // Subscribe to the OnResized event. This will do work when the browser is resized.
-            resizeListener.OnResize += WindowResized;
-        }
     }
 
     // This method will be called when the window resizes.
@@ -229,9 +222,7 @@ else
         {
             if (disposing)
             {
-                resizeListener.OnResize -= WindowResized;
                 state.UiHasChanged -= OnUiChanged;
-
             }
 
             disposedValue = true;

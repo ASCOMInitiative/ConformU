@@ -2,27 +2,31 @@
 
 @implements IDisposable
 @using System.Threading;
-@using System.Diagnostics
 
 @inject ConformLogger logger
 @inject ConformConfiguration configuration
 @inject SessionState conformState
-@inject BrowserResizeService listener
 @inject IJSRuntime JS
 @inject NotificationService notificationService
 
 <h2>Check Alpaca Protocol</h2>
 
 <div>
-    <RadzenButton Id="testButton" Click=@(() => StartCheckAlpacaProtocol()) Text="Check Protocol" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" IsBusy=@settings.OperationInProgress Disabled=@(configuration.Settings.DeviceTechnology!=DeviceTechnology.Alpaca) />
+    <RadzenButton Id="testButton" Click=@(() => StartCheckAlpacaProtocol()) Text="Check Protocol" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" IsBusy=@settings.OperationInProgress Disabled=@(configuration.Settings.DeviceTechnology != DeviceTechnology.Alpaca) />
     <RadzenButton Id="StopButton" Click=@(async () => await StopTest()) Text="Stop" Style="margin-bottom: 20px; margin-right: 40px; width: 150px" Disabled=@(!configuration.Settings.OperationInProgress) />
     <span style="white-space:nowrap">
         <RadzenLabel Text="Status:" Component="TESTSTATUS" Style="margin-right:2px;margin-top:0px; color:#0366d6;font-weight:bold" />
         <RadzenTextBox Name="TESTSTATUS" Placeholder="" @bind-Value=@statusText ReadOnly=true Style="width:600px;font-weight:bold;margin-right:40px;margin-bottom:10px" />
     </span>
 </div>
-<RadzenTextArea Id="ProtocolLog" Style='font-family: "Lucida Console", "Courier New", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px' Name="ProtocolLogName" @bind-Value=@conformState.ProtocolLog Rows="@screenLogRows" @bind-Cols=@screenLogColumns ReadOnly=true />
-
+<div style="height: calc(100vh - 12rem); min-height: 200px;">
+    <RadzenTextArea Id="ProtocolLog"
+                Style='font-family: "Lucida Console", "Courier New", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px; width:100%; height:100%;'
+                Name="ProtocolLogName"
+                @bind-Value=@conformState.ProtocolLog
+                Cols="250"
+                ReadOnly=true />
+</div>
 @code
 {
     private bool disposedValue;
@@ -36,8 +40,6 @@
     CancellationTokenSource applicationCancellationTokenSource;
     CancellationToken applicationCancellationToken;
 
-    int screenLogRows;
-    int screenLogColumns;
     string statusText;
     ConformU.Settings settings;
 
@@ -45,9 +47,8 @@
 
     protected override void OnInitialized()
     {
-        conformState.UiHasChanged += OnUiHasChanged;
         settings = configuration.Settings;
-    
+
         // Automatically start a check if an Alpaca device is selected and no test is already running
         if (settings.DeviceTechnology == DeviceTechnology.Alpaca && !settings.OperationInProgress)
             StartCheckAlpacaProtocol();
@@ -55,13 +56,6 @@
 
     protected override async void OnAfterRender(bool firstRender)
     {
-        if (firstRender)
-        {
-            // Subscribe to the OnResized event. This will do work when the browser is resized.
-            listener.Init(JS);
-            listener.OnResize += WindowResized;
-            await ResizeLogWindow();
-        }
     }
 
     #endregion
@@ -224,87 +218,6 @@
     }
 
     /// <summary>
-    /// Make the log window fit the browser size
-    ///    </summary>
-    /// <returns></returns>
-    async Task ResizeLogWindow()
-    {
-        try
-        {
-            BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>
-                ("GetBoundingWindowRect");
-            BrowserWindowSize blazorProWindowSize = new();
-            blazorProWindowSize.Width = (int)browserWindowSize.Width;
-            blazorProWindowSize.Height = (int)browserWindowSize.Height;
-
-            //logger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
-            WindowResized(new object(), blazorProWindowSize);
-            //logger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
-        }
-        catch
-        {
-            // ignored
-        }
-    }
-
-    // This method will be called when the window resizes.
-    // It is ONLY called when the user stops dragging the window's edge. (It is already throttled to protect your app from performance nightmares)
-    async void WindowResized(object _, BrowserWindowSize window)
-    {
-        try
-        {
-            // Get the browsers's width / height
-            // Find the current position of the Conform log text area in the viewport
-            BoundingClientRectangle result = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingClientRect", "ProtocolLog");
-            if (result is not null)
-            {
-                screenLogRows = Convert.ToInt32(((Convert.ToDouble(window.Height) - result.Top) / 18.0)) - 2;
-                //screenLogColumns = Convert.ToInt32(Convert.ToDouble(result.Width) / (Globals.IsSmall(window.Width, window.Height) ? 8.4 : 9.3));
-                screenLogColumns = Convert.ToInt32((Convert.ToDouble(result.Width) - 32.0) / (Globals.IsSmall(window.Width, window.Height) ? 8.4 : 8.482));
-                // Hide the status field at small heights
-                if (window.Height < 600)
-                {
-                    screenLogRows += 0;
-                }
-                else
-                {
-
-                }
-
-                string browser = "";
-                browser = await JS.InvokeAsync<string>(identifier: "IdentifyBrowser");
-
-                if (browser.Contains("Firefox", StringComparison.InvariantCultureIgnoreCase)) screenLogRows -= 1;
-
-
-                //logger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"Window width: {window.Width}, Window.height: {window.Height}, LogTop: {result.Top}, LogHeight: {result.Height}, ScreenLogRows: {screenLogRows}, Browser: {browser}");
-                await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
-            }
-
-            else
-            {
-                logger.LogMessage("SetScreenLogRows", MessageLevel.Debug, $"BoundingClientRectangle is NULL - No action taken.");
-            }
-        }
-        catch
-        {
-            // logger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
-        }
-    }
-
-    public async void OnUiHasChanged(object sender, EventArgs e)
-    {
-        try
-        {
-            await ResizeLogWindow();
-        }
-        catch (Exception ex)
-        {
-            logger.LogMessage("CheckAlpacaProtocol.OnUiHasChanged", MessageLevel.Error, $"Exception: {ex}.");
-        }
-    }
-
-    /// <summary>
     /// Event handler for messages returned from the tester
     /// </summary>
     /// <param name="source"></param>
@@ -356,8 +269,6 @@
         {
             if (disposing)
             {
-                listener.OnResize -= WindowResized;
-                conformState.UiHasChanged -= OnUiHasChanged;
             }
 
             disposedValue = true;
