@@ -10,7 +10,7 @@
 @*Title and settings reset button*@
 <div class="row">
     <h2>Settings</h2>
-    <RadzenButton Click=@(args => OnResetButtonClick()) Text="Reset to Defaults" Style="margin-bottom: 20px; position: absolute; right: 30px;" />
+    <RadzenButton Click=@(args => OnResetButtonClick()) Text="Reset to Defaults" Style="margin-bottom: 20px; position: absolute; right: 30px;border-radius:20px;" />
 </div>
 
 @*Status message*@
@@ -324,8 +324,8 @@
                     <h4 style="margin-top: 5px; color: #479cc8">Select the tests to perform.</h4>
 
                     <div class="row" style="margin-top:0px;">
-                        <RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(true)) Text="Check all" Style="margin-left: 20px; " />
-                        <RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(false)) Text="Uncheck all" Style="margin-left: 20px; " />
+                        <RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(true)) Text="Check all" Style="margin-left: 20px;border-radius:20px;" />
+                        <RadzenButton Click=@(args => OnSetTelescopeTestsButtonClick(false)) Text="Uncheck all" Style="margin-left: 20px;border-radius:20px;" />
                     </div>
 
                     <RadzenCheckBoxList @bind-Value=@telescopeTests
@@ -596,8 +596,8 @@
                 <RadzenCard Style="margin-left: 10px;padding-bottom:5px;margin-right: 10px;margin-bottom: 20px">
                     <h4 style="margin-top: 5px; color: #479cc8">Select the tests to perform.</h4>
                     <div class="row" style="margin-top:0px;">
-                        <RadzenButton Click=@(args => OnSetDomeTestsButtonClick(true)) Text="Check all" Style="margin-left: 20px; " />
-                        <RadzenButton Click=@(args => OnSetDomeTestsButtonClick(false)) Text="Uncheck all" Style="margin-left: 20px; " />
+                        <RadzenButton Click=@(args => OnSetDomeTestsButtonClick(true)) Text="Check all" Style="margin-left: 20px;border-radius:20px;" />
+                        <RadzenButton Click=@(args => OnSetDomeTestsButtonClick(false)) Text="Uncheck all" Style="margin-left: 20px;border-radius:20px;" />
                     </div>
 
                     <RadzenCheckBoxList @bind-Value=@domeTests

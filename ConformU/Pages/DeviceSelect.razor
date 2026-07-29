@@ -78,7 +78,7 @@
                 @* Alpaca rediscover button *@
                 <div class="row">
 
-                    <RadzenButton Style="width: 150px; margin-left: 20px; margin-right:20px"
+                    <RadzenButton Style="width: 150px; margin-left: 20px; margin-right:20px;border-radius:20px;"
                                   Text="Rediscover"
                                   Disabled=@(discoveryInProgress | !configuration.Settings.AlpacaConfiguration.DiscoveryEnabled | (selectedDeviceTypeString == DeviceTypes.Video.ToString()))
                                   Click=@(args => OnAlpacaSearchClick()) />
@@ -120,7 +120,7 @@
 
                 <div class="row">
 
-                    <RadzenButton Style="margin-top: 0px; width: 150px; margin-left: 20px; margin-right: 20px"
+                    <RadzenButton Style="margin-top: 0px; width: 150px; margin-left: 20px; margin-right: 20px;border-radius:20px;"
                                   Text="Select"
                                   Disabled="@(discoveryInProgress | selectedDeviceTypeString == DeviceTypes.Video.ToString())"
                                   Click=@(args => OnManualAlpacaDeviceSelect()) />

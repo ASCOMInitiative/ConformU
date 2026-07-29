@@ -53,7 +53,7 @@ else
 }
 
 <h4 style="margin-top:40px;">Check for updates</h4>
-<RadzenButton Id="CheckForUpdatesButton" Click=@(args => CheckForUpdates()) Text="Check Now" Style="margin-bottom: 10px; margin-right: 10px; width: 130px;" />
+<RadzenButton Id="CheckForUpdatesButton" Click=@(args => CheckForUpdates()) Text="Check Now" Style="margin-bottom: 10px; margin-right: 10px; width: 130px;border-radius:20px;" />
 
 <h5 style="margin-top:20px;">Progress</h5>
 <RadzenTextArea Id="UpdateLog" Style="line-height: 18px; padding-bottom: 0px" Name="UpdateLog" @bind-Value=@updateLogMessages Rows="20" Cols="150" ReadOnly=true />

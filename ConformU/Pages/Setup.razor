@@ -22,8 +22,8 @@
     {
         <div style="margin-top: 20px">
             <h4 style="margin-bottom: 20px">COM Driver Setup</h4>
-            <RadzenButton Click=@(args => SetupCom()) Text="Open Setup Dialogue" Style="width: 230px; margin-bottom:20px; margin-right:20px" Disabled=@configuration.Settings.OperationInProgress />
-            <RadzenButton Click=@(args => CancelSetup()) Text="Cancel Setup" Style="width: 230px;" Disabled=@(!configuration.Settings.OperationInProgress) />
+            <RadzenButton Click=@(args => SetupCom()) Text="Open Setup Dialogue" Style="width: 230px; margin-bottom:20px; margin-right:20px;border-radius:20px;" Disabled=@configuration.Settings.OperationInProgress />
+            <RadzenButton Click=@(args => CancelSetup()) Text="Cancel Setup" Style="width: 230px;border-radius:20px;" Disabled=@(!configuration.Settings.OperationInProgress) />
         </div>
     }
 
@@ -31,8 +31,8 @@
     {
         <div style="margin-top: 20px">
             <h4 style="margin-bottom: 20px">Alpaca Device Setup</h4>
-            <RadzenButton Click=@(args => SetupAlpacaMain()) Text="Main Setup Page" Style="width: 210px; margin-bottom:20px; margin-right: 20px" />
-            <RadzenButton Click=@(args => SetupAlpacaDevice()) Text="Device Setup Page" Style="width: 210px" />
+            <RadzenButton Click=@(args => SetupAlpacaMain()) Text="Main Setup Page" Style="width: 210px; margin-bottom:20px; margin-right: 20px;border-radius:20px;" />
+            <RadzenButton Click=@(args => SetupAlpacaDevice()) Text="Device Setup Page" Style="width: 210px;border-radius:20px;" />
         </div>
     }
 </div>
