@@ -134,6 +134,46 @@
             element.scrollTop = scrollTop;
         }
 
+        window.conformU = window.conformU || {};
+        window.conformU.autoSizeViewportElementState = window.conformU.autoSizeViewportElementState || {};
+
+        window.conformU.autoSizeViewportElement = (elementId, bottomOffset) => {
+            window.conformU.disposeAutoSizeViewportElement(elementId);
+
+            const element = document.getElementById(elementId);
+            if (!element) {
+                return;
+            }
+
+            const updateHeight = () => {
+                const rect = element.getBoundingClientRect();
+                const availableHeight = Math.max(0, Math.floor(window.innerHeight - rect.top - bottomOffset));
+                element.style.height = `${availableHeight}px`;
+            };
+
+            const resizeObserver = new ResizeObserver(updateHeight);
+            resizeObserver.observe(document.body);
+            window.addEventListener('resize', updateHeight);
+
+            updateHeight();
+
+            window.conformU.autoSizeViewportElementState[elementId] = {
+                resizeObserver: resizeObserver,
+                updateHeight: updateHeight
+            };
+        };
+
+        window.conformU.disposeAutoSizeViewportElement = (elementId) => {
+            const state = window.conformU.autoSizeViewportElementState[elementId];
+            if (!state) {
+                return;
+            }
+
+            window.removeEventListener('resize', state.updateHeight);
+            state.resizeObserver.disconnect();
+            delete window.conformU.autoSizeViewportElementState[elementId];
+        };
+
     </script>
 </body>
 </html>
