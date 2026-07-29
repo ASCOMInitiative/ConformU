@@ -17,10 +17,10 @@
 <div id="DiscoveryDiagnosticsPage" style="display:flex; flex-direction:column; min-height:320px;">
     <h2>Discovery Diagnostics</h2>
 
-    <div>
+    <div style="margin-bottom:12px;">
         <RadzenButton Id="discoverButton" Click=@(() => StartDiscoveryDiagnostics()) Text="Run Diagnostics" Style="margin-bottom: 20px; margin-right: 20px; width: 150px" IsBusy=@configuration.Settings.OperationInProgress />
-        <RadzenLabel Text="Diagnostic outcome:" Component="DIAGNOSTICSTATUS" Style="margin-left: 40px;margin-right:2px" />
-        <RadzenTextBox Name="DIAGNOSTICSTATUS" Placeholder="Diagnostic not run." @bind-Value=@statusText ReadOnly=true Style="width:500px;font-weight:bold;" />
+        <RadzenLabel Text="Diagnostic outcome:" Component="DIAGNOSTICSTATUS" Style="margin-left: 40px;margin-right:2px;" />
+        <RadzenTextBox Name="DIAGNOSTICSTATUS" Placeholder="Diagnostic not run." @bind-Value=@statusText ReadOnly=true Style="width:453px;font-weight:bold;" />
     </div>
     <div style="flex: 1 1 auto; min-height: 200px;margin-bottom:12px;">
         <RadzenTextArea Id="ConformLog"

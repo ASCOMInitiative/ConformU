@@ -134,10 +134,16 @@
             element.scrollTop = scrollTop;
         }
 
+        // Keep ConformU-specific helpers under one namespace on window so multiple pages can
+        // share the same logic without polluting the global scope with separate functions.
         window.conformU = window.conformU || {};
+
+        // Track one resize subscription/observer set per element ID so that each page can
+        // register and later clean up its own viewport sizing behaviour.
         window.conformU.autoSizeViewportElementState = window.conformU.autoSizeViewportElementState || {};
 
         window.conformU.autoSizeViewportElement = (elementId, bottomOffset) => {
+            // Remove any previous registration for this element before creating a new one.
             window.conformU.disposeAutoSizeViewportElement(elementId);
 
             const element = document.getElementById(elementId);
@@ -146,15 +152,25 @@
             }
 
             const updateHeight = () => {
+                // Measure where the element currently starts in the viewport. This means the
+                // computed height automatically reflects wrapped button rows or any other content
+                // above the element that changes height as the page width changes.
                 const rect = element.getBoundingClientRect();
+
+                // Fill the remaining viewport height, leaving a small bottom margin so the
+                // element does not sit directly against the browser edge.
                 const availableHeight = Math.max(0, Math.floor(window.innerHeight - rect.top - bottomOffset));
                 element.style.height = `${availableHeight}px`;
             };
 
+            // ResizeObserver catches layout changes that move the element vertically even when the
+            // browser window size itself has not changed. The resize event handles viewport size
+            // changes directly.
             const resizeObserver = new ResizeObserver(updateHeight);
             resizeObserver.observe(document.body);
             window.addEventListener('resize', updateHeight);
 
+            // Apply the height immediately so the page is correct on first render.
             updateHeight();
 
             window.conformU.autoSizeViewportElementState[elementId] = {
@@ -169,6 +185,8 @@
                 return;
             }
 
+            // Remove the observer and event handler when a page is disposed to avoid keeping
+            // unnecessary references alive after navigation.
             window.removeEventListener('resize', state.updateHeight);
             state.resizeObserver.disconnect();
             delete window.conformU.autoSizeViewportElementState[elementId];
