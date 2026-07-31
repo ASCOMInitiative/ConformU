@@ -117,7 +117,7 @@
         // Validate that the application SEMVER string is valid
         if (SemVersion.TryParse(Update.ConformuVersion, SemVersionStyles.AllowV, out SemVersion currentversion))
         {
-
+            // Validates OK, no action required
         }
         else
         {
@@ -179,14 +179,13 @@
         }
     }
 
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await JS.InvokeVoidAsync("conformU.autoSizeViewportElement", "IndexPage", 12);
 
-            // Scroll the log window to the bottom of its contents.
+            // Scroll the log window to the top of its contents.
             try
             {
                 await JS.InvokeVoidAsync("setScrollTop", "ConformLog", _conformState.ConformLogScrollTop.ToString());
@@ -196,12 +195,6 @@
                 Console.WriteLine($"OnInitialized-setScrollTop: {ex}");
             }
         }
-    }
-
-    [JSInvokable]
-    public static void PageAboutToBeReloaded()
-    {
-        Console.WriteLine("##### Page is being be refreshed #####");
     }
 
     /// <summary>
@@ -410,15 +403,6 @@
                     .ContinueWith(static t => _ = t.Exception, TaskContinuationOptions.OnlyOnFaulted);
         }
     }
-
-    #region Log textarea - resize support
-
-    async Task ResizeLogWindow()
-    {
-        await InvokeAsync(StateHasChanged); // Display the updated log on the screen - invoke required because this event handler method could be called by any thread
-    }
-
-    #endregion
 
     #region Dispose support
 

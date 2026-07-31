@@ -131,21 +131,9 @@ else
         try
         {
             BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
-            BrowserWindowSize blazorProWindowSize = new();
-            blazorProWindowSize.Width = (int)browserWindowSize.Width;
-            blazorProWindowSize.Height = (int)browserWindowSize.Height;
-            IsSmall = Globals.IsSmall(blazorProWindowSize.Width, blazorProWindowSize.Height);//window.Width < Globals.UI_SMALL_TRANSITION_SIZE;
-
-            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Width: {blazorProWindowSize.Width}, Height: {blazorProWindowSize.Height}");
-            //WindowResized(new object(), blazorProWindowSize);
-            //conformLogger.LogMessage("ResizeLogWindow", MessageLevel.Debug, $"Method completed");
+            IsSmall = Globals.IsSmall(browserWindowSize.Width, browserWindowSize.Height);//window.Width < Globals.UI_SMALL_TRANSITION_SIZE;
         }
         catch { }
-
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
     }
 
     // This method will be called when the window resizes.
@@ -179,11 +167,10 @@ else
             try
             {
                 BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
-                IsSmall = Globals.IsSmall(browserWindowSize.Width, browserWindowSize.Height); //browserWindowSize.Width < Globals.UI_SMALL_TRANSITION_SIZE;
+                IsSmall = Globals.IsSmall(browserWindowSize.Width, browserWindowSize.Height);
             }
             catch { }
 
-            //conformLogger.LogMessage("Navmenu.OnConfigurationChange", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {browserWindowSize.Width}, Window height: {browserWindowSize.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
@@ -191,7 +178,6 @@ else
             conformLogger.LogMessage("NavMenu.OnUiChanged", MessageLevel.Error, $"Exception: {ex}.");
             throw;
         }
-
     }
 
     private void ToggleNavMenu()

@@ -51,9 +51,10 @@
 
                     @* Alpaca device selection radio buttons *@
                     <RadzenCard Id="Devices" Style="margin-bottom: 20px; min-height:155px;  height:fit-content; margin-right: 20px; overflow: auto;">
-                        <h3 style="color: #479cc8; margin-bottom:-4px">Automatically Discovered Devices</h3>
+                        <h3 style="color: #479cc8; margin-bottom:12px">Automatically Discovered Devices</h3>
                         <RadzenRadioButtonList @bind-Value=@ascomDevice
                                                Orientation="Orientation.Vertical"
+                                               Gap="0.3rem"
                                                Data=@ascomDevices
                                                TValue="AscomDevice"
                                                TextProperty="DisplayName"

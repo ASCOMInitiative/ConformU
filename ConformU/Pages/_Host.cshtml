@@ -15,9 +15,7 @@
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="_content/Radzen.Blazor/css/default-base.css">
     <link href="css/site.css" rel="stylesheet" />
-
-
-    </head>
+</head>
 <body>
     <app>
         <component type="typeof(App)" render-mode="Server" />
@@ -41,156 +39,90 @@
     <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
 
     <script>
-        function setTitle(title) {
-            document.title = title;
-        }
+            // Return position information for a control with the supplied element ID
+            GetBoundingClientRect = (elementId) => {
+                let rect = null;
+                try {
+                    rect = document.getElementById(elementId).getBoundingClientRect();
+                }
+                catch (err) {
+                    rect = null;
+                }
 
-        function XXscrollToBottom(ref) {
-            ref.scrollTop = ref.scrollHeight;
-        }
-
-        function CloseDownApplication() {
-            window.open("/CloseApplication");
-        }
-
-        IdentifyBrowser = () => {
-            var sBrowser, sUsrAg = navigator.userAgent;
-
-            if (sUsrAg.indexOf("Firefox") > -1) {   // "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"
-                sBrowser = "Mozilla Firefox";
-            } else if (sUsrAg.indexOf("SamsungBrowser") > -1) {     // "Mozilla/5.0 (Linux; Android 9; SAMSUNG SM-G955F Build/PPR1.180610.011) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/9.4 Chrome/67.0.3396.87 Mobile Safari/537.36
-                sBrowser = "Samsung Internet";
-            } else if (sUsrAg.indexOf("Opera") > -1 || sUsrAg.indexOf("OPR") > -1) {         // "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 OPR/57.0.3098.106"
-                sBrowser = "Opera";
-            } else if (sUsrAg.indexOf("Trident") > -1) {            // "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; Zoom 3.6.0; wbx 1.0.0; rv:11.0) like Gecko"
-                sBrowser = "Microsoft Internet Explorer";
-            } else if (sUsrAg.indexOf("Edge") > -1) {               // "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299"
-                sBrowser = "Microsoft Edge";
-            } else if (sUsrAg.indexOf("Chrome") > -1) {             // "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/66.0.3359.181 Chrome/66.0.3359.181 Safari/537.36"
-                sBrowser = "Google Chrome or Chromium";
-            } else if (sUsrAg.indexOf("Safari") > -1) {             // "Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.0 Mobile/15E148 Safari/604.1 980x1306"
-                sBrowser = "Apple Safari";
-            } else {
-                sBrowser = "unknown";
-            }
-
-            return sBrowser;
-        };
-
-        // Return position information for a control with the supplied element ID
-        GetBoundingClientRect = (elementId) => {
-            let rect = null;
-            try {
-                rect = document.getElementById(elementId).getBoundingClientRect();
-            }
-            catch (err) {
-                rect = null;
-            }
-
-            return rect;
-        };
-
-        // Return size information for the browser window
-        GetBoundingWindowRect = () => {
-            return new DOMRect(0,
-                0,
-                window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
-                window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
-        }
-
-        // Listen for page resize
-        function resizeListener(dotnethelper) {
-            $(window).resize(() => {
-                let browserHeight = $(window).innerHeight();
-                let browserWidth = $(window).innerWidth();
-                dotnethelper.invokeMethodAsync('SetBrowserDimensions', browserWidth, browserHeight).then(() => {
-                    // success, do nothing
-                }).catch(error => { console.log("Error during browser resize: " + error); });
-            });
-        }
-
-        // Scroll to the bottom of the page
-        function ScrollToBottom(elementId) {
-            let top = document.getElementById(elementId).scrollHeight;
-            document.getElementById(elementId).scrollTop = top;
-            return top;
-        };
-
-        // Get the element's scroll position
-        function getScrollPosition(elementId) {
-            let element = document.getElementById(elementId);
-
-            return {
-                scrollTop: element.scrollTop,
-                scrollLeft: element.scrollLeft,
-                scrollHeight: element.scrollHeight,
-                clientHeight: element.clientHeight
-            };
-        }
-
-        // Set element.top for a scrollable element
-        function setScrollTop(elementId, scrollTop) {
-            let element = document.getElementById(elementId);
-            element.scrollTop = scrollTop;
-        }
-
-        // Keep ConformU-specific helpers under one namespace on window so multiple pages can
-        // share the same logic without polluting the global scope with separate functions.
-        window.conformU = window.conformU || {};
-
-        // Track one resize subscription/observer set per element ID so that each page can
-        // register and later clean up its own viewport sizing behaviour.
-        window.conformU.autoSizeViewportElementState = window.conformU.autoSizeViewportElementState || {};
-
-        window.conformU.autoSizeViewportElement = (elementId, bottomOffset) => {
-            // Remove any previous registration for this element before creating a new one.
-            window.conformU.disposeAutoSizeViewportElement(elementId);
-
-            const element = document.getElementById(elementId);
-            if (!element) {
-                return;
-            }
-
-            const updateHeight = () => {
-                // Measure where the element currently starts in the viewport. This means the
-                // computed height automatically reflects wrapped button rows or any other content
-                // above the element that changes height as the page width changes.
-                const rect = element.getBoundingClientRect();
-
-                // Fill the remaining viewport height, leaving a small bottom margin so the
-                // element does not sit directly against the browser edge.
-                const availableHeight = Math.max(0, Math.floor(window.innerHeight - rect.top - bottomOffset));
-                element.style.height = `${availableHeight}px`;
+                return rect;
             };
 
-            // ResizeObserver catches layout changes that move the element vertically even when the
-            // browser window size itself has not changed. The resize event handles viewport size
-            // changes directly.
-            const resizeObserver = new ResizeObserver(updateHeight);
-            resizeObserver.observe(document.body);
-            window.addEventListener('resize', updateHeight);
-
-            // Apply the height immediately so the page is correct on first render.
-            updateHeight();
-
-            window.conformU.autoSizeViewportElementState[elementId] = {
-                resizeObserver: resizeObserver,
-                updateHeight: updateHeight
-            };
-        };
-
-        window.conformU.disposeAutoSizeViewportElement = (elementId) => {
-            const state = window.conformU.autoSizeViewportElementState[elementId];
-            if (!state) {
-                return;
+            // Return size information for the browser window
+            GetBoundingWindowRect = () => {
+                return new DOMRect(0,
+                    0,
+                    window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+                    window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
             }
 
-            // Remove the observer and event handler when a page is disposed to avoid keeping
-            // unnecessary references alive after navigation.
-            window.removeEventListener('resize', state.updateHeight);
-            state.resizeObserver.disconnect();
-            delete window.conformU.autoSizeViewportElementState[elementId];
-        };
+            // Scroll to the bottom of the page
+            function ScrollToBottom(elementId) {
+                let top = document.getElementById(elementId).scrollHeight;
+                document.getElementById(elementId).scrollTop = top;
+                return top;
+            };
+
+            // Set element.top for a scroll-able element
+            function setScrollTop(elementId, scrollTop) {
+                let element = document.getElementById(elementId);
+                element.scrollTop = scrollTop;
+            }
+
+            // Keep ConformU-specific helpers under one namespace on window so multiple pages can share the same logic without polluting the global scope with separate functions.
+            window.conformU = window.conformU || {};
+
+            // Track one resize subscription/observer set per element ID so that each page can register and later clean up its own viewport sizing behaviour.
+            window.conformU.autoSizeViewportElementState = window.conformU.autoSizeViewportElementState || {};
+
+            window.conformU.autoSizeViewportElement = (elementId, bottomOffset) => {
+                // Remove any previous registration for this element before creating a new one.
+                window.conformU.disposeAutoSizeViewportElement(elementId);
+
+                const element = document.getElementById(elementId);
+                if (!element) {
+                    return;
+                }
+
+                const updateHeight = () => {
+                    // Measure where the element currently starts in the viewport. This means the computed height automatically reflects wrapped button rows or any other content
+                    // above the element that changes height as the page width changes.
+                    const rect = element.getBoundingClientRect();
+
+                    // Fill the remaining viewport height, leaving a small bottom margin so the element does not sit directly against the browser edge.
+                    const availableHeight = Math.max(0, Math.floor(window.innerHeight - rect.top - bottomOffset));
+                    element.style.height = `${availableHeight}px`;
+                };
+
+                // ResizeObserver catches layout changes that move the element vertically even when the browser window size itself has not changed. The resize event handles viewport size changes directly.
+                const resizeObserver = new ResizeObserver(updateHeight);
+                resizeObserver.observe(document.body);
+                window.addEventListener('resize', updateHeight);
+
+                // Apply the height immediately so the page is correct on first render.
+                updateHeight();
+
+                window.conformU.autoSizeViewportElementState[elementId] = {
+                    resizeObserver: resizeObserver,
+                    updateHeight: updateHeight
+                };
+            };
+
+            window.conformU.disposeAutoSizeViewportElement = (elementId) => {
+                const state = window.conformU.autoSizeViewportElementState[elementId];
+                if (!state) {
+                    return;
+                }
+
+                // Remove the observer and event handler when a page is disposed to avoid keeping unnecessary references alive after navigation.
+                window.removeEventListener('resize', state.updateHeight);
+                state.resizeObserver.disconnect();
+                delete window.conformU.autoSizeViewportElementState[elementId];
+            };
 
     </script>
 </body>
