@@ -15,8 +15,7 @@
 @inject DialogService _dialogService
 
 <div id="IndexPage" style="display:flex; flex-direction:column; min-height:320px;">
-    <h2 style="display: @statusVisible">Welcome to Conform Universal!</h2>
-
+    <h2 style="display: @statusVisible">@(titleMessage)</h2>
     <div>
         <RadzenButton Id="StartButton" Click=@(args => StartTest(1)) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 130px;border-radius:20px;" IsBusy=@_configuration.Settings.OperationInProgress />
         <RadzenButton Id="StopButton" Click=@(args => StopTest()) Text="Stop" Style="margin-bottom: 20px; margin-right: 20px; width: 130px;border-radius:20px;" Disabled=@(!_configuration.Settings.OperationInProgress) />
@@ -39,8 +38,10 @@
 </div>
 
 @code {
+    private string titleMessage = "";
     private string statusVisible = "initial";
     private bool disposedValue;
+    private DotNetObjectReference<Index> resizeCallbackReference; // Callback from JavaScript when the user resizes the browser window.
     object statusLockObject = new object();
     private string deviceDescription = "";
     string statusMessage = "";
@@ -52,7 +53,7 @@
     CancellationTokenSource cancellationTokenSource;
     CancellationToken cancelConformToken;
 
-    protected override async void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _conformLogger.Debug = _configuration.Settings.Debug;
         _conformState.UiHasChanged += OnUiHasChanged;
@@ -126,20 +127,20 @@
 
 #if WINDOWS
 
-    // Give warning message if running as ADMIN
-    using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
-    {
-        // Determine whether the user is running as admin
-        WindowsPrincipal principal = new WindowsPrincipal(identity);
-        if (principal.IsInRole(WindowsBuiltInRole.Administrator))
+        // Give warning message if running as ADMIN
+        using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
         {
-            // Running as admin so show a warning message on the screen
-            _conformState.ConformLog += ("\r\n\r\n***** CONFORM UNIVERSAL IS RUNNING WITH ADMIN PRIVILEGE!");
-            _conformState.ConformLog += ("\r\n\r\n***** This increases the risk that malicious individuals will target you and cause havoc in your life.");
-            _conformState.ConformLog += ("\r\n***** There is no need to run Conform Universal with Admin privilege, the application is fully functional in normal user mode.");
-            _conformState.ConformLog += ("\r\n***** Please close the application and re-open it in normal user mode.\r\n");
+            // Determine whether the user is running as admin
+            WindowsPrincipal principal = new WindowsPrincipal(identity);
+            if (principal.IsInRole(WindowsBuiltInRole.Administrator))
+            {
+                // Running as admin so show a warning message on the screen
+                _conformState.ConformLog += ("\r\n\r\n***** CONFORM UNIVERSAL IS RUNNING WITH ADMIN PRIVILEGE!");
+                _conformState.ConformLog += ("\r\n\r\n***** This increases the risk that malicious individuals will target you and cause havoc in your life.");
+                _conformState.ConformLog += ("\r\n***** There is no need to run Conform Universal with Admin privilege, the application is fully functional in normal user mode.");
+                _conformState.ConformLog += ("\r\n***** Please close the application and re-open it in normal user mode.\r\n");
+            }
         }
-    }
 
 #endif
 
@@ -162,6 +163,48 @@
         _conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"End");
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("conformU.autoSizeViewportElement", "IndexPage", 12);
+
+            // Register a JS resize callback once so the page title is recalculated both after the first browser render and on every subsequent window resize.
+            resizeCallbackReference = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("conformU.registerWindowResizeCallback", "IndexPageTitleMessage", resizeCallbackReference);
+
+            // Scroll the log window to the top of its contents.
+            try
+            {
+                await JS.InvokeVoidAsync("setScrollTop", "ConformLog", _conformState.ConformLogScrollTop.ToString());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"OnInitialized-setScrollTop Exception: {ex}");
+            }
+        }
+    }
+
+    [JSInvokable]
+    public async Task HandleWindowResizeAsync(double width, double height)
+    {
+        try
+        {
+            // Update the heading from the current viewport size inside a JS-invokable method so Blazor can re-render the bound title when JavaScript reports a size change.
+            string newTitleMessage = Globals.IsSmall(width, height) ? "Conform Universal" : "Welcome to Conform Universal";
+
+            if (titleMessage == newTitleMessage)
+                return;
+
+            titleMessage = newTitleMessage;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            _conformLogger.LogMessage("Index.HandleWindowResizeAsync", MessageLevel.Error, $"Exception: {ex.Message}\r\n{ex}.");
+        }
+    }
+
     void GoToSelectionPage(string buttonName)
     {
         _navigationManager.NavigateTo("/DeviceSelection");
@@ -171,29 +214,11 @@
     {
         try
         {
-            await InvokeAsync(StateHasChanged);
+            await JS.InvokeVoidAsync("setScrollTop", "ConformLog", _conformState.ConformLogScrollTop.ToString());
         }
         catch (Exception ex)
         {
             _conformLogger.LogMessage("Index.OnUiHasChanged", MessageLevel.Error, $"Exception: {ex}.");
-        }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JS.InvokeVoidAsync("conformU.autoSizeViewportElement", "IndexPage", 12);
-
-            // Scroll the log window to the top of its contents.
-            try
-            {
-                await JS.InvokeVoidAsync("setScrollTop", "ConformLog", _conformState.ConformLogScrollTop.ToString());
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"OnInitialized-setScrollTop: {ex}");
-            }
         }
     }
 
@@ -404,6 +429,7 @@
         }
     }
 
+
     #region Dispose support
 
     protected virtual void Dispose(bool disposing)
@@ -415,9 +441,13 @@
                 try
                 {
                     _ = JS.InvokeVoidAsync("conformU.disposeAutoSizeViewportElement", "IndexPage");
+
+                    // Remove the JS resize handler when the page goes away so later resizes do not try to call back into a disposed component instance.
+                    _ = JS.InvokeVoidAsync("conformU.disposeWindowResizeCallback", "IndexPageTitleMessage");
                 }
                 catch { }
 
+                resizeCallbackReference?.Dispose();
                 _conformState.UiHasChanged -= OnUiHasChanged;
             }
 

@@ -16,7 +16,8 @@
 
             <span style="text-align:left; color: yellow"><b>Operation in progress</b></span>
         }
-        else @* Operation in progress and normal screen *@
+        else
+        @* Operation in progress and normal screen *@
         {
             <span class="navbar-brand" style="width: 100%; text-align: center">Conform Universal</span>
         }
@@ -28,7 +29,8 @@
         {
             <span class="navbar-brand" style="text-align: left">Conform Universal</span>
         }
-        else @* No operation and screen is normal *@
+        else
+        @* No operation and screen is normal *@
         {
             <span class="navbar-brand" style="width: 100%; text-align: center">Conform Universal</span>
         }
@@ -113,19 +115,19 @@ else
 
     private bool collapseNavMenu = true;
 
-        private string NavMenuCssClass
+    private string NavMenuCssClass
+    {
+        get
         {
-            get
-            {
-                return collapseNavMenu ? "collapse" : null;
-            }
+            return collapseNavMenu ? "collapse" : null;
         }
+    }
 
-        /// <summary>
-        /// Event handler for page initialised event
-        /// </summary>
-        /// <remarks>Hook up an event handler to redisplay the page header whenever the configuration is changed. </remarks>
-        protected override async Task OnInitializedAsync()
+    /// <summary>
+    /// Event handler for page initialised event
+    /// </summary>
+    /// <remarks>Hook up an event handler to redisplay the page header whenever the configuration is changed. </remarks>
+    protected override async Task OnInitializedAsync()
     {
         state.UiHasChanged += OnUiChanged;
         try
@@ -134,21 +136,6 @@ else
             IsSmall = Globals.IsSmall(browserWindowSize.Width, browserWindowSize.Height);//window.Width < Globals.UI_SMALL_TRANSITION_SIZE;
         }
         catch { }
-    }
-
-    // This method will be called when the window resizes.
-    private async void WindowResized(object _, BrowserWindowSize window)
-    {
-        try
-        {
-            IsSmall = Globals.IsSmall(window.Width, window.Height);//window.Width < Globals.UI_SMALL_TRANSITION_SIZE;
-                                                                   //conformLogger.LogMessage("Navmenu.WindowResized", MessageLevel.Debug, $"IsSmall: {IsSmall}, Window width: {window.Width}, Window height: {window.Height}, Operation in progress: {configuration.Settings.OperationInProgress}");
-            await InvokeAsync(StateHasChanged);
-        }
-        catch (Exception ex)
-        {
-            conformLogger.LogMessage("SetScreenLogRows", $"Exception: \r\n{ex}");
-        }
     }
 
     /// <summary>

@@ -78,6 +78,7 @@
 
             // Track one resize subscription/observer set per element ID so that each page can register and later clean up its own viewport sizing behaviour.
             window.conformU.autoSizeViewportElementState = window.conformU.autoSizeViewportElementState || {};
+            window.conformU.windowResizeState = window.conformU.windowResizeState || {};
 
             window.conformU.autoSizeViewportElement = (elementId, bottomOffset) => {
                 // Remove any previous registration for this element before creating a new one.
@@ -122,6 +123,34 @@
                 window.removeEventListener('resize', state.updateHeight);
                 state.resizeObserver.disconnect();
                 delete window.conformU.autoSizeViewportElementState[elementId];
+            };
+
+            window.conformU.registerWindowResizeCallback = (callbackId, dotNetReference) => {
+                // Keep at most one resize handler per callback ID so repeated page renders do not accumulate duplicate subscriptions.
+                window.conformU.disposeWindowResizeCallback(callbackId);
+
+                const notifySizeChanged = () => {
+                    dotNetReference.invokeMethodAsync('HandleWindowResizeAsync', window.innerWidth, window.innerHeight);
+                };
+
+                window.addEventListener('resize', notifySizeChanged);
+                window.conformU.windowResizeState[callbackId] = {
+                    dotNetReference: dotNetReference,
+                    notifySizeChanged: notifySizeChanged
+                };
+
+                // Trigger the callback immediately so the page gets the correct initial title before the user resizes the browser window.
+                notifySizeChanged();
+            };
+
+            window.conformU.disposeWindowResizeCallback = (callbackId) => {
+                const state = window.conformU.windowResizeState[callbackId];
+                if (!state) {
+                    return;
+                }
+
+                window.removeEventListener('resize', state.notifySizeChanged);
+                delete window.conformU.windowResizeState[callbackId];
             };
 
     </script>
