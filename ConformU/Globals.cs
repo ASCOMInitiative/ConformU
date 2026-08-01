@@ -24,6 +24,8 @@
         internal const int TEST_NAME_WIDTH = 35; // Width allowed for test names in screen display and log files
 
         internal const double UI_SMALL_TRANSITION_SIZE = 767.98;
+        internal const double UI_VERY_SMALL_HEIGHT = 550.0;
+        internal const double UI_VERY_SMALL_WIDTH = 550.0;
 
         internal const string USER_AGENT_PRODUCT_NAME = "ConformUniversal";
 
@@ -56,9 +58,18 @@
         #endregion
 
         #region Static classes
+
         internal static bool IsSmall(double width, double height)
         {
             return (width < UI_SMALL_TRANSITION_SIZE) || (height < UI_SMALL_TRANSITION_SIZE);
+        }
+
+        internal static bool IsVerySmall(double width, double height)
+        {
+            if (width < UI_VERY_SMALL_WIDTH)
+                return height < UI_VERY_SMALL_HEIGHT;
+            else
+                return false;
         }
 
         #endregion

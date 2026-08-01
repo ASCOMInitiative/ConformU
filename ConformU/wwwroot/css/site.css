@@ -221,7 +221,18 @@ app {
     }
 }
 
-/*@media (min-width: 768px) and (orientation: portrait), (min-height: 768px) and (orientation: landscape) { */
+@media (min-width:760px) and (max-width: 1150px) {
+    .top-header {
+        /*display: none; */
+        font-size: smaller;
+        margin-left: 0px;
+    }
+
+    .top-row {
+        height: 4rem;
+    }
+}
+
 @media (min-width: 768px) {
     app {
         flex-direction: row;

@@ -24,7 +24,7 @@
     </div>
 
     <h4>Conform Log</h4>
-    <div style="flex: 1 1 auto; min-height: 200px; margin-bottom:6px;">
+    <div style="flex: 1 1 auto; min-height: 150px; margin-bottom:6px;">
         <RadzenTextArea Id="ConformLog"
                         Style='font-family: "Lucida Console", "Courier New", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px; width:100%; height:100%;'
                         Name="_conformState.ScreenLog"
@@ -191,7 +191,8 @@
         try
         {
             // Update the heading from the current viewport size inside a JS-invokable method so Blazor can re-render the bound title when JavaScript reports a size change.
-            string newTitleMessage = Globals.IsSmall(width, height) ? "Conform Universal" : "Welcome to Conform Universal";
+            Console.WriteLine($"HandleWindowResizeAsync: Width: {width}, Height: {height}");
+            string newTitleMessage = Globals.IsVerySmall(width, height) ? "Conform Universal" : "Welcome to Conform Universal";
 
             if (titleMessage == newTitleMessage)
                 return;
