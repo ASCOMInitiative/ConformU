@@ -215,6 +215,20 @@ app {
 
 /* @media (max-width: 767.98px) and (orientation: portrait), (max-height: 768px) and (orientation: landscape) { */
 @media (max-width: 767.98px) {
+    .sidebar .top-row .navbar-brand {
+        order: 1;
+    }
+
+    .sidebar .top-row .navbar-toggler {
+        order: 2;
+        margin-left: auto;
+    }
+
+    .sidebar .top-row .operation-status {
+        order: 3;
+        flex-basis: 100%;
+    }
+
     .main .top-row:not(.auth) {
         display: none;
     }
