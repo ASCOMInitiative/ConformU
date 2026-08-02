@@ -1,7 +1,7 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
 /* Apply compact styling to small viewports. */
-@media (max-width: 1200px), (max-height: 1200px) {
+@media (max-width: 1024px), (max-height: 768px) {
     .rz-colorpicker, .rz-lookup-search input, .rz-spinner, .rz-calendar .rz-inputtext, .rz-multiselect, .rz-dropdown, .mask, .rz-textarea, .rz-textbox, .rz-radiobutton-label, .label,
     input {
         font-size: 0.8rem;
@@ -232,11 +232,11 @@ app {
     }
 }
 
-@media (min-width:1200px) and (max-width: 1400px) {
+@media (min-width:1200px) and (max-width: 1513px) {
     .top-row-text {
         /*display: none; */
-        font-size: smaller;
-        margin-left: 0px;
+        /*font-size: smaller;*/
+        /*margin-left: 0px;*/
     }
 
     .top-row-visible {

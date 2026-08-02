@@ -6,16 +6,24 @@
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
 @inject SessionState state
+@inject IJSRuntime JS
 
 @* Top level page layout including page header at top and navigation bar at left *@
 <div class="sidebar">
     <NavMenu />
 </div>
 
+@{
+    if (isSmallWidth)
+        displayVisible = "display: none;";
+    else
+        displayVisible = "display: block;";
+}
+
 <div class="main">
     <div class="top-row px-4">
-        <span class="top-row-text top-row-visible">Current device:&nbsp;</span>
-        <span class="top-row-text" style="color: #0366d6;font-weight:bold">@deviceName.Replace(".", ".\u200B"); &nbsp;(@deviceTechnology @deviceType @((deviceTechnology == DeviceTechnology.Alpaca) ? alpacaDeviceNumber : ""))</span>
+        <span class="top-row-text top-row-visible" style="@displayVisible">Current&nbsp;Device:&nbsp;</span>
+        <span class="top-row-text" style="color: #0366d6;font-weight:bold">@deviceName.Replace(".", ".\u200B") &nbsp;(@deviceTechnology @deviceType @((deviceTechnology == DeviceTechnology.Alpaca) ? alpacaDeviceNumber : ""))</span>
         <a class="top-row-text" href="https://ascom-standards.org" target="_blank">ASCOM Initiative</a>
     </div>
 
@@ -31,21 +39,64 @@
 
 @code
 {
+    string displayVisible = "display: block;";
     bool disposedValue;
-
+    bool isSmallWidth = false;
     private string deviceName;
     private DeviceTypes deviceType;
     private DeviceTechnology deviceTechnology;
     private int alpacaDeviceNumber;
+    private DotNetObjectReference<MainLayout> resizeCallbackReference; // Callback from JavaScript when the user resizes the browser window.
 
     /// <summary>
     /// Event handler for page initialised event
     /// </summary>
     /// <remarks>Hook up an event handler to redisplay the page header whenever the configuration is changed. </remarks>
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         state.UiHasChanged += OnUiChanged;
         SetDisplayVariables();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Register a JS resize callback once so the page title is recalculated both after the first browser render and on every subsequent window resize.
+            resizeCallbackReference = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("conformU.registerWindowResizeCallback", "MainLayout", resizeCallbackReference);
+        }
+    }
+
+    /// <summary>
+    /// Callback to handle window re-size events
+    /// </summary>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
+    /// <returns></returns>
+    [JSInvokable]
+    public async Task HandleWindowResizeAsync(double width, double height)
+    {
+        try
+        {
+            // Generate the device string that will be displayed at the top of the application
+            string titleMessage = $"{deviceName.Replace(".", ".\u200B")} ({deviceTechnology} {deviceType} {((deviceTechnology == DeviceTechnology.Alpaca) ? alpacaDeviceNumber : "")})";
+
+            // Calculate whether it is too long to fit if the "Current Device: " text is visible
+            bool newIsSmallWidth = titleMessage.Length * 11 > width - 255;
+
+            // Check whether the value has changed, if not return quickly
+            if (isSmallWidth == newIsSmallWidth)
+                return;
+
+            // Value is different so force a Blazor re-display
+            isSmallWidth = newIsSmallWidth;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            conformLogger.LogMessage("MainLayout.HandleWindowResizeAsync", MessageLevel.Error, $"Exception: {ex.Message}\r\n{ex}.");
+        }
     }
 
     /// <summary>

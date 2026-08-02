@@ -61,7 +61,8 @@
 
         internal static bool IsSmall(double width, double height)
         {
-            return (width < UI_SMALL_TRANSITION_SIZE) || (height < UI_SMALL_TRANSITION_SIZE);
+            //return (width < UI_SMALL_TRANSITION_SIZE) || (height < UI_SMALL_TRANSITION_SIZE);
+            return (width < UI_SMALL_TRANSITION_SIZE);
         }
 
         internal static bool IsVerySmall(double width, double height)

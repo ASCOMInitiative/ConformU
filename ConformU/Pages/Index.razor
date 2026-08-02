@@ -210,7 +210,6 @@
         {
             bool newIsSmallWidth = Globals.IsSmall(width, 20000); // Force the isSmall to only reflect the width not the height.
 
-            Console.WriteLine($"HandleWindowResizeAsync: Width: {width}, Height: {height}, IsSmallWidth: {newIsSmallWidth}");
             string newTitleMessage = Globals.IsVerySmall(width, height) ? "Conform Universal" : "Welcome to Conform Universal";
 
             if (isSmallWidth == newIsSmallWidth && titleMessage == newTitleMessage)

@@ -168,7 +168,11 @@ else
 
     private void ToggleNavMenu()
     {
-        if (IsSmall) collapseNavMenu = !collapseNavMenu;
+        if (IsSmall)
+            collapseNavMenu = !collapseNavMenu;
+        else
+            collapseNavMenu = true;
+
         conformLogger.LogMessage("NavMenu-ToggleNavMenu", MessageLevel.Debug, $"Collapse menu: {collapseNavMenu}");
         state.RaiseUiHasChangedEvent();
         conformLogger.LogMessage("NavMenu-ToggleNavMenu", MessageLevel.Debug, $"UI changed event complete");
