@@ -208,15 +208,15 @@
     {
         try
         {
-            isSmallWidth = Globals.IsSmall(width, 20000); // Force the isSmall to only reflect the width not the height.
+            bool newIsSmallWidth = Globals.IsSmall(width, 20000); // Force the isSmall to only reflect the width not the height.
 
-            // Update the heading from the current viewport size inside a JS-invokable method so Blazor can re-render the bound title when JavaScript reports a size change.
-            Console.WriteLine($"HandleWindowResizeAsync: Width: {width}, Height: {height}, IsSmallWidth: {isSmallWidth}");
+            Console.WriteLine($"HandleWindowResizeAsync: Width: {width}, Height: {height}, IsSmallWidth: {newIsSmallWidth}");
             string newTitleMessage = Globals.IsVerySmall(width, height) ? "Conform Universal" : "Welcome to Conform Universal";
 
-            if (titleMessage == newTitleMessage)
+            if (isSmallWidth == newIsSmallWidth && titleMessage == newTitleMessage)
                 return;
 
+            isSmallWidth = newIsSmallWidth;
             titleMessage = newTitleMessage;
             await InvokeAsync(StateHasChanged);
         }
