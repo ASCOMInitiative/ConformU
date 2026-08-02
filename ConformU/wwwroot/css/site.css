@@ -96,8 +96,14 @@ app {
     align-items: center;
 }
 
+.top-row-text {
+    min-width: 0;
+    word-break: auto-phrase; /*  break-all; */
+}
+
 .main {
     flex: 1;
+    min-width: 0;
 }
 
     .main .top-row {
@@ -221,15 +227,15 @@ app {
     }
 }
 
-@media (min-width:760px) and (max-width: 1150px) {
-    .top-header {
+@media (min-width:760px) and (max-width: 1000px) {
+    .top-row-text {
         /*display: none; */
         font-size: smaller;
         margin-left: 0px;
     }
 
-    .top-row {
-        height: 4rem;
+    .top-row-visible {
+        display:none;
     }
 }
 

@@ -14,8 +14,9 @@
 
 <div class="main">
     <div class="top-row px-4">
-        <span class="top-header">Current device -&nbsp;</span><span class="top-header"><b style="color: #0366d6">@deviceName &nbsp;</b></span><span class="top-header">(@deviceTechnology @deviceType @((deviceTechnology == DeviceTechnology.Alpaca) ? alpacaDeviceNumber : ""))</span>
-        <a href="https://ascom-standards.org" target="_blank">ASCOM Initiative</a>
+        <span class="top-row-text top-row-visible">Current device:&nbsp;</span>
+        <span class="top-row-text" style="color: #0366d6;font-weight:bold">@deviceName.Replace(".", ".\u200B"); &nbsp;(@deviceTechnology @deviceType @((deviceTechnology == DeviceTechnology.Alpaca) ? alpacaDeviceNumber : ""))</span>
+        <a class="top-row-text" href="https://ascom-standards.org" target="_blank">ASCOM Initiative</a>
     </div>
 
     <div class="content px-4">

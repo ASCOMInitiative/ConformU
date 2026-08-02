@@ -24,7 +24,7 @@
         internal const int TEST_NAME_WIDTH = 35; // Width allowed for test names in screen display and log files
 
         internal const double UI_SMALL_TRANSITION_SIZE = 767.98;
-        internal const double UI_VERY_SMALL_HEIGHT = 550.0;
+        internal const double UI_VERY_SMALL_HEIGHT = 500.0;
         internal const double UI_VERY_SMALL_WIDTH = 550.0;
 
         internal const string USER_AGENT_PRODUCT_NAME = "ConformUniversal";
