@@ -95,7 +95,7 @@
                     const rect = element.getBoundingClientRect();
 
                     // Fill the remaining viewport height, leaving a small bottom margin so the element does not sit directly against the browser edge.
-                    const availableHeight = Math.max(0, Math.floor(window.innerHeight - rect.top - bottomOffset));
+                    const availableHeight = Math.max(0, Math.floor(document.documentElement.clientHeight - rect.top - bottomOffset));
                     element.style.height = `${availableHeight}px`;
                 };
 

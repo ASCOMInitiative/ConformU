@@ -91,14 +91,14 @@ app {
 }
 
 .top-row {
-    height: 3.5rem;
+    min-height: 3.5rem;
     display: flex;
     align-items: center;
 }
 
 .top-row-text {
     min-width: 0;
-    word-break: auto-phrase; /*  break-all; */
+    word-break: break-word; /*  break-all; */
 }
 
 .main {
@@ -113,6 +113,7 @@ app {
     }
 
         .main .top-row > a, .main .top-row .btn-link {
+            flex: 0 0 auto;
             white-space: nowrap;
             margin-left: 1.5rem;
         }
@@ -235,7 +236,7 @@ app {
     }
 
     .top-row-visible {
-        display:none;
+        display: none;
     }
 }
 
