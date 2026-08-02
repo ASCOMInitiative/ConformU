@@ -1,38 +1,29 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
-/* Override the Radzen small screen size font increase to 1 rem */
-@media (max-width: 768px), (max-height: 768px) {
+/* Apply compact styling to small viewports. */
+@media (max-width: 1200px), (max-height: 1200px) {
     .rz-colorpicker, .rz-lookup-search input, .rz-spinner, .rz-calendar .rz-inputtext, .rz-multiselect, .rz-dropdown, .mask, .rz-textarea, .rz-textbox, .rz-radiobutton-label, .label,
     input {
         font-size: 0.8rem;
     }
-}
 
-/* Override the h1 font size when small  */
-@media (max-width: 768px), (max-height: 768px) {
     h1 {
         font-size: 1.5rem;
     }
-}
 
-/* Set a smaller font for labels when on small devices */
-@media (max-width: 768px), (max-height: 768px) {
     label, p, h3 {
         font-size: 0.8rem;
+    }
+
+    .rz-tabview-nav li a {
+        padding-left: 10px;
+        padding-right: 10px;
     }
 }
 
 /* Make tabs flow round top multiple lines at small screen sizes */
 ul[role=tablist] {
     flex-wrap: wrap;
-}
-
-/* Set a smaller padding for tab text on small screens so that more tabs fit in */
-@media (max-width: 768px), (max-height: 768px) {
-    .rz-tabview-nav li a {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
 }
 
 @font-face {
@@ -213,8 +204,7 @@ app {
         top: 0.5rem;
     }
 
-/* @media (max-width: 767.98px) and (orientation: portrait), (max-height: 768px) and (orientation: landscape) { */
-@media (max-width: 767.98px) {
+@media (max-width: 1199.98px) {
     .sidebar .top-row .navbar-brand {
         order: 1;
     }
@@ -242,7 +232,7 @@ app {
     }
 }
 
-@media (min-width:760px) and (max-width: 1000px) {
+@media (min-width:1200px) and (max-width: 1400px) {
     .top-row-text {
         /*display: none; */
         font-size: smaller;
@@ -254,7 +244,7 @@ app {
     }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1200px) {
     app {
         flex-direction: row;
     }

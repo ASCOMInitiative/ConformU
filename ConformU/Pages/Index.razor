@@ -16,13 +16,27 @@
 
 <div id="IndexPage" style="display:flex; flex-direction:column; min-height:320px;">
     <h2 style="display: @statusVisible">@(titleMessage)</h2>
+
+    @* Buttons *@
     <div>
-        <RadzenButton Id="StartButton" Click=@(args => StartTest(1)) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 130px;border-radius:20px;" IsBusy=@_configuration.Settings.OperationInProgress />
-        <RadzenButton Id="StopButton" Click=@(args => StopTest()) Text="Stop" Style="margin-bottom: 20px; margin-right: 20px; width: 130px;border-radius:20px;" Disabled=@(!_configuration.Settings.OperationInProgress) />
-        <RadzenButton Id="StressTestButton" Click=@(args => StartTest(int.MaxValue)) ButtonStyle="ButtonStyle.Secondary" Text="Stress Test" Style="margin-bottom: 20px; margin-right: 20px; width: 130px;border-radius:20px;" Disabled=@(_configuration.Settings.OperationInProgress) />
-        <RadzenButton Id="ConfigureButton" ButtonStyle="ButtonStyle.Info" Shade="Shade.Dark" Click=@(args => GoToSelectionPage("ConfigureButton")) Text="Select Device" Style="margin-bottom: 10px; margin-right: 10px; width: 130px;border-radius:20px;" Disabled=@_configuration.Settings.OperationInProgress />
+        @if (isSmallWidth)
+        {
+            <RadzenButton Id="StartButton" Click=@(args => StartTest(1)) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 80px;border-radius:20px;" IsBusy=@_configuration.Settings.OperationInProgress />
+            <RadzenButton Id="StopButton" Click=@(args => StopTest()) Text="Stop" Style="margin-bottom: 20px; margin-right: 20px; width: 80px;border-radius:20px;" Disabled=@(!_configuration.Settings.OperationInProgress) />
+            <RadzenButton Id="StressTestButton" Click=@(args => StartTest(int.MaxValue)) ButtonStyle="ButtonStyle.Secondary" Text="Stress" Style="margin-bottom: 20px; margin-right: 20px; width: 80px;border-radius:20px;" Disabled=@(_configuration.Settings.OperationInProgress) />
+            <RadzenButton Id="ConfigureButton" ButtonStyle="ButtonStyle.Info" Shade="Shade.Dark" Click=@(args => GoToSelectionPage("ConfigureButton")) Text="Select" Style="margin-bottom: 10px; margin-right: 10px; width: 80px;border-radius:20px;" Disabled=@_configuration.Settings.OperationInProgress />
+        }
+        else
+        {
+            <RadzenButton Id="StartButton" Click=@(args => StartTest(1)) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 130px;border-radius:20px;" IsBusy=@_configuration.Settings.OperationInProgress />
+            <RadzenButton Id="StopButton" Click=@(args => StopTest()) Text="Stop" Style="margin-bottom: 20px; margin-right: 20px; width: 130px;border-radius:20px;" Disabled=@(!_configuration.Settings.OperationInProgress) />
+            <RadzenButton Id="StressTestButton" Click=@(args => StartTest(int.MaxValue)) ButtonStyle="ButtonStyle.Secondary" Text="Stress Test" Style="margin-bottom: 20px; margin-right: 20px; width: 130px;border-radius:20px;" Disabled=@(_configuration.Settings.OperationInProgress) />
+            <RadzenButton Id="ConfigureButton" ButtonStyle="ButtonStyle.Info" Shade="Shade.Dark" Click=@(args => GoToSelectionPage("ConfigureButton")) Text="Select Device" Style="margin-bottom: 10px; margin-right: 10px; width: 130px;border-radius:20px;" Disabled=@_configuration.Settings.OperationInProgress />
+        }
+
     </div>
 
+    @* Conform log *@
     <h4>Conform Log</h4>
     <div style="flex: 1 1 auto; min-height: 150px; margin-bottom:6px;">
         <RadzenTextArea Id="ConformLog"
@@ -32,12 +46,16 @@
                         Cols="250"
                         ReadOnly=true />
     </div>
+
+    @* Status line *@
     <div style="margin-top:12px;display :@statusVisible">
         <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:6px; margin-right:20px; margin-top:0px" @bind-Value=@statusMessage />
     </div>
 </div>
 
 @code {
+    private bool isSmallWidth = false;
+    private string buttonWidth;
     private string titleMessage = "";
     private string statusVisible = "initial";
     private bool disposedValue;
@@ -190,8 +208,10 @@
     {
         try
         {
+            isSmallWidth = Globals.IsSmall(width, 20000); // Force the isSmall to only reflect the width not the height.
+
             // Update the heading from the current viewport size inside a JS-invokable method so Blazor can re-render the bound title when JavaScript reports a size change.
-            Console.WriteLine($"HandleWindowResizeAsync: Width: {width}, Height: {height}");
+            Console.WriteLine($"HandleWindowResizeAsync: Width: {width}, Height: {height}, IsSmallWidth: {isSmallWidth}");
             string newTitleMessage = Globals.IsVerySmall(width, height) ? "Conform Universal" : "Welcome to Conform Universal";
 
             if (titleMessage == newTitleMessage)
