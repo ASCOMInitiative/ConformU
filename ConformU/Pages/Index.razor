@@ -73,8 +73,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine($"Index OnInitializedAsync - Start");
-
         _conformLogger.Debug = _configuration.Settings.Debug;
         _conformState.UiHasChanged += OnUiHasChanged;
         _conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"Before Task.Run");
@@ -181,7 +179,6 @@
         }
 
         _conformLogger.LogMessage("Index.OnInitialized", MessageLevel.Debug, $"End");
-        Console.WriteLine($"Index OnInitializedAsync - Finished");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

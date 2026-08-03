@@ -54,26 +54,19 @@
     /// <remarks>Hook up an event handler to redisplay the page header whenever the configuration is changed. </remarks>
     protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine($"MainLayout OnInitializedAsync - Start");
         SetDisplayVariables();
-        Console.WriteLine($"MainLayout OnInitializedAsync - Set display variables");
         try
         {
             BoundingClientRectangle browserWindowSize = await JS.InvokeAsync<BoundingClientRectangle>("GetBoundingWindowRect");
             state.IsSmall = Globals.IsSmall(browserWindowSize.Width, browserWindowSize.Height);
-            Console.WriteLine($"MainLayoput.OnInitializedAsync - State.IsSmall: {state.IsSmall} - Changed");
         }
         catch { }
-        Console.WriteLine($"MainLayout OnInitializedAsync - Set IsSmall manually");
 
         // Register a JS resize callback once so the page title is recalculated both after the first browser render and on every subsequent window resize.
         resizeCallbackReference = DotNetObjectReference.Create(this);
-        Console.WriteLine($"MainLayout OnInitializedAsync - Created .NET Reference");
         await JS.InvokeVoidAsync("conformU.registerWindowResizeCallback", "MainLayout", resizeCallbackReference);
-        Console.WriteLine($"MainLayout OnInitializedAsync - Registered callback");
 
         state.UiHasChanged += OnUiChanged;
-        Console.WriteLine($"MainLayout OnInitializedAsync - Finished");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -105,16 +98,13 @@
 
             // Check whether the value has changed, if not return quickly
             if (state.IsSmall == newIsSmall && isSmallWidth == newIsSmallWidth)
-            {
-                Console.WriteLine($"MainLayoput - State.IsSmall: {state.IsSmall} - Not changed");
                 return;
-            }
 
             // Value is different so force a Blazor re-display
             state.IsSmall = newIsSmall;
             isSmallWidth = newIsSmallWidth;
+            state.RaiseUiHasChangedEvent();
             await InvokeAsync(StateHasChanged);
-            Console.WriteLine($"MainLayoput.HandleWindowResizeAsync - State.IsSmall: {state.IsSmall} - Changed");
         }
         catch (Exception ex)
         {
@@ -123,7 +113,7 @@
     }
 
     /// <summary>
-    /// Event hander called when the configuration is changed
+    /// Event handler called when the configuration is changed
     /// </summary>
     /// <param name="caller"></param>
     /// <param name="args"></param>

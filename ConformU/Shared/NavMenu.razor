@@ -126,10 +126,7 @@ else
     /// <remarks>Hook up an event handler to redisplay the page header whenever the configuration is changed. </remarks>
     protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine($"NavMenu OnInitializedAsync - Start");
-
         state.UiHasChanged += OnUiChanged;
-        Console.WriteLine($"NavMenu OnInitializedAsync - Finished");
     }
 
     /// <summary>
