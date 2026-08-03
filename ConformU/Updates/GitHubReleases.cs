@@ -53,7 +53,7 @@ namespace ConformU
             }
             if (releases.Any())
             {
-                return releases.OrderBy(rp => rp.ReleaseSemVersionFromTag()).LastOrDefault();
+                return releases.OrderBy(rp => rp.ReleaseSemVersionFromTag(), Comparer<SemVersion>.Create(SemVersion.ComparePrecedence)).LastOrDefault();
             }
             return null;
         }
