@@ -56,7 +56,7 @@ namespace ConformU
 
         public bool SafetyWarningDisplayed { get; set; } = false;
 
-        public bool IsSmall { get; set; } = false;
+        public bool IsSmall { get; set; } = true;
 
         public void RaiseUiHasChangedEvent()
         {
