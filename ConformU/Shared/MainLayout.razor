@@ -5,7 +5,7 @@
 @inherits LayoutComponentBase
 @inject ConformLogger conformLogger
 @inject ConformConfiguration configuration
-@inject SessionState state
+@inject State state
 @inject IJSRuntime JS
 
 @* Top level page layout including page header at top and navigation bar at left *@
@@ -85,11 +85,16 @@
             // Calculate whether it is too long to fit if the "Current Device: " text is visible
             bool newIsSmallWidth = titleMessage.Length * 11 > width - 255;
 
+            bool newIsSmall = Globals.IsSmall(width, height);
+
+
+
             // Check whether the value has changed, if not return quickly
-            if (isSmallWidth == newIsSmallWidth)
+            if (state.IsSmall == newIsSmall && isSmallWidth == newIsSmallWidth)
                 return;
 
             // Value is different so force a Blazor re-display
+            state.IsSmall = newIsSmall;
             isSmallWidth = newIsSmallWidth;
             await InvokeAsync(StateHasChanged);
         }

@@ -3,7 +3,7 @@ using System.Text;
 
 namespace ConformU
 {
-    public class SessionState : IDisposable
+    public class State : IDisposable
     {
         private bool disposedValue;
         private readonly ConformLogger TL;
@@ -17,7 +17,7 @@ namespace ConformU
         private readonly object _conformLogLock = new();
         private readonly object _protocolLogLock = new();
 
-        public SessionState(ConformLogger logger)
+        public State(ConformLogger logger)
         {
             TL = logger;
             TL?.LogMessage("ConformStateManager", MessageLevel.Debug, "Service started");
@@ -25,16 +25,6 @@ namespace ConformU
 
         public event EventHandler UiHasChanged;
 
-        public void RaiseUiHasChangedEvent()
-        {
-            if (UiHasChanged is not null)
-            {
-                EventArgs args = new();
-                TL?.LogMessage("RaiseUiHasChangedEvent", MessageLevel.Debug, "About to call UI has changed event handler");
-                UiHasChanged(this, args);
-                TL?.LogMessage("RaiseUiHasChangedEvent", MessageLevel.Debug, "Returned from UI has changed event handler");
-            }
-        }
 
         /// <summary>
         /// The current content of the main conformance log pane.
@@ -45,6 +35,38 @@ namespace ConformU
         {
             get { lock (_conformLogLock) { return _conformLogBuilder.ToString(); } }
             set { lock (_conformLogLock) { _conformLogBuilder.Clear(); if (value is not null) _conformLogBuilder.Append(value); } }
+        }
+
+        /// <summary>
+        /// The current content of the Alpaca protocol log pane.
+        /// Setting this property replaces the entire buffer (use for clear/initialise).
+        /// For incremental appends from the hot path use <see cref="AppendToProtocolLog"/>.
+        /// </summary>
+        public string ProtocolLog
+        {
+            get { lock (_protocolLogLock) { return _protocolLogBuilder.ToString(); } }
+            set { lock (_protocolLogLock) { _protocolLogBuilder.Clear(); if (value is not null) _protocolLogBuilder.Append(value); } }
+        }
+
+        /// <summary>
+        /// Current value of the main ConformLog window scroll position
+        /// </summary>
+        /// <remarks>Used to restore the scroll position when the user does a browser refresh or returns to the home page.</remarks>
+        public double ConformLogScrollTop { get; set; } = 0;
+
+        public bool SafetyWarningDisplayed { get; set; } = false;
+
+        public bool IsSmall { get; set; } = false;
+
+        public void RaiseUiHasChangedEvent()
+        {
+            if (UiHasChanged is not null)
+            {
+                EventArgs args = new();
+                TL?.LogMessage("RaiseUiHasChangedEvent", MessageLevel.Debug, "About to call UI has changed event handler");
+                UiHasChanged(this, args);
+                TL?.LogMessage("RaiseUiHasChangedEvent", MessageLevel.Debug, "Returned from UI has changed event handler");
+            }
         }
 
         /// <summary>
@@ -59,25 +81,6 @@ namespace ConformU
                 if (_conformLogBuilder.Length > LOG_MAX_LENGTH)
                     _conformLogBuilder.Remove(0, _conformLogBuilder.Length - LOG_TRIM_LENGTH);
             }
-        }
-
-        /// <summary>
-        /// Current value of the main ConformLog window scroll position
-        /// </summary>
-        /// <remarks>Used to restore the scroll position when the user does a browser refresh or returns to the home page.</remarks>
-        public double ConformLogScrollTop { get; set; } = 0;
-
-        public bool SafetyWarningDisplayed { get; set; } = false;
-
-        /// <summary>
-        /// The current content of the Alpaca protocol log pane.
-        /// Setting this property replaces the entire buffer (use for clear/initialise).
-        /// For incremental appends from the hot path use <see cref="AppendToProtocolLog"/>.
-        /// </summary>
-        public string ProtocolLog
-        {
-            get { lock (_protocolLogLock) { return _protocolLogBuilder.ToString(); } }
-            set { lock (_protocolLogLock) { _protocolLogBuilder.Clear(); if (value is not null) _protocolLogBuilder.Append(value); } }
         }
 
         /// <summary>
