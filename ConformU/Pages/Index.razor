@@ -40,7 +40,7 @@
     <h4>Conform Log</h4>
     <div style="flex: 1 1 auto; min-height: 150px; margin-bottom:6px;">
         <RadzenTextArea Id="ConformLog"
-                        Style='font-family: "Lucida Console", "Courier New", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px; width:100%; height:100%;'
+                        Style=@textStyle
                         Name="_conformState.ScreenLog"
                         @bind-Value=@_conformState.ConformLog
                         Cols="250"
@@ -49,7 +49,9 @@
 
     @* Status line *@
     <div style="margin-top:12px;display :@statusVisible">
-        <RadzenTextBox Id="Status" Style="width: 100%; margin-bottom:6px; margin-right:20px; margin-top:0px" @bind-Value=@statusMessage />
+        <RadzenTextBox Id="Status"
+                       Style="width: 100%; margin-bottom:6px; margin-right:20px; margin-top:0px"
+                       @bind-Value=@statusMessage />
     </div>
 </div>
 
@@ -58,6 +60,7 @@
     private string buttonWidth;
     private string titleMessage = "";
     private string statusVisible = "initial";
+    private string textStyle = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px; width:100%; height:100%;";
     private bool disposedValue;
     private DotNetObjectReference<Index> resizeCallbackReference; // Callback from JavaScript when the user resizes the browser window.
     object statusLockObject = new object();
@@ -217,6 +220,13 @@
 
             isSmallWidth = newIsSmallWidth;
             titleMessage = newTitleMessage;
+
+            if (isSmallWidth)
+                textStyle = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 12px; line-height: 16px; padding-bottom: 0px; width:100%; height:100%;";
+
+            else
+                textStyle = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px; width:100%; height:100%;";
+
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
