@@ -15,41 +15,44 @@
 @inject DialogService _dialogService
 
 <div id="IndexPage" style="display:flex; flex-direction:column; min-height:320px;">
-    <h2 style="display: @statusVisible">@(titleMessage)</h2>
 
     @* Buttons *@
-    @if (isSmallWidth)
+    @if (isSmallWidth) @* When the display is small *@
     {
+        <h4 style="display: @statusVisible;"><b>@(titleMessage)</b></h4>
+
         <div class="button-row">
             <RadzenButton Id="StartButton"
                           Click=@(args => StartTest(1))
                           Text="Start"
                           ButtonStyle="ButtonStyle.Primary"
-                          Style=" width: 79px; margin-bottom: 20px; border-radius:20px;"
+                          Style="width: 79px; height: 30px; min-height: 30px; padding: 0; margin-bottom: 10px; border-radius:20px;"
                           IsBusy=@_configuration.Settings.OperationInProgress />
             <RadzenButton Id="StopButton"
                           Click=@(args => StopTest())
                           Text="Stop"
                           ButtonStyle="ButtonStyle.Danger"
-                          Style=" width: 79px; margin-bottom: 20px; border-radius:20px; background-color:red;"
+                          Style="width: 79px; height: 30px; min-height: 30px; padding: 0; margin-bottom: 10px; border-radius:20px; background-color:red;"
                           Disabled=@(!_configuration.Settings.OperationInProgress) />
             <RadzenButton Id="StressTestButton"
                           Click=@(args => StartTest(int.MaxValue))
                           Text="Stress"
                           ButtonStyle="ButtonStyle.Secondary"
-                          Style=" width: 79px; margin-bottom: 20px; border-radius:20px;"
+                          Style="width: 79px; height: 30px; min-height: 30px; padding: 0; margin-bottom: 10px; border-radius:20px;"
                           Disabled=@(_configuration.Settings.OperationInProgress) />
             <RadzenButton Id="ConfigureButton"
                           Click=@(args => GoToSelectionPage("ConfigureButton"))
                           Text="Select"
                           ButtonStyle="ButtonStyle.Info"
-                          Style=" width: 79px; margin-bottom: 10px; border-radius:20px;"
+                          Style="width: 79px; height: 30px; min-height: 30px; padding: 0; margin-bottom: 10px; border-radius:20px;"
                           Shade="Shade.Dark"
                           Disabled=@_configuration.Settings.OperationInProgress />
         </div>
+        <h5>Conform Log</h5>
     }
-    else
+    else @* When the display is normal *@
     {
+        <h2 style="display: @statusVisible">@(titleMessage)</h2>
         <div>
             <RadzenButton Id="StartButton"
                           Click=@(args => StartTest(1))
@@ -77,11 +80,11 @@
                           Style="width: 130px; margin-bottom: 10px; border-radius:20px;"
                           Disabled=@_configuration.Settings.OperationInProgress />
         </div>
+        <h4>Conform Log</h4>
     }
 
 
     @* Conform log *@
-    <h4>Conform Log</h4>
     <div style="flex: 1 1 auto; min-height: 150px; margin-bottom:6px;">
         <RadzenTextArea Id="ConformLog"
                         Style=@textStyle
