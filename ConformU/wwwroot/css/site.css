@@ -223,8 +223,8 @@ app {
     }
 
     .sidebar .top-row .operation-status {
-        order: 3;
-        flex-basis: 100%;
+        order: 1;
+        white-space: nowrap;
     }
 
     .main .top-row:not(.auth) {
