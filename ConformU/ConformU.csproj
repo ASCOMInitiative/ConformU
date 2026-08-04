@@ -159,8 +159,8 @@
 		<PackageReference Include="ISafetyMonitorV4Components" Version="0.2.0" />
 		<PackageReference Include="jQuery" Version="3.7.1" />
 		<PackageReference Include="Octokit" Version="14.0.0" />
-		<PackageReference Include="Radzen.Blazor" Version="10.4.4" />
+		<PackageReference Include="Radzen.Blazor" Version="11.2.1" />
 		<PackageReference Include="Semver" Version="3.0.0" />
-		<PackageReference Include="System.CommandLine" Version="2.0.8" />
+		<PackageReference Include="System.CommandLine" Version="2.0.10" />
 	</ItemGroup>
 </Project>
