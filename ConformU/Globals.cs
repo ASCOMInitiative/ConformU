@@ -25,7 +25,7 @@
 
         internal const double UI_SMALL_TRANSITION_SIZE = 1200.0;//767.98;
         internal const double UI_VERY_SMALL_HEIGHT = 500.0;
-        internal const double UI_VERY_SMALL_WIDTH = 550.0;
+        internal const double UI_VERY_SMALL_WIDTH = 500.0;
 
         internal const string USER_AGENT_PRODUCT_NAME = "ConformUniversal";
 
@@ -67,8 +67,8 @@
 
         internal static bool IsVerySmall(double width, double height)
         {
-            if (width < UI_VERY_SMALL_WIDTH)
-                return height < UI_VERY_SMALL_HEIGHT;
+            if (width < UI_VERY_SMALL_WIDTH || height < UI_VERY_SMALL_HEIGHT)
+                return true;
             else
                 return false;
         }

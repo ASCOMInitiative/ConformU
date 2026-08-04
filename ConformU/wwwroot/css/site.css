@@ -92,6 +92,14 @@ app {
     word-break: break-word; /*  break-all; */
 }
 
+.button-row {
+    width: 400px;
+    padding-left: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
 .main {
     flex: 1;
     min-width: 0;

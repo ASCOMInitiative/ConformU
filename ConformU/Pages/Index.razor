@@ -18,23 +18,33 @@
     <h2 style="display: @statusVisible">@(titleMessage)</h2>
 
     @* Buttons *@
-    <div>
-        @if (isSmallWidth)
-        {
-            <RadzenButton Id="StartButton" Click=@(args => StartTest(1)) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 80px;border-radius:20px;" IsBusy=@_configuration.Settings.OperationInProgress />
-            <RadzenButton Id="StopButton" Click=@(args => StopTest()) Text="Stop" Style="margin-bottom: 20px; margin-right: 20px; width: 80px;border-radius:20px;" Disabled=@(!_configuration.Settings.OperationInProgress) />
-            <RadzenButton Id="StressTestButton" Click=@(args => StartTest(int.MaxValue)) ButtonStyle="ButtonStyle.Secondary" Text="Stress" Style="margin-bottom: 20px; margin-right: 20px; width: 80px;border-radius:20px;" Disabled=@(_configuration.Settings.OperationInProgress) />
-            <RadzenButton Id="ConfigureButton" ButtonStyle="ButtonStyle.Info" Shade="Shade.Dark" Click=@(args => GoToSelectionPage("ConfigureButton")) Text="Select" Style="margin-bottom: 10px; margin-right: 10px; width: 80px;border-radius:20px;" Disabled=@_configuration.Settings.OperationInProgress />
-        }
-        else
-        {
+    @if (isSmallWidth)
+    {
+        <div class="button-row">
+            <RadzenButton Id="StartButton" Click=@(args => StartTest(1)) Text="Start"
+                          Style=" width: 79px; margin-bottom: 20px; border-radius:20px;"
+                          IsBusy=@_configuration.Settings.OperationInProgress />
+            <RadzenButton Id="StopButton" Click=@(args => StopTest()) Text="Stop"
+                          Style=" width: 79px; margin-bottom: 20px; border-radius:20px;"
+                          Disabled=@(!_configuration.Settings.OperationInProgress) />
+            <RadzenButton Id="StressTestButton" Click=@(args => StartTest(int.MaxValue)) ButtonStyle="ButtonStyle.Secondary" Text="Stress"
+                          Style=" width: 79px; margin-bottom: 20px; border-radius:20px;"
+                          Disabled=@(_configuration.Settings.OperationInProgress) />
+            <RadzenButton Id="ConfigureButton" ButtonStyle="ButtonStyle.Info" Shade="Shade.Dark" Click=@(args => GoToSelectionPage("ConfigureButton")) Text="Select"
+                          Style=" width: 79px; margin-bottom: 20px; border-radius:20px;"
+                          Disabled=@_configuration.Settings.OperationInProgress />
+        </div>
+    }
+    else
+    {
+        <div>
             <RadzenButton Id="StartButton" Click=@(args => StartTest(1)) Text="Start" Style="margin-bottom: 20px; margin-right: 20px; width: 130px;border-radius:20px;" IsBusy=@_configuration.Settings.OperationInProgress />
             <RadzenButton Id="StopButton" Click=@(args => StopTest()) Text="Stop" Style="margin-bottom: 20px; margin-right: 20px; width: 130px;border-radius:20px;" Disabled=@(!_configuration.Settings.OperationInProgress) />
             <RadzenButton Id="StressTestButton" Click=@(args => StartTest(int.MaxValue)) ButtonStyle="ButtonStyle.Secondary" Text="Stress Test" Style="margin-bottom: 20px; margin-right: 20px; width: 130px;border-radius:20px;" Disabled=@(_configuration.Settings.OperationInProgress) />
             <RadzenButton Id="ConfigureButton" ButtonStyle="ButtonStyle.Info" Shade="Shade.Dark" Click=@(args => GoToSelectionPage("ConfigureButton")) Text="Select Device" Style="margin-bottom: 10px; margin-right: 10px; width: 130px;border-radius:20px;" Disabled=@_configuration.Settings.OperationInProgress />
-        }
+        </div>
+    }
 
-    </div>
 
     @* Conform log *@
     <h4>Conform Log</h4>
@@ -57,7 +67,6 @@
 
 @code {
     private bool isSmallWidth = false;
-    private string buttonWidth;
     private string titleMessage = "";
     private string statusVisible = "initial";
     private string textStyle = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px; width:100%; height:100%;";
@@ -223,7 +232,6 @@
 
             if (isSmallWidth)
                 textStyle = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 12px; line-height: 16px; padding-bottom: 0px; width:100%; height:100%;";
-
             else
                 textStyle = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px; width:100%; height:100%;";
 
