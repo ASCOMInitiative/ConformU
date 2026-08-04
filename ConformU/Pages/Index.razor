@@ -30,8 +30,8 @@
             <RadzenButton Id="StopButton"
                           Click=@(args => StopTest())
                           Text="Stop"
-                          ButtonStyle="ButtonStyle.Secondary"
-                          Style=" width: 79px; margin-bottom: 20px; border-radius:20px;"
+                          ButtonStyle="ButtonStyle.Danger"
+                          Style=" width: 79px; margin-bottom: 20px; border-radius:20px; background-color:red;"
                           Disabled=@(!_configuration.Settings.OperationInProgress) />
             <RadzenButton Id="StressTestButton"
                           Click=@(args => StartTest(int.MaxValue))
@@ -43,7 +43,7 @@
                           Click=@(args => GoToSelectionPage("ConfigureButton"))
                           Text="Select"
                           ButtonStyle="ButtonStyle.Info"
-                          Style=" width: 79px; margin-bottom: 20px; border-radius:20px;"
+                          Style=" width: 79px; margin-bottom: 10px; border-radius:20px;"
                           Shade="Shade.Dark"
                           Disabled=@_configuration.Settings.OperationInProgress />
         </div>
@@ -55,26 +55,26 @@
                           Click=@(args => StartTest(1))
                           Text="Start"
                           ButtonStyle="ButtonStyle.Primary"
-                          Style="margin-bottom: 20px; margin-right: 20px; width: 130px;border-radius:20px;"
+                          Style="width: 130px; margin-bottom: 20px; margin-right:20px; border-radius:20px;"
                           IsBusy=@_configuration.Settings.OperationInProgress />
             <RadzenButton Id="StopButton"
                           Click=@(args => StopTest())
                           Text="Stop"
                           ButtonStyle="ButtonStyle.Danger"
-                          Style="background-color:red; margin-bottom: 20px; margin-right: 20px; width: 130px;border-radius:20px;"
+                          Style="width: 130px; margin-bottom: 20px;  margin-right:20px; border-radius:20px; background-color:red;"
                           Disabled=@(!_configuration.Settings.OperationInProgress) />
             <RadzenButton Id="StressTestButton"
                           Click=@(args => StartTest(int.MaxValue))
                           Text="Stress Test"
                           ButtonStyle="ButtonStyle.Secondary"
-                          Style="margin-bottom: 20px; margin-right: 20px; width: 130px;border-radius:20px;"
+                          Style="width: 130px; margin-bottom: 20px;  margin-right:20px; border-radius:20px;"
                           Disabled=@(_configuration.Settings.OperationInProgress) />
             <RadzenButton Id="ConfigureButton"
                           Click=@(args => GoToSelectionPage("ConfigureButton"))
                           Text="Select Device"
                           ButtonStyle="ButtonStyle.Info"
                           Shade="Shade.Dark"
-                          Style="margin-bottom: 10px; margin-right: 10px; width: 130px;border-radius:20px;"
+                          Style="width: 130px; margin-bottom: 10px; border-radius:20px;"
                           Disabled=@_configuration.Settings.OperationInProgress />
         </div>
     }
