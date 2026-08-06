@@ -58,6 +58,8 @@ namespace ConformU
 
         public bool IsSmall { get; set; } = true;
 
+        public bool IsVerySmall { get; set; } = false;
+
         public void RaiseUiHasChangedEvent()
         {
             if (UiHasChanged is not null)

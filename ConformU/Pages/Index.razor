@@ -103,11 +103,8 @@
 
 @code {
     private bool isSmall = false;
-    private int lastWidth = 0;
-    private int lastHieght = 0;
     private string titleMessage = "";
     private string statusVisible = "initial";
-    private string textStyle = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px; width:100%; height:100%;";
     private bool disposedValue;
     private DotNetObjectReference<Index> resizeCallbackReference; // Callback from JavaScript when the user resizes the browser window.
     object statusLockObject = new object();
@@ -262,16 +259,11 @@
 
             string newTitleMessage = Globals.IsVerySmall(width, height) ? "Conform Universal" : "Welcome to Conform Universal";
 
-            if (width == lastWidth && height == lastHieght && titleMessage == newTitleMessage)
+            if (isSmall == newIsSmall && titleMessage == newTitleMessage)
                 return;
 
             isSmall = newIsSmall;
             titleMessage = newTitleMessage;
-
-            if ((width < Globals.UI_SMALL_TRANSITION_WIDTH) || (height < Globals.UI_SMALL_TRANSITION_HEIGHT))
-                textStyle = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 12px; line-height: 16px; padding-bottom: 0px; width:100%; height:100%;";
-            else
-                textStyle = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px; width:100%; height:100%;";
 
             await InvokeAsync(StateHasChanged);
         }

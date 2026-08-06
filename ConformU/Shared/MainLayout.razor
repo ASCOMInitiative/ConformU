@@ -94,15 +94,16 @@
             bool newIsSmallWidth = titleMessage.Length * 11 > width - 255;
 
             bool newIsSmall = Globals.IsSmall(width, height);
-
+            bool newIsverySmall = Globals.IsVerySmall(width, height);
 
             // Check whether the value has changed, if not return quickly
-            if (state.IsSmall == newIsSmall && isSmallWidth == newIsSmallWidth)
+            if (state.IsSmall == newIsSmall && isSmallWidth == newIsSmallWidth && state.IsVerySmall == newIsverySmall)
                 return;
 
             // Value is different so force a Blazor re-display
             state.IsSmall = newIsSmall;
             isSmallWidth = newIsSmallWidth;
+            state.IsVerySmall = newIsverySmall;
             state.RaiseUiHasChangedEvent();
             await InvokeAsync(StateHasChanged);
         }

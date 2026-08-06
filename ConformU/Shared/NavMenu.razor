@@ -11,8 +11,14 @@
     {
         @if (state.IsSmall)@* Operation in progress and screen is small *@
         {
-            <span class="navbar-brand">Welcome to Conform Universal</span>
-
+            @if(Update.UpdateAvailable()&& state.IsVerySmall) @* Update available and very small width *@
+            {
+                <span class="navbar-brand">Conform Universal</span>
+            }
+            else @* Update available and not very small width *@
+            {
+                <span class="navbar-brand">Welcome to Conform Universal</span>
+            }
             <span class="operation-status" style="text-align:left; color: yellow"><b>Running...</b></span>
         }
         else
@@ -26,7 +32,23 @@
     {
         @if (state.IsSmall)@* No operation and screen is small *@
         {
-            <span class="navbar-brand" style="text-align: left">Welcome to Conform Universal</span>
+            @if(Update.UpdateAvailable())
+            {
+                @if(state.IsVerySmall)
+                {
+                    <span class="navbar-brand" style="text-align: left">Conform Universal</span>
+                    <span class="operation-status" style="text-align:left; font-size:small; color: yellow;"><b>(Update available)</b></span>
+                }
+                else
+                {
+                    <span class="navbar-brand" style="text-align: left">Welcome to Conform Universal</span>
+                    <span class="operation-status" style="text-align:left; font-size:small; color: yellow;"><b>(Update available)</b></span>
+                }
+            }
+            else
+            {
+                <span class="navbar-brand" style="text-align: left">Welcome to Conform Universal</span>
+            }
         }
         else
         @* No operation and screen is normal *@
