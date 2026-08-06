@@ -23,7 +23,8 @@
         internal const int MESSAGE_LEVEL_WIDTH = 8; // Width to which the message level will be padded
         internal const int TEST_NAME_WIDTH = 35; // Width allowed for test names in screen display and log files
 
-        internal const double UI_SMALL_TRANSITION_SIZE = 1200.0;//767.98;
+        internal const double UI_SMALL_TRANSITION_WIDTH = 1200.0;
+        internal const double UI_SMALL_TRANSITION_HEIGHT = 768.0;
         internal const double UI_VERY_SMALL_HEIGHT = 500.0;
         internal const double UI_VERY_SMALL_WIDTH = 500.0;
 
@@ -61,8 +62,8 @@
 
         internal static bool IsSmall(double width, double height)
         {
-            //return (width < UI_SMALL_TRANSITION_SIZE) || (height < UI_SMALL_TRANSITION_SIZE);
-            return (width < UI_SMALL_TRANSITION_SIZE);
+            return (width < UI_SMALL_TRANSITION_WIDTH) || (height < UI_SMALL_TRANSITION_HEIGHT) || (height > width);
+            //return (width < UI_SMALL_TRANSITION_SIZE);
         }
 
         internal static bool IsVerySmall(double width, double height)

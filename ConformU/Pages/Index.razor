@@ -17,10 +17,8 @@
 <div id="IndexPage" style="display:flex; flex-direction:column; min-height:320px;">
 
     @* Buttons *@
-    @if (isSmallWidth) @* When the display is small *@
+    @if (isSmall) @* When the display is small *@
     {
-        <h4 style="display: @statusVisible;"><b>@(titleMessage)</b></h4>
-
         <div class="button-row">
             <RadzenButton Id="StartButton"
                           Click=@(args => StartTest(1))
@@ -50,7 +48,8 @@
         </div>
         <h5>Conform Log</h5>
     }
-    else @* When the display is normal *@
+    else
+    @* When the display is normal *@
     {
         <h2 style="display: @statusVisible">@(titleMessage)</h2>
         <div>
@@ -87,7 +86,7 @@
     @* Conform log *@
     <div style="flex: 1 1 auto; min-height: 150px; margin-bottom:6px;">
         <RadzenTextArea Id="ConformLog"
-                        Style=@textStyle
+                        class="textarea"
                         Name="_conformState.ScreenLog"
                         @bind-Value=@_conformState.ConformLog
                         Cols="250"
@@ -95,7 +94,7 @@
     </div>
 
     @* Status line *@
-    <div style="margin-top:12px;display :@statusVisible">
+    <div style="margin-top:12px; display :@statusVisible">
         <RadzenTextBox Id="Status"
                        Style="width: 100%; margin-bottom:6px; margin-right:20px; margin-top:0px"
                        @bind-Value=@statusMessage />
@@ -103,7 +102,9 @@
 </div>
 
 @code {
-    private bool isSmallWidth = false;
+    private bool isSmall = false;
+    private int lastWidth = 0;
+    private int lastHieght = 0;
     private string titleMessage = "";
     private string statusVisible = "initial";
     private string textStyle = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px; width:100%; height:100%;";
@@ -257,17 +258,17 @@
     {
         try
         {
-            bool newIsSmallWidth = Globals.IsSmall(width, 20000); // Force the isSmall to only reflect the width not the height.
+            bool newIsSmall = Globals.IsSmall(width, height); // Force the isSmall to only reflect the width not the height.
 
             string newTitleMessage = Globals.IsVerySmall(width, height) ? "Conform Universal" : "Welcome to Conform Universal";
 
-            if (isSmallWidth == newIsSmallWidth && titleMessage == newTitleMessage)
+            if (width == lastWidth && height == lastHieght && titleMessage == newTitleMessage)
                 return;
 
-            isSmallWidth = newIsSmallWidth;
+            isSmall = newIsSmall;
             titleMessage = newTitleMessage;
 
-            if (isSmallWidth)
+            if ((width < Globals.UI_SMALL_TRANSITION_WIDTH) || (height < Globals.UI_SMALL_TRANSITION_HEIGHT))
                 textStyle = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 12px; line-height: 16px; padding-bottom: 0px; width:100%; height:100%;";
             else
                 textStyle = "font-family: \"Lucida Console\", \"Courier New\", monospace; font-size: 14px; line-height: 18px; padding-bottom: 0px; width:100%; height:100%;";

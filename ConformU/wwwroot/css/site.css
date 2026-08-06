@@ -1,7 +1,7 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
 /* Apply compact styling to small viewports. */
-@media (max-width: 1024px), (max-height: 768px) {
+@media (max-width: 1200px), (max-height: 768px) {
     .rz-colorpicker, .rz-lookup-search input, .rz-spinner, .rz-calendar .rz-inputtext, .rz-multiselect, .rz-dropdown, .mask, .rz-textarea, .rz-textbox, .rz-radiobutton-label, .label,
     input {
         font-size: 0.8rem;
@@ -34,8 +34,20 @@ ul[role=tablist] {
 }
 
 /* Make the Radzen text area occupy 100% of the browser space */
-textarea {
+.rz-textarea {
+    font-family: "Lucida Console", "Courier New", monospace;
+    font-size: 14px;
+    line-height: 18px;
+    padding-bottom: 0px;
     width: 100%;
+    height: 100%;
+}
+
+@media (max-width: 1000px), (max-height: 768px) {
+    .rz-textarea {
+        font-size: 12px;
+        line-height: 16px;
+    }
 }
 
 /* Override the default radzen checkbox unchecked background colour when disabled > */
@@ -94,9 +106,9 @@ app {
 
 .button-row {
     width: 400px;
-    padding-left: 10px;
+    padding-left: 0px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 12px;
 }
 
@@ -212,7 +224,7 @@ app {
         top: 0.5rem;
     }
 
-@media (max-width: 1199.98px) {
+@media (max-width: 1200px), (max-height: 768px), (orientation: portrait) {
     .sidebar .top-row .navbar-brand {
         order: 1;
     }
@@ -240,19 +252,13 @@ app {
     }
 }
 
-@media (min-width:1200px) and (max-width: 1513px) {
-    .top-row-text {
-        /*display: none; */
-        /*font-size: smaller;*/
-        /*margin-left: 0px;*/
-    }
-
+@media (max-width: 1513px) {
     .top-row-visible {
         display: none;
     }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1200px) and (min-height: 768px) and (orientation: landscape) {
     app {
         flex-direction: row;
     }
