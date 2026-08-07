@@ -5,7 +5,7 @@ using static ConformU.Globals;
 
 namespace ConformU
 {
-    public class ConformLogger : TraceLogger, ITraceLogger, IDisposable
+    public class ConformLogger : TraceLogger, IAppLogger, ITraceLogger, IDisposable
     {
         static ConformLogger()
         {
@@ -163,6 +163,7 @@ namespace ConformU
 
         }
 
+        public void LogDebug(string method, string message) => LogMessage(method, MessageLevel.Debug, message);
 
     }
 }

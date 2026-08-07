@@ -164,7 +164,7 @@
             _conformState.SafetyWarningDisplayed = true;
         }
 
-        statusMessage = $"Version {Update.ConformuVersionDisplayString}";
+        statusMessage = $"Version {Update.VersionDisplayString}";
 
         string processBitness = Environment.Is64BitProcess ? "64" : "32";
         string osBitness = Environment.Is64BitOperatingSystem ? "64" : "32";
@@ -181,13 +181,13 @@
         statusMessage += $"        Running as a {processBitness}bit application on a {osBitness}bit {architecture} processor.        OS: {osName}";
 
         // Validate that the application SEMVER string is valid
-        if (SemVersion.TryParse(Update.ConformuVersion, SemVersionStyles.AllowV, out SemVersion currentversion))
+        if (SemVersion.TryParse(Update.VersionString, SemVersionStyles.AllowV, out SemVersion currentversion))
         {
             // Validates OK, no action required
         }
         else
         {
-            _conformState.ConformLog += $"\r\n\r\nINVALID PRODUCT VERSION: {Update.ConformuVersion}";
+            _conformState.ConformLog += $"\r\n\r\nINVALID PRODUCT VERSION: {Update.VersionString}";
         }
 
 #if WINDOWS

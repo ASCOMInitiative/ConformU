@@ -53,9 +53,8 @@
 
         #region Global Variables
 
-        // Variables shared between the test manager and device testers        
-        // (removed static conformResults - it is now an instance field on ConformanceTestManager)
-
+        internal const string GITHUB_OWNER = "ASCOMInitiative"; //"Peter-Simpson";
+        internal const string GITHUB_REPOSITORY = "ConformU"; // "ReleaseTester";
         #endregion
 
         #region Static classes

@@ -62,7 +62,7 @@ namespace ConformU
 
                 // ROOT command
                 var rootCommand = new RootCommand(
-                    $"Conform Universal {Update.ConformuVersionDisplayString}\r\nCopyright (c) 2021-{DateTime.Now.Year} Peter Simpson\r\n\r\nEnter conformu [command] -h for information on options available in each command.\r\n\r\nIf no command or options are provided Conform Universal will start as a GUI application using default parameters."
+                    $"Conform Universal {Update.VersionDisplayString}\r\nCopyright (c) 2021-{DateTime.Now.Year} Peter Simpson\r\n\r\nEnter conformu [command] -h for information on options available in each command.\r\n\r\nIf no command or options are provided Conform Universal will start as a GUI application using default parameters."
                 );
 
                 // Remove the built-in --version option so our custom handler is used instead
@@ -610,7 +610,7 @@ namespace ConformU
         {
             if (version)
             {
-                Console.WriteLine($"\r\nConform Universal {Update.ConformuVersionDisplayString}");
+                Console.WriteLine($"\r\nConform Universal {Update.VersionDisplayString}");
             }
             else
             {
