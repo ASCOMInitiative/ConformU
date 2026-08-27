@@ -94,9 +94,9 @@ namespace ConformU
         {
             get
             {
-                string? informationalVersion = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+                string informationalVersion = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
-                SemVersion.TryParse(informationalVersion, SemVersionStyles.AllowV, out SemVersion? semver);
+                SemVersion.TryParse(informationalVersion, SemVersionStyles.AllowV, out SemVersion semver);
                 if (semver is not null)
                     return $"{semver.Major}.{semver.Minor}.{semver.Patch}{(semver.Prerelease == "" ? "" : "-")}{semver.Prerelease} (Build {semver.Metadata})";
                 else
@@ -108,7 +108,7 @@ namespace ConformU
 
         #region Public methods
 
-        public static async Task<IReadOnlyList<Octokit.Release>> GetReleases(IAppLogger? logger = null)
+        public static async Task<IReadOnlyList<Octokit.Release>> GetReleases(IAppLogger logger = null)
         {
             try
             {
@@ -131,7 +131,7 @@ namespace ConformU
             }
         }
 
-        public static async Task CheckForUpdates(IAppLogger? logger = null)
+        public static async Task CheckForUpdates(IAppLogger logger = null)
         {
             try
             {
@@ -152,7 +152,7 @@ namespace ConformU
             }
         }
 
-        public static bool UpdateAvailable(IAppLogger? logger = null)
+        public static bool UpdateAvailable(IAppLogger logger = null)
         {
             try
             {
@@ -160,14 +160,14 @@ namespace ConformU
                 {
                     if (Releases.Count > 0)
                     {
-                        if (SemVersion.TryParse(Update.VersionString, SemVersionStyles.AllowV, out SemVersion? currentversion))
+                        if (SemVersion.TryParse(Update.VersionString, SemVersionStyles.AllowV, out SemVersion currentversion))
                         {
                             logger?.LogDebug("UpdateAvailable", $"Update - Application semver - Major: {currentversion.Major}, Minor: {currentversion.Minor}, Patch: {currentversion.Patch}, Pre-release: {currentversion.Prerelease}, Metadata: {currentversion.Metadata}");
-                            Octokit.Release? Release = Releases?.Latest();
+                            Octokit.Release Release = Releases?.Latest();
 
                             if (Release != null)
                             {
-                                if (SemVersion.TryParse(Release.TagName, SemVersionStyles.AllowV, out SemVersion? latestrelease))
+                                if (SemVersion.TryParse(Release.TagName, SemVersionStyles.AllowV, out SemVersion latestrelease))
                                 {
                                     logger?.LogDebug("UpdateAvailable", $"Update - Found release semver - Major: {latestrelease.Major}, Minor: {latestrelease.Minor}, Patch: {latestrelease.Patch}, Pre-release: {latestrelease.Prerelease}, Metadata: {latestrelease.Metadata}");
                                     return SemVersion.ComparePrecedence(currentversion, latestrelease) == -1;
@@ -196,23 +196,23 @@ namespace ConformU
         /// Set properties according to the releases returned
         /// </summary>
         /// <param name="logger">ILogger instance to record operational messages</param>
-        private static void SetProperties(IAppLogger? logger)
+        private static void SetProperties(IAppLogger logger)
         {
             try
             {
                 logger?.LogDebug("Update.SetProperties", $"Update - SetProperties Running...");
-                if (SemVersion.TryParse(Update.VersionString, SemVersionStyles.AllowV, out SemVersion? installedVersion))
+                if (SemVersion.TryParse(Update.VersionString, SemVersionStyles.AllowV, out SemVersion installedVersion))
                 {
                     logger?.LogDebug("Update.SetProperties", $"Update - Installed version: {installedVersion}");
 
-                    Octokit.Release? latestRelease = Update.Releases?.LatestRelease();
-                    Octokit.Release? latestPreRelease = Update.Releases?.LatestPrerelease();
+                    Octokit.Release latestRelease = Update.Releases?.LatestRelease();
+                    Octokit.Release latestPreRelease = Update.Releases?.LatestPrerelease();
                     if ((latestRelease is not null) & (latestPreRelease is not null))
                     {
 
-                        bool latesOk = SemVersion.TryParse(latestRelease?.TagName, SemVersionStyles.AllowV, out SemVersion? latestVersion);
+                        bool latesOk = SemVersion.TryParse(latestRelease?.TagName, SemVersionStyles.AllowV, out SemVersion latestVersion);
 
-                        bool latestPreOk = SemVersion.TryParse(latestPreRelease?.TagName, SemVersionStyles.AllowV, out SemVersion? latestPreReleaseVersion);
+                        bool latestPreOk = SemVersion.TryParse(latestPreRelease?.TagName, SemVersionStyles.AllowV, out SemVersion latestPreReleaseVersion);
 
                         logger?.LogDebug("Update.SetProperties", $"Update - Installed version: {installedVersion}, Latest release: {latestVersion}, Latest pre-release: {latestPreReleaseVersion}");
                         logger?.LogDebug("Update.SetProperties", $"Update - ComparePrecedence(installedVersion, latestVersion): {SemVersion.ComparePrecedence(installedVersion, latestVersion)}");
