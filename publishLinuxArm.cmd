@@ -13,8 +13,16 @@ cd
 MSBuild ConformU.sln /p:Configuration=Debug /p:Platform="Any CPU" /t:Rebuild
 echo *** Completed Build
 
-echo *** Publishing Windows ARM 64bit
-dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r win-arm64 --framework net10.0-windows --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true -o ./publish/ConformUArm64/
+echo *** Publishing Linux ARM32
+dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r linux-arm --framework net10.0 --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true /p:UseAppHost=true /p:PublishReadyToRun=true -o ./publish/LinuxArm32/
+rem bsdtar -cJf publish/conformu.linux-arm32.needsexec.tar.xz -C ConformU\bin\Debug\net10.0\linux-arm\publish\ *
+echo *** Completed Linux ARM32
+
+echo *** Publishing Linux ARM64
+dotnet publish ConformU/ConformU.csproj -c Debug /p:Platform="Any CPU" -r linux-arm64 --framework net10.0 --self-contained true /p:PublishTrimmed=false /p:PublishSingleFile=true /p:UseAppHost=true /p:PublishReadyToRun=true -o ./publish/LinuxArm64/
+rem bsdtar -cJf publish/conformu.linux-arm64.needsexec.tar.xz -C ConformU\bin\Debug\net10.0\linux-arm64\publish\ *
+echo *** Completed Linux ARM64
+
 echo *** Completed 64bit publish
 
 echo *** Builds complete

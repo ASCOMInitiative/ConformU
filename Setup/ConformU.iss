@@ -27,7 +27,7 @@
 #define MyAppUpdatesURL "https://github.com/ASCOMInitiative/ConformU/releases"
 #define MyAppExeName "ConformU.exe"
 #define MyAppAuthor "Peter Simpson"
-#define MyAppCopyright "Copyright © 2024 " + MyAppAuthor
+#define MyAppCopyright "Copyright © 2026 " + MyAppAuthor
 #define MyAppVersion GetVersionNumbersString("..\publish\ConformU64\conformu.exe")  ; Create version number variable
 
 [Setup]
@@ -40,7 +40,7 @@ AppSupportURL={#MyAppSupportURL}
 AppUpdatesURL={#MyAppUpdatesURL}
 AppVerName={#MyAppName}
 AppVersion={#MyAppVersion}
-ArchitecturesInstallIn64BitMode=x64 arm64
+ArchitecturesInstallIn64BitMode=x64compatible arm64
 Compression=lzma2/max
 DefaultDirName={autopf}\ASCOM\ConformU
 DefaultGroupName=ASCOMConformUniversal
@@ -102,10 +102,10 @@ Source: "..\publish\ConformUArm64\*"; DestDir: "{app}"; Flags: ignoreversion; Ex
 Source: "..\publish\ConformUArm64\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode and IsARM64
 
 ; Intel 64bit OS - Install the 64bit app
-Source: "..\publish\ConformUx64\*.exe"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode and IsX64
-Source: "..\publish\ConformUx64\*.dll"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode and IsX64
-Source: "..\publish\ConformUx64\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode and IsX64
-Source: "..\publish\ConformUx64\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode and IsX64
+Source: "..\publish\ConformUx64\*.exe"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode and IsX64OS
+Source: "..\publish\ConformUx64\*.dll"; DestDir: "{app}"; Flags: ignoreversion signonce; Check: Is64BitInstallMode and IsX64OS
+Source: "..\publish\ConformUx64\*"; DestDir: "{app}"; Flags: ignoreversion; Excludes:"*.exe,*.dll"; Check: Is64BitInstallMode and IsX64OS
+Source: "..\publish\ConformUx64\wwwroot\*"; DestDir: "{app}\wwwroot"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: Is64BitInstallMode and IsX64OS
 
 ; Intel 64bit OS - Install the 32bit app
 Source: "..\publish\ConformUx86\*.exe"; DestDir: "{app}\32bit"; Flags: ignoreversion signonce; Check: Is64BitInstallMode
