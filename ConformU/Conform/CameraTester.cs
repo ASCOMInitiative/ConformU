@@ -761,7 +761,11 @@ namespace ConformU
                         LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                         TimeMethod("ImageArrayVariant", () => mImageArrayVariant = (Array)camera.ImageArrayVariant, TargetTime.Extended);
 
-                        if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
+                        if (settings.DeviceTechnology == DeviceTechnology.Alpaca)
+                        {
+                            LogOk("ImageArrayVariant", "ImageArrayVariant returned an image array");
+                        }
+                        else if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
                         {
                             LogIssue("ImageArrayVariant", "No image has been taken but ImageArrayVariant has not returned an error");
                         }
@@ -772,7 +776,11 @@ namespace ConformU
                     }
                     catch (Exception ex)
                     {
-                        if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
+                        if (IsExpectedAlpacaImageArrayVariantException(ex))
+                        {
+                            HandleException("ImageArrayVariant", MemberType.Property, Required.MustNotBeImplemented, ex, "Alpaca cameras may omit ImageArrayVariant");
+                        }
+                        else if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
                         {
                             LogOk("ImageArrayVariant", $"Received error before an image has been taken: {ex.Message}");
                         }
@@ -789,11 +797,17 @@ namespace ConformU
                     {
                         LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                         TimeMethod("ImageArrayVariant", () => mImageArrayVariant = (Array)camera.ImageArrayVariant, TargetTime.Extended);
-                        LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not returned an error");
+                        if (settings.DeviceTechnology == DeviceTechnology.Alpaca)
+                            LogOk("ImageArrayVariant", "ImageArrayVariant returned an image array");
+                        else
+                            LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArrayVariant has not returned an error");
                     }
                     catch (Exception ex)
                     {
-                        LogOk("ImageArrayVariant", $"Received error when ImageReady is false: {ex.Message}");
+                        if (IsExpectedAlpacaImageArrayVariantException(ex))
+                            HandleException("ImageArrayVariant", MemberType.Property, Required.MustNotBeImplemented, ex, "Alpaca cameras may omit ImageArrayVariant");
+                        else
+                            LogOk("ImageArrayVariant", $"Received error when ImageReady is false: {ex.Message}");
                     }
                 }
             }
@@ -3396,7 +3410,7 @@ namespace ConformU
                     CancellationTokenSource iavTokenSource = new();
                     CancellationToken iavToken = iavTokenSource.Token;
 
-                    Task iavTask = Task.Factory.StartNew<bool>(() =>
+                    Task<bool> iavTask = Task.Factory.StartNew(() =>
                     {
                         bool gotImageOk = false;
                         try
@@ -3413,7 +3427,7 @@ namespace ConformU
                             // Assign the array to the application variable if the task is not cancelled
                             if (!cancellationToken.IsCancellationRequested) // Completed successfully
                             {
-                                mImageArrayVariant = (Array)imageObject;
+                                mImageArrayVariant = imageObject as Array ?? throw new InvalidCastException("ImageArrayVariant did not return an array");
                                 gotImageOk = true;
                             }
                             else // Operation cancelled
@@ -3439,8 +3453,13 @@ namespace ConformU
                         {
                             if (!cancellationToken.IsCancellationRequested) // Only log the error if the task has not been cancelled
                             {
-                                LogIssue("ImageArrayVariant", $"Error when reading ImageArrayVariant: {ex.Message}");
-                                LogDebug("ImageArrayVariant", $"Exception detail: {ex}");
+                                if (IsExpectedAlpacaImageArrayVariantException(ex))
+                                    HandleException("ImageArrayVariant", MemberType.Property, Required.MustNotBeImplemented, ex, "Alpaca cameras may omit ImageArrayVariant");
+                                else
+                                {
+                                    LogIssue("ImageArrayVariant", $"Error when reading ImageArrayVariant: {ex.Message}");
+                                    LogDebug("ImageArrayVariant", $"Exception detail: {ex}");
+                                }
                             }
                         }
 
@@ -3520,10 +3539,10 @@ namespace ConformU
                         return;
                     }
 
-                    // Test image array variant array for conformity
-                    if ((mImageArrayVariant.GetLength(0) == requiredNumX) & (mImageArrayVariant.GetLength(1) == requiredNumY))
+                    // A not-implemented result is valid for Alpaca; validate pixels only when an array was returned.
+                    if (iavTask.Result)
                     {
-                        if (mImageArrayVariant.GetType().ToString() == "System.Object[,]" | mImageArrayVariant.GetType().ToString() == "System.Object[,,]")
+                        if (IsValidImageArrayVariant(mImageArrayVariant, requiredNumX, requiredNumY))
                         {
                             if (mImageArrayVariant.Rank == 2)
                             {
@@ -3544,16 +3563,18 @@ namespace ConformU
                             }
                             LogOk("ImageArrayVariant", $"Successfully read variant array ({numPlanes}) with {variantType} elements {mImageArrayVariant.GetLength(0)} x {mImageArrayVariant.GetLength(1)} pixels in {sw.ElapsedMilliseconds}ms.");
                         }
-                        else
+                        else if ((mImageArrayVariant.GetLength(0) == requiredNumX) & (mImageArrayVariant.GetLength(1) == requiredNumY))
+                        {
                             LogIssue("ImageArrayVariant",
                                 $"Expected variant array, actually got: {mImageArrayVariant.GetType()}");
+                        }
+                        else if ((mImageArrayVariant.GetLength(0) == requiredNumY) & (mImageArrayVariant.GetLength(1) == requiredNumX))
+                            LogIssue("ImageArrayVariant",
+                                $"Camera image dimensions swapped, expected values: {requiredNumX} x {requiredNumY} - actual values: {mImageArrayVariant.GetLength(0)} x {mImageArrayVariant.GetLength(1)}");
+                        else
+                            LogIssue("ImageArrayVariant",
+                                $"Camera image does not have the expected dimensions of: {requiredNumX} x {requiredNumY} - actual values: {mImageArrayVariant.GetLength(0)} x {mImageArrayVariant.GetLength(1)}");
                     }
-                    else if ((mImageArrayVariant.GetLength(0) == requiredNumY) & (mImageArrayVariant.GetLength(1) == requiredNumX))
-                        LogIssue("ImageArrayVariant",
-                            $"Camera image dimensions swapped, expected values: {requiredNumX} x {requiredNumY} - actual values: {mImageArrayVariant.GetLength(0)} x {mImageArrayVariant.GetLength(1)}");
-                    else
-                        LogIssue("ImageArrayVariant",
-                            $"Camera image does not have the expected dimensions of: {requiredNumX} x {requiredNumY} - actual values: {mImageArrayVariant.GetLength(0)} x {mImageArrayVariant.GetLength(1)}");
 
                     // Release memory currently consumed by images
                     ReleaseMemory();
@@ -3970,6 +3991,20 @@ namespace ConformU
                 LogDebug(pName, $"Exception detail:\r\n {ex}");
             }
         }
+
+        internal static bool IsExpectedAlpacaImageArrayVariantException(DeviceTechnology technology, Exception ex) =>
+            technology == DeviceTechnology.Alpaca &&
+            (ex is PropertyNotImplementedException or ASCOM.NotImplementedException);
+
+        internal static bool IsValidImageArrayVariant(Array imageArray, int requiredNumX, int requiredNumY) =>
+            (imageArray is object[,] or object[,,]) &&
+            imageArray.GetLength(0) == requiredNumX &&
+            imageArray.GetLength(1) == requiredNumY;
+
+        private bool IsExpectedAlpacaImageArrayVariantException(Exception ex) =>
+            settings.DeviceTechnology == DeviceTechnology.Alpaca &&
+            (IsExpectedAlpacaImageArrayVariantException(settings.DeviceTechnology, ex) ||
+             IsPropertyNotImplementedException(ex) || IsNotImplementedException(ex));
 
         /// <summary>
         /// Release memory allocated to the large arrays on the large object heap.

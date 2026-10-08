@@ -56,7 +56,8 @@ namespace ConformU
             None,
             AxisRates,
             DeviceState,
-            ImageArray
+            ImageArray,
+            ImageArrayVariant
         }
 
         #region New and Dispose
@@ -644,7 +645,7 @@ namespace ConformU
                     await GetNoParameters("ImageArray", additionalParameterCheck: AdditionalParameterCheck.ImageArray);
 
                     SetStatus("Getting ImageArrayVariant...");
-                    await GetNoParameters("ImageArrayVariant", additionalParameterCheck: AdditionalParameterCheck.ImageArray);
+                    await GetNoParameters("ImageArrayVariant", additionalParameterCheck: AdditionalParameterCheck.ImageArrayVariant);
 
                     // Remove any added fast image download headers
                     if ((settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.Base64HandOff) | (settings.AlpacaConfiguration.ImageArrayTransferType == ImageArrayTransferType.BestAvailable))
@@ -2527,6 +2528,7 @@ namespace ConformU
                                                     break;
 
                                                 case AdditionalParameterCheck.ImageArray:
+                                                case AdditionalParameterCheck.ImageArrayVariant:
                                                     // Check whether the root element has a Type parameter
                                                     if (rootElement.TryGetProperty(TYPE_PARAMETER_NAME, out _)) // A Type parameter exists
                                                     {
@@ -2623,7 +2625,11 @@ namespace ConformU
                                             else // Not a base 64 hand-off response so report the missing Value parameter
                                             {
                                                 // Decide whether to report the missing Value parameter
-                                                if (!settings.AlpacaConfiguration.ProtocolStrictChecks & returnedErrorNumber != 0) // We are in tolerant mode and an error was returned
+                                                if (additionalParameterCheck == AdditionalParameterCheck.ImageArrayVariant & returnedErrorNumber == AlpacaErrors.NotImplemented)
+                                                {
+                                                    LogOk(testName, "ImageArrayVariant returned the expected NotImplemented error", responseString);
+                                                }
+                                                else if (!settings.AlpacaConfiguration.ProtocolStrictChecks & returnedErrorNumber != 0) // We are in tolerant mode and an error was returned
                                                 {
                                                     // No action, we tolerate an absent Value parameter when the device returns an error and Conform is in tolerant mode.
                                                 }
