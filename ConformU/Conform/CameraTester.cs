@@ -747,10 +747,7 @@ namespace ConformU
             // Release memory currently consumed by images
             ReleaseMemory();
 
-            // ImageArrayVariant
-            // Release memory currently consumed by images
-            ReleaseMemory();
-
+            // ImageArrayVariant - Optional
             SetFullStatus("ImageArrayVariant", "Getting image data from device...", "");
             if (settings.CameraTestImageArrayVariant) // Test if configured to do so
             {
@@ -769,6 +766,10 @@ namespace ConformU
                         {
                             LogOk("ImageArrayVariant", "ImageArray read OK");
                         }
+                    }
+                    catch (ASCOM.NotImplementedException ex) // Handle cases where the driver does not implement the optional ImageArrayVariant property
+                    {
+                        HandleException("ImageArrayVariant", MemberType.Property, Required.Optional, ex, "");
                     }
                     catch (Exception ex)
                     {
@@ -789,7 +790,11 @@ namespace ConformU
                     {
                         LogCallToDriver("ConformanceCheck", "About to get ImageArrayVariant");
                         TimeMethod("ImageArrayVariant", () => mImageArrayVariant = (Array)camera.ImageArrayVariant, TargetTime.Extended);
-                        LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArray has not returned an error");
+                        LogIssue("ImageArrayVariant", "ImageReady is false and no image has been taken but ImageArrayVariant did not return an error");
+                    }
+                    catch (ASCOM.NotImplementedException ex) // Handle cases where the driver does not implement the optional ImageArrayVariant property
+                    {
+                        HandleException("ImageArrayVariant", MemberType.Property, Required.Optional, ex, "");
                     }
                     catch (Exception ex)
                     {
@@ -3396,9 +3401,9 @@ namespace ConformU
                     CancellationTokenSource iavTokenSource = new();
                     CancellationToken iavToken = iavTokenSource.Token;
 
-                    Task iavTask = Task.Factory.StartNew<bool>(() =>
+                    Task<Exception> iavTask = Task.Factory.StartNew<Exception>(() =>
                     {
-                        bool gotImageOk = false;
+                        Exception returnException = null;
                         try
                         {
                             object imageObject = null;
@@ -3414,7 +3419,6 @@ namespace ConformU
                             if (!cancellationToken.IsCancellationRequested) // Completed successfully
                             {
                                 mImageArrayVariant = (Array)imageObject;
-                                gotImageOk = true;
                             }
                             else // Operation cancelled
                             {
@@ -3433,6 +3437,15 @@ namespace ConformU
                                 // Log an error
                                 LogError("ImageArrayVariant", $"OutOfMemoryException - Conform Universal or the device ran out of memory: {ex.Message}");
                                 LogDebug("ImageArrayVariant", $"Exception detail: {ex}");
+                                returnException = ex;
+                            }
+                        }
+                        catch (ASCOM.NotImplementedException ex)
+                        {
+                            if (!cancellationToken.IsCancellationRequested) // Only log the error if the task has not been cancelled
+                            {
+                                HandleException("ImageArrayVariant", MemberType.Property, Required.Optional, ex, "");
+                                returnException = ex;
                             }
                         }
                         catch (Exception ex)
@@ -3441,11 +3454,13 @@ namespace ConformU
                             {
                                 LogIssue("ImageArrayVariant", $"Error when reading ImageArrayVariant: {ex.Message}");
                                 LogDebug("ImageArrayVariant", $"Exception detail: {ex}");
+                                returnException = ex;
                             }
                         }
 
                         // Return a result indicating whether we got the image OK
-                        return gotImageOk;
+                        LogDebug("ImageArrayVariant", $"Return exception is {(returnException is null ? "null" : returnException.Message)}.");
+                        return returnException;
                     }, iavToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
 
                     bool ranToCompletion = false;
@@ -3515,6 +3530,13 @@ namespace ConformU
 
                     // Exit if cancelled
                     if (ApplicationCancellationToken.IsCancellationRequested)
+                    {
+                        ResetTestActionStatus();
+                        return;
+                    }
+
+                    // Exit if unsuccessful
+                    if (iavTask.Result is not null)
                     {
                         ResetTestActionStatus();
                         return;
