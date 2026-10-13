@@ -747,7 +747,7 @@ namespace ConformU
             // Release memory currently consumed by images
             ReleaseMemory();
 
-            // ImageArrayVariant - Optional
+            // ImageArrayVariant - Mandatory for COM, Optional (deprecated) for Alpaca.
             SetFullStatus("ImageArrayVariant", "Getting image data from device...", "");
             if (settings.CameraTestImageArrayVariant) // Test if configured to do so
             {
@@ -767,19 +767,23 @@ namespace ConformU
                             LogOk("ImageArrayVariant", "ImageArray read OK");
                         }
                     }
-                    catch (ASCOM.NotImplementedException ex) // Handle cases where the driver does not implement the optional ImageArrayVariant property
-                    {
-                        HandleException("ImageArrayVariant", MemberType.Property, Required.Optional, ex, "");
-                    }
                     catch (Exception ex)
                     {
-                        if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
+                        // Check if this is a not implemented exception from an Alpaca device
+                        if ((settings.DeviceTechnology == DeviceTechnology.Alpaca) && (ex is ASCOM.NotImplementedException)) // This is an Alpaca not implemented exception so handle as optional.
                         {
-                            LogOk("ImageArrayVariant", $"Received error before an image has been taken: {ex.Message}");
+                            HandleException("ImageArrayVariant", MemberType.Property, Required.Optional, ex, "");
                         }
-                        else // Omit first use tests
+                        else
                         {
-                            LogIssue("ImageArrayVariant", $"Conform is configured to omit \"First use\" tests and ImageReady is true, but ImageArrayVariant returned an error: {ex.Message}");
+                            if (settings.CameraFirstUseTests) // Only perform this test if configured to do so
+                            {
+                                LogOk("ImageArrayVariant", $"Received error before an image has been taken: {ex.Message}");
+                            }
+                            else // Omit first use tests
+                            {
+                                LogIssue("ImageArrayVariant", $"Conform is configured to omit \"First use\" tests and ImageReady is true, but ImageArrayVariant returned an error: {ex.Message}");
+                            }
                         }
                         LogDebug("ImageArrayVariant", $"Exception detail:\r\n{ex}");
                     }
@@ -799,6 +803,7 @@ namespace ConformU
                     catch (Exception ex)
                     {
                         LogOk("ImageArrayVariant", $"Received error when ImageReady is false: {ex.Message}");
+                        LogDebug("ImageArrayVariant", $"Exception detail:\r\n{ex}");
                     }
                 }
             }
@@ -3437,25 +3442,25 @@ namespace ConformU
                                 // Log an error
                                 LogError("ImageArrayVariant", $"OutOfMemoryException - Conform Universal or the device ran out of memory: {ex.Message}");
                                 LogDebug("ImageArrayVariant", $"Exception detail: {ex}");
-                                returnException = ex;
                             }
-                        }
-                        catch (ASCOM.NotImplementedException ex)
-                        {
-                            if (!cancellationToken.IsCancellationRequested) // Only log the error if the task has not been cancelled
-                            {
-                                HandleException("ImageArrayVariant", MemberType.Property, Required.Optional, ex, "");
-                                returnException = ex;
-                            }
+                            returnException = ex;
                         }
                         catch (Exception ex)
                         {
                             if (!cancellationToken.IsCancellationRequested) // Only log the error if the task has not been cancelled
                             {
-                                LogIssue("ImageArrayVariant", $"Error when reading ImageArrayVariant: {ex.Message}");
-                                LogDebug("ImageArrayVariant", $"Exception detail: {ex}");
-                                returnException = ex;
+                                // Check for a NotImplementedException from an Alpaca device and handle it as an optional property
+                                if ((settings.DeviceTechnology == DeviceTechnology.Alpaca) && (ex is ASCOM.NotImplementedException)) // Alpaca device and NotImplementedException
+                                {
+                                    HandleException("ImageArrayVariant", MemberType.Property, Required.Optional, ex, "");
+                                }
+                                else
+                                {
+                                    LogIssue("ImageArrayVariant", $"Error when reading ImageArrayVariant: {ex.Message}");
+                                    LogDebug("ImageArrayVariant", $"Exception detail: {ex}");
+                                }
                             }
+                            returnException = ex;
                         }
 
                         // Return a result indicating whether we got the image OK
