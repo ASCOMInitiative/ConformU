@@ -3331,7 +3331,6 @@ namespace ConformU
                 TelescopeOptionalMethodsTest(OptionalMethodType.PulseGuide, "PulseGuide", canPulseGuide);
                 if (cancellationToken.IsCancellationRequested)
                     return;
-
                 // Check whether the extended pulse guide tests are enabled
                 if (settings.TelescopeExtendedPulseGuideTests)
                 {
@@ -3361,6 +3360,8 @@ namespace ConformU
                     else
                         LogInfo(PULSE_GUIDE, $"Extended pulse guide tests skipped because the CanPulseGuide property returned False.");
                 }
+                else
+                    LogDebug(PULSE_GUIDE, "Extended pulse guide tests skipped.");
             }
             else
                 LogInfo(PULSE_GUIDE, "Tests skipped");
@@ -6131,7 +6132,7 @@ namespace ConformU
                                 double targetRa = Utilities.ConditionRA(telescopeDevice.SiderealTime - targetHa);
 
                                 // Calculate the target declination
-                                targetDeclination = GetTestDeclinationLessThan65(testName, targetRa);
+                                targetDeclination = GetTestDeclination65OrLess(testName, targetRa);
                                 LogDebug(testName, $"Slewing to HA: {targetHa.ToHMS()} (RA: {targetRa.ToHMS()}), Dec: {targetDeclination.ToDMS()}");
 
                                 // Slew to the target coordinates
@@ -7417,7 +7418,7 @@ namespace ConformU
 
             // Calculate the test RA form hour angle -3.0
             startRa = TelescopeRaFromHourAngle("SideofPier", -3.0d);
-            startDeclination = GetTestDeclinationLessThan65("SideofPier", startRa);
+            startDeclination = GetTestDeclination65OrLess("SideofPier", startRa);
 
             // Calculate the acceptable declinations for hour angle 
             declination3 = GetTestDeclinationHalfwayToHorizon("SideOfPierTests", startRa); // 90.0d - (180.0d - siteLatitude) * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR; // Calculate for northern hemisphere
@@ -8151,12 +8152,12 @@ namespace ConformU
         }
 
         /// <summary>
-        /// Return the declination which provides the highest elevation that is less than 65 degrees at the given RA.
+        /// Given an RA, return the declination (in the range -65 to +65 degrees) that provides the highest elevation that is 65 degrees or less.
         /// </summary>
         /// <param name="testRa">RA to use when determining the optimum declination.</param>
-        /// <returns>Declination in the range -80.0 to +80.0</returns>
+        /// <returns>Declination in the range -65.0 to +65.0</returns>
         /// <remarks>The returned declination will correspond to an elevation in the range 0 to 65 degrees.</remarks>
-        internal double GetTestDeclinationLessThan65(string testName, double testRa)
+        internal double GetTestDeclination65OrLess(string testName, double testRa)
         {
             double testDeclination = 0.0;
             double testElevation = double.MinValue;
@@ -8183,27 +8184,31 @@ namespace ConformU
                 // Set transform's topocentric coordinates
                 transform.SetTopocentric(testRa, declination);
 
-                // Retrieve the corresponding elevation
+                // Retrieve the corresponding topocentric elevation
                 double elevation = transform.ElevationTopocentric;
 
-                //LogDebug("GetTestDeclinationLessThan65", $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
+                LogDebug("GetTestDeclinationLessThan65", $"TRANSFORM: RA: {testRa.ToHMS()}, Declination: {declination.ToDMS()}, Azimuth: {transform.AzimuthTopocentric.ToDMS()}, Elevation: {elevation.ToDMS()}");
 
-                // Update the test declination if the new elevation is less that 65 degrees and also greater than the current highest elevation 
-                if ((elevation < 65.0) & (elevation > testElevation))
+                if ((declination >= -65.0) && (declination <= 65.0))
                 {
-                    testDeclination = declination;
-                    testElevation = elevation;
-                    //LogDebug("GetTestDeclinationLessThan65", $"Saved declination {testDeclination.ToDMS()} as having highest elevation: {testElevation.ToDMS()}");
+                    // Update the test declination if the new elevation is less that 65 degrees and also greater than the current highest elevation 
+                    if ((elevation < 65.0) & (elevation > testElevation))
+                    {
+                        testDeclination = declination;
+                        testElevation = elevation;
+                        LogDebug("GetTestDeclinationLessThan65", $"Saved declination {testDeclination.ToDMS()} as having highest elevation: {testElevation.ToDMS()}");
+                    }
                 }
+                else
+                    LogDebug("GetTestDeclinationLessThan65", $"Skipping declination {declination} because it is outside the range -65.0 to +65.0");
             }
             sw.Stop();
             LogDebug("GetTestDeclinationLessThan65", $"Test RightAscension: {testRa.ToHMS()}, Test Declination: {testDeclination.ToDMS()} at Elevation: {testElevation.ToDMS()} found in {sw.Elapsed.TotalMilliseconds:0.0}ms.");
 
             // Throw an exception if the test elevation is below 0 degrees
             if (testElevation < 0.0)
-            {
-                throw new ASCOM.InvalidOperationException($"The highest elevation available: {testElevation.ToDMS()} is below the horizon");
-            }
+                throw new ASCOM.InvalidOperationException($"The highest elevation available: {testElevation.ToDMS()} is below the horizon in the test declination range -65.0 to +65.0 degrees.");
+
             // Return the test declination
             return testDeclination;
         }
@@ -8717,7 +8722,7 @@ namespace ConformU
             double targetRa = Utilities.ConditionRA(telescopeDevice.SiderealTime - targetHa);
 
             // Calculate the target declination
-            double targetDeclination = GetTestDeclinationLessThan65("SlewToHa", targetRa);
+            double targetDeclination = GetTestDeclination65OrLess("SlewToHa", targetRa);
             LogDebug("SlewToHa", $"Slewing to HA: {targetHa.ToHMS()} (RA: {targetRa.ToHMS()}), Dec: {targetDeclination.ToDMS()}");
 
             // Slew to the target coordinates
