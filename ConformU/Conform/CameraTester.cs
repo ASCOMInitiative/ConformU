@@ -1273,7 +1273,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidValueExceptionAsOk("PercentCompleted Read", MemberType.Property, Required.Optional, ex, "", "Operation is invalid when camera is not imaging or downloading");
+                    HandleInvalidOperationExceptionAsOk("PercentCompleted Read", MemberType.Property, Required.Optional, ex, "", "Operation is invalid when camera is not imaging or downloading");
                 }
 
                 // ReadoutModes - Mandatory
