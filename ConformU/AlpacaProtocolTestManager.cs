@@ -517,7 +517,8 @@ namespace ConformU
 
         private async Task TestCamera()
         {
-            using (AlpacaCamera camera = AlpacaClient.GetDevice<AlpacaCamera>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.VersionString))
+            using (AlpacaCamera camera = AlpacaClient.GetDevice<AlpacaCamera>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, 
+                userAgentProductVersion: Update.VersionString, userName: settings.AlpacaConfiguration.AccessUserName,password: settings.AlpacaConfiguration.AccessPassword))
             {
                 try
                 {
@@ -680,7 +681,8 @@ namespace ConformU
 
         private async Task TestCoverCalibrator()
         {
-            using (AlpacaCoverCalibrator coverCalibrator = AlpacaClient.GetDevice<AlpacaCoverCalibrator>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.VersionString))
+            using (AlpacaCoverCalibrator coverCalibrator = AlpacaClient.GetDevice<AlpacaCoverCalibrator>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, 
+                userAgentProductVersion: Update.VersionString, userName: settings.AlpacaConfiguration.AccessUserName, password: settings.AlpacaConfiguration.AccessPassword))
             {
                 try
                 {
@@ -734,7 +736,8 @@ namespace ConformU
         {
             string parameter1 = "";
 
-            using (AlpacaDome dome = AlpacaClient.GetDevice<AlpacaDome>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.VersionString))
+            using (AlpacaDome dome = AlpacaClient.GetDevice<AlpacaDome>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, 
+                userAgentProductVersion: Update.VersionString,userName: settings.AlpacaConfiguration.AccessUserName, password: settings.AlpacaConfiguration.AccessPassword))
             {
                 try
                 {
@@ -853,7 +856,8 @@ namespace ConformU
         {
             string parameter1 = "";
 
-            using (AlpacaFilterWheel filterWheel = AlpacaClient.GetDevice<AlpacaFilterWheel>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.VersionString))
+            using (AlpacaFilterWheel filterWheel = AlpacaClient.GetDevice<AlpacaFilterWheel>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME,
+                userAgentProductVersion: Update.VersionString, userName: settings.AlpacaConfiguration.AccessUserName, password: settings.AlpacaConfiguration.AccessPassword))
             {
                 try
                 {
@@ -886,7 +890,8 @@ namespace ConformU
         {
             string parameter1 = "";
 
-            using (AlpacaFocuser focuser = AlpacaClient.GetDevice<AlpacaFocuser>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.VersionString))
+            using (AlpacaFocuser focuser = AlpacaClient.GetDevice<AlpacaFocuser>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME,
+                userAgentProductVersion: Update.VersionString, userName: settings.AlpacaConfiguration.AccessUserName, password: settings.AlpacaConfiguration.AccessPassword))
             {
                 try
                 {
@@ -935,7 +940,8 @@ namespace ConformU
         {
             string parameter1 = "0.0";
 
-            using (AlpacaObservingConditions observingConditions = AlpacaClient.GetDevice<AlpacaObservingConditions>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.VersionString))
+            using (AlpacaObservingConditions observingConditions = AlpacaClient.GetDevice<AlpacaObservingConditions>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME,
+                userAgentProductVersion: Update.VersionString, userName: settings.AlpacaConfiguration.AccessUserName, password: settings.AlpacaConfiguration.AccessPassword))
             {
                 try
                 {
@@ -998,7 +1004,8 @@ namespace ConformU
         {
             string parameter1 = "";
 
-            using (AlpacaRotator rotator = AlpacaClient.GetDevice<AlpacaRotator>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.VersionString))
+            using (AlpacaRotator rotator = AlpacaClient.GetDevice<AlpacaRotator>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME,
+                userAgentProductVersion: Update.VersionString, userName: settings.AlpacaConfiguration.AccessUserName, password: settings.AlpacaConfiguration.AccessPassword))
             {
                 try
                 {
@@ -1060,7 +1067,8 @@ namespace ConformU
 
         private async Task TestSafetyMonitor()
         {
-            using (AlpacaSafetyMonitor safetyMonitor = AlpacaClient.GetDevice<AlpacaSafetyMonitor>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.VersionString))
+            using (AlpacaSafetyMonitor safetyMonitor = AlpacaClient.GetDevice<AlpacaSafetyMonitor>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME,
+                userAgentProductVersion: Update.VersionString, userName: settings.AlpacaConfiguration.AccessUserName, password: settings.AlpacaConfiguration.AccessPassword))
             {
                 try
                 {
@@ -1084,7 +1092,8 @@ namespace ConformU
 
         private async Task TestSwitch()
         {
-            using (AlpacaSwitch switchDevice = AlpacaClient.GetDevice<AlpacaSwitch>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.VersionString))
+            using (AlpacaSwitch switchDevice = AlpacaClient.GetDevice<AlpacaSwitch>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME,
+                userAgentProductVersion: Update.VersionString, userName: settings.AlpacaConfiguration.AccessUserName, password: settings.AlpacaConfiguration.AccessPassword))
             {
                 try
                 {
@@ -1165,7 +1174,8 @@ namespace ConformU
             string parameter1 = "";
             string parameter2 = "";
 
-            using (AlpacaTelescope telescope = AlpacaClient.GetDevice<AlpacaTelescope>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, userAgentProductVersion: Update.VersionString))
+            using (AlpacaTelescope telescope = AlpacaClient.GetDevice<AlpacaTelescope>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME,
+                userAgentProductVersion: Update.VersionString, userName: settings.AlpacaConfiguration.AccessUserName, password: settings.AlpacaConfiguration.AccessPassword))
             {
                 try
                 {
