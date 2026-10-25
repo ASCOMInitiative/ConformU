@@ -25,10 +25,18 @@ namespace ConformU
         /// <returns>JsonNameCaseSensitivity.CorrectCasingOnly when value is true, JsonNameCaseSensitivity.AnyCasing when value is false</returns>
         public static JsonNameCaseSensitivity ToJsonNameCaseSensitivity(this bool value)
         {
-            if(value)
+            if (value)
                 return JsonNameCaseSensitivity.CorrectCasingOnly;
 
             return JsonNameCaseSensitivity.AnyCasing;
+        }
+
+        // Limit string length for display purposes, e.g. in the log file. This is to avoid very long strings that can cause issues with the log file viewer.
+        public static string LimitLength(this string value)
+        {
+            if (value.Length > 1000)
+                return value[..1000];
+            return value;
         }
     }
 }

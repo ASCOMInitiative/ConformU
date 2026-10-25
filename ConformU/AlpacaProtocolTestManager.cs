@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -517,8 +518,8 @@ namespace ConformU
 
         private async Task TestCamera()
         {
-            using (AlpacaCamera camera = AlpacaClient.GetDevice<AlpacaCamera>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, 
-                userAgentProductVersion: Update.VersionString, userName: settings.AlpacaConfiguration.AccessUserName,password: settings.AlpacaConfiguration.AccessPassword))
+            using (AlpacaCamera camera = AlpacaClient.GetDevice<AlpacaCamera>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME,
+                userAgentProductVersion: Update.VersionString, userName: settings.AlpacaConfiguration.AccessUserName, password: settings.AlpacaConfiguration.AccessPassword))
             {
                 try
                 {
@@ -681,7 +682,7 @@ namespace ConformU
 
         private async Task TestCoverCalibrator()
         {
-            using (AlpacaCoverCalibrator coverCalibrator = AlpacaClient.GetDevice<AlpacaCoverCalibrator>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, 
+            using (AlpacaCoverCalibrator coverCalibrator = AlpacaClient.GetDevice<AlpacaCoverCalibrator>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME,
                 userAgentProductVersion: Update.VersionString, userName: settings.AlpacaConfiguration.AccessUserName, password: settings.AlpacaConfiguration.AccessPassword))
             {
                 try
@@ -736,8 +737,8 @@ namespace ConformU
         {
             string parameter1 = "";
 
-            using (AlpacaDome dome = AlpacaClient.GetDevice<AlpacaDome>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME, 
-                userAgentProductVersion: Update.VersionString,userName: settings.AlpacaConfiguration.AccessUserName, password: settings.AlpacaConfiguration.AccessPassword))
+            using (AlpacaDome dome = AlpacaClient.GetDevice<AlpacaDome>(settings.AlpacaDevice, userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME,
+                userAgentProductVersion: Update.VersionString, userName: settings.AlpacaConfiguration.AccessUserName, password: settings.AlpacaConfiguration.AccessPassword))
             {
                 try
                 {
@@ -2108,7 +2109,7 @@ namespace ConformU
                             }
                             else // Does have a contextual message
                             {
-                                LogInformation(testName, $"Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected but the device reported an ASCOM error:", ascomOutcome);
+                                LogInformation(testName, $"Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected but the device reported an ASCOM error: '{ascomOutcome}'", responseString.LimitLength());
                             }
                         }
                         else // Received a status code other than 200 OK
@@ -2194,7 +2195,7 @@ namespace ConformU
                                 bool negativeIds = false,
                                 AdditionalParameterCheck additionalParameterCheck = AdditionalParameterCheck.None)
         {
-            string ascomOutcome = null;
+            string ascomOutcome = "";
             CancellationTokenSource requestCancellationTokenSource;
             Response deviceResponse = new(); // Parsed JSON response
 
@@ -2207,6 +2208,8 @@ namespace ConformU
 
             const string DEFAULT_CONTENT_TYPE = "application/json";
             const string DEFAULT_ENCODING = "UTF-8";
+
+            string responseString = ""; // The string representation of the response, which may be JSON or ImageBytes
 
             // Do not attempt to process the request if the test has been cancelled
             LogDebug(testName, $"Ignore cancellation: {ignoreApplicationCancellation} - Test is cancelled: {applicationCancellationToken.IsCancellationRequested}");
@@ -2320,349 +2323,38 @@ namespace ConformU
                 // Set the token source to time out after the specified interval
                 requestCancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(settings.AlpacaConfiguration.LongResponseTimeout));
 
-                // Send the request to the remote device and wait for the response
-                HttpResponseMessage httpResponse = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, requestCancellationTokenSource.Token);
+                // Send the request to the remote device and wait for the headers to be returned
+                HttpResponseMessage httpResponse = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, requestCancellationTokenSource.Token);
 
                 #endregion
 
-                // Get the device response
-                string responseString = await httpResponse.Content.ReadAsStringAsync();
+                // Get the returned media type, if any, and create flags to indicate whether the response is an ImageBytes response or a base 64 hand-off response
+                string mediatype = httpResponse.Content.Headers.ContentType?.MediaType ?? "unknown";
+                bool isBase64Handoff = httpResponse.Headers.Contains(AlpacaConstants.BASE64_HANDOFF_HEADER); // Check whether the base 64 hand-off header was returned
+                bool isImageBytes = mediatype.Contains(AlpacaConstants.IMAGE_BYTES_MIME_TYPE, StringComparison.InvariantCultureIgnoreCase); // Check whether the media type indicates an ImageBytes response
 
-                // Log the received response
-                LogDebug(testName, $"HTTP Status code: {httpResponse.StatusCode}");
-                LogDebug(testName, $"JSON response length: {responseString.Length}");
-                LogDebug(testName, $"JSON response: #####{responseString[..Math.Min(responseString.Length, 250)]}#####");
+                LogDebug(testName, $"HTTP Status code: {httpResponse.StatusCode}, Media type: {mediatype}, IsBase64Handoff: {isBase64Handoff}, IsImageBytes: {isImageBytes}");
 
                 #region Process successful HTTP status = 200 responses
 
-                // If the call was successful at an HTTP level (Status = 200) check whether there was an ASCOM error reported in the returned JSON
-                if ((httpResponse.StatusCode == HttpStatusCode.OK) & (!responseString.Contains("<!DOCTYPE")))
+                // Cheek whether the call was successful at an HTTP level (Status = 200)
+                if (httpResponse.StatusCode == HttpStatusCode.OK) // Call was successful
                 {
                     // Response should be either a JSON or an ImageBytes response so get the media type to determine which, assuming JSON if no content type is returned
-                    try
+                    // Handle the response, which will be either JSON or ImageBytes
+                    if (isImageBytes) // This is an ImageBytes response
                     {
-                        MediaTypeHeaderValue contentType; // Variable to hold the returned media type, if any.
+                        byte[] responseBytes = [];
                         try
                         {
-                            LogDebug(testName, $"About to read content type...");
-                            contentType = httpResponse.Content.Headers.ContentType;
-
-                            // Test whether the response has a content type
-                            if (contentType is not null) // Response has a content type
-                            {
-                                LogDebug(testName, $"Got content type OK: {contentType}");
-                            }
-                            else // Response does not have a content type
-                            {
-                                // Apply a default empty string value so that later tests succeed.
-                                LogDebug(testName, $"Content type is null, setting content type to empty string!");
-                                contentType = new MediaTypeHeaderValue(DEFAULT_CONTENT_TYPE, DEFAULT_ENCODING);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            LogDebug(testName, $"Exception reading content type:\r\n{ex}");
-                            contentType = new MediaTypeHeaderValue(DEFAULT_CONTENT_TYPE, DEFAULT_ENCODING);
-                        }
-
-                        // Check whether this is a Base64Handoff response
-                        bool isBase64Handoff = false;
-                        try
-                        {
-                            isBase64Handoff = httpResponse.Headers.Contains(AlpacaConstants.BASE64_HANDOFF_HEADER); // Check whether the base 64 hand-off header was returned
-                        }
-                        catch (Exception ex)
-                        {
-                            LogDebug(testName, $"Exception reading base 64 header:{ex.Message}\r\n{ex}");
-                        }
-
-                        // Handle the response, which will be either JSON or ImageBytes
-                        LogDebug(testName, $"About to test content type...");
-                        if (!contentType.ToString().Contains(AlpacaConstants.IMAGE_BYTES_MIME_TYPE, StringComparison.InvariantCultureIgnoreCase)) // This is a JSON response
-                        {
-                            LogDebug(testName, $"Processing JSON response");
-
-                            // Parse the common device values from the JSON response into a Response class
-                            LogDebug(testName, $"About to de-serialise response...");
-                            deviceResponse = JsonSerializer.Deserialize<Response>(responseString);
-
-                            // Save the parsed response values
-                            returnedClientTransactionID = deviceResponse.ClientTransactionID;
-                            returnedServerTransactionID = deviceResponse.ServerTransactionID;
-                            returnedErrorNumber = deviceResponse.ErrorNumber;
-                            returnedErrorMessage = deviceResponse.ErrorMessage;
-
-                            // Check casing of JSON parameters
-                            try
-                            {
-                                // Get the whole JSON string as a JSON document
-                                using (JsonDocument document = JsonDocument.Parse(responseString))
-                                {
-                                    // Get the JSON root element
-                                    JsonElement rootElement = document.RootElement;
-
-                                    // Check casing of ErrorMessage and ErrorNumber
-                                    JsonElement.ObjectEnumerator rootEnumerator = rootElement.EnumerateObject();
-                                    foreach (JsonProperty property in rootEnumerator)
-                                    {
-                                        // Check whether this is a ClientTransactionID parameter cased in any way
-                                        if (property.Name.ToLowerInvariant() == CLIENT_TRANSACTION_ID_PARAMETER_NAME.ToLowerInvariant()) // This is an ClientTransactionID parameter
-                                        {
-                                            // Check whether the property is correctly cased
-                                            if (property.Name == CLIENT_TRANSACTION_ID_PARAMETER_NAME) // Casing is correct
-                                                LogOk(testName, $"{CLIENT_TRANSACTION_ID_PARAMETER_NAME} is correctly cased", null);
-                                            else
-                                                LogIssue(testName, $"The {CLIENT_TRANSACTION_ID_PARAMETER_NAME} JSON parameter is incorrectly cased, it should be cased like this: {CLIENT_TRANSACTION_ID_PARAMETER_NAME}", responseString);
-                                        }
-
-                                        // Check whether this is a ServerTransactionId parameter cased in any way
-                                        if (property.Name.ToLowerInvariant() == SERVER_TRANSACTION_ID_PARAMETER_NAME.ToLowerInvariant()) // This is an ServerTransactionId parameter
-                                        {
-                                            // Check whether the property is correctly cased
-                                            if (property.Name == SERVER_TRANSACTION_ID_PARAMETER_NAME) // Casing is correct
-                                                LogOk(testName, $"{SERVER_TRANSACTION_ID_PARAMETER_NAME} is correctly cased", null);
-                                            else
-                                                LogIssue(testName, $"The {SERVER_TRANSACTION_ID_PARAMETER_NAME} JSON parameter is incorrectly cased, it should be cased like this: {SERVER_TRANSACTION_ID_PARAMETER_NAME}", responseString);
-                                        }
-
-                                        // Check whether this is an ErrorNumber parameter cased in any way
-                                        if (property.Name.ToLowerInvariant() == ERROR_NUMBER_PARAMETER_NAME.ToLowerInvariant()) // This is an ErrorNumber parameter
-                                        {
-                                            // Check whether the property is correctly cased
-                                            if (property.Name == ERROR_NUMBER_PARAMETER_NAME) // Casing is correct
-                                                LogOk(testName, $"{ERROR_NUMBER_PARAMETER_NAME} is correctly cased", null);
-                                            else
-                                                LogIssue(testName, $"The {ERROR_NUMBER_PARAMETER_NAME} JSON parameter is incorrectly cased, it should be cased like this: {ERROR_NUMBER_PARAMETER_NAME}", responseString);
-                                        }
-
-                                        // Check whether this is an ErrorMessage parameter cased in any way
-                                        if (property.Name.ToLowerInvariant() == ERROR_MESSAGE_PARAMETER_NAME.ToLowerInvariant()) // This is an ErrorMessage parameter
-                                        {
-                                            // Check whether the property is correctly cased
-                                            if (property.Name == ERROR_MESSAGE_PARAMETER_NAME) // Casing is correct
-                                                LogOk(testName, $"{ERROR_MESSAGE_PARAMETER_NAME} is correctly cased", null);
-                                            else
-                                                LogIssue(testName, $"The {ERROR_MESSAGE_PARAMETER_NAME} JSON parameter is incorrectly cased, it should be cased like this: {ERROR_MESSAGE_PARAMETER_NAME}", responseString);
-                                        }
-                                    }
-
-                                    // Check whether this is an HTTP GET and if so confirm that a Value element is returned plus other possible parameters
-                                    if (httpMethod == HttpMethod.Get) // This is a GET method
-                                    {
-                                        // Check whether the root element has a Value parameter
-                                        if (rootElement.TryGetProperty(VALUE_PARAMETER_NAME, out _)) // A Value parameter exists
-                                        {
-                                            LogOk(testName, $"JSON {VALUE_PARAMETER_NAME} parameter found OK", null);
-
-                                            // Get the Value property as a document element
-                                            JsonElement valueElement = rootElement.GetProperty(VALUE_PARAMETER_NAME);
-
-                                            // Check additional parameters if required
-                                            switch (additionalParameterCheck)
-                                            {
-                                                case AdditionalParameterCheck.None:
-                                                    // No additional parameters so no action required
-                                                    break;
-
-                                                case AdditionalParameterCheck.AxisRates:
-                                                    // Get an enumerator for the array of AxisRate objects
-                                                    JsonElement.ArrayEnumerator axisRatesEnumerator = valueElement.EnumerateArray();
-
-                                                    // Iterate over the device state values, getting each as a JSON document element
-                                                    int rateCount = 0;
-                                                    foreach (JsonElement axisRateElement in axisRatesEnumerator)
-                                                    {
-                                                        // Increment the rate counter
-                                                        rateCount++;
-
-                                                        // Search for a Name parameter
-                                                        if (axisRateElement.TryGetProperty(MINIMUM_PARAMETER_NAME, out _)) // Found a Minimum parameter
-                                                        {
-                                                            LogOk(testName, $"Rate {rateCount} - JSON {MINIMUM_PARAMETER_NAME} parameter found OK", null);
-                                                        }
-                                                        else // Did not find the expected Minimum parameter so log an issue
-                                                        {
-                                                            LogIssue(testName, $"Rate {rateCount} - A JSON parameter of name {MINIMUM_PARAMETER_NAME} was expected, but was not found within the returned AxisRate object: {axisRateElement}. This test is case sensitive.", responseString);
-                                                            LogInformation(testName, $"The JSON {MINIMUM_PARAMETER_NAME} parameter must exist and be cased like this: {MINIMUM_PARAMETER_NAME}.", null);
-                                                        }
-
-                                                        // Search for a Maximum parameter
-                                                        if (axisRateElement.TryGetProperty(MAXIMUM_PARAMETER_NAME, out _)) // Found a Maximum parameter
-                                                        {
-                                                            // Log the string value of the Value property
-                                                            LogOk(testName, $"Rate {rateCount} - JSON {MAXIMUM_PARAMETER_NAME} parameter found OK", null);
-                                                        }
-                                                        else // Did not find the expected Value parameter so log an issue
-                                                        {
-                                                            LogIssue(testName, $"Rate {rateCount} - A JSON parameter of name {MAXIMUM_PARAMETER_NAME} was expected, but was not found within the returned AxisRate object:{axisRateElement}. This test is case sensitive.", responseString);
-                                                            LogInformation(testName, $"The JSON {MAXIMUM_PARAMETER_NAME} parameter must exist and be cased like this: {MAXIMUM_PARAMETER_NAME}.", null);
-                                                        }
-                                                    }
-                                                    break;
-
-                                                case AdditionalParameterCheck.DeviceState:
-                                                    // Get an enumerator for the array of DeviceState objects
-                                                    JsonElement.ArrayEnumerator deviceStateEnumerator = valueElement.EnumerateArray();
-
-                                                    // Iterate over the device state values, getting each as a JSON document element
-                                                    foreach (JsonElement deviceStateElement in deviceStateEnumerator)
-                                                    {
-                                                        string propertyName = "";
-
-                                                        // Search for a Name parameter
-                                                        if (deviceStateElement.TryGetProperty(NAME_PARAMETER_NAME, out _)) // Found a name parameter
-                                                        {
-                                                            // Log the string value of the Name property
-                                                            propertyName = deviceStateElement.GetProperty(NAME_PARAMETER_NAME).GetString();
-                                                            LogOk(testName, $"{propertyName} - JSON {NAME_PARAMETER_NAME} parameter found OK", null);
-                                                        }
-                                                        else // Did not find the expected Name parameter so log an issue
-                                                        {
-                                                            LogIssue(testName, $"A JSON parameter of name {NAME_PARAMETER_NAME} was expected, but was not found within the returned DeviceState object: {deviceStateElement}. This test is case sensitive.", responseString);
-                                                            LogInformation(testName, $"The JSON {NAME_PARAMETER_NAME} parameter must exist and be cased like this: {NAME_PARAMETER_NAME}.", null);
-                                                        }
-
-                                                        // Search for a Value parameter
-                                                        if (deviceStateElement.TryGetProperty(VALUE_PARAMETER_NAME, out _)) // Found a Value parameter
-                                                        {
-                                                            // Log the string value of the Value property
-                                                            LogOk(testName, $"{propertyName} - JSON {VALUE_PARAMETER_NAME} parameter found OK", null);
-                                                        }
-                                                        else // Did not find the expected Value parameter so log an issue
-                                                        {
-                                                            LogIssue(testName, $"A JSON parameter of name {VALUE_PARAMETER_NAME} was expected, but was not found within the returned DeviceState object: {deviceStateElement}. This test is case sensitive.", responseString);
-                                                            LogInformation(testName, $"The JSON {VALUE_PARAMETER_NAME} parameter must exist and be cased like this: {VALUE_PARAMETER_NAME}.", null);
-                                                        }
-                                                    }
-                                                    break;
-
-                                                case AdditionalParameterCheck.ImageArray:
-                                                    // Check whether the root element has a Type parameter
-                                                    if (rootElement.TryGetProperty(TYPE_PARAMETER_NAME, out _)) // A Type parameter exists
-                                                    {
-                                                        LogOk(testName, $"JSON {TYPE_PARAMETER_NAME} parameter found OK", null);
-                                                    }
-                                                    else // A Type parameter can not be found. It may be missing, incorrectly spelled or mis-cased.
-                                                    {
-                                                        LogIssue(testName, $"A JSON parameter of name {TYPE_PARAMETER_NAME} was expected, but was not found in the JSON response. This test is case sensitive.", responseString);
-                                                        LogInformation(testName, $"The JSON {TYPE_PARAMETER_NAME} parameter must exist and be cased like this: {TYPE_PARAMETER_NAME}.", null);
-                                                    }
-
-                                                    // Check whether the root element has a Rank parameter
-                                                    if (rootElement.TryGetProperty(RANK_PARAMETER_NAME, out _)) // A Rank parameter exists
-                                                    {
-                                                        LogOk(testName, $"JSON {RANK_PARAMETER_NAME} parameter found OK", null);
-                                                    }
-                                                    else // A Rank parameter can not be found. It may be missing, incorrectly spelled or mis-cased.
-                                                    {
-                                                        LogIssue(testName, $"A JSON parameter of name {RANK_PARAMETER_NAME} was expected, but was not found in the JSON response. This test is case sensitive.", responseString);
-                                                        LogInformation(testName, $"The JSON {RANK_PARAMETER_NAME} parameter must exist and be cased like this: {RANK_PARAMETER_NAME}.", null);
-                                                    }
-                                                    break;
-
-                                                default:
-                                                    LogError(testName, $"Unknown AdditionalParameterCheck value: {additionalParameterCheck}", null);
-                                                    break;
-                                            }
-                                        }
-                                        else // A Value parameter can not be found. It may be missing, incorrectly spelled or mis-cased.
-                                        {
-                                            // Check whether this is a base 64 hand-off response
-                                            if (isBase64Handoff) // This is a base 64 hand-off
-                                            {
-                                                // Search for a Type parameter
-                                                if (rootElement.TryGetProperty(TYPE_PARAMETER_NAME, out _)) // A Type parameter exists
-                                                {
-                                                    // Log the Type property
-                                                    LogOk(testName, $"Base64HandOff - JSON {TYPE_PARAMETER_NAME} parameter found OK", null);
-                                                }
-                                                else // Did not find the expected Type parameter so log an issue
-                                                {
-                                                    LogIssue(testName, $"Base64HandOff - A JSON parameter of name {TYPE_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString);
-                                                    LogInformation(testName, $"The JSON {TYPE_PARAMETER_NAME} parameter must exist and be cased like this: {TYPE_PARAMETER_NAME}.", null);
-                                                }
-
-                                                // Search for a Rank parameter
-                                                if (rootElement.TryGetProperty(RANK_PARAMETER_NAME, out _)) // A Rank parameter exists
-                                                {
-                                                    // Log the Rank property
-                                                    LogOk(testName, $"Base64HandOff - JSON {RANK_PARAMETER_NAME} parameter found OK", null);
-                                                }
-                                                else // Did not find the expected Rank parameter so log an issue
-                                                {
-                                                    LogIssue(testName, $"Base64HandOff - A JSON parameter of name {RANK_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString);
-                                                    LogInformation(testName, $"The JSON {RANK_PARAMETER_NAME} parameter must exist and be cased like this: {RANK_PARAMETER_NAME}.", null);
-                                                }
-
-                                                // Search for a Dimension0 parameter
-                                                if (rootElement.TryGetProperty(DIMENSION0_LENGTH_PARAMETER_NAME, out _)) // A Dimension0 parameter exists
-                                                {
-                                                    // Log the Dimension0 property
-                                                    LogOk(testName, $"Base64HandOff - JSON {DIMENSION0_LENGTH_PARAMETER_NAME} parameter found OK", null);
-                                                }
-                                                else // Did not find the expected Dimension0 so log an issue
-                                                {
-                                                    LogIssue(testName, $"Base64HandOff - A JSON parameter of name {DIMENSION0_LENGTH_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString);
-                                                    LogInformation(testName, $"The JSON {DIMENSION0_LENGTH_PARAMETER_NAME} parameter must exist and be cased like this: {DIMENSION0_LENGTH_PARAMETER_NAME}.", null);
-                                                }
-
-                                                // Search for a Dimension1 parameter
-                                                if (rootElement.TryGetProperty(DIMENSION1_LENGTH_PARAMETER_NAME, out _)) // A Dimension1 parameter exists
-                                                {
-                                                    // Log the Dimension1 property
-                                                    LogOk(testName, $"Base64HandOff - JSON {DIMENSION1_LENGTH_PARAMETER_NAME} parameter found OK", null);
-                                                }
-                                                else // Did not find the expected Dimension1 parameter so log an issue
-                                                {
-                                                    LogIssue(testName, $"Base64HandOff - A JSON parameter of name {DIMENSION1_LENGTH_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString);
-                                                    LogInformation(testName, $"The JSON {DIMENSION1_LENGTH_PARAMETER_NAME} parameter must exist and be cased like this: {DIMENSION1_LENGTH_PARAMETER_NAME}.", null);
-                                                }
-
-                                                // Search for a Dimension2 parameter
-                                                if (rootElement.TryGetProperty(DIMENSION2_LENGTH_PARAMETER_NAME, out _)) // A Dimension2 parameter exists
-                                                {
-                                                    // Log the Dimension2 property
-                                                    LogOk(testName, $"Base64HandOff - JSON {DIMENSION2_LENGTH_PARAMETER_NAME} parameter found OK", null);
-                                                }
-                                                else // Did not find the expected Dimension2 parameter so log an issue
-                                                {
-                                                    LogIssue(testName, $"Base64HandOff - A JSON parameter of name {DIMENSION2_LENGTH_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString);
-                                                    LogInformation(testName, $"The JSON {DIMENSION2_LENGTH_PARAMETER_NAME} parameter must exist and be cased like this: {DIMENSION2_LENGTH_PARAMETER_NAME}.", null);
-                                                }
-                                            }
-                                            else // Not a base 64 hand-off response so report the missing Value parameter
-                                            {
-                                                // Decide whether to report the missing Value parameter
-                                                if (!settings.AlpacaConfiguration.ProtocolStrictChecks & returnedErrorNumber != 0) // We are in tolerant mode and an error was returned
-                                                {
-                                                    // No action, we tolerate an absent Value parameter when the device returns an error and Conform is in tolerant mode.
-                                                }
-                                                else // We are in strict mode or the device did not return an error
-                                                {
-                                                    // Report the missing Value parameter as an Issue
-                                                    LogIssue(testName, $"A JSON parameter of name {VALUE_PARAMETER_NAME} was expected, but was not found in the JSON response. This test is case sensitive.", responseString);
-                                                    LogInformation(testName, $"The JSON {VALUE_PARAMETER_NAME} parameter must exist and be cased like this: {VALUE_PARAMETER_NAME}.", null);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                LogIssue(testName, $"Exception while parsing Alpaca response JSON: {ex.Message}", responseString);
-                                LogDebug(testName, ex.ToString());
-                            }
-
-                        } // Handle a JSON response
-                        else // Should be an ImageBytes binary response
-                        {
+                            // Get the imagebytes binary response body from the stream
                             LogDebug(testName, $"Processing ImageBytes response");
+
                             // Convert the string response to a byte array
-                            byte[] bytes = Encoding.ASCII.GetBytes(responseString);
+                            responseBytes = await httpResponse.Content.ReadAsByteArrayAsync(requestCancellationTokenSource.Token);
 
                             // Get the metadata version
-                            int metadataVersion = bytes.GetMetadataVersion();
+                            int metadataVersion = responseBytes.GetMetadataVersion();
 
                             // Handle version number possibilities
                             switch (metadataVersion)
@@ -2677,7 +2369,9 @@ namespace ConformU
                             }
 
                             // Get the metadata from the response bytes
-                            ArrayMetadataV1 metadata = bytes.GetMetadataV1();
+                            ArrayMetadataV1 metadata = responseBytes.GetMetadataV1();
+                            LogOk(testName, $"ImageBytes metadata - Dimension1: {metadata.Dimension1}, Dimension 2:{metadata.Dimension2}, Dimension 3: {metadata.Dimension3}, " +
+                                $"Image element type: {metadata.ImageElementType}, Transmission element type: {metadata.TransmissionElementType}", null);
 
                             // Save the response values in the returned metadata
                             returnedClientTransactionID = metadata.ClientTransactionID;
@@ -2687,37 +2381,327 @@ namespace ConformU
                             // Get the error message if required
                             if (returnedErrorNumber != AlpacaErrors.AlpacaNoError)
                             {
-                                returnedErrorMessage = bytes.GetErrrorMessage();
+                                returnedErrorMessage = responseBytes.GetErrrorMessage();
                             }
 
                             // Set a useful response string because otherwise we will get the enormous number of AlpacaBytes binary values encoded as a string
-                            responseString = $"ClientTransactionID: {returnedClientTransactionID}, ServerTransactionID: {returnedServerTransactionID}, ErrorNumber: {returnedErrorNumber}, ErrorMessage: '{returnedErrorMessage}'";
-
-                        } // Handle an ImageBytes response
-                    }
-                    catch (JsonException ex)
-                    {
-                        // Could not parse the device JSON so check whether this may be permissible
-                        if (!settings.AlpacaConfiguration.ProtocolStrictChecks & negativeIds) // We are in tolerant mode and are making a check with a negative ID
-                        {
-                            // Report an error
-                            LogInformation(testName, $"{messagePrefix} - Could not parse the returned JSON. Possibly the device returned the supplied negative ID value, which is not a valid unsigned integer value.", null);
-                            LogDebug(testName, $"{ex}");
+                            responseString = $"From ImageBytes metadata: ClientTransactionID: {returnedClientTransactionID}, ServerTransactionID: {returnedServerTransactionID}, " +
+                                $"Dimension1: {metadata.Dimension1}, Dimension 2:{metadata.Dimension2}, Dimension 3: {metadata.Dimension3}, ErrorNumber: {returnedErrorNumber}, ErrorMessage: '{returnedErrorMessage}'";
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            // Report an error
-                            LogError(testName, $"{messagePrefix} - {ex.Message}", null);
-                            LogDebug(testName, $"{ex}");
+                            LogIssue(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) but could not process AlpacaBytes metadata: {ex.Message}", responseBytes[..Math.Min(responseBytes.Length - 1, 40)].ToString());
+                            LogDebug(testName, $"Exception parsing AlpacaBytes metadata:\r\n{ex}");
+                            LogBlankLine();
+                            return;
                         }
                     }
-
-                    catch (Exception ex)
+                    else // This is a JSON response
                     {
-                        LogIssue(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) but could not de-serialise the returned JSON string. Exception message: {ex.Message}", responseString);
-                        LogDebug(testName, $"Exception parsing JSON:\r\n{ex}");
-                        LogBlankLine();
-                        return;
+                        try
+                        {
+                            LogDebug(testName, $"Processing JSON response");
+                            responseString = await httpResponse.Content.ReadAsStringAsync(requestCancellationTokenSource.Token);
+
+                            // Check whether this is a basic HTTP page and ignore if this is the case
+                            if (!responseString.Contains("<!DOCTYPE")) // Not an HTTP page so treat as JSON
+                            {
+                                // Parse the common device values from the JSON response into a Response class
+                                LogDebug(testName, $"About to de-serialise response...");
+                                deviceResponse = JsonSerializer.Deserialize<Response>(responseString);
+
+                                // Save the parsed response values
+                                returnedClientTransactionID = deviceResponse.ClientTransactionID;
+                                returnedServerTransactionID = deviceResponse.ServerTransactionID;
+                                returnedErrorNumber = deviceResponse.ErrorNumber;
+                                returnedErrorMessage = deviceResponse.ErrorMessage;
+
+                                // Check casing of JSON parameters
+                                try
+                                {
+                                    // Get the whole JSON string as a JSON document
+                                    using (JsonDocument document = JsonDocument.Parse(responseString))
+                                    {
+                                        // Get the JSON root element
+                                        JsonElement rootElement = document.RootElement;
+
+                                        // Check casing of ErrorMessage and ErrorNumber
+                                        JsonElement.ObjectEnumerator rootEnumerator = rootElement.EnumerateObject();
+                                        foreach (JsonProperty property in rootEnumerator)
+                                        {
+                                            // Check whether this is a ClientTransactionID parameter cased in any way
+                                            if (property.Name.ToLowerInvariant() == CLIENT_TRANSACTION_ID_PARAMETER_NAME.ToLowerInvariant()) // This is an ClientTransactionID parameter
+                                            {
+                                                // Check whether the property is correctly cased
+                                                if (property.Name == CLIENT_TRANSACTION_ID_PARAMETER_NAME) // Casing is correct
+                                                    LogOk(testName, $"{CLIENT_TRANSACTION_ID_PARAMETER_NAME} is correctly cased", null);
+                                                else
+                                                    LogIssue(testName, $"The {CLIENT_TRANSACTION_ID_PARAMETER_NAME} JSON parameter is incorrectly cased, it should be cased like this: {CLIENT_TRANSACTION_ID_PARAMETER_NAME}", responseString.LimitLength());
+                                            }
+
+                                            // Check whether this is a ServerTransactionId parameter cased in any way
+                                            if (property.Name.ToLowerInvariant() == SERVER_TRANSACTION_ID_PARAMETER_NAME.ToLowerInvariant()) // This is an ServerTransactionId parameter
+                                            {
+                                                // Check whether the property is correctly cased
+                                                if (property.Name == SERVER_TRANSACTION_ID_PARAMETER_NAME) // Casing is correct
+                                                    LogOk(testName, $"{SERVER_TRANSACTION_ID_PARAMETER_NAME} is correctly cased", null);
+                                                else
+                                                    LogIssue(testName, $"The {SERVER_TRANSACTION_ID_PARAMETER_NAME} JSON parameter is incorrectly cased, it should be cased like this: {SERVER_TRANSACTION_ID_PARAMETER_NAME}", responseString.LimitLength());
+                                            }
+
+                                            // Check whether this is an ErrorNumber parameter cased in any way
+                                            if (property.Name.ToLowerInvariant() == ERROR_NUMBER_PARAMETER_NAME.ToLowerInvariant()) // This is an ErrorNumber parameter
+                                            {
+                                                // Check whether the property is correctly cased
+                                                if (property.Name == ERROR_NUMBER_PARAMETER_NAME) // Casing is correct
+                                                    LogOk(testName, $"{ERROR_NUMBER_PARAMETER_NAME} is correctly cased", null);
+                                                else
+                                                    LogIssue(testName, $"The {ERROR_NUMBER_PARAMETER_NAME} JSON parameter is incorrectly cased, it should be cased like this: {ERROR_NUMBER_PARAMETER_NAME}", responseString.LimitLength());
+                                            }
+
+                                            // Check whether this is an ErrorMessage parameter cased in any way
+                                            if (property.Name.ToLowerInvariant() == ERROR_MESSAGE_PARAMETER_NAME.ToLowerInvariant()) // This is an ErrorMessage parameter
+                                            {
+                                                // Check whether the property is correctly cased
+                                                if (property.Name == ERROR_MESSAGE_PARAMETER_NAME) // Casing is correct
+                                                    LogOk(testName, $"{ERROR_MESSAGE_PARAMETER_NAME} is correctly cased", null);
+                                                else
+                                                    LogIssue(testName, $"The {ERROR_MESSAGE_PARAMETER_NAME} JSON parameter is incorrectly cased, it should be cased like this: {ERROR_MESSAGE_PARAMETER_NAME}", responseString.LimitLength());
+                                            }
+                                        }
+
+                                        // Check whether this is an HTTP GET and if so confirm that a Value element is returned plus other possible parameters
+                                        if (httpMethod == HttpMethod.Get) // This is a GET method
+                                        {
+                                            // Check whether the root element has a Value parameter
+                                            if (rootElement.TryGetProperty(VALUE_PARAMETER_NAME, out _)) // A Value parameter exists
+                                            {
+                                                LogOk(testName, $"JSON {VALUE_PARAMETER_NAME} parameter found OK", null);
+
+                                                // Get the Value property as a document element
+                                                JsonElement valueElement = rootElement.GetProperty(VALUE_PARAMETER_NAME);
+
+                                                // Check additional parameters if required
+                                                switch (additionalParameterCheck)
+                                                {
+                                                    case AdditionalParameterCheck.None:
+                                                        // No additional parameters so no action required
+                                                        break;
+
+                                                    case AdditionalParameterCheck.AxisRates:
+                                                        // Get an enumerator for the array of AxisRate objects
+                                                        JsonElement.ArrayEnumerator axisRatesEnumerator = valueElement.EnumerateArray();
+
+                                                        // Iterate over the device state values, getting each as a JSON document element
+                                                        int rateCount = 0;
+                                                        foreach (JsonElement axisRateElement in axisRatesEnumerator)
+                                                        {
+                                                            // Increment the rate counter
+                                                            rateCount++;
+
+                                                            // Search for a Name parameter
+                                                            if (axisRateElement.TryGetProperty(MINIMUM_PARAMETER_NAME, out _)) // Found a Minimum parameter
+                                                            {
+                                                                LogOk(testName, $"Rate {rateCount} - JSON {MINIMUM_PARAMETER_NAME} parameter found OK", null);
+                                                            }
+                                                            else // Did not find the expected Minimum parameter so log an issue
+                                                            {
+                                                                LogIssue(testName, $"Rate {rateCount} - A JSON parameter of name {MINIMUM_PARAMETER_NAME} was expected, but was not found within the returned AxisRate object: {axisRateElement}. This test is case sensitive.", responseString.LimitLength());
+                                                                LogInformation(testName, $"The JSON {MINIMUM_PARAMETER_NAME} parameter must exist and be cased like this: {MINIMUM_PARAMETER_NAME}.", null);
+                                                            }
+
+                                                            // Search for a Maximum parameter
+                                                            if (axisRateElement.TryGetProperty(MAXIMUM_PARAMETER_NAME, out _)) // Found a Maximum parameter
+                                                            {
+                                                                // Log the string value of the Value property
+                                                                LogOk(testName, $"Rate {rateCount} - JSON {MAXIMUM_PARAMETER_NAME} parameter found OK", null);
+                                                            }
+                                                            else // Did not find the expected Value parameter so log an issue
+                                                            {
+                                                                LogIssue(testName, $"Rate {rateCount} - A JSON parameter of name {MAXIMUM_PARAMETER_NAME} was expected, but was not found within the returned AxisRate object:{axisRateElement}. This test is case sensitive.", responseString.LimitLength());
+                                                                LogInformation(testName, $"The JSON {MAXIMUM_PARAMETER_NAME} parameter must exist and be cased like this: {MAXIMUM_PARAMETER_NAME}.", null);
+                                                            }
+                                                        }
+                                                        break;
+
+                                                    case AdditionalParameterCheck.DeviceState:
+                                                        // Get an enumerator for the array of DeviceState objects
+                                                        JsonElement.ArrayEnumerator deviceStateEnumerator = valueElement.EnumerateArray();
+
+                                                        // Iterate over the device state values, getting each as a JSON document element
+                                                        foreach (JsonElement deviceStateElement in deviceStateEnumerator)
+                                                        {
+                                                            string propertyName = "";
+
+                                                            // Search for a Name parameter
+                                                            if (deviceStateElement.TryGetProperty(NAME_PARAMETER_NAME, out _)) // Found a name parameter
+                                                            {
+                                                                // Log the string value of the Name property
+                                                                propertyName = deviceStateElement.GetProperty(NAME_PARAMETER_NAME).GetString();
+                                                                LogOk(testName, $"{propertyName} - JSON {NAME_PARAMETER_NAME} parameter found OK", null);
+                                                            }
+                                                            else // Did not find the expected Name parameter so log an issue
+                                                            {
+                                                                LogIssue(testName, $"A JSON parameter of name {NAME_PARAMETER_NAME} was expected, but was not found within the returned DeviceState object: {deviceStateElement}. This test is case sensitive.", responseString.LimitLength());
+                                                                LogInformation(testName, $"The JSON {NAME_PARAMETER_NAME} parameter must exist and be cased like this: {NAME_PARAMETER_NAME}.", null);
+                                                            }
+
+                                                            // Search for a Value parameter
+                                                            if (deviceStateElement.TryGetProperty(VALUE_PARAMETER_NAME, out _)) // Found a Value parameter
+                                                            {
+                                                                // Log the string value of the Value property
+                                                                LogOk(testName, $"{propertyName} - JSON {VALUE_PARAMETER_NAME} parameter found OK", null);
+                                                            }
+                                                            else // Did not find the expected Value parameter so log an issue
+                                                            {
+                                                                LogIssue(testName, $"A JSON parameter of name {VALUE_PARAMETER_NAME} was expected, but was not found within the returned DeviceState object: {deviceStateElement}. This test is case sensitive.", responseString.LimitLength());
+                                                                LogInformation(testName, $"The JSON {VALUE_PARAMETER_NAME} parameter must exist and be cased like this: {VALUE_PARAMETER_NAME}.", null);
+                                                            }
+                                                        }
+                                                        break;
+
+                                                    case AdditionalParameterCheck.ImageArray:
+                                                        // Check whether the root element has a Type parameter
+                                                        if (rootElement.TryGetProperty(TYPE_PARAMETER_NAME, out _)) // A Type parameter exists
+                                                        {
+                                                            LogOk(testName, $"JSON {TYPE_PARAMETER_NAME} parameter found OK", null);
+                                                        }
+                                                        else // A Type parameter can not be found. It may be missing, incorrectly spelled or mis-cased.
+                                                        {
+                                                            LogIssue(testName, $"A JSON parameter of name {TYPE_PARAMETER_NAME} was expected, but was not found in the JSON response. This test is case sensitive.", responseString.LimitLength());
+                                                            LogInformation(testName, $"The JSON {TYPE_PARAMETER_NAME} parameter must exist and be cased like this: {TYPE_PARAMETER_NAME}.", null);
+                                                        }
+
+                                                        // Check whether the root element has a Rank parameter
+                                                        if (rootElement.TryGetProperty(RANK_PARAMETER_NAME, out _)) // A Rank parameter exists
+                                                        {
+                                                            LogOk(testName, $"JSON {RANK_PARAMETER_NAME} parameter found OK", null);
+                                                        }
+                                                        else // A Rank parameter can not be found. It may be missing, incorrectly spelled or mis-cased.
+                                                        {
+                                                            LogIssue(testName, $"A JSON parameter of name {RANK_PARAMETER_NAME} was expected, but was not found in the JSON response. This test is case sensitive.", responseString.LimitLength());
+                                                            LogInformation(testName, $"The JSON {RANK_PARAMETER_NAME} parameter must exist and be cased like this: {RANK_PARAMETER_NAME}.", null);
+                                                        }
+                                                        break;
+
+                                                    default:
+                                                        LogError(testName, $"Unknown AdditionalParameterCheck value: {additionalParameterCheck}", null);
+                                                        break;
+                                                }
+                                            }
+                                            else // A Value parameter can not be found. It may be missing, incorrectly spelled or mis-cased.
+                                            {
+                                                // Check whether this is a base 64 hand-off response
+                                                if (isBase64Handoff) // This is a base 64 hand-off
+                                                {
+                                                    // Search for a Type parameter
+                                                    if (rootElement.TryGetProperty(TYPE_PARAMETER_NAME, out _)) // A Type parameter exists
+                                                    {
+                                                        // Log the Type property
+                                                        LogOk(testName, $"Base64HandOff - JSON {TYPE_PARAMETER_NAME} parameter found OK", null);
+                                                    }
+                                                    else // Did not find the expected Type parameter so log an issue
+                                                    {
+                                                        LogIssue(testName, $"Base64HandOff - A JSON parameter of name {TYPE_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString.LimitLength());
+                                                        LogInformation(testName, $"The JSON {TYPE_PARAMETER_NAME} parameter must exist and be cased like this: {TYPE_PARAMETER_NAME}.", null);
+                                                    }
+
+                                                    // Search for a Rank parameter
+                                                    if (rootElement.TryGetProperty(RANK_PARAMETER_NAME, out _)) // A Rank parameter exists
+                                                    {
+                                                        // Log the Rank property
+                                                        LogOk(testName, $"Base64HandOff - JSON {RANK_PARAMETER_NAME} parameter found OK", null);
+                                                    }
+                                                    else // Did not find the expected Rank parameter so log an issue
+                                                    {
+                                                        LogIssue(testName, $"Base64HandOff - A JSON parameter of name {RANK_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString.LimitLength());
+                                                        LogInformation(testName, $"The JSON {RANK_PARAMETER_NAME} parameter must exist and be cased like this: {RANK_PARAMETER_NAME}.", null);
+                                                    }
+
+                                                    // Search for a Dimension0 parameter
+                                                    if (rootElement.TryGetProperty(DIMENSION0_LENGTH_PARAMETER_NAME, out _)) // A Dimension0 parameter exists
+                                                    {
+                                                        // Log the Dimension0 property
+                                                        LogOk(testName, $"Base64HandOff - JSON {DIMENSION0_LENGTH_PARAMETER_NAME} parameter found OK", null);
+                                                    }
+                                                    else // Did not find the expected Dimension0 so log an issue
+                                                    {
+                                                        LogIssue(testName, $"Base64HandOff - A JSON parameter of name {DIMENSION0_LENGTH_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString.LimitLength());
+                                                        LogInformation(testName, $"The JSON {DIMENSION0_LENGTH_PARAMETER_NAME} parameter must exist and be cased like this: {DIMENSION0_LENGTH_PARAMETER_NAME}.", null);
+                                                    }
+
+                                                    // Search for a Dimension1 parameter
+                                                    if (rootElement.TryGetProperty(DIMENSION1_LENGTH_PARAMETER_NAME, out _)) // A Dimension1 parameter exists
+                                                    {
+                                                        // Log the Dimension1 property
+                                                        LogOk(testName, $"Base64HandOff - JSON {DIMENSION1_LENGTH_PARAMETER_NAME} parameter found OK", null);
+                                                    }
+                                                    else // Did not find the expected Dimension1 parameter so log an issue
+                                                    {
+                                                        LogIssue(testName, $"Base64HandOff - A JSON parameter of name {DIMENSION1_LENGTH_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString.LimitLength());
+                                                        LogInformation(testName, $"The JSON {DIMENSION1_LENGTH_PARAMETER_NAME} parameter must exist and be cased like this: {DIMENSION1_LENGTH_PARAMETER_NAME}.", null);
+                                                    }
+
+                                                    // Search for a Dimension2 parameter
+                                                    if (rootElement.TryGetProperty(DIMENSION2_LENGTH_PARAMETER_NAME, out _)) // A Dimension2 parameter exists
+                                                    {
+                                                        // Log the Dimension2 property
+                                                        LogOk(testName, $"Base64HandOff - JSON {DIMENSION2_LENGTH_PARAMETER_NAME} parameter found OK", null);
+                                                    }
+                                                    else // Did not find the expected Dimension2 parameter so log an issue
+                                                    {
+                                                        LogIssue(testName, $"Base64HandOff - A JSON parameter of name {DIMENSION2_LENGTH_PARAMETER_NAME} was expected, but was not found within the returned JSON. This test is case sensitive.", responseString.LimitLength());
+                                                        LogInformation(testName, $"The JSON {DIMENSION2_LENGTH_PARAMETER_NAME} parameter must exist and be cased like this: {DIMENSION2_LENGTH_PARAMETER_NAME}.", null);
+                                                    }
+                                                }
+                                                else // Not a base 64 hand-off response so report the missing Value parameter
+                                                {
+                                                    // Decide whether to report the missing Value parameter
+                                                    if (!settings.AlpacaConfiguration.ProtocolStrictChecks & returnedErrorNumber != 0) // We are in tolerant mode and an error was returned
+                                                    {
+                                                        // No action, we tolerate an absent Value parameter when the device returns an error and Conform is in tolerant mode.
+                                                    }
+                                                    else // We are in strict mode or the device did not return an error
+                                                    {
+                                                        // Report the missing Value parameter as an Issue
+                                                        LogIssue(testName, $"A JSON parameter of name {VALUE_PARAMETER_NAME} was expected, but was not found in the JSON response. This test is case sensitive.", responseString.LimitLength());
+                                                        LogInformation(testName, $"The JSON {VALUE_PARAMETER_NAME} parameter must exist and be cased like this: {VALUE_PARAMETER_NAME}.", null);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogIssue(testName, $"Exception while parsing Alpaca response JSON: {ex.Message}", responseString.LimitLength());
+                                    LogDebug(testName, ex.ToString());
+                                }
+                            }
+                        }
+                        catch (JsonException ex)
+                        {
+                            // Could not parse the device JSON so check whether this may be permissible
+                            if (!settings.AlpacaConfiguration.ProtocolStrictChecks & negativeIds) // We are in tolerant mode and are making a check with a negative ID
+                            {
+                                // Report an error
+                                LogInformation(testName, $"{messagePrefix} - Could not parse the returned JSON. Possibly the device returned the supplied negative ID value, which is not a valid unsigned integer value.", null);
+                                LogDebug(testName, $"{ex}");
+                            }
+                            else
+                            {
+                                // Report an error
+                                LogError(testName, $"{messagePrefix} - {ex.Message}", null);
+                                LogDebug(testName, $"{ex}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogIssue(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) but could not de-serialise the returned JSON string. Exception message: {ex.Message}", responseString.LimitLength());
+                            LogDebug(testName, $"Exception parsing JSON:\r\n{ex}");
+                            LogBlankLine();
+                            return;
+                        }
                     }
                 }
 
@@ -2836,16 +2820,16 @@ namespace ConformU
                             // Log an OK outcome if there was no contextual message or an Information if there was
                             if (string.IsNullOrEmpty(ascomOutcome)) // No contextual message
                             {
-                                LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
+                                LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString.LimitLength());
                             }
                             else // Does have a contextual message
                             {
-                                LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected but the device reported an ASCOM error:", ascomOutcome);
+                                LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected but the device reported an ASCOM error: '{ascomOutcome}'", responseString.LimitLength());
                             }
                         }
                         else // Received a status code other than 200 OK
                         {
-                            LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString);
+                            LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) as expected.", responseString.LimitLength());
                         }
                     }
                     else // We got an unexpected HTTP status code outcome
@@ -2853,7 +2837,7 @@ namespace ConformU
                         // Test whether we are going to accept the reported error anyway
                         if ((httpResponse.StatusCode == HttpStatusCode.OK) & acceptInvalidValueError & (deviceResponse.ErrorNumber == AlpacaErrors.InvalidValue)) // We are going to accept an InvalidValue error
                         {
-                            LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) and an invalid value error: {deviceResponse.ErrorMessage}", responseString);
+                            LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) and an invalid value error: {deviceResponse.ErrorMessage}", responseString.LimitLength());
                         }
                         else if ((httpResponse.StatusCode == HttpStatusCode.OK) & // We got an HTTP 200 response
                                  (deviceResponse.ErrorNumber == AlpacaErrors.NotImplemented) & // The device returned a not implemented Alpaca error
@@ -2862,7 +2846,7 @@ namespace ConformU
                                  expectedCodes.Contains(HttpStatusCode.BadRequest) // The expected response code was 400 Bad request
                                 )
                         {
-                            LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) and a not implemented error: {deviceResponse.ErrorMessage}", responseString);
+                            LogOk(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}) and a not implemented error: {deviceResponse.ErrorMessage}", responseString.LimitLength());
                         }
                         else // Did not get the expected response so log this as an issue
                         {
@@ -2874,7 +2858,7 @@ namespace ConformU
                             expectedCodeList = expectedCodeList.TrimEnd(' ', ',');
 
                             LogIssue(testName,
-                                $"{messagePrefix} - Expected HTTP status{(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString);
+                                $"{messagePrefix} - Expected HTTP status{(expectedCodeList.Contains(',') ? "es" : "")}: {expectedCodeList.Trim()} but received status: {(int)httpResponse.StatusCode} ({httpResponse.StatusCode}).", responseString.LimitLength());
 
                             LogBlankLine();
                         }
@@ -2882,7 +2866,7 @@ namespace ConformU
                 }
                 else // There are no expected codes, which indicates that any code is acceptable
                 {
-                    LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode})", responseString);
+                    LogInformation(testName, $"{messagePrefix} - Received HTTP status {(int)httpResponse.StatusCode} ({httpResponse.StatusCode})", responseString.LimitLength());
                 }
 
                 #endregion
