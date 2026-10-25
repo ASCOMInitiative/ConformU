@@ -2328,12 +2328,16 @@ namespace ConformU
 
                 #endregion
 
+                #region Process the response headers and media type
+
                 // Get the returned media type, if any, and create flags to indicate whether the response is an ImageBytes response or a base 64 hand-off response
                 string mediatype = httpResponse.Content.Headers.ContentType?.MediaType ?? "unknown";
                 bool isBase64Handoff = httpResponse.Headers.Contains(AlpacaConstants.BASE64_HANDOFF_HEADER); // Check whether the base 64 hand-off header was returned
                 bool isImageBytes = mediatype.Contains(AlpacaConstants.IMAGE_BYTES_MIME_TYPE, StringComparison.InvariantCultureIgnoreCase); // Check whether the media type indicates an ImageBytes response
 
                 LogDebug(testName, $"HTTP Status code: {httpResponse.StatusCode}, Media type: {mediatype}, IsBase64Handoff: {isBase64Handoff}, IsImageBytes: {isImageBytes}");
+
+                #endregion
 
                 #region Process successful HTTP status = 200 responses
 
@@ -2419,6 +2423,11 @@ namespace ConformU
                                 // Check casing of JSON parameters
                                 try
                                 {
+                                    bool foundClientTransactionID = false;
+                                    bool foundServerTransactionID = false;
+                                    bool foundErrorNumber = false;
+                                    bool foundErrorMessage = false;
+
                                     // Get the whole JSON string as a JSON document
                                     using (JsonDocument document = JsonDocument.Parse(responseString))
                                     {
@@ -2432,6 +2441,7 @@ namespace ConformU
                                             // Check whether this is a ClientTransactionID parameter cased in any way
                                             if (property.Name.ToLowerInvariant() == CLIENT_TRANSACTION_ID_PARAMETER_NAME.ToLowerInvariant()) // This is an ClientTransactionID parameter
                                             {
+                                                foundClientTransactionID = true;
                                                 // Check whether the property is correctly cased
                                                 if (property.Name == CLIENT_TRANSACTION_ID_PARAMETER_NAME) // Casing is correct
                                                     LogOk(testName, $"{CLIENT_TRANSACTION_ID_PARAMETER_NAME} is correctly cased", null);
@@ -2442,6 +2452,7 @@ namespace ConformU
                                             // Check whether this is a ServerTransactionId parameter cased in any way
                                             if (property.Name.ToLowerInvariant() == SERVER_TRANSACTION_ID_PARAMETER_NAME.ToLowerInvariant()) // This is an ServerTransactionId parameter
                                             {
+                                                foundServerTransactionID = true;
                                                 // Check whether the property is correctly cased
                                                 if (property.Name == SERVER_TRANSACTION_ID_PARAMETER_NAME) // Casing is correct
                                                     LogOk(testName, $"{SERVER_TRANSACTION_ID_PARAMETER_NAME} is correctly cased", null);
@@ -2452,6 +2463,7 @@ namespace ConformU
                                             // Check whether this is an ErrorNumber parameter cased in any way
                                             if (property.Name.ToLowerInvariant() == ERROR_NUMBER_PARAMETER_NAME.ToLowerInvariant()) // This is an ErrorNumber parameter
                                             {
+                                                foundErrorNumber = true;
                                                 // Check whether the property is correctly cased
                                                 if (property.Name == ERROR_NUMBER_PARAMETER_NAME) // Casing is correct
                                                     LogOk(testName, $"{ERROR_NUMBER_PARAMETER_NAME} is correctly cased", null);
@@ -2462,12 +2474,26 @@ namespace ConformU
                                             // Check whether this is an ErrorMessage parameter cased in any way
                                             if (property.Name.ToLowerInvariant() == ERROR_MESSAGE_PARAMETER_NAME.ToLowerInvariant()) // This is an ErrorMessage parameter
                                             {
+                                                foundErrorMessage = true;
                                                 // Check whether the property is correctly cased
                                                 if (property.Name == ERROR_MESSAGE_PARAMETER_NAME) // Casing is correct
                                                     LogOk(testName, $"{ERROR_MESSAGE_PARAMETER_NAME} is correctly cased", null);
                                                 else
                                                     LogIssue(testName, $"The {ERROR_MESSAGE_PARAMETER_NAME} JSON parameter is incorrectly cased, it should be cased like this: {ERROR_MESSAGE_PARAMETER_NAME}", responseString.LimitLength());
                                             }
+                                        }
+
+                                        // Check whether we are in strict mode, if so, report any mandatory parameters that were not found
+                                        if (settings.AlpacaConfiguration.ProtocolStrictChecks) // We are in strict mode so check whether all mandatory parameters were found
+                                        {
+                                            if (!foundClientTransactionID)
+                                                LogIssue(testName, $"Strict mode is enabled: JSON {CLIENT_TRANSACTION_ID_PARAMETER_NAME} parameter not found", responseString.LimitLength());
+                                            if (!foundServerTransactionID)
+                                                LogIssue(testName, $"Strict mode is enabled: JSON {SERVER_TRANSACTION_ID_PARAMETER_NAME} parameter not found", responseString.LimitLength());
+                                            if (!foundErrorNumber)
+                                                LogIssue(testName, $"Strict mode is enabled: JSON {ERROR_NUMBER_PARAMETER_NAME} parameter not found", responseString.LimitLength());
+                                            if (!foundErrorMessage)
+                                                LogIssue(testName, $"Strict mode is enabled: JSON {ERROR_MESSAGE_PARAMETER_NAME} parameter not found", responseString.LimitLength());
                                         }
 
                                         // Check whether this is an HTTP GET and if so confirm that a Value element is returned plus other possible parameters
