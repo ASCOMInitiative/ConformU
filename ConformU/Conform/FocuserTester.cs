@@ -690,17 +690,19 @@ namespace ConformU
                 LogCallToDriver(testName, "About to get Position property");
                 mPositionOrg = focuser.Position;
 
+                // Calculate the distance to move making sure that the value is <= the maximum number of steps than can be moved in one operation.
+                int distanceToMove = Math.Min(Convert.ToInt32(mMaxStep / 10), mMaxIncrement);
+
                 // Calculate an acceptable focus position
-                mPosition = mPositionOrg + Convert.ToInt32(mMaxStep / 10); // Move by 1/10 of the maximum focus distance outwards
-                if (mPosition >= mMaxStep)
+                mPosition = mPositionOrg + distanceToMove; // Move by the test distance outwards
+
+                // Check whether the move would exceed the maximum number of steps and if so, move inwards instead
+                if (mPosition >= mMaxStep) // Test position is greater than or equal to the maximum number of steps, so move inwards instead
                 {
-                    mPosition = mPositionOrg - Convert.ToInt32(mMaxStep / 10.0);// Move by 1/10 of the maximum focus distance inwards
+                    mPosition = mPositionOrg - distanceToMove;// Move by the test distance inwards
                 }
 
-                if (Math.Abs(mPosition - mPositionOrg) > mMaxIncrement)
-                {
-                    mPosition = mPositionOrg + mMaxIncrement; // Apply the MaxIncrement check
-                }
+                LogDebug(testName, $"MoveFocuser - Original position: {mPositionOrg}, Calculated position: {mPosition}, MaxIncrement: {mMaxIncrement}, MaxStep: {mMaxStep}");
             }
             else // Relative focuser
             {
