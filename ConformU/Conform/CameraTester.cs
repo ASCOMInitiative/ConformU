@@ -1206,7 +1206,7 @@ namespace ConformU
                             }
                             catch (Exception ex)
                             {
-                                HandleException("Gain Write", MemberType.Property, Required.MustNotBeImplemented, ex, "when writing a legal value");
+                                HandleException("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value");
                             }
 
                             // Test writing a lower than minimum value - this should result in am invalid value exception
@@ -1469,7 +1469,7 @@ namespace ConformU
                             }
                             catch (Exception ex)
                             {
-                                HandleException("Offset Write", MemberType.Property, Required.MustNotBeImplemented, ex, "when writing a legal value");
+                                HandleException("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value");
                             }
 
                             // Test writing a lower than minimum value - this should result in am invalid value exception
