@@ -50,7 +50,7 @@ namespace ConformU
         private double mExposureMax, mExposureMin, mExposureResolution;
         private bool mFastReadout, mCanReadReadoutModes;
 
-        private GainOffsetOutcome canReadGainMin, canReadGainMax, canReadGains, canReadGain;
+        private GainOffsetOutcome canReadGainMin, canReadGainMax, canReadGains, canReadGain, canReadOffsetMin, canReadOffsetMax, canReadOffsets, canReadOffset;
         private IList<string> mGains;
         private IList<string> mReadoutModes;
         private SensorType mSensorType;
@@ -1169,6 +1169,11 @@ namespace ConformU
                     else
                         LogOk("Gain Read", mGain.ToString());
                 }
+                catch (ASCOM.InvalidOperationException)
+                {
+                    canReadGain = GainOffsetOutcome.InvalidOperation;
+                    LogOk("Gain Read", "InvalidOperation error returned.");
+                }
                 catch (Exception ex)
                 {
                     bool exceptionIsOk = HandleException("Gain Read", MemberType.Property, Required.Optional, ex, "");
@@ -1222,12 +1227,12 @@ namespace ConformU
                 else
                 {
                     mGainMode = GainOffsetMode.Unknown;
-                    LogIssue("Gain Implementation", $"The outcomes from Gain, Gains, GainMin and GainMax were not consistent with any of the three supported gain modes: \"Gain Not Implemented\", \"Gain Index\" and \"Gain Value\".");
+                    LogIssue("Gain Implementation", $"The outcomes from Gain, Gains, GainMin and GainMax are not consistent with any of the three supported gain modes: \"Gain Not Implemented\", \"Gain Index\" and \"Gain Value\".");
                     LogInfo("Gain Implementation", $"\"Gain Not Implemented\" mode requires Gain, Gains, GainMin and GainMax to be not implemented.");
                     LogInfo("Gain Implementation", $"\"Gain Index\" mode requires Gain and Gains to be implemented while GainMin and GainMax are not implemented.");
                     LogInfo("Gain Implementation", $"\"Gain Value\" mode requires Gain, GainMin and GainMax to be implemented while Gains is not implemented.");
                     LogInfo("Gain Implementation", $"Properties are accepted as implemented if they return a value or if they return an InvalidOperationException.");
-                    LogInfo("Gain Implementation", $"Outcomes - Gain: {canReadGain}, Gains: {canReadGains}, GainMin: {canReadGainMin}, GainMax: {canReadGainMax}");
+                    LogInfo("Gain Implementation", $"Detected outcomes - Gain: {canReadGain}, Gains: {canReadGains}, GainMin: {canReadGainMin}, GainMax: {canReadGainMax}");
                 }
 
                 // Gain write - Optional when neither gain index nor gain value mode is supported; must be implemented if either mode is supported
@@ -1433,188 +1438,299 @@ namespace ConformU
                 // OffsetMin Read - Optional
                 try
                 {
-                    mCanReadOffsetMin = false;
+                    canReadOffsetMin = GainOffsetOutcome.Unknown;
                     LogCallToDriver("ConformanceCheck", "About to get OffsetMin");
                     TimeMethod("OffsetMin", () => mOffsetMin = camera.OffsetMin, TargetTime.Fast);
 
                     // Successfully retrieved a value
-                    mCanReadOffsetMin = true;
+                    canReadOffsetMin = GainOffsetOutcome.WorkedCorrectly;
                     LogOk("OffsetMin Read", mOffsetMin.ToString());
+                }
+                catch (ASCOM.InvalidOperationException)
+                {
+                    canReadOffsetMin = GainOffsetOutcome.InvalidOperation;
+                    LogOk("OffsetMin Read", "InvalidOperation error returned.");
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidOperationExceptionAsOk("OffsetMin Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
+                    bool exceptionIsOk = HandleException("OffsetMin Read", MemberType.Property, Required.Optional, ex, "");
+
+                    // Set the outcome as appropriate based on whether the exception is acceptable or not
+                    if (exceptionIsOk)
+                        canReadOffsetMin = GainOffsetOutcome.NotImplemented;
+                    else
+                        canReadOffsetMin = GainOffsetOutcome.Failed;
                 }
 
                 // OffsetMax Read - Optional
                 try
                 {
-                    mCanReadOffsetMax = false;
+                    canReadOffsetMax = GainOffsetOutcome.Unknown;
                     LogCallToDriver("ConformanceCheck", "About to get OffsetMax");
                     TimeMethod("OffsetMax", () => mOffsetMax = camera.OffsetMax, TargetTime.Fast);
 
                     // Successfully retrieved a value
-                    mCanReadOffsetMax = true;
+                    canReadOffsetMax = GainOffsetOutcome.WorkedCorrectly;
                     LogOk("OffsetMax Read", mOffsetMax.ToString());
+                }
+                catch (ASCOM.InvalidOperationException)
+                {
+                    canReadOffsetMax = GainOffsetOutcome.InvalidOperation;
+                    LogOk("OffsetMax Read", "InvalidOperation error returned.");
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidOperationExceptionAsOk("OffsetMax Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
+                    bool exceptionIsOk = HandleException("OffsetMax Read", MemberType.Property, Required.Optional, ex, "");
+
+                    // Set the outcome as appropriate based on whether the exception is acceptable or not
+                    if (exceptionIsOk)
+                        canReadOffsetMax = GainOffsetOutcome.NotImplemented;
+                    else
+                        canReadOffsetMax = GainOffsetOutcome.Failed;
                 }
 
                 // Offsets Read - Optional
                 try
                 {
-                    mCanReadOffsets = false;
+                    canReadOffsets = GainOffsetOutcome.Unknown;
                     LogCallToDriver("ConformanceCheck", "About to get Offsets");
                     TimeMethod("Offsets", () => mOffsets = camera.Offsets, TargetTime.Fast);
 
                     // Successfully retrieved a value
-                    mCanReadOffsets = true;
-                    foreach (string offset in mOffsets)
-                        LogOk("Offsets Read", offset.ToString());
+                    if (mOffsets.Count == 0)
+                    {
+                        canReadOffsets = GainOffsetOutcome.Failed;
+                        LogIssue("Offsets", $"Offsets returned an empty list of offset values.");
+                    }
+                    else
+                    {
+                        canReadOffsets = GainOffsetOutcome.WorkedCorrectly;
+                        foreach (string offset in mOffsets)
+                        {
+                            LogOk("Offsets Read", offset.ToString());
+                        }
+                    }
+                }
+                catch (ASCOM.InvalidOperationException)
+                {
+                    canReadOffsets = GainOffsetOutcome.InvalidOperation;
+                    LogOk("Offsets Read", "InvalidOperation error returned.");
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidOperationExceptionAsOk("Offsets Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
-                }
+                    bool exceptionIsOk = HandleException("Offsets Read", MemberType.Property, Required.Optional, ex, "");
 
-                if (mCanReadOffsetMax & mCanReadOffsetMin & mCanReadOffsets)
-                    LogIssue("Offsets", "OffsetMin, OffsetMax and Offsets are all readable. Only one of OffsetMin/Max as a pair or Offsets should be used, the other should throw a PropertyNotImplemented error");
-                else
-                {
+                    // Set the outcome as appropriate based on whether the exception is acceptable or not
+                    if (exceptionIsOk)
+                        canReadOffsets = GainOffsetOutcome.NotImplemented;
+                    else
+                        canReadOffsets = GainOffsetOutcome.Failed;
                 }
-                if (cancellationToken.IsCancellationRequested) return;
 
                 // Offset Read - Optional 
                 try
                 {
-                    mCanReadOffset = false; // Set default value to indicate can't read offset
+                    canReadOffset = GainOffsetOutcome.Unknown; // Set default value to indicate can't read offset
                     LogCallToDriver("ConformanceCheck", "About to get Offset");
                     TimeMethod("Offset", () => mOffset = camera.Offset, TargetTime.Fast);
 
-                    mCanReadOffset = true; // Flag that we can read Offset OK
-                    if (mCanReadOffsets)
+                    canReadOffset = GainOffsetOutcome.WorkedCorrectly; // Flag that we can read Offset OK
+                    if (canReadOffsets == GainOffsetOutcome.WorkedCorrectly)
                         LogOk("Offset Read", $"{mOffset} {mOffsets[0]}");
                     else
                         LogOk("Offset Read", mOffset.ToString());
                 }
+                catch (ASCOM.InvalidOperationException)
+                {
+                    canReadOffset = GainOffsetOutcome.InvalidOperation;
+                    LogOk("Offset Read", "InvalidOperation error returned.");
+                }
                 catch (Exception ex)
                 {
-                    HandleException("Offset Read", MemberType.Property, Required.Optional, ex, "");
+                    bool exceptionIsOk = HandleException("Gain Read", MemberType.Property, Required.Optional, ex, "");
+
+                    // Set the outcome as appropriate based on whether the exception is acceptable or not
+                    if (exceptionIsOk)
+                        canReadOffset = GainOffsetOutcome.NotImplemented;
+                    else
+                        canReadOffset = GainOffsetOutcome.Failed;
                 }
 
-                // Now check that offset property groups are implemented to handle the three offset modes: NotImplemented, Offset Index (Offset + Offsets) and Offset Value (Offset + OffsetMin + OffsetMax)
-                if (!mCanReadOffset & !mCanReadOffsets & !mCanReadOffsetMin & !mCanReadOffsetMax)
-                    LogOk("Offset Read", "All four offset properties return errors - the driver is in \"Offset Not Implemented\" mode.");
-                else if (mCanReadOffset)
+                // Validate the three allowed combinations of Offset, Offsets, OffsetMin and OffsetMax properties. The three allowed combinations are:
+                // 1) Offset Not Implemented - All four properties are not implemented
+                // 2) Offset Index - Offset and Offsets can be read while OffsetMin and OffsetMax are not implemented
+                // 3) Offset Value - Offset, OffsetMin and OffsetMax can be read while Offsets is not implemented
+
+                // Check for Offset Not Implemented mode
+                if (canReadOffset == GainOffsetOutcome.NotImplemented &&
+                    canReadOffsets == GainOffsetOutcome.NotImplemented &&
+                    canReadOffsetMin == GainOffsetOutcome.NotImplemented &&
+                    canReadOffsetMax == GainOffsetOutcome.NotImplemented)
                 {
-                    // Test for Offset Index mode
-                    if ((mCanReadOffset & mCanReadOffsets & !mCanReadOffsetMin & !mCanReadOffsetMax))
-                    {
-                        mOffsetMode = GainOffsetMode.IndexMode;
-                        LogOk("Offset Read", "Offset and Offsets can be read while OffsetMin and OffsetMax return errors - the driver is in \"Offset Index\" mode.");
-                    }
-                    else if ((mCanReadOffset & !mCanReadOffsets & mCanReadOffsetMin & mCanReadOffsetMax))
-                    {
-                        mOffsetMode = GainOffsetMode.ValueMode;
-                        LogOk("Offset Read", "Offset, OffsetMin and OffsetMax can be read OK while Offsets returns an error - the driver is in \"Offset Value\" mode.");
-                    }
-                    else
-                    {
-                        mOffsetMode = GainOffsetMode.Unknown;
-                        LogIssue("Offset Read", $"Unable to determine whether the driver is in \"Offset Not Implemented\", \"Offset Index\" or \"Offset Value\" mode. Please check the interface specification.");
-                        LogInfo("Offset Read", $"Offset returned an error: {mCanReadOffset}, Offsets returned an error: {mCanReadOffsets}, OffsetMin returned an error: {mCanReadOffsetMin}, OffsetMax returned an error: {mCanReadOffsetMax}.");
-                        LogInfo("Offset Read", $"\"Offset Not Implemented\" mode: Offset, Offsets, OffsetMin and OffsetMax must all return errors.");
-                        LogInfo("Offset Read", $"\"Offset Index\" mode: Offset and Offsets must work while OffsetMin and OffsetMax must return errors.");
-                        LogInfo("Offset Read", $"\"Offset Value\" mode: Offset, OffsetMin and OffsetMax must work while Offsets must throw return an error.");
-                    }
+                    // Offset is not implemented in this device
+                    mOffsetMode = GainOffsetMode.NotImplemented;
+                    LogOk("Offset Implementation", "All four offset properties are not implemented - the driver is in \"Offset Not Implemented\" mode.");
                 }
+
+                // Check for Offset Index mode
+                else if ((canReadOffset == GainOffsetOutcome.WorkedCorrectly | canReadOffset == GainOffsetOutcome.InvalidOperation) &
+                         (canReadOffsets == GainOffsetOutcome.WorkedCorrectly | canReadOffsets == GainOffsetOutcome.InvalidOperation) &&
+                         (canReadOffsetMin == GainOffsetOutcome.NotImplemented) &&
+                         (canReadOffsetMax == GainOffsetOutcome.NotImplemented))
+                {
+                    // The device is in Offset Index mode
+                    mOffsetMode = GainOffsetMode.IndexMode;
+                    LogOk("Offset Implementation", "Offset and Offsets worked as expected while OffsetMin and OffsetMax are not implemented - the driver is in \"Offset Index\" mode.");
+                }
+
+                // Check for Offset Value mode
+                else if ((canReadOffset == GainOffsetOutcome.WorkedCorrectly | canReadOffset == GainOffsetOutcome.InvalidOperation) &
+                         (canReadOffsets == GainOffsetOutcome.NotImplemented) &&
+                         (canReadOffsetMin == GainOffsetOutcome.WorkedCorrectly | canReadOffsetMin == GainOffsetOutcome.InvalidOperation) &&
+                         (canReadOffsetMax == GainOffsetOutcome.WorkedCorrectly | canReadOffsetMax == GainOffsetOutcome.InvalidOperation))
+                {
+                    // The device is in Offset Value mode
+                    mOffsetMode = GainOffsetMode.ValueMode;
+                    LogOk("Offset Implementation", "Offset, OffsetMin and OffsetMax worked as expected while Offsets is not implemented - the driver is in \"Offset Value\" mode.");
+                }
+
+                // If we get here, then the driver is in an invalid state for Offset implementation
                 else
                 {
-                    LogIssue("Offset Read", $"Offset Read returned an error but at least one of Offsets, OffsetMin Or OffsetMax did not return an error. If Offset returns an error, all the other offset properties must do likewise.");
-                    LogInfo("Offset Read", $"Offsets returned an error : {mCanReadOffsets}, OffsetMin returned an error : {mCanReadOffsetMin}, OffsetMax returned an error : {mCanReadOffsetMax}.");
+                    mOffsetMode = GainOffsetMode.Unknown;
+                    LogIssue("Offset Implementation", $"The outcomes from Offset, Offsets, OffsetMin and OffsetMax are not consistent with any of the three supported offset modes: \"Offset Not Implemented\", \"Offset Index\" and \"Offset Value\".");
+                    LogInfo("Offset Implementation", $"\"Offset Not Implemented\" mode requires Offset, Offsets, OffsetMin and OffsetMax to be not implemented.");
+                    LogInfo("Offset Implementation", $"\"Offset Index\" mode requires Offset and Offsets to be implemented while OffsetMin and OffsetMax are not implemented.");
+                    LogInfo("Offset Implementation", $"\"Offset Value\" mode requires Offset, OffsetMin and OffsetMax to be implemented while Offsets is not implemented.");
+                    LogInfo("Offset Implementation", $"Properties are accepted as implemented if they return a value or if they return an InvalidOperationException.");
+                    LogInfo("Offset Implementation", $"Detected outcomes - Offset: {canReadOffset}, Offsets: {canReadOffsets}, OffsetMin: {canReadOffsetMin}, OffsetMax: {canReadOffsetMax}");
                 }
 
                 // Offset write - Optional when neither offset index nor offset value mode is supported; must be implemented if either mode is supported
 
-                // First test for the only valid not implemented state when neither offset mode is supported
-                if (!mCanReadOffset & !mCanReadOffsets & !mCanReadOffsetMin & !mCanReadOffsetMax)
+                switch (mOffsetMode)
                 {
-                    try
-                    {
-                        LogCallToDriver("ConformanceCheck", "About to set Offset");
-                        camera.Offset = 0;
-                        LogIssue("Offset Write", "Writing to Offset did not throw a PropertyNotImplemented error when reading Offset did.");
-                    }
-                    catch (Exception ex)
-                    {
-                        HandleException("Offset Write", MemberType.Property, Required.MustNotBeImplemented, ex, "PropertyNotImplemented error is expected");
-                    }
+                    case GainOffsetMode.NotImplemented:
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Offset");
+                            TimeMethod("Offset Write", () => camera.Offset = 0, TargetTime.Standard);
+                            LogIssue("Offset Write", "Writing to Offset did not return a PropertyNotImplemented error whereas this was the case for reading Offset.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleException("Offset Write", MemberType.Property, Required.MustNotBeImplemented, ex, "PropertyNotImplemented error is expected");
+                        }
+                        break;
+
+                    case GainOffsetMode.IndexMode:
+                        // Test writing the minimum valid value
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Offset");
+                            TimeMethod("Offset Write", () => camera.Offset = 0, TargetTime.Standard);
+                            LogOk("Offset Write", $"Successfully set offset minimum value 0.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleException("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value");
+                        }
+
+                        // Test writing the maximum valid value
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Offset");
+                            TimeMethod("Offset Write", () => camera.Offset = Convert.ToInt16(mOffsets.Count - 1), TargetTime.Standard);
+                            LogOk("Offset Write", $"Successfully set offset to maximum value {Convert.ToInt16(mOffsets.Count - 1)}.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleException("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value");
+                        }
+
+                        // Test writing a lower than minimum value - this should result in am invalid value exception
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Offset");
+                            camera.Offset = -1;
+                            LogIssue("Offset Write", $"Successfully set an offset below zero (- 1), this should have resulted in an InvalidValue error.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleInvalidValueExceptionAsOk("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"Received InvalidValue error for offset -1, which is lower than the minimum value.");
+                        }
+
+                        // Test writing a higher than maximum value - this should result in an invalid value exception
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Offset");
+                            camera.Offset = Convert.ToInt16(mOffsets.Count);
+                            LogIssue("Offset Write", $"Successfully set an offset above the maximum value({mOffsets.Count}), this should have resulted in an InvalidValue error.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleInvalidValueExceptionAsOk("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"Received InvalidValue error for offset {mOffsets.Count} which is higher than the maximum value.");
+                        }
+                        break;
+
+                    case GainOffsetMode.ValueMode:
+                        // Test writing the minimum valid value
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Offset");
+                            TimeMethod("Offset Write", () => camera.Offset = mOffsetMin, TargetTime.Standard);
+                            LogOk("Offset Write", $"Successfully set offset minimum value {mOffsetMin}.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleException("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value");
+                        }
+
+                        // Test writing the maximum valid value
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Offset");
+                            camera.Offset = mOffsetMax;
+                            LogOk("Offset Write", $"Successfully set offset maximum value {mOffsetMax}.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleException("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value");
+                        }
+
+                        // Test writing a lower than minimum value - this should result in am invalid value exception
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Offset");
+                            camera.Offset = mOffsetMin - 1;
+                            LogIssue("Offset Write", $"Successfully set an offset below the minimum value ({mOffsetMin - 1}), this should have resulted in an InvalidValue error.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleInvalidValueExceptionAsOk("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"InvalidValue Received error for offset {mOffsetMin - 1}, which is lower than the minimum value.");
+                        }
+
+                        // Test writing a lower than minimum value - this should result in am invalid value exception
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Offset");
+                            camera.Offset = mOffsetMax + 1;
+                            LogIssue("Offset Write", $"Successfully set an offset above the maximum value({mOffsetMax + 1}), this should have resulted in an InvalidValueerror.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleInvalidValueExceptionAsOk("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"InvalidValue Received error for offset {mOffsetMax + 1} which is higher than the maximum value.");
+                        }
+                        break;
+
+                    case GainOffsetMode.Unknown:
+                        LogIssue("Offset Write", "Cannot test Offset Write because of issues with other offset properties - skipping test");
+                        break;
+
+                    default:
+                        LogError("Offset Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {mOffsetMode}");
+                        break;
                 }
-                else
-                    switch (mOffsetMode)
-                    {
-                        case GainOffsetMode.Unknown:
-                            LogIssue("Offset Write", "Cannot test Offset Write because of issues with other offset properties - skipping test");
-                            break;
-
-                        case GainOffsetMode.IndexMode:
-                            break;
-
-                        case GainOffsetMode.ValueMode:
-                            // Test writing the minimum valid value
-                            try
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to set Offset");
-                                TimeMethod("Offset Write", () => camera.Offset = mOffsetMin, TargetTime.Standard);
-                                LogOk("Offset Write", $"Successfully set offset minimum value {mOffsetMin}.");
-                            }
-                            catch (Exception ex)
-                            {
-                                HandleException("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value");
-                            }
-
-                            // Test writing the maximum valid value
-                            try
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to set Offset");
-                                camera.Offset = mOffsetMax;
-                                LogOk("Offset Write", $"Successfully set offset maximum value {mOffsetMax}.");
-                            }
-                            catch (Exception ex)
-                            {
-                                HandleException("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value");
-                            }
-
-                            // Test writing a lower than minimum value - this should result in am invalid value exception
-                            try
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to set Offset");
-                                camera.Offset = mOffsetMin - 1;
-                                LogIssue("Offset Write", $"Successfully set an offset below the minimum value ({mOffsetMin - 1}), this should have resulted in an InvalidValue error.");
-                            }
-                            catch (Exception ex)
-                            {
-                                HandleInvalidValueExceptionAsOk("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"InvalidValue Received error for offset {mOffsetMin - 1}, which is lower than the minimum value.");
-                            }
-
-                            // Test writing a lower than minimum value - this should result in am invalid value exception
-                            try
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to set Offset");
-                                camera.Offset = mOffsetMax + 1;
-                                LogIssue("Offset Write", $"Successfully set an offset above the maximum value({mOffsetMax + 1}), this should have resulted in an InvalidValueerror.");
-                            }
-                            catch (Exception ex)
-                            {
-                                HandleInvalidValueExceptionAsOk("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"InvalidValue Received error for offset {mOffsetMax + 1} which is higher than the maximum value.");
-                            }
-                            break;
-                        default:
-                            LogIssue("Offset Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {mOffsetMode}");
-                            break;
-                    }
 
                 // SubExposureDuration Read - Optional 
                 mSubExposureDuration = CameraPropertyTestDouble(CamPropertyType.SubExposureDuration, "SubExposureDuration", double.Epsilon, double.MaxValue, false);
