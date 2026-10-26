@@ -18,8 +18,13 @@ dotnet build ConformU/ConformU.csproj -c Debug -p:Platform="Any CPU" --framework
 Rem Extract the full build number from the InformationVersion.txt file.
 set /p FULL_VERSION=<"ConformU\bin\Any CPU\Debug\net10.0\InformationVersion.txt"
 
-Rem Extract the version number from the full build number
+rem Step 1: strip +build metadata → gives "4.6.0-rc.1"
 for /f "tokens=1 delims=+" %%a in ("%FULL_VERSION%") do (
+    set TMP_VERSION=%%a
+)
+
+rem Step 2: strip -prerelease → gives "4.6.0"
+for /f "tokens=1 delims=-" %%a in ("%TMP_VERSION%") do (
     set BUILD_VERSION=%%a
 )
 
