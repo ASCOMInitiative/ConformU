@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -3769,95 +3770,44 @@ namespace ConformU
             {
                 LogCallToDriver("ConformanceCheck", "About to get LastExposureStartTime");
                 mLastExposureStartTime = camera.LastExposureStartTime;
-                int lI;
-                // Confirm that the format is as expected
-                bool lFormatOk;
-                lFormatOk = true;
-                if (mLastExposureStartTime.Length >= 19)
+                LogDebug("LastExposureStartTime", $"LastExposureStartTime returned: {mLastExposureStartTime}");
+
+                // Confirm that the format is as expected using this format for CCYY-MM-DDThh:mm:ss[.sss…] as defined in the camera interface specification
+                string pattern = @"(?<![0-9])[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?(?![0-9])";
+
+                // Check whether the LastExposureStartTime matches the pattern
+                Match match = Regex.Match(mLastExposureStartTime, pattern);
+
+                // Check whether there was a match 
+                if (match.Length > 0) // There was a match so the basic format is OK
                 {
-                    for (lI = 1; lI <= 19; lI++)
+                    // Confirm that LastExposureStartTime parses as a valid date and check for correct value
+                    try
                     {
-                        switch (lI)
+                        // Parse LastExposureStartTime
+                        lStartTime = DateTime.Parse(mLastExposureStartTime);
+
+                        // Calculate the difference between the times ignoring its sign
+                        double difference = Math.Abs(pStart.Subtract(lStartTime).TotalSeconds);
+                        LogDebug("LastExposureStartTime", $"Local start time: {pStart:HH:mm:ss.fff}, Camera image start time: {lStartTime:HH:mm:ss.fff}, Difference: {difference:0.000} seconds");
+
+                        // Check whether the difference is less than a reference standard of 2.0 seconds
+                        if (difference <= 2.0) // OK - Difference is 2.0 seconds or less
+                            LogOk("LastExposureStartTime", $"LastExposureStartTime {mLastExposureStartTime} agrees with UTC time on this device to within ±2 seconds (Difference: {difference:0.000} seconds)");
+                        else // Bad - Difference is > 2.0 seconds
                         {
-                            case 5:
-                            case 8: // "-"
-                                if (mLastExposureStartTime.Substring(lI - 1, 1) != "-")
-                                {
-                                    LogInfo("LastExposureDuration", $"Character '{mLastExposureStartTime.Substring(lI - 1, 1)}' at position {lI}is not '-'");
-                                    lFormatOk = false;
-                                }
-                                else
-                                {
-
-                                }
-                                break;
-
-                            case 11: // "T"
-                                if (mLastExposureStartTime.Substring(lI - 1, 1) != "T")
-                                {
-                                    LogInfo("LastExposureDuration", $"Character '{mLastExposureStartTime.Substring(lI - 1, 1)}' at position {lI}is not 'T'");
-                                    lFormatOk = false;
-                                }
-                                else
-                                {
-
-                                }
-                                break;
-
-                            case 14:
-                            case 17: // ":"
-                                if (mLastExposureStartTime.Substring(lI - 1, 1) != ":")
-                                {
-                                    LogInfo("LastExposureDuration", $"Character '{mLastExposureStartTime.Substring(lI - 1, 1)}' at position {lI}is not ':'");
-                                    lFormatOk = false;
-                                }
-                                else
-                                {
-
-                                }
-                                break;
-
-                            default:
-                                if (!mLastExposureStartTime.Substring(lI - 1, 1).IsNumeric())
-                                {
-                                    LogInfo("LastExposureDuration", $"Character '{mLastExposureStartTime.Substring(lI - 1, 1)}' at position {lI}is not 'numeric'");
-                                    lFormatOk = false;
-                                }
-                                else
-                                {
-
-                                }
-                                break;
+                            LogIssue("LastExposureStartTime", $"The camera's LastExposureStartTime is more than 2 seconds different from UTC time on this device.");
+                            LogInfo("LastExposureStartTime", $"Local UTC start time: {pStart:HH:mm:ss.fff}, Camera image UTC start time: {lStartTime:HH:mm:ss.fff}, Difference: {difference:0.000} seconds");
                         }
                     }
-                    if (lFormatOk)
+                    catch (Exception ex)
                     {
-                        try // Confirm that it parses as a valid date and check for correct value
-                        {
-                            lStartTime = DateTime.Parse(mLastExposureStartTime);
-                            if (pStart.Subtract(lStartTime).TotalSeconds < 2.0)
-                                LogOk("LastExposureStartTime",
-                                    $"LastExposureStartTime is correct to within 2 seconds: {mLastExposureStartTime} UTC");
-                            else
-                                LogIssue("LastExposureStartTime",
-                                    $"LastExposureStartTime is more than 2 seconds inaccurate : {mLastExposureStartTime}, expected: {pStart:yyyy-MM-ddTHH:mm:ss} UTC");
-                        }
-                        catch (Exception ex)
-                        {
-                            LogIssue("LastExposureStartTime",
-                                $"Parsing LastExposureStartTime - {ex.Message} {mLastExposureStartTime}");
-                            LogDebug("LastExposureStartTime", $"Exception detail:\r\n {ex}");
-                        }
+                        LogIssue("LastExposureStartTime", $"Parsing LastExposureStartTime - {ex.Message} {mLastExposureStartTime}");
+                        LogDebug("LastExposureStartTime", $"Exception detail:\r\n {ex}");
                     }
-                    else
-                        LogIssue("LastExposureStartTime",
-                            $"LastExposureStartTime not in the expected format yyyy-mm-ddThh:mm:ss - {mLastExposureStartTime}");
                 }
-                else if (mLastExposureStartTime == "")
-                    LogIssue("LastExposureStartTime", "LastExposureStartTime has returned an empty string - expected yyyy-mm-ddThh:mm:ss");
-                else
-                    LogIssue("LastExposureStartTime",
-                        $"LastExposureStartTime is less than 19 characters - expected yyyy-mm-ddThh:mm:ss - {mLastExposureStartTime}");
+                else // The supplied LastExposureDuration value is not of the expected form so log an issue
+                    LogIssue("LastExposureStartTime", $"LastExposureStartTime is not in the expected format yyyy-mm-ddThh:mm:ss - {mLastExposureStartTime}");
             }
             catch (Exception ex)
             {
