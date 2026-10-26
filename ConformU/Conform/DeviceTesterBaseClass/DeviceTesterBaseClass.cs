@@ -1483,7 +1483,7 @@ namespace ConformU
             {
                 case DeviceTechnology.Alpaca:
                     LogTestOnly($"Alpaca device: {settings.AlpacaDevice.AscomDeviceName} ({settings.AlpacaDevice.IpAddress}:{settings.AlpacaDevice.IpPort} {settings.AlpacaDevice.AscomDeviceType}/{settings.AlpacaDevice.AlpacaDeviceNumber})");
-                    if (!settings.AlpacaConfiguration.StrictCasing) 
+                    if (!settings.AlpacaConfiguration.StrictCasing)
                         LogConfigurationAlert("Alpaca strict casing has been disabled, this is not advised when checking device conformance.");
 
                     break;
@@ -2096,8 +2096,9 @@ namespace ConformU
         /// <param name="ex">The exception received from the device</param>
         /// <param name="userMessage">The member specific message to report</param>
         /// <remarks></remarks>
-        protected void HandleException(string memberName, MemberType typeOfMember, Required isRequired, Exception ex, string userMessage)
+        protected bool HandleException(string memberName, MemberType typeOfMember, Required isRequired, Exception ex, string userMessage)
         {
+            bool exceptionIsOk = false; // Return true for an acceptable exception and false for all other conditions. Default to not OK
 
             // Handle PropertyNotImplemented exceptions from properties and MethodNotImplemented exceptions from methods and NotImplementedExceptions from Alpaca devices
             if (IsPropertyNotImplementedException(ex) & typeOfMember == MemberType.Property |
@@ -2112,6 +2113,7 @@ namespace ConformU
 
                     case Required.MustNotBeImplemented:
                         LogOk(memberName, $"{userMessage} and a {GetExceptionName(ex, typeOfMember)} error was generated as expected");
+                        exceptionIsOk = true;
                         break;
 
                     case Required.MustBeImplemented:
@@ -2120,6 +2122,7 @@ namespace ConformU
 
                     case Required.Optional:
                         LogOk(memberName, $"Optional member returned a {GetExceptionName(ex, typeOfMember)} error.");
+                        exceptionIsOk = true;
                         break;
 
                     default:
@@ -2144,6 +2147,7 @@ namespace ConformU
                 {
                     // NotImplementedException is expected from an Alpaca device so flag as OK
                     LogOk(memberName, "Received a NotImplementedException from an Alpaca device as expected");
+                    exceptionIsOk = true;
                 }
                 else // We are testing a COM device
                 {
@@ -2151,6 +2155,7 @@ namespace ConformU
                     if ((settings.ComConfiguration.ComAccessMechanic == ComAccessMechanic.DriverAccess) & (settings.DeviceTechnology == DeviceTechnology.COM)) // We are testing a COM device using the cross platform DriverAccess module so report OK.
                     {
                         LogOk(memberName, "Received a NotImplementedException from DriverAccess as expected");
+                        exceptionIsOk = true;
                     }
                     else // We are NOT testing a COM device using the cross platform DriverAccess module so report an issue.
                     {
@@ -2160,8 +2165,7 @@ namespace ConformU
             }
             else if (ex is System.NotImplementedException)
             {
-                LogIssue(memberName,
-                    $"Received a System.NotImplementedException instead of an ASCOM.{((typeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException")}");
+                LogIssue(memberName, $"Received a System.NotImplementedException instead of an ASCOM.{((typeOfMember == MemberType.Property) ? "PropertyNotImplementedException" : "MethodNotImplementedException")}");
             }
 
             // Handle all other types of error
@@ -2171,6 +2175,9 @@ namespace ConformU
             }
 
             LogDebug(memberName, $"Exception detail: {ex}");
+
+            // Return the assessment outcome: true for an acceptable exception and false for all other conditions
+            return exceptionIsOk;
         }
 
         protected void HandleInvalidValueExceptionAsOk(string memberName, MemberType typeOfMember, Required isRequired, Exception ex, string userAction, string message)

@@ -48,7 +48,9 @@ namespace ConformU
         // ICameraV2 properties
         private short mGain, mGainMax, mGainMin, mPercentCompleted, mReadoutMode;
         private double mExposureMax, mExposureMin, mExposureResolution;
-        private bool mFastReadout, mCanReadGain, mCanReadGainMax, mCanReadGainMin, mCanReadGains, mCanReadReadoutModes;
+        private bool mFastReadout, mCanReadReadoutModes;
+
+        private GainOffsetOutcome canReadGainMin, canReadGainMax, canReadGains, canReadGain;
         private IList<string> mGains;
         private IList<string> mReadoutModes;
         private SensorType mSensorType;
@@ -155,8 +157,17 @@ namespace ConformU
         private enum GainOffsetMode
         {
             Unknown = 0,
-            IndexMode = 1,
-            ValueMode = 2
+            NotImplemented = 1,
+            IndexMode = 2,
+            ValueMode = 3
+        }
+        private enum GainOffsetOutcome
+        {
+            Unknown = 0,
+            NotImplemented = 1,
+            InvalidOperation = 2,
+            WorkedCorrectly = 3,
+            Failed = 4
         }
 
         private readonly Settings settings;
@@ -1056,189 +1067,293 @@ namespace ConformU
                 // GainMin Read - Optional
                 try
                 {
-                    mCanReadGainMin = false;
+                    canReadGainMin = GainOffsetOutcome.Unknown;
                     LogCallToDriver("ConformanceCheck", "About to get GainMin");
                     TimeFunc<short>("GainMin", () => mGainMin = camera.GainMin, TargetTime.Standard);
 
                     // Successfully retrieved a value
-                    mCanReadGainMin = true;
+                    canReadGainMin = GainOffsetOutcome.WorkedCorrectly;
                     LogOk("GainMin Read", mGainMin.ToString());
+                }
+                catch (ASCOM.InvalidOperationException)
+                {
+                    canReadGainMin = GainOffsetOutcome.InvalidOperation;
+                    LogOk("GainMin Read", "InvalidOperation error returned.");
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidOperationExceptionAsOk("GainMin Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
+                    bool exceptionIsOk = HandleException("GainMin Read", MemberType.Property, Required.Optional, ex, "");
+
+                    // Set the outcome as appropriate based on whether the exception is acceptable or not
+                    if (exceptionIsOk)
+                        canReadGainMin = GainOffsetOutcome.NotImplemented;
+                    else
+                        canReadGainMin = GainOffsetOutcome.Failed;
                 }
 
                 // GainMax Read - Optional
                 try
                 {
-                    mCanReadGainMax = false;
+                    canReadGainMax = GainOffsetOutcome.Unknown;
                     LogCallToDriver("ConformanceCheck", "About to get GainMax");
                     TimeFunc("GainMax", () => mGainMax = camera.GainMax, TargetTime.Standard);
 
                     // Successfully retrieved a value
-                    mCanReadGainMax = true;
+                    canReadGainMax = GainOffsetOutcome.WorkedCorrectly;
                     LogOk("GainMax Read", mGainMax.ToString());
+                }
+                catch (ASCOM.InvalidOperationException)
+                {
+                    canReadGainMax = GainOffsetOutcome.InvalidOperation;
+                    LogOk("GainMax Read", "InvalidOperation error returned.");
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidOperationExceptionAsOk("GainMax Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
+                    bool exceptionIsOk = HandleException("GainMax Read", MemberType.Property, Required.Optional, ex, "");
+
+                    // Set the outcome as appropriate based on whether the exception is acceptable or not
+                    if (exceptionIsOk)
+                        canReadGainMax = GainOffsetOutcome.NotImplemented;
+                    else
+                        canReadGainMax = GainOffsetOutcome.Failed;
                 }
 
                 // Gains Read - Optional
                 try
                 {
-                    mCanReadGains = false;
+                    canReadGains = GainOffsetOutcome.Unknown;
                     LogCallToDriver("ConformanceCheck", "About to get Gains");
-                    TimeFunc("GainMax", () => mGains = camera.Gains, TargetTime.Fast);
+                    TimeFunc("Gains", () => mGains = camera.Gains, TargetTime.Fast);
 
                     // Successfully retrieved a value
-                    mCanReadGains = true;
-                    foreach (string gain in mGains)
-                        LogOk("Gains Read", gain.ToString());
+                    if (mGains.Count == 0)
+                    {
+                        canReadGains = GainOffsetOutcome.Failed;
+                        LogIssue("Gains", $"Gains returned an empty list of gain values.");
+                    }
+                    else
+                    {
+                        canReadGains = GainOffsetOutcome.WorkedCorrectly;
+                        foreach (string gain in mGains)
+                        {
+                            LogOk("Gains Read", gain.ToString());
+                        }
+                    }
+                }
+                catch (ASCOM.InvalidOperationException)
+                {
+                    canReadGains = GainOffsetOutcome.InvalidOperation;
+                    LogOk("Gains Read", "InvalidOperation error returned.");
                 }
                 catch (Exception ex)
                 {
-                    HandleInvalidOperationExceptionAsOk("Gains Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperation error returned");
-                }
+                    bool exceptionIsOk = HandleException("Gains Read", MemberType.Property, Required.Optional, ex, "");
 
-                if (mCanReadGainMax & mCanReadGainMin & mCanReadGains)
-                    LogIssue("Gains", "GainMin, GainMax and Gains are all readable. Only one of GainMin/Max as a pair or Gains should be used, the other should throw a PropertyNotImplemented error");
-                else
-                {
+                    // Set the outcome as appropriate based on whether the exception is acceptable or not
+                    if (exceptionIsOk)
+                        canReadGains = GainOffsetOutcome.NotImplemented;
+                    else
+                        canReadGains = GainOffsetOutcome.Failed;
                 }
 
                 // Gain Read - Optional 
                 try
                 {
-                    mCanReadGain = false; // Set default value to indicate can't read gain
+                    canReadGain = GainOffsetOutcome.Unknown; // Set default value to indicate can't read gain
                     LogCallToDriver("ConformanceCheck", "About to get Gain");
-                    TimeFunc("GainMax", () => mGain = camera.Gain, TargetTime.Fast);
+                    TimeFunc("Gain Read", () => mGain = camera.Gain, TargetTime.Fast);
 
-                    mCanReadGain = true; // Flag that we can read Gain OK
-                    if (mCanReadGains)
-                        LogOk("Gain Read", $"{mGain} {mGains[0]}");
+                    canReadGain = GainOffsetOutcome.WorkedCorrectly; // Flag that we can read Gain OK
+                    if (canReadGains == GainOffsetOutcome.WorkedCorrectly)
+                        LogOk("Gain Read", $"{mGain} ({mGains[0]})");
                     else
                         LogOk("Gain Read", mGain.ToString());
                 }
                 catch (Exception ex)
                 {
-                    HandleException("Gain Read", MemberType.Property, Required.Optional, ex, "");
+                    bool exceptionIsOk = HandleException("Gain Read", MemberType.Property, Required.Optional, ex, "");
+
+                    // Set the outcome as appropriate based on whether the exception is acceptable or not
+                    if (exceptionIsOk)
+                        canReadGain = GainOffsetOutcome.NotImplemented;
+                    else
+                        canReadGain = GainOffsetOutcome.Failed;
                 }
 
-                // Now check that gain property groups are implemented to handle the three gain modes: NotImplemented, Gain Index (Gain + Gains) and Gain Value (Gain + GainMin + GainMax)
-                if (!mCanReadGain & !mCanReadGains & !mCanReadGainMin & !mCanReadGainMax)
-                    LogOk("Gain Read", "All four gain properties return errors - the driver is in \"Gain Not Implemented\" mode.");
-                else if (mCanReadGain)
+                // Validate the three allowed combinations of Gain, Gains, GainMin and GainMax properties. The three allowed combinations are:
+                // 1) Gain Not Implemented - All four properties are not implemented
+                // 2) Gain Index - Gain and Gains can be read while GainMin and GainMax are not implemented
+                // 3) Gain Value - Gain, GainMin and GainMax can be read while Gains is not implemented
+
+                // Check for Gain Not Implemented mode
+                if (canReadGain == GainOffsetOutcome.NotImplemented &&
+                    canReadGains == GainOffsetOutcome.NotImplemented &&
+                    canReadGainMin == GainOffsetOutcome.NotImplemented &&
+                    canReadGainMax == GainOffsetOutcome.NotImplemented)
                 {
-                    // Test for Gain Index mode
-                    if ((mCanReadGain & mCanReadGains & !mCanReadGainMin & !mCanReadGainMax))
-                    {
-                        mGainMode = GainOffsetMode.IndexMode;
-                        LogOk("Gain Read", "Gain and Gains can be read while GainMin and GainMax returned errors - the driver is in \"Gain Index\" mode.");
-                    }
-                    else if ((mCanReadGain & !mCanReadGains & mCanReadGainMin & mCanReadGainMax))
-                    {
-                        mGainMode = GainOffsetMode.ValueMode;
-                        LogOk("Gain Read", "Gain, GainMin and GainMax can be read OK while Gains returns an error - the driver is in \"Gain Value\" mode.");
-                    }
-                    else
-                    {
-                        LogIssue("Gain Read", $"Unable to determine whether the driver is in \"Gain Not Implemented\", \"Gain Index\" or \"Gain Value\" mode. Please check the interface specification.");
-                        LogInfo("Gain Read", $"Gain returned an error: {mCanReadGain}, Gains returned an error: {mCanReadGains}, GainMin returned an error: {mCanReadGainMin}, GainMax returned an error: {mCanReadGainMax}.");
-                        LogInfo("Gain Read", $"\"Gain Not Implemented\" mode: Gain, Gains, GainMin and GainMax must all return errors.");
-                        LogInfo("Gain Read", $"\"Gain Index\" mode: Gain and Gains must work while GainMin and GainMax must return errors.");
-                        LogInfo("Gain Read", $"\"Gain Value\" mode: Gain, GainMin and GainMax must work while Gains must return an error.");
-                    }
+                    // Gain is not implemented in this device
+                    mGainMode = GainOffsetMode.NotImplemented;
+                    LogOk("Gain Implementation", "All four gain properties are not implemented - the driver is in \"Gain Not Implemented\" mode.");
                 }
+
+                // Check for Gain Index mode
+                else if ((canReadGain == GainOffsetOutcome.WorkedCorrectly | canReadGain == GainOffsetOutcome.InvalidOperation) &
+                         (canReadGains == GainOffsetOutcome.WorkedCorrectly | canReadGains == GainOffsetOutcome.InvalidOperation) &&
+                         (canReadGainMin == GainOffsetOutcome.NotImplemented) &&
+                         (canReadGainMax == GainOffsetOutcome.NotImplemented))
+                {
+                    // The device is in Gain Index mode
+                    mGainMode = GainOffsetMode.IndexMode;
+                    LogOk("Gain Implementation", "Gain and Gains worked as expected while GainMin and GainMax are not implemented - the driver is in \"Gain Index\" mode.");
+                }
+
+                // Check for Gain Value mode
+                else if ((canReadGain == GainOffsetOutcome.WorkedCorrectly | canReadGain == GainOffsetOutcome.InvalidOperation) &
+                         (canReadGains == GainOffsetOutcome.NotImplemented) &&
+                         (canReadGainMin == GainOffsetOutcome.WorkedCorrectly | canReadGainMin == GainOffsetOutcome.InvalidOperation) &&
+                         (canReadGainMax == GainOffsetOutcome.WorkedCorrectly | canReadGainMax == GainOffsetOutcome.InvalidOperation))
+                {
+                    // The device is in Gain Value mode
+                    mGainMode = GainOffsetMode.ValueMode;
+                    LogOk("Gain Implementation", "Gain, GainMin and GainMax worked as expected while Gains is not implemented - the driver is in \"Gain Value\" mode.");
+                }
+
+                // If we get here, then the driver is in an invalid state for Gain implementation
                 else
                 {
-                    LogIssue("Gain Read", $"Gain Read returned an error but at least one of Gains, GainMin Or GainMax did not return an error. If Gain returns an error, all the other gain properties should do likewise.");
-                    LogInfo("Gain Read", $"Gains returned an error : {mCanReadGains}, GainMin returned an error : {mCanReadGainMin}, GainMax returned an error : {mCanReadGainMax}.");
+                    mGainMode = GainOffsetMode.Unknown;
+                    LogIssue("Gain Implementation", $"The outcomes from Gain, Gains, GainMin and GainMax were not consistent with any of the three supported gain modes: \"Gain Not Implemented\", \"Gain Index\" and \"Gain Value\".");
+                    LogInfo("Gain Implementation", $"\"Gain Not Implemented\" mode requires Gain, Gains, GainMin and GainMax to be not implemented.");
+                    LogInfo("Gain Implementation", $"\"Gain Index\" mode requires Gain and Gains to be implemented while GainMin and GainMax are not implemented.");
+                    LogInfo("Gain Implementation", $"\"Gain Value\" mode requires Gain, GainMin and GainMax to be implemented while Gains is not implemented.");
+                    LogInfo("Gain Implementation", $"Properties are accepted as implemented if they return a value or if they return an InvalidOperationException.");
+                    LogInfo("Gain Implementation", $"Outcomes - Gain: {canReadGain}, Gains: {canReadGains}, GainMin: {canReadGainMin}, GainMax: {canReadGainMax}");
                 }
 
                 // Gain write - Optional when neither gain index nor gain value mode is supported; must be implemented if either mode is supported
 
-                // First test for the only valid not implemented state when neither gain mode is supported
-                if (!mCanReadGain & !mCanReadGains & !mCanReadGainMin & !mCanReadGainMax)
+                switch (mGainMode)
                 {
-                    try
-                    {
-                        LogCallToDriver("ConformanceCheck", "About to set Gain");
-                        TimeMethod("Gain Write", () => camera.Gain = 0, TargetTime.Standard);
-                        LogIssue("Gain Write", "Writing to Gain did not return a PropertyNotImplemented error whereas this was the case for reading Gain.");
-                    }
-                    catch (Exception ex)
-                    {
-                        HandleException("Gain Write", MemberType.Property, Required.MustNotBeImplemented, ex, "PropertyNotImplemented error is expected");
-                    }
-                }
-                else
-                {
-                    switch (mGainMode)
-                    {
-                        case GainOffsetMode.Unknown:
-                            LogIssue("Gain Write", "Cannot test Gain Write because of issues with other gain properties - skipping test");
-                            break;
+                    case GainOffsetMode.NotImplemented:
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Gain");
+                            TimeMethod("Gain Write", () => camera.Gain = 0, TargetTime.Standard);
+                            LogIssue("Gain Write", "Writing to Gain did not return a PropertyNotImplemented error whereas this was the case for reading Gain.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleException("Gain Write", MemberType.Property, Required.MustNotBeImplemented, ex, "PropertyNotImplemented error is expected");
+                        }
+                        break;
 
-                        case GainOffsetMode.IndexMode:
-                            break;
+                    case GainOffsetMode.IndexMode:
+                        // Test writing the minimum valid value
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Gain");
+                            TimeMethod("Gain Write", () => camera.Gain = 0, TargetTime.Standard);
+                            LogOk("Gain Write", $"Successfully set gain minimum value 0.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleException("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value");
+                        }
 
-                        case GainOffsetMode.ValueMode:
-                            // Test writing the minimum valid value
-                            try
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to set Gain");
-                                TimeMethod("Gain Write", () => camera.Gain = mGainMin, TargetTime.Standard);
-                                LogOk("Gain Write", $"Successfully set gain minimum value {mGainMin}.");
-                            }
-                            catch (Exception ex)
-                            {
-                                HandleException("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value");
-                            }
+                        // Test writing the maxim valid value
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Gain");
+                            TimeMethod("Gain Write", () => camera.Gain = Convert.ToInt16(mGains.Count - 1), TargetTime.Standard);
+                            LogOk("Gain Write", $"Successfully set gain to maximum value {Convert.ToInt16(mGains.Count - 1)}.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleException("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value");
+                        }
 
-                            // Test writing the maximum valid value
-                            try
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to set Gain");
-                                camera.Gain = mGainMax;
-                                LogOk("Gain Write", $"Successfully set gain maximum value {mGainMax}.");
-                            }
-                            catch (Exception ex)
-                            {
-                                HandleException("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value");
-                            }
+                        // Test writing a lower than minimum value - this should result in am invalid value exception
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Gain");
+                            camera.Gain = -1;
+                            LogIssue("Gain Write", $"Successfully set an gain below zero (- 1), this should have resulted in an InvalidValue error.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleInvalidValueExceptionAsOk("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"Received InvalidValue error for gain -1, which is lower than the minimum value.");
+                        }
 
-                            // Test writing a lower than minimum value - this should result in am invalid value exception
-                            try
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to set Gain");
-                                camera.Gain = (short)(mGainMin - 1);
-                                LogIssue("Gain Write", $"Successfully set an gain below the minimum value ({mGainMin - 1}), this should have resulted in an InvalidValue error.");
-                            }
-                            catch (Exception ex)
-                            {
-                                HandleInvalidValueExceptionAsOk("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"InvalidValue Received error for gain {mGainMin - 1}, which is lower than the minimum value.");
-                            }
+                        // Test writing a higher than maximum value - this should result in an invalid value exception
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Gain");
+                            camera.Gain = Convert.ToInt16(mGains.Count);
+                            LogIssue("Gain Write", $"Successfully set a gain above the maximum value({mGains.Count}), this should have resulted in an InvalidValue error.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleInvalidValueExceptionAsOk("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"Received InvalidValue error for gain {mGains.Count} which is higher than the maximum value.");
+                        }
+                        break;
 
-                            // Test writing a lower than minimum value - this should result in am invalid value exception
-                            try
-                            {
-                                LogCallToDriver("ConformanceCheck", "About to set Gain");
-                                camera.Gain = (short)(mGainMax + 1);
-                                LogIssue("Gain Write", $"Successfully set a gain above the maximum value({mGainMax + 1}), this should have resulted in an InvalidValue error.");
-                            }
-                            catch (Exception ex)
-                            {
-                                HandleInvalidValueExceptionAsOk("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"InvalidValue Received error for gain {mGainMax + 1} which is higher than the maximum value.");
-                            }
+                    case GainOffsetMode.ValueMode:
+                        // Test writing the minimum valid value
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Gain");
+                            TimeMethod("Gain Write", () => camera.Gain = mGainMin, TargetTime.Standard);
+                            LogOk("Gain Write", $"Successfully set gain minimum value {mGainMin}.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleException("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value");
+                        }
 
-                            break;
+                        // Test writing the maximum valid value
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Gain");
+                            camera.Gain = mGainMax;
+                            LogOk("Gain Write", $"Successfully set gain maximum value {mGainMax}.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleException("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value");
+                        }
 
-                        default:
-                            LogIssue("Gain Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {mGainMode}");
-                            break;
-                    }
+                        // Test writing a lower than minimum value - this should result in am invalid value exception
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Gain");
+                            camera.Gain = (short)(mGainMin - 1);
+                            LogIssue("Gain Write", $"Successfully set an gain below the minimum value ({mGainMin - 1}), this should have resulted in an InvalidValue error.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleInvalidValueExceptionAsOk("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"Received InvalidValue error for gain {mGainMin - 1}, which is lower than the minimum value.");
+                        }
+
+                        // Test writing a higher than maximum value - this should result in an invalid value exception
+                        try
+                        {
+                            LogCallToDriver("ConformanceCheck", "About to set Gain");
+                            camera.Gain = (short)(mGainMax + 1);
+                            LogIssue("Gain Write", $"Successfully set a gain above the maximum value({mGainMax + 1}), this should have resulted in an InvalidValue error.");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleInvalidValueExceptionAsOk("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValue error is expected.", $"Received InvalidValue error for gain {mGainMax + 1} which is higher than the maximum value.");
+                        }
+                        break;
+
+                    case GainOffsetMode.Unknown:
+                        LogIssue("Gain Write", "Cannot test Gain Write because of issues with other gain properties - skipping test");
+                        break;
+
+                    default:
+                        LogError("Gain Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {mGainMode}");
+                        break;
                 }
                 if (cancellationToken.IsCancellationRequested) return;
 
