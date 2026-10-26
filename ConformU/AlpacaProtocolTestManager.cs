@@ -2206,9 +2206,6 @@ namespace ConformU
             AlpacaErrors returnedErrorNumber = AlpacaErrors.AlpacaNoError;
             string returnedErrorMessage = "";
 
-            const string DEFAULT_CONTENT_TYPE = "application/json";
-            const string DEFAULT_ENCODING = "UTF-8";
-
             string responseString = ""; // The string representation of the response, which may be JSON or ImageBytes
 
             // Do not attempt to process the request if the test has been cancelled
