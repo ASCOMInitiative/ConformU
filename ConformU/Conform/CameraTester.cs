@@ -59,7 +59,6 @@ namespace ConformU
 
         // ICameraV3 properties
         private int mOffset, mOffsetMax, mOffsetMin;
-        private bool mCanReadOffset, mCanReadOffsetMax, mCanReadOffsetMin, mCanReadOffsets;
         private IList<string> mOffsets;
         private double mSubExposureDuration;
         private GainOffsetMode mOffsetMode = GainOffsetMode.Unknown;
