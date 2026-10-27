@@ -194,6 +194,7 @@ namespace ConformU
         {
             int[] filterOffsets = default;
             int numberOfFilternames = 0, numberOfFilterOffsets = 0, filterNumber, startingFilterNumber = default;
+            bool namesThrewException = false, offsetsThrewException = false;
 
             string[] filterNames = default;
 
@@ -222,6 +223,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
+                offsetsThrewException = true;
                 HandleException("FocusOffsets Get", MemberType.Property, Required.Mandatory, ex, "");
             }
 
@@ -251,175 +253,184 @@ namespace ConformU
             }
             catch (Exception ex)
             {
+                namesThrewException = true;
                 HandleException("Names Get", MemberType.Property, Required.Mandatory, ex, "");
             }
 
             // Confirm number of array elements in filter names and filter offsets are the same
-            if (numberOfFilternames == numberOfFilterOffsets)
-                LogOk("Names Get", $"Number of filter offsets and number of names are the same: {numberOfFilternames}");
-            else
-                LogIssue("Names Get", $"Number of filter offsets and number of names are different: {numberOfFilterOffsets} {numberOfFilternames}");
-
-            // Determine the number of positions to test, which is the maximum of the number of filter names and the number of filter offsets
-            int numberOfFilters = Math.Max(numberOfFilternames, numberOfFilterOffsets);
-
-            // Position - Required - Read
-            try
+            if (offsetsThrewException | namesThrewException) // At least one threw an exception
             {
-                SetTest("Position Get");
-                LogCallToDriver("Position Get", "About to get Position property");
-                TimeMethod("Position", () => startingFilterNumber = filterWheel.Position, TargetTime.Fast);
-
-                if ((startingFilterNumber < 0) | (startingFilterNumber >= numberOfFilters))
-                    LogIssue("Position Get", $"Illegal filter position returned: {startingFilterNumber}");
+                LogIssue("Names Get", $"The number of filter offsets and names could not be compared because one or both mandatory members returned an error. Further testing abandoned.");
+            }
+            else // Both returned successfully so compare the number of elements
+            {
+                if (numberOfFilternames == numberOfFilterOffsets)
+                    LogOk("Names Get", $"Number of filter offsets and number of names are the same: {numberOfFilternames}");
                 else
-                    LogOk("Position Get", $"Currently at position: {startingFilterNumber}");
-            }
-            catch (Exception ex)
-            {
-                HandleException("Position", MemberType.Property, Required.Mandatory, ex, "");
-            }
+                    LogIssue("Names Get", $"Number of filter offsets and number of names are different: {numberOfFilterOffsets} {numberOfFilternames}");
 
-            // Position - Required - Write
-            SetTest("Position Set");
+                // Determine the number of positions to test, which is the maximum of the number of filter names and the number of filter offsets
+                int numberOfFilters = Math.Max(numberOfFilternames, numberOfFilterOffsets);
 
-            // Make sure some filter slots are available, if not exit
-            if (numberOfFilters <= 0) // No filter slots available so exit
-            {
-                LogIssue("Position", $"Filter position tests skipped as number of filters appears to be 0: {numberOfFilters}");
-                ResetTestActionStatus();
-                return;
-            }
-
-            // Some filters are available so test movement
-            try
-            {
-                // Move sequentially upwards to each position in turn
-                LogNewLine();
-                LogTestOnly("Testing ascending sequential movement");
-
-                double upwardMovewentTime = 0.0;
-                for (short i = 0; i <= Convert.ToInt16(numberOfFilters - 1); i++)
-                {
-                    upwardMovewentTime += MoveToPosition(i);
-                    if (cancellationToken.IsCancellationRequested)
-                        return;
-                }
-                if (cancellationToken.IsCancellationRequested)
-                    return;
-
-                // Move sequentially downwards to each position in turn
-                LogNewLine();
-                LogTestOnly("Testing descending sequential movement");
-
-                double downwardMovewentTime = 0.0;
-
-                for (short i = Convert.ToInt16(numberOfFilters - 1); i >= 0; i--)
-                {
-                    downwardMovewentTime += MoveToPosition(i);
-                    if (cancellationToken.IsCancellationRequested)
-                        return;
-                }
-                if (cancellationToken.IsCancellationRequested)
-                    return;
-
-                // Test long distance moves
-                LogNewLine();
-                LogTestOnly("Testing potentially long distance moves");
-
-                // Move to position 0
-                MoveToPosition(0);
-                if (cancellationToken.IsCancellationRequested)
-                    return;
-
-                // Move to highest position
-                MoveToPosition(numberOfFilters - 1);
-                if (cancellationToken.IsCancellationRequested)
-                    return;
-
-                // Move to one down from the highest position (uni-directional filter wheels will have to travel a long way)
-                if ((numberOfFilters - 1) > 0)
-                {
-                    MoveToPosition(numberOfFilters - 2);
-                }
-                if (cancellationToken.IsCancellationRequested)
-                    return;
-
-                // Move back to position 0
-                MoveToPosition(0);
-                if (cancellationToken.IsCancellationRequested)
-                    return;
-
-                // Move to the half way position
-                if ((numberOfFilters - 1) / 2 > 0)
-                {
-                    MoveToPosition((numberOfFilters - 1) / 2);
-                }
-                if (cancellationToken.IsCancellationRequested)
-                    return;
-
-                // Move back to position 0
-                MoveToPosition(0);
-                if (cancellationToken.IsCancellationRequested)
-                    return;
-
-                LogNewLine();
-                LogTestOnly("Testing error conditions");
-
-                // Confirm that an error is correctly generated for outside range values
+                // Position - Required - Read
                 try
                 {
-                    LogCallToDriver("Position Set", "About to set Position property");
-                    filterWheel.Position = -1; // Negative position, positions should never be negative
-                    LogIssue("Position Set", "Failed to generate exception when selecting filter with negative filter number");
-                }
-                catch (Exception ex)
-                {
-                    HandleInvalidValueExceptionAsOk("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to - 1", "Correctly rejected bad position: -1");
-                }
-                if (cancellationToken.IsCancellationRequested)
-                    return;
+                    SetTest("Position Get");
+                    LogCallToDriver("Position Get", "About to get Position property");
+                    TimeMethod("Position", () => startingFilterNumber = filterWheel.Position, TargetTime.Fast);
 
-                // Confirm that an error is correctly generated for outside range values
-                try
-                {
-                    LogCallToDriver("Position Set", "About to set Position property");
-                    filterWheel.Position = (short)numberOfFilters; // This should be 1 above the highest array element returned
-                    LogIssue("Position Set", "Failed to generate exception when selecting filter outside expected range");
-                }
-                catch (Exception ex)
-                {
-                    HandleInvalidValueExceptionAsOk("Position Set", MemberType.Property, Required.MustBeImplemented, ex,
-                        $"setting position to {System.Convert.ToString(numberOfFilterOffsets)}",
-                        $"Correctly rejected bad position: {System.Convert.ToString(numberOfFilterOffsets)}");
-                }
-
-                // Report on the uni-directional and bi-directional behaviour.
-                LogNewLine();
-                LogTestOnly("Directionality assessment");
-
-                if (numberOfFilters >= 3) // 3 or more filters so there will be a difference between uni-directional and bi-directional filter wheels
-                {
-                    if (Math.Abs(upwardMovewentTime - downwardMovewentTime) < Math.Min(upwardMovewentTime, downwardMovewentTime) / numberOfFilters)
-                    {
-                        LogInfo("Directionality", $"The filter wheel is bi-directional.");
-                    }
+                    if ((startingFilterNumber < 0) | (startingFilterNumber >= numberOfFilters))
+                        LogIssue("Position Get", $"Illegal filter position returned: {startingFilterNumber}");
                     else
-                    {
-                        LogInfo("Directionality", $"The filter wheel is uni-directional.");
-                    }
+                        LogOk("Position Get", $"Currently at position: {startingFilterNumber}");
                 }
-                else // 1 or less filters so cannot tell whether the filter wheel is bi-directional or uni-directional.
+                catch (Exception ex)
                 {
-                    LogInfo("Directionality", $"The filter wheel has 1 or 2 filters and it is not possible to differentiate between uni-directional and bi-directional behaviour.");
+                    HandleException("Position", MemberType.Property, Required.Mandatory, ex, "");
                 }
 
-                LogDebug("Directionality",
-                    $"Overall upward movement time: {upwardMovewentTime:0.0}, Overall downward movement time: {downwardMovewentTime:0.0}, Difference: {Math.Abs(upwardMovewentTime - downwardMovewentTime):0.0}, Smallest average movement time: {Math.Min(upwardMovewentTime, downwardMovewentTime) / numberOfFilterOffsets:0.0}.");
-            }
-            catch (Exception ex)
-            {
-                HandleException("Position Get", MemberType.Property, Required.Mandatory, ex, "");
+                // Position - Required - Write
+                SetTest("Position Set");
+
+                // Make sure some filter slots are available, if not exit
+                if (numberOfFilters <= 0) // No filter slots available so exit
+                {
+                    LogIssue("Position", $"Filter position tests skipped as number of filters appears to be 0: {numberOfFilters}");
+                    ResetTestActionStatus();
+                }
+                else // Some filters are available so test movement
+                {
+                    // Test movement to each position in turn, first ascending then descending. This will test the movement of the filter wheel and also the Position property.
+                    try
+                    {
+                        // Move sequentially upwards to each position in turn
+                        LogNewLine();
+                        LogTestOnly("Testing ascending sequential movement");
+
+                        double upwardMovewentTime = 0.0;
+                        for (short i = 0; i <= Convert.ToInt16(numberOfFilters - 1); i++)
+                        {
+                            upwardMovewentTime += MoveToPosition(i);
+                            if (cancellationToken.IsCancellationRequested)
+                                return;
+                        }
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
+                        // Move sequentially downwards to each position in turn
+                        LogNewLine();
+                        LogTestOnly("Testing descending sequential movement");
+
+                        double downwardMovewentTime = 0.0;
+
+                        for (short i = Convert.ToInt16(numberOfFilters - 1); i >= 0; i--)
+                        {
+                            downwardMovewentTime += MoveToPosition(i);
+                            if (cancellationToken.IsCancellationRequested)
+                                return;
+                        }
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
+                        // Test long distance moves
+                        LogNewLine();
+                        LogTestOnly("Testing potentially long distance moves");
+
+                        // Move to position 0
+                        MoveToPosition(0);
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
+                        // Move to highest position
+                        MoveToPosition(numberOfFilters - 1);
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
+                        // Move to one down from the highest position (uni-directional filter wheels will have to travel a long way)
+                        if ((numberOfFilters - 1) > 0)
+                        {
+                            MoveToPosition(numberOfFilters - 2);
+                        }
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
+                        // Move back to position 0
+                        MoveToPosition(0);
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
+                        // Move to the half way position
+                        if ((numberOfFilters - 1) / 2 > 0)
+                        {
+                            MoveToPosition((numberOfFilters - 1) / 2);
+                        }
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
+                        // Move back to position 0
+                        MoveToPosition(0);
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
+                        LogNewLine();
+                        LogTestOnly("Testing error conditions");
+
+                        // Confirm that an error is correctly generated for outside range values
+                        try
+                        {
+                            LogCallToDriver("Position Set", "About to set Position property");
+                            filterWheel.Position = -1; // Negative position, positions should never be negative
+                            LogIssue("Position Set", "Failed to generate exception when selecting filter with negative filter number");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleInvalidValueExceptionAsOk("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to - 1", "Correctly rejected bad position: -1");
+                        }
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
+                        // Confirm that an error is correctly generated for outside range values
+                        try
+                        {
+                            LogCallToDriver("Position Set", "About to set Position property");
+                            filterWheel.Position = (short)numberOfFilters; // This should be 1 above the highest array element returned
+                            LogIssue("Position Set", "Failed to generate exception when selecting filter outside expected range");
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleInvalidValueExceptionAsOk("Position Set", MemberType.Property, Required.MustBeImplemented, ex,
+                                $"setting position to {System.Convert.ToString(numberOfFilterOffsets)}",
+                                $"Correctly rejected bad position: {System.Convert.ToString(numberOfFilterOffsets)}");
+                        }
+
+                        // Report on the uni-directional and bi-directional behaviour.
+                        LogNewLine();
+                        LogTestOnly("Directionality assessment");
+
+                        if (numberOfFilters >= 3) // 3 or more filters so there will be a difference between uni-directional and bi-directional filter wheels
+                        {
+                            if (Math.Abs(upwardMovewentTime - downwardMovewentTime) < Math.Min(upwardMovewentTime, downwardMovewentTime) / numberOfFilters)
+                            {
+                                LogInfo("Directionality", $"The filter wheel is bi-directional.");
+                            }
+                            else
+                            {
+                                LogInfo("Directionality", $"The filter wheel is uni-directional.");
+                            }
+                        }
+                        else // 1 or less filters so cannot tell whether the filter wheel is bi-directional or uni-directional.
+                        {
+                            LogInfo("Directionality", $"The filter wheel has 1 or 2 filters and it is not possible to differentiate between uni-directional and bi-directional behaviour.");
+                        }
+
+                        LogDebug("Directionality",
+                            $"Overall upward movement time: {upwardMovewentTime:0.0}, Overall downward movement time: {downwardMovewentTime:0.0}, Difference: {Math.Abs(upwardMovewentTime - downwardMovewentTime):0.0}, Smallest average movement time: {Math.Min(upwardMovewentTime, downwardMovewentTime) / numberOfFilterOffsets:0.0}.");
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleException("Position Get", MemberType.Property, Required.Mandatory, ex, "");
+                    }
+                }
             }
 
             ResetTestActionStatus();
