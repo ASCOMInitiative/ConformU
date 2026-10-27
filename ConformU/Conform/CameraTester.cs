@@ -426,12 +426,10 @@ namespace ConformU
                     {
                         LogOk("LastExposureStartTime", $"LastExposureStartTime returned an error before an exposure was made: {ex.Message}");
                     }
-
                 }
                 else
                 {
-                    LogInfo("LastExposureStartTime", "Conform is configured to omit these \"First use\" tests .");
-
+                    LogInfo("LastExposureStartTime", "Conform is configured to omit the \"First use\" tests .");
                 }
             }
         }

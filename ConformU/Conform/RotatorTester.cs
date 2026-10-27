@@ -217,7 +217,8 @@ namespace ConformU
                 LogCallToDriver("PreRun Check", "About to get IsMoving property repeatedly");
                 RotatorWait(RotatorMember.Move, "Ensuring that movement is stopped", 0, 0);
 
-                if (!rotator.IsMoving)
+                // Check whether the rotator is still moving after the timeout period. If it is then cancel the test because we can't continue with a moving rotator.
+                if (!rotator.IsMoving) // Rotator is stationary so we can continue with the test
                 {
                     LogOk("Pre-run Check", "Rotator is stationary");
 
@@ -248,11 +249,16 @@ namespace ConformU
                         LogInfo("Pre-run Check", $"Rotator initial position could not be read: {ex.Message}");
                     }
                 }
-                else
-                    LogIssue("Pre-run Check", $"Rotator still moving after {settings.RotatorTimeout} seconds, could IsMoving be stuck on?");
+                else // Rotator is still moving after the timeout period so cancel the test because we can't continue with a moving rotator.
+                {
+                    LogIssue("Pre-run Check", $"Rotator still moving after {settings.RotatorTimeout} seconds, could IsMoving be stuck on? Abandoning further checks.");
+                    conformCancellationTokenSource.Cancel(); // Cancel the test because the rotator is still moving
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogInfo("Pre-run Check", $"An exception occurred during the pre-run check: {ex.Message}");
+                LogDebug("Pre-run Check", $"Exception detail:\r\n{ex}");
             }
         }
 

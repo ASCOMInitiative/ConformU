@@ -298,8 +298,8 @@ namespace ConformU
                                     lV1 = lV1 * 1000000 + lV2 * 1000 + lV3;
                                     if (lV1 < 5000007)
                                     {
-                                        LogIssue("Version Check", "*** This version of the dome simulator has known conformance issues, ***");
-                                        LogIssue("Version Check", "*** please update it from the ASCOM site https://ascom-standards.org/Downloads/Index.htm ***");
+                                        LogIssue("Version Check", "*** This version of the dome simulator has known conformance issues. ***");
+                                        LogInfo("Version Check", "*** Please update it from the ASCOM site https://ascom-standards.org/Downloads/Index.htm ***");
                                         LogNewLine();
                                     }
                                     else
@@ -314,6 +314,7 @@ namespace ConformU
                     LogIssue("ConformanceCheck", ex.ToString());
                 }
             }
+
             if (!cancellationToken.IsCancellationRequested)
             {
                 // Get into a consistent state
@@ -329,7 +330,8 @@ namespace ConformU
                 {
                     LogIssue("DomeSafety", $"The Slewing property threw an exception and should not have: {ex.Message}"); // Display a warning message because Slewing should not throw an exception!
                     LogDebug("DomeSafety", $"{ex}");
-                }// Log the full message in debug mode
+                }
+
                 if (settings.DomeOpenShutter)
                 {
                     LogTestAndMessage("DomeSafety", "Attempting to open shutter as some tests may fail if it is closed...");
@@ -344,11 +346,10 @@ namespace ConformU
                         catch
                         {
                         }
+
                         if (cancellationToken.IsCancellationRequested)
                         {
-                            LogCallToDriver("PreRunCheck", "About to get ShutterStatus property");
-                            LogTestAndMessage("DomeSafety",
-                                $"Stop button pressed, further testing abandoned, shutter status: {domeDevice.ShutterStatus}");
+                            LogTestAndMessage("DomeSafety", $"Stop button pressed, further testing abandoned, shutter status: {domeDevice.ShutterStatus}");
                         }
                         else
                         {

@@ -454,15 +454,17 @@ namespace ConformU
 
         public override void PreRunCheck()
         {
-            // Get into a consistent state
-            if (GetInterfaceVersion() > 1)
+            // Get into a consistent state depending on the interface version and the capabilities of the driver
+            if (GetInterfaceVersion() > 1) // Interface version 2 and later, the AtPark property is mandatory, so we can check it here
             {
                 try
                 {
+                    // Check whether the mount is parked, if it is, we will try to unpark it for testing if the driver can unpark the mount
                     LogCallToDriver("Mount Safety", "About to get AtPark property");
                     if (telescopeDevice.AtPark)
                     {
-                        if (canUnpark)
+                        // Check whether the driver can unpark the mount, if it is parked
+                        if (canUnpark) // The driver can unpark the mount, so we can unpark it for testing
                         {
                             try
                             {
@@ -478,12 +480,12 @@ namespace ConformU
                                 HandleException("Mount Safety - Unpark", MemberType.Method, Required.MustBeImplemented, ex, "CanUnpark is true");
                             }
                         }
-                        else
+                        else // The driver cannot unpark the mount, so we cannot unpark it for testing
                         {
                             LogIssue("Mount Safety", "Scope reports that it is parked but CanUnPark is false - please manually unpark the scope");
                         }
                     }
-                    else
+                    else // The mount is not parked, so we can continue testing
                     {
                         LogInfo("Mount Safety", "Scope is not parked, continuing testing");
                     }
@@ -493,13 +495,13 @@ namespace ConformU
                     HandleException("Mount Safety - AtPark", MemberType.Property, Required.Mandatory, ex, "");
                 }
             }
-            else
+            else // Interface version 1, the AtPark property is not mandatory, so we cannot check it here
             {
-                LogInfo("Mount Safety",
-                    $"Skipping AtPark test as this method is not supported in interface V{GetInterfaceVersion()}");
+                LogInfo("Mount Safety", $"Skipping AtPark test as this method is not supported in interface V{GetInterfaceVersion()}");
                 try
                 {
-                    if (canUnpark)
+                    // Check whether the driver can unpark the mount, if it is parked
+                    if (canUnpark) // The driver can unpark the mount, so we can unpark it for testing
                     {
                         LogCallToDriver("Mount Safety", "About to call Unpark method");
                         telescopeDevice.Unpark();
@@ -508,7 +510,7 @@ namespace ConformU
 
                         LogOk("Mount Safety", "Scope has been unparked for testing");
                     }
-                    else
+                    else // The driver cannot unpark the mount, so we cannot unpark it for testing
                     {
                         LogOk("Mount Safety", "Scope reports that it cannot unpark, unparking skipped");
                     }
@@ -519,6 +521,7 @@ namespace ConformU
                 }
             }
 
+            // Check whether the driver can set the Tracking property, if it can, we will try to set it to true for testing
             if (!cancellationToken.IsCancellationRequested && canSetTracking)
             {
                 LogCallToDriver("Mount Safety", "About to set Tracking property true");

@@ -178,12 +178,12 @@ namespace ConformU
                 {
                     LogIssue("Pre-run Check", $"The filter wheel is still moving after {settings.FilterWheelTimeout} seconds, further tests abandoned because the device is not in the expected stationary state.");
                     ResetTestActionStatus();
-                    return;
+                    conformCancellationTokenSource.Cancel();
                 }
             }
             catch (Exception ex)
             {
-                LogIssue("Pre-run Check", $"Unable to determine that the Filter wheel is stationary: {ex.Message}");
+                LogIssue("Pre-run Check", $"Unable to determine that the Filter wheel is stationary, further tests abandoned: {ex.Message}");
                 LogDebug("Pre-run Check", $"Exception detail: {ex}");
             }
 
