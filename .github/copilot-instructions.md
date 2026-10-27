@@ -68,3 +68,14 @@ The facade layer is important for technology differences:
 - Settings properties that must be forced to a fixed value during CLI full-test runs are decorated with `[MandatoryInFullTest(bool)]`. Annotate new settings that belong to test scope rather than user preference.
 - Windows-only code is conditionally compiled with `#if WINDOWS` / `#if !WINDOWS`. The project dual-targets `net10.0-windows` (Windows, including COM/WinForms STA host) and `net10.0` (cross-platform). Keep platform-specific blocks explicit rather than relying on runtime OS checks when a compile-time guard is sufficient.
 - The Blazor UI uses **Radzen** components (`RadzenButton`, `RadzenTextArea`, `NotificationService`, `DialogService`, etc.). Radzen services are registered `AddScoped` (per Blazor circuit), not singleton. `Settings.OperationInProgress` is the canonical flag that enables/disables Start/Stop buttons; set it at the start and end of any long-running operation exposed through the UI.
+
+## Issue reports
+- When reporting issues create a markdown file and put all issues in the same file using the following format where nn is the issue number:
+  - # Issue nn
+	- A short description of the issue
+  - ## Concrete Example
+	- A concrete example of the issue, including any relevant code snippets
+  - ## Location
+	- Where in the codebase the issue is located (file, class, method, line number)
+  - ## Expected Behaviour and Recommended Steps to Fix
+	- Recommended steps to fix the issue

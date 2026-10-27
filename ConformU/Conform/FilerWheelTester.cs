@@ -195,9 +195,6 @@ namespace ConformU
             int[] filterOffsets = default;
             int numberOfFilternames = 0, numberOfFilterOffsets = 0, filterNumber, startingFilterNumber = default;
 
-            int maxFilterNumber = 0; // The highest populated filter slot number (1 less than the number of filters)
-            int halfDistanceFilterNumber = 0; // A filter slot number close to the middle of the filter wheel
-
             string[] filterNames = default;
 
             // FocusOffsets - Required - Read only
@@ -212,8 +209,6 @@ namespace ConformU
                 else
                 {
                     LogOk("FocusOffsets Get", $"Found {numberOfFilterOffsets} filter offset values");
-                    maxFilterNumber = Convert.ToInt16(numberOfFilterOffsets - 1);
-                    halfDistanceFilterNumber = maxFilterNumber / 2;
                 }
 
                 filterNumber = 0;
@@ -265,6 +260,9 @@ namespace ConformU
             else
                 LogIssue("Names Get", $"Number of filter offsets and number of names are different: {numberOfFilterOffsets} {numberOfFilternames}");
 
+            // Determine the number of positions to test, which is the maximum of the number of filter names and the number of filter offsets
+            int numberOfFilters = Math.Max(numberOfFilternames, numberOfFilterOffsets);
+
             // Position - Required - Read
             try
             {
@@ -272,7 +270,7 @@ namespace ConformU
                 LogCallToDriver("Position Get", "About to get Position property");
                 TimeMethod("Position", () => startingFilterNumber = filterWheel.Position, TargetTime.Fast);
 
-                if ((startingFilterNumber < 0) | (startingFilterNumber >= numberOfFilterOffsets))
+                if ((startingFilterNumber < 0) | (startingFilterNumber >= numberOfFilters))
                     LogIssue("Position Get", $"Illegal filter position returned: {startingFilterNumber}");
                 else
                     LogOk("Position Get", $"Currently at position: {startingFilterNumber}");
@@ -286,9 +284,9 @@ namespace ConformU
             SetTest("Position Set");
 
             // Make sure some filter slots are available, if not exit
-            if (numberOfFilterOffsets <= 0) // No filter slots available so exit
+            if (numberOfFilters <= 0) // No filter slots available so exit
             {
-                LogIssue("Position", $"Filter position tests skipped as number of filters appears to be 0: {numberOfFilterOffsets}");
+                LogIssue("Position", $"Filter position tests skipped as number of filters appears to be 0: {numberOfFilters}");
                 ResetTestActionStatus();
                 return;
             }
@@ -301,7 +299,7 @@ namespace ConformU
                 LogTestOnly("Testing ascending sequential movement");
 
                 double upwardMovewentTime = 0.0;
-                for (short i = 0; i <= Convert.ToInt16(numberOfFilterOffsets - 1); i++)
+                for (short i = 0; i <= Convert.ToInt16(numberOfFilters - 1); i++)
                 {
                     upwardMovewentTime += MoveToPosition(i);
                     if (cancellationToken.IsCancellationRequested)
@@ -316,7 +314,7 @@ namespace ConformU
 
                 double downwardMovewentTime = 0.0;
 
-                for (short i = Convert.ToInt16(numberOfFilterOffsets - 1); i >= 0; i--)
+                for (short i = Convert.ToInt16(numberOfFilters - 1); i >= 0; i--)
                 {
                     downwardMovewentTime += MoveToPosition(i);
                     if (cancellationToken.IsCancellationRequested)
@@ -335,14 +333,14 @@ namespace ConformU
                     return;
 
                 // Move to highest position
-                MoveToPosition(maxFilterNumber);
+                MoveToPosition(numberOfFilters - 1);
                 if (cancellationToken.IsCancellationRequested)
                     return;
 
                 // Move to one down from the highest position (uni-directional filter wheels will have to travel a long way)
-                if (maxFilterNumber > 0)
+                if ((numberOfFilters - 1) > 0)
                 {
-                    MoveToPosition(maxFilterNumber - 1);
+                    MoveToPosition(numberOfFilters - 2);
                 }
                 if (cancellationToken.IsCancellationRequested)
                     return;
@@ -353,9 +351,9 @@ namespace ConformU
                     return;
 
                 // Move to the half way position
-                if (halfDistanceFilterNumber > 0)
+                if ((numberOfFilters - 1) / 2 > 0)
                 {
-                    MoveToPosition(halfDistanceFilterNumber);
+                    MoveToPosition((numberOfFilters - 1) / 2);
                 }
                 if (cancellationToken.IsCancellationRequested)
                     return;
@@ -386,7 +384,7 @@ namespace ConformU
                 try
                 {
                     LogCallToDriver("Position Set", "About to set Position property");
-                    filterWheel.Position = (short)numberOfFilterOffsets; // This should be 1 above the highest array element returned
+                    filterWheel.Position = (short)numberOfFilters; // This should be 1 above the highest array element returned
                     LogIssue("Position Set", "Failed to generate exception when selecting filter outside expected range");
                 }
                 catch (Exception ex)
@@ -400,9 +398,9 @@ namespace ConformU
                 LogNewLine();
                 LogTestOnly("Directionality assessment");
 
-                if (numberOfFilternames > 1) // 3 or more filters so there will be a difference between uni-directional and bi-directional filter wheels
+                if (numberOfFilters >= 3) // 3 or more filters so there will be a difference between uni-directional and bi-directional filter wheels
                 {
-                    if (Math.Abs(upwardMovewentTime - downwardMovewentTime) < Math.Min(upwardMovewentTime, downwardMovewentTime) / numberOfFilterOffsets)
+                    if (Math.Abs(upwardMovewentTime - downwardMovewentTime) < Math.Min(upwardMovewentTime, downwardMovewentTime) / numberOfFilters)
                     {
                         LogInfo("Directionality", $"The filter wheel is bi-directional.");
                     }
@@ -413,7 +411,7 @@ namespace ConformU
                 }
                 else // 1 or less filters so cannot tell whether the filter wheel is bi-directional or uni-directional.
                 {
-                    LogInfo("Directionality", $"The filter wheel has 0 or 1 filters and it is not possible to differentiate between uni-directional and bi-directional behaviour.");
+                    LogInfo("Directionality", $"The filter wheel has 1 or 2 filters and it is not possible to differentiate between uni-directional and bi-directional behaviour.");
                 }
 
                 LogDebug("Directionality",

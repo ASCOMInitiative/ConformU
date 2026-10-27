@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /Setup/builds
 /WindowsInstaller/builds
+/filterwheelreport.md
+/rotatorreport.txt
