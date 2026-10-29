@@ -642,7 +642,7 @@ namespace ConformU
             cameraYSize = CameraPropertyTestInteger(CamPropertyType.CameraYSize, "CameraYSize", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
 
             double ccdTemperature = CameraPropertyTestDouble(CamPropertyType.CcdTemperature, "CCDTemperature", ABSOLUTE_ZERO_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
-            mCoolerOn = CameraPropertyTestBoolean(CamPropertyType.CoolerOn, "CoolerOn Read", false); if (cancellationToken.IsCancellationRequested) return;
+            mCoolerOn = CameraPropertyTestBoolean(CamPropertyType.CoolerOn, "CoolerOn Read", true); if (cancellationToken.IsCancellationRequested) return;
 
             // Write CoolerOn
             bool lOriginalCoolerState;
@@ -695,10 +695,10 @@ namespace ConformU
             CameraPropertyTestDouble(CamPropertyType.CoolerPower, "CoolerPower", 0.0, 100.0, false); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyTestDouble(CamPropertyType.ElectronsPerAdu, "ElectronsPerADU", 0.00001, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyTestDouble(CamPropertyType.FullWellCapacity, "FullWellCapacity", 0.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
-            CameraPropertyTestBoolean(CamPropertyType.HasShutter, "HasShutter", false); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyTestBoolean(CamPropertyType.HasShutter, "HasShutter", true); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyTestDouble(CamPropertyType.HeatSinkTemperature, "HeatSinkTemperature", ABSOLUTE_ZERO_TEMPERATURE, MAX_CAMERA_REPORTED_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
 
-            mImageReady = CameraPropertyTestBoolean(CamPropertyType.ImageReady, "ImageReady", false); if (cancellationToken.IsCancellationRequested) return;
+            mImageReady = CameraPropertyTestBoolean(CamPropertyType.ImageReady, "ImageReady", true); if (cancellationToken.IsCancellationRequested) return;
             if (mImageReady & settings.CameraFirstUseTests) // Issue this warning if configured to do so
                 LogIssue("ImageReady", "Image is flagged as ready but no exposure has been started!");
 
@@ -837,8 +837,8 @@ namespace ConformU
             CameraPropertyTestInteger(CamPropertyType.NumY, "NumY Read", 1, cameraYSize); if (cancellationToken.IsCancellationRequested) return;
             CameraPropertyWriteTest(CamPropertyType.NumY, "NumY", System.Convert.ToInt32(cameraYSize / (double)2));
 
-            CameraPropertyTestDouble(CamPropertyType.PixelSizeX, "PixelSizeX", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
-            CameraPropertyTestDouble(CamPropertyType.PixelSizeY, "PixelSizeY", 1.0, double.PositiveInfinity, false); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyTestDouble(CamPropertyType.PixelSizeX, "PixelSizeX", double.Epsilon, double.PositiveInfinity, true); if (cancellationToken.IsCancellationRequested) return;
+            CameraPropertyTestDouble(CamPropertyType.PixelSizeY, "PixelSizeY", double.Epsilon, double.PositiveInfinity, true); if (cancellationToken.IsCancellationRequested) return;
 
             mSetCcdTemperature = CameraPropertyTestDouble(CamPropertyType.SetCcdTemperature, "SetCCDTemperature Read", ABSOLUTE_ZERO_TEMPERATURE, BOILING_POINT_TEMPERATURE, false); if (cancellationToken.IsCancellationRequested) return;
 
@@ -2246,7 +2246,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                HandleException(pName, MemberType.Property, Required.Optional, ex, "");
+                HandleException(pName, MemberType.Property, Required.Mandatory, ex, "");
             }
 
             return returnValue;
@@ -2452,7 +2452,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                HandleException(pName, MemberType.Property, Required.Optional, ex, "");
+                HandleException(pName, MemberType.Property, Required.Mandatory, ex, "");
             }
             return returnValue;
         }
