@@ -436,7 +436,7 @@ namespace ConformU
 
         public override void CheckProperties()
         {
-            int lBinX, lBinY, lMaxBinX, lMaxBinY;
+            int xBin, yBin, lMaxBinX, lMaxBinY;
 
             // Basic read tests
             mMaxBinX = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.MaxBinX, "MaxBinX", 1, MAX_BIN_X));
@@ -457,9 +457,27 @@ namespace ConformU
             if (cancellationToken.IsCancellationRequested)
                 return;
 
+            // Check that startup defaults specified in the interface definition are correct.
+            if (settings.CameraFirstUseTests)
+            {
+                if (mBinX == 1)
+                    LogOk("BinX Read", "BinX correctly defaults to 1 on start-up");
+                else
+                    LogIssue("BinX Read", $"BinX incorrectly defaults to {mBinX} on start-up, should be 1");
+            }
+
             mBinY = System.Convert.ToInt16(CameraPropertyTestInteger(CamPropertyType.BinY, "BinY Read", 1, 1)); // Must default to 1 on start-up
             if (cancellationToken.IsCancellationRequested)
                 return;
+
+            // Check that startup defaults specified in the interface definition are correct.
+            if (settings.CameraFirstUseTests)
+            {
+                if (mBinY == 1)
+                    LogOk("BinY Read", "BinY correctly defaults to 1 on start-up");
+                else
+                    LogIssue("BinY Read", $"BinY incorrectly defaults to {mBinY} on start-up, should be 1");
+            }
 
             if (!mCanAsymmetricBin)
             {
@@ -476,7 +494,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogOk("BinX Write", $"Received error on setting BinX to 0: {ex.Message}");
+                HandleInvalidValueExceptionAsOk("BinX Write", MemberType.Property, Required.Mandatory, ex, "when setting BinX to 0", $"InvalidValue error received when setting BinX to 0");
             }
 
             try // Invalid high value
@@ -487,7 +505,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogOk("BinX Write", $"Received error on setting BinX to {mMaxBinX + 1}: {ex.Message}");
+                HandleInvalidValueExceptionAsOk("BinX Write", MemberType.Property, Required.Mandatory, ex, $"when setting BinX to {mMaxBinX + 1}", $"InvalidValue error received when setting BinX to {mMaxBinX + 1}");
             }
 
             try // Invalid low value
@@ -498,7 +516,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogOk("BinY Write", $"Received error on setting BinY to 0: {ex.Message}");
+                HandleInvalidValueExceptionAsOk("BinY Write", MemberType.Property, Required.Mandatory, ex, "when setting BinY to 0", $"InvalidValue error received when setting BinY to 0");
             }
 
             try // Invalid high value
@@ -509,7 +527,7 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                LogOk("BinY Write", $"Received error on setting BinY to {mMaxBinY + 1}: {ex.Message}");
+                HandleInvalidValueExceptionAsOk("BinY Write", MemberType.Property, Required.Mandatory, ex, $"when setting BinY to {mMaxBinY + 1}", $"InvalidValue error received when setting BinY to {mMaxBinY + 1}");
             }
 
             // Use either the maximum values supplied by the camera driver or the maximum values defined in Conform's setup, if these have been set
@@ -545,77 +563,69 @@ namespace ConformU
                 LogNewLine(); // Insert a blank line if required
 
             // Write BinX and BinY
-            if (mCanAsymmetricBin)
+            if (mCanAsymmetricBin) // Can bin asymmetrically
             {
-                for (lBinX = 1; lBinX <= lMaxBinX; lBinX++)
+                for (xBin = 1; xBin <= lMaxBinX; xBin++)
                 {
-                    for (lBinY = 1; lBinY <= lMaxBinY; lBinY++)
+                    for (yBin = 1; yBin <= lMaxBinY; yBin++)
                     {
                         bool binXSetOk = false;
                         try
                         {
                             LogCallToDriver("ConformanceCheck", "About to set BinX");
-                            TimeMethod("BinX Write", () => camera.BinX = (short)lBinX, TargetTime.Standard);
+                            TimeMethod("BinX Write", () => camera.BinX = (short)xBin, TargetTime.Standard);
                             binXSetOk = true;
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsInfo("BinX Write", MemberType.Property, Required.Mandatory, ex,
-                                $"when setting BinX to {lBinX}",
-                                $"InvalidValue error received when setting BinX to {lBinX}");
+                            HandleInvalidValueExceptionAsInfo("BinX Write", MemberType.Property, Required.Mandatory, ex, $"when setting BinX to {xBin}", $"InvalidValue error received when setting BinX to {xBin}");
                         }
 
                         try
                         {
                             LogCallToDriver("ConformanceCheck", "About to set BinY");
-                            TimeMethod("BinY Write", () => camera.BinY = (short)lBinY, TargetTime.Standard);
+                            TimeMethod("BinY Write", () => camera.BinY = (short)yBin, TargetTime.Standard);
 
                             if (binXSetOk)
-                                LogOk("BinXY Write", $"Successfully set asymmetric XY binning: {lBinX} x {lBinY}");
+                                LogOk("BinXY Write", $"Successfully set asymmetric XY binning: {xBin} x {yBin}");
                             else
-                                LogOk("BinXY Write", $"Successfully set Y binning to {lBinY}");
+                                LogOk("BinXY Write", $"Successfully set Y binning to {yBin}");
                         }
                         catch (Exception ex)
                         {
-                            HandleInvalidValueExceptionAsInfo("BinY Write", MemberType.Property, Required.Mandatory, ex,
-                                $"when setting BinY to {lBinY}",
-                                $"InvalidValue error received when setting BinY to {lBinY}");
+                            HandleInvalidValueExceptionAsInfo("BinY Write", MemberType.Property, Required.Mandatory, ex, $"when setting BinY to {yBin}", $"InvalidValue error received when setting BinY to {yBin}");
                         }
                     }
                 }
             }
             else // Can only bin symmetrically
-                for (lBinX = 1; lBinX <= lMaxBinX; lBinX++)
+                for (xBin = 1; xBin <= lMaxBinX; xBin++)
                 {
                     bool binXSetOk = false;
 
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to set BinX");
-                        TimeMethod("BinX Write", () => camera.BinX = (short)lBinX, TargetTime.Standard);
+                        TimeMethod("BinX Write", () => camera.BinX = (short)xBin, TargetTime.Standard);
                         binXSetOk = true;
                     }
                     catch (Exception ex)
                     {
-                        HandleInvalidValueExceptionAsInfo("BinX Write", MemberType.Property, Required.Mandatory, ex,
-                            $"when setting BinX to {lBinX}",
-                            $"InvalidValueException received when setting BinX to {lBinX}");
+                        HandleInvalidValueExceptionAsInfo("BinX Write", MemberType.Property, Required.Mandatory, ex, $"when setting BinX to {xBin}", $"InvalidValueException received when setting BinX to {xBin}");
                     }
 
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to set BinY");
-                        TimeMethod("BinY Write", () => camera.BinY = (short)lBinX, TargetTime.Standard);
+                        TimeMethod("BinY Write", () => camera.BinY = (short)xBin, TargetTime.Standard);
                         if (binXSetOk)
-                            LogOk("BinXY Write", $"Successfully set symmetric XY binning: {lBinX} x {lBinX}");
+                            LogOk("BinXY Write", $"Successfully set symmetric XY binning: {xBin} x {xBin}");
                         else
-                            LogOk("BinXY Write", $"Successfully set Y binning to {lBinX}");
+                            LogOk("BinXY Write", $"Successfully set Y binning to {xBin}");
                     }
                     catch (Exception ex)
                     {
-                        HandleInvalidValueExceptionAsInfo("BinY Write", MemberType.Property, Required.Mandatory, ex,
-                            $"when setting BinY to {lBinX}",
-                            $"InvalidValueException received when setting BinY to {lBinX}");
+                        HandleInvalidValueExceptionAsInfo("BinY Write", MemberType.Property, Required.Mandatory, ex, $"when setting BinY to {xBin}", $"InvalidValueException received when setting BinY to {xBin}");
                     }
                 }
 
@@ -831,10 +841,30 @@ namespace ConformU
 
             CameraPropertyTestInteger(CamPropertyType.MaxAdu, "MaxADU", 1, int.MaxValue); if (cancellationToken.IsCancellationRequested) return;
 
-            CameraPropertyTestInteger(CamPropertyType.NumX, "NumX Read", 1, cameraXSize); if (cancellationToken.IsCancellationRequested) return;
+            int numX = CameraPropertyTestInteger(CamPropertyType.NumX, "NumX Read", 1, cameraXSize); if (cancellationToken.IsCancellationRequested) return;
+
+            // Check that startup defaults specified in the interface definition are correct.
+            if (settings.CameraFirstUseTests)
+            {
+                if (numX == cameraXSize)
+                    LogOk("NumX Read", "NumX correctly defaults to cameraXSize on startup");
+                else
+                    LogIssue("NumX Read", $"NumX must default to {cameraXSize} on startup but instead returned: {numX}");
+            }
+
             CameraPropertyWriteTest(CamPropertyType.NumX, "NumX", System.Convert.ToInt32(cameraXSize / (double)2));
 
-            CameraPropertyTestInteger(CamPropertyType.NumY, "NumY Read", 1, cameraYSize); if (cancellationToken.IsCancellationRequested) return;
+            int numY = CameraPropertyTestInteger(CamPropertyType.NumY, "NumY Read", 1, cameraYSize); if (cancellationToken.IsCancellationRequested) return;
+
+            // Check that startup defaults specified in the interface definition are correct.
+            if (settings.CameraFirstUseTests)
+            {
+                if (numY == cameraYSize)
+                    LogOk("NumY Read", "NumY correctly defaults to cameraYSize on startup");
+                else
+                    LogIssue("NumY Read", $"NumY must default to {cameraYSize} on startup but instead returned: {numY}");
+            }
+
             CameraPropertyWriteTest(CamPropertyType.NumY, "NumY", System.Convert.ToInt32(cameraYSize / (double)2));
 
             CameraPropertyTestDouble(CamPropertyType.PixelSizeX, "PixelSizeX", double.Epsilon, double.PositiveInfinity, true); if (cancellationToken.IsCancellationRequested) return;
@@ -945,6 +975,7 @@ namespace ConformU
                 }
             }
             else
+            {
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to set SetCCDTemperature");
@@ -955,10 +986,31 @@ namespace ConformU
                 {
                     HandleException("SetCCDTemperature Write", MemberType.Property, Required.Optional, ex, "");
                 }
+            }
 
-            CameraPropertyTestInteger(CamPropertyType.StartX, "StartX Read", 0, cameraXSize - 1); if (cancellationToken.IsCancellationRequested) return;
+            int startX = CameraPropertyTestInteger(CamPropertyType.StartX, "StartX Read", 0, cameraXSize - 1); if (cancellationToken.IsCancellationRequested) return;
+
+            // Check that startup defaults specified in the interface definition are correct.
+            if (settings.CameraFirstUseTests)
+            {
+                if (startX == 0)
+                    LogOk("StartX Read", "StartX correctly defaults to 0 on startup");
+                else
+                    LogIssue("StartX Read", $"StartX must default to 0 on startup but instead returned: {startX}");
+            }
+
             CameraPropertyWriteTest(CamPropertyType.StartX, "StartX", System.Convert.ToInt32(cameraXSize / (double)2));
-            CameraPropertyTestInteger(CamPropertyType.StartY, "StartY Read", 0, cameraYSize - 1); if (cancellationToken.IsCancellationRequested) return;
+            int startY = CameraPropertyTestInteger(CamPropertyType.StartY, "StartY Read", 0, cameraYSize - 1); if (cancellationToken.IsCancellationRequested) return;
+
+            // Check that startup defaults specified in the interface definition are correct.
+            if (settings.CameraFirstUseTests)
+            {
+                if (startY == 0)
+                    LogOk("StartY Read", "StartY correctly defaults to 0 on startup");
+                else
+                    LogIssue("StartY Read", $"StartY must default to 0 on startup but instead returned: {startY}");
+            }
+
             CameraPropertyWriteTest(CamPropertyType.StartY, "StartY", System.Convert.ToInt32(cameraYSize / (double)2));
             LogCallToDriver("ConformanceCheck", "About to get InterfaceVersion");
             if (camera.InterfaceVersion > 1)
