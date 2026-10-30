@@ -828,10 +828,6 @@ namespace ConformU
                     }
                 }
             }
-            else // Log an issue because the ImageArrayVariant test was omitted
-            {
-                LogIssue("ImageArrayVariant", "Test omitted due to Conform configuration.");
-            }
 
             // Release memory currently consumed by images
             ReleaseMemory();
@@ -1088,7 +1084,7 @@ namespace ConformU
                     }
 
                 // FastReadout Write Optional
-                if (mCanFastReadout)
+                if (mCanFastReadout) // Can fast readout
                 {
                     try
                     {
@@ -1098,14 +1094,15 @@ namespace ConformU
                         LogCallToDriver("ConformanceCheck", "About to set FastReadout");
                         camera.FastReadout = mFastReadout;
 
+                        // Log the fact that we can write FastReadout
                         LogOk("FastReadout Write", "Able to change the FastReadout state OK");
                     }
                     catch (Exception ex)
                     {
-                        HandleException("FastReadout Write", MemberType.Property, Required.Mandatory, ex, "");
+                        HandleException("FastReadout Write", MemberType.Property, Required.MustBeImplemented, ex, "CanFastReadOut is True");
                     }
                 }
-                else
+                else // Cannot fast readout
                     try
                     {
                         LogCallToDriver("ConformanceCheck", "About to set FastReadout");
@@ -1440,46 +1437,126 @@ namespace ConformU
                     HandleInvalidOperationExceptionAsOk("PercentCompleted Read", MemberType.Property, Required.Optional, ex, "", "Operation is invalid when camera is not imaging or downloading");
                 }
 
-                // ReadoutModes - Mandatory
+                // ReadoutModes - Mandatory if CanfastReadout =FALSE, must NOT be implemented when CanFastReadout = TRUE
                 try
                 {
                     mCanReadReadoutModes = false;
                     LogCallToDriver("ConformanceCheck", "About to get ReadoutModes");
                     TimeMethod("ReadoutModes", () => mReadoutModes = camera.ReadoutModes, TargetTime.Fast);
 
-                    // Successfully retrieved a value
-                    mCanReadReadoutModes = true;
-                    foreach (string readoutMode in mReadoutModes)
-                        LogOk("ReadoutModes Read", readoutMode.ToString());
+                    // Successfully retrieved a value, handle it depending on whether CanFastReadout is true or false
+                    if (mCanFastReadout) // The Camera can fast readout so ReadoutModes must NOT be implemented, so this is an error
+                    {
+                        LogIssue("ReadoutModes Read", "CanFastReadout is True but ReadoutModes is implemented and returned the following values, it should have returned a not implemented error.");
+                        mCanReadReadoutModes = true;
+                        foreach (string readoutMode in mReadoutModes)
+                            LogInfo("ReadoutModes Read", $"Found readout mode: {readoutMode}");
+
+                    }
+                    else // The Camera cannot fast readout so ReadoutModes must be implemented, so this is correct
+                    {
+                        mCanReadReadoutModes = true;
+                        foreach (string readoutMode in mReadoutModes)
+                            LogOk("ReadoutModes Read", $"Found readout mode: {readoutMode}");
+                    }
                 }
                 catch (Exception ex)
                 {
-                    HandleException("ReadoutModes Read", MemberType.Property, Required.Mandatory, ex, "");
+                    // Handle the exception depending on whether the camera can fast readout
+                    if (mCanFastReadout) // Can fast readout so ReadoutModes MUST NOT be implemented
+                        HandleException("ReadoutModes Read", MemberType.Property, Required.MustNotBeImplemented, ex, "CanFastReadout is True"); // Save the flag indicating whether a PropertyNotImplemented exception was received
+                    else // Can not fast readout so ReadoutModes MUST be implemented
+                        HandleException("ReadoutModes Read", MemberType.Property, Required.MustBeImplemented, ex, "CanfastReadout is False");
                 }
                 if (cancellationToken.IsCancellationRequested) return;
 
-                // ReadoutMode Read - Mandatory
-                mReadoutMode = CameraPropertyTestShort(CamPropertyType.ReadoutMode, "ReadoutMode Read", 0, short.MaxValue, true);
-                if (mCanReadReadoutModes)
+                // ReadoutMode Read - Mandatory if CanFastReadout = FALSE, must NOT be implemented when CanFastReadout = TRUE
+                // If ReadOutModes is not implemented then ReadoutMode must not be implemented either, so check top make sure it throws a not implemented exception
+                if (mCanFastReadout) // CanFastReadout is true so ReadoutMode must throw a not implemented exception
                 {
+                    // Confirm that read is not implemented
                     try
                     {
-                        if (mReadoutMode < mReadoutModes.Count)
-                        {
-                            LogOk("ReadoutMode Index", "ReadReadoutMode is within the bounds of the ReadoutModes ArrayList");
-                            LogInfo("ReadoutMode Index", $"Current value: {mReadoutModes[mReadoutMode]}");
-                        }
-                        else
-                            LogIssue("ReadoutMode Index", "ReadReadoutMode is outside the bounds of the ReadoutModes ArrayList");
+                        LogCallToDriver("ConformanceCheck", "About to get ReadoutMode");
+                        mReadoutMode = camera.ReadoutMode;
+                        LogIssue("ReadoutMode Read", "CanFastReadout is True but ReadoutMode did not throw a not implemented exception");
                     }
                     catch (Exception ex)
                     {
-                        LogIssue("ReadoutMode Index", $"Exception: {ex.Message}");
-                        LogDebug("ReadoutMode Index", $"Exception detail: {ex}");
+                        HandleException("ReadoutMode Read", MemberType.Property, Required.MustNotBeImplemented, ex, "CanFastReadout is True");
+                    }
+
+                    // Confirm that write is not implemented
+                    try
+                    {
+                        LogCallToDriver("ConformanceCheck", "About to set ReadoutMode to 0");
+                        camera.ReadoutMode = 0;
+                        LogIssue("ReadoutMode Write", "CanFastReadout is True but writing to ReadoutMode did not throw a not implemented exception");
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleException("ReadoutMode Write", MemberType.Property, Required.MustNotBeImplemented, ex, "CanFastReadout is True");
                     }
                 }
-                else
-                    LogInfo("ReadoutMode Index", "Skipping ReadReadoutMode index test because ReadoutModes is unavailable");
+                else // CanFastReadout is False so ReadoutMode must be implemented
+                {
+                    try
+                    {
+                        LogCallToDriver("ConformanceCheck", "About to get ReadoutMode");
+                        mReadoutMode = camera.ReadoutMode;
+                        LogOk("ReadoutMode Read", $"CanFastReadout is False and ReadoutMode returned a value: {mReadoutMode}");
+                        if (mCanReadReadoutModes)
+                        {
+                            try
+                            {
+                                if (mReadoutMode < mReadoutModes.Count)
+                                {
+                                    LogOk("ReadoutMode Read", $"ReadReadoutMode is within the bounds of the ReadoutModes ArrayList: {mReadoutModes[mReadoutMode]}.");
+
+                                    // Check that each value can be written to the ReadoutMode property
+                                    for (short i = 0; i < mReadoutModes.Count; i++)
+                                    {
+                                        try
+                                        {
+                                            LogCallToDriver("ConformanceCheck", $"About to set ReadoutMode to {i}");
+                                            TimeMethod("ReadoutMode Write", () => camera.ReadoutMode = i, TargetTime.Standard);
+                                            LogOk("ReadoutMode Write", $"Successfully set ReadoutMode to '{mReadoutModes[i]}'.");
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            HandleException("ReadoutMode Write", MemberType.Property, Required.MustBeImplemented, ex, "CanFastReadOut is False");
+                                        }
+                                    }
+
+                                    // Now reset ReadOutMode to its original value
+                                    try
+                                    {
+                                        LogCallToDriver("ConformanceCheck", $"About to set ReadoutMode to {mReadoutMode}");
+                                        TimeMethod("ReadoutMode Reset", () => camera.ReadoutMode = mReadoutMode, TargetTime.Standard);
+                                        LogOk("ReadoutMode Reset", $"Successfully reset ReadoutMode to its original value: '{mReadoutModes[mReadoutMode]}'.");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        HandleException("ReadoutMode Reset", MemberType.Property, Required.MustBeImplemented, ex, "CanFastReadOut is False");
+                                    }
+                                }
+                                else
+                                    LogIssue("ReadoutMode Index", "ReadReadoutMode is outside the bounds of the ReadoutModes ArrayList");
+                            }
+                            catch (Exception ex)
+                            {
+                                LogIssue("ReadoutMode Index", $"Exception: {ex.Message}");
+                                LogDebug("ReadoutMode Index", $"Exception detail: {ex}");
+                            }
+                        }
+                        else
+                            LogInfo("ReadoutMode Index", "Skipping ReadReadoutMode index test because ReadoutModes is unavailable");
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleException("ReadoutMode Read", MemberType.Property, Required.MustBeImplemented, ex, "CanFastReadout is False");
+                    }
+                }
 
                 // SensorName
                 CameraPropertyTestString(CamPropertyType.SensorName, "SensorName Read", 250, true);

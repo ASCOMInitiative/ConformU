@@ -2097,6 +2097,7 @@ namespace ConformU
         /// <param name="isRequired">Flag indicating whether the member is optional or mandatory</param>
         /// <param name="ex">The exception received from the device</param>
         /// <param name="userMessage">The member specific message to report</param>
+        /// <returns>True if the exception is permitted.</returns>
         /// <remarks></remarks>
         protected bool HandleException(string memberName, MemberType typeOfMember, Required isRequired, Exception ex, string userMessage)
         {
