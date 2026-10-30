@@ -20,6 +20,9 @@ namespace ConformU
     {
         #region Constants and variables
 
+        const int ABORT_STOP_EXPOSURE_DURATION = 3000; // Milliseconds
+        const int EARLY_STOP_TIME = 1000; // Milliseconds
+
         private const int CAMERA_PULSE_DURATION_MILLISECONDS = 2000; // Duration of camera pulse guide test (ms)
         private const int CAMERA_PULSE_TOLERANCE_MILLISECONDS = 300; // Tolerance for acceptable performance (ms)
 
@@ -1804,8 +1807,9 @@ namespace ConformU
         public override void CheckMethods()
         {
             int i, j, maxBinX, maxBinY;
-            // AbortExposure - Mandatory
-            SetTest("AbortExposure");
+
+            // AbortExposure - optional. 
+            SetTest("AbortExposure - While Idle");
             try
             {
                 LogCallToDriver("ConformanceCheck", "About to get CameraState");
@@ -1814,33 +1818,100 @@ namespace ConformU
                 // Test whether the camera is idle, which it should be in a well behaved device
                 if (mCameraState != CameraState.Idle)
                 {
-                    LogIssue("AbortExposure", $"The camera should be idle but is not: {mCameraState}");
+                    LogIssue("AbortExposure - While Idle", $"The camera should be idle but is not: {mCameraState}");
                 }
 
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to call AbortExposure");
-                    TimeMethod("AbortExposure", camera.AbortExposure, TargetTime.Standard);
+                    TimeMethod("AbortExposure - While Idle", camera.AbortExposure, TargetTime.Standard);
                     if (mCanAbortExposure)
-                        LogOk("AbortExposure", "No error returned when camera is already idle");
+                        LogOk("AbortExposure - While Idle", "No error returned when camera is already idle");
                     else
-                        LogIssue("AbortExposure", "CanAbortExposure is false but no error is returned when AbortExposure is called");
+                        LogIssue("AbortExposure - While Idle", "CanAbortExposure is false but no error is returned when AbortExposure is called");
                 }
                 catch (Exception ex)
                 {
                     if (mCanAbortExposure)
-                    {
-                        LogIssue("AbortExposure", $"Received error when camera is idle: {ex.Message}");
-                        LogDebug("AbortExposure", $"Exception detail: {ex}");
-                    }
+                        HandleException("AbortExposure - While Idle", MemberType.Method, Required.MustBeImplemented, ex, "CanAbortExposure is true");
                     else
-                        LogOk("AbortExposure", "CanAbortExposure is false and an error was returned");
+                        HandleException("AbortExposure - While Idle", MemberType.Method, Required.MustNotBeImplemented, ex, "CanAbortExposure is false");
                 }
             }
             catch (Exception ex)
             {
-                LogIssue("AbortExposure", $"Received error when reading camera state: {ex.Message}");
-                LogDebug("AbortExposure", $"Exception detail: {ex}");
+                LogIssue("AbortExposure - While Exposing", $"Received error when reading camera state: {ex.Message}");
+                LogDebug("AbortExposure - While Exposing", $"Exception detail: {ex}");
+            }
+
+            // Check whether AbortExposure is supported
+            if (mCanAbortExposure) // AbbortExpsoure is supported
+            {
+                SetTest("AbortExposure - While Exposing");
+                // Check whether AbortExposure cancels an exposure that is underway
+                try
+                {
+                    // Set exposure parameters to basic defaults
+                    LogDebug("AbortExposure - While Exposing", $"Setting exposure parameters");
+                    camera.BinX = 1;
+                    camera.BinY = 1;
+                    camera.StartX = 0;
+                    camera.StartY = 0;
+                    camera.NumX = camera.CameraXSize;
+                    camera.NumY = camera.CameraYSize;
+
+                    // Start the exposure
+                    LogDebug("AbortExposure - While Exposing", $"Starting exposure");
+                    camera.StartExposure(ABORT_STOP_EXPOSURE_DURATION / 1000, true);
+
+                    // Wait for the camera state to become Exposing
+                    WaitWhile($"Waiting for camera to start exposure", () => camera.CameraState != CameraState.Exposing, 100, settings.CameraWaitTimeout);
+
+                    // Start a stopwatch to time how long it takes to stop the exposure
+                    Stopwatch exposureTime = Stopwatch.StartNew();
+
+                    // Wait for a short time before trying to stop the exposure
+                    LogDebug("AbortExposure - While Exposing", $"Waiting for {EARLY_STOP_TIME} milli-seconds");
+                    Thread.Sleep(EARLY_STOP_TIME);
+
+                    // Stop the exposure and capture how long it took to stop the exposure
+                    LogDebug("AbortExposure - While Exposing", $"Calling AbortExposure...");
+                    camera.AbortExposure();
+                    TimeSpan endOfAbortTimeSpan = exposureTime.Elapsed;
+                    LogDebug("AbortExposure - While Exposing", $"Returned from AbortExposure");
+
+                    // Report the outcome
+                    if (camera.CameraState == CameraState.Idle) // Camera is already idle
+                    {
+                        LogOk("AbortExposure - While Exposing", $"Exposure successfully stopped after {EARLY_STOP_TIME / 1000:0.0} seconds of a {ABORT_STOP_EXPOSURE_DURATION / 1000:0.0} second exposure. AbortExposure took {(endOfAbortTimeSpan.TotalMilliseconds - EARLY_STOP_TIME) / 1000:0.000} seconds to complete.");
+                    }
+                    else // Camera is not yet idle so wait for it to achieve this state
+                    {
+                        // Wait for idle or timeout
+                        WaitWhile($"Waiting for camera to become idle", () => camera.CameraState != CameraState.Idle, 100, settings.CameraWaitTimeout);
+
+                        // The camera is now idle so stop the stopwatch and report the outcome
+                        exposureTime.Stop();
+
+                        // Determine the final outcome based on time to return
+                        switch (exposureTime.ElapsedMilliseconds)
+                        {
+                            case <= ABORT_STOP_EXPOSURE_DURATION: // Stopped in less than the exposure time
+                                LogOk("AbortExposure - While Exposing", $"Exposure successfully stopped after {EARLY_STOP_TIME / 1000:0.0} seconds of a {ABORT_STOP_EXPOSURE_DURATION / 1000:0.0} second exposure. AbortExposure took {(exposureTime.Elapsed.TotalMilliseconds - EARLY_STOP_TIME) / 1000:0.0} ±0.1 seconds to complete.");
+                                break;
+
+                            default: // Took a long time to return to idle
+                                LogIssue("AbortExposure - While Exposing", $"Exposure stopped but only after the full exposure duration had passed, AbortExposure did not stop the exposure promptly.");
+                                LogInfo("AbortExposure - While Exposing", $"The time between issuing AbortExposure and the camera returning to idle was {(exposureTime.Elapsed.TotalMilliseconds - EARLY_STOP_TIME) / 1000:0.0} ±0.1 seconds.");
+                                break;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogIssue("AbortExposure - While Exposing", $"Unexpected exception: {ex.Message}");
+                    LogDebug("AbortExposure - While Exposing", $"Exception detail: {ex}");
+                }
             }
 
             // PulseGuide
@@ -1891,7 +1962,7 @@ namespace ConformU
                 }
 
             // StopExposure
-            SetTest("StopExposure");
+            SetTest("StopExposure - While Idle");
             try
             {
                 LogCallToDriver("ConformanceCheck", "About to get CameraState");
@@ -1900,40 +1971,101 @@ namespace ConformU
                 // Test whether the camera is idle, which it should be in a well behaved device
                 if (mCameraState != CameraState.Idle)
                 {
-                    LogIssue("StopExposure", $"The camera should be idle but is not: {mCameraState}");
+                    LogIssue("StopExposure - While Idle", $"The camera should be idle but is not: {mCameraState}");
                 }
 
                 try
                 {
                     LogCallToDriver("ConformanceCheck", "About to call StopExposure");
                     SetAction("Calling StopExposure()");
-                    TimeMethod("StopExposure", camera.StopExposure, TargetTime.Standard);
+                    TimeMethod("StopExposure - While Idle", camera.StopExposure, TargetTime.Standard);
 
                     LogCallToDriver("ConformanceCheck", "About to get ImageReady repeatedly...");
                     WaitWhile($"Waiting for exposure to stop", () => camera.ImageReady, 100, settings.CameraWaitTimeout);
 
                     if (mCanStopExposure)
-                        LogOk("StopExposure", "No error returned when camera is already idle");
+                        LogOk("StopExposure - While Idle", "No error returned when camera is already idle");
                     else
-                        LogIssue("StopExposure", "CanStopExposure is false but no error is returned when StopExposure is called");
+                        LogIssue("StopExposure - While Idle", "CanStopExposure is false but no error is returned when StopExposure is called");
                 }
                 catch (Exception ex)
                 {
                     if (mCanStopExposure)
-                        LogIssue("StopExposure", $"Received error when the camera is idle: {ex.Message}");
+                        LogIssue("StopExposure - While Idle", $"Received error when the camera is idle: {ex.Message}");
                     else
                     {
                         LogOk("StopExposure", $"CanStopExposure is false and an error was returned: {ex.Message}");
                     }
 
-                    LogDebug("StopExposure", $"Exception detail: {ex}");
+                    LogDebug("StopExposure - While Idle", $"Exception detail: {ex}");
                 }
-
             }
             catch (Exception ex)
             {
                 LogIssue("StopExposure", $"Received error when reading camera state: {ex.Message}");
                 LogDebug("StopExposure", $"Exception detail: {ex}");
+            }
+
+            // Check that StopExposure works
+            if (mCanStopExposure)
+            {
+                SetTest("StopExposure - While Exposing");
+                // Check whether StopExposure cancels an exposure that is underway
+                try
+                {
+                    // Set exposure parameters to basic defaults
+                    LogDebug("StopExposure - While Exposing", $"Setting exposure parameters");
+                    camera.BinX = 1;
+                    camera.BinY = 1;
+                    camera.StartX = 0;
+                    camera.StartY = 0;
+                    camera.NumX = camera.CameraXSize;
+                    camera.NumY = camera.CameraYSize;
+
+                    // Start the exposure
+                    LogDebug("StopExposure - While Exposing", $"Starting exposure");
+                    camera.StartExposure(ABORT_STOP_EXPOSURE_DURATION / 1000, true);
+
+                    // Wait for the camera state to become Exposing
+                    WaitWhile($"Waiting for camera to start exposure", () => camera.CameraState != CameraState.Exposing, 100, settings.CameraWaitTimeout);
+
+                    // Start a stopwatch to time how long it takes to stop the exposure
+                    Stopwatch exposureTime = Stopwatch.StartNew();
+
+                    // Wait for a short time before trying to stop the exposure
+                    LogDebug("StopExposure - While Exposing", $"Waiting for {EARLY_STOP_TIME} milli-seconds");
+                    Thread.Sleep(EARLY_STOP_TIME);
+
+                    // Stop the exposure and capture how long it took to stop the exposure
+                    LogDebug("StopExposure - While Exposing", $"Calling StopExposure...");
+                    camera.StopExposure();
+                    TimeSpan endOfStopTimeSpan = exposureTime.Elapsed;
+                    LogDebug("StopExposure - While Exposing", $"Returned from StopExposure");
+
+                    // Wait for ImageReady to become true or timeout
+                    WaitWhile($"Waiting for ImageReady to become true", () => !camera.ImageReady, 100, settings.CameraWaitTimeout);
+
+                    // The image is now ready for download so stop the stopwatch and report the outcome
+                    exposureTime.Stop();
+
+                    // Determine the final outcome based on time to return
+                    switch (exposureTime.ElapsedMilliseconds)
+                    {
+                        case <= ABORT_STOP_EXPOSURE_DURATION: // Stopped in less than the exposure time
+                            LogOk("StopExposure - While Exposing", $"Exposure successfully stopped after {EARLY_STOP_TIME / 1000:0.0} seconds of a {ABORT_STOP_EXPOSURE_DURATION / 1000:0.0} second exposure. StopExposure took {(exposureTime.Elapsed.TotalMilliseconds - EARLY_STOP_TIME) / 1000:0.0} ±0.1 seconds to complete.");
+                            break;
+
+                        default: // Took a long time to return to idle
+                            LogIssue("StopExposure - While Exposing", $"Exposure stopped but only after the full exposure duration had passed, StopExposure did not stop the exposure promptly.");
+                            LogInfo("StopExposure - While Exposing", $"The time between issuing StopExposure and the camera returning to idle was {(exposureTime.Elapsed.TotalMilliseconds - EARLY_STOP_TIME) / 1000:0.0} ±0.1 seconds.");
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogIssue("StopExposure - While Exposing", $"Unexpected exception: {ex.Message}");
+                    LogDebug("StopExposure - While Exposing", $"Exception detail: {ex}");
+                }
             }
 
             // StartExposure

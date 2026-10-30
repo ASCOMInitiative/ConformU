@@ -1774,12 +1774,14 @@ namespace ConformU
                 }
             }
 
-            bool currentWaitFunctionValue = waitFunction();
-
+            // The wait ended because either the wait function returned false or the operation was cancelled (either by timeout or by the application)
+            bool currentWaitFunctionValue = waitFunction(); // Get the current wait function value to determine whether the wait was successful or not
             LogDebug(nameof(WaitWhile), $"The Wait completed - Wait was successful: {!currentWaitFunctionValue}, " +
                 $"Timeout cancelled: {timeoutCts.Token.IsCancellationRequested}, Application cancelled: {ApplicationCancellationToken.IsCancellationRequested}, " +
                 $"Combined cancelled: {combinedCts.Token.IsCancellationRequested}.");
-            if (currentWaitFunctionValue)
+
+            // Check whether the wait function is still true, if so then check whether the operation timed out or was cancelled by the application
+            if (currentWaitFunctionValue) // The wait condition is still true
             {
                 // Test whether the operation timed out
                 if (timeoutCts.IsCancellationRequested) // The operation did time out
@@ -1791,16 +1793,16 @@ namespace ConformU
                         LogDebug(nameof(WaitWhile), $"The {actionName} operation timed out after {timeoutSeconds} seconds.");
                         throw new TimeoutException($"The \"{actionName}\" operation exceeded its {timeoutSeconds} second timeout.");
                     }
-                    else // The wait function is False
+                    else // The wait function is now False
                     {
                         // The wait function transitioned to False after the last poll interval and before the timeout so this is a successful wait
                         // No action required
                     }
                 }
             }
-            else
+            else // The wait function is False so the operation completed successfully
             {
-                //LogDebug(nameof(WaitWhile), $"WaitFunction is FALSE - Operation completed successfully");
+                // No action required
             }
 
             SetStatus("");
