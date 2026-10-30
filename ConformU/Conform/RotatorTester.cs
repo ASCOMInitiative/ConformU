@@ -347,31 +347,23 @@ namespace ConformU
             }
             catch (Exception ex)
             {
-                // Check whether this is a Platform 7 or later interface
-                if (GetInterfaceVersion() < 3) // Platform 6 or earlier interface
-                {
-                    HandleException("IsMoving", MemberType.Property, Required.Optional, ex, ""); // Handle as optional
-                }
-                else // Platform 7 or later interface
-                {
-                    HandleException("IsMoving", MemberType.Property, Required.Mandatory, ex, "");  // Handle as mandatory
-                }
+                HandleException("IsMoving", MemberType.Property, GetInterfaceVersion() < 3 ? Required.Optional : Required.Mandatory, ex, ""); // Handle as optional
             }
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // Position - Optional (V1,V2), Mandatory (V3)
-            rotatorPosition = RotatorPropertyTestSingle(RotatorMember.Position, "Position", 0.0f, 360.0f, Required.Mandatory);
+            rotatorPosition = RotatorPropertyTestSingle(RotatorMember.Position, "Position", 0.0f, 360.0f, GetInterfaceVersion() < 3 ? Required.Optional : Required.Mandatory);
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // TargetPosition - Optional (V1,V2), Mandatory (V3)
-            RotatorPropertyTestSingle(RotatorMember.TargetPosition, "TargetPosition", 0.0f, 360.0f, Required.Mandatory);
+            RotatorPropertyTestSingle(RotatorMember.TargetPosition, "TargetPosition", 0.0f, 360.0f, GetInterfaceVersion() < 3 ? Required.Optional : Required.Mandatory);
             if (cancellationToken.IsCancellationRequested)
                 return;
 
             // StepSize - Optional (V1,V2 and V3)
-            rotatorStepSize = RotatorPropertyTestSingle(RotatorMember.StepSize, "StepSize", 0.0f, 360.0f, Required.Optional);
+            rotatorStepSize = RotatorPropertyTestSingle(RotatorMember.StepSize, "StepSize", 0.0f, 360.0f, GetInterfaceVersion() < 3 ? Required.Optional : Required.Optional);
             if (cancellationToken.IsCancellationRequested)
                 return;
 
@@ -395,14 +387,14 @@ namespace ConformU
                 {
                     if (canReverse)
                     {
-                        HandleException("Reverse Read", MemberType.Property, Required.MustBeImplemented, ex, "when CanReverse is True");
+                        HandleException("Reverse Read", MemberType.Property, Required.MustBeImplemented, ex, "CanReverse is True");
                     }
                     else
                     {
-                        HandleException("Reverse Read", MemberType.Property, Required.MustNotBeImplemented, ex, "when CanReverse is False");
+                        HandleException("Reverse Read", MemberType.Property, Required.MustNotBeImplemented, ex, "CanReverse is False");
                     }
                 }
-                else // Mandatory in IRotatorV3
+                else // Mandatory in IRotatorV3 and later
                 {
                     HandleException("Reverse Read", MemberType.Property, Required.Mandatory, ex, "");
                 }
@@ -441,11 +433,11 @@ namespace ConformU
                 {
                     if (canReverse)
                     {
-                        HandleException("Reverse Write", MemberType.Property, Required.MustBeImplemented, ex, "when CanReverse is True");
+                        HandleException("Reverse Write", MemberType.Property, Required.MustBeImplemented, ex, "CanReverse is True");
                     }
                     else
                     {
-                        HandleException("Reverse Write", MemberType.Property, Required.MustNotBeImplemented, ex, "when CanReverse is False");
+                        HandleException("Reverse Write", MemberType.Property, Required.MustNotBeImplemented, ex, "CanReverse is False");
                     }
                 }
                 else // Mandatory in IRotatorV3
