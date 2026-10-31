@@ -361,8 +361,7 @@ namespace ConformU
                         }
 
                         // Find valid GetSwitch values
-                        LogDebug("GetSwitchName ",
-                            $"Extended switch number test range: {-extendedSwitchNumberTestRange} - {maxSwitch + extendedSwitchNumberTestRange - 1}");
+                        LogDebug("GetSwitchName ", $"Extended switch number test range: {-extendedSwitchNumberTestRange} - {maxSwitch + extendedSwitchNumberTestRange - 1}");
                         for (i = (short)-extendedSwitchNumberTestRange; i <= Convert.ToInt16(maxSwitch + extendedSwitchNumberTestRange - 1); i++)
                         {
                             SetStatus(i.ToString());
@@ -560,13 +559,19 @@ namespace ConformU
                                         else // The device is not capable of one or both of write or async so test the remaining 3 combinations
                                         {
                                             if (switchCanWrite) // Switch can write but not async - OK
+                                            {
                                                 LogOk("CanAsync ", $"  CanAsync: {switchCanAsync}");
+                                                CheckAsyncNotImplemented(i);
+                                            }
                                             else // Switch cannot write so check whether CanAsync is set
                                             {
                                                 if (switchCanAsync) // Switch cannot write but can async - BAD
                                                     LogIssue("CanAsync ", $"  CanWrite is False but CanAsync is True. CanWrite must be true if CanAsync is true.");
                                                 else // Switch cannot write or async - OK
+                                                {
                                                     LogOk("CanAsync ", $"  CanAsync: {switchCanAsync}");
+                                                    CheckAsyncNotImplemented(i);
+                                                }
                                             }
                                         }
                                     }
@@ -1004,7 +1009,7 @@ namespace ConformU
                                     }
 
                                     // Test the async methods if present
-                                    if (DeviceCapabilities.HasAsyncSwitch(GetInterfaceVersion()))
+                                    if (DeviceCapabilities.HasAsyncSwitch(GetInterfaceVersion())) // 
                                     {
                                         // Only test if the switch can write and supports async operation
                                         LogDebug("CanAsync", $"CanAsync: {switchCanAsync}, CanWrite: {switchCanWrite}");
@@ -1531,6 +1536,67 @@ namespace ConformU
         #endregion
 
         #region Support code
+
+        /// <summary>
+        /// Checks whether asynchronous switch operations are not implemented for the specified switch.
+        /// </summary>
+        /// <remarks>Calls asynchronous members expected to be unsupported and suppresses any exceptions
+        /// they raise.</remarks>
+        /// <param name="id">Identifier of the switch to use when checking asynchronous state-change support.</param>
+        private void CheckAsyncNotImplemented(short id)
+        {
+            bool canReadStateChangeComplete = false;
+            try
+            {
+                LogCallToDriver("CheckAsyncNotImplemented", $"About to call StateChangeComplete({id})");
+                _ = switchDevice.StateChangeComplete(id);
+                canReadStateChangeComplete = true;
+                LogIssue("StateChangeComplete", $"StateChangeComplete returned a value for switch {id} that does not support async operation, it should have returned a not implemented error.");
+            }
+            catch (Exception ex)
+            {
+                HandleException("StateChangeComplete", MemberType.Method, Required.MustNotBeImplemented, ex, $"  CanAsync is false");
+            }
+
+            if (settings.SwitchEnableSet)
+            {
+                try
+                {
+                    LogCallToDriver("CheckAsyncNotImplemented", $"About to call SetAsync({id})");
+                    switchDevice.SetAsync(id, false);
+                    if (canReadStateChangeComplete)
+                    {
+                        LogCallToDriver("CheckAsyncNotImplemented", $"About to call StateChangeComplete({id}) multiple times");
+                        WaitWhile("SetAsync", () => !switchDevice.StateChangeComplete(id), 100, 5);
+                    }
+                    LogIssue("SetAsync", $"SetAsync succeeded for switch {id} that does not support async operation, it should have returned a not implemented error.");
+                }
+                catch (Exception ex)
+                {
+                    HandleException("SetAsync", MemberType.Method, Required.MustNotBeImplemented, ex, $"  CanAsync is false");
+                }
+
+                try
+                {
+                    LogCallToDriver("CheckAsyncNotImplemented", $"About to call SetAsyncValue({id})");
+                    switchDevice.SetAsyncValue(id, 0.0);
+                    if (canReadStateChangeComplete)
+                    {
+                        LogCallToDriver("CheckAsyncNotImplemented", $"About to call StateChangeComplete({id}) multiple times.");
+                        WaitWhile("SetAsyncValue", () => !switchDevice.StateChangeComplete(id), 100, 5);
+                    }
+                    LogIssue("SetAsyncValue", $"SetAsyncValue succeeded for switch {id} that does not support async operation, it should have returned a not implemented error.");
+                }
+                catch (Exception ex)
+                {
+                    HandleException("SetAsyncValue", MemberType.Method, Required.MustNotBeImplemented, ex, $"  CanAsync is false");
+                }
+            }
+            else
+            {
+                LogInfo("Asynchronous Method Tests", $"Skipping checks to confirm that asynchronous writes throw exceptions because writing to switches is not enabled.");
+            }
+        }
 
         private short SwitchPropertyTestShort(SwitchPropertyMethod pType, string pName, short pMin, short pMax)
         {
