@@ -281,98 +281,84 @@ namespace ConformU
                 switch (settings.ComDevice.ProgId ?? "")
                 {
                     case "Hub.Telescope":
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = (int)0x80040401;
-                            ExInvalidValue2 = (int)0x80040402;
-                            ExInvalidValue3 = (int)0x80040405;
-                            ExInvalidValue4 = (int)0x80040402;
-                            ExInvalidValue5 = (int)0x80040402;
-                            ExInvalidValue6 = (int)0x80040402;
-                            ExNotSet1 = (int)0x80040403;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = (int)0x80040401;
+                        ExInvalidValue2 = (int)0x80040402;
+                        ExInvalidValue3 = (int)0x80040405;
+                        ExInvalidValue4 = (int)0x80040402;
+                        ExInvalidValue5 = (int)0x80040402;
+                        ExInvalidValue6 = (int)0x80040402;
+                        ExNotSet1 = (int)0x80040403;
+                        break;
 
                     case "ASCOM.MI250SA.Telescope":
                     case "Celestron.Telescope":
                     case "ASCOM.MI250.Telescope":
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = (int)0x80040401;
-                            ExInvalidValue2 = (int)0x80040402;
-                            ExInvalidValue3 = (int)0x80040402;
-                            ExInvalidValue4 = (int)0x80040402;
-                            ExInvalidValue5 = (int)0x80040402;
-                            ExInvalidValue6 = (int)0x80040402;
-                            ExNotSet1 = (int)0x80040403;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = (int)0x80040401;
+                        ExInvalidValue2 = (int)0x80040402;
+                        ExInvalidValue3 = (int)0x80040402;
+                        ExInvalidValue4 = (int)0x80040402;
+                        ExInvalidValue5 = (int)0x80040402;
+                        ExInvalidValue6 = (int)0x80040402;
+                        ExNotSet1 = (int)0x80040403;
+                        break;
 
                     case "TemmaLite.Telescope":
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = (int)0x80040410;
-                            ExInvalidValue2 = (int)0x80040418;
-                            ExInvalidValue3 = (int)0x80040418;
-                            ExInvalidValue4 = (int)0x80040418;
-                            ExInvalidValue5 = (int)0x80040418;
-                            ExInvalidValue6 = (int)0x80040418;
-                            ExNotSet1 = (int)0x80040417;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = (int)0x80040410;
+                        ExInvalidValue2 = (int)0x80040418;
+                        ExInvalidValue3 = (int)0x80040418;
+                        ExInvalidValue4 = (int)0x80040418;
+                        ExInvalidValue5 = (int)0x80040418;
+                        ExInvalidValue6 = (int)0x80040418;
+                        ExNotSet1 = (int)0x80040417;
+                        break;
 
                     case "Gemini.Telescope":
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = (int)0x80040410;
-                            ExInvalidValue2 = (int)0x80040418;
-                            ExInvalidValue3 = (int)0x80040419;
-                            ExInvalidValue4 = (int)0x80040420;
-                            ExInvalidValue5 = (int)0x80040420;
-                            ExInvalidValue6 = (int)0x80040420;
-                            ExNotSet1 = (int)0x80040417;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = (int)0x80040410;
+                        ExInvalidValue2 = (int)0x80040418;
+                        ExInvalidValue3 = (int)0x80040419;
+                        ExInvalidValue4 = (int)0x80040420;
+                        ExInvalidValue5 = (int)0x80040420;
+                        ExInvalidValue6 = (int)0x80040420;
+                        ExNotSet1 = (int)0x80040417;
+                        break;
 
                     case "POTH.Telescope":
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = (int)0x80040405;
-                            ExInvalidValue2 = (int)0x80040406;
-                            ExInvalidValue3 = (int)0x80040406;
-                            ExInvalidValue4 = (int)0x80040406;
-                            ExInvalidValue5 = (int)0x80040406;
-                            ExInvalidValue6 = (int)0x80040406;
-                            ExNotSet1 = (int)0x80040403;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = (int)0x80040405;
+                        ExInvalidValue2 = (int)0x80040406;
+                        ExInvalidValue3 = (int)0x80040406;
+                        ExInvalidValue4 = (int)0x80040406;
+                        ExInvalidValue5 = (int)0x80040406;
+                        ExInvalidValue6 = (int)0x80040406;
+                        ExNotSet1 = (int)0x80040403;
+                        break;
 
                     case "ServoCAT.Telescope":
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = ErrorCodes.InvalidValue;
-                            ExInvalidValue2 = (int)0x80040405;
-                            ExInvalidValue3 = (int)0x80040405;
-                            ExInvalidValue4 = (int)0x80040405;
-                            ExInvalidValue5 = (int)0x80040405;
-                            ExInvalidValue6 = (int)0x80040405;
-                            ExNotSet1 = (int)0x80040403;
-                            ExNotSet2 = (int)0x80040404; // I'm using the simulator values as the defaults since it is the reference platform
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = ErrorCodes.InvalidValue;
+                        ExInvalidValue2 = (int)0x80040405;
+                        ExInvalidValue3 = (int)0x80040405;
+                        ExInvalidValue4 = (int)0x80040405;
+                        ExInvalidValue5 = (int)0x80040405;
+                        ExInvalidValue6 = (int)0x80040405;
+                        ExNotSet1 = (int)0x80040403;
+                        ExNotSet2 = (int)0x80040404; // I'm using the simulator values as the defaults since it is the reference platform
+                        break;
 
                     default:
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = ErrorCodes.InvalidValue;
-                            ExInvalidValue2 = (int)0x80040405;
-                            ExInvalidValue3 = (int)0x80040405;
-                            ExInvalidValue4 = (int)0x80040405;
-                            ExInvalidValue5 = (int)0x80040405;
-                            ExInvalidValue6 = (int)0x80040405;
-                            ExNotSet1 = (int)0x80040403;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = ErrorCodes.InvalidValue;
+                        ExInvalidValue2 = (int)0x80040405;
+                        ExInvalidValue3 = (int)0x80040405;
+                        ExInvalidValue4 = (int)0x80040405;
+                        ExInvalidValue5 = (int)0x80040405;
+                        ExInvalidValue6 = (int)0x80040405;
+                        ExNotSet1 = (int)0x80040403;
+                        break;
                 }
             }
 
@@ -688,22 +674,16 @@ namespace ConformU
                 switch (altitude)
                 {
                     case var @case when @case < 0.0d:
-                        {
-                            LogIssue("Altitude", $"Altitude is <0.0 degrees: {altitude.ToDMS().Trim()}");
-                            break;
-                        }
+                        LogIssue("Altitude", $"Altitude is <0.0 degrees: {altitude.ToDMS().Trim()}");
+                        break;
 
                     case var case1 when case1 > 90.0000001d:
-                        {
-                            LogIssue("Altitude", $"Altitude is >90.0 degrees: {altitude.ToDMS().Trim()}");
-                            break;
-                        }
+                        LogIssue("Altitude", $"Altitude is >90.0 degrees: {altitude.ToDMS().Trim()}");
+                        break;
 
                     default:
-                        {
-                            LogOk("Altitude", altitude.ToDMS().Trim());
-                            break;
-                        }
+                        LogOk("Altitude", altitude.ToDMS().Trim());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -722,22 +702,16 @@ namespace ConformU
                 switch (apertureArea)
                 {
                     case var case2 when case2 < 0d:
-                        {
-                            LogIssue("ApertureArea", $"ApertureArea is < 0.0 : {apertureArea}");
-                            break;
-                        }
+                        LogIssue("ApertureArea", $"ApertureArea is < 0.0 : {apertureArea}");
+                        break;
 
                     case 0.0d:
-                        {
-                            LogInfo("ApertureArea", "ApertureArea is 0.0");
-                            break;
-                        }
+                        LogInfo("ApertureArea", "ApertureArea is 0.0");
+                        break;
 
                     default:
-                        {
-                            LogOk("ApertureArea", apertureArea.ToString());
-                            break;
-                        }
+                        LogOk("ApertureArea", apertureArea.ToString());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -756,22 +730,16 @@ namespace ConformU
                 switch (apertureDiameter)
                 {
                     case var case3 when case3 < 0.0d:
-                        {
-                            LogIssue("ApertureDiameter", $"ApertureDiameter is < 0.0 : {apertureDiameter}");
-                            break;
-                        }
+                        LogIssue("ApertureDiameter", $"ApertureDiameter is < 0.0 : {apertureDiameter}");
+                        break;
 
                     case 0.0d:
-                        {
-                            LogInfo("ApertureDiameter", "ApertureDiameter is 0.0");
-                            break;
-                        }
+                        LogInfo("ApertureDiameter", "ApertureDiameter is 0.0");
+                        break;
 
                     default:
-                        {
-                            LogOk("ApertureDiameter", apertureDiameter.ToString());
-                            break;
-                        }
+                        LogOk("ApertureDiameter", apertureDiameter.ToString());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -838,22 +806,16 @@ namespace ConformU
                 switch (azimuth)
                 {
                     case var case4 when case4 < 0.0d:
-                        {
-                            LogIssue("Azimuth", $"Azimuth is <0.0 degrees: {FormatAzimuth(azimuth).Trim()}");
-                            break;
-                        }
+                        LogIssue("Azimuth", $"Azimuth is <0.0 degrees: {FormatAzimuth(azimuth).Trim()}");
+                        break;
 
                     case var case5 when case5 > 360.0000000001d:
-                        {
-                            LogIssue("Azimuth", $"Azimuth is >360.0 degrees: {FormatAzimuth(azimuth).Trim()}");
-                            break;
-                        }
+                        LogIssue("Azimuth", $"Azimuth is >360.0 degrees: {FormatAzimuth(azimuth).Trim()}");
+                        break;
 
                     default:
-                        {
-                            LogOk("Azimuth", FormatAzimuth(azimuth).Trim());
-                            break;
-                        }
+                        LogOk("Azimuth", FormatAzimuth(azimuth).Trim());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -873,16 +835,12 @@ namespace ConformU
                 {
                     case var case6 when case6 < -90.0d:
                     case var case7 when case7 > 90.0d:
-                        {
-                            LogIssue("Declination", $"Declination is <-90 or >90 degrees: {declination.ToDMS().Trim()}");
-                            break;
-                        }
+                        LogIssue("Declination", $"Declination is <-90 or >90 degrees: {declination.ToDMS().Trim()}");
+                        break;
 
                     default:
-                        {
-                            LogOk("Declination", declination.ToDMS().Trim());
-                            break;
-                        }
+                        LogOk("Declination", declination.ToDMS().Trim());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1151,22 +1109,16 @@ namespace ConformU
                 switch (focalLength)
                 {
                     case var case9 when case9 < 0.0d:
-                        {
-                            LogIssue("FocalLength", $"FocalLength is <0.0 : {focalLength}");
-                            break;
-                        }
+                        LogIssue("FocalLength", $"FocalLength is <0.0 : {focalLength}");
+                        break;
 
                     case 0.0d:
-                        {
-                            LogInfo("FocalLength", "FocalLength is 0.0");
-                            break;
-                        }
+                        LogInfo("FocalLength", "FocalLength is 0.0");
+                        break;
 
                     default:
-                        {
-                            LogOk("FocalLength", focalLength.ToString());
-                            break;
-                        }
+                        LogOk("FocalLength", focalLength.ToString());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1222,17 +1174,13 @@ namespace ConformU
                         switch (guideRateDeclination)
                         {
                             case var case11 when case11 < 0.0d:
-                                {
-                                    LogIssue("GuideRateDeclination Read",
-                                        $"GuideRateDeclination is < 0.0 {guideRateDeclination:0.00}");
-                                    break;
-                                }
+                                LogIssue("GuideRateDeclination Read",
+                                    $"GuideRateDeclination is < 0.0 {guideRateDeclination:0.00}");
+                                break;
 
                             default:
-                                {
-                                    LogOk("GuideRateDeclination Read", guideRateDeclination.ToString("0.00"));
-                                    break;
-                                }
+                                LogOk("GuideRateDeclination Read", guideRateDeclination.ToString("0.00"));
+                                break;
                         }
                     }
                     catch (Exception ex) // Some other error
@@ -1308,17 +1256,13 @@ namespace ConformU
                         switch (guideRateDeclination)
                         {
                             case var case13 when case13 < 0.0d:
-                                {
-                                    LogIssue("GuideRateRightAscension Read",
-                                        $"GuideRateRightAscension is < 0.0 {guideRateRightAscension:0.00}");
-                                    break;
-                                }
+                                LogIssue("GuideRateRightAscension Read",
+                                    $"GuideRateRightAscension is < 0.0 {guideRateRightAscension:0.00}");
+                                break;
 
                             default:
-                                {
-                                    LogOk("GuideRateRightAscension Read", guideRateRightAscension.ToString("0.00"));
-                                    break;
-                                }
+                                LogOk("GuideRateRightAscension Read", guideRateRightAscension.ToString("0.00"));
+                                break;
                         }
                     }
                     catch (Exception ex) // Some other error
@@ -1397,17 +1341,13 @@ namespace ConformU
                 {
                     case var case14 when case14 < 0.0d:
                     case var case15 when case15 >= 24.0d:
-                        {
-                            LogIssue("RightAscension",
-                                $"RightAscension is <0 or >=24 hours: {rightAscension} {rightAscension.ToHMS().Trim()}");
-                            break;
-                        }
+                        LogIssue("RightAscension",
+                            $"RightAscension is <0 or >=24 hours: {rightAscension} {rightAscension.ToHMS().Trim()}");
+                        break;
 
                     default:
-                        {
-                            LogOk("RightAscension", rightAscension.ToHMS().Trim());
-                            break;
-                        }
+                        LogOk("RightAscension", rightAscension.ToHMS().Trim());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1429,17 +1369,13 @@ namespace ConformU
                     switch (declinationRate)
                     {
                         case var case16 when case16 >= 0.0d:
-                            {
-                                LogOk("RightAscensionRate Read", rightAscensionRate.ToString("0.00"));
-                                break;
-                            }
+                            LogOk("RightAscensionRate Read", rightAscensionRate.ToString("0.00"));
+                            break;
 
                         default:
-                            {
-                                LogIssue("RightAscensionRate Read",
-                                    $"Negative RightAscensionRate: {rightAscensionRate:0.00}");
-                                break;
-                            }
+                            LogIssue("RightAscensionRate Read",
+                                $"Negative RightAscensionRate: {rightAscensionRate:0.00}");
+                            break;
                     }
                 }
                 else // Only zero is acceptable
@@ -1447,17 +1383,13 @@ namespace ConformU
                     switch (rightAscensionRate)
                     {
                         case 0.0d:
-                            {
-                                LogOk("RightAscensionRate Read", rightAscensionRate.ToString("0.00"));
-                                break;
-                            }
+                            LogOk("RightAscensionRate Read", rightAscensionRate.ToString("0.00"));
+                            break;
 
                         default:
-                            {
-                                LogIssue("RightAscensionRate Read",
-                                    $"RightAscensionRate is non zero when CanSetRightAscensionRate is False {declinationRate:0.00}");
-                                break;
-                            }
+                            LogIssue("RightAscensionRate Read",
+                                $"RightAscensionRate is non zero when CanSetRightAscensionRate is False {declinationRate:0.00}");
+                            break;
                     }
                 }
             }
@@ -1589,24 +1521,18 @@ namespace ConformU
                 switch (siteElevation)
                 {
                     case var case17 when case17 < -300.0d:
-                        {
-                            LogIssue("SiteElevation Read", "SiteElevation is <-300m");
-                            canReadSiteElevation = false;
-                            break;
-                        }
+                        LogIssue("SiteElevation Read", "SiteElevation is <-300m");
+                        canReadSiteElevation = false;
+                        break;
 
                     case var case18 when case18 > 10000.0d:
-                        {
-                            LogIssue("SiteElevation Read", "SiteElevation is >10,000m");
-                            canReadSiteElevation = false;
-                            break;
-                        }
+                        LogIssue("SiteElevation Read", "SiteElevation is >10,000m");
+                        canReadSiteElevation = false;
+                        break;
 
                     default:
-                        {
-                            LogOk("SiteElevation Read", siteElevation.ToString());
-                            break;
-                        }
+                        LogOk("SiteElevation Read", siteElevation.ToString());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1859,24 +1785,18 @@ namespace ConformU
                 switch (siteLongitude)
                 {
                     case var case21 when case21 < -180.0d:
-                        {
-                            canReadSiteLongitude = false;
-                            LogIssue("SiteLongitude Read", "SiteLongitude is < -180 degrees");
-                            break;
-                        }
+                        canReadSiteLongitude = false;
+                        LogIssue("SiteLongitude Read", "SiteLongitude is < -180 degrees");
+                        break;
 
                     case var case22 when case22 > 180.0d:
-                        {
-                            canReadSiteLongitude = false;
-                            LogIssue("SiteLongitude Read", "SiteLongitude is > 180 degrees");
-                            break;
-                        }
+                        canReadSiteLongitude = false;
+                        LogIssue("SiteLongitude Read", "SiteLongitude is > 180 degrees");
+                        break;
 
                     default:
-                        {
-                            LogOk("SiteLongitude Read", siteLongitude.ToDMS());
-                            break;
-                        }
+                        LogOk("SiteLongitude Read", siteLongitude.ToDMS());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -2004,16 +1924,12 @@ namespace ConformU
                 switch (slewing)
                 {
                     case false:
-                        {
-                            LogOk("Slewing", slewing.ToString());
-                            break;
-                        }
+                        LogOk("Slewing", slewing.ToString());
+                        break;
 
                     case true:
-                        {
-                            LogIssue("Slewing", $"Slewing should be false and it reads as {slewing}");
-                            break;
-                        }
+                        LogIssue("Slewing", $"Slewing should be false and it reads as {slewing}");
+                        break;
                 }
             }
             catch (Exception ex)
@@ -2032,22 +1948,16 @@ namespace ConformU
                 switch (slewSettleTime)
                 {
                     case var case23 when case23 < 0:
-                        {
-                            LogIssue("SlewSettleTime Read", "SlewSettleTime is < 0 seconds");
-                            break;
-                        }
+                        LogIssue("SlewSettleTime Read", "SlewSettleTime is < 0 seconds");
+                        break;
 
                     case var case24 when case24 > (short)Math.Round(30.0d):
-                        {
-                            LogInfo("SlewSettleTime Read", "SlewSettleTime is > 30 seconds");
-                            break;
-                        }
+                        LogInfo("SlewSettleTime Read", "SlewSettleTime is > 30 seconds");
+                        break;
 
                     default:
-                        {
-                            LogOk("SlewSettleTime Read", slewSettleTime.ToString());
-                            break;
-                        }
+                        LogOk("SlewSettleTime Read", slewSettleTime.ToString());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -2122,88 +2032,58 @@ namespace ConformU
                 {
                     case var case25 when case25 < 0.0d:
                     case var case26 when case26 >= 24.0d:
-                        {
-                            LogIssue("SiderealTime", $"SiderealTime is <0 or >=24 hours: {siderealTimeScope.ToHMS()}"); // Valid time returned
-                            break;
-                        }
+                        LogIssue("SiderealTime", $"SiderealTime is <0 or >=24 hours: {siderealTimeScope.ToHMS()}"); // Valid time returned
+                        break;
 
                     default:
+                        // Now do a sense check on the received value
+                        LogOk("SiderealTime", siderealTimeScope.ToHMS());
+                        timeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom); // Get time difference between scope and PC
+                                                                                          // Process edge cases where the two clocks are on either side of 0:0:0/24:0:0
+                        if (siderealTimeAscom > 23.0d & siderealTimeAscom < 23.999d & siderealTimeScope > 0.0d & siderealTimeScope < 1.0d)
                         {
-                            // Now do a sense check on the received value
-                            LogOk("SiderealTime", siderealTimeScope.ToHMS());
-                            timeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom); // Get time difference between scope and PC
-                                                                                              // Process edge cases where the two clocks are on either side of 0:0:0/24:0:0
-                            if (siderealTimeAscom > 23.0d & siderealTimeAscom < 23.999d & siderealTimeScope > 0.0d & siderealTimeScope < 1.0d)
-                            {
-                                timeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom + 24.0d);
-                            }
-
-                            if (siderealTimeScope > 23.0d & siderealTimeScope < 23.999d & siderealTimeAscom > 0.0d & siderealTimeAscom < 1.0d)
-                            {
-                                timeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom - 24.0d);
-                            }
-
-                            switch (timeDifference)
-                            {
-                                case var case27 when case27 <= 1.0d / 3600.0d: // 1 seconds
-                                    {
-                                        LogOk("SiderealTime",
-                                            $"Scope and ASCOM sidereal times agree to better than 1 second, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
-                                        break;
-                                    }
-
-                                case var case28 when case28 <= 2.0d / 3600.0d: // 2 seconds
-                                    {
-                                        LogOk("SiderealTime",
-                                            $"Scope and ASCOM sidereal times agree to better than 2 seconds, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
-                                        break;
-                                    }
-
-                                case var case29 when case29 <= 5.0d / 3600.0d: // 5 seconds
-                                    {
-                                        LogOk("SiderealTime",
-                                            $"Scope and ASCOM sidereal times agree to better than 5 seconds, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
-                                        break;
-                                    }
-
-                                case var case30 when case30 <= 1.0d / 60.0d: // 1 minute
-                                    {
-                                        LogOk("SiderealTime",
-                                            $"Scope and ASCOM sidereal times agree to better than 1 minute, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
-                                        break;
-                                    }
-
-                                case var case31 when case31 <= 5.0d / 60.0d: // 5 minutes
-                                    {
-                                        LogOk("SiderealTime",
-                                            $"Scope and ASCOM sidereal times agree to better than 5 minutes, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
-                                        break;
-                                    }
-
-                                case var case32 when case32 <= 0.5d: // 0.5 an hour
-                                    {
-                                        LogInfo("SiderealTime",
-                                            $"Scope and ASCOM sidereal times are up to 0.5 hour different, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
-                                        break;
-                                    }
-
-                                case var case33 when case33 <= 1.0d: // 1.0 an hour
-                                    {
-                                        LogInfo("SiderealTime",
-                                            $"Scope and ASCOM sidereal times are up to 1.0 hour different, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
-                                        break;
-                                    }
-
-                                default:
-                                    {
-                                        LogIssue("SiderealTime",
-                                            $"Scope and ASCOM sidereal times are more than 1 hour apart, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
-                                        return;
-                                    }
-                            }
-
-                            break;
+                            timeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom + 24.0d);
                         }
+                        if (siderealTimeScope > 23.0d & siderealTimeScope < 23.999d & siderealTimeAscom > 0.0d & siderealTimeAscom < 1.0d)
+                        {
+                            timeDifference = Math.Abs(siderealTimeScope - siderealTimeAscom - 24.0d);
+                        }
+                        switch (timeDifference)
+                        {
+                            case var case27 when case27 <= 1.0d / 3600.0d: // 1 seconds
+                                LogOk("SiderealTime",
+                                    $"Scope and ASCOM sidereal times agree to better than 1 second, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
+                                break;
+                            case var case28 when case28 <= 2.0d / 3600.0d: // 2 seconds
+                                LogOk("SiderealTime",
+                                    $"Scope and ASCOM sidereal times agree to better than 2 seconds, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
+                                break;
+                            case var case29 when case29 <= 5.0d / 3600.0d: // 5 seconds
+                                LogOk("SiderealTime",
+                                    $"Scope and ASCOM sidereal times agree to better than 5 seconds, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
+                                break;
+                            case var case30 when case30 <= 1.0d / 60.0d: // 1 minute
+                                LogOk("SiderealTime",
+                                    $"Scope and ASCOM sidereal times agree to better than 1 minute, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
+                                break;
+                            case var case31 when case31 <= 5.0d / 60.0d: // 5 minutes
+                                LogOk("SiderealTime",
+                                    $"Scope and ASCOM sidereal times agree to better than 5 minutes, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
+                                break;
+                            case var case32 when case32 <= 0.5d: // 0.5 an hour
+                                LogInfo("SiderealTime",
+                                    $"Scope and ASCOM sidereal times are up to 0.5 hour different, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
+                                break;
+                            case var case33 when case33 <= 1.0d: // 1.0 an hour
+                                LogInfo("SiderealTime",
+                                    $"Scope and ASCOM sidereal times are up to 1.0 hour different, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
+                                break;
+                            default:
+                                LogIssue("SiderealTime",
+                                    $"Scope and ASCOM sidereal times are more than 1 hour apart, Scope: {siderealTimeScope.ToHMS()}, ASCOM: {siderealTimeAscom.ToHMS()}");
+                                return;
+                        }
+                        break;
                 }
             }
             catch (Exception ex)
@@ -2236,10 +2116,8 @@ namespace ConformU
                             break;
 
                         default:
-                            {
-                                LogOk("TargetDeclination Read", targetDeclination.ToDMS());
-                                break;
-                            }
+                            LogOk("TargetDeclination Read", targetDeclination.ToDMS());
+                            break;
                     }
                 }
             }
@@ -3492,39 +3370,29 @@ namespace ConformU
                         switch (Math.Abs(telescopeDevice.TargetRightAscension - targetRightAscension))
                         {
                             case 0.0d:
-                                {
-                                    LogOk("TargetRightAscension Write",
-                                        $"Legal value {targetRightAscension.ToHMS()} HH:MM:SS written successfully");
-                                    break;
-                                }
+                                LogOk("TargetRightAscension Write",
+                                    $"Legal value {targetRightAscension.ToHMS()} HH:MM:SS written successfully");
+                                break;
 
                             case var @case when @case <= 1.0d / 3600.0d: // 1 seconds
-                                {
-                                    LogOk("TargetRightAscension Write",
-                                        $"Target RightAscension is within 1 second of the value set: {targetRightAscension.ToHMS()}");
-                                    break;
-                                }
+                                LogOk("TargetRightAscension Write",
+                                    $"Target RightAscension is within 1 second of the value set: {targetRightAscension.ToHMS()}");
+                                break;
 
                             case var case1 when case1 <= 2.0d / 3600.0d: // 2 seconds
-                                {
-                                    LogOk("TargetRightAscension Write",
-                                        $"Target RightAscension is within 2 seconds of the value set: {targetRightAscension.ToHMS()}");
-                                    break;
-                                }
+                                LogOk("TargetRightAscension Write",
+                                    $"Target RightAscension is within 2 seconds of the value set: {targetRightAscension.ToHMS()}");
+                                break;
 
                             case var case2 when case2 <= 5.0d / 3600.0d: // 5 seconds
-                                {
-                                    LogOk("TargetRightAscension Write",
-                                        $"Target RightAscension is within 5 seconds of the value set: {targetRightAscension.ToHMS()}");
-                                    break;
-                                }
+                                LogOk("TargetRightAscension Write",
+                                    $"Target RightAscension is within 5 seconds of the value set: {targetRightAscension.ToHMS()}");
+                                break;
 
                             default:
-                                {
-                                    LogInfo("TargetRightAscension Write",
-                                        $"Target RightAscension: {telescopeDevice.TargetRightAscension.ToHMS()}");
-                                    break;
-                                }
+                                LogInfo("TargetRightAscension Write",
+                                    $"Target RightAscension: {telescopeDevice.TargetRightAscension.ToHMS()}");
+                                break;
                         }
                     }
                     catch (Exception ex)
@@ -3585,38 +3453,28 @@ namespace ConformU
                         switch (Math.Abs(telescopeDevice.TargetDeclination - targetDeclination))
                         {
                             case 0.0d:
-                                {
-                                    LogOk("TargetDeclination Write",
-                                        $"Legal value {targetDeclination.ToDMS()} DD:MM:SS written successfully");
-                                    break;
-                                }
+                                LogOk("TargetDeclination Write",
+                                    $"Legal value {targetDeclination.ToDMS()} DD:MM:SS written successfully");
+                                break;
 
                             case var case3 when case3 <= 1.0d / 3600.0d: // 1 seconds
-                                {
-                                    LogOk("TargetDeclination Write",
-                                        $"Target Declination is within 1 second of the value set: {targetDeclination.ToDMS()}");
-                                    break;
-                                }
+                                LogOk("TargetDeclination Write",
+                                    $"Target Declination is within 1 second of the value set: {targetDeclination.ToDMS()}");
+                                break;
 
                             case var case4 when case4 <= 2.0d / 3600.0d: // 2 seconds
-                                {
-                                    LogOk("TargetDeclination Write",
-                                        $"Target Declination is within 2 seconds of the value set: {targetDeclination.ToDMS()}");
-                                    break;
-                                }
+                                LogOk("TargetDeclination Write",
+                                    $"Target Declination is within 2 seconds of the value set: {targetDeclination.ToDMS()}");
+                                break;
 
                             case var case5 when case5 <= 5.0d / 3600.0d: // 5 seconds
-                                {
-                                    LogOk("TargetDeclination Write",
-                                        $"Target Declination is within 5 seconds of the value set: {targetDeclination.ToDMS()}");
-                                    break;
-                                }
+                                LogOk("TargetDeclination Write",
+                                    $"Target Declination is within 5 seconds of the value set: {targetDeclination.ToDMS()}");
+                                break;
 
                             default:
-                                {
-                                    LogInfo("TargetDeclination Write", $"Target Declination: {targetDeclination.ToDMS()}");
-                                    break;
-                                }
+                                LogInfo("TargetDeclination Write", $"Target Declination: {targetDeclination.ToDMS()}");
+                                break;
                         }
                     }
                     catch (Exception ex)
@@ -4562,16 +4420,12 @@ namespace ConformU
                                     switch (raDifference)
                                     {
                                         case var @case when @case <= SLEW_SYNC_OK_TOLERANCE:  // Within specified tolerance
-                                            {
-                                                LogOk(testName, string.Format("The TargetRightAscension property {0} matches the expected RA OK. ", syncRa.ToHMS())); // Outside specified tolerance
-                                                break;
-                                            }
+                                            LogOk(testName, string.Format("The TargetRightAscension property {0} matches the expected RA OK. ", syncRa.ToHMS())); // Outside specified tolerance
+                                            break;
 
                                         default:
-                                            {
-                                                LogIssue(testName, string.Format("The TargetRightAscension property {0} does not match the expected RA {1}", currentRa.ToHMS(), syncRa.ToHMS()));
-                                                break;
-                                            }
+                                            LogIssue(testName, string.Format("The TargetRightAscension property {0} does not match the expected RA {1}", currentRa.ToHMS(), syncRa.ToHMS()));
+                                            break;
                                     }
                                 }
                                 catch (COMException ex) when (ex.ErrorCode == ErrorCodes.ValueNotSet | ex.ErrorCode == ExNotSet1 | ex.ErrorCode == ExNotSet2)
@@ -5607,83 +5461,59 @@ namespace ConformU
                     switch (pType)
                     {
                         case PerformanceType.TstPerfAltitude:
-                            {
-                                altitude = telescopeDevice.Altitude;
-                                break;
-                            }
+                            altitude = telescopeDevice.Altitude;
+                            break;
 
                         case var @case when @case == PerformanceType.TstPerfAtHome:
-                            {
-                                atHome = telescopeDevice.AtHome;
-                                break;
-                            }
+                            atHome = telescopeDevice.AtHome;
+                            break;
 
                         case PerformanceType.TstPerfAtPark:
-                            {
-                                atPark = telescopeDevice.AtPark;
-                                break;
-                            }
+                            atPark = telescopeDevice.AtPark;
+                            break;
 
                         case PerformanceType.TstPerfAzimuth:
-                            {
-                                azimuth = telescopeDevice.Azimuth;
-                                break;
-                            }
+                            azimuth = telescopeDevice.Azimuth;
+                            break;
 
                         case PerformanceType.TstPerfDeclination:
-                            {
-                                declination = telescopeDevice.Declination;
-                                break;
-                            }
+                            declination = telescopeDevice.Declination;
+                            break;
 
                         case PerformanceType.TstPerfIsPulseGuiding:
-                            {
-                                isPulseGuiding = telescopeDevice.IsPulseGuiding;
-                                break;
-                            }
+                            isPulseGuiding = telescopeDevice.IsPulseGuiding;
+                            break;
 
                         case PerformanceType.TstPerfRightAscension:
-                            {
-                                rightAscension = telescopeDevice.RightAscension;
-                                break;
-                            }
+                            rightAscension = telescopeDevice.RightAscension;
+                            break;
 
                         case PerformanceType.TstPerfSideOfPier:
-                            {
-                                sideOfPier = (PointingState)telescopeDevice.SideOfPier;
-                                break;
-                            }
+                            sideOfPier = (PointingState)telescopeDevice.SideOfPier;
+                            break;
 
                         case PerformanceType.TstPerfSiderealTime:
-                            {
-                                siderealTimeScope = telescopeDevice.SiderealTime;
-                                break;
-                            }
+                            siderealTimeScope = telescopeDevice.SiderealTime;
+                            break;
 
                         case PerformanceType.TstPerfSlewing:
-                            {
-                                slewing = telescopeDevice.Slewing;
-                                break;
-                            }
+                            slewing = telescopeDevice.Slewing;
+                            break;
 
                         case PerformanceType.TstPerfUtcDate:
+                            // Ignore InvalidJsonDateTimeException as this is not relevant to performance testing
+                            try
                             {
-                                // Ignore InvalidJsonDateTimeException as this is not relevant to performance testing
-                                try
-                                {
-                                    utcDate = telescopeDevice.UTCDate;
-                                }
-                                catch (InvalidJsonDateTimeException)
-                                {
-                                }
-                                break;
+                                utcDate = telescopeDevice.UTCDate;
                             }
+                            catch (InvalidJsonDateTimeException)
+                            {
+                            }
+                            break;
 
                         default:
-                            {
-                                LogIssue(pName, $"Conform:PerformanceTest: Unknown test type {pType}");
-                                break;
-                            }
+                            LogIssue(pName, $"Conform:PerformanceTest: Unknown test type {pType}");
+                            break;
                     }
 
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
@@ -5701,28 +5531,20 @@ namespace ConformU
                 switch (lRate)
                 {
                     case var case1 when case1 > 10.0d:
-                        {
-                            LogInfo($"Performance: {pName}", $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo($"Performance: {pName}", $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     case var case2 when 2.0d <= case2 && case2 <= 10.0d:
-                        {
-                            LogInfo($"Performance: {pName}", $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo($"Performance: {pName}", $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     case var case3 when 1.0d <= case3 && case3 <= 2.0d:
-                        {
-                            LogInfo($"Performance: {pName}", $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo($"Performance: {pName}", $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     default:
-                        {
-                            LogInfo($"Performance: {pName}", $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo($"Performance: {pName}", $"Transaction rate: {lRate:0.0} per second");
+                        break;
                 }
             }
             catch (Exception ex)
@@ -6195,28 +6017,20 @@ namespace ConformU
                     switch (pAxis) // Get the relevant axis rates object for this axis
                     {
                         case TelescopeAxis.Primary:
-                            {
-                                lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary);
-                                break;
-                            }
+                            lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Primary);
+                            break;
 
                         case TelescopeAxis.Secondary:
-                            {
-                                lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary);
-                                break;
-                            }
+                            lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Secondary);
+                            break;
 
                         case TelescopeAxis.Tertiary:
-                            {
-                                lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary);
-                                break;
-                            }
+                            lAxisRates = telescopeDevice.AxisRates(TelescopeAxis.Tertiary);
+                            break;
 
                         default:
-                            {
-                                LogIssue(pName, $"AxisRate.Dispose() - Unknown axis: {pAxis}");
-                                break;
-                            }
+                            LogIssue(pName, $"AxisRate.Dispose() - Unknown axis: {pAxis}");
+                            break;
                     }
 
                     if (lHasRates) // This axis does have one or more rates that can be accessed through ForEach so test these for correct Rate.Dispose() action
@@ -6281,39 +6095,29 @@ namespace ConformU
                     switch (pType)
                     {
                         case RequiredMethodType.TstAxisrates:
-                            {
-                                break;
-                            }
+                            break;
                         // This is now done by TelescopeAxisRateTest subroutine 
                         case RequiredMethodType.TstCanMoveAxisPrimary:
-                            {
-                                LogCallToDriver(pName, $"About to call CanMoveAxis method {((int)TelescopeAxis.Primary)}");
-                                canMoveAxisPrimary = telescopeDevice.CanMoveAxis(TelescopeAxis.Primary);
-                                LogOk(pName, $"{pName} {canMoveAxisPrimary}");
-                                break;
-                            }
+                            LogCallToDriver(pName, $"About to call CanMoveAxis method {((int)TelescopeAxis.Primary)}");
+                            canMoveAxisPrimary = telescopeDevice.CanMoveAxis(TelescopeAxis.Primary);
+                            LogOk(pName, $"{pName} {canMoveAxisPrimary}");
+                            break;
 
                         case RequiredMethodType.TstCanMoveAxisSecondary:
-                            {
-                                LogCallToDriver(pName, $"About to call CanMoveAxis method {((int)TelescopeAxis.Secondary)}");
-                                canMoveAxisSecondary = telescopeDevice.CanMoveAxis(TelescopeAxis.Secondary);
-                                LogOk(pName, $"{pName} {canMoveAxisSecondary}");
-                                break;
-                            }
+                            LogCallToDriver(pName, $"About to call CanMoveAxis method {((int)TelescopeAxis.Secondary)}");
+                            canMoveAxisSecondary = telescopeDevice.CanMoveAxis(TelescopeAxis.Secondary);
+                            LogOk(pName, $"{pName} {canMoveAxisSecondary}");
+                            break;
 
                         case RequiredMethodType.TstCanMoveAxisTertiary:
-                            {
-                                LogCallToDriver(pName, $"About to call CanMoveAxis method {((int)TelescopeAxis.Tertiary)}");
-                                canMoveAxisTertiary = telescopeDevice.CanMoveAxis(TelescopeAxis.Tertiary);
-                                LogOk(pName, $"{pName} {canMoveAxisTertiary}");
-                                break;
-                            }
+                            LogCallToDriver(pName, $"About to call CanMoveAxis method {((int)TelescopeAxis.Tertiary)}");
+                            canMoveAxisTertiary = telescopeDevice.CanMoveAxis(TelescopeAxis.Tertiary);
+                            LogOk(pName, $"{pName} {canMoveAxisTertiary}");
+                            break;
 
                         default:
-                            {
-                                LogIssue(pName, $"Conform:RequiredMethodsTest: Unknown test type {pType}");
-                                break;
-                            }
+                            LogIssue(pName, $"Conform:RequiredMethodsTest: Unknown test type {pType}");
+                            break;
                     }
                 }, TargetTime.Fast);
             }
@@ -6764,67 +6568,54 @@ namespace ConformU
                                 switch (telescopeDevice.SideOfPier)
                                 {
                                     case PointingState.Normal: // We are on pierEast so try pierWest
+                                        try
                                         {
-                                            try
+                                            LogDebug(testName, "Scope is pierEast so flipping West");
+                                            SetAction("Flipping mount to pointing state pierWest");
+                                            LogCallToDriver(testName, $"About to set SideOfPier property to {PointingState.ThroughThePole}");
+                                            TimeMethod($"{testName} {PointingState.ThroughThePole}", () => telescopeDevice.SideOfPier = PointingState.ThroughThePole, TargetTime.Standard);
+                                            WaitForSlew(testName, $"Moving to the pierEast pointing state asynchronously");
+                                            LogCallToDriver(testName, "About to get SideOfPier property");
+                                            sideOfPier = telescopeDevice.SideOfPier;
+                                            if (sideOfPier == PointingState.ThroughThePole)
                                             {
-                                                LogDebug(testName, "Scope is pierEast so flipping West");
-                                                SetAction("Flipping mount to pointing state pierWest");
-                                                LogCallToDriver(testName, $"About to set SideOfPier property to {PointingState.ThroughThePole}");
-                                                TimeMethod($"{testName} {PointingState.ThroughThePole}", () => telescopeDevice.SideOfPier = PointingState.ThroughThePole, TargetTime.Standard);
-
-                                                WaitForSlew(testName, $"Moving to the pierEast pointing state asynchronously");
-
-                                                LogCallToDriver(testName, "About to get SideOfPier property");
-                                                sideOfPier = telescopeDevice.SideOfPier;
-
-                                                if (sideOfPier == PointingState.ThroughThePole)
-                                                {
-                                                    LogOk(testName, "Successfully flipped pierEast to pierWest");
-                                                }
-                                                else
-                                                {
-                                                    LogIssue(testName, $"Failed to set SideOfPier to pierWest, got: {sideOfPier}");
-                                                }
-
-                                                if (cancellationToken.IsCancellationRequested)
-                                                    return;
+                                                LogOk(testName, "Successfully flipped pierEast to pierWest");
                                             }
-                                            catch (Exception ex)
+                                            else
                                             {
-                                                HandleException("SideOfPier Write pierWest", MemberType.Method, Required.MustBeImplemented, ex, "CanSetPierSide is True");
+                                                LogIssue(testName, $"Failed to set SideOfPier to pierWest, got: {sideOfPier}");
                                             }
-
-                                            break;
+                                            if (cancellationToken.IsCancellationRequested)
+                                                return;
                                         }
+                                        catch (Exception ex)
+                                        {
+                                            HandleException("SideOfPier Write pierWest", MemberType.Method, Required.MustBeImplemented, ex, "CanSetPierSide is True");
+                                        }
+                                        break;
 
                                     case PointingState.ThroughThePole: // We are on pierWest so try pierEast
+                                        try
                                         {
-                                            try
-                                            {
-                                                LogDebug(testName, "Scope is pierWest so flipping East");
-                                                SetAction("Flipping mount to pointing state pierEast");
-
-                                                LogCallToDriver(testName, $"About to set SideOfPier property to {PointingState.Normal}");
-                                                TimeMethod($"{testName} {PointingState.Normal}", () => telescopeDevice.SideOfPier = PointingState.Normal, TargetTime.Standard);
-
-                                                WaitForSlew(testName, $"Moving to the pierWest pointing state asynchronously");
-
-                                                if (cancellationToken.IsCancellationRequested)
-                                                    return;
-
-                                                LogCallToDriver(testName, "About to get SideOfPier property");
-                                                sideOfPier = telescopeDevice.SideOfPier;
-                                                if (sideOfPier == PointingState.Normal)
-                                                    LogOk(testName, "Successfully flipped pierWest to pierEast");
-                                                else
-                                                    LogIssue(testName, $"Failed to set SideOfPier to pierEast, got: {sideOfPier}");
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                HandleException("SideOfPier Write pierEast", MemberType.Method, Required.MustBeImplemented, ex, "CanSetPierSide is True");
-                                            }
-                                            break;
+                                            LogDebug(testName, "Scope is pierWest so flipping East");
+                                            SetAction("Flipping mount to pointing state pierEast");
+                                            LogCallToDriver(testName, $"About to set SideOfPier property to {PointingState.Normal}");
+                                            TimeMethod($"{testName} {PointingState.Normal}", () => telescopeDevice.SideOfPier = PointingState.Normal, TargetTime.Standard);
+                                            WaitForSlew(testName, $"Moving to the pierWest pointing state asynchronously");
+                                            if (cancellationToken.IsCancellationRequested)
+                                                return;
+                                            LogCallToDriver(testName, "About to get SideOfPier property");
+                                            sideOfPier = telescopeDevice.SideOfPier;
+                                            if (sideOfPier == PointingState.Normal)
+                                                LogOk(testName, "Successfully flipped pierWest to pierEast");
+                                            else
+                                                LogIssue(testName, $"Failed to set SideOfPier to pierEast, got: {sideOfPier}");
                                         }
+                                        catch (Exception ex)
+                                        {
+                                            HandleException("SideOfPier Write pierEast", MemberType.Method, Required.MustBeImplemented, ex, "CanSetPierSide is True");
+                                        }
+                                        break;
 
                                     default:
                                         LogIssue(testName, $"Unknown PierSide: {sideOfPier}");
@@ -6909,68 +6700,50 @@ namespace ConformU
                     switch (testType)
                     {
                         case OptionalMethodType.AbortSlew:
-                            {
-                                AbortSlew(testName);
-                                break;
-                            }
+                            AbortSlew(testName);
+                            break;
 
                         case OptionalMethodType.DestinationSideOfPier:
-                            {
-                                targetRightAscension = TelescopeRaFromSiderealTime(testName, -1.0d);
-                                LogCallToDriver(testName, $"About to call DestinationSideOfPier method, RA: {targetRightAscension.ToHMS()}, Declination: {0.0d.ToDMS()}");
-                                destinationSideOfPier = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, 0.0d);
-                                break;
-                            }
+                            targetRightAscension = TelescopeRaFromSiderealTime(testName, -1.0d);
+                            LogCallToDriver(testName, $"About to call DestinationSideOfPier method, RA: {targetRightAscension.ToHMS()}, Declination: {0.0d.ToDMS()}");
+                            destinationSideOfPier = (PointingState)telescopeDevice.DestinationSideOfPier(targetRightAscension, 0.0d);
+                            break;
 
                         case OptionalMethodType.FindHome:
-                            {
-                                LogCallToDriver(testName, "About to call FindHome method");
-                                telescopeDevice.FindHome();
-                                // Wait for mount to find home
-                                WaitWhile("Waiting for mount to home...", () => !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000), 200, settings.TelescopeMaximumSlewTime);
-                                break;
-                            }
+                            LogCallToDriver(testName, "About to call FindHome method");
+                            telescopeDevice.FindHome();
+                            // Wait for mount to find home
+                            WaitWhile("Waiting for mount to home...", () => !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000), 200, settings.TelescopeMaximumSlewTime);
+                            break;
 
                         case OptionalMethodType.MoveAxisPrimary:
-                            {
-                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {((int)TelescopeAxis.Primary)} at speed 0");
-                                telescopeDevice.MoveAxis(TelescopeAxis.Primary, 0.0d);
-                                break;
-                            }
+                            LogCallToDriver(testName, $"About to call MoveAxis method for axis {((int)TelescopeAxis.Primary)} at speed 0");
+                            telescopeDevice.MoveAxis(TelescopeAxis.Primary, 0.0d);
+                            break;
 
                         case OptionalMethodType.MoveAxisSecondary:
-                            {
-                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {((int)TelescopeAxis.Secondary)} at speed 0");
-                                telescopeDevice.MoveAxis(TelescopeAxis.Secondary, 0.0d);
-                                break;
-                            }
+                            LogCallToDriver(testName, $"About to call MoveAxis method for axis {((int)TelescopeAxis.Secondary)} at speed 0");
+                            telescopeDevice.MoveAxis(TelescopeAxis.Secondary, 0.0d);
+                            break;
 
                         case OptionalMethodType.MoveAxisTertiary:
-                            {
-                                LogCallToDriver(testName, $"About to call MoveAxis method for axis {((int)TelescopeAxis.Tertiary)} at speed 0");
-                                telescopeDevice.MoveAxis(TelescopeAxis.Tertiary, 0.0d);
-                                break;
-                            }
+                            LogCallToDriver(testName, $"About to call MoveAxis method for axis {((int)TelescopeAxis.Tertiary)} at speed 0");
+                            telescopeDevice.MoveAxis(TelescopeAxis.Tertiary, 0.0d);
+                            break;
 
                         case OptionalMethodType.PulseGuide:
-                            {
-                                LogCallToDriver(testName, $"About to call PulseGuide method, Direction: {((int)GuideDirection.East)}, Duration: 0ms");
-                                telescopeDevice.PulseGuide(GuideDirection.East, 0);
-                                break;
-                            }
+                            LogCallToDriver(testName, $"About to call PulseGuide method, Direction: {((int)GuideDirection.East)}, Duration: 0ms");
+                            telescopeDevice.PulseGuide(GuideDirection.East, 0);
+                            break;
 
                         case OptionalMethodType.SideOfPierWrite:
-                            {
-                                LogCallToDriver(testName, $"About to set SideOfPier property to {((int)PointingState.Normal)}");
-                                telescopeDevice.SideOfPier = PointingState.Normal;
-                                break;
-                            }
+                            LogCallToDriver(testName, $"About to set SideOfPier property to {((int)PointingState.Normal)}");
+                            telescopeDevice.SideOfPier = PointingState.Normal;
+                            break;
 
                         default:
-                            {
-                                LogIssue(testName, $"Conform:OptionalMethodsTest: Unknown test type {testType}");
-                                break;
-                            }
+                            LogIssue(testName, $"Conform:OptionalMethodsTest: Unknown test type {testType}");
+                            break;
                     }
 
                     LogIssue(testName, $"Can{testName} is false but no exception was generated on use");
@@ -8104,22 +7877,16 @@ namespace ConformU
                         switch (testType)
                         {
                             case InterfaceType.TelescopeV2:
-                                {
-                                    //l_ITelescope = (ASCOM.Interface.ITelescope)l_DeviceObject;
-                                    break;
-                                }
+                                //l_ITelescope = (ASCOM.Interface.ITelescope)l_DeviceObject;
+                                break;
 
                             case InterfaceType.TelescopeV3:
-                                {
-                                    lITelescope = (ITelescopeV3)lDeviceObject;
-                                    break;
-                                }
+                                lITelescope = (ITelescopeV3)lDeviceObject;
+                                break;
 
                             default:
-                                {
-                                    LogIssue("TestEarlyBinding", $"Unknown interface type: {testType}");
-                                    break;
-                                }
+                                LogIssue("TestEarlyBinding", $"Unknown interface type: {testType}");
+                                break;
                         }
 
                         LogDebug("AccessChecks", $"Successfully created driver with interface {testType}");
@@ -8199,46 +7966,37 @@ namespace ConformU
             switch (pPierSide)
             {
                 case PointingState.Normal:
+                    if (pLong)
                     {
-                        if (pLong)
-                        {
-                            lPierSide = "pierEast";
-                        }
-                        else
-                        {
-                            lPierSide = "E";
-                        }
-
-                        break;
+                        lPierSide = "pierEast";
                     }
+                    else
+                    {
+                        lPierSide = "E";
+                    }
+                    break;
 
                 case PointingState.ThroughThePole:
+                    if (pLong)
                     {
-                        if (pLong)
-                        {
-                            lPierSide = "pierWest";
-                        }
-                        else
-                        {
-                            lPierSide = "W";
-                        }
-
-                        break;
+                        lPierSide = "pierWest";
                     }
+                    else
+                    {
+                        lPierSide = "W";
+                    }
+                    break;
 
                 default:
+                    if (pLong)
                     {
-                        if (pLong)
-                        {
-                            lPierSide = "pierUnknown";
-                        }
-                        else
-                        {
-                            lPierSide = "U";
-                        }
-
-                        break;
+                        lPierSide = "pierUnknown";
                     }
+                    else
+                    {
+                        lPierSide = "U";
+                    }
+                    break;
             }
 
             return lPierSide;
