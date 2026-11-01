@@ -896,6 +896,7 @@ namespace ConformU
                 return;
 
             // DeclinationRate Write - Optional
+            // NOTE - Checks on InvalidOperationException when setting DeclinationRate in non-sidereal modes are in the TrackingRates checks
             if (GetInterfaceVersion() > 1) // ITelescopeV2 and later
             {
                 if (canSetDeclinationRate) // Any value is acceptable
@@ -1404,14 +1405,15 @@ namespace ConformU
                 return;
 
             // RightAscensionRate Write - Optional
+            // NOTE - Checks on InvalidOperationException when setting RightAscensionRate in non-sidereal modes are in the TrackingRates checks
             if (GetInterfaceVersion() > 1)
             {
-                if (canSetRightAscensionRate) // Perform several tests starting with proving we can set a rate of 0.0
+                // Check whether RightAscensionRate write is permitted
+                if (canSetRightAscensionRate) // Can write to RightAscensionRate
                 {
-
                     SetTest("RightAscensionRate Write");
 
-                    // Set up the rate offset Write test by ensuring that the telescope is in sidereal mode
+                    // Set up the rate offset Write test by ensuring that the telescope is in sidereal mode if possible
                     try
                     {
                         telescopeDevice.TrackingRate = DriveRate.Sidereal;
@@ -1479,7 +1481,7 @@ namespace ConformU
                         TestRaDecRate("RightAscensionRate Write", "Reset rate to 0.0", Axis.Ra, 0.0d, false); // Reset the rate to zero, skipping the slewing test
                     }
                 }
-                else // Should generate an error
+                else // Cannot write to RightAscensionRate
                 {
                     try
                     {
