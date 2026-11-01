@@ -649,7 +649,7 @@ namespace ConformU
                 // Serialise the rule
                 serialisedTestState = JsonSerializer.Serialize<List<SafetyEvent>>(testSafetyState, jsonOptions);
 
-                // First make suree that IsSafe returns true so the tests below will work correctly
+                // First make sure that IsSafe returns true so the tests below will work correctly
                 // Make sure that isSafe returns false.
                 try
                 {

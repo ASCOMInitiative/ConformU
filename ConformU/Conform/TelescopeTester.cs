@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace ConformU
@@ -170,19 +171,19 @@ namespace ConformU
 
         private enum ParkedExceptionType
         {
-            TstPExcepAbortSlew = 1,
-            TstPExcepFindHome = 2,
-            TstPExcepMoveAxisPrimary = 3,
-            TstPExcepMoveAxisSecondary = 4,
-            TstPExcepMoveAxisTertiary = 5,
-            TstPExcepSlewToCoordinates = 6,
-            TstPExcepSlewToCoordinatesAsync = 7,
-            TstPExcepSlewToTarget = 8,
-            TstPExcepSlewToTargetAsync = 9,
-            TstPExcepSyncToCoordinates = 10,
-            TstPExcepSyncToTarget = 11,
-            TstPExcepPulseGuide = 12,
-            TstExcepTracking = 13
+            AbortSlew = 1,
+            FindHome = 2,
+            MoveAxisPrimary = 3,
+            MoveAxisSecondary = 4,
+            MoveAxisTertiary = 5,
+            SlewToCoordinates = 6,
+            SlewToCoordinatesAsync = 7,
+            SlewToTarget = 8,
+            SlewToTargetAsync = 9,
+            SyncToCoordinates = 10,
+            SyncToTarget = 11,
+            PulseGuide = 12,
+            Tracking = 13
         }
         // Private Enum SyncType
         // End Enum
@@ -2936,84 +2937,84 @@ namespace ConformU
                                         // Confirm that methods do raise exceptions when scope is parked
                                         if (canSlew | canSlewAsync | canSlewAltAz | canSlewAltAzAsync)
                                         {
-                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepAbortSlew, "AbortSlew");
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.AbortSlew, "AbortSlew");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
                                         }
 
                                         if (canFindHome)
                                         {
-                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepFindHome, "FindHome");
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.FindHome, "FindHome");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
                                         }
 
                                         if (canMoveAxisPrimary)
                                         {
-                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepMoveAxisPrimary, "MoveAxis Primary");
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.MoveAxisPrimary, "MoveAxis Primary");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
                                         }
 
                                         if (canMoveAxisSecondary)
                                         {
-                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepMoveAxisSecondary, "MoveAxis Secondary");
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.MoveAxisSecondary, "MoveAxis Secondary");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
                                         }
 
                                         if (canMoveAxisTertiary)
                                         {
-                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepMoveAxisTertiary, "MoveAxis Tertiary");
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.MoveAxisTertiary, "MoveAxis Tertiary");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
                                         }
 
                                         if (canPulseGuide)
                                         {
-                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepPulseGuide, "PulseGuide");
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.PulseGuide, "PulseGuide");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
                                         }
 
                                         if (canSlew)
                                         {
-                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepSlewToCoordinates, "SlewToCoordinates");
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.SlewToCoordinates, "SlewToCoordinates");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
                                         }
 
                                         if (canSlewAsync)
                                         {
-                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepSlewToCoordinatesAsync, "SlewToCoordinatesAsync");
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.SlewToCoordinatesAsync, "SlewToCoordinatesAsync");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
                                         }
 
                                         if (canSlew)
                                         {
-                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepSlewToTarget, "SlewToTarget");
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.SlewToTarget, "SlewToTarget");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
                                         }
 
                                         if (canSlewAsync)
                                         {
-                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepSlewToTargetAsync, "SlewToTargetAsync");
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.SlewToTargetAsync, "SlewToTargetAsync");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
                                         }
 
                                         if (canSync)
                                         {
-                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepSyncToCoordinates, "SyncToCoordinates");
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.SyncToCoordinates, "SyncToCoordinates");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
                                         }
 
                                         if (canSync)
                                         {
-                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstPExcepSyncToTarget, "SyncToTarget");
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.SyncToTarget, "SyncToTarget");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
                                         }
@@ -3022,7 +3023,7 @@ namespace ConformU
                                         if (canSetTracking & IsPlatform7OrLater)
                                         {
                                             // Confirm that setting Tracking = true results in a ParkedException
-                                            TelescopeParkedExceptionTest(ParkedExceptionType.TstExcepTracking, "Tracking = true");
+                                            TelescopeParkedExceptionTest(ParkedExceptionType.Tracking, "Tracking = true");
                                             if (cancellationToken.IsCancellationRequested)
                                                 return;
 
@@ -3367,7 +3368,11 @@ namespace ConformU
                     LogDebug(PULSE_GUIDE, "Extended pulse guide tests skipped.");
             }
             else
+            {
                 LogInfo(PULSE_GUIDE, "Tests skipped");
+            }
+
+            // SetPark - There is no way to determine the current park position programmatically. Consequently, to avoid changing the park position, the SetPark method is not tested by Conform.
 
             // Test Equatorial slewing to coordinates - Optional
             if (telescopeTests[SLEW_TO_COORDINATES])
@@ -3375,14 +3380,21 @@ namespace ConformU
                 TelescopeSlewTest(SlewSyncType.SlewToCoordinates, "SlewToCoordinates", canSlew, "CanSlew");
                 if (cancellationToken.IsCancellationRequested)
                     return;
-                if (canSlew) // Test slewing to bad co-ordinates
+
+                if (canSlew)
                 {
+                    // Test slewing to bad co-ordinates
                     TelescopeBadCoordinateTest("SlewToCoordinates (Bad L)", SlewSyncType.SlewToCoordinates, BAD_RA_LOW, BAD_DEC_LOW);
                     if (cancellationToken.IsCancellationRequested)
                         return;
+
+                    // Test slewing to bad co-ordinates
                     TelescopeBadCoordinateTest("SlewToCoordinates (Bad H)", SlewSyncType.SlewToCoordinates, BAD_RA_HIGH, BAD_DEC_HIGH);
                     if (cancellationToken.IsCancellationRequested)
                         return;
+
+                    // Test rejection when Tracking is in the wrong state
+                    TelescopeInvalidTrackingStateTest("SlewToCoordinates (Bad Track)", SlewSyncType.SlewToCoordinates);
                 }
             }
             else
@@ -3396,14 +3408,21 @@ namespace ConformU
                 TelescopeSlewTest(SlewSyncType.SlewToCoordinatesAsync, "SlewToCoordinatesAsync", canSlewAsync, "CanSlewAsync");
                 if (cancellationToken.IsCancellationRequested)
                     return;
-                if (canSlewAsync) // Test slewing to bad co-ordinates
+
+                if (canSlewAsync)
                 {
+                    // Test slewing to bad co-ordinates
                     TelescopeBadCoordinateTest("SlewToCoordinatesAsync (Bad L)", SlewSyncType.SlewToCoordinatesAsync, BAD_RA_LOW, BAD_DEC_LOW);
                     if (cancellationToken.IsCancellationRequested)
                         return;
+
+                    // Test slewing to bad co-ordinates
                     TelescopeBadCoordinateTest("SlewToCoordinatesAsync (Bad H)", SlewSyncType.SlewToCoordinatesAsync, BAD_RA_HIGH, BAD_DEC_HIGH);
                     if (cancellationToken.IsCancellationRequested)
                         return;
+
+                    // Test rejection when Tracking is in the wrong state
+                    TelescopeInvalidTrackingStateTest("SlewToCoordinatesAsync (Bad Track)", SlewSyncType.SlewToCoordinatesAsync);
                 }
             }
             else
@@ -3624,14 +3643,21 @@ namespace ConformU
                 TelescopeSlewTest(SlewSyncType.SlewToTarget, "SlewToTarget", canSlew, "CanSlew");
                 if (cancellationToken.IsCancellationRequested)
                     return;
-                if (canSlew) // Test slewing to bad co-ordinates
+
+                if (canSlew)
                 {
+                    // Test slewing to bad co-ordinates
                     TelescopeBadCoordinateTest("SlewToTarget (Bad L)", SlewSyncType.SlewToTarget, BAD_RA_LOW, BAD_DEC_LOW);
                     if (cancellationToken.IsCancellationRequested)
                         return;
+
+                    // Test slewing to bad co-ordinates
                     TelescopeBadCoordinateTest("SlewToTarget (Bad H)", SlewSyncType.SlewToTarget, BAD_RA_HIGH, BAD_DEC_HIGH);
                     if (cancellationToken.IsCancellationRequested)
                         return;
+
+                    // Test rejection when Tracking is in the wrong state
+                    TelescopeInvalidTrackingStateTest("SlewToTarget (Bad Track)", SlewSyncType.SlewToTarget);
                 }
             }
             else
@@ -3645,14 +3671,21 @@ namespace ConformU
                 TelescopeSlewTest(SlewSyncType.SlewToTargetAsync, "SlewToTargetAsync", canSlewAsync, "CanSlewAsync");
                 if (cancellationToken.IsCancellationRequested)
                     return;
-                if (canSlewAsync) // Test slewing to bad co-ordinates
+
+                if (canSlewAsync)
                 {
+                    // Test slewing to bad co-ordinates
                     TelescopeBadCoordinateTest("SlewToTargetAsync (Bad L)", SlewSyncType.SlewToTargetAsync, BAD_RA_LOW, BAD_DEC_LOW);
                     if (cancellationToken.IsCancellationRequested)
                         return;
+
+                    // Test slewing to bad co-ordinates
                     TelescopeBadCoordinateTest("SlewToTargetAsync (Bad H)", SlewSyncType.SlewToTargetAsync, BAD_RA_HIGH, BAD_DEC_HIGH);
                     if (cancellationToken.IsCancellationRequested)
                         return;
+
+                    // Test rejection when Tracking is in the wrong state
+                    TelescopeInvalidTrackingStateTest("SlewToTargetAsync (Mad Track)", SlewSyncType.SlewToTargetAsync);
                 }
             }
             else
@@ -3695,14 +3728,21 @@ namespace ConformU
                     TelescopeSlewTest(SlewSyncType.SlewToAltAz, "SlewToAltAz", canSlewAltAz, "CanSlewAltAz");
                     if (cancellationToken.IsCancellationRequested)
                         return;
-                    if (canSlewAltAz) // Test slewing to bad co-ordinates
+
+                    if (canSlewAltAz)
                     {
+                        // Test slewing to bad co-ordinate
                         TelescopeBadCoordinateTest("SlewToAltAz (Bad L)", SlewSyncType.SlewToAltAz, BAD_ALTITUDE_LOW, BAD_AZIMUTH_LOW);
                         if (cancellationToken.IsCancellationRequested)
-                            return; // -100 is used for the Altitude limit to enable -90 to be used for parking the scope
+                            return;
+
+                        // Test slewing to bad co-ordinate
                         TelescopeBadCoordinateTest("SlewToAltAz (Bad H)", SlewSyncType.SlewToAltAz, BAD_ALTITUDE_HIGH, BAD_AZIMUTH_HIGH);
                         if (cancellationToken.IsCancellationRequested)
                             return;
+
+                        // Test rejection when Tracking is in the wrong state
+                        TelescopeInvalidTrackingStateTest("SlewToAltAz (Bad Track)", SlewSyncType.SlewToAltAz);
                     }
                 }
                 else
@@ -3724,14 +3764,21 @@ namespace ConformU
                     TelescopeSlewTest(SlewSyncType.SlewToAltAzAsync, "SlewToAltAzAsync", canSlewAltAzAsync, "CanSlewAltAzAsync");
                     if (cancellationToken.IsCancellationRequested)
                         return;
-                    if (canSlewAltAzAsync) // Test slewing to bad co-ordinates
+
+                    if (canSlewAltAzAsync)
                     {
+                        // Test slewing to bad co-ordinates
                         TelescopeBadCoordinateTest("SlewToAltAzAsync (Bad L)", SlewSyncType.SlewToAltAzAsync, BAD_ALTITUDE_LOW, BAD_AZIMUTH_LOW);
                         if (cancellationToken.IsCancellationRequested)
                             return;
+
+                        // Test slewing to bad co-ordinates
                         TelescopeBadCoordinateTest("SlewToAltAzAsync (Bad H)", SlewSyncType.SlewToAltAzAsync, BAD_ALTITUDE_HIGH, BAD_AZIMUTH_HIGH);
                         if (cancellationToken.IsCancellationRequested)
                             return;
+
+                        // Test rejection when Tracking is in the wrong state
+                        TelescopeInvalidTrackingStateTest("SlewToAltAzAsync (Bad Track)", SlewSyncType.SlewToAltAzAsync);
                     }
                 }
                 else
@@ -4075,6 +4122,203 @@ namespace ConformU
         #endregion
 
         #region Support Code
+
+        /// <summary>
+        /// Confirm that InValidValueExceptions are thrown for invalid values for ITelescopeV4 and later
+        /// </summary>
+        /// <param name="testName"></param>
+        /// <param name="testMethod">The method to test</param>
+        /// <param name="badCoordinate1">RA or Altitude</param>
+        /// <param name="badCoordinate2">Dec or Azimuth</param>
+        /// <remarks></remarks>
+        private void TelescopeInvalidTrackingStateTest(string testName, SlewSyncType testMethod)
+        {
+            bool testTrackingState = false; // The tracking state that will be tested for rejection of the method call
+            double targetRa = 0.0, targetDeclination = 0.0;
+
+            // This test only applies to ITelescopeV4 and later, so skip it if the interface version is less than 4
+            if (GetInterfaceVersion() < 4)
+                return;
+
+            // Check whether the Tracking property can be read and set and skip the test if it cannot
+            if (canReadTracking && canSetTracking) // Tracking can be read and written OK
+            {
+                // Determine the required test tracking state
+                switch (testMethod)
+                {
+                    // Test cases where the Tracking property must be true to allow the method to be called
+                    case SlewSyncType.SlewToCoordinates:
+                    case SlewSyncType.SlewToCoordinatesAsync:
+                    case SlewSyncType.SlewToTarget:
+                    case SlewSyncType.SlewToTargetAsync:
+                        testTrackingState = false; // The tracking state that will be tested for rejection of the method call
+                        break;
+
+                    // Test cases where the Tracking property must be false to allow the method to be called
+                    case SlewSyncType.SlewToAltAz:
+                    case SlewSyncType.SlewToAltAzAsync:
+                        testTrackingState = true; // The tracking state that will be tested for rejection of the method call
+                        break;
+
+                    default:
+                        LogError(testName, $"TelescopeInvalidTrackingStateTest - Unknown or unsupported test type {testMethod}.");
+                        return;
+                }
+
+                LogCallToDriver(testName, "About to get Tracking property");
+                bool currentTrackingState = telescopeDevice.Tracking;
+
+                // Test process
+                try
+                {
+                    // Slew to starting coordinates depending on equatorial or horizon coordinates.
+                    switch (testMethod)
+                    {
+                        case SlewSyncType.SlewToCoordinates:
+                        case SlewSyncType.SlewToCoordinatesAsync:
+                        case SlewSyncType.SlewToTarget:
+                        case SlewSyncType.SlewToTargetAsync:
+                            // Slew to a starting position from which the test slew can be initiated
+                            SlewToHa(-3.0);
+
+                            // Calculate the test slew target coordinates
+                            targetRa = GetRaFromHourAngle(testName, -2.0);
+                            targetDeclination = GetTestDeclination65OrLess(testName, targetRa);
+                            break;
+
+                        case SlewSyncType.SlewToAltAz:
+                        case SlewSyncType.SlewToAltAzAsync:
+                            // Ensure tracking is false so that the Alt/Az Slew will succeed
+                            LogCallToDriver(testName, "About to set Tracking false");
+                            telescopeDevice.Tracking = false;
+
+                            // Slew to a starting position from which the test slew can be initiated
+                            LogCallToDriver(testName, "About to call SlewToAltAzAsync");
+                            telescopeDevice.SlewToAltAzAsync(150, 45);
+                            WaitWhile(testName, () => telescopeDevice.Slewing, 500, settings.TelescopeMaximumSlewTime);
+
+                            // Set the test slew target coordinates
+                            targetAltitude = 60;
+                            targetAzimuth = 120;
+                            break;
+
+                        default:
+                            LogError(testName, $"TelescopeInvalidTrackingStateTest - Unknown or unsupported method: {testMethod}.");
+                            return;
+                    }
+
+                    // Check whether the tracking state is what is required for the test
+                    if (currentTrackingState != testTrackingState) // Tracking is not in the required test state, so set it to the test state
+                    {
+                        // Set the required test tracking state
+                        LogCallToDriver(testName, $"About to set Tracking property to {testTrackingState}");
+                        telescopeDevice.Tracking = testTrackingState;
+                        LogDebug(testName, $"Tracking property set to {testTrackingState}.");
+                    }
+                    else // Tracking is in the required state
+                    {
+                        LogDebug(testName, $"Tracking property is already {testTrackingState}, so there is no need to change it.");
+                    }
+
+                    // The tracking state is now incorrect so initiate the test slew to confirm that the device rejects it with an InvalidOperationExcveption.
+                    try
+                    {
+                        // Create and run a task to perform the slew operation in a separate thread
+                        Task slewTask = Task.Run(() =>
+                        {
+                            try
+                            {
+                                // Issue the appropriate slew depending on the method being tested.
+                                switch (testMethod)
+                                {
+                                    case SlewSyncType.SlewToCoordinates:
+                                        LogCallToDriver(testName, "About to call SlewToCoordinates method to a starting position");
+                                        telescopeDevice.SlewToCoordinates(targetRa, targetDeclination);
+                                        break;
+
+                                    case SlewSyncType.SlewToCoordinatesAsync:
+                                        LogCallToDriver(testName, "About to call SlewToCoordinatesAsync method to a starting position");
+                                        telescopeDevice.SlewToCoordinatesAsync(targetRa, targetDeclination);
+                                        WaitWhile(testName, () => telescopeDevice.Slewing, 500, settings.TelescopeMaximumSlewTime);
+                                        break;
+
+                                    case SlewSyncType.SlewToTarget:
+                                        LogCallToDriver(testName, "About to call SlewToTarget method to a starting position");
+                                        telescopeDevice.TargetRightAscension = targetRa;
+                                        telescopeDevice.TargetDeclination = targetDeclination;
+                                        telescopeDevice.SlewToTarget();
+                                        break;
+
+                                    case SlewSyncType.SlewToTargetAsync:
+                                        LogCallToDriver(testName, "About to call SlewToTargetAsync method to a starting position");
+                                        telescopeDevice.TargetRightAscension = targetRa;
+                                        telescopeDevice.TargetDeclination = targetDeclination;
+                                        telescopeDevice.SlewToTargetAsync();
+                                        WaitWhile(testName, () => telescopeDevice.Slewing, 500, settings.TelescopeMaximumSlewTime);
+                                        break;
+
+                                    case SlewSyncType.SlewToAltAz:
+                                        LogCallToDriver(testName, "About to call SlewToAltAz method to a starting position");
+                                        telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
+                                        break;
+
+                                    case SlewSyncType.SlewToAltAzAsync:
+                                        LogCallToDriver(testName, "About to call SlewToCoordinatesAsync method to a starting position");
+                                        telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
+                                        WaitWhile(testName, () => telescopeDevice.Slewing, 500, settings.TelescopeMaximumSlewTime);
+                                        break;
+
+                                    default:
+                                        LogError(testName, $"Unknown or unsupported method: {testMethod}");
+                                        break;
+                                }
+
+                                // If we get here the expected exception was not thrown and the slew completed without error so raise an issue
+                                LogIssue(testName, $"{testMethod} did not reject the slew with an InvalidOperationException when tracking was {testTrackingState}.");
+                                LogInfo(testName, $"Equatorial slews with Tracking = False and AltAz slews with Tracking = True are meaningless because the earth's movement");
+                                LogInfo(testName, $"during the slew ensures that the telescope will not be at the expected coordinates when the slew ends.");
+                            }
+                            catch (Exception ex) // An exception of some sort was thrown
+                            {
+                                // Check whether the exception is the expected InvalidOperationException and handle that as OK, all other exceptions are incorrect.
+                                HandleInvalidOperationExceptionAsOk(testName, MemberType.Method, Required.Mandatory, ex, $"InvalidValueException is expected but received {ex.GetType().Name}", $"Correctly rejected operation when tracking is {testTrackingState}.");
+                            }
+                        });
+
+                        // Wait for the slew test task to complete or timeout
+                        LogDebug(testName, $"Waiting for the slew test task to complete or timeout after {settings.TelescopeMaximumSlewTime} seconds.");
+                        slewTask?.Wait(settings.TelescopeMaximumSlewTime * 1000);
+                        LogDebug(testName, "Slew task completed or timed out.");
+                    }
+                    catch (Exception ex)
+                    {
+                        LogIssue(testName, $"Exception when testing method: {ex.Message}");
+                        LogDebug(testName, $"Exception detail:\r\n:{ex}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogIssue(testName, $"Exception when setting Tracking property: {ex.Message}");
+                    LogDebug(testName, $"Exception detail:\r\n:{ex}");
+                }
+            }
+            else // Tracking property cannot be read or cannot be set, so skip the test
+            {
+                LogInfo(testName, "Skipping test because the Tracking property is not fully implemented. Can Read: " + canReadTracking + ", Can Set: " + canSetTracking);
+            }
+
+            if (cancellationToken.IsCancellationRequested)
+                return;
+        }
+
+        private double GetRaFromHourAngle(string testName, double hourAngle)
+        {
+            LogCallToDriver(testName, "About to get SiderealTime property");
+            double siderealTime = telescopeDevice.SiderealTime;
+            double ra = Utilities.ConditionRA(siderealTime - hourAngle);
+            LogDebug(testName, $"Sidereal Time: {siderealTime.ToHMS()}, Hour Angle: {hourAngle.ToHMS()}, RA: {ra.ToHMS()}");
+            return ra;
+        }
 
         /// <summary>
         /// Confirm that rate offsets are reported as 0.0 and that they cannot be set when tracking at drive rates other than sidereal.
@@ -4880,31 +5124,169 @@ namespace ConformU
             {
                 case SlewSyncType.SlewToCoordinates:
                 case SlewSyncType.SlewToCoordinatesAsync:
+                    LogCallToDriver(pName, "About to get Tracking property");
+                    if (canSetTracking & !telescopeDevice.Tracking)
                     {
-                        LogCallToDriver(pName, "About to get Tracking property");
-                        if (canSetTracking & !telescopeDevice.Tracking)
+                        LogCallToDriver(pName, "About to set Tracking property to true");
+                        telescopeDevice.Tracking = true;
+                    }
+
+                    try
+                    {
+                        SetAction("Slew underway");
+                        targetRightAscension = badCoordinate1;
+                        targetDeclination = 0.0d;
+
+                        if (pTest == SlewSyncType.SlewToCoordinates)
                         {
-                            LogCallToDriver(pName, "About to set Tracking property to true");
-                            telescopeDevice.Tracking = true;
+                            LogCallToDriver(pName,
+                                $"About to call SlewToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                            telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination);
+                        }
+                        else
+                        {
+                            LogCallToDriver(pName,
+                                $"About to call SlewToCoordinatesAsync method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                            telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
+                        }
+
+                        SetAction("Attempting to abort slew");
+                        try
+                        {
+                            AbortSlew(pName);
+                        }
+                        catch { } // Attempt to stop any motion that has actually started
+
+                        LogIssue(pName, $"Failed to reject bad RA coordinate: {targetRightAscension.ToHMS()}");
+                    }
+                    catch (Exception ex)
+                    {
+                        SetAction("Slew rejected");
+                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad RA coordinate",
+                            $"Correctly rejected bad RA coordinate: {targetRightAscension.ToHMS()}");
+                    }
+
+                    try
+                    {
+                        SetAction("Slew underway");
+                        targetRightAscension = TelescopeRaFromSiderealTime(pName, -2.0d);
+                        targetDeclination = badCoordinate2;
+                        if (pTest == SlewSyncType.SlewToCoordinates)
+                        {
+                            LogCallToDriver(pName,
+                                $"About to call SlewToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                            telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination);
+                        }
+                        else
+                        {
+                            LogCallToDriver(pName,
+                                $"About to call SlewToCoordinatesAsync method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                            telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
+                        }
+
+                        SetAction("Attempting to abort slew");
+                        try
+                        {
+                            AbortSlew(pName);
+                        }
+                        catch
+                        {
+                        } // Attempt to stop any motion that has actually started
+
+                        LogIssue(pName, $"Failed to reject bad Dec coordinate: {targetDeclination.ToDMS()}");
+                    }
+                    catch (Exception ex)
+                    {
+                        SetAction("Slew rejected");
+                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad Dec coordinate",
+                            $"Correctly rejected bad Dec coordinate: {targetDeclination.ToDMS()}");
+                    }
+
+                    break;
+
+                case SlewSyncType.SyncToCoordinates:
+                    LogCallToDriver(pName, "About to get Tracking property");
+                    if (canSetTracking & !telescopeDevice.Tracking)
+                    {
+                        LogCallToDriver(pName, "About to set Tracking property to true");
+                        telescopeDevice.Tracking = true;
+                    }
+
+                    try
+                    {
+                        SetAction("Sync underway");
+                        targetRightAscension = badCoordinate1;
+                        targetDeclination = 0.0d;
+                        LogCallToDriver(pName,
+                                                       $"About to call SyncToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                        telescopeDevice.SyncToCoordinates(targetRightAscension, targetDeclination);
+                        LogIssue(pName, $"Failed to reject bad RA coordinate: {targetRightAscension.ToHMS()}");
+                    }
+                    catch (Exception ex)
+                    {
+                        SetAction("Sync rejected");
+                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad RA coordinate",
+                            $"Correctly rejected bad RA coordinate: {targetRightAscension.ToHMS()}");
+                    }
+
+                    try
+                    {
+                        SetAction("Sync underway");
+                        targetRightAscension = TelescopeRaFromSiderealTime(pName, -3.0d);
+                        targetDeclination = badCoordinate2;
+                        LogCallToDriver(pName,
+                                                       $"About to call SyncToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+                        telescopeDevice.SyncToCoordinates(targetRightAscension, targetDeclination);
+                        LogIssue(pName, $"Failed to reject bad Dec coordinate: {targetDeclination.ToDMS()}");
+                    }
+                    catch (Exception ex)
+                    {
+                        SetAction("Sync rejected");
+                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad Dec coordinate",
+                            $"Correctly rejected bad Dec coordinate: {targetDeclination.ToDMS()}");
+                    }
+
+                    break;
+
+                case SlewSyncType.SlewToTarget:
+                case SlewSyncType.SlewToTargetAsync:
+                    LogCallToDriver(pName, "About to get Tracking property");
+                    if (canSetTracking & !telescopeDevice.Tracking)
+                    {
+                        LogCallToDriver(pName, "About to set Tracking property to true");
+                        telescopeDevice.Tracking = true;
+                    }
+
+                    try
+                    {
+                        SetAction("Slew underway");
+                        targetRightAscension = badCoordinate1;
+                        targetDeclination = 0.0d;
+                        LogCallToDriver(pName,
+                                                       $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
+                        telescopeDevice.TargetRightAscension = targetRightAscension;
+                        // Successfully set bad RA coordinate so now set the good Dec coordinate and see whether the move fails when the slew is attempted
+                        try
+                        {
+                            LogCallToDriver(pName,
+                                $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
+                            telescopeDevice.TargetDeclination = targetDeclination;
+                        }
+                        catch
+                        {
                         }
 
                         try
                         {
-                            SetAction("Slew underway");
-                            targetRightAscension = badCoordinate1;
-                            targetDeclination = 0.0d;
-
-                            if (pTest == SlewSyncType.SlewToCoordinates)
+                            if (pTest == SlewSyncType.SlewToTarget)
                             {
-                                LogCallToDriver(pName,
-                                    $"About to call SlewToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
-                                telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination);
+                                LogCallToDriver(pName, "About to call SlewToTarget method");
+                                telescopeDevice.SlewToTarget();
                             }
                             else
                             {
-                                LogCallToDriver(pName,
-                                    $"About to call SlewToCoordinatesAsync method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
-                                telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
+                                LogCallToDriver(pName, "About to call SlewToTargetAsync method");
+                                telescopeDevice.SlewToTargetAsync();
                             }
 
                             SetAction("Attempting to abort slew");
@@ -4912,33 +5294,55 @@ namespace ConformU
                             {
                                 AbortSlew(pName);
                             }
-                            catch { } // Attempt to stop any motion that has actually started
+                            catch
+                            {
+                            } // Attempt to stop any motion that has actually started
 
                             LogIssue(pName, $"Failed to reject bad RA coordinate: {targetRightAscension.ToHMS()}");
                         }
-                        catch (Exception ex)
+                        catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                         {
                             SetAction("Slew rejected");
                             HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad RA coordinate",
                                 $"Correctly rejected bad RA coordinate: {targetRightAscension.ToHMS()}");
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleInvalidValueExceptionAsOk(pName, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad RA coordinate",
+                            $"Telescope.TargetRA correctly rejected bad RA coordinate: {targetRightAscension.ToHMS()}");
+                    }
+
+                    try
+                    {
+                        SetAction("Slew underway");
+                        targetRightAscension = TelescopeRaFromSiderealTime(pName, -2.0d);
+                        targetDeclination = badCoordinate2;
+                        LogCallToDriver(pName,
+                                                       $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
+                        telescopeDevice.TargetDeclination = targetDeclination;
+                        // Successfully set bad Dec coordinate so now set the good RA coordinate and see whether the move fails when the slew is attempted
+                        try
+                        {
+                            LogCallToDriver(pName,
+                                $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
+                            telescopeDevice.TargetRightAscension = targetRightAscension;
+                        }
+                        catch
+                        {
+                        }
 
                         try
                         {
-                            SetAction("Slew underway");
-                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -2.0d);
-                            targetDeclination = badCoordinate2;
-                            if (pTest == SlewSyncType.SlewToCoordinates)
+                            if (pTest == SlewSyncType.SlewToTarget)
                             {
-                                LogCallToDriver(pName,
-                                    $"About to call SlewToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
-                                telescopeDevice.SlewToCoordinates(targetRightAscension, targetDeclination);
+                                LogCallToDriver(pName, "About to call SlewToTarget method");
+                                telescopeDevice.SlewToTarget();
                             }
                             else
                             {
-                                LogCallToDriver(pName,
-                                    $"About to call SlewToCoordinatesAsync method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
-                                telescopeDevice.SlewToCoordinatesAsync(targetRightAscension, targetDeclination);
+                                LogCallToDriver(pName, "About to call SlewToTargetAsync method");
+                                telescopeDevice.SlewToTargetAsync();
                             }
 
                             SetAction("Attempting to abort slew");
@@ -4952,409 +5356,235 @@ namespace ConformU
 
                             LogIssue(pName, $"Failed to reject bad Dec coordinate: {targetDeclination.ToDMS()}");
                         }
-                        catch (Exception ex)
+                        catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                         {
                             SetAction("Slew rejected");
                             HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad Dec coordinate",
                                 $"Correctly rejected bad Dec coordinate: {targetDeclination.ToDMS()}");
                         }
-
-                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleInvalidValueExceptionAsOk(pName, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad Dec coordinate",
+                            $"Telescope.TargetDeclination correctly rejected bad Dec coordinate: {targetDeclination.ToDMS()}");
                     }
 
-                case SlewSyncType.SyncToCoordinates:
+                    break;
+
+                case SlewSyncType.SyncToTarget:
+                    LogCallToDriver(pName, "About to get Tracking property");
+                    if (canSetTracking & !telescopeDevice.Tracking)
                     {
-                        LogCallToDriver(pName, "About to get Tracking property");
-                        if (canSetTracking & !telescopeDevice.Tracking)
+                        LogCallToDriver(pName, "About to set Tracking property to true");
+                        telescopeDevice.Tracking = true;
+                    }
+
+                    try
+                    {
+                        SetAction("Sync underway");
+                        targetRightAscension = badCoordinate1;
+                        targetDeclination = 0.0d;
+                        LogCallToDriver(pName,
+                                                       $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
+                        telescopeDevice.TargetRightAscension = targetRightAscension;
+                        // Successfully set bad RA coordinate so now set the good Dec coordinate and see whether the move fails when the slew is attempted
+                        try
                         {
-                            LogCallToDriver(pName, "About to set Tracking property to true");
-                            telescopeDevice.Tracking = true;
+                            LogCallToDriver(pName,
+                                $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
+                            telescopeDevice.TargetDeclination = targetDeclination;
+                        }
+                        catch
+                        {
                         }
 
                         try
                         {
-                            SetAction("Sync underway");
-                            targetRightAscension = badCoordinate1;
-                            targetDeclination = 0.0d;
-                            LogCallToDriver(pName,
-                                                           $"About to call SyncToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
-                            telescopeDevice.SyncToCoordinates(targetRightAscension, targetDeclination);
+                            LogCallToDriver(pName, "About to call SyncToTarget method");
+                            telescopeDevice.SyncToTarget();
                             LogIssue(pName, $"Failed to reject bad RA coordinate: {targetRightAscension.ToHMS()}");
                         }
-                        catch (Exception ex)
+                        catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                         {
                             SetAction("Sync rejected");
                             HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad RA coordinate",
                                 $"Correctly rejected bad RA coordinate: {targetRightAscension.ToHMS()}");
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleInvalidValueExceptionAsOk(pName, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad RA coordinate",
+                            $"Telescope.TargetRA correctly rejected bad RA coordinate: {targetRightAscension.ToHMS()}");
+                    }
+
+                    try
+                    {
+                        SetAction("Sync underway");
+                        targetRightAscension = TelescopeRaFromSiderealTime(pName, -3.0d);
+                        targetDeclination = badCoordinate2;
+                        LogCallToDriver(pName,
+                                                       $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
+                        telescopeDevice.TargetDeclination = targetDeclination;
+                        // Successfully set bad Dec coordinate so now set the good RA coordinate and see whether the move fails when the slew is attempted
+                        try
+                        {
+                            LogCallToDriver(pName,
+                                $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
+                            telescopeDevice.TargetRightAscension = targetRightAscension;
+                        }
+                        catch
+                        {
+                        }
 
                         try
                         {
-                            SetAction("Sync underway");
-                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -3.0d);
-                            targetDeclination = badCoordinate2;
-                            LogCallToDriver(pName,
-                                                           $"About to call SyncToCoordinates method, RA: {targetRightAscension.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
-                            telescopeDevice.SyncToCoordinates(targetRightAscension, targetDeclination);
+                            LogCallToDriver(pName, "About to call SyncToTarget method");
+                            telescopeDevice.SyncToTarget();
                             LogIssue(pName, $"Failed to reject bad Dec coordinate: {targetDeclination.ToDMS()}");
                         }
-                        catch (Exception ex)
+                        catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                         {
                             SetAction("Sync rejected");
                             HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad Dec coordinate",
                                 $"Correctly rejected bad Dec coordinate: {targetDeclination.ToDMS()}");
                         }
-
-                        break;
                     }
-
-                case SlewSyncType.SlewToTarget:
-                case SlewSyncType.SlewToTargetAsync:
+                    catch (Exception ex)
                     {
-                        LogCallToDriver(pName, "About to get Tracking property");
-                        if (canSetTracking & !telescopeDevice.Tracking)
-                        {
-                            LogCallToDriver(pName, "About to set Tracking property to true");
-                            telescopeDevice.Tracking = true;
-                        }
-
-                        try
-                        {
-                            SetAction("Slew underway");
-                            targetRightAscension = badCoordinate1;
-                            targetDeclination = 0.0d;
-                            LogCallToDriver(pName,
-                                                           $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
-                            telescopeDevice.TargetRightAscension = targetRightAscension;
-                            // Successfully set bad RA coordinate so now set the good Dec coordinate and see whether the move fails when the slew is attempted
-                            try
-                            {
-                                LogCallToDriver(pName,
-                                    $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
-                                telescopeDevice.TargetDeclination = targetDeclination;
-                            }
-                            catch
-                            {
-                            }
-
-                            try
-                            {
-                                if (pTest == SlewSyncType.SlewToTarget)
-                                {
-                                    LogCallToDriver(pName, "About to call SlewToTarget method");
-                                    telescopeDevice.SlewToTarget();
-                                }
-                                else
-                                {
-                                    LogCallToDriver(pName, "About to call SlewToTargetAsync method");
-                                    telescopeDevice.SlewToTargetAsync();
-                                }
-
-                                SetAction("Attempting to abort slew");
-                                try
-                                {
-                                    AbortSlew(pName);
-                                }
-                                catch
-                                {
-                                } // Attempt to stop any motion that has actually started
-
-                                LogIssue(pName, $"Failed to reject bad RA coordinate: {targetRightAscension.ToHMS()}");
-                            }
-                            catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
-                            {
-                                SetAction("Slew rejected");
-                                HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad RA coordinate",
-                                    $"Correctly rejected bad RA coordinate: {targetRightAscension.ToHMS()}");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            HandleInvalidValueExceptionAsOk(pName, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad RA coordinate",
-                                $"Telescope.TargetRA correctly rejected bad RA coordinate: {targetRightAscension.ToHMS()}");
-                        }
-
-                        try
-                        {
-                            SetAction("Slew underway");
-                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -2.0d);
-                            targetDeclination = badCoordinate2;
-                            LogCallToDriver(pName,
-                                                           $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
-                            telescopeDevice.TargetDeclination = targetDeclination;
-                            // Successfully set bad Dec coordinate so now set the good RA coordinate and see whether the move fails when the slew is attempted
-                            try
-                            {
-                                LogCallToDriver(pName,
-                                    $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
-                                telescopeDevice.TargetRightAscension = targetRightAscension;
-                            }
-                            catch
-                            {
-                            }
-
-                            try
-                            {
-                                if (pTest == SlewSyncType.SlewToTarget)
-                                {
-                                    LogCallToDriver(pName, "About to call SlewToTarget method");
-                                    telescopeDevice.SlewToTarget();
-                                }
-                                else
-                                {
-                                    LogCallToDriver(pName, "About to call SlewToTargetAsync method");
-                                    telescopeDevice.SlewToTargetAsync();
-                                }
-
-                                SetAction("Attempting to abort slew");
-                                try
-                                {
-                                    AbortSlew(pName);
-                                }
-                                catch
-                                {
-                                } // Attempt to stop any motion that has actually started
-
-                                LogIssue(pName, $"Failed to reject bad Dec coordinate: {targetDeclination.ToDMS()}");
-                            }
-                            catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
-                            {
-                                SetAction("Slew rejected");
-                                HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad Dec coordinate",
-                                    $"Correctly rejected bad Dec coordinate: {targetDeclination.ToDMS()}");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            HandleInvalidValueExceptionAsOk(pName, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad Dec coordinate",
-                                $"Telescope.TargetDeclination correctly rejected bad Dec coordinate: {targetDeclination.ToDMS()}");
-                        }
-
-                        break;
+                        HandleInvalidValueExceptionAsOk(pName, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad Dec coordinate",
+                            $"Telescope.TargetDeclination correctly rejected bad Dec coordinate: {targetDeclination.ToDMS()}");
                     }
 
-                case SlewSyncType.SyncToTarget:
-                    {
-                        LogCallToDriver(pName, "About to get Tracking property");
-                        if (canSetTracking & !telescopeDevice.Tracking)
-                        {
-                            LogCallToDriver(pName, "About to set Tracking property to true");
-                            telescopeDevice.Tracking = true;
-                        }
-
-                        try
-                        {
-                            SetAction("Sync underway");
-                            targetRightAscension = badCoordinate1;
-                            targetDeclination = 0.0d;
-                            LogCallToDriver(pName,
-                                                           $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
-                            telescopeDevice.TargetRightAscension = targetRightAscension;
-                            // Successfully set bad RA coordinate so now set the good Dec coordinate and see whether the move fails when the slew is attempted
-                            try
-                            {
-                                LogCallToDriver(pName,
-                                    $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
-                                telescopeDevice.TargetDeclination = targetDeclination;
-                            }
-                            catch
-                            {
-                            }
-
-                            try
-                            {
-                                LogCallToDriver(pName, "About to call SyncToTarget method");
-                                telescopeDevice.SyncToTarget();
-                                LogIssue(pName, $"Failed to reject bad RA coordinate: {targetRightAscension.ToHMS()}");
-                            }
-                            catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
-                            {
-                                SetAction("Sync rejected");
-                                HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad RA coordinate",
-                                    $"Correctly rejected bad RA coordinate: {targetRightAscension.ToHMS()}");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            HandleInvalidValueExceptionAsOk(pName, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad RA coordinate",
-                                $"Telescope.TargetRA correctly rejected bad RA coordinate: {targetRightAscension.ToHMS()}");
-                        }
-
-                        try
-                        {
-                            SetAction("Sync underway");
-                            targetRightAscension = TelescopeRaFromSiderealTime(pName, -3.0d);
-                            targetDeclination = badCoordinate2;
-                            LogCallToDriver(pName,
-                                                           $"About to set TargetDeclination property to {targetDeclination.ToDMS()}");
-                            telescopeDevice.TargetDeclination = targetDeclination;
-                            // Successfully set bad Dec coordinate so now set the good RA coordinate and see whether the move fails when the slew is attempted
-                            try
-                            {
-                                LogCallToDriver(pName,
-                                    $"About to set TargetRightAscension property to {targetRightAscension.ToHMS()}");
-                                telescopeDevice.TargetRightAscension = targetRightAscension;
-                            }
-                            catch
-                            {
-                            }
-
-                            try
-                            {
-                                LogCallToDriver(pName, "About to call SyncToTarget method");
-                                telescopeDevice.SyncToTarget();
-                                LogIssue(pName, $"Failed to reject bad Dec coordinate: {targetDeclination.ToDMS()}");
-                            }
-                            catch (Exception ex) // Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
-                            {
-                                SetAction("Sync rejected");
-                                HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad Dec coordinate",
-                                    $"Correctly rejected bad Dec coordinate: {targetDeclination.ToDMS()}");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            HandleInvalidValueExceptionAsOk(pName, MemberType.Property, Required.MustBeImplemented, ex, "Exception setting bad Dec coordinate",
-                                $"Telescope.TargetDeclination correctly rejected bad Dec coordinate: {targetDeclination.ToDMS()}");
-                        }
-
-                        break;
-                    }
+                    break;
 
                 case SlewSyncType.SlewToAltAz:
                 case SlewSyncType.SlewToAltAzAsync:
+                    LogCallToDriver(pName, "About to get Tracking property");
+                    if (canSetTracking & telescopeDevice.Tracking)
                     {
-                        LogCallToDriver(pName, "About to get Tracking property");
-                        if (canSetTracking & telescopeDevice.Tracking)
-                        {
-                            LogCallToDriver(pName, "About to set Tracking property to false");
-                            telescopeDevice.Tracking = false;
-                        }
-
-                        try
-                        {
-                            SetAction("Slew underway");
-                            targetAltitude = badCoordinate1;
-                            targetAzimuth = 45.0d;
-                            if (pTest == SlewSyncType.SlewToAltAz)
-                            {
-                                LogCallToDriver(pName,
-                                    $"About to call SlewToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
-                                telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
-                            }
-                            else
-                            {
-                                LogCallToDriver(pName,
-                                    $"About To call SlewToAltAzAsync method, Altitude:  {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
-                                telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
-                            }
-
-                            SetAction("Attempting to abort slew");
-                            try
-                            {
-                                AbortSlew(pName);
-                            }
-                            catch
-                            {
-                            } // Attempt to stop any motion that has actually started
-
-                            LogIssue(pName, $"Failed to reject bad Altitude coordinate: {targetAltitude.ToDMS()}");
-                        }
-                        catch (Exception ex)
-                        {
-                            SetAction("Slew rejected");
-                            HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {targetAltitude.ToDMS()}");
-                        }
-
-                        try
-                        {
-                            SetAction("Slew underway");
-                            targetAltitude = 45.0d;
-                            targetAzimuth = badCoordinate2;
-                            if (pTest == SlewSyncType.SlewToAltAz)
-                            {
-                                LogCallToDriver(pName,
-                                    $"About to call SlewToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
-                                telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
-                            }
-                            else
-                            {
-                                LogCallToDriver(pName,
-                                    $"About to call SlewToAltAzAsync method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
-                                telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
-                            }
-
-                            SetAction("Attempting to abort slew");
-                            try
-                            {
-                                AbortSlew(pName);
-                            }
-                            catch
-                            {
-                            } // Attempt to stop any motion that has actually started
-
-                            LogIssue(pName, $"Failed to reject bad Azimuth coordinate: {FormatAzimuth(targetAzimuth)}");
-                        }
-                        catch (Exception ex)
-                        {
-                            SetAction("Slew rejected");
-                            HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad Azimuth coordinate",
-                                $"Correctly rejected bad Azimuth coordinate: {FormatAzimuth(targetAzimuth)}");
-                        }
-
-                        break;
+                        LogCallToDriver(pName, "About to set Tracking property to false");
+                        telescopeDevice.Tracking = false;
                     }
+
+                    try
+                    {
+                        SetAction("Slew underway");
+                        targetAltitude = badCoordinate1;
+                        targetAzimuth = 45.0d;
+                        if (pTest == SlewSyncType.SlewToAltAz)
+                        {
+                            LogCallToDriver(pName,
+                                $"About to call SlewToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
+                            telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
+                        }
+                        else
+                        {
+                            LogCallToDriver(pName,
+                                $"About To call SlewToAltAzAsync method, Altitude:  {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
+                            telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
+                        }
+
+                        SetAction("Attempting to abort slew");
+                        try
+                        {
+                            AbortSlew(pName);
+                        }
+                        catch
+                        {
+                        } // Attempt to stop any motion that has actually started
+
+                        LogIssue(pName, $"Failed to reject bad Altitude coordinate: {targetAltitude.ToDMS()}");
+                    }
+                    catch (Exception ex)
+                    {
+                        SetAction("Slew rejected");
+                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {targetAltitude.ToDMS()}");
+                    }
+
+                    try
+                    {
+                        SetAction("Slew underway");
+                        targetAltitude = 45.0d;
+                        targetAzimuth = badCoordinate2;
+                        if (pTest == SlewSyncType.SlewToAltAz)
+                        {
+                            LogCallToDriver(pName,
+                                $"About to call SlewToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
+                            telescopeDevice.SlewToAltAz(targetAzimuth, targetAltitude);
+                        }
+                        else
+                        {
+                            LogCallToDriver(pName,
+                                $"About to call SlewToAltAzAsync method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
+                            telescopeDevice.SlewToAltAzAsync(targetAzimuth, targetAltitude);
+                        }
+
+                        SetAction("Attempting to abort slew");
+                        try
+                        {
+                            AbortSlew(pName);
+                        }
+                        catch
+                        {
+                        } // Attempt to stop any motion that has actually started
+
+                        LogIssue(pName, $"Failed to reject bad Azimuth coordinate: {FormatAzimuth(targetAzimuth)}");
+                    }
+                    catch (Exception ex)
+                    {
+                        SetAction("Slew rejected");
+                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "slewing to bad Azimuth coordinate",
+                            $"Correctly rejected bad Azimuth coordinate: {FormatAzimuth(targetAzimuth)}");
+                    }
+
+                    break;
 
                 case SlewSyncType.SyncToAltAz:
+                    LogCallToDriver(pName, "About to get Tracking property");
+                    if (canSetTracking & telescopeDevice.Tracking)
                     {
-                        LogCallToDriver(pName, "About to get Tracking property");
-                        if (canSetTracking & telescopeDevice.Tracking)
-                        {
-                            LogCallToDriver(pName, "About to set Tracking property to false");
-                            telescopeDevice.Tracking = false;
-                        }
-
-                        try
-                        {
-                            SetAction("Sync underway");
-                            targetAltitude = badCoordinate1;
-                            targetAzimuth = 45.0d;
-                            LogCallToDriver(pName,
-                                                           $"About to call SyncToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
-                            telescopeDevice.SyncToAltAz(targetAzimuth, targetAltitude);
-                            LogIssue(pName, $"Failed to reject bad Altitude coordinate: {targetAltitude.ToDMS()}");
-                        }
-                        catch (Exception ex)
-                        {
-                            SetAction("Sync rejected");
-                            HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {targetAltitude.ToDMS()}");
-                        }
-
-                        try
-                        {
-                            SetAction("Sync underway");
-                            targetAltitude = 45.0d;
-                            targetAzimuth = badCoordinate2;
-                            LogCallToDriver(pName,
-                                                           $"About to call SyncToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
-                            telescopeDevice.SyncToAltAz(targetAzimuth, targetAltitude);
-                            LogIssue(pName, $"Failed to reject bad Azimuth coordinate: {FormatAzimuth(targetAzimuth)}");
-                        }
-                        catch (Exception ex)
-                        {
-                            SetAction("Sync rejected");
-                            HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad Azimuth coordinate",
-                                $"Correctly rejected bad Azimuth coordinate: {FormatAzimuth(targetAzimuth)}");
-                        }
-
-                        break;
+                        LogCallToDriver(pName, "About to set Tracking property to false");
+                        telescopeDevice.Tracking = false;
                     }
+
+                    try
+                    {
+                        SetAction("Sync underway");
+                        targetAltitude = badCoordinate1;
+                        targetAzimuth = 45.0d;
+                        LogCallToDriver(pName,
+                                                       $"About to call SyncToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
+                        telescopeDevice.SyncToAltAz(targetAzimuth, targetAltitude);
+                        LogIssue(pName, $"Failed to reject bad Altitude coordinate: {targetAltitude.ToDMS()}");
+                    }
+                    catch (Exception ex)
+                    {
+                        SetAction("Sync rejected");
+                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad Altitude coordinate", $"Correctly rejected bad Altitude coordinate: {targetAltitude.ToDMS()}");
+                    }
+
+                    try
+                    {
+                        SetAction("Sync underway");
+                        targetAltitude = 45.0d;
+                        targetAzimuth = badCoordinate2;
+                        LogCallToDriver(pName,
+                                                       $"About to call SyncToAltAz method, Altitude: {targetAltitude.ToDMS()}, Azimuth: {targetAzimuth.ToDMS()}");
+                        telescopeDevice.SyncToAltAz(targetAzimuth, targetAltitude);
+                        LogIssue(pName, $"Failed to reject bad Azimuth coordinate: {FormatAzimuth(targetAzimuth)}");
+                    }
+                    catch (Exception ex)
+                    {
+                        SetAction("Sync rejected");
+                        HandleInvalidValueExceptionAsOk(pName, MemberType.Method, Required.Mandatory, ex, "syncing to bad Azimuth coordinate",
+                            $"Correctly rejected bad Azimuth coordinate: {FormatAzimuth(targetAzimuth)}");
+                    }
+
+                    break;
 
                 default:
-                    {
-                        LogIssue(pName, $"Conform:SlewTest: Unknown test type {pTest}");
-                        break;
-                    }
+                    LogIssue(pName, $"Conform:SlewTest: Unknown test type {pTest}");
+                    break;
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -5512,49 +5742,49 @@ namespace ConformU
                 {
                     switch (pType)
                     {
-                        case ParkedExceptionType.TstPExcepAbortSlew:
+                        case ParkedExceptionType.AbortSlew:
                             AbortSlew("Parked");
                             break;
 
-                        case ParkedExceptionType.TstPExcepFindHome:
+                        case ParkedExceptionType.FindHome:
                             LogCallToDriver($"Parked:{methodName}", "About to call FindHome method");
                             telescopeDevice.FindHome();
                             // Wait for mount to find home
                             WaitWhile("Waiting for mount to home...", () => !telescopeDevice.AtHome & (DateTime.Now.Subtract(startTime).TotalMilliseconds < 60000), 200, settings.TelescopeMaximumSlewTime);
                             break;
 
-                        case ParkedExceptionType.TstPExcepMoveAxisPrimary:
+                        case ParkedExceptionType.MoveAxisPrimary:
                             LogCallToDriver($"Parked:{methodName}", "About to call MoveAxis(Primary, 0.0) method");
                             telescopeDevice.MoveAxis(TelescopeAxis.Primary, 0.0d);
                             break;
 
-                        case ParkedExceptionType.TstPExcepMoveAxisSecondary:
+                        case ParkedExceptionType.MoveAxisSecondary:
                             LogCallToDriver($"Parked:{methodName}", "About to call MoveAxis(Secondary, 0.0) method");
                             telescopeDevice.MoveAxis(TelescopeAxis.Secondary, 0.0d);
                             break;
 
-                        case ParkedExceptionType.TstPExcepMoveAxisTertiary:
+                        case ParkedExceptionType.MoveAxisTertiary:
                             LogCallToDriver($"Parked:{methodName}", "About to call MoveAxis(Tertiary, 0.0) method");
                             telescopeDevice.MoveAxis(TelescopeAxis.Tertiary, 0.0d);
                             break;
 
-                        case ParkedExceptionType.TstPExcepPulseGuide:
+                        case ParkedExceptionType.PulseGuide:
                             LogCallToDriver($"Parked:{methodName}", "About to call PulseGuide(East, 0.0) method");
                             telescopeDevice.PulseGuide(GuideDirection.East, 0);
                             break;
 
-                        case ParkedExceptionType.TstPExcepSlewToCoordinates:
+                        case ParkedExceptionType.SlewToCoordinates:
                             LogCallToDriver($"Parked:{methodName}", "About to call SlewToCoordinates method");
                             telescopeDevice.SlewToCoordinates(TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d), 0.0d);
                             break;
 
-                        case ParkedExceptionType.TstPExcepSlewToCoordinatesAsync:
+                        case ParkedExceptionType.SlewToCoordinatesAsync:
                             LogCallToDriver($"Parked:{methodName}", "About to call SlewToCoordinatesAsync method");
                             telescopeDevice.SlewToCoordinatesAsync(TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d), 0.0d);
                             WaitForSlew($"Parked:{methodName}", "Slewing to coordinates asynchronously");
                             break;
 
-                        case ParkedExceptionType.TstPExcepSlewToTarget:
+                        case ParkedExceptionType.SlewToTarget:
                             targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d);
                             LogCallToDriver($"Parked:{methodName}", $"About to set property TargetRightAscension to {targetRa.ToHMS()}");
                             telescopeDevice.TargetRightAscension = targetRa;
@@ -5564,7 +5794,7 @@ namespace ConformU
                             telescopeDevice.SlewToTarget();
                             break;
 
-                        case ParkedExceptionType.TstPExcepSlewToTargetAsync:
+                        case ParkedExceptionType.SlewToTargetAsync:
                             targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d);
                             LogCallToDriver($"Parked:{methodName}", $"About to set property to {targetRa.ToHMS()}");
                             telescopeDevice.TargetRightAscension = targetRa;
@@ -5575,13 +5805,13 @@ namespace ConformU
                             WaitForSlew($"Parked:{methodName}", "Slewing to target asynchronously");
                             break;
 
-                        case ParkedExceptionType.TstPExcepSyncToCoordinates:
+                        case ParkedExceptionType.SyncToCoordinates:
                             targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d);
                             LogCallToDriver($"Parked:{methodName}", $"About to call method, RA: {targetRa.ToHMS()}, Declination: 0.0");
                             telescopeDevice.SyncToCoordinates(targetRa, 0.0d);
                             break;
 
-                        case ParkedExceptionType.TstPExcepSyncToTarget:
+                        case ParkedExceptionType.SyncToTarget:
                             targetRa = TelescopeRaFromSiderealTime($"Parked:{methodName}", 1.0d);
                             LogCallToDriver($"Parked:{methodName}", $"About to set property to {targetRa.ToHMS()}");
                             telescopeDevice.TargetRightAscension = targetRa;
@@ -5591,7 +5821,7 @@ namespace ConformU
                             telescopeDevice.SyncToTarget();
                             break;
 
-                        case ParkedExceptionType.TstExcepTracking:
+                        case ParkedExceptionType.Tracking:
                             LogCallToDriver($"Parked:{methodName}", "About to get Tracking");
                             bool orginalTrackingState = telescopeDevice.Tracking;
                             LogCallToDriver($"Parked:{methodName}", "About to set Tracking True");
@@ -7789,16 +8019,12 @@ namespace ConformU
                 switch (telescopeRa)
                 {
                     case var @case when @case < 0.0d: // Illegal if < 0 hours
-                        {
-                            telescopeRa += 24.0d;
-                            break;
-                        }
+                        telescopeRa += 24.0d;
+                        break;
 
                     case var case1 when case1 >= 24.0d: // Illegal if > 24 hours
-                        {
-                            telescopeRa -= 24.0d;
-                            break;
-                        }
+                        telescopeRa -= 24.0d;
+                        break;
                 }
             }
             else
@@ -8731,8 +8957,7 @@ namespace ConformU
             // Slew to the target coordinates
             LogCallToDriver("SlewToHa", $"About to call SlewToCoordinatesAsync. RA: {targetRa.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
 
-            LogCallToDriver("SlewToHa",
-                $"About to call SlewToCoordinatesAsync method, RA: {targetRa.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
+            LogCallToDriver("SlewToHa", $"About to call SlewToCoordinatesAsync method, RA: {targetRa.ToHMS()}, Declination: {targetDeclination.ToDMS()}");
             telescopeDevice.SlewToCoordinatesAsync(targetRa, targetDeclination);
 
             WaitForSlew("SlewToHa", $"Slewing to HA {targetHa:+0.0;-0.0;+0.0}");
