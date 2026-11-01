@@ -14,7 +14,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:5000",
-      "hotReloadEnabled": false
+      "hotReloadEnabled": true
     }
   },
   "iisSettings": {
