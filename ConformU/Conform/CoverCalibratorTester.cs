@@ -91,17 +91,15 @@ namespace ConformU
                 switch (settings.ComDevice.ProgId)
                 {
                     default:
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = (int)0x80040405;
-                            ExInvalidValue2 = (int)0x80040405;
-                            ExInvalidValue3 = (int)0x80040405;
-                            ExInvalidValue4 = (int)0x80040405;
-                            ExInvalidValue5 = (int)0x80040405;
-                            ExInvalidValue6 = (int)0x80040405;
-                            ExNotSet1 = (int)0x80040403;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = (int)0x80040405;
+                        ExInvalidValue2 = (int)0x80040405;
+                        ExInvalidValue3 = (int)0x80040405;
+                        ExInvalidValue4 = (int)0x80040405;
+                        ExInvalidValue5 = (int)0x80040405;
+                        ExInvalidValue6 = (int)0x80040405;
+                        ExNotSet1 = (int)0x80040403;
+                        break;
                 }
             }
             base.InitialiseTest();
@@ -840,7 +838,7 @@ namespace ConformU
                                 else // The cover should have been moving after just half of the expected open time, but was not
                                     LogIssue("HaltCover", "Cover should have been moving after waiting for half of the previous open time, but it was not. Test abandoned");
                             }
-                            catch(Exception ex)
+                            catch (Exception ex)
                             {
                                 HandleException("HaltCover", MemberType.Method, Required.MustBeImplemented, ex, "The test did not complete successfully so HaltCover could not be fully tested");
                             }
@@ -1267,10 +1265,8 @@ namespace ConformU
                             break;
 
                         default:
-                            {
-                                LogIssue(propertyName, $"PerformanceTest: Unknown test type {propertyToTest}");
-                                break;
-                            }
+                            LogIssue(propertyName, $"PerformanceTest: Unknown test type {propertyToTest}");
+                            break;
                     }
 
                     elapsedTime = DateTime.Now.Subtract(startTime).TotalSeconds;
@@ -1288,28 +1284,20 @@ namespace ConformU
                 switch (loopRate)
                 {
                     case object _ when loopRate > 10.0:
-                        {
-                            LogInfo(propertyName, $"Transaction rate: {loopRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(propertyName, $"Transaction rate: {loopRate:0.0} per second");
+                        break;
 
                     case object _ when 2.0 <= loopRate && loopRate <= 10.0:
-                        {
-                            LogOk(propertyName, $"Transaction rate: {loopRate:0.0} per second");
-                            break;
-                        }
+                        LogOk(propertyName, $"Transaction rate: {loopRate:0.0} per second");
+                        break;
 
                     case object _ when 1.0 <= loopRate && loopRate <= 2.0:
-                        {
-                            LogInfo(propertyName, $"Transaction rate: {loopRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(propertyName, $"Transaction rate: {loopRate:0.0} per second");
+                        break;
 
                     default:
-                        {
-                            LogInfo(propertyName, $"Transaction rate: {loopRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(propertyName, $"Transaction rate: {loopRate:0.0} per second");
+                        break;
                 }
             }
             catch (Exception ex)

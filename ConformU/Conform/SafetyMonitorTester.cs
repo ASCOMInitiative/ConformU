@@ -81,17 +81,15 @@ namespace ConformU
                 switch (settings.ComDevice.ProgId ?? "")
                 {
                     default:
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = (int)0x80040405;
-                            ExInvalidValue2 = (int)0x80040405;
-                            ExInvalidValue3 = (int)0x80040405;
-                            ExInvalidValue4 = (int)0x80040405;
-                            ExInvalidValue5 = (int)0x80040405;
-                            ExInvalidValue6 = (int)0x80040405;
-                            ExNotSet1 = (int)0x80040403;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = (int)0x80040405;
+                        ExInvalidValue2 = (int)0x80040405;
+                        ExInvalidValue3 = (int)0x80040405;
+                        ExInvalidValue4 = (int)0x80040405;
+                        ExInvalidValue5 = (int)0x80040405;
+                        ExInvalidValue6 = (int)0x80040405;
+                        ExNotSet1 = (int)0x80040403;
+                        break;
                 }
             }
             base.InitialiseTest();
@@ -235,18 +233,14 @@ namespace ConformU
                 switch (pType)
                 {
                     case RequiredProperty.PropIsSafe:
-                        {
-                            LogCallToDriver("IsSafe", "About to get IsSafe property");
-                            mIsSafe = TimeFunc("IsSafe", () => mSafetyMonitor.IsSafe, TargetTime.Fast);
-                            LogOk(pName, mIsSafe.ToString());
-                            break;
-                        }
+                        LogCallToDriver("IsSafe", "About to get IsSafe property");
+                        mIsSafe = TimeFunc("IsSafe", () => mSafetyMonitor.IsSafe, TargetTime.Fast);
+                        LogOk(pName, mIsSafe.ToString());
+                        break;
 
                     default:
-                        {
-                            LogIssue(pName, $"RequiredPropertiesTest: Unknown test type {pType}");
-                            break;
-                        }
+                        LogIssue(pName, $"RequiredPropertiesTest: Unknown test type {pType}");
+                        break;
                 }
             }
             catch (Exception ex)
@@ -304,28 +298,20 @@ namespace ConformU
                 switch (lRate)
                 {
                     case object _ when lRate > 10.0:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     case object _ when 2.0 <= lRate && lRate <= 10.0:
-                        {
-                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     case object _ when 1.0 <= lRate && lRate <= 2.0:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     default:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
                 }
             }
             catch (Exception ex)

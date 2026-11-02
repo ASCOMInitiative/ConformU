@@ -75,36 +75,26 @@ namespace ConformU
                 case MessageLevel.OK:
                 case MessageLevel.Issue:
                 case MessageLevel.Error:
-                    {
-                        messageLevel = logLevel.ToString().ToUpperInvariant().PadRight(MESSAGE_LEVEL_WIDTH);
-                        break;
-                    }
+                    messageLevel = logLevel.ToString().ToUpperInvariant().PadRight(MESSAGE_LEVEL_WIDTH);
+                    break;
 
                 case MessageLevel.TestOnly:
                 case MessageLevel.TestAndMessage:
-                    {
-                        messageLevel = "".PadRight(MESSAGE_LEVEL_WIDTH);
-                        break;
-                    }
+                    messageLevel = "".PadRight(MESSAGE_LEVEL_WIDTH);
+                    break;
                 default:
-                    {
-                        throw new ASCOM.InvalidValueException($"LogMsg - Unknown message level: {logLevel}.");
-                    }
+                    throw new ASCOM.InvalidValueException($"LogMsg - Unknown message level: {logLevel}.");
             }
 
             // Format the screen message to be consistent with the messages in the log file 
             switch (logLevel)
             {
                 case MessageLevel.TestOnly:
-                    {
-                        screenMessage = id;
-                        break;
-                    }
+                    screenMessage = id;
+                    break;
                 default:
-                    {
-                        screenMessage = $"{id,-TEST_NAME_WIDTH} {messageLevel} {message}";
-                        break;
-                    }
+                    screenMessage = $"{id,-TEST_NAME_WIDTH} {messageLevel} {message}";
+                    break;
             }
 
             // Write the message to the console

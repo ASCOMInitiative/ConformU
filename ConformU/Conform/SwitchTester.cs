@@ -107,13 +107,11 @@ namespace ConformU
                 switch (settings.ComDevice.ProgId)
                 {
                     default:
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = (int)0x80040405;
-                            ExInvalidValue2 = (int)0x80040405;
-                            ExNotSet1 = (int)0x80040403;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = (int)0x80040405;
+                        ExInvalidValue2 = (int)0x80040405;
+                        ExNotSet1 = (int)0x80040403;
+                        break;
                 }
             }
             base.InitialiseTest();
@@ -1630,11 +1628,9 @@ namespace ConformU
                         break;
 
                     default:
-                        {
-                            canReadMaxSwitch = true; // A valid value has been found
-                            LogOk(pName, returnValue.ToString());
-                            break;
-                        }
+                        canReadMaxSwitch = true; // A valid value has been found
+                        LogOk(pName, returnValue.ToString());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1940,10 +1936,8 @@ namespace ConformU
                             break;
 
                         default:
-                            {
-                                LogIssue("CheckInaccessibleOutOfRange", $"Unknown value of SwitchMethod Enum: {method}");
-                                break;
-                            }
+                            LogIssue("CheckInaccessibleOutOfRange", $"Unknown value of SwitchMethod Enum: {method}");
+                            break;
                     }
                     LogIssue("SwitchNumber", $"Switch did not throw an exception when a switch ID below 0 was used in method: {method}");
                 }
@@ -2024,10 +2018,8 @@ namespace ConformU
                             break;
 
                         default:
-                            {
-                                LogIssue("CheckInaccessibleOutOfRange", $"Unknown value of SwitchMethod Enum: {method}");
-                                break;
-                            }
+                            LogIssue("CheckInaccessibleOutOfRange", $"Unknown value of SwitchMethod Enum: {method}");
+                            break;
                     }
                     LogIssue("SwitchNumber", $"Switch did not throw an exception when a switch ID above MaxSwitch was used in method: {method}");
                 }

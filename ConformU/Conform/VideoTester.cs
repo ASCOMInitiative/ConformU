@@ -156,13 +156,11 @@ namespace ConformU
                 switch (settings.ComDevice.ProgId)
                 {
                     default:
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = (int)0x80040405;
-                            ExInvalidValue2 = (int)0x80040405;
-                            ExNotSet1 = (int)0x80040403;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = (int)0x80040405;
+                        ExInvalidValue2 = (int)0x80040405;
+                        ExNotSet1 = (int)0x80040403;
+                        break;
                 }
             }
             base.InitialiseTest();
@@ -396,43 +394,35 @@ namespace ConformU
                         {
                             case 1 // Rank 1
                            :
-                                {
-                                    if (imageArrayAsArray.GetType().Equals(typeof(int[])))
-                                        LogOk("ImageArray", "  Received a 1 dimension Integer array as expected.");
-                                    else
-                                        LogIssue("ImageArray",
-                                            $"  Did not receive a 1 dimension Integer array as expected. Received: {imageArrayAsArray.GetType().Name}");
-                                    break;
-                                }
+                                if (imageArrayAsArray.GetType().Equals(typeof(int[])))
+                                    LogOk("ImageArray", "  Received a 1 dimension Integer array as expected.");
+                                else
+                                    LogIssue("ImageArray",
+                                        $"  Did not receive a 1 dimension Integer array as expected. Received: {imageArrayAsArray.GetType().Name}");
+                                break;
 
                             case 2 // Rank 2
                      :
-                                {
-                                    if (imageArrayAsArray.GetType().Equals(typeof(int[,])))
-                                        LogOk("ImageArray", "  Received a 2 dimension Integer array as expected.");
-                                    else
-                                        LogIssue("ImageArray",
-                                            $"  Did not receive a 2 dimension Integer array as expected. Received: {imageArrayAsArray.GetType().Name}");
-                                    break;
-                                }
+                                if (imageArrayAsArray.GetType().Equals(typeof(int[,])))
+                                    LogOk("ImageArray", "  Received a 2 dimension Integer array as expected.");
+                                else
+                                    LogIssue("ImageArray",
+                                        $"  Did not receive a 2 dimension Integer array as expected. Received: {imageArrayAsArray.GetType().Name}");
+                                break;
 
                             case 3 // Rank 3
                      :
-                                {
-                                    if (imageArrayAsArray.GetType().Equals(typeof(int[,,])))
-                                        LogOk("ImageArray", "  Received a 3 dimension Integer array as expected.");
-                                    else
-                                        LogIssue("ImageArray",
-                                            $"  Did not receive a 3 dimension Integer array as expected. Received: {imageArrayAsArray.GetType().Name}");
-                                    break;
-                                }
+                                if (imageArrayAsArray.GetType().Equals(typeof(int[,,])))
+                                    LogOk("ImageArray", "  Received a 3 dimension Integer array as expected.");
+                                else
+                                    LogIssue("ImageArray",
+                                        $"  Did not receive a 3 dimension Integer array as expected. Received: {imageArrayAsArray.GetType().Name}");
+                                break;
 
                             default:
-                                {
-                                    LogIssue("ImageArray",
-                                        $"  Array rank is 0 or exceeds 3: {imageArrayAsArray.GetType().Name}");
-                                    break;
-                                }
+                                LogIssue("ImageArray",
+                                    $"  Array rank is 0 or exceeds 3: {imageArrayAsArray.GetType().Name}");
+                                break;
                         }
 
                         if (canReadSensorType)
@@ -441,82 +431,62 @@ namespace ConformU
                             {
                                 case object _ when sensorType == SensorType.Color // This camera returns multiple image planes of colour information
                                :
+                                    switch (imageArrayAsArray.Rank)
                                     {
-                                        switch (imageArrayAsArray.Rank)
-                                        {
-                                            case 1 // Invalid configuration
-                                           :
-                                                {
-                                                    LogIssue("ImageArray", "  The SensorType is Colour and the zero based array rank is 0. For a colour sensor the array rank must be 1 or 2.");
-                                                    LogInfo("ImageArray", "  Please see the IVideoFrame.ImageArray entry in the Platform Help file for allowed combinations of SensorType and ImageArray format.");
-                                                    break;
-                                                }
+                                        case 1 // Invalid configuration
+                                       :
+                                            LogIssue("ImageArray", "  The SensorType is Colour and the zero based array rank is 0. For a colour sensor the array rank must be 1 or 2.");
+                                            LogInfo("ImageArray", "  Please see the IVideoFrame.ImageArray entry in the Platform Help file for allowed combinations of SensorType and ImageArray format.");
+                                            break;
 
-                                            case 2 // NumPlanes x (Height * Width). NumPlanes should be 3
-                                     :
-                                                {
-                                                    CheckImage(imageArrayAsArray, 3, height * width, 0);
-                                                    break;
-                                                }
+                                        case 2 // NumPlanes x (Height * Width). NumPlanes should be 3
+                                 :
+                                            CheckImage(imageArrayAsArray, 3, height * width, 0);
+                                            break;
 
-                                            case 3 // NumPlanes x Height x Width. NumPlanes should be 3
-                                     :
-                                                {
-                                                    CheckImage(imageArrayAsArray, 3, height, width);
-                                                    break;
-                                                }
+                                        case 3 // NumPlanes x Height x Width. NumPlanes should be 3
+                                 :
+                                            CheckImage(imageArrayAsArray, 3, height, width);
+                                            break;
 
-                                            default:
-                                                {
-                                                    // This is an unsupported rank 0 or >3 so create an error
-                                                    LogIssue("ImageArray",
-                                                        $"  The zero based array rank must be 1, 2 or 3 . The returned array had rank: {imageArrayAsArray.Rank}");
-                                                    break;
-                                                }
-                                        }
-
-                                        break;
+                                        default:
+                                            // This is an unsupported rank 0 or >3 so create an error
+                                            LogIssue("ImageArray",
+                                                $"  The zero based array rank must be 1, 2 or 3 . The returned array had rank: {imageArrayAsArray.Rank}");
+                                            break;
                                     }
+
+                                    break;
 
                                 default:
+                                    // This camera returns just one plane that may be literally monochrome or may appear monochrome
+                                    // but contain encoded colour information e.g. Bayer RGGB format
+                                    switch (imageArrayAsArray.Rank)
                                     {
-                                        // This camera returns just one plane that may be literally monochrome or may appear monochrome 
-                                        // but contain encoded colour information e.g. Bayer RGGB format
-                                        switch (imageArrayAsArray.Rank)
-                                        {
-                                            case 1 // (Height * Width)
-                                           :
-                                                {
-                                                    CheckImage(imageArrayAsArray, height * width, 0, 0);
-                                                    break;
-                                                }
+                                        case 1 // (Height * Width)
+                                       :
+                                            CheckImage(imageArrayAsArray, height * width, 0, 0);
+                                            break;
 
-                                            case 2 // Height x Width.
-                                     :
-                                                {
-                                                    CheckImage(imageArrayAsArray, height, width, 0);
-                                                    break;
-                                                }
+                                        case 2 // Height x Width.
+                                 :
+                                            CheckImage(imageArrayAsArray, height, width, 0);
+                                            break;
 
-                                            case 3 // Invalid configuration
-                                     :
-                                                {
-                                                    LogIssue("ImageArray", "  The SensorType is not Colour and the array rank is 3. For non-colour sensors the array rank must be 1 or 2.");
-                                                    LogInfo("ImageArray", "  Please see the IVideoFrame.ImageArray entry in the Platform Help file for allowed combinations of SensorType and ImageArray format.");
-                                                    break;
-                                                }
+                                        case 3 // Invalid configuration
+                                 :
+                                            LogIssue("ImageArray", "  The SensorType is not Colour and the array rank is 3. For non-colour sensors the array rank must be 1 or 2.");
+                                            LogInfo("ImageArray", "  Please see the IVideoFrame.ImageArray entry in the Platform Help file for allowed combinations of SensorType and ImageArray format.");
+                                            break;
 
-                                            default:
-                                                {
-                                                    // This is an unsupported rank 0 or >3 so create an error
-                                                    LogIssue("ImageArray",
-                                                        $"  The ImageArray rank must be 1, 2 or 3. The returned array had rank: {imageArrayAsArray.Rank}");
-                                                    break;
-                                                }
-                                        }
-
-                                        break;
+                                        default:
+                                            // This is an unsupported rank 0 or >3 so create an error
+                                            LogIssue("ImageArray",
+                                                $"  The ImageArray rank must be 1, 2 or 3. The returned array had rank: {imageArrayAsArray.Rank}");
+                                            break;
                                     }
+
+                                    break;
                             }
                         }
                         else
@@ -604,18 +574,14 @@ namespace ConformU
                 switch (pType)
                 {
                     case CanProperty.CanConfigureDeviceProperties:
-                        {
-                            LogCallToDriver(pType.ToString(), "About to get CanConfigureDeviceProperties property");
-                            canConfigureDeviceProperties = videoDevice.CanConfigureDeviceProperties;
-                            LogOk(pName, canConfigureDeviceProperties.ToString());
-                            break;
-                        }
+                        LogCallToDriver(pType.ToString(), "About to get CanConfigureDeviceProperties property");
+                        canConfigureDeviceProperties = videoDevice.CanConfigureDeviceProperties;
+                        LogOk(pName, canConfigureDeviceProperties.ToString());
+                        break;
 
                     default:
-                        {
-                            LogIssue(pName, $"Conform:CanTest: Unknown test type {pType}");
-                            break;
-                        }
+                        LogIssue(pName, $"Conform:CanTest: Unknown test type {pType}");
+                        break;
                 }
             }
             catch (Exception ex)
@@ -720,54 +686,40 @@ namespace ConformU
                 switch (pType)
                 {
                     case VideoProperty.GainMax:
-                        {
-                            canReadGainMax = false;
-                            returnValue = videoDevice.GainMax;
-                            canReadGainMax = true;
-                            break;
-                        }
+                        canReadGainMax = false;
+                        returnValue = videoDevice.GainMax;
+                        canReadGainMax = true;
+                        break;
 
                     case VideoProperty.GainMin:
-                        {
-                            canReadGainMin = false;
-                            returnValue = videoDevice.GainMin;
-                            canReadGainMin = true;
-                            break;
-                        }
+                        canReadGainMin = false;
+                        returnValue = videoDevice.GainMin;
+                        canReadGainMin = true;
+                        break;
 
                     case VideoProperty.Gain:
-                        {
-                            returnValue = videoDevice.Gain;
-                            break;
-                        }
+                        returnValue = videoDevice.Gain;
+                        break;
 
                     case VideoProperty.GammaMax:
-                        {
-                            canReadGammaMax = false;
-                            returnValue = videoDevice.GammaMax;
-                            canReadGammaMax = true;
-                            break;
-                        }
+                        canReadGammaMax = false;
+                        returnValue = videoDevice.GammaMax;
+                        canReadGammaMax = true;
+                        break;
 
                     case VideoProperty.GammaMin:
-                        {
-                            canReadGammaMin = false;
-                            returnValue = videoDevice.GammaMin;
-                            canReadGammaMin = true;
-                            break;
-                        }
+                        canReadGammaMin = false;
+                        returnValue = videoDevice.GammaMin;
+                        canReadGammaMin = true;
+                        break;
 
                     case VideoProperty.Gamma:
-                        {
-                            returnValue = videoDevice.Gamma;
-                            break;
-                        }
+                        returnValue = videoDevice.Gamma;
+                        break;
 
                     default:
-                        {
-                            LogIssue(methodName, $"TestShort: Unknown test type - {pType}");
-                            break;
-                        }
+                        LogIssue(methodName, $"TestShort: Unknown test type - {pType}");
+                        break;
                 }
 
                 // Successfully retrieved a value
@@ -775,23 +727,17 @@ namespace ConformU
                 {
                     case object _ when returnValue < pMin // Lower than minimum value
                    :
-                        {
-                            LogIssue(methodName, $"Invalid value: {returnValue}");
-                            break;
-                        }
+                        LogIssue(methodName, $"Invalid value: {returnValue}");
+                        break;
 
                     case object _ when returnValue > pMax // Higher than maximum value
              :
-                        {
-                            LogIssue(methodName, $"Invalid value: {returnValue}");
-                            break;
-                        }
+                        LogIssue(methodName, $"Invalid value: {returnValue}");
+                        break;
 
                     default:
-                        {
-                            LogOk(methodName, returnValue.ToString());
-                            break;
-                        }
+                        LogOk(methodName, returnValue.ToString());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -832,48 +778,34 @@ namespace ConformU
                 switch (pType)
                 {
                     case VideoProperty.BitDepth:
-                        {
-                            returnValue = videoDevice.BitDepth;
-                            break;
-                        }
+                        returnValue = videoDevice.BitDepth;
+                        break;
 
                     case VideoProperty.CameraState:
-                        {
-                            returnValue = (int)videoDevice.CameraState;
-                            break;
-                        }
+                        returnValue = (int)videoDevice.CameraState;
+                        break;
 
                     case VideoProperty.Height:
-                        {
-                            returnValue = videoDevice.Height;
-                            break;
-                        }
+                        returnValue = videoDevice.Height;
+                        break;
 
                     case VideoProperty.IntegrationRate:
-                        {
-                            canReadIntegrationRate = false;
-                            returnValue = videoDevice.IntegrationRate;
-                            canReadIntegrationRate = true;
-                            break;
-                        }
+                        canReadIntegrationRate = false;
+                        returnValue = videoDevice.IntegrationRate;
+                        canReadIntegrationRate = true;
+                        break;
 
                     case VideoProperty.Width:
-                        {
-                            returnValue = videoDevice.Width;
-                            break;
-                        }
+                        returnValue = videoDevice.Width;
+                        break;
 
                     case VideoProperty.VideoFramesBufferSize:
-                        {
-                            returnValue = videoDevice.VideoFramesBufferSize;
-                            break;
-                        }
+                        returnValue = videoDevice.VideoFramesBufferSize;
+                        break;
 
                     default:
-                        {
-                            LogIssue(methodName, $"TestInteger: Unknown test type - {pType}");
-                            break;
-                        }
+                        LogIssue(methodName, $"TestInteger: Unknown test type - {pType}");
+                        break;
                 }
 
                 // Successfully retrieved a value
@@ -881,23 +813,17 @@ namespace ConformU
                 {
                     case object _ when returnValue < pMin // Lower than minimum value
                    :
-                        {
-                            LogIssue(methodName, $"Invalid value: {returnValue}");
-                            break;
-                        }
+                        LogIssue(methodName, $"Invalid value: {returnValue}");
+                        break;
 
                     case object _ when returnValue > pMax // Higher than maximum value
              :
-                        {
-                            LogIssue(methodName, $"Invalid value: {returnValue}");
-                            break;
-                        }
+                        LogIssue(methodName, $"Invalid value: {returnValue}");
+                        break;
 
                     default:
-                        {
-                            LogOk(methodName, returnValue.ToString());
-                            break;
-                        }
+                        LogOk(methodName, returnValue.ToString());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -937,16 +863,12 @@ namespace ConformU
                 switch (pType)
                 {
                     case VideoProperty.FrameNumber:
-                        {
-                            returnValue = lastVideoFrame.FrameNumber;
-                            break;
-                        }
+                        returnValue = lastVideoFrame.FrameNumber;
+                        break;
 
                     default:
-                        {
-                            LogIssue(methodName, $"TestInteger: Unknown test type - {pType}");
-                            break;
-                        }
+                        LogIssue(methodName, $"TestInteger: Unknown test type - {pType}");
+                        break;
                 }
 
                 // Successfully retrieved a value
@@ -954,23 +876,17 @@ namespace ConformU
                 {
                     case object _ when returnValue < pMin // Lower than minimum value
                    :
-                        {
-                            LogIssue(methodName, $"Invalid value: {returnValue}");
-                            break;
-                        }
+                        LogIssue(methodName, $"Invalid value: {returnValue}");
+                        break;
 
                     case object _ when returnValue > pMax // Higher than maximum value
              :
-                        {
-                            LogIssue(methodName, $"Invalid value: {returnValue}");
-                            break;
-                        }
+                        LogIssue(methodName, $"Invalid value: {returnValue}");
+                        break;
 
                     default:
-                        {
-                            LogOk(methodName, returnValue.ToString());
-                            break;
-                        }
+                        LogOk(methodName, returnValue.ToString());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1011,18 +927,14 @@ namespace ConformU
                 switch (pType)
                 {
                     case VideoProperty.LastVideoFrame:
-                        {
-                            canReadVideoFrame = false;
-                            returnValue = videoDevice.LastVideoFrame;
-                            canReadVideoFrame = true;
-                            break;
-                        }
+                        canReadVideoFrame = false;
+                        returnValue = videoDevice.LastVideoFrame;
+                        canReadVideoFrame = true;
+                        break;
 
                     default:
-                        {
-                            LogIssue(methodName, $"TestVideoFrame: Unknown test type - {pType}");
-                            break;
-                        }
+                        LogIssue(methodName, $"TestVideoFrame: Unknown test type - {pType}");
+                        break;
                 }
 
                 // Successfully retrieved a value
@@ -1057,63 +969,45 @@ namespace ConformU
                 switch (pType)
                 {
                     case VideoProperty.PixelSizeX:
-                        {
-                            returnValue = videoDevice.PixelSizeX;
-                            break;
-                        }
+                        returnValue = videoDevice.PixelSizeX;
+                        break;
 
                     case VideoProperty.PixelSizeY:
-                        {
-                            returnValue = videoDevice.PixelSizeY;
-                            break;
-                        }
+                        returnValue = videoDevice.PixelSizeY;
+                        break;
 
                     case VideoProperty.ExposureMax:
-                        {
-                            returnValue = videoDevice.ExposureMax;
-                            break;
-                        }
+                        returnValue = videoDevice.ExposureMax;
+                        break;
 
                     case VideoProperty.ExposureMin:
-                        {
-                            returnValue = videoDevice.ExposureMin;
-                            break;
-                        }
+                        returnValue = videoDevice.ExposureMin;
+                        break;
 
                     case VideoProperty.ExposureDuration:
-                        {
-                            returnValue = lastVideoFrame.ExposureDuration;
-                            break;
-                        }
+                        returnValue = lastVideoFrame.ExposureDuration;
+                        break;
 
                     default:
-                        {
-                            LogIssue(methodName, $"TestDouble: Unknown test type - {pType}");
-                            break;
-                        }
+                        LogIssue(methodName, $"TestDouble: Unknown test type - {pType}");
+                        break;
                 }
                 // Successfully retrieved a value
                 switch (returnValue)
                 {
                     case object _ when returnValue < pMin // Lower than minimum value
                    :
-                        {
-                            LogIssue(methodName, $"Invalid value: {returnValue}");
-                            break;
-                        }
+                        LogIssue(methodName, $"Invalid value: {returnValue}");
+                        break;
 
                     case object _ when returnValue > pMax // Higher than maximum value
              :
-                        {
-                            LogIssue(methodName, $"Invalid value: {returnValue}");
-                            break;
-                        }
+                        LogIssue(methodName, $"Invalid value: {returnValue}");
+                        break;
 
                     default:
-                        {
-                            LogOk(methodName, returnValue.ToString());
-                            break;
-                        }
+                        LogOk(methodName, returnValue.ToString());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1144,10 +1038,8 @@ namespace ConformU
                 switch (pType)
                 {
                     default:
-                        {
-                            LogIssue(methodName, $"TestBoolean: Unknown test type - {pType}");
-                            break;
-                        }
+                        LogIssue(methodName, $"TestBoolean: Unknown test type - {pType}");
+                        break;
                 }
                 // Successfully retrieved a value
                 LogOk(methodName, returnValue.ToString());
@@ -1191,36 +1083,26 @@ namespace ConformU
                 switch (pType)
                 {
                     case VideoProperty.Gains:
-                        {
-                            returnValue = videoDevice.Gains;
-                            break;
-                        }
+                        returnValue = videoDevice.Gains;
+                        break;
 
                     case VideoProperty.Gammas:
-                        {
-                            returnValue = videoDevice.Gammas;
-                            break;
-                        }
+                        returnValue = videoDevice.Gammas;
+                        break;
 
                     case VideoProperty.SupportedIntegrationRates:
-                        {
-                            canReadSupportedIntegrationRates = false;
-                            returnValue = videoDevice.SupportedIntegrationRates;
-                            canReadSupportedIntegrationRates = true;
-                            break;
-                        }
+                        canReadSupportedIntegrationRates = false;
+                        returnValue = videoDevice.SupportedIntegrationRates;
+                        canReadSupportedIntegrationRates = true;
+                        break;
 
                     case VideoProperty.ImageMetadata:
-                        {
-                            returnValue = lastVideoFrame.ImageMetadata;
-                            break;
-                        }
+                        returnValue = lastVideoFrame.ImageMetadata;
+                        break;
 
                     default:
-                        {
-                            LogIssue(methodName, $"TestArrayList: Unknown test type - {pType}");
-                            break;
-                        }
+                        LogIssue(methodName, $"TestArrayList: Unknown test type - {pType}");
+                        break;
                 }
 
                 // Successfully retrieved a value
@@ -1266,59 +1148,43 @@ namespace ConformU
                 switch (pType)
                 {
                     case VideoProperty.SensorName:
-                        {
-                            returnValue = videoDevice.SensorName;
-                            break;
-                        }
+                        returnValue = videoDevice.SensorName;
+                        break;
 
                     case VideoProperty.ExposureStartTime:
-                        {
-                            returnValue = lastVideoFrame.ExposureStartTime;
-                            break;
-                        }
+                        returnValue = lastVideoFrame.ExposureStartTime;
+                        break;
 
                     case VideoProperty.VideoCaptureDeviceName:
-                        {
-                            returnValue = videoDevice.VideoCaptureDeviceName;
-                            break;
-                        }
+                        returnValue = videoDevice.VideoCaptureDeviceName;
+                        break;
 
                     case VideoProperty.VideoCodec:
-                        {
-                            returnValue = videoDevice.VideoCodec;
-                            break;
-                        }
+                        returnValue = videoDevice.VideoCodec;
+                        break;
 
                     case VideoProperty.VideoFileFormat:
-                        {
-                            returnValue = videoDevice.VideoFileFormat;
-                            break;
-                        }
+                        returnValue = videoDevice.VideoFileFormat;
+                        break;
 
                     default:
-                        {
-                            LogIssue(methodName, $"TestString: Unknown test type - {pType}");
-                            break;
-                        }
+                        LogIssue(methodName, $"TestString: Unknown test type - {pType}");
+                        break;
                 }
                 // Successfully retrieved a value
                 switch (returnValue)
                 {
                     case object _ when returnValue == "":
-                        {
-                            LogOk(methodName, "The driver returned an empty string");
-                            break;
-                        }
+                        LogOk(methodName, "The driver returned an empty string");
+                        break;
 
                     default:
-                        {
-                            if (returnValue.Length <= pMaxLength)
-                                LogOk(methodName, returnValue);
-                            else
-                                LogIssue(methodName,
-                                    $"String exceeds {pMaxLength} characters maximum length - {returnValue}");
-                            break;
-                        }
+                        if (returnValue.Length <= pMaxLength)
+                            LogOk(methodName, returnValue);
+                        else
+                            LogIssue(methodName,
+                                $"String exceeds {pMaxLength} characters maximum length - {returnValue}");
+                        break;
                 }
             }
             catch (Exception ex)
@@ -1370,16 +1236,12 @@ namespace ConformU
                     switch (pType)
                     {
                         case CameraPerformance.CameraState:
-                            {
-                                cameraState = videoDevice.CameraState;
-                                break;
-                            }
+                            cameraState = videoDevice.CameraState;
+                            break;
 
                         default:
-                            {
-                                LogIssue(pName, $"Conform:PerformanceTest: Unknown test type {pType}");
-                                break;
-                            }
+                            LogIssue(pName, $"Conform:PerformanceTest: Unknown test type {pType}");
+                            break;
                     }
 
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
@@ -1396,28 +1258,20 @@ namespace ConformU
                 switch (lRate)
                 {
                     case object _ when lRate > 10.0:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     case object _ when 2.0 <= lRate && lRate <= 10.0:
-                        {
-                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     case object _ when 1.0 <= lRate && lRate <= 2.0:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     default:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
                 }
             }
             catch (Exception ex)

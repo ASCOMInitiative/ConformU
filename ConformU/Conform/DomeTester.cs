@@ -140,13 +140,11 @@ namespace ConformU
                 switch (settings.ComDevice.ProgId.ToUpper())
                 {
                     default:
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = (int)0x80040405;
-                            ExInvalidValue2 = (int)0x80040405;
-                            ExNotSet1 = (int)0x80040403;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = (int)0x80040405;
+                        ExInvalidValue2 = (int)0x80040405;
+                        ExNotSet1 = (int)0x80040403;
+                        break;
                 }
             }
             base.InitialiseTest();
@@ -2016,40 +2014,28 @@ namespace ConformU
                     switch (memberType)
                     {
                         case DomeInterfaceMember.Altitude:
-                            {
-                                lDouble = domeDevice.Altitude;
-                                break;
-                            }
+                            lDouble = domeDevice.Altitude;
+                            break;
 
                         case DomeInterfaceMember.Azimuth:
-                            {
-                                lDouble = domeDevice.Azimuth;
-                                break;
-                            }
+                            lDouble = domeDevice.Azimuth;
+                            break;
 
                         case DomeInterfaceMember.ShutterStatus:
-                            {
-                                lShutterState = domeDevice.ShutterStatus;
-                                break;
-                            }
+                            lShutterState = domeDevice.ShutterStatus;
+                            break;
 
                         case DomeInterfaceMember.SlavedRead:
-                            {
-                                lBoolean = domeDevice.Slaved;
-                                break;
-                            }
+                            lBoolean = domeDevice.Slaved;
+                            break;
 
                         case DomeInterfaceMember.Slewing:
-                            {
-                                lBoolean = domeDevice.Slewing;
-                                break;
-                            }
+                            lBoolean = domeDevice.Slewing;
+                            break;
 
                         default:
-                            {
-                                LogIssue(testName, $"DomePerformanceTest: Unknown test type {memberType}");
-                                break;
-                            }
+                            LogIssue(testName, $"DomePerformanceTest: Unknown test type {memberType}");
+                            break;
                     }
 
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
@@ -2066,28 +2052,20 @@ namespace ConformU
                 switch (lRate)
                 {
                     case object _ when lRate > 10.0:
-                        {
-                            LogInfo(testName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(testName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     case object _ when 2.0 <= lRate && lRate <= 10.0:
-                        {
-                            LogOk(testName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogOk(testName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     case object _ when 1.0 <= lRate && lRate <= 2.0:
-                        {
-                            LogInfo(testName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(testName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     default:
-                        {
-                            LogInfo(testName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(testName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
                 }
             }
             catch (Exception ex)

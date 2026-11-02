@@ -81,13 +81,11 @@ namespace ConformU
                 switch (settings.ComDevice.ProgId)
                 {
                     default:
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = (int)0x80040404;
-                            ExInvalidValue2 = (int)0x80040404;
-                            ExNotSet1 = (int)0x80040403;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = (int)0x80040404;
+                        ExInvalidValue2 = (int)0x80040404;
+                        ExNotSet1 = (int)0x80040403;
+                        break;
                 }
             }
             base.InitialiseTest();
@@ -264,11 +262,9 @@ namespace ConformU
                             break;
 
                         default:
-                            {
-                                LogOk("Position", mPosition.ToString());
-                                mAbsolutePositionOk = true;
-                                break;
-                            }
+                            LogOk("Position", mPosition.ToString());
+                            mAbsolutePositionOk = true;
+                            break;
                     }
                 }
                 catch (Exception ex)
@@ -516,7 +512,7 @@ namespace ConformU
                         for (int i = 0; i < 50; i++)
                         {
                             Thread.Sleep(100);
-                            LogInfo("Halt While Moving", $"IsMoving state after {(i + 1)*100} milli-seconds... {focuser.IsMoving}");
+                            LogInfo("Halt While Moving", $"IsMoving state after {(i + 1) * 100} milli-seconds... {focuser.IsMoving}");
                         }
                     }
                 }
@@ -1037,28 +1033,20 @@ namespace ConformU
                     switch (pType)
                     {
                         case FocuserPropertyMethod.IsMoving:
-                            {
-                                lBoolean = focuser.IsMoving;
-                                break;
-                            }
+                            lBoolean = focuser.IsMoving;
+                            break;
 
                         case FocuserPropertyMethod.Position:
-                            {
-                                lSingle = focuser.Position;
-                                break;
-                            }
+                            lSingle = focuser.Position;
+                            break;
 
                         case FocuserPropertyMethod.Temperature:
-                            {
-                                lRate = focuser.Temperature;
-                                break;
-                            }
+                            lRate = focuser.Temperature;
+                            break;
 
                         default:
-                            {
-                                LogIssue(pName, $"FocuserPerformanceTest: Unknown test type {pType}");
-                                break;
-                            }
+                            LogIssue(pName, $"FocuserPerformanceTest: Unknown test type {pType}");
+                            break;
                     }
 
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
@@ -1074,28 +1062,20 @@ namespace ConformU
                 switch (lRate)
                 {
                     case object _ when lRate > 10.0:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     case object _ when 2.0 <= lRate && lRate <= 10.0:
-                        {
-                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     case object _ when 1.0 <= lRate && lRate <= 2.0:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     default:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
                 }
             }
             catch (Exception ex)

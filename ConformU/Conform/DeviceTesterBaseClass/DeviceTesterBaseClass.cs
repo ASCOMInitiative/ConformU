@@ -265,16 +265,12 @@ namespace ConformU
                     switch (pType)
                     {
                         case PerformanceProperty.DeviceState:
-                            {
-                                deviceState = baseClassDevice.DeviceState;
-                                break;
-                            }
+                            deviceState = baseClassDevice.DeviceState;
+                            break;
 
                         default:
-                            {
-                                LogIssue(pName, $"PerformanceTest: Unknown test type {pType}");
-                                break;
-                            }
+                            LogIssue(pName, $"PerformanceTest: Unknown test type {pType}");
+                            break;
                     }
 
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
@@ -291,28 +287,20 @@ namespace ConformU
                 switch (lRate)
                 {
                     case object _ when lRate > 10.0:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     case object _ when 2.0 <= lRate && lRate <= 10.0:
-                        {
-                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     case object _ when 1.0 <= lRate && lRate <= 2.0:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     default:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
                 }
             }
             catch (Exception ex)
@@ -533,81 +521,79 @@ namespace ConformU
                                         break;
 
                                     default:
-                                        {
-                                            LogOk("SupportedActions", $"Found action: {actionString}");
+                                        LogOk("SupportedActions", $"Found action: {actionString}");
 
-                                            // Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
-                                            if (baseClassDeviceType == DeviceTypes.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.Equals("ASCOM.OCH.OBSERVINGCONDITIONS", StringComparison.OrdinalIgnoreCase))
+                                        // Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
+                                        if (baseClassDeviceType == DeviceTypes.ObservingConditions & settings.DeviceTechnology == DeviceTechnology.COM & settings.ComDevice.ProgId.Equals("ASCOM.OCH.OBSERVINGCONDITIONS", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            string result;
+                                            if (actionString.StartsWith("//OCSIMULATOR:", StringComparison.InvariantCultureIgnoreCase))
                                             {
-                                                string result;
-                                                if (actionString.StartsWith("//OCSIMULATOR:", StringComparison.InvariantCultureIgnoreCase))
+                                                try
                                                 {
-                                                    try
-                                                    {
-                                                        LogCallToDriver("SupportedActions", "About to call method Action");
-                                                        result = baseClassDevice.Action(actionString, testParameters);
-                                                        LogOk("SupportedActions", $"OC simulator action {actionString} gave result: {result}");
-                                                    }
-                                                    catch (Exception ex1)
-                                                    {
-                                                        LogIssue("SupportedActions",
-                                                            $"Exception calling OCH simulator action {actionString}: {ex1.Message}");
-                                                    }
+                                                    LogCallToDriver("SupportedActions", "About to call method Action");
+                                                    result = baseClassDevice.Action(actionString, testParameters);
+                                                    LogOk("SupportedActions", $"OC simulator action {actionString} gave result: {result}");
                                                 }
-                                                else if (actionString.StartsWith("//ASCOM.SIMULATOR.OBSERVINGCONDITIONS:", StringComparison.InvariantCultureIgnoreCase))
+                                                catch (Exception ex1)
                                                 {
-                                                    try
-                                                    {
-                                                        LogCallToDriver("SupportedActions", "About to call method Action");
-                                                        result = baseClassDevice.Action(actionString, testParameters);
-                                                        LogOk("SupportedActions", $"OC simulator action {actionString} gave result: {result}");
-                                                    }
-                                                    catch (Exception ex1)
-                                                    {
-                                                        LogIssue("SupportedActions",
-                                                            $"Exception calling OCH simulator action {actionString}: {ex1.Message}");
-                                                    }
-                                                }
-                                                else if (actionString.StartsWith("//SWITCHSIMULATOR:", StringComparison.InvariantCultureIgnoreCase))
-                                                {
-                                                    try
-                                                    {
-                                                        LogCallToDriver("SupportedActions", "About to call method Action");
-                                                        result = baseClassDevice.Action(actionString, testParameters);
-                                                        LogOk("SupportedActions", $"Switch simulator action {actionString} gave result: {result}");
-                                                    }
-                                                    catch (Exception ex1)
-                                                    {
-                                                        LogIssue("SupportedActions",
-                                                            $"Exception calling switch simulator action {actionString}: {ex1.Message}");
-                                                    }
-                                                }
-                                                else if (actionString.StartsWith("//ASCOM.SIMULATOR.SWITCH:", StringComparison.InvariantCultureIgnoreCase))
-                                                {
-                                                    try
-                                                    {
-                                                        LogCallToDriver("SupportedActions", "About to call method Action");
-                                                        result = baseClassDevice.Action(actionString, testParameters);
-                                                        LogOk("SupportedActions", $"Switch simulator action {actionString} gave result: {result}");
-                                                    }
-                                                    catch (Exception ex1)
-                                                    {
-                                                        LogIssue("SupportedActions",
-                                                            $"Exception calling switch simulator action {actionString}: {ex1.Message}");
-                                                    }
+                                                    LogIssue("SupportedActions",
+                                                        $"Exception calling OCH simulator action {actionString}: {ex1.Message}");
                                                 }
                                             }
-
-                                            if (actionString.Trim().Equals(GET_SAFETY_EVENTS_ACTION_NAME, StringComparison.InvariantCultureIgnoreCase))
-                                                hasGetSafetyState = true;
-
-                                            if (actionString.Trim().Equals(SET_EXTERNAL_EVENTS_ACTION_NAME, StringComparison.InvariantCultureIgnoreCase))
-                                                hasSetSafetyState = true;
-
-                                            if (actionString.Trim().Equals(CLEAR_EXTERNAL_EVENTS_ACTION_NAME, StringComparison.InvariantCultureIgnoreCase))
-                                                hasClearSafetyState = true;
-                                            break;
+                                            else if (actionString.StartsWith("//ASCOM.SIMULATOR.OBSERVINGCONDITIONS:", StringComparison.InvariantCultureIgnoreCase))
+                                            {
+                                                try
+                                                {
+                                                    LogCallToDriver("SupportedActions", "About to call method Action");
+                                                    result = baseClassDevice.Action(actionString, testParameters);
+                                                    LogOk("SupportedActions", $"OC simulator action {actionString} gave result: {result}");
+                                                }
+                                                catch (Exception ex1)
+                                                {
+                                                    LogIssue("SupportedActions",
+                                                        $"Exception calling OCH simulator action {actionString}: {ex1.Message}");
+                                                }
+                                            }
+                                            else if (actionString.StartsWith("//SWITCHSIMULATOR:", StringComparison.InvariantCultureIgnoreCase))
+                                            {
+                                                try
+                                                {
+                                                    LogCallToDriver("SupportedActions", "About to call method Action");
+                                                    result = baseClassDevice.Action(actionString, testParameters);
+                                                    LogOk("SupportedActions", $"Switch simulator action {actionString} gave result: {result}");
+                                                }
+                                                catch (Exception ex1)
+                                                {
+                                                    LogIssue("SupportedActions",
+                                                        $"Exception calling switch simulator action {actionString}: {ex1.Message}");
+                                                }
+                                            }
+                                            else if (actionString.StartsWith("//ASCOM.SIMULATOR.SWITCH:", StringComparison.InvariantCultureIgnoreCase))
+                                            {
+                                                try
+                                                {
+                                                    LogCallToDriver("SupportedActions", "About to call method Action");
+                                                    result = baseClassDevice.Action(actionString, testParameters);
+                                                    LogOk("SupportedActions", $"Switch simulator action {actionString} gave result: {result}");
+                                                }
+                                                catch (Exception ex1)
+                                                {
+                                                    LogIssue("SupportedActions",
+                                                        $"Exception calling switch simulator action {actionString}: {ex1.Message}");
+                                                }
+                                            }
                                         }
+
+                                        if (actionString.Trim().Equals(GET_SAFETY_EVENTS_ACTION_NAME, StringComparison.InvariantCultureIgnoreCase))
+                                            hasGetSafetyState = true;
+
+                                        if (actionString.Trim().Equals(SET_EXTERNAL_EVENTS_ACTION_NAME, StringComparison.InvariantCultureIgnoreCase))
+                                            hasSetSafetyState = true;
+
+                                        if (actionString.Trim().Equals(CLEAR_EXTERNAL_EVENTS_ACTION_NAME, StringComparison.InvariantCultureIgnoreCase))
+                                            hasClearSafetyState = true;
+                                        break;
                                 }
                             }
                             else

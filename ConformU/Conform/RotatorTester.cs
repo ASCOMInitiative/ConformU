@@ -94,13 +94,11 @@ namespace ConformU
                 switch (settings.ComDevice.ProgId ?? "")
                 {
                     default:
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = (int)0x80040405;
-                            ExInvalidValue2 = (int)0x80040405;
-                            ExNotSet1 = (int)0x80040403;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = (int)0x80040405;
+                        ExInvalidValue2 = (int)0x80040405;
+                        ExNotSet1 = (int)0x80040403;
+                        break;
                 }
             }
             base.InitialiseTest();
@@ -462,22 +460,16 @@ namespace ConformU
                     switch (mechanicalPosition)
                     {
                         case var @case when @case < 0.0f: // Lower than minimum value
-                            {
-                                LogIssue("MechanicalPosition", $"Invalid value: {mechanicalPosition}");
-                                break;
-                            }
+                            LogIssue("MechanicalPosition", $"Invalid value: {mechanicalPosition}");
+                            break;
 
                         case var case1 when case1 >= 360.0f: // Higher than maximum value
-                            {
-                                LogIssue("MechanicalPosition", $"Invalid value: {mechanicalPosition}"); // OK value
-                                break;
-                            }
+                            LogIssue("MechanicalPosition", $"Invalid value: {mechanicalPosition}"); // OK value
+                            break;
 
                         default:
-                            {
-                                LogOk("MechanicalPosition", mechanicalPosition.ToString());
-                                break;
-                            }
+                            LogOk("MechanicalPosition", mechanicalPosition.ToString());
+                            break;
                     }
 
                     // For information show the sync offset, if possible, using OFFSET = SKYPOSITION - MECHANICALPOSITION
@@ -727,55 +719,41 @@ namespace ConformU
                 switch (pType)
                 {
                     case RotatorMember.Position:
-                        {
-                            canReadPosition = false;
-                            TimeMethod(pName, () => rotatorPropertyTestSingleRet = rotator.Position, TargetTime.Fast);
-                            canReadPosition = true; // Can read position OK, doesn't generate an exception
-                            break;
-                        }
+                        canReadPosition = false;
+                        TimeMethod(pName, () => rotatorPropertyTestSingleRet = rotator.Position, TargetTime.Fast);
+                        canReadPosition = true; // Can read position OK, doesn't generate an exception
+                        break;
 
                     case RotatorMember.StepSize:
-                        {
-                            canReadStepSize = false;
-                            TimeMethod(pName, () => rotatorPropertyTestSingleRet = rotator.StepSize, TargetTime.Fast);
-                            canReadStepSize = true;
-                            break;
-                        }
+                        canReadStepSize = false;
+                        TimeMethod(pName, () => rotatorPropertyTestSingleRet = rotator.StepSize, TargetTime.Fast);
+                        canReadStepSize = true;
+                        break;
 
                     case RotatorMember.TargetPosition:
-                        {
-                            canReadTargetPosition = false;
-                            TimeMethod(pName, () => rotatorPropertyTestSingleRet = rotator.TargetPosition, TargetTime.Fast);
-                            canReadTargetPosition = true;
-                            break;
-                        }
+                        canReadTargetPosition = false;
+                        TimeMethod(pName, () => rotatorPropertyTestSingleRet = rotator.TargetPosition, TargetTime.Fast);
+                        canReadTargetPosition = true;
+                        break;
 
                     default:
-                        {
-                            LogIssue(pName, $"RotatorPropertyTestSingle: Unknown test type - {pType}");
-                            break;
-                        }
+                        LogIssue(pName, $"RotatorPropertyTestSingle: Unknown test type - {pType}");
+                        break;
                 }
                 // Successfully retrieved a value
                 switch (rotatorPropertyTestSingleRet)
                 {
                     case var @case when @case < pMin: // Lower than minimum value
-                        {
-                            LogIssue(pName, $"Invalid value: {rotatorPropertyTestSingleRet}");
-                            break;
-                        }
+                        LogIssue(pName, $"Invalid value: {rotatorPropertyTestSingleRet}");
+                        break;
 
                     case var case1 when case1 >= pMax: // Higher than maximum value
-                        {
-                            LogIssue(pName, $"Invalid value: {rotatorPropertyTestSingleRet}"); // OK value
-                            break;
-                        }
+                        LogIssue(pName, $"Invalid value: {rotatorPropertyTestSingleRet}"); // OK value
+                        break;
 
                     default:
-                        {
-                            LogOk(pName, rotatorPropertyTestSingleRet.ToString());
-                            break;
-                        }
+                        LogOk(pName, rotatorPropertyTestSingleRet.ToString());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -808,34 +786,24 @@ namespace ConformU
                     switch (pType)
                     {
                         case RotatorMember.Position:
-                            {
-                                single = rotator.Position;
-                                break;
-                            }
+                            single = rotator.Position;
+                            break;
 
                         case RotatorMember.TargetPosition:
-                            {
-                                single = rotator.TargetPosition;
-                                break;
-                            }
+                            single = rotator.TargetPosition;
+                            break;
 
                         case RotatorMember.StepSize:
-                            {
-                                single = rotator.StepSize;
-                                break;
-                            }
+                            single = rotator.StepSize;
+                            break;
 
                         case RotatorMember.IsMoving:
-                            {
-                                boolean = rotator.IsMoving;
-                                break;
-                            }
+                            boolean = rotator.IsMoving;
+                            break;
 
                         default:
-                            {
-                                LogIssue(pName, $"RotatorPerformanceTest: Unknown test type {pType}");
-                                break;
-                            }
+                            LogIssue(pName, $"RotatorPerformanceTest: Unknown test type {pType}");
+                            break;
                     }
 
                     elapsedTime = DateTime.Now.Subtract(startTime).TotalSeconds;
@@ -853,28 +821,20 @@ namespace ConformU
                 switch (rate)
                 {
                     case var @case when @case > 10.0d:
-                        {
-                            LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
+                        break;
 
                     case var case1 when 2.0d <= case1 && case1 <= 10.0d:
-                        {
-                            LogOk(pName, $"Transaction rate: {rate:0.0} per second");
-                            break;
-                        }
+                        LogOk(pName, $"Transaction rate: {rate:0.0} per second");
+                        break;
 
                     case var case2 when 1.0d <= case2 && case2 <= 2.0d:
-                        {
-                            LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
+                        break;
 
                     default:
-                        {
-                            LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {rate:0.0} per second");
+                        break;
                 }
             }
             catch (Exception ex)

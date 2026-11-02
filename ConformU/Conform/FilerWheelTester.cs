@@ -71,13 +71,11 @@ namespace ConformU
                 switch (settings.ComDevice.ProgId)
                 {
                     default:
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = (int)0x80040404;
-                            ExInvalidValue2 = (int)0x80040404;
-                            ExNotSet1 = (int)0x80040403;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = (int)0x80040404;
+                        ExInvalidValue2 = (int)0x80040404;
+                        ExNotSet1 = (int)0x80040403;
+                        break;
                 }
             }
             base.InitialiseTest();
@@ -494,28 +492,20 @@ namespace ConformU
                     switch (pType)
                     {
                         case FilterWheelProperties.FocusOffsets:
-                            {
-                                lOffsets = filterWheel.FocusOffsets;
-                                break;
-                            }
+                            lOffsets = filterWheel.FocusOffsets;
+                            break;
 
                         case FilterWheelProperties.Names:
-                            {
-                                lNames = filterWheel.Names;
-                                break;
-                            }
+                            lNames = filterWheel.Names;
+                            break;
 
                         case FilterWheelProperties.Position:
-                            {
-                                lStartFilterNumber = filterWheel.Position;
-                                break;
-                            }
+                            lStartFilterNumber = filterWheel.Position;
+                            break;
 
                         default:
-                            {
-                                LogIssue(pName, $"FilterWheelPerformanceTest: Unknown test type {pType}");
-                                break;
-                            }
+                            LogIssue(pName, $"FilterWheelPerformanceTest: Unknown test type {pType}");
+                            break;
                     }
 
                     lElapsedTime = DateTime.Now.Subtract(lStartTime).TotalSeconds;
@@ -532,28 +522,20 @@ namespace ConformU
                 switch (lRate)
                 {
                     case object _ when lRate > 10.0:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     case object _ when 2.0 <= lRate && lRate <= 10.0:
-                        {
-                            LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogOk(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     case object _ when 1.0 <= lRate && lRate <= 2.0:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
 
                     default:
-                        {
-                            LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
-                            break;
-                        }
+                        LogInfo(pName, $"Transaction rate: {lRate:0.0} per second");
+                        break;
                 }
             }
             catch (Exception ex)

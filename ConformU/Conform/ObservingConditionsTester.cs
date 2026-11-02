@@ -163,13 +163,11 @@ namespace ConformU
                 switch (settings.ComDevice.ProgId)
                 {
                     default:
-                        {
-                            ExNotImplemented = (int)0x80040400;
-                            ExInvalidValue1 = (int)0x80040405;
-                            ExInvalidValue2 = (int)0x80040405;
-                            ExNotSet1 = (int)0x80040403;
-                            break;
-                        }
+                        ExNotImplemented = (int)0x80040400;
+                        ExInvalidValue1 = (int)0x80040405;
+                        ExInvalidValue2 = (int)0x80040405;
+                        ExNotSet1 = (int)0x80040403;
+                        break;
                 }
             }
             base.InitialiseTest();
@@ -733,25 +731,19 @@ namespace ConformU
                 switch (returnValue)
                 {
                     case null:
-                        {
-                            LogIssue(enumName.ToString(), "The driver did not return any string at all: Nothing (VB), null (C#)");
-                            break;
-                        }
+                        LogIssue(enumName.ToString(), "The driver did not return any string at all: Nothing (VB), null (C#)");
+                        break;
 
                     case "":
-                        {
-                            LogOk(enumName.ToString(), "The driver returned an empty string: \"\"");
-                            break;
-                        }
+                        LogOk(enumName.ToString(), "The driver returned an empty string: \"\"");
+                        break;
 
                     default:
-                        {
-                            if (returnValue.Length <= pMaxLength)
-                                LogOk(enumName.ToString(), returnValue);
-                            else
-                                LogIssue(enumName.ToString(), $"String exceeds {pMaxLength} characters maximum length - {returnValue}");
-                            break;
-                        }
+                        if (returnValue.Length <= pMaxLength)
+                            LogOk(enumName.ToString(), returnValue);
+                        else
+                            LogIssue(enumName.ToString(), $"String exceeds {pMaxLength} characters maximum length - {returnValue}");
+                        break;
                 }
 
                 sensorHasDescription.Add(propertyName);
