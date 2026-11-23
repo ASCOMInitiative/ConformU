@@ -39,6 +39,10 @@ namespace ConformU
 
             switch (settings.DeviceType) // Set current progID and device test class
             {
+                case DeviceTypes.Aligner:
+                    testDevice = new AlignerTester(configuration, TL, cancellationToken, ConformCancellationTokenSource, conformResults);
+                    break;
+
                 case DeviceTypes.Telescope:
                     testDevice = new TelescopeTester(configuration, TL, cancellationToken, ConformCancellationTokenSource, conformResults);
                     break;
@@ -354,7 +358,8 @@ namespace ConformU
                             TL.LogMessage(testStage, MessageLevel.Debug, $"{ex}");
                             testDevice.LogInfo(testStage, $"The {settings.DeviceType} device reported interface version {testDevice.GetInterfaceVersion()}, which indicates that it supports the Connect() and Disconnect() methods and the Connecting property.");
                             testDevice.LogInfo(testStage, $"However, the Connecting property is not present in the device interface.");
-                            testDevice.LogInfo(testStage, $"Please check whether the device is reporting the correct interface version. For Platform 6 devices the latest {settings.DeviceType} interface version is {DeviceCapabilities.LatestPlatform6Interface[settings.DeviceType.Value]}.");
+                            if (settings.DeviceType != null && DeviceCapabilitySupport.TryGetLatestPlatform6Interface(settings.DeviceType.Value, out short latestPlatform6Interface))
+                                testDevice.LogInfo(testStage, $"Please check whether the device is reporting the correct interface version. For Platform 6 devices the latest {settings.DeviceType} interface version is {latestPlatform6Interface}.");
                             testDevice.LogNewLine();
                             testDevice.LogTestAndMessage(testStage, "Cannot connect to device, further tests abandoned.");
                         }
@@ -369,7 +374,8 @@ namespace ConformU
                     catch (InvalidValueException ex) // Interface version is invalid
                     {
                         testDevice.LogIssue(testStage, $"The returned interface version is invalid for a {settings.DeviceType} device: {ex.Message}");
-                        testDevice.LogInfo(testStage, $"For a Platform 6 interface device the interface version should be: {DeviceCapabilities.LatestPlatform6Interface[settings.DeviceType.Value]}");
+                        if (settings.DeviceType != null && DeviceCapabilitySupport.TryGetLatestPlatform6Interface(settings.DeviceType.Value, out short latestPlatform6Interface))
+                            testDevice.LogInfo(testStage, $"For a Platform 6 interface device the interface version should be: {latestPlatform6Interface}");
                         testDevice.LogInfo(testStage, $"For a Platform 7 interface device that supports Connect(), Disconnect(), Connecting and DeviceState, the interface version should be: {DeviceCapabilities.LatestInterface[settings.DeviceType.Value]}");
                         testDevice.LogNewLine();
                         testDevice.LogTestAndMessage(testStage, "This device is incompatible with ASCOM clients because its interface version is invalid and the device cannot be tested further.");

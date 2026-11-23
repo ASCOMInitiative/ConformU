@@ -98,7 +98,7 @@ namespace ConformU
         }
 
         #region New and Dispose
-        public DomeTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken, CancellationTokenSource conformCancellationTokenSource, ConformResults conformResults) : base(true, true, true, true, false, true, true, conformConfiguration, logger, conformCancellationToken, conformCancellationTokenSource, conformResults) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
+        public DomeTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken, CancellationTokenSource conformCancellationTokenSource, ConformResults conformResults) : base(true, true, true, true, false, true, true, true, conformConfiguration, logger, conformCancellationToken, conformCancellationTokenSource, conformResults) // Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
         {
             settings = conformConfiguration.Settings;
             cancellationToken = conformCancellationToken;

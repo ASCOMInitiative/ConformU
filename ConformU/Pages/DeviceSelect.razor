@@ -137,7 +137,7 @@
 
         @* COM device search tab *@
         <RadzenTabsItem Text="Windows COM Drivers"
-                        Disabled=@osIsNotWindows
+                        Disabled=@(osIsNotWindows | (selectedDeviceTypeString == DeviceTypes.Aligner.ToString()))
                         Visible=@osIsWindows>
 
             <div class="row">
@@ -176,7 +176,7 @@
     AscomDevice ascomDevice;
     ComDevice comDevice;
     bool discoveryInProgress = false;
-    List<string> validAscomdDeviceTypes = new() { DeviceTypes.Telescope.ToString(), DeviceTypes.Camera.ToString(), DeviceTypes.CoverCalibrator.ToString(), DeviceTypes.Dome.ToString(), DeviceTypes.FilterWheel.ToString(), DeviceTypes.Focuser.ToString(), DeviceTypes.ObservingConditions.ToString(), DeviceTypes.Rotator.ToString(), DeviceTypes.SafetyMonitor.ToString(), DeviceTypes.Switch.ToString(), DeviceTypes.Video.ToString() };
+    List<string> validAscomdDeviceTypes = new() { DeviceTypes.Aligner.ToString(), DeviceTypes.Telescope.ToString(), DeviceTypes.Camera.ToString(), DeviceTypes.CoverCalibrator.ToString(), DeviceTypes.Dome.ToString(), DeviceTypes.FilterWheel.ToString(), DeviceTypes.Focuser.ToString(), DeviceTypes.ObservingConditions.ToString(), DeviceTypes.Rotator.ToString(), DeviceTypes.SafetyMonitor.ToString(), DeviceTypes.Switch.ToString(), DeviceTypes.Video.ToString() };
     DeviceTypes selectedDeviceType; // DeviceType of the selected device
     string selectedDeviceTypeString; // String representation of the currently selected DeviceType
     string alpacaDiscoveryProgress; // Text describing events happening while Alpaca discovery is underway
@@ -263,11 +263,20 @@
                 break;
 
             case DeviceTechnology.COM: // COM device selected
-                // Switch to COM tab
-                selectedTabIndex = COM_TAB_NUMBER;
+                if (selectedDeviceType == DeviceTypes.Aligner)
+                {
+                    selectedTabIndex = ALPACA_TAB_NUMBER;
+                    selectedTabNumber = ALPACA_TAB_NUMBER;
+                    StartDiscovery();
+                }
+                else
+                {
+                    // Switch to COM tab
+                    selectedTabIndex = COM_TAB_NUMBER;
 
-                // Populate the COM tab with available drivers
-                OnTabChange(COM_TAB_NUMBER);
+                    // Populate the COM tab with available drivers
+                    OnTabChange(COM_TAB_NUMBER);
+                }
                 break;
 
             case DeviceTechnology.NotSelected: // No device selected
@@ -308,6 +317,16 @@
         state.SafetyWarningDisplayed = false;
 
         SaveConfiguration();
+
+        if (selectedDeviceTypeString == DeviceTypes.Aligner.ToString())
+        {
+            selectedTabIndex = ALPACA_TAB_NUMBER;
+            selectedTabNumber = ALPACA_TAB_NUMBER;
+            ascomDevices.Clear();
+            StartDiscovery();
+            StateHasChanged();
+            return;
+        }
 
         switch (selectedTabNumber)
         {

@@ -67,6 +67,7 @@ namespace ConformU
         internal bool hasGetSafetyState = false;
         internal bool hasSetSafetyState = false;
         internal bool hasClearSafetyState = false;
+        internal bool hasConnectedSet = true;
 
         private string testRuleId;
         private bool testRuleSetOk = false;
@@ -163,6 +164,7 @@ namespace ConformU
             hasMethods = true;
             hasPostRunCheck = false;
             hasPerformanceCheck = true;
+            hasConnectedSet = true;
 
             ClearStatus();
         }
@@ -177,8 +179,9 @@ namespace ConformU
         /// <param name="hasPreConnectCheck">Device requires a pre connection check</param>
         /// <param name="hasPerformanceCheck">Device has a performance test</param>
         /// <param name="hasPostRunCheck">Device requires a post run safety check</param>
+        /// <param name="hasConnectedSet">The interface requires Connected Set to be tested.</param>
         /// <remarks></remarks>
-        public DeviceTesterBaseClass(bool hasCanProperties, bool hasProperties, bool hasMethods, bool hasPreRunCheck, bool hasPreConnectCheck, bool hasPerformanceCheck, bool hasPostRunCheck, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken cancellationToken, CancellationTokenSource cancellationTokenSource, ConformResults conformResults) : this()
+        public DeviceTesterBaseClass(bool hasCanProperties, bool hasProperties, bool hasMethods, bool hasPreRunCheck, bool hasPreConnectCheck, bool hasPerformanceCheck, bool hasPostRunCheck, bool hasConnectedSet, ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken cancellationToken, CancellationTokenSource cancellationTokenSource, ConformResults conformResults) : this()
         {
             this.hasPreConnectCheck = hasPreConnectCheck;
             this.hasPreRunCheck = hasPreRunCheck;
@@ -187,6 +190,7 @@ namespace ConformU
             this.hasMethods = hasMethods;
             this.hasPostRunCheck = hasPostRunCheck;
             this.hasPerformanceCheck = hasPerformanceCheck;
+            this.hasConnectedSet = hasConnectedSet;
 
             tl = logger;
             this.ApplicationCancellationToken = cancellationToken;
@@ -848,7 +852,7 @@ namespace ConformU
             LogNewLine();
 
             // DeviceState - Mandatory for Platform 7 and above, otherwise not present
-            if (DeviceCapabilities.HasConnectAndDeviceState(baseClassDeviceType, GetInterfaceVersion()))
+            if (DeviceCapabilitySupport.HasConnectAndDeviceState(baseClassDeviceType, GetInterfaceVersion()))
             {
                 try
                 {
@@ -868,6 +872,13 @@ namespace ConformU
                     // Define expected operational properties for each device type
                     switch (settings.DeviceType)
                     {
+                        case DeviceTypes.Aligner:
+                            casedPropertyNames.Add(nameof(IAlignerV1.IsMoving), false);
+                            casedPropertyNames.Add(nameof(IAlignerV1.XPosition), false);
+                            casedPropertyNames.Add(nameof(IAlignerV1.YPosition), false);
+                            casedPropertyNames.Add(nameof(IAlignerV1.ZPosition), false);
+                            break;
+
                         case DeviceTypes.Camera:
                             casedPropertyNames.Add(nameof(ICameraV4.CameraState), false);
                             casedPropertyNames.Add(nameof(ICameraV4.CCDTemperature), false);
@@ -1118,10 +1129,10 @@ namespace ConformU
             SetAction("Waiting for Connected to become 'true'");
 
             // Set an internal property indicating whether this is a Platform 7 or later device
-            IsPlatform7OrLater = DeviceCapabilities.IsPlatform7OrLater(settings.DeviceType, GetInterfaceVersion());
+            IsPlatform7OrLater = DeviceCapabilitySupport.IsPlatform7OrLater(settings.DeviceType, GetInterfaceVersion());
 
             // Use Connect /Disconnect if present
-            if (DeviceCapabilities.HasConnectAndDeviceState(baseClassDeviceType, GetInterfaceVersion()))
+            if (DeviceCapabilitySupport.HasConnectAndDeviceState(baseClassDeviceType, GetInterfaceVersion()))
             {
                 // First make sure that the Connecting property exists
                 try
@@ -1141,36 +1152,40 @@ namespace ConformU
                 LogCallToDriver("Connect", "About to get Connecting property");
                 if (!baseClassDevice.Connecting) // No connection / disconnection is in progress
                 {
-                    // First make sure that Connecting is correctly implemented
-                    SetAction("Waiting for Connected to become True");
-                    LogCallToDriver("Connected", "About to set Connected property true");
-                    baseClassDevice.Connected = true;
-
-                    LogCallToDriver("Connect", "About to get Connected property");
-                    if (baseClassDevice.Connected != true)
+                    // Check whether this interface has Connected Set
+                    if (hasConnectedSet) // Connected Set is valid in this interface
                     {
-                        throw new ASCOM.InvalidOperationException($"Set Connected True - The device connected without error but Connected Get returned False.");
+                        // First make sure that Connected is correctly implemented
+                        SetAction("Waiting for Connected to become True");
+                        LogCallToDriver("Connected", "About to set Connected property true");
+                        baseClassDevice.Connected = true;
+
+                        LogCallToDriver("Connect", "About to get Connected property");
+                        if (baseClassDevice.Connected != true)
+                        {
+                            throw new ASCOM.InvalidOperationException($"Set Connected True - The device connected without error but Connected Get returned False.");
+                        }
+
+                        LogOk("Connected", "Connected to device successfully using Connected = True");
+
+                        //Wait for a short time
+                        WaitFor(500, 100);
+
+                        // Make sure that we can disconnect as well
+                        SetAction("Waiting for Connected to become False");
+                        LogCallToDriver("Connected", "About to set Connected property False");
+                        baseClassDevice.Connected = false;
+                        bool connectedOutcome = baseClassDevice.Connected;
+                        if (!settings.AllowConnectedTrueAfterDisconnect && connectedOutcome != false)
+                        {
+                            throw new ASCOM.InvalidOperationException($"Set Connected False - The device disconnected without error but Connected Get returned True.");
+                        }
+
+                        if (connectedOutcome)
+                            LogInfo("Connected", "===> Connected returned true after setting Connected = False.");
+                        else
+                            LogOk("Connected", "Disconnected from device successfully using Connected = False");
                     }
-
-                    LogOk("Connected", "Connected to device successfully using Connected = True");
-
-                    //Wait for a short time
-                    WaitFor(500, 100);
-
-                    // Make sure that we can disconnect as well
-                    SetAction("Waiting for Connected to become False");
-                    LogCallToDriver("Connected", "About to set Connected property False");
-                    baseClassDevice.Connected = false;
-                    bool connectedOutcome = baseClassDevice.Connected;
-                    if (!settings.AllowConnectedTrueAfterDisconnect && connectedOutcome != false)
-                    {
-                        throw new ASCOM.InvalidOperationException($"Set Connected False - The device disconnected without error but Connected Get returned True.");
-                    }
-
-                    if (connectedOutcome)
-                        LogInfo("Connected", "===> Connected returned true after setting Connected = False.");
-                    else
-                        LogOk("Connected", "Disconnected from device successfully using Connected = False");
 
                     // Call the Connect method and wait for the device to connect
                     SetAction("Waiting for the Connect method to complete");
@@ -1184,7 +1199,7 @@ namespace ConformU
                     LogInfo("Connect", "Ignoring this request because a Connect() or Disconnect() operation is already in progress.");
                 }
             }
-            else // Historic synchronous behaviour
+            else // Historic synchronous behaviour using Connected Set.
             {
                 // Handle connection to devices 
                 if (DeviceCapabilities.HasConnected(baseClassDeviceType, GetInterfaceVersion())) // All devices and interfaces except IFocuserV1
@@ -1209,7 +1224,7 @@ namespace ConformU
                 throw new ASCOM.InvalidOperationException($"The device connected without error but Connected Get returned False.");
             }
 
-            if (DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, GetInterfaceVersion()))
+            if (DeviceCapabilitySupport.HasConnectAndDeviceState(settings.DeviceType, GetInterfaceVersion()))
                 tl.LogMessage("Connect", MessageLevel.OK, "Connected to device successfully using Connect()");
             else
                 LogOk("Connected", "Connected to device successfully using Connected = True");
@@ -1244,7 +1259,7 @@ namespace ConformU
             LogDebug("Disconnect", $"Interface version: {GetInterfaceVersion()}");
 
             // Use Connect /Disconnect if present
-            if (DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, GetInterfaceVersion()))
+            if (DeviceCapabilitySupport.HasConnectAndDeviceState(settings.DeviceType, GetInterfaceVersion()))
             {
                 LogCallToDriver("Disconnect", "About to get Connecting property");
                 if (!baseClassDevice.Connecting) // No connection / disconnection is in progress
@@ -1277,14 +1292,14 @@ namespace ConformU
                 LogCallToDriver("Disconnect", "About to get Connected property");
                 if (baseClassDevice.Connected == true) // Connected Get has returned True after setting Connected False.
                 {
-                    if (settings.DeviceType != null && DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, (short)GetInterfaceVersion()))
+                    if (settings.DeviceType != null && DeviceCapabilitySupport.HasConnectAndDeviceState(settings.DeviceType, (short)GetInterfaceVersion()))
                         LogInfo("Disconnect", "==> Connected returned true after Disconnect()");
                     else
                         LogInfo("Disconnect", "==> Connected returned true after setting Connected = False.");
                 }
                 else // Connected Get has returned False after setting Connected False.
                 {
-                    if (settings.DeviceType != null && DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, (short)GetInterfaceVersion()))
+                    if (settings.DeviceType != null && DeviceCapabilitySupport.HasConnectAndDeviceState(settings.DeviceType, (short)GetInterfaceVersion()))
                         tl.LogMessage("Disconnect", MessageLevel.OK, "Disconnected from device successfully using Disconnect()");
                     else
                         tl.LogMessage("Connected", MessageLevel.OK, "False");
@@ -1298,7 +1313,7 @@ namespace ConformU
                     throw new ASCOM.InvalidOperationException($"The device disconnected without error but Connected Get returned True.");
                 }
 
-                if (settings.DeviceType != null && DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, (short)GetInterfaceVersion()))
+                if (settings.DeviceType != null && DeviceCapabilitySupport.HasConnectAndDeviceState(settings.DeviceType, (short)GetInterfaceVersion()))
                     tl.LogMessage("Disconnect", MessageLevel.OK, "Disconnected from device successfully using Disconnect()");
                 else
                     tl.LogMessage("Connected", MessageLevel.OK, "False");

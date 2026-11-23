@@ -282,6 +282,10 @@ namespace ConformU
                         // Test device specific members
                         switch (settings.DeviceType)
                         {
+                            case DeviceTypes.Aligner:
+                                await TestAligner();
+                                break;
+
                             case DeviceTypes.Camera:
                                 await TestCamera();
                                 break;
@@ -479,7 +483,7 @@ namespace ConformU
                 int interfaceVersion = await GetInterfaceVersion(); // First get the interface version
 
                 // Check whether this is a Platform 7 device that should have DeviceState
-                if (DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, interfaceVersion)) // has DeviceState
+                if (DeviceCapabilitySupport.HasConnectAndDeviceState(settings.DeviceType, interfaceVersion)) // has DeviceState
                 {
                     // TestDeviceState
                     await GetNoParameters("DeviceState", AdditionalParameterCheck.DeviceState);
@@ -497,7 +501,7 @@ namespace ConformU
             int interfaceVersion = await GetInterfaceVersion();
 
             // Test Connect and Disconnect if the device supports it
-            if (DeviceCapabilities.HasConnectAndDeviceState(settings.DeviceType, interfaceVersion))
+            if (DeviceCapabilitySupport.HasConnectAndDeviceState(settings.DeviceType, interfaceVersion))
             {
                 // Call the Disconnect() method
                 await PutNoParameters("Disconnect", null);
@@ -515,6 +519,41 @@ namespace ConformU
         #endregion
 
         #region Device specific tests
+
+        private async Task TestAligner()
+        {
+            using (AlpacaAligner aligner = AlpacaClient.GetDevice<AlpacaAligner>(settings.AlpacaDevice,
+                userAgentProductName: Globals.USER_AGENT_PRODUCT_NAME,
+                userAgentProductVersion: Update.VersionString,
+                userName: settings.AlpacaConfiguration.AccessUserName,
+                password: settings.AlpacaConfiguration.AccessPassword))
+            {
+                try
+                {
+                    try { aligner.Connected = true; } catch { }
+
+                    await TestConnect(aligner);
+
+                    // TODO: Test IAlignerV1.Configuration first. Verify that the returned object is non-null,
+                    //       implements IAlignerConfigurationV1, and exposes all 21 configuration properties.
+                    // TODO: Test IAlignerV1.IsMoving.
+                    // TODO: Test IAlignerV1.XPosition.
+                    // TODO: Test IAlignerV1.YPosition.
+                    // TODO: Test IAlignerV1.ZPosition.
+                    // TODO: Test IAlignerV1.FindHome().
+                    // TODO: Test IAlignerV1.Halt().
+                    // TODO: Test IAlignerV1.Move(double X, double Y, double Z).
+                    // TODO: Test IAlignerV1.MoveAbsolute(double X, double Y, double Z).
+                    // TODO: Test IAlignerV1.Sync(double X, double Y, double Z).
+                }
+                catch (TestCancelledException)
+                {
+                    // Ignore exceptions arising because the user cancelled the test and return to the caller.
+                }
+
+                try { aligner.Connected = false; } catch { }
+            }
+        }
 
         private async Task TestCamera()
         {
