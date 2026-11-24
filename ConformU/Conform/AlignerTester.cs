@@ -27,6 +27,7 @@ namespace ConformU
         AlignerUnits units = AlignerUnits.Unset;
 
         bool backlashCompensation = false;
+        bool okToTestMethods = false; // Flag indicating whether position can be read and can methods are as expected.
 
         double? xMaxMove = null;
         double? xMaxPosition = null;
@@ -297,28 +298,49 @@ namespace ConformU
                 // Check that aligners can move appropriate axes
                 switch (alignerType)
                 {
+                    // Aligner type not set
                     case AlignerType.Unset:
                         LogIssue("Axis Movement", $"The aligner type is \"Unset\" so axis movement rules cannot be checked.");
                         break;
 
+                    // Polar aligner
                     case AlignerType.PolarAligner:
                         if (canMoveX.GetValueOrDefault() & canMoveY.GetValueOrDefault() & !canMoveZ.GetValueOrDefault())
+                        {
                             LogOk("Axis Movement", "The polar aligner can move its X and Y axes and cannot move its Z axis.");
+
+                            // Check whether it is OK to test the move methods. This is only possible if both X and Y positions can be read.
+                            if (xPosition.HasValue & yPosition.HasValue) // Both axes are readable, so it is OK to test the move methods.
+                                okToTestMethods = true;
+                            else // There is a problem so don't test the move methods
+                                LogIssue("Axis Movement", $"The polar aligner can move both X and Y axes, but at least one of the axes cannot be read. XPosition: {xPosition}, YPosition: {yPosition}");
+                        }
                         else
-                            LogIssue("Polar aligner movement", $"Polar aligners must be able to move both X and Y axes and not be able to move the Z axis. " +
-                                $"CanMoveX: {canMoveX}, CanMoveY: {canMoveY}, CanMoveZ: {canMoveZ}");
+                        {
+                            LogIssue("Axis Movement", $"Polar aligners must be able to move both X and Y axes and not be able to move the Z axis. ");
+                            LogInfo("Axis Movement", $"CanMoveX: {canMoveX.GetValueOrDefault()}, CanMoveY: {canMoveY.GetValueOrDefault()}, CanMoveZ: {canMoveZ.GetValueOrDefault()}");
+                        }
                         break;
 
+                    //Optical axis aligner and all other types
                     case AlignerType.OpticalAxisAligner:
-                        // Check that at least one axis is movable for optical axcis aligners
-                        if (canMoveX.GetValueOrDefault() | canMoveY.GetValueOrDefault() | canMoveZ.GetValueOrDefault())
-                            LogOk("Axis Movement", $"At least one aligner axis can move.");
-                        else
-                            LogIssue("Axis Movement", $"None of the axes are configured as moveable - CanMoveX: {canMoveX}, CanMoveY: {canMoveY}, CanMoveZ: {canMoveZ}");
-                        break;
-
                     default:
-                        LogInfo("Axis Movement", $"Axis movement rule checking skipped because the aligner type is {alignerType}, for which there are no defined movement rules.");
+                        // Check that at least one axis is movable for optical axis aligners
+                        if (canMoveX.GetValueOrDefault() | canMoveY.GetValueOrDefault() | canMoveZ.GetValueOrDefault())
+                        {
+                            LogOk("Axis Movement", $"At least one aligner axis can move.");
+
+                            // Check whether it is OK to test the move methods. This is only possible if both X and Y positions can be read.
+                            if ((canMoveX.GetValueOrDefault() & xPosition.HasValue) | (canMoveY.GetValueOrDefault() & yPosition.HasValue) | (canMoveZ.GetValueOrDefault() & zPosition.HasValue)) // All implemented axes are readable so it is OK to test the move methods.
+                                okToTestMethods = true;
+                            else // There is a problem so don't test the move methods
+                            {
+                                LogIssue("Axis Movement", $"Method tests will be skipped because the aligner can move at least one axis, but at least one of the movable axes can not be read.");
+                                LogInfo("Axis Movement", $"CanMoveX: {canMoveX.GetValueOrDefault()}, CanMoveY: {canMoveY.GetValueOrDefault()}, CanMoveZ: {canMoveZ.GetValueOrDefault()}, XPosition: {xPosition}, YPosition: {yPosition}, ZPosition: {zPosition}");
+                            }
+                        }
+                        else
+                            LogIssue("Axis Movement", $"None of the axes are configured as moveable - CanMoveX: {canMoveX.GetValueOrDefault()}, CanMoveY: {canMoveY.GetValueOrDefault()}, CanMoveZ: {canMoveZ.GetValueOrDefault()}");
                         break;
                 }
             }
@@ -331,13 +353,20 @@ namespace ConformU
 
         public override void CheckMethods()
         {
-            Vector3D? newRelativePosition = GetMovePosition(MovementType.Relative, canMoveX.GetValueOrDefault(), canMoveY.GetValueOrDefault(), canMoveZ.GetValueOrDefault());
+            // Check whether there is sufficient information to test methods
+            if (okToTestMethods) // OK to test methods
+            {
+                // Save the start position so we can return to it at the end of testing
+                Vector3D? startingPosition = new Vector3D(xPosition.GetValueOrDefault(), yPosition.GetValueOrDefault(), zPosition.GetValueOrDefault());
 
-            // TODO: Test IAlignerV1.FindHome().
-            // TODO: Test IAlignerV1.Halt().
-            // TODO: Test IAlignerV1.Move(double X, double Y, double Z).
-            // TODO: Test IAlignerV1.MoveAbsolute(double X, double Y, double Z).
-            // TODO: Test IAlignerV1.Sync(double X, double Y, double Z).
+                // TODO: Test IAlignerV1.FindHome().
+                // TODO: Test IAlignerV1.Halt().
+                // TODO: Test IAlignerV1.Move(double X, double Y, double Z).
+                // TODO: Test IAlignerV1.MoveAbsolute(double X, double Y, double Z).
+                // TODO: Test IAlignerV1.Sync(double X, double Y, double Z).
+            }
+            else
+                LogInfo("CheckMethods", "Method tests were skipped because of issues in returned properties reported earlier..");
         }
 
         public override void CheckPerformance()
@@ -373,32 +402,9 @@ namespace ConformU
 
         #region Support Code
 
-        private Vector3D? GetMovePosition(MovementType movementType, bool getX, bool getY, bool getZ)
+        private Vector3D? GetMovePosition(MovementType movementType, bool canMoveX, bool canMoveY, bool canMoveZ)
         {
-            Vector3D? position = null;
-            // Check whether we have the min and max positions as well as position.
-            if (xMinPosition.HasValue & xMaxPosition.HasValue & xPosition.HasValue) // We do have both positions
-            {
-
-
-                switch (movementType)
-                {
-                    // Absolute moves
-                    case MovementType.Abolute:
-                        try
-                        {
-                        }
-                        catch (Exception ex)
-                        {
-
-                        }
-                        break;
-                    case MovementType.Relative:
-                        break;
-                }
-            }
-
-
+            Vector3D? position = new Vector3D();
 
             return position;
         }
