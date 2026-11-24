@@ -43,9 +43,15 @@ namespace ConformU
 
         bool isMoving = false;
 
-        double xPosition = 0.0;
-        double yPosition = 0.0;
-        double zPosition = 0.0;
+        double? xPosition = null;
+        double? yPosition = null;
+        double? zPosition = null;
+
+        private enum MovementType
+        {
+            Abolute,
+            Relative
+        }
 
         public AlignerTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken, CancellationTokenSource conformCancellationTokenSource, ConformResults conformResults)
             : base(true, true, true, false, false, true, false, true, conformConfiguration, logger, conformCancellationToken, conformCancellationTokenSource, conformResults)
@@ -250,7 +256,7 @@ namespace ConformU
                 }
                 catch (Exception ex)
                 {
-                    HandleException("XPosition", MemberType.Property, Required.Optional, ex, "");
+                    HandleException("YPosition", MemberType.Property, Required.Optional, ex, "");
                 }
 
                 // Verify ZPosition is accessible and can throw PropertyNotImplementedException.
@@ -287,6 +293,34 @@ namespace ConformU
                 else
                     LogIssue("ZMinPosition/ZMaxPosition", $"ZMinPosition and ZMaxPosition must either both be implemented or bot be not implemented. " +
                         $"ZMinPosition is {(zMinPosition is not null ? "implemented" : "not implemented")} while ZMaxPosition is {(zMaxPosition is not null ? "implemented" : "not implemented")}.");
+
+                // Check that aligners can move appropriate axes
+                switch (alignerType)
+                {
+                    case AlignerType.Unset:
+                        LogIssue("Axis Movement", $"The aligner type is \"Unset\" so axis movement rules cannot be checked.");
+                        break;
+
+                    case AlignerType.PolarAligner:
+                        if (canMoveX.GetValueOrDefault() & canMoveY.GetValueOrDefault() & !canMoveZ.GetValueOrDefault())
+                            LogOk("Axis Movement", "The polar aligner can move its X and Y axes and cannot move its Z axis.");
+                        else
+                            LogIssue("Polar aligner movement", $"Polar aligners must be able to move both X and Y axes and not be able to move the Z axis. " +
+                                $"CanMoveX: {canMoveX}, CanMoveY: {canMoveY}, CanMoveZ: {canMoveZ}");
+                        break;
+
+                    case AlignerType.OpticalAxisAligner:
+                        // Check that at least one axis is movable for optical axcis aligners
+                        if (canMoveX.GetValueOrDefault() | canMoveY.GetValueOrDefault() | canMoveZ.GetValueOrDefault())
+                            LogOk("Axis Movement", $"At least one aligner axis can move.");
+                        else
+                            LogIssue("Axis Movement", $"None of the axes are configured as moveable - CanMoveX: {canMoveX}, CanMoveY: {canMoveY}, CanMoveZ: {canMoveZ}");
+                        break;
+
+                    default:
+                        LogInfo("Axis Movement", $"Axis movement rule checking skipped because the aligner type is {alignerType}, for which there are no defined movement rules.");
+                        break;
+                }
             }
             catch (Exception ex)
             {
@@ -297,6 +331,8 @@ namespace ConformU
 
         public override void CheckMethods()
         {
+            Vector3D? newRelativePosition = GetMovePosition(MovementType.Relative, canMoveX.GetValueOrDefault(), canMoveY.GetValueOrDefault(), canMoveZ.GetValueOrDefault());
+
             // TODO: Test IAlignerV1.FindHome().
             // TODO: Test IAlignerV1.Halt().
             // TODO: Test IAlignerV1.Move(double X, double Y, double Z).
@@ -336,6 +372,36 @@ namespace ConformU
         }
 
         #region Support Code
+
+        private Vector3D? GetMovePosition(MovementType movementType, bool getX, bool getY, bool getZ)
+        {
+            Vector3D? position = null;
+            // Check whether we have the min and max positions as well as position.
+            if (xMinPosition.HasValue & xMaxPosition.HasValue & xPosition.HasValue) // We do have both positions
+            {
+
+
+                switch (movementType)
+                {
+                    // Absolute moves
+                    case MovementType.Abolute:
+                        try
+                        {
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                        break;
+                    case MovementType.Relative:
+                        break;
+                }
+            }
+
+
+
+            return position;
+        }
 
         /// <summary>
         /// Test a CanXXX function and return its value or null if an error occurs.

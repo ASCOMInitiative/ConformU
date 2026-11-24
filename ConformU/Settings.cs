@@ -140,9 +140,8 @@ namespace ConformU
 
         #endregion
 
-        #region Device test configuration
+        #region Telescope test configuration
 
-        // Telescope test configuration
         /// <summary>
         /// List of telescope tests that can be enabled / disabled through configuration
         /// </summary>
@@ -196,13 +195,27 @@ namespace ConformU
         public double TelescopeRateOffsetTestHighValue { get; set; } = 40.0; // ArcSeconds per SI second
         public int TelescopeTimeForSlewingToBecomeFalse { get; set; } = 30; // Number of seconds to wait for Slewing to become false
 
-        // Camera test configuration
-        [MandatoryInFullTest(true)]
+        #endregion
+
+        #region Aligner test configuration
+
+        public double AlignerXRelativeMovement { get; set; } = 0.0;
+        public double AlignerYRelativeMovement { get; set; } = 0.0;
+        public double AlignerZRelativeMovement { get; set; } = 0.0;
+        public double AlignerXAbsoluteMovement { get; set; } = 0.0;
+        public double AlignerYAbsoluteMovement { get; set; } = 0.0;
+        public double AlignerZAbsoluteMovement { get; set; } = 0.0;
+
+        #endregion
+
+        #region  Camera test configuration
+
+[MandatoryInFullTest(true)]
         public bool CameraFirstUseTests { get; set; } = true;
 
         [MandatoryInFullTest(true)]
         public bool CameraTestImageArrayVariant { get; set; } = true;
-        
+
         public int CameraMaxBinX { get; set; } = 0;
         public int CameraMaxBinY { get; set; } = 0;
         public double CameraExposureDuration { get; set; } = 2.0;
@@ -210,7 +223,10 @@ namespace ConformU
         public int CameraYMax { get; set; } = 0;
         public int CameraWaitTimeout { get; set; } = 10;
 
-        // Dome test configuration
+        #endregion
+
+        #region Dome test configuration
+
         /// <summary>
         /// List of dome tests that can be enabled / disabled through configuration
         /// </summary>
@@ -236,21 +252,36 @@ namespace ConformU
         public int DomeStabilisationWaitTime { get; set; } = 10;
         public double DomeSlewTolerance { get; set; } = 1.0; // Degrees
 
-        // Filter wheel test configuration
+        #endregion
+
+        #region Filter wheel test configuration
+
         public int FilterWheelTimeout { get; set; } = 30;
 
-        // Focuser test configuration
+        #endregion
+
+        #region Focuser test configuration
+
         public int FocuserTimeout { get; set; } = 60;
         public int FocuserMoveTolerance { get; set; } = 2;
 
-        // ObservingConditions test configuration
+        #endregion
+
+        #region ObservingConditions test configuration
+
         public int ObservingConditionsRetryTime { get; set; } = 1; // Seconds
         public int ObservingConditionsMaxRetries { get; set; } = 5;
 
-        // Rotator test configuration
+        #endregion
+
+        #region Rotator test configuration
+
         public int RotatorTimeout { get; set; } = 60;
 
-        // Switch test configuration
+        #endregion
+
+        #region  Switch test configuration
+
         [MandatoryInFullTest(true)]
         public bool SwitchEnableSet { get; set; } = false;
         public int SwitchReadDelay { get; set; } = 500; // Milliseconds

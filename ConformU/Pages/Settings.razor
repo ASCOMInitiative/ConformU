@@ -529,6 +529,40 @@
             </div>
         </RadzenTabsItem>
 
+        @*Aligner configuration*@
+        <RadzenTabsItem Text="Aligner">
+            <h4 style="margin-top: 10px">Movement Settings</h4>
+            <p>By default, Conform will automatically determine test movements. If you wish to specify movements yourself, enter them below. Enter a value of 0.0 to enable Conform's automatic calculation.</p>
+
+            <div class="row">
+                <RadzenNumeric Style="margin-left: 20px" Format="0.0000" @bind-Value="alignerXRelativeMovement" TValue="double" Min="0.0m" Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.AlignerXRelativeMovement)) />
+                <p style="margin-left: 20px;margin-top: 5px;">The X axis relative movement in AlignerUnits.</p>
+            </div>
+            <div class="row">
+                <RadzenNumeric Style="margin-left: 20px" Format="0.0000" @bind-Value="alignerYRelativeMovement" TValue="double" Min="0.0m" Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.AlignerYRelativeMovement)) />
+                <p style="margin-left: 20px;margin-top: 5px;">The Y axis relative movement in AlignerUnits.</p>
+            </div>
+            <div class="row">
+                <RadzenNumeric Style="margin-left: 20px" Format="0.0000" @bind-Value="alignerZRelativeMovement" TValue="double" Min="0.0m" Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.AlignerZRelativeMovement)) />
+                <p style="margin-left: 20px;margin-top: 5px;">The Z axis relative movement in AlignerUnits.</p>
+            </div>
+            <div class="row">
+                <RadzenNumeric Style="margin-left: 20px" Format="0.0000" @bind-Value="alignerXAbsoluteMovement" TValue="double" Min="0.0m" Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.AlignerXAbsoluteMovement)) />
+                <p style="margin-left: 20px;margin-top: 5px;">The X axis absolute movement in AlignerUnits.</p>
+            </div>
+            <div class="row">
+                <RadzenNumeric Style="margin-left: 20px" Format="0.0000" @bind-Value="alignerYAbsoluteMovement" TValue="double" Min="0.0m" Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.AlignerYAbsoluteMovement)) />
+                <p style="margin-left: 20px;margin-top: 5px;">The Y axis absolute movement in AlignerUnits.</p>
+            </div>
+            <div class="row">
+                <RadzenNumeric Style="margin-left: 20px" Format="0.0000" @bind-Value="alignerZAbsoluteMovement" TValue="double" Min="0.0m" Change=@(args => OnDoubleItemChange(args, NumericConfigurationItem.AlignerZAbsoluteMovement)) />
+                <p style="margin-left: 20px;margin-top: 5px;">The Z axis absolute movement in AlignerUnits.</p>
+            </div>
+
+        </RadzenTabsItem>
+
+
+
         @*Camera configuration*@
         <RadzenTabsItem Text="Camera">
             <h4 style="margin-top: 10px">Exposure Settings</h4>
@@ -818,6 +852,14 @@
     private bool chkProtocolStrictChecks;
     private ProtocolMessageLevel protocolMessageLevel;
 
+    // Aligner test configuration
+    private double alignerXRelativeMovement;
+    private double alignerYRelativeMovement;
+    private double alignerZRelativeMovement;
+    private double alignerXAbsoluteMovement;
+    private double alignerYAbsoluteMovement;
+    private double alignerZAbsoluteMovement;
+
     // Camera test configuration
     private int cameraXMax;
     private int cameraYMax;
@@ -889,6 +931,12 @@
 
     private enum NumericConfigurationItem
     {
+        AlignerXRelativeMovement,
+        AlignerYRelativeMovement,
+        AlignerZRelativeMovement,
+        AlignerXAbsoluteMovement,
+        AlignerYAbsoluteMovement,
+        AlignerZAbsoluteMovement,
         AlpacaNumberOfDiscoveryPolls,
         AlpacaDiscoveryPollInterval,
         AlpacaDiscoveryPort,
@@ -1002,6 +1050,25 @@
     {
         switch (numericConfigurationItem)
         {
+            case NumericConfigurationItem.AlignerXRelativeMovement:
+                settings.AlignerXRelativeMovement = newValue;
+                break;
+                case NumericConfigurationItem.AlignerYRelativeMovement:
+                settings.AlignerYRelativeMovement = newValue;
+                break;
+                case NumericConfigurationItem.AlignerZRelativeMovement:
+                settings.AlignerZRelativeMovement = newValue;
+                break;
+                case NumericConfigurationItem.AlignerXAbsoluteMovement:
+                settings.AlignerXAbsoluteMovement = newValue;
+                break;
+                case NumericConfigurationItem.AlignerYAbsoluteMovement:
+                settings.AlignerYAbsoluteMovement = newValue;
+                break;
+                case NumericConfigurationItem.AlignerZAbsoluteMovement:
+                settings.AlignerZAbsoluteMovement = newValue;
+                break;
+
             case NumericConfigurationItem.AlpacaDiscoveryDuration:
                 settings.AlpacaConfiguration.DiscoveryDuration = newValue;
                 break;
@@ -1341,6 +1408,14 @@
         telescopeRateOffsetTestValueLow = settings.TelescopeRateOffsetTestLowValue;
         telescopeRateOffsetTestValueHigh = settings.TelescopeRateOffsetTestHighValue;
         telescopeTimeForSlewingToBecomeFalse = settings.TelescopeTimeForSlewingToBecomeFalse;
+
+        // Aligner tests
+        alignerXRelativeMovement = settings.AlignerXRelativeMovement;
+        alignerYRelativeMovement = settings.AlignerYRelativeMovement;
+        alignerZRelativeMovement = settings.AlignerZRelativeMovement;
+        alignerXAbsoluteMovement = settings.AlignerXAbsoluteMovement;
+        alignerYAbsoluteMovement = settings.AlignerYAbsoluteMovement;
+        alignerZAbsoluteMovement = settings.AlignerZAbsoluteMovement;
 
         // Camera tests
         cameraTestMaxBinX = settings.CameraMaxBinX;
