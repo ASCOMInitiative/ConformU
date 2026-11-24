@@ -2748,7 +2748,7 @@ namespace ConformU
                             }
                             else // Got some value other than expected value of 0
                             {
-                                LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {returnedClientTransactionID}, Expected: {expectedClientTransactionID}", null);
+                                LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {returnedClientTransactionID}, Expected: 0", null);
                             }
                         }
                         else // Running in tolerant mode
@@ -2762,7 +2762,7 @@ namespace ConformU
                             {
                                 LogInformation(testName, $"{messagePrefix} - The ClientTransactionID was round-tripped suggesting that the device did not treat it as case sensitive. Sent value: {expectedClientTransactionID}, Returned value: {returnedClientTransactionID}", null);
                             }
-                            else // Got some value other than expected value of 0
+                            else // Got some value other than expected value or 0
                             {
                                 LogIssue(testName, $"{messagePrefix} - An unexpected ClientTransactionID was returned: {returnedClientTransactionID}, Expected: {expectedClientTransactionID}", null);
                             }
