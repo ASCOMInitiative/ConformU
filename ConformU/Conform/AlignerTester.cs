@@ -50,7 +50,7 @@ namespace ConformU
 
         private enum MovementType
         {
-            Abolute,
+            Absolute,
             Relative
         }
 
@@ -330,8 +330,10 @@ namespace ConformU
                         {
                             LogOk("Axis Movement", $"At least one aligner axis can move.");
 
-                            // Check whether it is OK to test the move methods. This is only possible if both X and Y positions can be read.
-                            if ((canMoveX.GetValueOrDefault() & xPosition.HasValue) | (canMoveY.GetValueOrDefault() & yPosition.HasValue) | (canMoveZ.GetValueOrDefault() & zPosition.HasValue)) // All implemented axes are readable so it is OK to test the move methods.
+                            // Check whether it is OK to test the move methods. This is only possible if every movable axis position can be read.
+                            if ((!canMoveX.GetValueOrDefault() || xPosition.HasValue) &
+                                (!canMoveY.GetValueOrDefault() || yPosition.HasValue) &
+                                (!canMoveZ.GetValueOrDefault() || zPosition.HasValue))
                                 okToTestMethods = true;
                             else // There is a problem so don't test the move methods
                             {
@@ -357,12 +359,55 @@ namespace ConformU
             if (okToTestMethods) // OK to test methods
             {
                 // Save the start position so we can return to it at the end of testing
-                Vector3D? startingPosition = new Vector3D(xPosition.GetValueOrDefault(), yPosition.GetValueOrDefault(), zPosition.GetValueOrDefault());
+                Vector3D startingPosition = new(xPosition.GetValueOrDefault(), yPosition.GetValueOrDefault(), zPosition.GetValueOrDefault());
 
-                // TODO: Test IAlignerV1.FindHome().
+                Vector3D? relativeMovement = GetMovePosition(MovementType.Relative, canMoveX.GetValueOrDefault(), canMoveY.GetValueOrDefault(), canMoveZ.GetValueOrDefault());
+                if (relativeMovement.HasValue)
+                {
+                    if (MoveAligner("Move", () => aligner.Move(relativeMovement.Value.X, relativeMovement.Value.Y, relativeMovement.Value.Z)))
+                    {
+                        CheckPosition("Move", new Vector3D(
+                            startingPosition.X + relativeMovement.Value.X,
+                            startingPosition.Y + relativeMovement.Value.Y,
+                            startingPosition.Z + relativeMovement.Value.Z));
+                    }
+
+                    RestorePosition(startingPosition);
+                }
+                else
+                    LogInfo("Move", "Move test skipped because a safe relative movement could not be determined.");
+
+                if (canMoveAbsolute.GetValueOrDefault())
+                {
+                    Vector3D? absolutePosition = GetMovePosition(MovementType.Absolute, canMoveX.GetValueOrDefault(), canMoveY.GetValueOrDefault(), canMoveZ.GetValueOrDefault());
+                    if (absolutePosition.HasValue)
+                    {
+                        if (MoveAligner("MoveAbsolute", () => aligner.MoveAbsolute(absolutePosition.Value.X, absolutePosition.Value.Y, absolutePosition.Value.Z)))
+                            CheckPosition("MoveAbsolute", absolutePosition.Value);
+
+                        RestorePosition(startingPosition);
+                    }
+                    else
+                        LogInfo("MoveAbsolute", "MoveAbsolute test skipped because a safe absolute position could not be determined.");
+                }
+                else
+                {
+                    TestUnimplementedMethod("MoveAbsolute", () => aligner.MoveAbsolute(0.0, 0.0, 0.0), "CanMoveAbsolute is false");
+                    RestorePosition(startingPosition);
+                }
+
+                if (canFindHome.GetValueOrDefault())
+                {
+                    MoveAligner("FindHome", () => aligner.FindHome());
+                    RestorePosition(startingPosition);
+                }
+                else
+                {
+                    TestUnimplementedMethod("FindHome", () => aligner.FindHome(), "CanFindHome is false");
+                    RestorePosition(startingPosition);
+                }
+
                 // TODO: Test IAlignerV1.Halt().
-                // TODO: Test IAlignerV1.Move(double X, double Y, double Z).
-                // TODO: Test IAlignerV1.MoveAbsolute(double X, double Y, double Z).
                 // TODO: Test IAlignerV1.Sync(double X, double Y, double Z).
             }
             else
@@ -404,9 +449,294 @@ namespace ConformU
 
         private Vector3D? GetMovePosition(MovementType movementType, bool canMoveX, bool canMoveY, bool canMoveZ)
         {
-            Vector3D? position = new Vector3D();
+            double? x = GetAxisMovePosition(movementType, canMoveX, xPosition, xMinPosition, xMaxPosition, xMaxMove, xResolution, "X");
+            double? y = GetAxisMovePosition(movementType, canMoveY, yPosition, yMinPosition, yMaxPosition, yMaxMove, yResolution, "Y");
+            double? z = GetAxisMovePosition(movementType, canMoveZ, zPosition, zMinPosition, zMaxPosition, zMaxMove, zResolution, "Z");
 
-            return position;
+            if ((canMoveX & !x.HasValue) | (canMoveY & !y.HasValue) | (canMoveZ & !z.HasValue))
+                return null;
+
+            return new Vector3D(x.GetValueOrDefault(), y.GetValueOrDefault(), z.GetValueOrDefault());
+        }
+
+        private double? GetAxisMovePosition(
+            MovementType movementType,
+            bool canMoveAxis,
+            double? currentPosition,
+            double? minimumPosition,
+            double? maximumPosition,
+            double? maximumMove,
+            double? resolution,
+            string axisName)
+        {
+            if (!canMoveAxis)
+                return 0.0;
+
+            if (!currentPosition.HasValue)
+            {
+                LogIssue("Move Position", $"{axisName} can move but its current position is unavailable, so a safe test position cannot be calculated.");
+                return null;
+            }
+
+            bool hasPositionRange = minimumPosition.HasValue & maximumPosition.HasValue;
+            if ((minimumPosition.HasValue ^ maximumPosition.HasValue) ||
+                (hasPositionRange && minimumPosition.Value > maximumPosition.Value))
+            {
+                LogIssue("Move Position", $"{axisName} position limits are invalid: minimum {minimumPosition}, maximum {maximumPosition}.");
+                return null;
+            }
+
+            if (movementType == MovementType.Absolute && !hasPositionRange)
+            {
+                LogInfo("Move Position", $"{axisName} position limits are not implemented, so a safe absolute test position cannot be calculated.");
+                return null;
+            }
+
+            double direction = 1.0;
+            double? availableMovement = null;
+            double? movementRange = null;
+
+            if (hasPositionRange)
+            {
+                double positiveMovement = maximumPosition.Value - currentPosition.Value;
+                double negativeMovement = currentPosition.Value - minimumPosition.Value;
+                movementRange = maximumPosition.Value - minimumPosition.Value;
+
+                if (positiveMovement < 0.0 || negativeMovement < 0.0)
+                {
+                    LogIssue("Move Position", $"{axisName} current position {currentPosition.Value} is outside its configured range {minimumPosition.Value} to {maximumPosition.Value}.");
+                    return null;
+                }
+
+                if (negativeMovement > positiveMovement)
+                    direction = -1.0;
+
+                availableMovement = Math.Max(positiveMovement, negativeMovement);
+            }
+
+            double movement = GetTestMovement(movementRange, maximumMove, resolution);
+            if (availableMovement.HasValue)
+            {
+                if (resolution.HasValue && resolution.Value > availableMovement.Value)
+                {
+                    LogIssue("Move Position", $"{axisName} has only {availableMovement.Value} {units} available in the larger direction, which is less than its resolution {resolution.Value}.");
+                    return null;
+                }
+
+                movement = Math.Min(movement, availableMovement.Value);
+            }
+
+            if (!(movement > 0.0) || !double.IsFinite(movement) || (maximumMove.HasValue && maximumMove.Value >= 0.0 && movement > maximumMove.Value))
+            {
+                LogIssue("Move Position", $"A valid non-zero {axisName} movement could not be calculated. Maximum move: {maximumMove}, range: {movementRange}, resolution: {resolution}.");
+                return null;
+            }
+
+            movement *= direction;
+            return movementType == MovementType.Absolute ? currentPosition.Value + movement : movement;
+        }
+
+        private double GetTestMovement(double? movementRange, double? maximumMove, double? resolution)
+        {
+            double movement = 0.0;
+
+            if (movementRange.HasValue && movementRange.Value > 0.0)
+            {
+                movement = movementRange.Value / 10.0;
+
+                if (maximumMove.HasValue && maximumMove.Value > 0.0)
+                    movement = Math.Min(movement, Math.Abs(maximumMove.Value));
+            }
+            else if (maximumMove.HasValue && maximumMove.Value > 0.0)
+            {
+                movement = Math.Abs(maximumMove.Value) / 10.0;
+            }
+
+            if (resolution.HasValue && resolution.Value > 0.0)
+                movement = movement > 0.0 ? Math.Max(movement, resolution.Value) : resolution.Value;
+
+            if (!(movement > 0.0))
+            {
+                movement = alignerType switch
+                {
+                    AlignerType.PolarAligner => 0.1,
+                    AlignerType.OpticalAxisAligner => 0.1,
+                    _ => units == AlignerUnits.Counts ? 1.0 : 0.1
+                };
+            }
+
+            return movement;
+        }
+
+        private bool MoveAligner(string testName, Action moveAction)
+        {
+            try
+            {
+                LogCallToDriver(testName, "About to get IsMoving property");
+                if (aligner.IsMoving)
+                {
+                    LogIssue(testName, "Aligner is already moving before the test, so the method test was skipped.");
+                    return false;
+                }
+
+                SetAction(testName);
+                LogCallToDriver(testName, $"About to call {testName} method");
+                TimeMethod(testName, moveAction, TargetTime.Standard);
+
+                LogCallToDriver(testName, "About to get IsMoving property repeatedly");
+                WaitWhile($"Waiting for {testName} to complete", () => aligner.IsMoving, 500, settings.AlpacaConfiguration.LongResponseTimeout);
+
+                if (cancellationToken.IsCancellationRequested)
+                    return false;
+
+                LogCallToDriver(testName, "About to get IsMoving property");
+                if (aligner.IsMoving)
+                {
+                    LogIssue(testName, "IsMoving is still true after the move completed.");
+                    return false;
+                }
+
+                LogOk(testName, $"{testName} completed and IsMoving is false.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, "");
+                return false;
+            }
+        }
+
+        private void TestUnimplementedMethod(string testName, Action testAction, string reason)
+        {
+            try
+            {
+                LogCallToDriver(testName, $"About to call {testName} method");
+                testAction();
+                LogIssue(testName, $"{reason}, but {testName} did not throw a MethodNotImplementedException.");
+
+                LogCallToDriver(testName, "About to get IsMoving property");
+                if (aligner.IsMoving)
+                {
+                    LogCallToDriver(testName, "About to call Halt method to stop unexpected movement");
+                    aligner.Halt();
+                }
+            }
+            catch (Exception ex)
+            {
+                HandleException(testName, MemberType.Method, Required.MustNotBeImplemented, ex, reason);
+            }
+        }
+
+        private void CheckPosition(string testName, Vector3D expectedPosition)
+        {
+            if (canMoveX.GetValueOrDefault())
+                CheckAxisPosition(testName, "X", expectedPosition.X, xResolution, () => aligner.XPosition);
+
+            if (canMoveY.GetValueOrDefault())
+                CheckAxisPosition(testName, "Y", expectedPosition.Y, yResolution, () => aligner.YPosition);
+
+            if (canMoveZ.GetValueOrDefault())
+                CheckAxisPosition(testName, "Z", expectedPosition.Z, zResolution, () => aligner.ZPosition);
+        }
+
+        private void CheckAxisPosition(string testName, string axisName, double expectedPosition, double? resolution, Func<double> getPosition)
+        {
+            try
+            {
+                LogCallToDriver(testName, $"About to get {axisName}Position property");
+                double actualPosition = getPosition();
+                double tolerance = resolution.HasValue && resolution.Value > 0.0
+                    ? resolution.Value
+                    : Math.Max(1.0e-9, Math.Abs(expectedPosition) * 1.0e-9);
+
+                if (Math.Abs(actualPosition - expectedPosition) <= tolerance)
+                    LogOk(testName, $"{axisName} position is {actualPosition}, matching expected position {expectedPosition} within tolerance {tolerance}.");
+                else
+                    LogIssue(testName, $"{axisName} position is {actualPosition}, which differs from expected position {expectedPosition} by {Math.Abs(actualPosition - expectedPosition)}; tolerance is {tolerance}.");
+            }
+            catch (Exception ex)
+            {
+                HandleException(testName, MemberType.Property, Required.MustBeImplemented, ex, $"{axisName}Position was readable earlier in the test run");
+            }
+        }
+
+        private void RestorePosition(Vector3D startingPosition)
+        {
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            SetAction("Restoring aligner position");
+
+            if (canMoveAbsolute.GetValueOrDefault())
+            {
+                MoveAligner(
+                    "Restore Position",
+                    () => aligner.MoveAbsolute(startingPosition.X, startingPosition.Y, startingPosition.Z));
+                return;
+            }
+
+            for (int pass = 0; pass < 100 && !cancellationToken.IsCancellationRequested; pass++)
+            {
+                Vector3D? relativeMovement = GetRestoreMovement(startingPosition);
+                if (!relativeMovement.HasValue)
+                    return;
+
+                if (MoveIsComplete(relativeMovement.Value))
+                    return;
+
+                if (!MoveAligner(
+                    "Restore Position",
+                    () => aligner.Move(relativeMovement.Value.X, relativeMovement.Value.Y, relativeMovement.Value.Z)))
+                {
+                    return;
+                }
+            }
+
+            if (!cancellationToken.IsCancellationRequested)
+                LogIssue("Restore Position", "The aligner did not return to its starting position after 100 relative moves.");
+        }
+
+        private Vector3D? GetRestoreMovement(Vector3D startingPosition)
+        {
+            try
+            {
+                double x = GetRestoreAxisMovement(canMoveX.GetValueOrDefault(), () => aligner.XPosition, startingPosition.X, xMaxMove, xResolution);
+                double y = GetRestoreAxisMovement(canMoveY.GetValueOrDefault(), () => aligner.YPosition, startingPosition.Y, yMaxMove, yResolution);
+                double z = GetRestoreAxisMovement(canMoveZ.GetValueOrDefault(), () => aligner.ZPosition, startingPosition.Z, zMaxMove, zResolution);
+                return new Vector3D(x, y, z);
+            }
+            catch (Exception ex)
+            {
+                HandleException("Restore Position", MemberType.Property, Required.MustBeImplemented, ex, "Unable to read the current position for restoration");
+                return null;
+            }
+        }
+
+        private double GetRestoreAxisMovement(bool canMoveAxis, Func<double> getPosition, double startingPosition, double? maximumMove, double? resolution)
+        {
+            if (!canMoveAxis)
+                return 0.0;
+
+            LogCallToDriver("Restore Position", "About to get current position property");
+            double remainingMovement = startingPosition - getPosition();
+            if (Math.Abs(remainingMovement) <= GetPositionTolerance(startingPosition, resolution))
+                return 0.0;
+
+            return maximumMove.HasValue && maximumMove.Value > 0.0
+                ? Math.Clamp(remainingMovement, -maximumMove.Value, maximumMove.Value)
+                : remainingMovement;
+        }
+
+        private static bool MoveIsComplete(Vector3D movement)
+        {
+            return movement.X == 0.0 & movement.Y == 0.0 & movement.Z == 0.0;
+        }
+
+        private static double GetPositionTolerance(double position, double? resolution)
+        {
+            return resolution.HasValue && resolution.Value > 0.0
+                ? resolution.Value
+                : Math.Max(1.0e-9, Math.Abs(position) * 1.0e-9);
         }
 
         /// <summary>
