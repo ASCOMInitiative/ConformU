@@ -361,9 +361,11 @@ namespace ConformU
                 // Save the start position so we can return to it at the end of testing
                 Vector3D startingPosition = new(xPosition.GetValueOrDefault(), yPosition.GetValueOrDefault(), zPosition.GetValueOrDefault());
 
+                // Test relative movement when a safe non-zero vector can be calculated.
                 Vector3D? relativeMovement = GetMovePosition(MovementType.Relative, canMoveX.GetValueOrDefault(), canMoveY.GetValueOrDefault(), canMoveZ.GetValueOrDefault());
                 if (relativeMovement.HasValue)
                 {
+                    // Verify position accuracy only after the asynchronous move completes successfully.
                     if (MoveAligner("Move", () => aligner.Move(relativeMovement.Value.X, relativeMovement.Value.Y, relativeMovement.Value.Z)))
                     {
                         CheckPosition("Move", new Vector3D(
@@ -377,6 +379,7 @@ namespace ConformU
                 else
                     LogInfo("Move", "Move test skipped because a safe relative movement could not be determined.");
 
+                // Test absolute movement only when the configuration advertises support.
                 if (canMoveAbsolute.GetValueOrDefault())
                 {
                     Vector3D? absolutePosition = GetMovePosition(MovementType.Absolute, canMoveX.GetValueOrDefault(), canMoveY.GetValueOrDefault(), canMoveZ.GetValueOrDefault());
@@ -396,6 +399,7 @@ namespace ConformU
                     RestorePosition(startingPosition);
                 }
 
+                // Test homing when supported; otherwise verify the required not-implemented response.
                 if (canFindHome.GetValueOrDefault())
                 {
                     MoveAligner("FindHome", () => aligner.FindHome());
@@ -447,6 +451,10 @@ namespace ConformU
 
         #region Support Code
 
+        /// <summary>
+        /// Calculates a safe relative movement or absolute target for the movable axes.
+        /// </summary>
+        /// <returns>The calculated position, or null when a safe movement cannot be determined.</returns>
         private Vector3D? GetMovePosition(MovementType movementType, bool canMoveX, bool canMoveY, bool canMoveZ)
         {
             double? x = GetAxisMovePosition(movementType, canMoveX, xPosition, xMinPosition, xMaxPosition, xMaxMove, xResolution, "X");
@@ -459,6 +467,10 @@ namespace ConformU
             return new Vector3D(x.GetValueOrDefault(), y.GetValueOrDefault(), z.GetValueOrDefault());
         }
 
+        /// <summary>
+        /// Calculates movement for one axis in the direction with the most available range.
+        /// </summary>
+        /// <returns>A relative movement or absolute target, or null when the calculation is unsafe.</returns>
         private double? GetAxisMovePosition(
             MovementType movementType,
             bool canMoveAxis,
@@ -469,9 +481,11 @@ namespace ConformU
             double? resolution,
             string axisName)
         {
+            // Non-movable axes must receive zero.
             if (!canMoveAxis)
                 return 0.0;
 
+            // Accurate movement verification requires a readable starting position.
             if (!currentPosition.HasValue)
             {
                 LogIssue("Move Position", $"{axisName} can move but its current position is unavailable, so a safe test position cannot be calculated.");
@@ -479,6 +493,7 @@ namespace ConformU
             }
 
             bool hasPositionRange = minimumPosition.HasValue & maximumPosition.HasValue;
+            // A usable position range must either be fully implemented or fully unimplemented.
             if ((minimumPosition.HasValue ^ maximumPosition.HasValue) ||
                 (hasPositionRange && minimumPosition.Value > maximumPosition.Value))
             {
@@ -486,6 +501,7 @@ namespace ConformU
                 return null;
             }
 
+            // Absolute movement requires known bounds so the target cannot exceed the device range.
             if (movementType == MovementType.Absolute && !hasPositionRange)
             {
                 LogInfo("Move Position", $"{axisName} position limits are not implemented, so a safe absolute test position cannot be calculated.");
@@ -502,12 +518,14 @@ namespace ConformU
                 double negativeMovement = currentPosition.Value - minimumPosition.Value;
                 movementRange = maximumPosition.Value - minimumPosition.Value;
 
+                // Reject inconsistent devices rather than risk moving beyond a configured limit.
                 if (positiveMovement < 0.0 || negativeMovement < 0.0)
                 {
                     LogIssue("Move Position", $"{axisName} current position {currentPosition.Value} is outside its configured range {minimumPosition.Value} to {maximumPosition.Value}.");
                     return null;
                 }
 
+                // Move toward the larger side of the available position range.
                 if (negativeMovement > positiveMovement)
                     direction = -1.0;
 
@@ -517,6 +535,7 @@ namespace ConformU
             double movement = GetTestMovement(movementRange, maximumMove, resolution);
             if (availableMovement.HasValue)
             {
+                // A resolvable move must fit in the larger side of the range.
                 if (resolution.HasValue && resolution.Value > availableMovement.Value)
                 {
                     LogIssue("Move Position", $"{axisName} has only {availableMovement.Value} {units} available in the larger direction, which is less than its resolution {resolution.Value}.");
@@ -528,6 +547,7 @@ namespace ConformU
 
             if (!(movement > 0.0) || !double.IsFinite(movement) || (maximumMove.HasValue && maximumMove.Value >= 0.0 && movement > maximumMove.Value))
             {
+                // Reject zero, non-finite, or command-limit-exceeding movements.
                 LogIssue("Move Position", $"A valid non-zero {axisName} movement could not be calculated. Maximum move: {maximumMove}, range: {movementRange}, resolution: {resolution}.");
                 return null;
             }
@@ -536,6 +556,9 @@ namespace ConformU
             return movementType == MovementType.Absolute ? currentPosition.Value + movement : movement;
         }
 
+        /// <summary>
+        /// Chooses a small, executable test movement from the available range metadata.
+        /// </summary>
         private double GetTestMovement(double? movementRange, double? maximumMove, double? resolution)
         {
             double movement = 0.0;
@@ -557,6 +580,7 @@ namespace ConformU
 
             if (!(movement > 0.0))
             {
+                // Use a conservative unit-appropriate fallback when the device exposes no range metadata.
                 movement = alignerType switch
                 {
                     AlignerType.PolarAligner => 0.1,
@@ -568,10 +592,15 @@ namespace ConformU
             return movement;
         }
 
+        /// <summary>
+        /// Executes an asynchronous aligner operation and waits for completion.
+        /// </summary>
+        /// <returns>True when the operation completes and IsMoving becomes false.</returns>
         private bool MoveAligner(string testName, Action moveAction)
         {
             try
             {
+                // Do not interfere with movement initiated before this test.
                 LogCallToDriver(testName, "About to get IsMoving property");
                 if (aligner.IsMoving)
                 {
@@ -606,6 +635,9 @@ namespace ConformU
             }
         }
 
+        /// <summary>
+        /// Verifies that a capability-disabled method throws a not-implemented exception.
+        /// </summary>
         private void TestUnimplementedMethod(string testName, Action testAction, string reason)
         {
             try
@@ -627,8 +659,12 @@ namespace ConformU
             }
         }
 
+        /// <summary>
+        /// Checks each movable axis against the expected final position.
+        /// </summary>
         private void CheckPosition(string testName, Vector3D expectedPosition)
         {
+            // Check only axes that the configuration says can move.
             if (canMoveX.GetValueOrDefault())
                 CheckAxisPosition(testName, "X", expectedPosition.X, xResolution, () => aligner.XPosition);
 
@@ -639,6 +675,9 @@ namespace ConformU
                 CheckAxisPosition(testName, "Z", expectedPosition.Z, zResolution, () => aligner.ZPosition);
         }
 
+        /// <summary>
+        /// Checks one axis position within the reported resolution or a numeric tolerance.
+        /// </summary>
         private void CheckAxisPosition(string testName, string axisName, double expectedPosition, double? resolution, Func<double> getPosition)
         {
             try
@@ -660,6 +699,9 @@ namespace ConformU
             }
         }
 
+        /// <summary>
+        /// Returns all movable axes to the position captured before method testing.
+        /// </summary>
         private void RestorePosition(Vector3D startingPosition)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -669,6 +711,7 @@ namespace ConformU
 
             if (canMoveAbsolute.GetValueOrDefault())
             {
+                // Absolute-capable devices can restore all axes in one operation.
                 MoveAligner(
                     "Restore Position",
                     () => aligner.MoveAbsolute(startingPosition.X, startingPosition.Y, startingPosition.Z));
@@ -696,6 +739,10 @@ namespace ConformU
                 LogIssue("Restore Position", "The aligner did not return to its starting position after 100 relative moves.");
         }
 
+        /// <summary>
+        /// Calculates the relative movement required to restore all axes.
+        /// </summary>
+        /// <returns>The restoration movement, or null when a position cannot be read.</returns>
         private Vector3D? GetRestoreMovement(Vector3D startingPosition)
         {
             try
@@ -712,6 +759,9 @@ namespace ConformU
             }
         }
 
+        /// <summary>
+        /// Calculates and limits one axis's movement toward its starting position.
+        /// </summary>
         private double GetRestoreAxisMovement(bool canMoveAxis, Func<double> getPosition, double startingPosition, double? maximumMove, double? resolution)
         {
             if (!canMoveAxis)
@@ -727,11 +777,17 @@ namespace ConformU
                 : remainingMovement;
         }
 
+        /// <summary>
+        /// Determines whether all axis restoration movements are zero.
+        /// </summary>
         private static bool MoveIsComplete(Vector3D movement)
         {
             return movement.X == 0.0 & movement.Y == 0.0 & movement.Z == 0.0;
         }
 
+        /// <summary>
+        /// Returns the position comparison tolerance for an axis.
+        /// </summary>
         private static double GetPositionTolerance(double position, double? resolution)
         {
             return resolution.HasValue && resolution.Value > 0.0
