@@ -2160,7 +2160,15 @@ namespace ConformU
             // Handle all other types of error
             else
             {
-                LogIssue(memberName, $"Unexpected error{(string.IsNullOrEmpty(userMessage) ? ":" : $" - {userMessage}:")} {ex.Message}");
+               string exceptionName = GetExceptionName(ex, typeOfMember);
+                LogIssue(memberName, $"Unexpected error{(string.IsNullOrEmpty(userMessage) ? ":" : $" - {userMessage}:")} {exceptionName} {ex.Message}.");
+
+                // Include extra information for optional members
+                if (isRequired == Required.Optional)
+                {
+                    string exceptionDescription = settings.DeviceTechnology == DeviceTechnology.Alpaca ? "an Alpaca Not Implemented error (0x400)" : typeOfMember == MemberType.Property ? "a PropertyNotImplementedException" : "a MethodNotImplementedException";
+                    LogInfo(memberName, $"NOTE: {memberName} is an optional member that must return {exceptionDescription} rather than an {exceptionName} when the feature is not supported.");
+                }
             }
 
             LogDebug(memberName, $"Exception detail: {ex}");
@@ -2210,14 +2218,14 @@ namespace ConformU
                 if (clientException.GetType().FullName.Contains("DRIVEREXCEPTION", StringComparison.InvariantCultureIgnoreCase)) // We have a driver exception so add its number
                 {
                     DriverException driverEx = (DriverException)clientException;
-                    retVal = $"DriverException(0x{driverEx.Number:X8})";
+                    retVal = $"ASCOM.DriverException(0x{driverEx.Number:X8})";
                 }
                 else // Otherwise just use the ASCOM exception's name
                 {
-                    retVal = clientException.GetType().Name;
+                    retVal = clientException.GetType().FullName;
                 }
             }
-            else if (clientException is COMException comEx) // Handle XOM exceptions with their error code
+            else if (clientException is COMException comEx) // Handle COM exceptions with their error code
             {
                 try
                 {
