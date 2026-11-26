@@ -10,6 +10,9 @@ namespace ConformU
 {
     internal class AlignerTester : DeviceTesterBaseClass
     {
+
+        #region Variables
+
         private IAlignerV1 aligner;
         private readonly Settings settings;
         private readonly ConformLogger logger;
@@ -54,6 +57,10 @@ namespace ConformU
             Relative
         }
 
+        #endregion
+
+        #region Constructor and dispose
+
         public AlignerTester(ConformConfiguration conformConfiguration, ConformLogger logger, CancellationToken conformCancellationToken, CancellationTokenSource conformCancellationTokenSource, ConformResults conformResults)
             : base(true, true, true, false, false, true, false, true, conformConfiguration, logger, conformCancellationToken, conformCancellationTokenSource, conformResults)
         {
@@ -77,6 +84,10 @@ namespace ConformU
             base.Dispose(disposing);
             disposedValue = true;
         }
+
+        #endregion
+
+        #region Conform process
 
         public override void InitialiseTest()
         {
@@ -301,6 +312,7 @@ namespace ConformU
                     // Aligner type not set
                     case AlignerType.Unset:
                         LogIssue("Axis Movement", $"The aligner type is \"Unset\" so axis movement rules cannot be checked.");
+                        LogIssue("Units", $"The aligner type is \"Unset\" so unit rules cannot be checked.");
                         break;
 
                     // Polar aligner
@@ -320,10 +332,46 @@ namespace ConformU
                             LogIssue("Axis Movement", $"Polar aligners must be able to move both X and Y axes and not be able to move the Z axis. ");
                             LogInfo("Axis Movement", $"CanMoveX: {canMoveX.GetValueOrDefault()}, CanMoveY: {canMoveY.GetValueOrDefault()}, CanMoveZ: {canMoveZ.GetValueOrDefault()}");
                         }
+
+                        if (units == AlignerUnits.Degrees)
+                            LogOk("Units", $"This device correctly returned units as {AlignerUnits.Degrees}.");
+                        else
+                        {
+                            LogIssue("Units", $"Polar aligners must return units as {AlignerUnits.Degrees}, This device returned Units as: {units}.");
+                            okToTestMethods = false;
+                        }
                         break;
 
                     //Optical axis aligner and all other types
                     case AlignerType.OpticalAxisAligner:
+                        // Check that at least one axis is movable for optical axis aligners
+                        if (canMoveX.GetValueOrDefault() | canMoveY.GetValueOrDefault() | canMoveZ.GetValueOrDefault())
+                        {
+                            LogOk("Axis Movement", $"At least one aligner axis can move.");
+
+                            // Check whether it is OK to test the move methods. This is only possible if every movable axis position can be read.
+                            if ((!canMoveX.GetValueOrDefault() || xPosition.HasValue) &
+                                (!canMoveY.GetValueOrDefault() || yPosition.HasValue) &
+                                (!canMoveZ.GetValueOrDefault() || zPosition.HasValue))
+                                okToTestMethods = true;
+                            else // There is a problem so don't test the move methods
+                            {
+                                LogIssue("Axis Movement", $"Method tests will be skipped because the aligner can move at least one axis, but at least one of the movable axes can not be read.");
+                                LogInfo("Axis Movement", $"CanMoveX: {canMoveX.GetValueOrDefault()}, CanMoveY: {canMoveY.GetValueOrDefault()}, CanMoveZ: {canMoveZ.GetValueOrDefault()}, XPosition: {xPosition}, YPosition: {yPosition}, ZPosition: {zPosition}");
+                            }
+                        }
+                        else
+                            LogIssue("Axis Movement", $"None of the axes are configured as moveable - CanMoveX: {canMoveX.GetValueOrDefault()}, CanMoveY: {canMoveY.GetValueOrDefault()}, CanMoveZ: {canMoveZ.GetValueOrDefault()}");
+
+                        if (units == AlignerUnits.Millimeters)
+                            LogOk("Units", $"This device correctly returned units as {AlignerUnits.Millimeters}.");
+                        else
+                        {
+                            LogIssue("Units", $"Optical axis aligners must return units as {AlignerUnits.Millimeters}, This device returned Units as: {units}.");
+                            okToTestMethods = false;
+                        }
+                        break;
+
                     default:
                         // Check that at least one axis is movable for optical axis aligners
                         if (canMoveX.GetValueOrDefault() | canMoveY.GetValueOrDefault() | canMoveZ.GetValueOrDefault())
@@ -343,6 +391,14 @@ namespace ConformU
                         }
                         else
                             LogIssue("Axis Movement", $"None of the axes are configured as moveable - CanMoveX: {canMoveX.GetValueOrDefault()}, CanMoveY: {canMoveY.GetValueOrDefault()}, CanMoveZ: {canMoveZ.GetValueOrDefault()}");
+
+                        if (units != AlignerUnits.Unset) // The units are set to a valid value, so log it as OK
+                            LogOk("Units", $"This device correctly returned units as {units}.");
+                        else // Units are set to the unset state, which is invalid for any aligner type, so log it as an issue
+                        {
+                            LogIssue("Units", $"This device returned Units as: {units}.");
+                            okToTestMethods = false;
+                        }
                         break;
                 }
             }
@@ -377,10 +433,10 @@ namespace ConformU
                     RestorePosition(startingPosition);
                 }
                 else
-                    LogInfo("Move", "Move test skipped because a safe relative movement could not be determined.");
+                    LogInfo("Move", "Test skipped because a safe relative movement could not be determined.");
 
                 // Test absolute movement only when the configuration advertises support.
-                if (canMoveAbsolute.GetValueOrDefault())
+                if (canMoveAbsolute.GetValueOrDefault()) // Absolute moves are supported
                 {
                     Vector3D? absolutePosition = GetMovePosition(MovementType.Absolute, canMoveX.GetValueOrDefault(), canMoveY.GetValueOrDefault(), canMoveZ.GetValueOrDefault());
                     if (absolutePosition.HasValue)
@@ -391,9 +447,9 @@ namespace ConformU
                         RestorePosition(startingPosition);
                     }
                     else
-                        LogInfo("MoveAbsolute", "MoveAbsolute test skipped because a safe absolute position could not be determined.");
+                        LogInfo("MoveAbsolute", "Test skipped because a safe absolute position could not be determined.");
                 }
-                else
+                else // Absolute moves are not supported
                 {
                     TestUnimplementedMethod("MoveAbsolute", () => aligner.MoveAbsolute(0.0, 0.0, 0.0), "CanMoveAbsolute is false");
                     RestorePosition(startingPosition);
@@ -449,6 +505,8 @@ namespace ConformU
             }
         }
 
+        #endregion
+
         #region Support Code
 
         /// <summary>
@@ -493,11 +551,17 @@ namespace ConformU
             }
 
             bool hasPositionRange = minimumPosition.HasValue & maximumPosition.HasValue;
+
             // A usable position range must either be fully implemented or fully unimplemented.
-            if ((minimumPosition.HasValue ^ maximumPosition.HasValue) ||
-                (hasPositionRange && minimumPosition.Value > maximumPosition.Value))
+            if (minimumPosition.HasValue ^ maximumPosition.HasValue) // The ^ operator is a boolean exclusive or (XOR) operator. It returns true when only one of the operands is true, and false when both are true or both are false.
             {
-                LogIssue("Move Position", $"{axisName} position limits are invalid: minimum {minimumPosition}, maximum {maximumPosition}.");
+                LogIssue("Move Position", $"{axisName} position limits are invalid: minimum {minimumPosition}, maximum {maximumPosition}. Both limits must be either implemented or unimplemented.");
+                return null;
+            }
+
+            if (hasPositionRange && minimumPosition.Value > maximumPosition.Value) // The ^ operator is a boolean exclusive or (XOR) operator. It returns true when only one of the operands is true, and false when both are true or both are false.
+            {
+                LogIssue("Move Position", $"{axisName} position limits are invalid: minimum {minimumPosition}, maximum {maximumPosition}. The minimum limit cannot be greater than the maximum limit.");
                 return null;
             }
 
@@ -512,7 +576,8 @@ namespace ConformU
             double? availableMovement = null;
             double? movementRange = null;
 
-            if (hasPositionRange)
+            // Check whether minimum and maximum positions are available
+            if (hasPositionRange) // Minimum and maximum positions are available, so calculate the available movement in each direction and the total range
             {
                 double positiveMovement = maximumPosition.Value - currentPosition.Value;
                 double negativeMovement = currentPosition.Value - minimumPosition.Value;
@@ -526,8 +591,10 @@ namespace ConformU
                 }
 
                 // Move toward the larger side of the available position range.
-                if (negativeMovement > positiveMovement)
+                if (negativeMovement > positiveMovement) // Move towards the minimum
                     direction = -1.0;
+                else // Move towards the maximum
+                    direction = 1.0;
 
                 availableMovement = Math.Max(positiveMovement, negativeMovement);
             }
@@ -583,9 +650,9 @@ namespace ConformU
                 // Use a conservative unit-appropriate fallback when the device exposes no range metadata.
                 movement = alignerType switch
                 {
-                    AlignerType.PolarAligner => 0.1,
-                    AlignerType.OpticalAxisAligner => 0.1,
-                    _ => units == AlignerUnits.Counts ? 1.0 : 0.1
+                    AlignerType.PolarAligner => 1.0,
+                    AlignerType.OpticalAxisAligner => 1.0,
+                    _ => units == AlignerUnits.Counts ? 10.0 : 0.1
                 };
             }
 
@@ -718,6 +785,7 @@ namespace ConformU
                 return;
             }
 
+            // Restore by a relative move
             for (int pass = 0; pass < 100 && !cancellationToken.IsCancellationRequested; pass++)
             {
                 Vector3D? relativeMovement = GetRestoreMovement(startingPosition);
@@ -859,5 +927,6 @@ namespace ConformU
 
 
         #endregion
+
     }
 }
